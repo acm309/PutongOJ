@@ -6,6 +6,7 @@ const staticCache = require('koa-static-cache')
 const koaBody = require('koa-body')
 const session = require('koa-session-minimal')
 const redisStore = require('koa-redis')
+const mongoose = require('mongoose')
 
 const path = require('path')
 
@@ -64,6 +65,9 @@ app.use(async function (ctx, next) {
     }
   }
 })
+
+mongoose.connect(config.mongoUrl)
+mongoose.Promise = global.Promise
 
 appRouter(app)
 
