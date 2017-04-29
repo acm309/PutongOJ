@@ -1,4 +1,6 @@
 const Koa = require('koa')
+const serve = require('koa-static')
+
 const config = require('./config')
 
 const app = new Koa()
@@ -9,9 +11,6 @@ app.use(async function (ctx, next) {
   await next()
 })
 
-app.use(async function (ctx, next) {
-  ctx.body = 'hello koa'
-  await next()
-})
+app.use(serve('public'))
 
 app.listen(config.port)
