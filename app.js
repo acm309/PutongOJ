@@ -50,6 +50,17 @@ app.use(session({
   }
 }))
 
+app.use(async function (ctx, next) {
+  try {
+    await next()
+  } catch (err) {
+    ctx.status = err.status || 500
+    ctx.body = {
+      error: err.message
+    }
+  }
+})
+
 console.log(`listening on port ${config.port}`)
 
 app.listen(config.port)
