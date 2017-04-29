@@ -6,5 +6,6 @@ const router = new Router({
 })
 
 router.get('/', contests.queryList)
+router.get('/:cid', contests.queryOneContest)
 
 module.exports = router
