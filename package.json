@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
   },
   "author": "lazzzis",
   "license": "MIT",
@@ -18,5 +19,8 @@
     "koa-session-minimal": "3.0.4",
     "koa-static": "3.0.0",
     "koa-static-cache": "5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "1.11.0"
   }
 }
