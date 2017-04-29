@@ -35,6 +35,27 @@ async function queryList (ctx, next) {
   }
 }
 
+async function queryOneProblem (ctx, next) {
+  const pid = +ctx.params.pid
+  if (isNaN(pid)) {
+    ctx.throw('Pid should be a number')
+  }
+
+  const problem = await Problem
+    .findOne({pid})
+    .select('-_id pid title memory time description input output in out')
+    .exec()
+
+  if (!problem) {
+    ctx.throw('No such a problem')
+  }
+
+  ctx.body = {
+    problem
+  }
+}
+
 module.exports = {
-  queryList
+  queryList,
+  queryOneProblem
 }
