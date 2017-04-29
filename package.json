@@ -1,0 +1,14 @@
+{
+  "name": "putong-oj",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "lazzzis",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "2.2.0"
+  }
+}
