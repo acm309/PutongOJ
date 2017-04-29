@@ -14,4 +14,4 @@ app.use(async function (ctx, next) {
   await next()
 })
 
-app.listen(3000)
+app.listen(config.port)
