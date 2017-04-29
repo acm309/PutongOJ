@@ -54,7 +54,8 @@ const ProblemSchema = mongoose.Schema({
   },
   argument: {
     type: String
-  }
+  },
+  hint: String
 }, {
   collection: 'Problem'
 })

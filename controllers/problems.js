@@ -43,7 +43,7 @@ async function queryOneProblem (ctx, next) {
 
   const problem = await Problem
     .findOne({pid})
-    .select('-_id pid title memory time description input output in out')
+    .select('-_id pid title memory time description input output in out hint')
     .exec()
 
   if (!problem) {
