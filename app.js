@@ -71,6 +71,10 @@ mongoose.Promise = global.Promise
 
 appRouter(app)
 
-console.log(`listening on port ${config.port}`)
+if (process.env.NODE_ENV !== 'test') {
+  console.log(`listening on port ${config.port}`)
 
-app.listen(config.port)
+  app.listen(config.port)
+}
+
+module.exports = app
