@@ -22,7 +22,7 @@ async function queryOneNews (ctx, next) {
   const nid = +ctx.params.nid
 
   if (isNaN(nid)) {
-    ctx.throw('Nid should be a number')
+    ctx.throw('Nid should be a number', 400)
   }
 
   const news = await News
@@ -31,7 +31,7 @@ async function queryOneNews (ctx, next) {
     .exec()
 
   if (!news) {
-    ctx.throw('No such a problem')
+    ctx.throw('No such a problem', 400)
   }
 
   ctx.body = {

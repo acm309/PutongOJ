@@ -34,7 +34,7 @@ async function queryList (ctx, next) {
 async function queryOneProblem (ctx, next) {
   const pid = +ctx.params.pid
   if (isNaN(pid)) {
-    ctx.throw('Pid should be a number')
+    ctx.throw('Pid should be a number', 400)
   }
 
   const problem = await Problem
@@ -43,7 +43,7 @@ async function queryOneProblem (ctx, next) {
     .exec()
 
   if (!problem) {
-    ctx.throw('No such a problem')
+    ctx.throw('No such a problem', 400)
   }
 
   ctx.body = {
