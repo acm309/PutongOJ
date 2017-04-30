@@ -6,6 +6,7 @@ const problems = require('./problems')
 const news = require('./news')
 const home = require('./home')
 const users = require('./users')
+const ranklist = require('./ranklist')
 
 api
   .use('/api', contests.routes(), contests.allowedMethods())
@@ -13,6 +14,7 @@ api
   .use('/api', news.routes(), news.allowedMethods())
   .use('/api', home.routes(), home.allowedMethods())
   .use('/api', users.routes(), users.allowedMethods())
+  .use('/api', ranklist.routes(), ranklist.allowedMethods())
 
 module.exports = function (app) {
   app
