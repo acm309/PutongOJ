@@ -6,5 +6,6 @@ const router = new Router({
 })
 
 router.get('/:uid', users.queryOneUser)
+router.post('/', users.register)
 
 module.exports = router

@@ -24,8 +24,14 @@ const UserSchema = mongoose.Schema({
     type: String,
     require: true
   },
-  timerecord: [Number],
-  iprecord: [String],
+  timerecord: {
+    type: [Number],
+    default: [0, 0, 0, 0, 0]
+  },
+  iprecord: {
+    type: [String],
+    default: ['', '', '', '', '']
+  },
   status: {
     type: Number,
     default: 2 // TODO: fix this number to a constant variable
