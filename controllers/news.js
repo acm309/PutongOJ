@@ -18,6 +18,28 @@ async function queryList (ctx, next) {
   }
 }
 
+async function queryOneNews (ctx, next) {
+  const nid = +ctx.params.nid
+
+  if (isNaN(nid)) {
+    ctx.throw('Nid should be a number', 400)
+  }
+
+  const news = await News
+    .findOne({nid})
+    .select('-_id title nid status create content')
+    .exec()
+
+  if (!news) {
+    ctx.throw('No such a problem', 400)
+  }
+
+  ctx.body = {
+    news
+  }
+}
+
 module.exports = {
-  queryList
+  queryList,
+  queryOneNews
 }

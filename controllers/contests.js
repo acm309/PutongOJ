@@ -34,7 +34,7 @@ async function queryList (ctx, next) {
 async function queryOneContest (ctx, next) {
   const cid = +ctx.params.cid
   if (isNaN(cid)) { // cid might be a string
-    ctx.throw('Cid should be a number')
+    ctx.throw('Cid should be a number', 400)
   }
   const contest = await Contest
     .findOne({cid})
@@ -43,7 +43,7 @@ async function queryOneContest (ctx, next) {
 
   // 查无此比赛
   if (!contest) {
-    ctx.throw('No such a contest')
+    ctx.throw('No such a contest', 400)
   }
   ctx.body = {
     contest
