@@ -1,4 +1,5 @@
 const Contest = require('../models/Contest')
+const { extractPagination } = require('../utils')
 
 async function queryList (ctx, next) {
   const filter = {} // 用于 mongoose 的筛选
@@ -26,12 +27,7 @@ async function queryList (ctx, next) {
 
   ctx.body = {
     contests: res.docs,
-    pagination: {
-      limit: res.limit,
-      page: +res.page,
-      pages: res.pages,
-      total: res.total
-    }
+    pagination: extractPagination(res)
   }
 }
 
