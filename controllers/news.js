@@ -1,5 +1,6 @@
 const News = require('../models/News')
-const { extractPagination } = require('../utils')
+const Ids = require('../models/ID')
+const { extractPagination, isUndefined } = require('../utils')
 
 /** 返回新闻列表 */
 async function queryList (ctx, next) {
@@ -41,7 +42,35 @@ async function queryOneNews (ctx, next) {
   }
 }
 
+/** 创造一个新的 News */
+async function create (ctx, next) {
+  const { title, content } = ctx.request.body
+
+  if (isUndefined(title)) {
+    ctx.throw(400, 'Title should not be empty')
+  } else if (isUndefined(content)) {
+    ctx.throw(400, 'Content should not be empty')
+  }
+
+  const verified = News.validate(ctx.request.body)
+
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  const nid = await Ids.generateId('News')
+
+  const news = new News({
+    nid, title, content
+  })
+
+  news.save()
+
+  ctx.body = { nid, title, content }
+}
+
 module.exports = {
   queryList,
-  queryOneNews
+  queryOneNews,
+  create
 }
