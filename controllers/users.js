@@ -9,7 +9,7 @@ async function queryOneUser (ctx, next) {
     .exec()
 
   if (!user) {
-    ctx.throw('No such a user', 400)
+    ctx.throw(400, 'No such a user')
   }
 
   ctx.body = {
