@@ -46,14 +46,10 @@ async function register (ctx, next) {
     }
   })
 
-  if (uid.length < 5 || uid.length > 20) {
-    ctx.throw(400, 'The length of uid should be between 6 and 20')
-  } else if (/[^\d\w]/i.test(uid)) {
-    ctx.throw(400, 'Uid should only be comprised of letters and numbers')
-  } else if (nick.length < 5 || nick.length > 40) {
-    ctx.throw(400, 'The length of nick should be between 6 and 40')
-  } else if (pwd.length < 5 || pwd.length > 25) {
-    ctx.throw(400, 'The length of pwd should be between 6 and 25')
+  const verified = User.validate(ctx.request.body)
+
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
   }
 
   const uidExist = await User
@@ -70,11 +66,7 @@ async function register (ctx, next) {
     pwd: generatePwd(pwd)
   })
 
-  user.iprecord.pop()
-  user.iprecord.unshift(ctx.ip)
-
-  user.timerecord.pop()
-  user.timerecord.unshift(Date.now())
+  user.updateRecords(ctx.ip, Date.now())
 
   await user.save()
 

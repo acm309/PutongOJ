@@ -10,6 +10,7 @@
   "author": "lazzzis",
   "license": "MIT",
   "dependencies": {
+    "isemail": "2.2.1",
     "koa": "2.2.0",
     "koa-body": "2.0.0",
     "koa-convert": "1.2.0",

@@ -14,7 +14,12 @@ function generatePwd (pwd) {
     crypto.createHash('sha1').update(pwd).digest('hex')
 }
 
+function isUndefined (item) {
+  return typeof item === 'undefined'
+}
+
 module.exports = {
   extractPagination,
-  generatePwd
+  generatePwd,
+  isUndefined
 }
