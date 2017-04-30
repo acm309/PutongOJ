@@ -1,6 +1,7 @@
 const News = require('../models/News')
 const { extractPagination } = require('../utils')
 
+/** 返回新闻列表 */
 async function queryList (ctx, next) {
   const res = await News
     .paginate({}, {
@@ -18,6 +19,7 @@ async function queryList (ctx, next) {
   }
 }
 
+/** 指定nid, 返回一条具体的新闻 */
 async function queryOneNews (ctx, next) {
   const nid = +ctx.params.nid
 

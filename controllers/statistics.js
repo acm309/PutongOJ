@@ -1,6 +1,12 @@
 const Solution = require('../models/Solution')
 const Problem = require('../models/Problem')
 
+/**
+  针对某一题的排名
+  以时间为第一维度，内存为第二维度，长度为第三维度，提交时间为第四维度
+  以上均以升序为标准
+  聚合算法参考自: https://github.com/KIDx/ACdream/blob/master/routers/statistic.js
+*/
 async function statistics (ctx, next) {
   const pid = +ctx.params.pid
 
@@ -15,7 +21,6 @@ async function statistics (ctx, next) {
   }
 
   // 聚合查询，所有 solutions 里每个用户只出现一次
-  // 先按时间升序排列
   const solutions = await Solution.aggregate([
     { $match: {
       pid,

@@ -1,6 +1,11 @@
 const User = require('../models/User')
 const { extractPagination } = require('../utils')
 
+/**
+  返回当前排行榜
+  以 solved 为第一维度降序，
+  以 submit 为第二维度降序
+ */
 async function ranklist (ctx, next) {
   const res = await User
     .paginate({}, {

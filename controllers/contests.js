@@ -1,6 +1,7 @@
 const Contest = require('../models/Contest')
 const { extractPagination } = require('../utils')
 
+/** 返回比赛列表 */
 async function queryList (ctx, next) {
   const filter = {} // 用于 mongoose 的筛选
 
@@ -31,6 +32,7 @@ async function queryList (ctx, next) {
   }
 }
 
+/** 指定cid, 返回一个比赛的具体信息 */
 async function queryOneContest (ctx, next) {
   const cid = +ctx.params.cid
   if (isNaN(cid)) { // cid might be a string

@@ -63,6 +63,10 @@ UserSchema.methods.updateRecords = function updateRecords (ip, time) {
   this.timerecord.unshift(time)
 }
 
+/**
+  校验字段是否符合要求；
+  参数里的所有字段都是可选的，只有提供了才会检查
+*/
 UserSchema.statics.validate = function validate ({
     uid,
     pwd,

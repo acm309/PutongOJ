@@ -3,6 +3,9 @@ const Solution = require('../models/Solution')
 const _ = require('ramda')
 const { generatePwd, isUndefined } = require('../utils')
 
+/**
+  指定 uid，返回一个以存在的用户
+*/
 async function queryOneUser (ctx, next) {
   const uid = ctx.params.uid
 
@@ -37,6 +40,9 @@ async function queryOneUser (ctx, next) {
   }
 }
 
+/**
+  注册用户
+*/
 async function register (ctx, next) {
   const { uid, nick, pwd } = ctx.request.body
 
@@ -52,6 +58,7 @@ async function register (ctx, next) {
     ctx.throw(400, verified.error)
   }
 
+  // 避免重复注册; uid 不可重，其它可重
   const uidExist = await User
     .count({uid})
     .exec()
@@ -79,6 +86,9 @@ async function register (ctx, next) {
   }
 }
 
+/**
+  更新一个已存在用户
+*/
 // TODO: 检查发出更新请求的用户是否与待更新的用户属于同一个
 // TODO: 如果发出请求的用户的权限较高，可更改其它用户的信息
 async function update (ctx, next) {

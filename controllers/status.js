@@ -1,6 +1,9 @@
 const Solution = require('../models/Solution')
 const { extractPagination } = require('../utils')
 
+/**
+  返回一个 solution 的列表，以时间降序（从晚到早的排）
+*/
 async function queryList (ctx, next) {
   const filter = {}
   ;['uid', 'pid', 'judge', 'language'].forEach((item) => {
@@ -25,6 +28,9 @@ async function queryList (ctx, next) {
   }
 }
 
+/**
+  返回一个具体的solution
+*/
 async function queryOneSolution (ctx, next) {
   const sid = +ctx.params.sid
 

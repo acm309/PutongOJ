@@ -1,6 +1,7 @@
 const Problem = require('../models/Problem')
 const { extractPagination } = require('../utils')
 
+/** 返回题目列表 */
 async function queryList (ctx, next) {
   const filter = {} // 用于 mongoose 的筛选
 
@@ -31,6 +32,7 @@ async function queryList (ctx, next) {
   }
 }
 
+/** 指定pid, 返回一个具体的题目 */
 async function queryOneProblem (ctx, next) {
   const pid = +ctx.params.pid
   if (isNaN(pid)) {
