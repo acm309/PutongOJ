@@ -8,5 +8,6 @@ const router = new Router({
 router.get('/', news.queryList)
 router.get('/:nid', news.queryOneNews)
 router.post('/', news.create)
+router.put('/:nid', news.update)
 
 module.exports = router
