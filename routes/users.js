@@ -7,6 +7,6 @@ const router = new Router({
 
 router.get('/:uid', users.queryOneUser)
 router.post('/', users.register)
-router.put('/:uid', users.register)
+router.put('/:uid', users.update)
 
 module.exports = router

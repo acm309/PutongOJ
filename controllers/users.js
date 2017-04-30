@@ -1,7 +1,7 @@
 const User = require('../models/User')
 const Solution = require('../models/Solution')
 const _ = require('ramda')
-const { generatePwd } = require('../utils')
+const { generatePwd, isUndefined } = require('../utils')
 
 async function queryOneUser (ctx, next) {
   const uid = ctx.params.uid
@@ -79,7 +79,45 @@ async function register (ctx, next) {
   }
 }
 
+// TODO: 检查发出更新请求的用户是否与待更新的用户属于同一个
+// TODO: 如果发出请求的用户的权限较高，可更改其它用户的信息
+async function update (ctx, next) {
+  const uid = ctx.params.uid
+
+  const user = await User
+    .findOne({uid})
+    .exec()
+
+  if (!user) {
+    ctx.throw(400, 'No such a user')
+  }
+
+  const verified = User.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  if (!isUndefined(ctx.request.body['pwd'])) {
+    ctx.request.body.pwd = generatePwd(ctx.request.body.pwd)
+  }
+  // 可更新的字段
+  const fields = ['nick', 'pwd', 'school', 'mail', 'motto']
+  fields.forEach((item) => {
+    if (!isUndefined(ctx.request.body[item])) {
+      user[item] = ctx.request.body[item]
+    }
+  })
+
+  await user.save()
+
+  const { nick, privilege, school, mail, motto } = user
+  ctx.body = {
+    uid, nick, privilege, school, mail, motto
+  }
+}
+
 module.exports = {
   queryOneUser,
-  register
+  register,
+  update
 }
