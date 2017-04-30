@@ -1,4 +1,5 @@
 const News = require('../models/News')
+const { extractPagination } = require('../utils')
 
 async function queryList (ctx, next) {
   const res = await News
@@ -13,12 +14,7 @@ async function queryList (ctx, next) {
 
   ctx.body = {
     news: res.docs,
-    pagination: {
-      limit: res.limit,
-      page: +res.page,
-      pages: res.pages,
-      total: res.total
-    }
+    pagination: extractPagination(res)
   }
 }
 
