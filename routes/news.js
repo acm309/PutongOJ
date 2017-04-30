@@ -1,11 +1,11 @@
 const Router = require('koa-router')
-const contests = require('../controllers/news')
+const news = require('../controllers/news')
 
 const router = new Router({
   prefix: '/news'
 })
 
-router.get('/', contests.queryList)
-// router.get('/:cid', contests.queryOneContest)
+router.get('/', news.queryList)
+router.get('/:nid', news.queryOneContest)
 
 module.exports = router
