@@ -6,6 +6,6 @@ const router = new Router({
 })
 
 router.get('/', news.queryList)
-router.get('/:nid', news.queryOneContest)
+router.get('/:nid', news.queryOneNews)
 
 module.exports = router
