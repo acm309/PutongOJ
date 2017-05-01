@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
+const { isUndefined } = require('../utils')
 
 const ProblemSchema = mongoose.Schema({
   pid: {
@@ -61,5 +62,19 @@ const ProblemSchema = mongoose.Schema({
 })
 
 ProblemSchema.plugin(mongoosePaginate)
+
+ProblemSchema.statics.validate = function validate ({ title }) {
+  let error = ''
+  let valid = true
+  if (!isUndefined(title)) {
+    if (title.length > 50) {
+      error = 'The length of title should not be more than 50'
+    }
+  }
+  if (error) {
+    valid = false
+  }
+  return { valid, error }
+}
 
 module.exports = mongoose.model('Problem', ProblemSchema)

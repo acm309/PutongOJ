@@ -7,5 +7,6 @@ const router = new Router({
 
 router.get('/', problems.queryList)
 router.get('/:pid', problems.queryOneProblem)
+router.put('/:pid', problems.update)
 
 module.exports = router
