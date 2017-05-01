@@ -89,8 +89,6 @@ async function register (ctx, next) {
 /**
   更新一个已存在用户
 */
-// TODO: 检查发出更新请求的用户是否与待更新的用户属于同一个
-// TODO: 如果发出请求的用户的权限较高，可更改其它用户的信息
 async function update (ctx, next) {
   const uid = ctx.params.uid
 
@@ -100,6 +98,12 @@ async function update (ctx, next) {
 
   if (!user) {
     ctx.throw(400, 'No such a user')
+  }
+
+  // 你不能修改他人的信息，除非你权限很高（比如 admin）
+  if (ctx.session.user.uid !== uid &&
+    ctx.session.user.privilege === ctx.config.privilege.Admin) {
+    ctx.throw(400, "You are not allowed to update others' info")
   }
 
   const verified = User.validate(ctx.request.body)
