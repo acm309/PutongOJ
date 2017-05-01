@@ -49,16 +49,20 @@ async function statistics (ctx, next) {
     }},
     { $limit: 30 }]).exec()
 
-  let statistics = []
+  let counted = []
   // TODO: fix this to a constant array with understandable variables
   for (let i = 1; i <= 11; i += 1) {
-    statistics.push(
+    counted.push(
       Solution.count({pid, judge: i}).exec()
     )
   }
 
-  statistics = await Promise.all(statistics)
-  statistics = statistics.map((item, index) => ({judge: index, count: item}))
+  counted = await Promise.all(counted)
+  const statistics = {}
+  // i means the judge result, counted[i - 1] represents corresponding count
+  for (let i = 1; i <= 11; i += 1) {
+    statistics[i] = counted[i - 1]
+  }
 
   ctx.body = {
     solutions,
