@@ -1,4 +1,5 @@
 const Contest = require('../models/Contest')
+const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
 
@@ -75,6 +76,18 @@ async function create (ctx, next) {
 
   const cid = await Ids.generateId('Contest')
   const { title, start, end, list, encrypt, argument } = ctx.request.body
+
+  // 检查列表里的题是否都存在
+  const ps = await Promise.all(
+    list.map((pid) => Problem.findOne({pid}).exec())
+  )
+
+  for (let i = 0; i < ps.length; i += 1) {
+    if (!ps[i]) { // 这道题没找到，说明没这题
+      ctx.throw(400, `Problem ${list[i]} not found`)
+    }
+  }
+
   const contest = new Contest({
     cid, title, start, end, list, encrypt, argument
   })
