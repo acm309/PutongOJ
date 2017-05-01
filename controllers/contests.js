@@ -144,9 +144,26 @@ async function update (ctx, next) {
   }
 }
 
+async function del (ctx, next) {
+  const cid = +ctx.params.cid
+  if (isNaN(cid)) {
+    ctx.throw(400, 'Cid should be a number')
+  }
+  const contest = await Contest
+    .findOne({cid})
+    .exec()
+
+  if (!contest) {
+    ctx.throw(400, 'No such a contest')
+  }
+  await Contest.findOneAndRemove({cid}).exec()
+  ctx.body = {}
+}
+
 module.exports = {
   queryList,
   queryOneContest,
   create,
-  update
+  update,
+  del
 }
