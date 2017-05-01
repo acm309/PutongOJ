@@ -1,8 +1,7 @@
 const chai = require('chai')
 const app = require('../../app')
-const supertest = require('supertest')
+const request = require('supertest')(app.listen())
 
-const request = supertest.agent(app.listen())
 const expect = chai.expect
 
 describe('User route', function () {
@@ -16,7 +15,7 @@ describe('User route', function () {
             .to.have.property('error')
             .to.equal('No such a user')
         })
-      done()
+        .end(done)
     })
 
     it('should return the user when query an existed user', function (done) {
@@ -36,7 +35,7 @@ describe('User route', function () {
             .to.have.property('unsolved')
             .to.be.an('array')
         })
-      done()
+        .end(done)
     })
   })
 
@@ -52,7 +51,7 @@ describe('User route', function () {
             .to.have.property('error')
             .not.to.be.empty
         })
-      done()
+        .end(done)
     })
 
     it('should error when one field does not meet the basic requirements', function (done) {
@@ -79,7 +78,7 @@ describe('User route', function () {
             .to.have.property('error')
             .not.to.be.empty
         })
-      done()
+        .end(done)
     })
   })
 })
