@@ -103,9 +103,24 @@ async function update (ctx, next) {
   }
 }
 
+async function del (ctx, next) {
+  const nid = +ctx.params.nid
+  const news = await News
+    .findOne({nid})
+    .exec()
+
+  if (!news) {
+    ctx.throw(400, 'No such a news')
+  }
+
+  await News.deleteOne({nid}).exec()
+  ctx.body = {}
+}
+
 module.exports = {
   queryList,
   queryOneNews,
   create,
-  update
+  update,
+  del
 }
