@@ -1,5 +1,6 @@
 const Contest = require('../models/Contest')
-const { extractPagination } = require('../utils')
+const Ids = require('../models/ID')
+const { extractPagination, isUndefined } = require('../utils')
 
 /** 返回比赛列表 */
 async function queryList (ctx, next) {
@@ -52,7 +53,41 @@ async function queryOneContest (ctx, next) {
   }
 }
 
+/**
+  创建新的比赛
+  Caveat:
+    传 post 参数的时候，对应数字的字段显示的其实为 string 类型，比如 start，理应 int，
+    但从 ctx.request.body 拿出来时为字符串
+    即时如此，mongoose 会自动转换，但你作其它事时可能需要注意
+*/
+async function create (ctx, next) {
+  // 必须的字段
+  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+    if (isUndefined(ctx.request.body[item])) {
+      ctx.throw(400, `Field "${item}" is required to create a contest`)
+    }
+  })
+
+  const verified = Contest.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  const cid = await Ids.generateId('Contest')
+  const { title, start, end, list, encrypt, argument } = ctx.request.body
+  const contest = new Contest({
+    cid, title, start, end, list, encrypt, argument
+  })
+  await contest.save()
+  ctx.body = {
+    contest: {
+      cid, title, start, end, list, encrypt, argument
+    }
+  }
+}
+
 module.exports = {
   queryList,
-  queryOneContest
+  queryOneContest,
+  create
 }
