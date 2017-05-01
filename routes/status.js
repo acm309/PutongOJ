@@ -7,7 +7,7 @@ const router = new Router({
 })
 
 router.get('/', status.queryList)
-router.get('/:sid', status.queryOneSolution)
+router.get('/:sid', loginRequired, status.queryOneSolution)
 router.post('/:sid', loginRequired, status.create)
 router.put('/:sid', loginRequired, adminRequired, status.rejudge)
 
