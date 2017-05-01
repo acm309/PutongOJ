@@ -82,35 +82,4 @@ describe('User route', function () {
       done()
     })
   })
-
-  describe('#users put (update one user)', function () {
-    it('should error when the provided user does not exist', function (done) {
-      request
-        .put('/api/users/965055be74b37f9b9')
-        .field('pwd', 'lessasd')
-        .field('nick', 'where is the pwd')
-        .expect(400)
-        .expect(function (res) {
-          expect(res.body)
-            .to.have.property('error')
-            .to.equal('No such a user')
-        })
-      done()
-    })
-
-    it('should error when one field does not meet the basic requirements', function (done) {
-      request
-        .put('/api/users/965055be74b37f9b9')
-        .field('pwd', 'less')
-        .field('nick', 'where is the pwd')
-        .expect(400)
-        .expect(function (res) {
-          expect(res.body)
-            .to.have.property('error')
-            .not.to.be.empty
-        })
-      done()
-    })
-  })
-
 })
