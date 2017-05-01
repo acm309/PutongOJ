@@ -105,6 +105,9 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const nid = +ctx.params.nid
+  if (isNaN(nid)) {
+    ctx.throw(400, 'Nid should be a number')
+  }
   const news = await News
     .findOne({nid})
     .exec()
