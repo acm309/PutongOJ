@@ -9,5 +9,6 @@ const router = new Router({
 router.get('/', contests.queryList)
 router.get('/:cid', contests.queryOneContest)
 router.post('/', loginRequired, adminRequired, contests.create)
+router.put('/:cid', loginRequired, adminRequired, contests.update)
 
 module.exports = router

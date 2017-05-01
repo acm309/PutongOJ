@@ -42,7 +42,8 @@ async function queryOneContest (ctx, next) {
   }
   const contest = await Contest
     .findOne({cid})
-    .select('-_id argument cid title create encrypt start end list status')
+    // argument 有时候可能是密码，因此这里不返回
+    .select('-_id cid title encrypt start end list status')
     .exec()
 
   // 查无此比赛
@@ -99,8 +100,53 @@ async function create (ctx, next) {
   }
 }
 
+async function update (ctx, next) {
+  const cid = +ctx.params.cid
+  if (isNaN(cid)) {
+    ctx.throw(400, 'Cid should be a number')
+  }
+  const contest = await Contest
+    .findOne({cid})
+    .exec()
+
+  // 查无此比赛
+  if (!contest) {
+    ctx.throw(400, 'No such a contest')
+  }
+
+  const verified = Contest.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  if (ctx.request.body['list']) {
+    // 检查列表里的题是否都存在
+    const ps = await Promise.all(
+      ctx.request.body['list'].map((pid) => Problem.findOne({pid}).exec())
+    )
+
+    for (let i = 0; i < ps.length; i += 1) {
+      if (!ps[i]) { // 这道题没找到，说明没这题
+        ctx.throw(400, `Problem ${ctx.request.body['list'][i]} not found`)
+      }
+    }
+  }
+
+  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+    if (!isUndefined(ctx.request.body[item])) {
+      contest[item] = ctx.request.body[item]
+    }
+  })
+  await contest.save()
+  const { title, start, end, list } = contest
+  ctx.body = {
+    contest: { cid, title, start, end, list }
+  }
+}
+
 module.exports = {
   queryList,
   queryOneContest,
-  create
+  create,
+  update
 }

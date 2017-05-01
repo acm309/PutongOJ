@@ -45,11 +45,13 @@ ContestSchema.statics.validate = function ({
     if (title.length > 50) {
       error = 'The length of title should not be more than 50'
     }
-  } else if (!isUndefined(list) && Array.isArray(list)) {
+  }
+  if (!isUndefined(list) && Array.isArray(list)) {
     if (list.length > 50) {
       error = 'The length of list should not be more than 50'
     }
-  } else if (!isUndefined(start) && !isUndefined(end)) {
+  }
+  if (!isUndefined(start) && !isUndefined(end)) {
     if (+start > +end) {
       error = 'Start time should not be later than end time'
     }
