@@ -86,8 +86,10 @@ async function update (ctx, next) {
   await problem.save()
 
   ctx.body = {
-    pid,
-    title: problem.title
+    problem: {
+      pid,
+      title: problem.title
+    }
   }
 }
 

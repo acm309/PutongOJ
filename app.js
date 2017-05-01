@@ -6,6 +6,7 @@ const staticCache = require('koa-static-cache')
 const koaBody = require('koa-body')
 const session = require('koa-session-minimal')
 const redisStore = require('koa-redis')
+const send = require('koa-send')
 const mongoose = require('mongoose')
 
 const path = require('path')
@@ -63,6 +64,16 @@ app.use(async function (ctx, next) {
     ctx.body = {
       error: err.message || 'Unknown message, please contact the admin'
     }
+  }
+})
+
+// 404
+// 后端支持，即使 404 也返回 public/index.html
+app.use(async function (ctx, next) {
+  await next()
+  const status = ctx.status || 404
+  if (status === 404) {
+    await send(ctx, 'public/index.html')
   }
 })
 

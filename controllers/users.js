@@ -126,7 +126,7 @@ async function update (ctx, next) {
 
   const { nick, privilege, school, mail, motto } = user
   ctx.body = {
-    uid, nick, privilege, school, mail, motto
+    user: { uid, nick, privilege, school, mail, motto }
   }
 }
 
