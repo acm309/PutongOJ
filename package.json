@@ -10,6 +10,7 @@
   "author": "lazzzis",
   "license": "MIT",
   "dependencies": {
+    "array-duplicated": "1.0.1",
     "isemail": "2.2.1",
     "koa": "2.2.0",
     "koa-body": "2.0.0",

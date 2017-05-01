@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 const { isUndefined } = require('../utils')
+const arrayDuplicated = require('array-duplicated')
 
 const ContestSchema = mongoose.Schema({
   cid: {
@@ -49,6 +50,11 @@ ContestSchema.statics.validate = function ({
   if (!isUndefined(list) && Array.isArray(list)) {
     if (list.length > 50) {
       error = 'The length of list should not be more than 50'
+    }
+    // 是否有重复元素
+    const dulp = arrayDuplicated(list)
+    if (dulp.length > 0) {
+      error = `${dulp.join(', ')} are dulplicated`
     }
   }
   if (!isUndefined(start) && !isUndefined(end)) {
