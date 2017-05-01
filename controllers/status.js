@@ -53,7 +53,23 @@ async function queryOneSolution (ctx, next) {
   }
 }
 
+/**
+  创建新的提交
+*/
+async function create (ctx, next) {
+
+}
+
+/**
+  更新提交，其实就是 rejudge
+*/
+async function rejudge () {
+
+}
+
 module.exports = {
   queryList,
-  queryOneSolution
+  queryOneSolution,
+  create,
+  rejudge
 }

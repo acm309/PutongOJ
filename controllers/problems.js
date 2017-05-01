@@ -1,5 +1,5 @@
 const Problem = require('../models/Problem')
-const { extractPagination } = require('../utils')
+const { extractPagination, isUndefined } = require('../utils')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -53,7 +53,46 @@ async function queryOneProblem (ctx, next) {
   }
 }
 
+/** 指定 pid, 更新一道已经存在的题目 */
+async function update (ctx, next) {
+  const pid = +ctx.params.pid
+  if (isNaN(pid)) {
+    ctx.throw(400, 'Pid should be a number')
+  }
+
+  const problem = await Problem
+    .findOne({pid})
+    .exec()
+
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  const verified = Problem.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  // 可更新的字段
+  const fields = ['title', 'time', 'memory', 'input', 'output', 'in', 'out',
+    'description', 'hint']
+
+  fields.forEach((field) => {
+    if (!isUndefined(ctx.request.body[field])) {
+      problem[field] = ctx.request.body[field]
+    }
+  })
+
+  await problem.save()
+
+  ctx.body = {
+    pid,
+    title: problem.title
+  }
+}
+
 module.exports = {
   queryList,
-  queryOneProblem
+  queryOneProblem,
+  update
 }
