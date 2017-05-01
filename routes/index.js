@@ -9,6 +9,7 @@ const users = require('./users')
 const ranklist = require('./ranklist')
 const status = require('./status')
 const statistics = require('./statistics')
+const session = require('./session')
 
 api
   .use('/api', contests.routes(), contests.allowedMethods())
@@ -19,6 +20,7 @@ api
   .use('/api', ranklist.routes(), ranklist.allowedMethods())
   .use('/api', status.routes(), status.allowedMethods())
   .use('/api', statistics.routes(), statistics.allowedMethods())
+  .use('/api', session.routes(), session.allowedMethods())
 
 module.exports = function (app) {
   app
