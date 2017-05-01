@@ -5,6 +5,14 @@ async function loginRequired (ctx, next) {
   await next()
 }
 
+async function adminRequired (ctx, next) {
+  if (ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+    ctx.throw(400, 'Only admins are allowed to do this')
+  }
+  await next()
+}
+
 module.exports = {
-  loginRequired
+  loginRequired,
+  adminRequired
 }

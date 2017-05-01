@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const news = require('../controllers/news')
-const { loginRequired } = require('../middlewares')
+const { loginRequired, adminRequired } = require('../middlewares')
 
 const router = new Router({
   prefix: '/news'
@@ -8,7 +8,7 @@ const router = new Router({
 
 router.get('/', news.queryList)
 router.get('/:nid', news.queryOneNews)
-router.post('/', loginRequired, news.create)
-router.put('/:nid', loginRequired, news.update)
+router.post('/', loginRequired, adminRequired, news.create)
+router.put('/:nid', loginRequired, adminRequired, news.update)
 
 module.exports = router

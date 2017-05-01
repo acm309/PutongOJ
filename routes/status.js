@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const status = require('../controllers/status')
-const { loginRequired } = require('../middlewares')
+const { loginRequired, adminRequired } = require('../middlewares')
 
 const router = new Router({
   prefix: '/status'
@@ -9,6 +9,6 @@ const router = new Router({
 router.get('/', status.queryList)
 router.get('/:sid', status.queryOneSolution)
 router.post('/:sid', loginRequired, status.create)
-router.put('/:sid', loginRequired, status.rejudge)
+router.put('/:sid', loginRequired, adminRequired, status.rejudge)
 
 module.exports = router
