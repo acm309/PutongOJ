@@ -20,12 +20,12 @@ async function login (ctx, next) {
     ctx.throw(400, 'Wrong password')
   }
 
-  ctx.session.user =
-  ctx.body = {
+  ctx.session.user = {
     uid,
     nick: user.nick,
     privilege: user.privilege
   }
+  ctx.body = { user: ctx.session.user }
 }
 
 /**
@@ -44,9 +44,7 @@ async function logout (ctx, next) {
 async function fetchSession (ctx, next) {
   if (ctx.session.user) {
     ctx.body = {
-      uid: ctx.session.user.uid,
-      nick: ctx.session.user.nick,
-      privilege: ctx.session.user.privilege
+      user: ctx.session.user
     }
   } else {
     ctx.body = {}

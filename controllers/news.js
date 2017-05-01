@@ -98,7 +98,9 @@ async function update (ctx, next) {
   await news.save()
 
   const { title, content } = news
-  ctx.body = { nid, title, content }
+  ctx.body = {
+    news: { nid, title, content }
+  }
 }
 
 module.exports = {
