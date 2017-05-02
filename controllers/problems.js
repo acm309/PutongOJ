@@ -75,7 +75,7 @@ async function update (ctx, next) {
 
   // 可更新的字段
   const fields = ['title', 'time', 'memory', 'input', 'output', 'in', 'out',
-    'description', 'hint']
+    'description', 'hint', 'status']
 
   fields.forEach((field) => {
     if (!isUndefined(ctx.request.body[field])) {
