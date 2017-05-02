@@ -4,6 +4,7 @@ const { isUndefined, redisGet, redisSet } = require('../utils')
 const arrayDuplicated = require('array-duplicated')
 const Problem = require('./Problem')
 const Solution = require('./Solution')
+const User = require('./User')
 
 const ContestSchema = mongoose.Schema({
   cid: {
@@ -120,12 +121,78 @@ ContestSchema.methods.fetchOverview = async function (solution) {
   return res
 }
 
-ContestSchema.methods.fetchRanklist = async function () {
-  const res = await redisGet(`contests:${this.cid}:ranklist`)
-  if (res === null) {
-    return ''
+ContestSchema.methods.fetchRanklist = async function (solution) {
+  const statusUpdate = (status, solution) => { // 里面用到了 this, 故意使用箭头函数
+    // 提交过且正确了，接下来的不用管了
+    if (!isUndefined(status.solved[solution.pid]) &&
+      status.solved[solution.pid].wa >= 0) {
+      return status
+    }
+    // Accepted
+    if (solution.judge === 3) { // TODO: fix this to a constant variable
+      if (isUndefined(status.solved[solution.pid])) { // 第一次提交
+        status.solve += 1
+        status.solved[solution.pid] = {wa: 0, create: solution.create - this.start}
+        status.penalty += solution.create - this.start
+      } else { // 提交过且作对了
+        status.solved[solution.pid].wa = -status.solved[solution.pid].wa
+        status.solved[solution.pid].create = solution.create - this.start
+        status.penalty += 20 * 60 * 1000 * status.solved[solution.pid].wa +
+          (solution.create - this.start) // 不知道为什么，反正这个括号不能少
+        // 20 minutes
+      }
+    } else { // 做错了
+      if (isUndefined(status.solved[solution.pid])) { // 第一次提交
+        status.solved[solution.pid] = {wa: -1}
+      } else { // 提交过且又做错了
+        status.solved[solution.pid].wa -= 1
+      }
+    }
+    return status
   }
-  return res
+
+  let res = await redisGet(`contests:${this.cid}:ranklist`)
+  if (res === null) {
+    res = {}
+    const solutions = await Solution
+      .find({mid: this.cid})
+      .sort({create: 1})
+      .exec()
+    for (let solution of solutions) {
+      if (isUndefined(res[solution.uid])) { // 这个用户还没记录
+        res[solution.uid] = {
+          uid: solution.uid,
+          solve: 0,
+          solved: {},
+          penalty: 0
+        }
+      }
+      res[solution.uid] = statusUpdate(res[solution.uid], solution)
+    }
+    // 添加暱称
+    await Promise.all(Object.keys(res).map(async function (uid) {
+      const nick = await User.findOne({uid}).exec().then((u) => u.nick)
+      res[uid].nick = nick
+    }))
+    await redisSet(`contests:${this.cid}:ranklist`, JSON.stringify(res))
+    return Object.values(res)
+  }
+  if (!isUndefined(solution)) {
+    if (isUndefined(res[solution.uid])) { // 这个用户还没记录
+      res[solution.uid] = {
+        uid: solution.uid,
+        solve: 0,
+        solved: {},
+        penalty: 0
+      }
+      const nick = await User.findOne({uid: solution.uid})
+        .exec().then((u) => u.nick)
+      res[solution.uid].nick = nick
+    }
+    res[solution.uid] = statusUpdate(res[solution.uid], solution)
+    await redisSet(`contests:${this.cid}:ranklist`, JSON.stringify(res))
+  }
+  return Object.values(res)
 }
 
 module.exports = mongoose.model('Contest', ContestSchema)
