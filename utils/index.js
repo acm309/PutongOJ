@@ -49,10 +49,23 @@ function redisGet (key) {
   })
 }
 
+function redisSet (key, value) {
+  return new Promise((resolve, reject) => {
+    client.set(key, value, function (err, reply) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(reply)
+      }
+    })
+  })
+}
+
 module.exports = {
   extractPagination,
   generatePwd,
   isUndefined,
   redisLPUSH,
-  redisGet
+  redisGet,
+  redisSet
 }

@@ -130,6 +130,9 @@ async function update (ctx, next) {
         ctx.throw(400, `Problem ${ctx.request.body['list'][i]} not found`)
       }
     }
+    // 列表有更新，以前的记录(overview, ranklist)需要更新
+    contest.clearOverview()
+    contest.clearRanklist()
   }
 
   ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
