@@ -93,8 +93,26 @@ async function update (ctx, next) {
   }
 }
 
+async function del (ctx, name) {
+  const pid = +ctx.params.pid
+  if (isNaN(pid)) {
+    ctx.throw(400, 'Pid should be a number')
+  }
+  const problem = await Problem
+    .findOne({pid})
+    .exec()
+
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  await Problem.deleteOne({pid}).exec()
+  ctx.body = {}
+}
+
 module.exports = {
   queryList,
   queryOneProblem,
-  update
+  update,
+  del
 }
