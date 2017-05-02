@@ -160,10 +160,20 @@ async function del (ctx, next) {
   ctx.body = {}
 }
 
+async function overview (ctx, next) {
+
+}
+
+async function ranklist (ctx, next) {
+
+}
+
 module.exports = {
   queryList,
   queryOneContest,
   create,
   update,
-  del
+  del,
+  overview,
+  ranklist
 }
