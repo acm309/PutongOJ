@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined } = require('../utils')
+const { isUndefined, redisGet } = require('../utils')
 const arrayDuplicated = require('array-duplicated')
 
 const ContestSchema = mongoose.Schema({
@@ -66,6 +66,22 @@ ContestSchema.statics.validate = function ({
     valid = false
   }
   return { valid, error }
+}
+
+ContestSchema.methods.fetchOverview = async function () {
+  const res = await redisGet(`contests:${this.cid}:overview`)
+  if (res === null) {
+    return ''
+  }
+  return res
+}
+
+ContestSchema.methods.fetchRanklist = async function () {
+  const res = await redisGet(`contests:${this.cid}:ranklist`)
+  if (res === null) {
+    return ''
+  }
+  return res
 }
 
 module.exports = mongoose.model('Contest', ContestSchema)

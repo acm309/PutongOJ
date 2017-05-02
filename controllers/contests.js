@@ -161,11 +161,39 @@ async function del (ctx, next) {
 }
 
 async function overview (ctx, next) {
+  const cid = +ctx.params.cid
+  if (isNaN(cid)) {
+    ctx.throw(400, 'Cid should be a number')
+  }
+  const contest = await Contest
+    .findOne({cid})
+    .exec()
 
+  if (!contest) {
+    ctx.throw(400, 'No such a contest')
+  }
+  const overview = await contest.fetchOverview()
+  ctx.body = {
+    overview
+  }
 }
 
 async function ranklist (ctx, next) {
+  const cid = +ctx.params.cid
+  if (isNaN(cid)) {
+    ctx.throw(400, 'Cid should be a number')
+  }
+  const contest = await Contest
+    .findOne({cid})
+    .exec()
 
+  if (!contest) {
+    ctx.throw(400, 'No such a contest')
+  }
+  const ranklist = await contest.fetchRanklist()
+  ctx.body = {
+    ranklist
+  }
 }
 
 module.exports = {
