@@ -1,5 +1,6 @@
 const Solution = require('../models/Solution')
-const { extractPagination } = require('../utils')
+const Ids = require('../models/ID')
+const { extractPagination, isUndefined } = require('../utils')
 
 /**
   返回一个 solution 的列表，以时间降序（从晚到早的排）
@@ -57,14 +58,60 @@ async function queryOneSolution (ctx, next) {
   创建新的提交
 */
 async function create (ctx, next) {
+  // 必备的字段
+  ;['pid', 'code', 'language'].forEach((item) => {
+    if (isUndefined(ctx.request.body[item])) {
+      ctx.throw(400, `Field "${item}" is required`)
+    }
+  })
 
+  const verified = Solution.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+
+  const { pid, code, language } = ctx.request.body
+  const mid = ctx.request.body['mid'] || 0
+  const sid = await Ids.generateId('solution')
+  const uid = ctx.session.user.uid
+
+  const solution = new Solution({
+    uid, sid, pid, mid, code, language: +language, length: code.length
+  })
+
+  await solution.save()
+  await solution.pending()
+
+  ctx.body = {
+    solution: {
+      sid, pid, mid, code, language, length: code.length
+    }
+  }
 }
 
 /**
   更新提交，其实就是 rejudge
 */
-async function rejudge () {
+async function rejudge (ctx, next) {
+  const sid = +ctx.params.sid
+  if (isNaN(sid)) {
+    ctx.throw(400, 'Sid should be a number')
+  }
 
+  const solution = await Solution
+    .findOne({sid})
+    .exec()
+
+  if (!solution) {
+    ctx.throw(400, 'No such a solution')
+  }
+
+  solution.judge = 0 // Pending TODO: fix this to a constant variable
+  await solution.save()
+
+  // 似乎可以不用等待?
+  await solution.pending()
+  ctx.body = {}
 }
 
 module.exports = {

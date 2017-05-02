@@ -64,6 +64,7 @@ app.use(async function (ctx, next) {
     ctx.body = {
       error: err.message || 'Unknown message, please contact the admin'
     }
+    console.log(err.message, err.stack)
   }
 })
 

@@ -1,4 +1,7 @@
 const crypto = require('crypto')
+const config = require('../config')
+const redis = require('redis')
+const client = redis.createClient({url: config.redisUrl})
 
 function extractPagination (pagination) {
   return {
@@ -22,8 +25,21 @@ function isUndefined (item) {
   return typeof item === 'undefined'
 }
 
+function redisLPUSH (value) {
+  return new Promise((resolve, reject) => {
+    client.lpush('solutions', value, function (err, reply) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(reply)
+      }
+    })
+  })
+}
+
 module.exports = {
   extractPagination,
   generatePwd,
-  isUndefined
+  isUndefined,
+  redisLPUSH
 }

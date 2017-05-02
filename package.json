@@ -25,7 +25,8 @@
     "koa-static-cache": "5.0.1",
     "mongoose": "4.9.6",
     "mongoose-paginate": "5.0.3",
-    "ramda": "0.23.0"
+    "ramda": "0.23.0",
+    "redis": "2.7.1"
   },
   "devDependencies": {
     "chai": "3.5.0",

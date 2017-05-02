@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
+const { redisLPUSH, isUndefined } = require('../utils')
 
 const SolutionSchema = mongoose.Schema({
   sid: {
@@ -35,7 +36,7 @@ const SolutionSchema = mongoose.Schema({
   length: Number,
   judge: {
     type: Number,
-    default: 1 // TODO: fix this number to a constant variable
+    default: 0 // TODO: fix this number to a constant variable
   },
   status: {
     type: Number,
@@ -66,5 +67,25 @@ const SolutionSchema = mongoose.Schema({
 })
 
 SolutionSchema.plugin(mongoosePaginate)
+
+SolutionSchema.methods.pending = async function () {
+  await redisLPUSH(this.sid)
+}
+
+SolutionSchema.statics.validate = function validate ({
+  code
+}) {
+  let valid = true
+  let error = ''
+  if (!isUndefined(code)) {
+    if (code.length < 20 || code.length > 10000) {
+      error = 'The length of code should be between 20 and 10000'
+    }
+  }
+  if (error) {
+    valid = false
+  }
+  return { valid, error }
+}
 
 module.exports = mongoose.model('Solution', SolutionSchema)

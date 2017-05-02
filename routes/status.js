@@ -8,7 +8,7 @@ const router = new Router({
 
 router.get('/', status.queryList)
 router.get('/:sid', loginRequired, status.queryOneSolution)
-router.post('/:sid', loginRequired, status.create)
+router.post('/', loginRequired, status.create)
 router.put('/:sid', loginRequired, adminRequired, status.rejudge)
 
 module.exports = router
