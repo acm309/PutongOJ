@@ -58,11 +58,7 @@ async function queryOneProblem (ctx, next) {
 
 /** 指定 pid, 更新一道已经存在的题目 */
 async function update (ctx, next) {
-  const pid = +ctx.params.pid
-  if (isNaN(pid)) {
-    ctx.throw(400, 'Pid should be a number')
-  }
-
+  const pid = +ctx.params.pid // router 那儿的中间件已经保证这是数字了
   const problem = await Problem
     .findOne({pid})
     .exec()
@@ -99,9 +95,6 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const pid = +ctx.params.pid
-  if (isNaN(pid)) {
-    ctx.throw(400, 'Pid should be a number')
-  }
   const problem = await Problem
     .findOne({pid})
     .exec()

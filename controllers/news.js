@@ -22,11 +22,7 @@ async function queryList (ctx, next) {
 
 /** 指定nid, 返回一条具体的新闻 */
 async function queryOneNews (ctx, next) {
-  const nid = +ctx.params.nid
-
-  if (isNaN(nid)) {
-    ctx.throw(400, 'Nid should be a number')
-  }
+  const nid = +ctx.params.nid // router 那儿的中间件已经保证这是数字了
 
   const news = await News
     .findOne({nid})
@@ -77,9 +73,6 @@ async function update (ctx, next) {
   }
 
   const nid = +ctx.params.nid
-  if (isNaN(nid)) {
-    ctx.throw(400, 'Nid should be a number')
-  }
 
   const news = await News
     .findOne({nid})
@@ -105,9 +98,7 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const nid = +ctx.params.nid
-  if (isNaN(nid)) {
-    ctx.throw(400, 'Nid should be a number')
-  }
+
   const news = await News
     .findOne({nid})
     .exec()
