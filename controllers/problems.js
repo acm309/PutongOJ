@@ -93,7 +93,7 @@ async function update (ctx, next) {
   }
 }
 
-async function del (ctx, name) {
+async function del (ctx, next) {
   const pid = +ctx.params.pid
   if (isNaN(pid)) {
     ctx.throw(400, 'Pid should be a number')
