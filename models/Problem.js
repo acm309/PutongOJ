@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 const { isUndefined } = require('../utils')
+const fse = require('fs-extra')
+const path = require('path')
 
 const ProblemSchema = mongoose.Schema({
   pid: {
@@ -53,8 +55,9 @@ const ProblemSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
-  argument: {
-    type: String
+  status: {
+    type: Number,
+    default: 2 // TODO: fix this to a constant variable
   },
   hint: String
 }, {
@@ -62,6 +65,13 @@ const ProblemSchema = mongoose.Schema({
 })
 
 ProblemSchema.plugin(mongoosePaginate)
+
+ProblemSchema.methods.saveSample = async function saveSample (root) {
+  await Promise.all([
+    fse.outputFile(path.resolve(root, `./${this.pid}/sample.in`), this.in),
+    fse.outputFile(path.resolve(root, `./${this.pid}/sample.out`), this.out)
+  ])
+}
 
 ProblemSchema.statics.validate = function validate ({ title }) {
   let error = ''

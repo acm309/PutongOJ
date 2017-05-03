@@ -1,3 +1,5 @@
+const path = require('path')
+
 const config = {
   port: 3000
 }
@@ -16,5 +18,8 @@ config.privilege = {
   Teacher: 2,
   Admin: 3
 }
+
+config.root = path.resolve(__dirname, '..')
+config.DataRoot = path.resolve(config.root, './data/Data')
 
 module.exports = config

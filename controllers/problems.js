@@ -1,4 +1,5 @@
 const Problem = require('../models/Problem')
+const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
 
 /** 返回题目列表 */
@@ -84,6 +85,7 @@ async function update (ctx, next) {
   })
 
   await problem.save()
+  await problem.saveSample(ctx.config.DataRoot)
 
   ctx.body = {
     problem: {
@@ -110,9 +112,53 @@ async function del (ctx, next) {
   ctx.body = {}
 }
 
+async function create (ctx, next) {
+  const verified = Problem.validate(ctx.request.body)
+  if (!verified.valid) {
+    ctx.throw(400, verified.error)
+  }
+  // 必须的字段只有 title， 其它都有默认值
+  const title = ctx.request.body['title']
+  if (isUndefined(title)) {
+    ctx.throw(400, 'Title is required!')
+  }
+  const pid = await Ids.generateId('Problem')
+  const problem = new Problem({
+    pid,
+    title
+  })
+  // 可选的其它字段
+  ;['time', 'memory', 'description', 'in', 'out', 'input', 'output',
+    'hint', 'status'].forEach((item) => {
+      if (!isUndefined(ctx.request.body[item])) {
+        problem[item] = ctx.request.body[item]
+      }
+    })
+  await problem.save()
+  await problem.saveSample(ctx.config.DataRoot)
+  const { time, memory, description, inData, out, input, output,
+    hint, status } = problem
+  ctx.body = {
+    problem: {
+      time,
+      memory,
+      description,
+      in: inData, // in 刚好是关键字，所以这里用 inData 表示
+      out,
+      input,
+      output,
+      hint,
+      status,
+      title,
+      pid
+    }
+  }
+}
+
 module.exports = {
   queryList,
   queryOneProblem,
   update,
-  del
+  del,
+  create
 }
