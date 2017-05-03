@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "array-duplicated": "1.0.1",
+    "fs-extra": "3.0.0",
     "isemail": "2.2.1",
     "koa": "2.2.0",
     "koa-body": "2.0.0",
