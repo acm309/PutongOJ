@@ -1,6 +1,8 @@
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
+const fse = require('fs-extra')
+const path = require('path')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -155,10 +157,22 @@ async function create (ctx, next) {
   }
 }
 
+async function testData (ctx, next) {
+  const dataPath = ctx.request.body.files.file.path
+  const type = ctx.query.type
+
+  await fse.move(dataPath,
+    path.resolve(ctx.config.DataRoot, `./${ctx.params.pid}/test.${type}`),
+    {overwrite: true}
+  )
+  ctx.body = {}
+}
+
 module.exports = {
   queryList,
   queryOneProblem,
   update,
   del,
-  create
+  create,
+  testData
 }

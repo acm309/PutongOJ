@@ -1,6 +1,8 @@
 # customary
 .tern-project
 requests/
+data/
+public/uploads
 
 # macOS
 
