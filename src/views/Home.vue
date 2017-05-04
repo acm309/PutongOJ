@@ -4,7 +4,9 @@
     <hr>
     <div class="notification" v-for="news in newsList" :key="news.nid">
       <p>{{ news.title }}</p>
-      <a>Read More</a> {{ news.create | timePretty }}
+      <router-link
+        :to="{name: 'news', params: {nid: news.nid}}"
+      >Read More</router-link> {{ news.create | timePretty }}
     </div>
   </div>
 </template>

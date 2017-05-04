@@ -8,6 +8,8 @@ import Contests from './views/Contests.vue'
 import Ranklist from './views/Ranklist.vue'
 import FAQ from './views/FAQ.vue'
 
+import News from './views/News.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -47,6 +49,13 @@ const routes = [
     path: '/faq',
     component: FAQ,
     name: 'faq'
+  }, {
+    path: '/news/:nid',
+    component: News,
+    name: 'news',
+    props: (route) => ({
+      nid: route.params.nid
+    })
   }
 ]
 
