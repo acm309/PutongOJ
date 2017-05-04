@@ -10,27 +10,22 @@
         <router-link
           class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'problems'}"
-          exact
         >Problems</router-link>
         <router-link
           class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'status'}"
-          exact
         >Status</router-link>
         <router-link
           class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'ranklist'}"
-          exact
         >Ranklist</router-link>
         <router-link
           class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'contests'}"
-          exact
         >Contests</router-link>
         <router-link
           class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'faq'}"
-          exact
         >FAQ</router-link>
       </div>
       <span class="nav-toggle">

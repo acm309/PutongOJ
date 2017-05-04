@@ -3,7 +3,7 @@
     <td></td>
     <td> {{ problem.pid }} </td>
     <td> {{ problem.title }} </td>
-    <td> -> </td>
+    <td> <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i></td>
     <td> {{ ratio(problem) }} ({{ problem.solve }} / {{ problem.submit }}) </td>
   </tr>
 </template>
@@ -16,7 +16,7 @@ export default {
       if (problem.submit === 0) {
         return '0.00%'
       } else {
-        return `${(problem.solve / problem.submit).toFixed(2)}%`
+        return `${(problem.solve * 100 / problem.submit).toFixed(2)}%`
       }
     }
   }

@@ -1,13 +1,33 @@
 <template lang="html">
   <div>
     <table class="table">
-      <tr
-        v-for="problem in problemsList"
-        :key="problem.pid"
-        is="oj-problemitem"
-        :problem="problem"
-      >
-      </tr>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>PID</th>
+          <th>Title</th>
+          <th>Submit</th>
+          <th>Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="problem in problemsList"
+          :key="problem.pid"
+          is="oj-problemitem"
+          :problem="problem"
+        >
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>#</th>
+          <th>PID</th>
+          <th>Title</th>
+          <th>Submit</th>
+          <th>Ratio</th>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </template>
