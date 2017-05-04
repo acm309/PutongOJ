@@ -17,6 +17,8 @@ export default {
   created () {
     this.$store.dispatch('fetchNews', {
       nid: this.nid
+    }).then(() => {
+      document.title = `News ${this.news.nid} -- ${this.news.title}`
     })
   },
   computed: {

@@ -14,6 +14,7 @@
 <script>
 export default {
   created() {
+    document.title = 'Home'
     this.$store.dispatch('fetchNewsList')
   },
   computed: {

@@ -38,6 +38,7 @@
 <script>
 export default {
   created () {
+    document.title = 'Contests'
     this.$store.dispatch('fetchContestsList')
   },
   computed: {

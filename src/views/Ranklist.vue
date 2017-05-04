@@ -52,6 +52,7 @@ export default {
     }
   },
   created() {
+    document.title = 'Ranklist'
     this.$store.dispatch('fetchRanklist', {
       page: this.page,
       limit: this.limit

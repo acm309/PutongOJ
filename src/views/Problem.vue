@@ -19,6 +19,8 @@ export default {
   created () {
     this.$store.dispatch('fetchProblem', {
       pid: this.pid
+    }).then(() => {
+      document.title = `Problem ${this.problem.pid} -- ${this.problem.title}`
     })
   },
   computed: {

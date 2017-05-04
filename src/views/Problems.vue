@@ -42,6 +42,7 @@ export default {
     'oj-problemitem': ProblemItem
   },
   created () {
+    document.title = 'Problems'
     this.$store.dispatch('fetchProblemsList', {
       page: this.page,
       limit: this.limit

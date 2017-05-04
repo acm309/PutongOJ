@@ -56,6 +56,7 @@ export default {
     }
   },
   created () {
+    document.title = 'Status'
     this.$store.dispatch('fetchSolutionsList', {
       page: this.page,
       limit: this.limit
