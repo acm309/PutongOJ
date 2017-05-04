@@ -36,10 +36,8 @@ async function queryList (ctx, next) {
 
 /** 指定cid, 返回一个比赛的具体信息 */
 async function queryOneContest (ctx, next) {
-  const cid = +ctx.params.cid
-  if (isNaN(cid)) { // cid might be a string
-    ctx.throw(400, 'Cid should be a number')
-  }
+  const cid = +ctx.params.cid // router 那儿的中间件已经保证这是数字了
+
   const contest = await Contest
     .findOne({cid})
     // argument 有时候可能是密码，因此这里不返回
@@ -92,7 +90,9 @@ async function create (ctx, next) {
   const contest = new Contest({
     cid, title, start, end, list, encrypt, argument
   })
+
   await contest.save()
+
   ctx.body = {
     contest: {
       cid, title, start, end, list, encrypt, argument
@@ -102,9 +102,7 @@ async function create (ctx, next) {
 
 async function update (ctx, next) {
   const cid = +ctx.params.cid
-  if (isNaN(cid)) {
-    ctx.throw(400, 'Cid should be a number')
-  }
+
   const contest = await Contest
     .findOne({cid})
     .exec()
@@ -140,7 +138,9 @@ async function update (ctx, next) {
       contest[item] = ctx.request.body[item]
     }
   })
+
   await contest.save()
+
   const { title, start, end, list } = contest
   ctx.body = {
     contest: { cid, title, start, end, list }
@@ -149,9 +149,7 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const cid = +ctx.params.cid
-  if (isNaN(cid)) {
-    ctx.throw(400, 'Cid should be a number')
-  }
+
   const contest = await Contest
     .findOne({cid})
     .exec()
@@ -159,15 +157,21 @@ async function del (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  await Contest.findOneAndRemove({cid}).exec()
+
+  await Contest
+    .findOneAndRemove({cid})
+    .exec()
+
   ctx.body = {}
 }
 
 async function overview (ctx, next) {
   const cid = +ctx.params.cid
+
   if (isNaN(cid)) {
     ctx.throw(400, 'Cid should be a number')
   }
+
   const contest = await Contest
     .findOne({cid})
     .exec()
@@ -175,7 +179,10 @@ async function overview (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  const overview = await contest.fetchOverview()
+
+  const overview = await contest
+    .fetchOverview()
+
   ctx.body = {
     overview
   }
@@ -183,9 +190,7 @@ async function overview (ctx, next) {
 
 async function ranklist (ctx, next) {
   const cid = +ctx.params.cid
-  if (isNaN(cid)) {
-    ctx.throw(400, 'Cid should be a number')
-  }
+
   const contest = await Contest
     .findOne({cid})
     .exec()
@@ -193,7 +198,9 @@ async function ranklist (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
+
   const ranklist = await contest.fetchRanklist()
+
   ctx.body = {
     ranklist
   }

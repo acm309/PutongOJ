@@ -12,7 +12,17 @@ async function adminRequired (ctx, next) {
   await next()
 }
 
+function idNumberRequired (item) {
+  return async function (ctx, next) {
+    if (isNaN(+ctx.params[item])) {
+      ctx.throw(400, `${item} should be a number`)
+    }
+    await next()
+  }
+}
+
 module.exports = {
   loginRequired,
-  adminRequired
+  adminRequired,
+  idNumberRequired
 }

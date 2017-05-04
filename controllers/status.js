@@ -8,7 +8,7 @@ const { extractPagination, isUndefined } = require('../utils')
 async function queryList (ctx, next) {
   const filter = {}
   ;['uid', 'pid', 'judge', 'language'].forEach((item) => {
-    if (typeof ctx.query[item] !== 'undefined') {
+    if (!isUndefined(ctx.query[item])) {
       filter[item] = ctx.query[item]
     }
   })
@@ -33,12 +33,7 @@ async function queryList (ctx, next) {
   返回一个具体的solution
 */
 async function queryOneSolution (ctx, next) {
-  const sid = +ctx.params.sid
-
-  if (isNaN(sid)) {
-    ctx.throw(400, 'Sid should be a number')
-  }
-
+  const sid = +ctx.params.sid // router 那的中间件已经保证这是数字了
   const solution = await Solution
     .findOne({sid})
     // 比上面函数里的 select 多了一个 code
@@ -94,10 +89,6 @@ async function create (ctx, next) {
 */
 async function rejudge (ctx, next) {
   const sid = +ctx.params.sid
-  if (isNaN(sid)) {
-    ctx.throw(400, 'Sid should be a number')
-  }
-
   const solution = await Solution
     .findOne({sid})
     .exec()

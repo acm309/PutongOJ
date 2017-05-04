@@ -107,6 +107,7 @@ async function update (ctx, next) {
   }
 
   const verified = User.validate(ctx.request.body)
+
   if (!verified.valid) {
     ctx.throw(400, verified.error)
   }
@@ -116,6 +117,7 @@ async function update (ctx, next) {
   }
   // 可更新的字段
   const fields = ['nick', 'pwd', 'school', 'mail', 'motto']
+
   fields.forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
       user[item] = ctx.request.body[item]
@@ -125,6 +127,7 @@ async function update (ctx, next) {
   await user.save()
 
   const { nick, privilege, school, mail, motto } = user
+
   ctx.body = {
     user: { uid, nick, privilege, school, mail, motto }
   }

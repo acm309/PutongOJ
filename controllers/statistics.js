@@ -58,6 +58,7 @@ async function statistics (ctx, next) {
   }
 
   counted = await Promise.all(counted)
+
   const statistics = {}
   // i means the judge result, counted[i - 1] represents corresponding count
   for (let i = 1; i <= 11; i += 1) {
