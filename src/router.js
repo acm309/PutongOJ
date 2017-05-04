@@ -34,7 +34,11 @@ const routes = [
   }, {
     path: '/ranklist',
     component: Ranklist,
-    name: 'ranklist'
+    name: 'ranklist',
+    props: (route) => ({
+      page: route.query.page,
+      limit: route.query.limit
+    })
   }, {
     path: '/contests',
     component: Contests,
