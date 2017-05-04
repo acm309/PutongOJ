@@ -1,6 +1,10 @@
 <template>
   <div id="app">
     <oj-nav></oj-nav>
+    <br>
+    <div class="container">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 

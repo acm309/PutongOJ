@@ -2,12 +2,31 @@
   <nav class="nav has-shadow">
     <div class="container">
       <div class="nav-left">
-        <a class="nav-item is-tab is-hidden-mobile">Home</a>
-        <a class="nav-item is-tab is-hidden-mobile">Problems</a>
-        <a class="nav-item is-tab is-hidden-mobile">Status</a>
-        <a class="nav-item is-tab is-hidden-mobile">Ranklist</a>
-        <a class="nav-item is-tab is-hidden-mobile">Contests</a>
-        <a class="nav-item is-tab is-hidden-mobile">FAQ</a>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'home'}"
+          exact
+        >Home</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'problems'}"
+        >Problems</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'status'}"
+        >Status</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'ranklist'}"
+        >Ranklist</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'contests'}"
+        >Contests</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'faq'}"
+        >FAQ</router-link>
       </div>
       <span class="nav-toggle">
         <span></span>
