@@ -18,7 +18,7 @@ async function ranklist (ctx, next) {
     })
 
   ctx.body = {
-    users: res.docs,
+    ranklist: res.docs,
     pagination: extractPagination(res)
   }
 }
