@@ -27,7 +27,7 @@
           <td>{{ contest.cid }}</td>
           <td>{{ contest.title }}</td>
           <td>{{ status(contest) }}</td>
-          <td>{{ contest.start }}</td>
+          <td>{{ contest.start | timePretty }}</td>
           <td>{{ contest.status }}</td>
         </tr>
       </tbody>

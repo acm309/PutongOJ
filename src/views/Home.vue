@@ -4,7 +4,7 @@
     <hr>
     <div class="notification" v-for="news in newsList" :key="news.nid">
       <p>{{ news.title }}</p>
-      <a>Read More</a> {{news.create}}
+      <a>Read More</a> {{ news.create | timePretty }}
     </div>
   </div>
 </template>

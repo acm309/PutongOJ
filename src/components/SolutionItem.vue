@@ -8,7 +8,7 @@
     <td>{{ solution.memory }} KB</td>
     <td>{{ solution.language }}</td>
     <td>{{ solution.length }} B</td>
-    <td>{{ solution.create }}</td>
+    <td>{{ solution.create | timePretty }}</td>
   </tr>
 </template>
 
