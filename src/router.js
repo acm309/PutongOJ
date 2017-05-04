@@ -26,7 +26,11 @@ const routes = [
   }, {
     path: '/status',
     component: Status,
-    name: 'status'
+    name: 'status',
+    props: (route) => ({
+      page: route.query.page,
+      limit: route.query.limit
+    })
   }, {
     path: '/ranklist',
     component: Ranklist,
