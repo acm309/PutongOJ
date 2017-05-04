@@ -17,11 +17,15 @@
 import ProblemItem from '../components/ProblemItem.vue'
 
 export default {
+  props: [ 'page', 'limit' ],
   components: {
     'oj-problemitem': ProblemItem
   },
   created () {
-    this.$store.dispatch('fetchProblemsList')
+    this.$store.dispatch('fetchProblemsList', {
+      page: this.page,
+      limit: this.limit
+    })
   },
   computed: {
     problemsList () {

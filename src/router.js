@@ -18,7 +18,11 @@ const routes = [
   }, {
     path: '/problems',
     component: Problems,
-    name: 'problems'
+    name: 'problems',
+    props: (route) => ({
+      page: route.query.page,
+      limit: route.query.limit
+    })
   }, {
     path: '/status',
     component: Status,
