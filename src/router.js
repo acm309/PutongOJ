@@ -9,6 +9,7 @@ import Ranklist from './views/Ranklist.vue'
 import FAQ from './views/FAQ.vue'
 
 import News from './views/News.vue'
+import Problem from './views/Problem.vue'
 
 Vue.use(VueRouter)
 
@@ -55,6 +56,13 @@ const routes = [
     name: 'news',
     props: (route) => ({
       nid: route.params.nid
+    })
+  }, {
+    path: '/problems/:pid',
+    component: Problem,
+    name: 'problem',
+    props: (route) => ({
+      pid: route.params.pid
     })
   }
 ]

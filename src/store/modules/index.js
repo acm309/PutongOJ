@@ -4,6 +4,7 @@ import solutions from './solutions'
 import ranklist from './ranklist'
 import contests from './contests'
 import oneNews from './oneNews'
+import problem from './problem'
 
 export default {
   news,
@@ -11,5 +12,6 @@ export default {
   solutions,
   ranklist,
   contests,
-  oneNews
+  oneNews,
+  problem
 }
