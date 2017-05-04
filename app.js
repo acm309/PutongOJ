@@ -8,6 +8,7 @@ const session = require('koa-session-minimal')
 const redisStore = require('koa-redis')
 const send = require('koa-send')
 const mongoose = require('mongoose')
+const cors = require('kcors')
 
 const path = require('path')
 
@@ -15,6 +16,8 @@ const config = require('./config')
 const appRouter = require('./routes')
 
 const app = new Koa()
+
+app.use(convert(cors()))
 
 // 注入 config，在后续路由或中间件中，可以直接使用 ctx.config 访问
 app.use(async function (ctx, next) {
