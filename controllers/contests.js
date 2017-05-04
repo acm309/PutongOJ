@@ -90,7 +90,9 @@ async function create (ctx, next) {
   const contest = new Contest({
     cid, title, start, end, list, encrypt, argument
   })
+
   await contest.save()
+
   ctx.body = {
     contest: {
       cid, title, start, end, list, encrypt, argument
@@ -136,7 +138,9 @@ async function update (ctx, next) {
       contest[item] = ctx.request.body[item]
     }
   })
+
   await contest.save()
+
   const { title, start, end, list } = contest
   ctx.body = {
     contest: { cid, title, start, end, list }
@@ -153,15 +157,21 @@ async function del (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  await Contest.findOneAndRemove({cid}).exec()
+
+  await Contest
+    .findOneAndRemove({cid})
+    .exec()
+
   ctx.body = {}
 }
 
 async function overview (ctx, next) {
   const cid = +ctx.params.cid
+
   if (isNaN(cid)) {
     ctx.throw(400, 'Cid should be a number')
   }
+
   const contest = await Contest
     .findOne({cid})
     .exec()
@@ -169,7 +179,10 @@ async function overview (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  const overview = await contest.fetchOverview()
+
+  const overview = await contest
+    .fetchOverview()
+
   ctx.body = {
     overview
   }
@@ -185,7 +198,9 @@ async function ranklist (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
+
   const ranklist = await contest.fetchRanklist()
+
   ctx.body = {
     ranklist
   }

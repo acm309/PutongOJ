@@ -8,7 +8,7 @@ const { extractPagination, isUndefined } = require('../utils')
 async function queryList (ctx, next) {
   const filter = {}
   ;['uid', 'pid', 'judge', 'language'].forEach((item) => {
-    if (typeof ctx.query[item] !== 'undefined') {
+    if (!isUndefined(ctx.query[item])) {
       filter[item] = ctx.query[item]
     }
   })

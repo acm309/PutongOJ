@@ -108,6 +108,7 @@ async function del (ctx, next) {
   }
 
   await News.deleteOne({nid}).exec()
+
   ctx.body = {}
 }
 
