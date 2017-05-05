@@ -112,11 +112,12 @@ export default {
   },
   methods: {
     pageClick (page) {
-      let query = {limit: this.limit, page}
-      query = Object.assign(query, {
+      const query = {
+        limit: this.limit,
+        page,
         field: this.field,
         query: this.query
-      })
+      }
       this.$router.push({
         name: 'problems',
         query
