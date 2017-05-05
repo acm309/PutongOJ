@@ -12,6 +12,14 @@ Vue.filter('timePretty', function (time) {
   return moment(parseInt(time)).format('YYYY-MM-DD HH:mm:ss')
 })
 
+Vue.filter('judgePretty', function (judgeCode) {
+  return store.getters.judges[judgeCode]
+})
+
+Vue.filter('languagePretty', function (languageCode) {
+  return store.getters.languages[languageCode]
+})
+
 new Vue({
   el: '#app',
   router,

@@ -3,8 +3,8 @@ import problems from './problems'
 import solutions from './solutions'
 import ranklist from './ranklist'
 import contests from './contests'
-import oneNews from './oneNews'
-import problem from './problem'
+// import oneNews from './oneNews'
+// import problem from './problem'
 import user from './user'
 import session from './session'
 
@@ -14,8 +14,8 @@ export default {
   solutions,
   ranklist,
   contests,
-  oneNews,
-  problem,
+  // oneNews,
+  // problem,
   user,
   session
 }

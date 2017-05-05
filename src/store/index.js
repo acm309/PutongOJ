@@ -15,7 +15,26 @@ const state = {
 
 const getters = {
   currentTime: (state) => state.currentTime,
-  loginModalActive: (state) => state.loginModalActive
+  loginModalActive: (state) => state.loginModalActive,
+  judges: (state) => ({
+    0: 'Pending',
+    1: 'Running & Judge',
+    2: 'Compile Error',
+    3: 'Accepted',
+    4: 'Runtime Error',
+    5: 'Wrong Answer',
+    6: 'Time Limit Exceeded',
+    7: 'Memory Limit Exceeded',
+    8: 'Output Limit Exceeded',
+    9: 'Presentation Error',
+    10: 'System Error',
+    11: 'Rejudge Pending'
+  }),
+  languages: (state) => ({
+    1: 'C',
+    2: 'C++',
+    3: 'Java'
+  })
 }
 
 const mutations = {
@@ -48,7 +67,7 @@ const store = new Vuex.Store({
   modules
 })
 
-store.dispatch('updateCurrentTime')
+// store.dispatch('updateCurrentTime')
 store.dispatch('fetchSession')
 
 export default store

@@ -1,9 +1,28 @@
 <template lang="html">
   <div>
     <oj-pagination
+      class="is-pulled-left"
       :pagination="pagination"
       @pageClick="pageClick"
     ></oj-pagination>
+    <div class="field has-addons is-pulled-right">
+      <p class="control">
+        <span class="select">
+          <select v-model="field">
+            <option value="pid">PID</option>
+            <option value="title">title</option>
+          </select>
+        </span>
+      </p>
+      <p class="control">
+        <input class="input" type="text" placeholder="Content" v-model="query"  @keyup.enter="search">
+      </p>
+      <p class="control">
+        <a class="button is-primary" @click="search">
+          Search
+        </a>
+      </p>
+    </div>
     <table class="table">
       <thead>
         <tr>
@@ -34,9 +53,28 @@
       </tfoot>
     </table>
     <oj-pagination
+      class="is-pulled-left"
       :pagination="pagination"
       @pageClick="pageClick"
     ></oj-pagination>
+    <div class="field has-addons is-pulled-right">
+      <p class="control">
+        <span class="select">
+          <select v-model="field">
+            <option value="pid">PID</option>
+            <option value="title">title</option>
+          </select>
+        </span>
+      </p>
+      <p class="control">
+        <input class="input" type="text" placeholder="Content" v-model="query"  @keyup.enter="search">
+      </p>
+      <p class="control">
+        <a class="button is-primary" @click="search">
+          Search
+        </a>
+      </p>
+    </div>
   </div>
 </template>
 
@@ -47,6 +85,12 @@ import Pagination from '../components/Pagination.vue'
 
 export default {
   props: [ 'page', 'limit' ],
+  data () {
+    return {
+      field: 'pid',
+      query: ''
+    }
+  },
   components: {
     'oj-pagination': Pagination,
     'oj-problemitem': ProblemItem
@@ -68,18 +112,22 @@ export default {
   },
   methods: {
     pageClick (page) {
+      const query = {
+        limit: this.limit,
+        page,
+        field: this.field,
+        query: this.query
+      }
       this.$router.push({
         name: 'problems',
-        query: {
-          page
-        }
+        query
       })
       // 同一组件，需要重新 dispatch
       // https://router.vuejs.org/en/essentials/dynamic-matching.html
-      this.$store.dispatch('fetchProblemsList', {
-        page: page,
-        limit: this.limit
-      })
+      this.$store.dispatch('fetchProblemsList', query)
+    },
+    search () {
+      this.pageClick(1) // 复用
     }
   }
 }

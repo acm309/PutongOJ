@@ -2,16 +2,14 @@ import axios from 'axios'
 
 const state = {
   newsList: [],
-  newsPagination: {}
+  newsPagination: {},
+  news: []
 }
 
 const getters = {
-  newsList: (state) => {
-    return state.newsList
-  },
-  newsPagination: (state) => {
-    return state.newsPagination
-  }
+  newsList: (state) => state.newsList,
+  newsPagination: (state) => state.newsPagination,
+  news: (state) => state.news
 }
 
 const mutations = {
@@ -20,6 +18,9 @@ const mutations = {
   },
   updateNewsPagination (state, payload) {
     state.newsPagination = payload.newsPagination
+  },
+  updateNews (state, payload) {
+    state.news = payload.news
   }
 }
 
@@ -32,6 +33,14 @@ const actions = {
         })
         commit('updateNewsPagination', {
           newsPagination: data.pagination
+        })
+      })
+  },
+  fetchNews ({commit}, payload) {
+    return axios.get(`/news/${payload.nid}`)
+      .then(({data}) => {
+        commit('updateNews', {
+          news: data.news
         })
       })
   }

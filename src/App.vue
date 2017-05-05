@@ -6,6 +6,7 @@
       <router-view></router-view>
     </div>
     <oj-loginmodal></oj-loginmodal>
+    <oj-solutionmodal v-if="$store.getters.solutionModalActive"></oj-solutionmodal>
   </div>
 </template>
 
@@ -13,12 +14,14 @@
 
 import Nav from './components/Nav.vue'
 import LoginModal from './components/LoginModal.vue'
+import SolutionModal from './components/SolutionModal.vue'
 
 export default {
   name: 'app',
   components: {
     'oj-nav': Nav,
-    'oj-loginmodal': LoginModal
+    'oj-loginmodal': LoginModal,
+    'oj-solutionmodal': SolutionModal
   },
   data () {
     return {

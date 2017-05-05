@@ -3,16 +3,14 @@ import queryString from 'query-string'
 
 const state = {
   problemsList: [],
-  problemsPagination: {}
+  problemsPagination: {},
+  problem: {}
 }
 
 const getters = {
-  problemsList: (state) => {
-    return state.problemsList
-  },
-  problemsPagination: (state) => {
-    return state.problemsPagination
-  }
+  problemsList: (state) => state.problemsList,
+  problemsPagination: (state) => state.problemsPagination,
+  problem: (state) => state.problem
 }
 
 const mutations = {
@@ -21,6 +19,9 @@ const mutations = {
   },
   updateProblemsPagination (state, payload) {
     state.problemsPagination = payload.problemsPagination
+  },
+  updateProblem (state, payload) {
+    state.problem = payload.problem
   }
 }
 
@@ -33,6 +34,14 @@ const actions = {
         })
         commit('updateProblemsPagination', {
           problemsPagination: data.pagination
+        })
+      })
+  },
+  fetchProblem ({commit}, payload) {
+    return axios.get(`/problems/${payload.pid}?` + queryString.stringify(payload))
+      .then(({data}) => {
+        commit('updateProblem', {
+          problem: data.problem
         })
       })
   }

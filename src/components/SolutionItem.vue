@@ -11,10 +11,10 @@
       >
       {{ solution.uid }}
     </router-link></td>
-    <td>{{ solution.judge }}</td>
+    <td>{{ solution.judge | judgePretty }}</td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
-    <td>{{ solution.language }}</td>
+    <td> <a @click="showSource(solution)"> {{ solution.language | languagePretty }} </a> </td>
     <td>{{ solution.length }} B</td>
     <td>{{ solution.create | timePretty }}</td>
   </tr>
@@ -22,7 +22,12 @@
 
 <script>
 export default {
-  props: ['solution']
+  props: ['solution'],
+  methods: {
+    showSource (solution) {
+      this.$store.commit('showSolutionModal', solution)
+    }
+  }
 }
 </script>
 

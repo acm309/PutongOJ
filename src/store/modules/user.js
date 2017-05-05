@@ -7,15 +7,9 @@ const state = {
 }
 
 const getters = {
-  user: (state) => {
-    return state.user
-  },
-  solved: (state) => {
-    return state.solved
-  },
-  unsolved: (state) => {
-    return state.unsolved
-  }
+  user: (state) => state.user,
+  solved: (state) => state.solved,
+  unsolved: (state) => state.unsolved
 }
 
 const mutations = {
