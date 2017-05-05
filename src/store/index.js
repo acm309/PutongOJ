@@ -5,16 +5,24 @@ import modules from './modules'
 Vue.use(Vuex)
 
 const state = {
-  currentTime: Date.now()
+  currentTime: Date.now(),
+  loginModalActive: false
 }
 
 const getters = {
-  currentTime: (state) => state.currentTime
+  currentTime: (state) => state.currentTime,
+  loginModalActive: (state) => state.loginModalActive
 }
 
 const mutations = {
   updateCurrentTime (state, payload) {
     state.currentTime += payload.step
+  },
+  showLoginModal (state, payload) {
+    state.loginModalActive = true
+  },
+  closeLoginModal (state, payload) {
+    state.loginModalActive = false
   }
 }
 

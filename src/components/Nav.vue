@@ -40,7 +40,7 @@
         <a class="nav-item is-tab is-hidden-tablet">Ranklist</a>
         <a class="nav-item is-tab is-hidden-tablet">Contests</a>
         <a class="nav-item is-tab is-hidden-tablet">FAQ</a>
-        <a class="nav-item is-tab">Emerald</a>
+        <a class="nav-item is-tab" @click="showLoginModal">Login</a>
         <a class="nav-item is-tab">Log out</a>
         <a class="nav-item is-tab">Admin</a>
       </div>
@@ -50,6 +50,11 @@
 
 <script>
 export default {
+  methods: {
+    showLoginModal () {
+      this.$store.commit('showLoginModal')
+    }
+  }
 }
 </script>
 

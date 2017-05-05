@@ -5,17 +5,20 @@
     <div class="container">
       <router-view></router-view>
     </div>
+    <oj-loginmodal></oj-loginmodal>
   </div>
 </template>
 
 <script>
 
 import Nav from './components/Nav.vue'
+import LoginModal from './components/LoginModal.vue'
 
 export default {
   name: 'app',
   components: {
-    'oj-nav': Nav
+    'oj-nav': Nav,
+    'oj-loginmodal': LoginModal
   },
   data () {
     return {
