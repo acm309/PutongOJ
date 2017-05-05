@@ -11,10 +11,10 @@
       >
       {{ solution.uid }}
     </router-link></td>
-    <td>{{ solution.judge }}</td>
+    <td>{{ solution.judge | judgePretty }}</td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
-    <td>{{ solution.language }}</td>
+    <td>{{ solution.language | languagePretty }}</td>
     <td>{{ solution.length }} B</td>
     <td>{{ solution.create | timePretty }}</td>
   </tr>
