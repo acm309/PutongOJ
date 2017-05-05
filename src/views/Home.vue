@@ -8,18 +8,43 @@
         :to="{name: 'news', params: {nid: news.nid}}"
       >Read More</router-link> {{ news.create | timePretty }}
     </div>
+    <oj-pagination
+      :pagination="pagination"
+      @pageClick="pageClick"
+    ></oj-pagination>
   </div>
 </template>
 
 <script>
+
+import Pagination from '../components/Pagination.vue'
+
 export default {
+  components: {
+    'oj-pagination': Pagination
+  },
+  props: [ 'page', 'limit' ],
   created() {
     document.title = 'Home'
-    this.$store.dispatch('fetchNewsList')
+    this.$store.dispatch('fetchNewsList', {
+      page: this.page,
+      limit: this.limit
+    })
+  },
+  methods: {
+    pageClick (page) {
+      this.$store.dispatch('fetchNewsList', {
+        page,
+        limit: this.limit
+      })
+    }
   },
   computed: {
     newsList () {
       return this.$store.getters.newsList
+    },
+    pagination () {
+      return this.$store.getters.newsPagination
     }
   }
 }
