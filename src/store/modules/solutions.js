@@ -7,12 +7,8 @@ const state = {
 }
 
 const getters = {
-  solutionsList: (state) => {
-    return state.solutionsList
-  },
-  solutionsPagination: (state) => {
-    return state.solutionsPagination
-  }
+  solutionsList: (state) => state.solutionsList,
+  solutionsPagination: (state) => state.solutionsPagination
 }
 
 const mutations = {

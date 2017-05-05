@@ -6,9 +6,7 @@ const state = {
 }
 
 const getters = {
-  contestsList: (state) => {
-    return state.contestsList
-  }
+  contestsList: (state) => state.contestsList
 }
 
 const mutations = {

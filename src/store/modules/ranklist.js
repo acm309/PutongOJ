@@ -7,12 +7,8 @@ const state = {
 }
 
 const getters = {
-  ranklist: (state) => {
-    return state.ranklist
-  },
-  ranklistPagination: (state) => {
-    return state.ranklistPagination
-  }
+  ranklist: (state) => state.ranklist,
+  ranklistPagination: (state) => state.ranklistPagination
 }
 
 const mutations = {
