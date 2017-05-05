@@ -30,7 +30,9 @@ const routes = [
     name: 'problems',
     props: (route) => ({
       page: route.query.page,
-      limit: route.query.limit
+      limit: route.query.limit,
+      field: route.query.field,
+      query: route.query.query
     })
   }, {
     path: '/status',

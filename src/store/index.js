@@ -48,7 +48,7 @@ const store = new Vuex.Store({
   modules
 })
 
-store.dispatch('updateCurrentTime')
+// store.dispatch('updateCurrentTime')
 store.dispatch('fetchSession')
 
 export default store
