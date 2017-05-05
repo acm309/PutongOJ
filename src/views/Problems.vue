@@ -35,11 +35,18 @@
       </thead>
       <tbody>
         <tr
-          v-for="problem in problemsList"
-          :key="problem.pid"
-          is="oj-problemitem"
-          :problem="problem"
-        >
+          v-for="problem in problemsList">
+          <td></td>
+          <td> {{ problem.pid }} </td>
+          <td> <router-link
+              :to="{name: 'problem', params: {pid: problem.pid}}"
+            > {{ problem.title }} </router-link></td>
+          <td>
+            <a @click="submit">
+              <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+            </a>
+          </td>
+          <td> {{ ratio(problem) }} ({{ problem.solve }} / {{ problem.submit }}) </td>
         </tr>
       </tbody>
       <tfoot>
@@ -75,6 +82,12 @@
         </a>
       </p>
     </div>
+    <oj-submitcodemodal
+      v-if="active"
+      @close="active = false"
+      @submit="submitCode">
+
+    </oj-submitcodemodal>
   </div>
 </template>
 
@@ -82,18 +95,21 @@
 
 import ProblemItem from '../components/ProblemItem.vue'
 import Pagination from '../components/Pagination.vue'
+import SubmitCodeModal from '../components/SubmitCodeModal.vue'
 
 export default {
   props: [ 'page', 'limit' ],
   data () {
     return {
       field: 'pid',
-      query: ''
+      query: '',
+      active: false
     }
   },
   components: {
     'oj-pagination': Pagination,
-    'oj-problemitem': ProblemItem
+    'oj-problemitem': ProblemItem,
+    'oj-submitcodemodal': SubmitCodeModal
   },
   created () {
     document.title = 'Problems'
@@ -128,6 +144,19 @@ export default {
     },
     search () {
       this.pageClick(1) // 复用
+    },
+    ratio(problem) {
+      if (problem.submit === 0) {
+        return '0.00%'
+      } else {
+        return `${(problem.solve * 100 / problem.submit).toFixed(2)}%`
+      }
+    },
+    submit () {
+      this.active = true
+    },
+    submitCode (language, code) {
+      
     }
   }
 }
