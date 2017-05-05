@@ -38,11 +38,20 @@
         </tr>
       </tbody>
     </table>
+    <oj-pagination
+      :pagination="pagination"
+      @pageClick="pageClick"
+    ></oj-pagination>
   </div>
 </template>
 
 <script>
+import Pagination from '../components/Pagination.vue'
+
 export default {
+  components: {
+    'oj-pagination': Pagination
+  },
   props: {
     page: {
       default: 1,
@@ -52,6 +61,7 @@ export default {
     }
   },
   created() {
+    document.title = 'Ranklist'
     this.$store.dispatch('fetchRanklist', {
       page: this.page,
       limit: this.limit
@@ -60,6 +70,9 @@ export default {
   computed: {
     ranklist () {
       return this.$store.getters.ranklist
+    },
+    pagination () {
+      return this.$store.getters.ranklistPagination
     }
   },
   methods: {
@@ -69,6 +82,20 @@ export default {
       } else {
         return `${(user.solve * 100 / user.submit).toFixed(2)}%`
       }
+    },
+    pageClick (page) {
+      this.$router.push({
+        name: 'ranklist',
+        query: {
+          page
+        }
+      })
+      // 同一组件，需要重新 dispatch
+      // https://router.vuejs.org/en/essentials/dynamic-matching.html
+      this.$store.dispatch('fetchRanklist', {
+        page: page,
+        limit: this.limit
+      })
     }
   }
 }

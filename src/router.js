@@ -8,13 +8,20 @@ import Contests from './views/Contests.vue'
 import Ranklist from './views/Ranklist.vue'
 import FAQ from './views/FAQ.vue'
 
+import News from './views/News.vue'
+import Problem from './views/Problem.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
     component: Home,
-    name: 'home'
+    name: 'home',
+    props: (route) => ({
+      page: route.query.page,
+      limit: route.query.limit
+    })
   }, {
     path: '/problems',
     component: Problems,
@@ -47,6 +54,20 @@ const routes = [
     path: '/faq',
     component: FAQ,
     name: 'faq'
+  }, {
+    path: '/news/:nid',
+    component: News,
+    name: 'news',
+    props: (route) => ({
+      nid: route.params.nid
+    })
+  }, {
+    path: '/problems/:pid',
+    component: Problem,
+    name: 'problem',
+    props: (route) => ({
+      pid: route.params.pid
+    })
   }
 ]
 

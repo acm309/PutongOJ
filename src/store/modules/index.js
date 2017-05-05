@@ -2,10 +2,16 @@ import news from './news'
 import problems from './problems'
 import solutions from './solutions'
 import ranklist from './ranklist'
+import contests from './contests'
+import oneNews from './oneNews'
+import problem from './problem'
 
 export default {
   news,
   problems,
   solutions,
-  ranklist
+  ranklist,
+  contests,
+  oneNews,
+  problem
 }

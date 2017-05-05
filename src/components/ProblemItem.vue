@@ -2,7 +2,9 @@
   <tr>
     <td></td>
     <td> {{ problem.pid }} </td>
-    <td> {{ problem.title }} </td>
+    <td> <router-link
+        :to="{name: 'problem', params: {pid: problem.pid}}"
+      > {{ problem.title }} </router-link></td>
     <td> <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i></td>
     <td> {{ ratio(problem) }} ({{ problem.solve }} / {{ problem.submit }}) </td>
   </tr>

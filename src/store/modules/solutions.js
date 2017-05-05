@@ -4,18 +4,25 @@ import queryString from 'query-string'
 const host = 'http://localhost:3000'
 
 const state = {
-  solutionsList: []
+  solutionsList: [],
+  solutionsPagination: {}
 }
 
 const getters = {
   solutionsList: (state) => {
     return state.solutionsList
+  },
+  solutionsPagination: (state) => {
+    return state.solutionsPagination
   }
 }
 
 const mutations = {
   updateSolutionsList (state, payload) {
     state.solutionsList = payload.solutionsList
+  },
+  updateSolutionsPagination (state, payload) {
+    state.solutionsPagination = payload.solutionsPagination
   }
 }
 
@@ -25,6 +32,9 @@ const actions = {
       .then(({data}) => {
         commit('updateSolutionsList', {
           solutionsList: data.solutions
+        })
+        commit('updateSolutionsPagination', {
+          solutionsPagination: data.pagination
         })
       })
   }
