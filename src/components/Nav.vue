@@ -51,7 +51,11 @@
           v-else="self"
         >Login</a>
         <a class="nav-item is-tab" v-if="self" @click="logout">Log out</a>
-        <a class="nav-item is-tab" v-else @click="logout">Register</a>
+        <router-link
+          class="nav-item is-tab"
+          v-else
+          :to="{name: 'register'}"
+        >Register</router-link>
         <a class="nav-item is-tab" v-if="self">Admin</a>
       </div>
     </div>

@@ -38,6 +38,14 @@ const actions = {
         commit('updateSolved', data)
         commit('updateUnsolved', data)
       })
+  },
+  register ({commit}, payload) {
+    return axios.post('/users', payload)
+      .then(({data}) => {
+        commit('updateSelf', { // session module
+          self: data.user
+        })
+      })
   }
 }
 
