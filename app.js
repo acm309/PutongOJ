@@ -17,7 +17,10 @@ const appRouter = require('./routes')
 
 const app = new Koa()
 
-app.use(convert(cors()))
+// 解决跨域请求问题，使得 cookie 能在不同域名间仍然能够传送
+app.use(convert(cors({
+  credentials: true
+})))
 
 // 注入 config，在后续路由或中间件中，可以直接使用 ctx.config 访问
 app.use(async function (ctx, next) {
