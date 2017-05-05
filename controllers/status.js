@@ -37,7 +37,7 @@ async function queryOneSolution (ctx, next) {
   const solution = await Solution
     .findOne({sid})
     // 比上面函数里的 select 多了一个 code
-    .select('-_id sid uid pid judge time memory language length create sim sim_s_id code')
+    .select('-_id sid uid pid judge time memory language length create sim sim_s_id code error')
     .exec()
 
   if (!solution) {
