@@ -10,7 +10,8 @@ axios.defaults.withCredentials = true
 
 const state = {
   currentTime: Date.now(),
-  loginModalActive: false
+  loginModalActive: false,
+  defaultLanguage: 1
 }
 
 const getters = {
@@ -34,7 +35,8 @@ const getters = {
     1: 'C',
     2: 'C++',
     3: 'Java'
-  })
+  }),
+  defaultLanguage: (state) => state.defaultLanguage
 }
 
 const mutations = {
@@ -46,6 +48,9 @@ const mutations = {
   },
   closeLoginModal (state, payload) {
     state.loginModalActive = false
+  },
+  updateDefaultLanguage (state, payload) {
+    state.defaultLanguage = payload.language
   }
 }
 

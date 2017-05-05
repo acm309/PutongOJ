@@ -53,6 +53,9 @@ const actions = {
       .then(({data}) => {
         commit('updateSolution', data)
       })
+  },
+  submitSolution ({commit}, payload) {
+    return axios.post('/status', payload)
   }
 }
 

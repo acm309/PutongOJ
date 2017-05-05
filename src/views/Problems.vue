@@ -26,11 +26,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th>#</th>
-          <th>PID</th>
-          <th>Title</th>
-          <th>Submit</th>
-          <th>Ratio</th>
+          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
         </tr>
       </thead>
       <tbody>
@@ -42,7 +38,7 @@
               :to="{name: 'problem', params: {pid: problem.pid}}"
             > {{ problem.title }} </router-link></td>
           <td>
-            <a @click="submit">
+            <a @click="submit(problem)">
               <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
             </a>
           </td>
@@ -51,11 +47,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <th>#</th>
-          <th>PID</th>
-          <th>Title</th>
-          <th>Submit</th>
-          <th>Ratio</th>
+          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
         </tr>
       </tfoot>
     </table>
@@ -86,7 +78,7 @@
       v-if="active"
       @close="active = false"
       @submit="submitCode">
-
+      {{ solutionTitle }}
     </oj-submitcodemodal>
   </div>
 </template>
@@ -103,7 +95,8 @@ export default {
     return {
       field: 'pid',
       query: '',
-      active: false
+      active: false,
+      submitProblem: {}
     }
   },
   components: {
@@ -124,6 +117,9 @@ export default {
     },
     pagination () {
       return this.$store.getters.problemsPagination
+    },
+    solutionTitle () {
+      return `${this.submitProblem.pid} -- ${this.submitProblem.title}`
     }
   },
   methods: {
@@ -152,11 +148,22 @@ export default {
         return `${(problem.solve * 100 / problem.submit).toFixed(2)}%`
       }
     },
-    submit () {
+    submit (problem) {
+      this.submitProblem = problem
       this.active = true
     },
-    submitCode (language, code) {
-      
+    submitCode (payload) {
+      this.$store.dispatch('submitSolution', Object.assign(payload, {
+        pid: this.submitProblem.pid
+      }))
+      .then(() => {
+        this.$router.push({
+          name: 'status',
+          query: {
+            uid: this.$store.getters.self.uid
+          }
+        })
+      })
     }
   }
 }

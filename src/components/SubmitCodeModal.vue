@@ -35,17 +35,30 @@ export default {
       language: 1
     }
   },
+  created () {
+    this.language = this.$store.getters.defaultLanguage
+  },
   methods: {
     close () {
       this.$emit('close')
     },
     submit () {
-      this.$emit('submit')
+      this.$emit('submit', {
+        code: this.code,
+        language: this.language
+      })
     }
   },
   computed: {
     LANGUAGES () {
       return this.$store.getters.languages
+    }
+  },
+  watch: {
+    'language' (to, from) {
+      this.$store.commit('updateDefaultLanguage', {
+        language: + this.language
+      })
     }
   }
 }
