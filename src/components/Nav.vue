@@ -40,8 +40,17 @@
         <a class="nav-item is-tab is-hidden-tablet">Ranklist</a>
         <a class="nav-item is-tab is-hidden-tablet">Contests</a>
         <a class="nav-item is-tab is-hidden-tablet">FAQ</a>
-        <a class="nav-item is-tab" @click="showLoginModal">Login</a>
-        <a class="nav-item is-tab">Log out</a>
+        <router-link
+          class="nav-item is-tab"
+          v-if="self"
+          :to="{name: 'user', params: {uid: self.uid}}"
+        > {{ self.uid }} </router-link>
+        <a
+          class="nav-item is-tab"
+          @click="showLoginModal"
+          v-else="self"
+        >Login</a>
+        <a class="nav-item is-tab" v-if="self">Log out</a>
         <a class="nav-item is-tab">Admin</a>
       </div>
     </div>
@@ -53,6 +62,11 @@ export default {
   methods: {
     showLoginModal () {
       this.$store.commit('showLoginModal')
+    }
+  },
+  computed: {
+    self () {
+      return this.$store.getters.self
     }
   }
 }
