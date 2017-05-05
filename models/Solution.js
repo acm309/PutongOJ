@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { redisLPUSH, isUndefined } = require('../utils')
+const { redisLPUSH, isUndefined, isAccepted } = require('../utils')
+const config = require('../config')
 
 const SolutionSchema = mongoose.Schema({
   sid: {
@@ -36,7 +37,7 @@ const SolutionSchema = mongoose.Schema({
   length: Number,
   judge: {
     type: Number,
-    default: 0 // TODO: fix this number to a constant variable
+    default: config.judge.Pending
   },
   status: {
     type: Number,
@@ -70,6 +71,10 @@ SolutionSchema.plugin(mongoosePaginate)
 
 SolutionSchema.methods.pending = async function () {
   await redisLPUSH(this.sid)
+}
+
+SolutionSchema.methods.isAccepted = function () {
+  return isAccepted(this.code)
 }
 
 SolutionSchema.statics.validate = function validate ({

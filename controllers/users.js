@@ -20,14 +20,14 @@ async function queryOneUser (ctx, next) {
   }
 
   let solved = await Solution
-    .find({uid, judge: 3}) // TODO: fix this number to a constant variable
+    .find({uid, judge: ctx.config.judge.Accepted})
     .distinct('pid')
     .exec()
 
   solved = _.sort((x, y) => (x < y ? -1 : 1), solved)
 
   let unsolved = await Solution
-    .find({uid, judge: {$ne: 3}}) // TODO: fix this number to a constant variable
+    .find({uid, judge: {$ne: ctx.config.judge.Accepted}})
     .distinct('pid')
     .exec()
 

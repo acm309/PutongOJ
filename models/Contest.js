@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined, redisGet, redisSet } = require('../utils')
+const { isUndefined, redisGet, redisSet, isAccepted } = require('../utils')
 const arrayDuplicated = require('array-duplicated')
 const Problem = require('./Problem')
 const Solution = require('./Solution')
@@ -129,7 +129,7 @@ ContestSchema.methods.fetchRanklist = async function (solution) {
       return status
     }
     // Accepted
-    if (solution.judge === 3) { // TODO: fix this to a constant variable
+    if (isAccepted(solution.judge)) {
       if (isUndefined(status.solved[solution.pid])) { // 第一次提交
         status.solve += 1
         status.solved[solution.pid] = {wa: 0, create: solution.create - this.start}
