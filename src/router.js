@@ -40,7 +40,11 @@ const routes = [
     name: 'status',
     props: (route) => ({
       page: route.query.page,
-      limit: route.query.limit
+      limit: route.query.limit,
+      uid: route.query.uid,
+      pid: route.query.pid,
+      language: route.query.language,
+      judge: route.query.judge
     })
   }, {
     path: '/ranklist',
