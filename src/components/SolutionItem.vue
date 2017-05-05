@@ -6,7 +6,11 @@
     >
       {{ solution.pid }}
     </router-link> </td>
-    <td>{{ solution.uid }}</td>
+    <td> <router-link
+        :to="{name: 'user', params: {uid: solution.uid}}"
+      >
+      {{ solution.uid }}
+    </router-link></td>
     <td>{{ solution.judge }}</td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>

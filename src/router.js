@@ -10,6 +10,7 @@ import FAQ from './views/FAQ.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
+import User from './views/User.vue'
 
 Vue.use(VueRouter)
 
@@ -67,6 +68,13 @@ const routes = [
     name: 'problem',
     props: (route) => ({
       pid: route.params.pid
+    })
+  }, {
+    path: '/users/:uid',
+    component: User,
+    name: 'user',
+    props: (route) => ({
+      uid: route.params.uid
     })
   }
 ]
