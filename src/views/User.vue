@@ -86,6 +86,7 @@
             <p
               v-for="(ip, index) in user.iprecord"
               :key="pid"
+              v-if="ip"
             >
               {{ ip }} -- {{ user.timerecord[index] | timePretty }}
             </p>
