@@ -1,8 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 import modules from './modules'
 
 Vue.use(Vuex)
+
+axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
+axios.defaults.withCredentials = true
 
 const state = {
   currentTime: Date.now(),
@@ -45,5 +49,6 @@ const store = new Vuex.Store({
 })
 
 store.dispatch('updateCurrentTime')
+store.dispatch('fetchSession')
 
 export default store

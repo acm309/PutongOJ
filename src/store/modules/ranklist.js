@@ -1,8 +1,6 @@
 import axios from 'axios'
 import queryString from 'query-string'
 
-const host = 'http://localhost:3000'
-
 const state = {
   ranklist: [],
   ranklistPagination: {}
@@ -28,7 +26,7 @@ const mutations = {
 
 const actions = {
   fetchRanklist ({commit}, payload) {
-    return axios.get(host + '/api/ranklist?' + queryString.stringify(payload))
+    return axios.get('/ranklist?' + queryString.stringify(payload))
       .then(({data}) => {
         commit('updateRanklist', {
           ranklist: data.ranklist

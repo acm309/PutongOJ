@@ -1,7 +1,5 @@
 import axios from 'axios'
 
-const host = 'http://localhost:3000'
-
 const state = {
   news: []
 }
@@ -20,7 +18,7 @@ const mutations = {
 
 const actions = {
   fetchNews ({commit}, payload) {
-    return axios.get(host + `/api/news/${payload.nid}`)
+    return axios.get(`/news/${payload.nid}`)
       .then(({data}) => {
         commit('updateNews', {
           news: data.news

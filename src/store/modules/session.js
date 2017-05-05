@@ -1,7 +1,5 @@
 import axios from 'axios'
 
-const host = 'http://localhost:3000'
-
 const state = {
   self: null
 }
@@ -18,11 +16,21 @@ const mutations = {
 
 const actions = {
   login ({commit}, payload) {
-    return axios.post(host + `/api/session`, payload)
+    return axios.post(`/session`, payload)
       .then(({data}) => {
         commit('updateSelf', {
           self: data.user
         })
+      })
+  },
+  fetchSession ({commit}, payload) {
+    return axios.get(`/session`)
+      .then(({data}) => {
+        if (data.user) {
+          commit('updateSelf', {
+            self: data.user
+          })
+        }
       })
   }
 }

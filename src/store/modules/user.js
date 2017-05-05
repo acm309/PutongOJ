@@ -1,7 +1,5 @@
 import axios from 'axios'
 
-const host = 'http://localhost:3000'
-
 const state = {
   user: {},
   solved: [],
@@ -34,7 +32,7 @@ const mutations = {
 
 const actions = {
   fetchUser ({commit}, payload) {
-    return axios.get(host + `/api/users/${payload.uid}`)
+    return axios.get(`/users/${payload.uid}`)
       .then(({data}) => {
         commit('updateUser', data)
         commit('updateSolved', data)
