@@ -11,6 +11,9 @@ const getters = {
 const mutations = {
   updateSelf (state, payload) {
     state.self = payload.self
+  },
+  deleteSelf (state, payload) {
+    state.self = null
   }
 }
 
@@ -31,6 +34,12 @@ const actions = {
             self: data.user
           })
         }
+      })
+  },
+  logout ({commit}, payload) {
+    return axios.delete('/session')
+      .then(({data}) => {
+        commit('deleteSelf')
       })
   }
 }

@@ -50,8 +50,9 @@
           @click="showLoginModal"
           v-else="self"
         >Login</a>
-        <a class="nav-item is-tab" v-if="self">Log out</a>
-        <a class="nav-item is-tab">Admin</a>
+        <a class="nav-item is-tab" v-if="self" @click="logout">Log out</a>
+        <a class="nav-item is-tab" v-else @click="logout">Register</a>
+        <a class="nav-item is-tab" v-if="self">Admin</a>
       </div>
     </div>
   </nav>
@@ -62,6 +63,9 @@ export default {
   methods: {
     showLoginModal () {
       this.$store.commit('showLoginModal')
+    },
+    logout () {
+      this.$store.dispatch('logout')
     }
   },
   computed: {
