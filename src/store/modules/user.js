@@ -40,6 +40,14 @@ const actions = {
           self: data.user
         })
       })
+  },
+  updateUser ({commit}, payload) {
+    return axios.put(`/users/${payload.uid}`, payload)
+      .then(({data}) => {
+        commit('updateUser', {
+          user: data.user
+        })
+      })
   }
 }
 
