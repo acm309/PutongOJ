@@ -3,12 +3,18 @@ import queryString from 'query-string'
 
 const state = {
   solutionsList: [],
-  solutionsPagination: {}
+  solutionsPagination: {},
+  solution: {},
+  solutionModalActive: false,
+  sid: null
 }
 
 const getters = {
   solutionsList: (state) => state.solutionsList,
-  solutionsPagination: (state) => state.solutionsPagination
+  solutionsPagination: (state) => state.solutionsPagination,
+  solution: (state) => state.solution,
+  solutionModalActive: (state) => state.solutionModalActive,
+  sid: (state) => state.sid
 }
 
 const mutations = {
@@ -17,6 +23,16 @@ const mutations = {
   },
   updateSolutionsPagination (state, payload) {
     state.solutionsPagination = payload.solutionsPagination
+  },
+  updateSolution (state, payload) {
+    state.solution = payload.solution
+  },
+  showSolutionModal (state, payload) {
+    state.solutionModalActive = true
+    state.sid = payload.sid
+  },
+  closeSolutionModal (state, payload) {
+    state.solutionModalActive = false
   }
 }
 
@@ -30,6 +46,12 @@ const actions = {
         commit('updateSolutionsPagination', {
           solutionsPagination: data.pagination
         })
+      })
+  },
+  fetchSolution ({commit}, payload) {
+    return axios.get(`/status/${payload.sid}`)
+      .then(({data}) => {
+        commit('updateSolution', data)
       })
   }
 }
