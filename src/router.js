@@ -10,7 +10,9 @@ import FAQ from './views/FAQ.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
-import User from './views/User.vue'
+import User from './views/User/User.vue'
+import UserProfile from './views/User/UserProfle.vue'
+import UserEdit from './views/User/UserEdit.vue'
 import Register from './views/Register.vue'
 
 Vue.use(VueRouter)
@@ -79,10 +81,18 @@ const routes = [
   }, {
     path: '/users/:uid',
     component: User,
-    name: 'user',
     props: (route) => ({
       uid: route.params.uid
-    })
+    }),
+    children: [{
+      path: '',
+      component: UserProfile,
+      name: 'user'
+    }, {
+      path: 'edit',
+      component: UserEdit,
+      name: 'useredit'
+    }]
   }, {
     path: '/register',
     component: Register,
