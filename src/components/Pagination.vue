@@ -9,7 +9,7 @@
         > 1 </a>
       </li>
       <!--  1 ... 4 5 6 ... 9 (current 5) -->
-      <li v-if="pagination.page - 1 > distance + 1">
+      <li v-if="pagination.page - 1 >= distance + 1">
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
       <li v-if="pagination.page - 1 > 1">
@@ -30,7 +30,7 @@
           @click="pageClick(pagination.page + 1)"
         >{{ pagination.page + 1 }}</a>
       </li>
-      <li v-if="pagination.pages - pagination.page > distance + 1">
+      <li v-if="pagination.pages - pagination.page >= distance + 1">
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
       <li v-if="pagination.pages !== 1">

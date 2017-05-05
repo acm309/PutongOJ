@@ -5,6 +5,8 @@ import ranklist from './ranklist'
 import contests from './contests'
 import oneNews from './oneNews'
 import problem from './problem'
+import user from './user'
+import session from './session'
 
 export default {
   news,
@@ -13,5 +15,7 @@ export default {
   ranklist,
   contests,
   oneNews,
-  problem
+  problem,
+  user,
+  session
 }

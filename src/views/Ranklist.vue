@@ -29,7 +29,13 @@
           :key="user.uid"
         >
           <td> {{ (page - 1) * limit + index + 1 }} </td>
-          <td>{{ user.uid }}</td>
+          <td>
+            <router-link
+              :to="{name: 'user', params: {uid: user.uid}}"
+            >
+              {{ user.uid }}
+            </router-link>
+          </td>
           <td>{{ user.nick }}</td>
           <td>{{ user.motto }}</td>
           <td>{{ user.solve }}</td>

@@ -3,7 +3,14 @@
     <oj-problemcontent :problem="problem">
     </oj-problemcontent>
     <hr>
-    <a class="button is-primary">Submit</a> <a class="button"> Statistics </a>
+    <a
+      class="button is-primary"
+      :disabled="!self"
+    >Submit</a>
+    <a class="button"> Statistics </a>
+    <p v-if="!self">
+      <a @click="login">Log in</a> to submit
+    </p>
   </div>
 </template>
 
@@ -26,6 +33,14 @@ export default {
   computed: {
     problem () {
       return this.$store.getters.problem
+    },
+    self () {
+      return this.$store.getters.self
+    }
+  },
+  methods: {
+    login () {
+      this.$store.commit('showLoginModal')
     }
   }
 }

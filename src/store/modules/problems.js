@@ -1,8 +1,6 @@
 import axios from 'axios'
 import queryString from 'query-string'
 
-const host = 'http://localhost:3000'
-
 const state = {
   problemsList: [],
   problemsPagination: {}
@@ -28,7 +26,7 @@ const mutations = {
 
 const actions = {
   fetchProblemsList ({commit}, payload) {
-    return axios.get(host + '/api/problems?' + queryString.stringify(payload))
+    return axios.get('/problems?' + queryString.stringify(payload))
       .then(({data}) => {
         commit('updateProblemsList', {
           problemsList: data.problems
