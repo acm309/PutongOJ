@@ -20,6 +20,9 @@ async function login (ctx, next) {
     ctx.throw(400, 'Wrong password')
   }
 
+  user.updateRecords(ctx.ip, Date.now())
+  await user.save()
+
   ctx.session.user = {
     uid,
     nick: user.nick,
