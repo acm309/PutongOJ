@@ -7,12 +7,12 @@
     <table class="table">
       <thead>
         <tr>
-          <td>#</td> <td>Id</td> <td>Title</td> <td>Submit</td> <td>Ratio</td>
+          <th>#</th> <th>Id</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
         </tr>
       </thead>
       <tfoot>
         <tr>
-          <td>#</td> <td>Id</td> <td>Title</td> <td>Submit</td> <td>Ratio</td>
+          <th>#</th> <th>Id</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
         </tr>
       </tfoot>
       <tbody>
