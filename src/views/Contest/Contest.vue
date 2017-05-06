@@ -6,8 +6,20 @@
       :start="contest.start"
     >
     </oj-timeremainder>
-    {{ contest.title }}
-    {{ contest.list }}
+    <br>
+    <div class="tabs is-boxed">
+      <ul>
+        <li class="is-active"><a><span>Overview</span></a></li>
+        <li><a><span>Problem</span></a></li>
+        <li><a><span>Status</span></a></li>
+        <li><a><span>Ranklist</span></a></li>
+      </ul>
+    </div>
+    <router-view
+      v-if="contest"
+      :contest="contest"
+    >
+    </router-view>
   </div>
 </template>
 

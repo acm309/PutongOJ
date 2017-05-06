@@ -3,12 +3,14 @@ import queryString from 'query-string'
 
 const state = {
   contestsList: [],
-  contest: null
+  contest: null,
+  contestOverview: []
 }
 
 const getters = {
   contestsList: (state) => state.contestsList,
-  contest: (state) => state.contest
+  contest: (state) => state.contest,
+  contestOverview: (state) => state.contestOverview
 }
 
 const mutations = {
@@ -17,6 +19,9 @@ const mutations = {
   },
   updateContest (state, payload) {
     state.contest = payload.contest
+  },
+  updateContestOverview (state, payload) {
+    state.contestOverview = payload.contestOverview
   }
 }
 
@@ -33,6 +38,14 @@ const actions = {
     return axios.get(`/contests/${payload.cid}`)
       .then(({data}) => {
         commit('updateContest', data)
+      })
+  },
+  fetchContestOverview ({commit}, payload) {
+    return axios.get(`/contests/${payload.cid}/overview`)
+      .then(({data}) => {
+        commit('updateContestOverview', {
+          contestOverview: data.overview
+        })
       })
   }
 }
