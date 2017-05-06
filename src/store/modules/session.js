@@ -5,7 +5,8 @@ const state = {
 }
 
 const getters = {
-  self: (state) => state.self
+  self: (state) => state.self,
+  logined: (state) => state.self !== null
 }
 
 const mutations = {
