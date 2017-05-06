@@ -5,14 +5,16 @@ const state = {
   contestsList: [],
   contest: null,
   contestOverview: [],
-  contestRanklist: []
+  contestRanklist: [],
+  contestDefaultPid: 0
 }
 
 const getters = {
   contestsList: (state) => state.contestsList,
   contest: (state) => state.contest,
   contestOverview: (state) => state.contestOverview,
-  contestRanklist: (state) => state.contestRanklist
+  contestRanklist: (state) => state.contestRanklist,
+  contestDefaultPid: (state) => state.contestDefaultPid
 }
 
 const mutations = {
@@ -24,6 +26,9 @@ const mutations = {
   },
   updateContestOverview (state, payload) {
     state.contestOverview = payload.contestOverview
+  },
+  updateContestDefaultPid (state, payload) {
+    state.contestDefaultPid = payload.pid
   },
   updateContestRanklist (state, payload) {
     let ranklist = payload.contestRanklist

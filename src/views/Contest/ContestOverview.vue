@@ -19,7 +19,9 @@
         <tr v-for="(problem, index) in overview">
           <td></td>
           <td>{{ index }}</td>
-          <td>{{ problem.title }}</td>
+          <td><router-link
+            :to="{name: 'contest_problem', params: {cid: cid, pid: index}}"
+            >{{ problem.title }}</router-link></td>
           <td><a @click="submit(problem)">
             <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
           </a></td>

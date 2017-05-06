@@ -1,6 +1,6 @@
 <template lang="html">
   <div class="content">
-    <h1>{{ problem.title }}</h1>
+    <h1> <slot name="title"> {{ problem.title }} </slot> </h1>
     <p>Time: {{problem.time}} MS Memory: {{ problem.memory }} KB</p>
     <hr>
     <h3> Description </h3>

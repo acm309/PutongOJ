@@ -14,8 +14,11 @@
             :to="{name: 'contest', params: {cid: cid}}"
             exact
           ><a><span>Overview</span></a></router-link>
-        <li><a><span>Problem</span></a></li>
-        <li><a><span>Status</span></a></li>
+        <router-link
+            tag="li"
+            :to="{name: 'contest_problem', params: {cid: cid, pid: defaultPid}}"
+            exact
+          ><a><span>Problem</span></a></router-link>
         <router-link
             tag="li"
             :to="{name: 'contest_ranklist', params: {cid: cid}}"
@@ -50,6 +53,9 @@ export default {
   computed: {
     contest () {
       return this.$store.getters.contest
+    },
+    defaultPid () {
+      return this.$store.getters.contestDefaultPid
     }
   }
 }

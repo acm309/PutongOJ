@@ -17,6 +17,7 @@ import Register from './views/Register.vue'
 import Contest from './views/Contest/Contest.vue'
 import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
+import ContestProblem from './views/Contest/ContestProblem.vue'
 
 Vue.use(VueRouter)
 
@@ -120,6 +121,14 @@ const routes = [
       component: ContestRanklist,
       props: (route) => ({
         cid: route.params.cid
+      })
+    }, {
+      path: 'problems/:pid',
+      name: 'contest_problem',
+      component: ContestProblem,
+      props: (route) => ({
+        cid: route.params.cid,
+        pid: route.params.pid
       })
     }]
   }
