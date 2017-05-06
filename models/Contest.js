@@ -130,8 +130,8 @@ ContestSchema.methods.fetchRanklist = async function (solution) {
     }
     // Accepted
     if (isAccepted(solution.judge)) {
+      status.solve += 1
       if (isUndefined(status.solved[solution.pid])) { // 第一次提交
-        status.solve += 1
         status.solved[solution.pid] = {wa: 0, create: solution.create - this.start}
         status.penalty += solution.create - this.start
       } else { // 提交过且作对了
@@ -176,6 +176,9 @@ ContestSchema.methods.fetchRanklist = async function (solution) {
     }))
     await redisSet(`contests:${this.cid}:ranklist`, JSON.stringify(res))
     return Object.values(res)
+  }
+  if (typeof res === 'string') {
+    res = JSON.parse(res)
   }
   if (!isUndefined(solution)) {
     if (isUndefined(res[solution.uid])) { // 这个用户还没记录
