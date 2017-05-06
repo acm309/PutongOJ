@@ -1,11 +1,12 @@
 <template lang="html">
   <tr>
     <td>{{ solution.sid }}</td>
-    <td> <router-link
+    <td>
+      <slot name="pid"> <router-link
       :to="{name: 'problem', params: {pid: solution.pid}}"
     >
       {{ solution.pid }}
-    </router-link> </td>
+    </router-link> </slot> </td>
     <td> <router-link
         :to="{name: 'user', params: {uid: solution.uid}}"
       >
