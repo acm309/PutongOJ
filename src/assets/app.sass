@@ -4,3 +4,21 @@ body
 .textarea.code
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace
   height: auto
+
+.contest-ranklist
+  overflow: scroll
+
+  td
+    padding: 0.3em 0.4em
+    vertical-align: middle
+    &.is-first.is-success
+      font-weight: bold
+      background-color: hsl(217, 71%, 53%)
+      color: white
+    &.is-success
+      font-weight: bold
+      background-color: hsl(141, 71%, 48%)
+      color: white
+    &.is-danger
+      font-weight: bold
+      color: hsl(14, 100%, 53%)

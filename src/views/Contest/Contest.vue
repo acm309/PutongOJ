@@ -9,10 +9,17 @@
     <br>
     <div class="tabs is-boxed">
       <ul>
-        <li class="is-active"><a><span>Overview</span></a></li>
+        <router-link
+            tag="li"
+            :to="{name: 'contest', params: {cid: cid}}"
+            exact
+          ><a><span>Overview</span></a></router-link>
         <li><a><span>Problem</span></a></li>
         <li><a><span>Status</span></a></li>
-        <li><a><span>Ranklist</span></a></li>
+        <router-link
+            tag="li"
+            :to="{name: 'contest_ranklist', params: {cid: cid}}"
+          ><a><span>Ranklist</span></a></router-link>
       </ul>
     </div>
     <router-view

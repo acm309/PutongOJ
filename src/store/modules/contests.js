@@ -4,13 +4,15 @@ import queryString from 'query-string'
 const state = {
   contestsList: [],
   contest: null,
-  contestOverview: []
+  contestOverview: [],
+  contestRanklist: []
 }
 
 const getters = {
   contestsList: (state) => state.contestsList,
   contest: (state) => state.contest,
-  contestOverview: (state) => state.contestOverview
+  contestOverview: (state) => state.contestOverview,
+  contestRanklist: (state) => state.contestRanklist
 }
 
 const mutations = {
@@ -22,6 +24,37 @@ const mutations = {
   },
   updateContestOverview (state, payload) {
     state.contestOverview = payload.contestOverview
+  },
+  updateContestRanklist (state, payload) {
+    let ranklist = payload.contestRanklist
+    ranklist.sort((x, y) => {
+      if (x.solve !== y.solve) {
+        return x.solve > y.solve ? -1 : 1
+      }
+      return x.penalty > y.penalty ? 1 : -1
+    })
+    // 挑选每到题最早的提交时间，从而选出每题第一个提交
+    let fatest = {}
+    for (let pid in state.contest.list) {
+      fatest[pid] = Infinity
+    }
+    for (let rank of ranklist) {
+      for (let pid in rank.solved) {
+        let sol = rank.solved[pid]
+        if (sol.wa >= 0) {
+          fatest[pid] = fatest[pid] < sol.create ? fatest[pid] : sol.create
+        }
+      }
+    }
+    for (let rank of ranklist) {
+      for (let pid in rank.solved) {
+        let sol = rank.solved[pid]
+        if (sol.wa >= 0 && fatest[pid] === sol.create) {
+          sol.isFirst = true
+        }
+      }
+    }
+    state.contestRanklist = ranklist
   }
 }
 
@@ -45,6 +78,14 @@ const actions = {
       .then(({data}) => {
         commit('updateContestOverview', {
           contestOverview: data.overview
+        })
+      })
+  },
+  fetchContestRanklist ({commit}, payload) {
+    return axios.get(`/contests/${payload.cid}/ranklist`)
+      .then(({data}) => {
+        commit('updateContestRanklist', {
+          contestRanklist: data.ranklist
         })
       })
   }

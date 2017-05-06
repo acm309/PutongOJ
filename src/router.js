@@ -16,6 +16,7 @@ import UserEdit from './views/User/UserEdit.vue'
 import Register from './views/Register.vue'
 import Contest from './views/Contest/Contest.vue'
 import ContestOverview from './views/Contest/ContestOverview.vue'
+import ContestRanklist from './views/Contest/ContestRanklist.vue'
 
 Vue.use(VueRouter)
 
@@ -110,6 +111,13 @@ const routes = [
       // Warning: 这是默认子路由，导航时这个 name 放在子路由里，别放在上一代路由里
       name: 'contest',
       component: ContestOverview,
+      props: (route) => ({
+        cid: route.params.cid
+      })
+    }, {
+      path: 'ranklist',
+      name: 'contest_ranklist',
+      component: ContestRanklist,
       props: (route) => ({
         cid: route.params.cid
       })
