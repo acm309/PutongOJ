@@ -1,11 +1,12 @@
 <template lang="html">
   <tr>
     <td>{{ solution.sid }}</td>
-    <td> <router-link
+    <td>
+      <slot name="pid"> <router-link
       :to="{name: 'problem', params: {pid: solution.pid}}"
     >
       {{ solution.pid }}
-    </router-link> </td>
+    </router-link> </slot> </td>
     <td> <router-link
         :to="{name: 'user', params: {uid: solution.uid}}"
       >
@@ -14,7 +15,10 @@
     <td>{{ solution.judge | judgePretty }}</td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
-    <td> <a @click="showSource(solution)"> {{ solution.language | languagePretty }} </a> </td>
+    <td>
+      <a v-if="logined && (self.uid === solution.uid || isAdmin)" @click="showSource(solution)"> {{ solution.language | languagePretty }} </a>
+      <span v-else> {{ solution.language | languagePretty }} </span>
+    </td>
     <td>{{ solution.length }} B</td>
     <td>{{ solution.create | timePretty }}</td>
   </tr>
@@ -26,6 +30,17 @@ export default {
   methods: {
     showSource (solution) {
       this.$store.commit('showSolutionModal', solution)
+    }
+  },
+  computed: {
+    isAdmin() {
+      return this.$store.getters.isAdmin
+    },
+    self () {
+      return this.$store.getters.self
+    },
+    logined () {
+      return this.$store.getters.logined
     }
   }
 }

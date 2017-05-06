@@ -1,7 +1,7 @@
 <template lang="html">
   <div class="modal" :class="{'is-active': solutionModalActive}">
     <div class="modal-background" @click="close"></div>
-    <div class="modal-content">
+    <div class="modal-content code-modal">
       <pre>
         <code v-html="code"></code>
       </pre>

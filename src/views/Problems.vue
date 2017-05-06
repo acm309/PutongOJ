@@ -38,7 +38,9 @@
               :to="{name: 'problem', params: {pid: problem.pid}}"
             > {{ problem.title }} </router-link></td>
           <td>
-            <a @click="submit(problem)">
+            <a
+              @click="submit(problem)"
+              >
               <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
             </a>
           </td>
@@ -85,7 +87,6 @@
 
 <script>
 
-import ProblemItem from '../components/ProblemItem.vue'
 import Pagination from '../components/Pagination.vue'
 import SubmitCodeModal from '../components/SubmitCodeModal.vue'
 
@@ -101,7 +102,6 @@ export default {
   },
   components: {
     'oj-pagination': Pagination,
-    'oj-problemitem': ProblemItem,
     'oj-submitcodemodal': SubmitCodeModal
   },
   created () {
@@ -112,6 +112,9 @@ export default {
     })
   },
   computed: {
+    logined () {
+      return this.$store.getters.logined
+    },
     problemsList () {
       return this.$store.getters.problemsList
     },
@@ -150,6 +153,11 @@ export default {
       }
     },
     submit (problem) {
+      if (!this.logined) {
+        // 先登录
+        this.$store.commit('showLoginModal')
+        return
+      }
       this.submitProblem = problem
       this.active = true // 打开代码提交框
     },

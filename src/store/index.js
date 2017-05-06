@@ -36,6 +36,25 @@ const getters = {
     2: 'C++',
     3: 'Java'
   }),
+  judgeCode: (state) => ({
+    Pending: 0,
+    Running: 1,
+    CompileError: 2,
+    Accepted: 3,
+    RuntimeError: 4,
+    WrongAnswer: 5,
+    TimeLimitExceeded: 6,
+    MemoryLimitExceed: 7,
+    OutputLimitExceed: 8,
+    PresentationError: 9,
+    SystemError: 10,
+    RejudgePending: 11
+  }),
+  privilege: (state) => ({
+    PrimaryUser: 1,
+    Teacher: 2,
+    Admin: 3
+  }),
   defaultLanguage: (state) => state.defaultLanguage
 }
 

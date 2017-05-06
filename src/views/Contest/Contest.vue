@@ -21,6 +21,10 @@
           ><a><span>Problem</span></a></router-link>
         <router-link
             tag="li"
+            :to="{name: 'contest_status', params: {cid: cid}, query: {uid: self.uid}}"
+          ><a><span>Status</span></a></router-link>
+        <router-link
+            tag="li"
             :to="{name: 'contest_ranklist', params: {cid: cid}}"
           ><a><span>Ranklist</span></a></router-link>
       </ul>
@@ -56,6 +60,9 @@ export default {
     },
     defaultPid () {
       return this.$store.getters.contestDefaultPid
+    },
+    self () {
+      return this.$store.getters.self
     }
   }
 }

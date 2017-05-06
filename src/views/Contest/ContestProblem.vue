@@ -41,6 +41,9 @@ export default {
       pid: this.contest.list[this.pid],
       mid: this.cid
     })
+    this.$store.commit('updateContestDefaultPid', {
+      pid: +this.pid // 记得确保是数字
+    })
   },
   methods: {
     chooseProblem (index) {
@@ -51,11 +54,11 @@ export default {
         name: 'contest_problem',
         params: {
           cid: this.cid,
-          pid: index
+          pid: +index
         }
       })
       this.$store.dispatch('fetchProblem', {
-        pid: this.contest.list[index],
+        pid: +this.contest.list[index],
         mid: this.cid
       })
     }

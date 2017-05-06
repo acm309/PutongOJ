@@ -17,9 +17,11 @@
           :key="contest.cid"
         >
           <td>{{ contest.cid }}</td>
-          <td><router-link
+          <td><router-link v-if="logined"
               :to="{name: 'contest', params: {cid: contest.cid}}"
-            > {{ contest.title }} </router-link> </td>
+            > {{ contest.title }} </router-link>
+            <a @click="login" v-else>{{ contest.title }}</a>
+          </td>
           <td>{{ status(contest) }}</td>
           <td>{{ contest.start | timePretty }}</td>
           <td>{{ contest.status }}</td>
@@ -39,6 +41,9 @@ export default {
   computed: {
     contestsList () {
       return this.$store.getters.contestsList
+    },
+    logined () {
+      return this.$store.getters.logined
     }
   },
   methods: {
@@ -49,6 +54,9 @@ export default {
         return 'Ended'
       }
       return 'Running'
+    },
+    login () {
+      this.$store.commit('showLoginModal')
     }
   }
 }

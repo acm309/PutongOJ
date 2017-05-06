@@ -18,6 +18,7 @@ import Contest from './views/Contest/Contest.vue'
 import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
 import ContestProblem from './views/Contest/ContestProblem.vue'
+import ContestStatus from './views/Contest/ContestStatus.vue'
 
 Vue.use(VueRouter)
 
@@ -129,6 +130,19 @@ const routes = [
       props: (route) => ({
         cid: route.params.cid,
         pid: route.params.pid
+      })
+    }, {
+      path: 'status',
+      name: 'contest_status',
+      component: ContestStatus,
+      props: (route) => ({
+        cid: route.params.cid,
+        page: route.query.page,
+        limit: route.query.limit,
+        uid: route.query.uid,
+        pid: route.query.pid,
+        language: route.query.language,
+        judge: route.query.judge
       })
     }]
   }
