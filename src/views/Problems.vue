@@ -85,7 +85,6 @@
 
 <script>
 
-import ProblemItem from '../components/ProblemItem.vue'
 import Pagination from '../components/Pagination.vue'
 import SubmitCodeModal from '../components/SubmitCodeModal.vue'
 
@@ -101,7 +100,6 @@ export default {
   },
   components: {
     'oj-pagination': Pagination,
-    'oj-problemitem': ProblemItem,
     'oj-submitcodemodal': SubmitCodeModal
   },
   created () {
