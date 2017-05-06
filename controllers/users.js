@@ -102,7 +102,7 @@ async function update (ctx, next) {
 
   // 你不能修改他人的信息，除非你权限很高（比如 admin）
   if (ctx.session.user.uid !== uid &&
-    ctx.session.user.privilege === ctx.config.privilege.Admin) {
+    ctx.session.user.privilege !== ctx.config.privilege.Admin) {
     ctx.throw(400, "You are not allowed to update others' info")
   }
 
