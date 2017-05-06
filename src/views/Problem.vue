@@ -1,7 +1,9 @@
 <template lang="html">
-  <div class="content">
-    <oj-problemcontent :problem="problem">
-    </oj-problemcontent>
+  <div>
+    <div class="content">
+      <oj-problemcontent :problem="problem">
+      </oj-problemcontent>
+    </div>
     <hr>
     <a
       class="button is-primary"
@@ -16,10 +18,9 @@
       v-if="active"
       @close="active=false"
       @submit="submit"
-    >
-      {{ problem.pid }} -- {{ problem.title }}
-    </oj-submitcodemodal>
+    >{{ problem.pid }} -- {{ problem.title }}</oj-submitcodemodal>
   </div>
+
 </template>
 
 <script>
