@@ -14,6 +14,7 @@ import User from './views/User/User.vue'
 import UserProfile from './views/User/UserProfle.vue'
 import UserEdit from './views/User/UserEdit.vue'
 import Register from './views/Register.vue'
+import Contest from './views/Contest/Contest.vue'
 
 Vue.use(VueRouter)
 
@@ -97,6 +98,13 @@ const routes = [
     path: '/register',
     component: Register,
     name: 'register'
+  }, {
+    path: '/contests/:cid',
+    component: Contest,
+    name: 'contest',
+    props: (route) => ({
+      cid: route.params.cid
+    })
   }
 ]
 

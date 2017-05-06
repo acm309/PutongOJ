@@ -109,6 +109,7 @@ import Pagination from '../components/Pagination.vue'
 
 export default {
   data () {
+    // 如果用 null，那么 post 的是否，这些属性会当作空字符串传，如 ?searchLanguage=&searchUid=
     return {
       searchUid: undefined,
       searchPid: undefined,

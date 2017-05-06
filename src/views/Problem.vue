@@ -63,6 +63,7 @@ export default {
         pid: this.problem.pid
       }))
       .then(() => {
+        // 跳转到 status 页面查看提交结果
         this.$router.push({
           name: 'status',
           query: {

@@ -83,6 +83,7 @@ export default {
   },
   methods: {
     ratio (user) {
+      // 不能除以 0，否则 NaN
       if (user.submit === 0) {
         return '0.00%'
       } else {
