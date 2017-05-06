@@ -6,7 +6,9 @@ const state = {
 
 const getters = {
   self: (state) => state.self,
-  logined: (state) => state.self !== null
+  logined: (state) => state.self !== null,
+  isAdmin: (state, getters) =>
+    getters.logined && state.self.privilege === getters.privilege.Admin
 }
 
 const mutations = {

@@ -50,6 +50,11 @@ const getters = {
     SystemError: 10,
     RejudgePending: 11
   }),
+  privilege: (state) => ({
+    PrimaryUser: 1,
+    Teacher: 2,
+    Admin: 3
+  }),
   defaultLanguage: (state) => state.defaultLanguage
 }
 
