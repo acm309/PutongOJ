@@ -119,6 +119,7 @@ export default {
       return this.$store.getters.problemsPagination
     },
     solutionTitle () {
+      // 代码提交框里的标题
       return `${this.submitProblem.pid} -- ${this.submitProblem.title}`
     }
   },
@@ -150,7 +151,7 @@ export default {
     },
     submit (problem) {
       this.submitProblem = problem
-      this.active = true
+      this.active = true // 打开代码提交框
     },
     submitCode (payload) {
       this.$store.dispatch('submitSolution', Object.assign(payload, {

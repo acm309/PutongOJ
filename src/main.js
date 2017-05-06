@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import moment from 'moment'
+import leftPad from 'left-pad'
 
 import router from './router'
 import store from './store'
@@ -18,6 +19,13 @@ Vue.filter('judgePretty', function (judgeCode) {
 
 Vue.filter('languagePretty', function (languageCode) {
   return store.getters.languages[languageCode]
+})
+
+Vue.filter('durationPretty', function (time) {
+  const duration = moment.duration(parseInt(time))
+  const m = duration.minutes()
+  const s = duration.seconds()
+  return `${Math.floor(duration.asHours())}:${leftPad(m, 2, '0')}:${leftPad(s, 2, '0')}`
 })
 
 new Vue({

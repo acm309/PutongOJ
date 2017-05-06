@@ -46,7 +46,7 @@
 
 <script>
 export default {
-  props: ['pagination', 'pageGen'],
+  props: ['pagination'],
   data () {
     return {
       distance: 2

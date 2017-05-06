@@ -3,20 +3,12 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Cid</th>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Start Time</th>
-          <th>Type</th>
+          <th>Cid</th> <th>Title</th> <th>Status</th> <th>Start Time</th> <th>Type</th>
         </tr>
       </thead>
       <tfoot>
         <tr>
-          <th>Cid</th>
-          <th>Title</th>
-          <th>Status</th>
-          <th>Start Time</th>
-          <th>Type</th>
+          <th>Cid</th> <th>Title</th> <th>Status</th> <th>Start Time</th> <th>Type</th>
         </tr>
       </tfoot>
       <tbody>
@@ -25,7 +17,9 @@
           :key="contest.cid"
         >
           <td>{{ contest.cid }}</td>
-          <td>{{ contest.title }}</td>
+          <td><router-link
+              :to="{name: 'contest', params: {cid: contest.cid}}"
+            > {{ contest.title }} </router-link> </td>
           <td>{{ status(contest) }}</td>
           <td>{{ contest.start | timePretty }}</td>
           <td>{{ contest.status }}</td>
@@ -36,6 +30,7 @@
 </template>
 
 <script>
+// TODO 权限检查
 export default {
   created () {
     document.title = 'Contests'
