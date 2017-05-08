@@ -61,11 +61,16 @@ function redisSet (key, value) {
   })
 }
 
+function isAccepted (code) {
+  return code === config.judge.Accepted
+}
+
 module.exports = {
   extractPagination,
   generatePwd,
   isUndefined,
   redisLPUSH,
   redisGet,
-  redisSet
+  redisSet,
+  isAccepted
 }

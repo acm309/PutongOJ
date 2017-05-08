@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { redisLPUSH, isUndefined } = require('../utils')
+const { redisLPUSH, isUndefined, isAccepted } = require('../utils')
+const config = require('../config')
 
 const SolutionSchema = mongoose.Schema({
   sid: {
@@ -19,7 +20,7 @@ const SolutionSchema = mongoose.Schema({
   },
   mid: {
     type: Number,
-    default: 0 // 历史遗留问题，这里的 mid 指代 cid, 0 代表没有
+    default: 1 // 历史遗留问题，这里的 mid 指代 cid, 默认为 1
   },
   time: {
     type: Number,
@@ -36,7 +37,7 @@ const SolutionSchema = mongoose.Schema({
   length: Number,
   judge: {
     type: Number,
-    default: 0 // TODO: fix this number to a constant variable
+    default: config.judge.Pending
   },
   status: {
     type: Number,
@@ -61,6 +62,10 @@ const SolutionSchema = mongoose.Schema({
   code: {
     type: String,
     required: true
+  },
+  module: {
+    type: Number,
+    default: config.module.Problem
   }
 }, {
   collection: 'Solution'
@@ -70,6 +75,10 @@ SolutionSchema.plugin(mongoosePaginate)
 
 SolutionSchema.methods.pending = async function () {
   await redisLPUSH(this.sid)
+}
+
+SolutionSchema.methods.isAccepted = function () {
+  return isAccepted(this.code)
 }
 
 SolutionSchema.statics.validate = function validate ({

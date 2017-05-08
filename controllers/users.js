@@ -20,14 +20,14 @@ async function queryOneUser (ctx, next) {
   }
 
   let solved = await Solution
-    .find({uid, judge: 3}) // TODO: fix this number to a constant variable
+    .find({uid, judge: ctx.config.judge.Accepted})
     .distinct('pid')
     .exec()
 
   solved = _.sort((x, y) => (x < y ? -1 : 1), solved)
 
   let unsolved = await Solution
-    .find({uid, judge: {$ne: 3}}) // TODO: fix this number to a constant variable
+    .find({uid, judge: {$ne: ctx.config.judge.Accepted}})
     .distinct('pid')
     .exec()
 
@@ -102,7 +102,7 @@ async function update (ctx, next) {
 
   // 你不能修改他人的信息，除非你权限很高（比如 admin）
   if (ctx.session.user.uid !== uid &&
-    ctx.session.user.privilege === ctx.config.privilege.Admin) {
+    ctx.session.user.privilege !== ctx.config.privilege.Admin) {
     ctx.throw(400, "You are not allowed to update others' info")
   }
 

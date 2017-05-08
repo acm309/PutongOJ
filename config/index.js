@@ -19,6 +19,26 @@ config.privilege = {
   Admin: 3
 }
 
+config.judge = {
+  Pending: 0,
+  Running: 1,
+  CompileError: 2,
+  Accepted: 3,
+  RuntimeError: 4,
+  WrongAnswer: 5,
+  TimeLimitExceeded: 6,
+  MemoryLimitExceed: 7,
+  OutputLimitExceed: 8,
+  PresentationError: 9,
+  SystemError: 10,
+  RejudgePending: 11
+}
+
+config.module = {
+  Problem: 1,
+  Contest: 2 // 这是比赛的提交还是普通的提交，这个设置完全是历史遗留原因，我也不知道这个字段有用么？
+}
+
 config.root = path.resolve(__dirname, '..')
 config.DataRoot = path.resolve(config.root, './data/Data')
 
