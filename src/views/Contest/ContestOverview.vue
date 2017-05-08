@@ -29,15 +29,44 @@
         </tr>
       </tbody>
     </table>
+    <oj-submitcodemodal
+      v-if="active"
+      @close="active = false"
+      @submit="submitCode">
+      {{ solutionTitle }}
+    </oj-submitcodemodal>
   </div>
 </template>
 
 <script>
+
+import SubmitCodeModal from '../../components/SubmitCodeModal.vue'
+
 export default {
+  components: {
+    'oj-submitcodemodal': SubmitCodeModal
+  },
+  data () {
+    return {
+      active: false,
+      solutionTitle: '',
+      pid: ''
+    }
+  },
   props: ['contest', 'cid'],
   methods: {
     submit (problem) {
-
+      this.active = true
+      this.solutionTitle = `${this.contest.list.indexOf(problem.pid)} -- ${problem.title}`
+      this.pid = problem.pid
+    },
+    submitCode (payload) {
+      payload.pid = this.pid
+      payload.mid = this.cid
+      this.$store.dispatch('submitSolution', payload)
+        .then(() => {
+          this.active = false
+        })
     },
     ratio (problem) {
       if (problem.submit === 0) {
