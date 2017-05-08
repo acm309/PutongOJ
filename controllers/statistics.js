@@ -39,7 +39,9 @@ async function statistics (ctx, next) {
       memory: {$first: '$memory'},
       length: {$first: '$length'},
       language: {$first: '$language'},
-      create: {$first: '$create'}
+      create: {$first: '$create'},
+      pid: {$first: '$pid'},
+      uid: {$first: '$uid'}
     }},
     { $sort: {
       time: 1,
@@ -51,7 +53,7 @@ async function statistics (ctx, next) {
 
   let counted = []
   // TODO: fix this to a constant array with understandable variables
-  for (let i = 1; i <= 11; i += 1) {
+  for (let i = 2; i <= 9; i += 1) {
     counted.push(
       Solution.count({pid, judge: i}).exec()
     )
@@ -61,8 +63,8 @@ async function statistics (ctx, next) {
 
   const statistics = {}
   // i means the judge result, counted[i - 1] represents corresponding count
-  for (let i = 1; i <= 11; i += 1) {
-    statistics[i] = counted[i - 1]
+  for (let i = 2; i <= 9; i += 1) {
+    statistics[i] = counted[i - 2]
   }
 
   ctx.body = {
