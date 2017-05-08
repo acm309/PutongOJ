@@ -55,6 +55,11 @@ const getters = {
     Teacher: 2,
     Admin: 3
   }),
+  encrypt: (state) => ({
+    Public: 1,
+    Priviate: 2,
+    Password: 3
+  }),
   defaultLanguage: (state) => state.defaultLanguage
 }
 

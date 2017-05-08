@@ -22,9 +22,9 @@
             > {{ contest.title }} </router-link>
             <a @click="login" v-else>{{ contest.title }}</a>
           </td>
-          <td>{{ status(contest) }}</td>
+          <td><b>{{ status(contest) }}</b></td>
           <td>{{ contest.start | timePretty }}</td>
-          <td>{{ contest.status }}</td>
+          <td>{{ contest.encrypt | encryptPretty }}</td>
         </tr>
       </tbody>
     </table>
