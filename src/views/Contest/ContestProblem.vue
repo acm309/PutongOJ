@@ -15,7 +15,13 @@
     <span slot="title"> {{pid}} -- {{problem.title}} </span>
     </oj-problemcontent>
     <hr>
-    <button class="button is-primary" @click="submit">Submit</button>
+    <button
+      class="button is-primary" @click="submit"
+      disabled="currentTime <= contest.start || currentTime >= contest.end"
+    >Submit</button>
+    <p v-if="currentTime <= contest.start || currentTime >= contest.end">
+      This contest is not on running, so you can't submit now.
+    </p>
     <oj-submitcodemodal
       v-if="active"
       @close="active = false"
@@ -48,6 +54,9 @@ export default {
     problem () {
       return this.$store.getters.problem
     },
+    currentTime () {
+      return this.$store.getters.currentTime
+    }
   },
   created () {
     this.$store.dispatch('fetchProblem', {

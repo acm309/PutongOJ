@@ -7,12 +7,12 @@
     <table class="table">
       <thead>
         <tr>
-          <th>#</th> <th>Id</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
+          <th>#</th> <th>Id</th> <th>Title</th> <th v-if="currentTime >= contest.start && currentTime <= contest.end">Submit</th> <th>Ratio</th>
         </tr>
       </thead>
       <tfoot>
         <tr>
-          <th>#</th> <th>Id</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
+          <th>#</th> <th>Id</th> <th>Title</th> <th v-if="currentTime >= contest.start && currentTime <= contest.end">Submit</th> <th>Ratio</th>
         </tr>
       </tfoot>
       <tbody>
@@ -22,9 +22,11 @@
           <td><router-link
             :to="{name: 'contest_problem', params: {cid: cid, pid: index}}"
             >{{ problem.title }}</router-link></td>
-          <td><a @click="submit(problem)">
-            <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
-          </a></td>
+          <td v-if="currentTime >= contest.start && currentTime <= contest.end">
+            <a @click="submit(problem)">
+              <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+            </a>
+          </td>
           <td>{{ ratio(problem) }}</td>
         </tr>
       </tbody>
@@ -84,6 +86,9 @@ export default {
     overview () {
       return this.$store.getters.contestOverview
     },
+    currentTime () {
+      return this.$store.getters.currentTime
+    }
   }
 }
 </script>
