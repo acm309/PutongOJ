@@ -34,6 +34,11 @@ config.judge = {
   RejudgePending: 11
 }
 
+config.module = {
+  Problem: 1,
+  Contest: 2 // 这是比赛的提交还是普通的提交，这个设置完全是历史遗留原因，我也不知道这个字段有用么？
+}
+
 config.root = path.resolve(__dirname, '..')
 config.DataRoot = path.resolve(config.root, './data/Data')
 

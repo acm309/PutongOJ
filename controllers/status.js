@@ -1,4 +1,5 @@
 const Solution = require('../models/Solution')
+const Contest = require('../models/Contest')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
 
@@ -12,6 +13,11 @@ async function queryList (ctx, next) {
       filter[item] = ctx.query[item]
     }
   })
+
+  // 默认为 module.Problem，此处要手动设置成 module.Contest
+  if (!isUndefined(ctx.query['mid'])) {
+    filter['module'] = ctx.config.module.Contest
+  }
 
   const res = await Solution
     .paginate(filter, {
@@ -66,13 +72,26 @@ async function create (ctx, next) {
   }
 
   const { pid, code, language } = ctx.request.body
-  const mid = ctx.request.body['mid'] || 0
+  const mid = ctx.request.body['mid']
   const sid = await Ids.generateId('solution')
   const uid = ctx.session.user.uid
 
-  const solution = new Solution({
-    uid, sid, pid, mid, code, language: +language, length: code.length
-  })
+  if (!isUndefined(mid)) {
+    const contest = await Contest
+      .findOne({ cid: mid })
+      .exec()
+    if (Date.now() < contest.start) {
+      ctx.throw(400, 'This contest is on scheduled!')
+    } else if (Date.now() > contest.end) {
+      ctx.throw(400, 'This contest has ended!')
+    }
+  }
+
+  const solution = isUndefined(mid)
+    // 普通提交
+    ? new Solution({ sid, pid, uid, mid: 1, code, language: +language, length: code.length })
+    // 比赛提交
+    : new Solution({ sid, pid, uid, mid, code, language: +language, length: code.length, module: ctx.config.module.Contest })
 
   await solution.save()
   await solution.pending()

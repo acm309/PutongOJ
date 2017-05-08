@@ -20,7 +20,7 @@ const SolutionSchema = mongoose.Schema({
   },
   mid: {
     type: Number,
-    default: 0 // 历史遗留问题，这里的 mid 指代 cid, 0 代表没有
+    default: 1 // 历史遗留问题，这里的 mid 指代 cid, 默认为 1
   },
   time: {
     type: Number,
@@ -62,6 +62,10 @@ const SolutionSchema = mongoose.Schema({
   code: {
     type: String,
     required: true
+  },
+  module: {
+    type: Number,
+    default: config.module.Problem
   }
 }, {
   collection: 'Solution'
