@@ -10,6 +10,7 @@ import FAQ from './views/FAQ.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
+import Statistics from './views/Statistics.vue'
 import User from './views/User/User.vue'
 import UserProfile from './views/User/UserProfle.vue'
 import UserEdit from './views/User/UserEdit.vue'
@@ -80,6 +81,13 @@ const routes = [
     path: '/problems/:pid',
     component: Problem,
     name: 'problem',
+    props: (route) => ({
+      pid: route.params.pid
+    })
+  }, {
+    path: '/statistics/:pid',
+    component: Statistics,
+    name: 'statistics',
     props: (route) => ({
       pid: route.params.pid
     })

@@ -10,7 +10,10 @@
       :disabled="!self"
       @click="active = true && self"
     >Submit</a>
-    <a class="button"> Statistics </a>
+    <router-link
+      class="button"
+      :to="{name: 'statistics', params: {pid}}"
+    > Statistics </router-link>
     <p v-if="!self">
       <a @click="login">Log in</a> to submit
     </p>
