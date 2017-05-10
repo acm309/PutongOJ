@@ -88,7 +88,7 @@ UserSchema.statics.validate = function validate ({
   }
 
   if (!isUndefined(nick)) {
-    if (nick.length < 5 || nick.length > 40) {
+    if (nick.length < 3 || nick.length > 40) {
       error = 'The length of nick should be between 6 and 40'
     }
   }

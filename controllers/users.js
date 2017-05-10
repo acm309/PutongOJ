@@ -3,6 +3,21 @@ const Solution = require('../models/Solution')
 const _ = require('ramda')
 const { generatePwd, isUndefined } = require('../utils')
 
+async function queryUsers (ctx, next) {
+  const filters = {}
+  // 可用于筛选的条件，目前仅有此项
+  for (let item of ['privilege']) {
+    if (!isUndefined(ctx.query[item])) {
+      filters[item] = ctx.query[item]
+    }
+  }
+  const users = await User
+    .find(filters)
+    .select('-_id uid nick privilege')
+    .exec()
+  ctx.body = { users }
+}
+
 /**
   指定 uid，返回一个以存在的用户
 */
@@ -116,7 +131,7 @@ async function update (ctx, next) {
     ctx.request.body.pwd = generatePwd(ctx.request.body.pwd)
   }
   // 可更新的字段
-  const fields = ['nick', 'pwd', 'school', 'mail', 'motto']
+  const fields = ['nick', 'pwd', 'school', 'mail', 'motto', 'privilege']
 
   fields.forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
@@ -136,5 +151,6 @@ async function update (ctx, next) {
 module.exports = {
   queryOneUser,
   register,
-  update
+  update,
+  queryUsers
 }
