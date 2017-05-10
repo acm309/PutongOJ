@@ -82,7 +82,7 @@ async function update (ctx, next) {
     ctx.throw(400, 'No such a news')
   }
 
-  for (let field of ['title', 'content']) {
+  for (let field of ['title', 'content', 'status']) {
     if (!isUndefined(ctx.request.body[field])) {
       news[field] = ctx.request.body[field]
     }
@@ -90,9 +90,9 @@ async function update (ctx, next) {
 
   await news.save()
 
-  const { title, content } = news
+  const { title, content, status } = news
   ctx.body = {
-    news: { nid, title, content }
+    news: { nid, title, content, status }
   }
 }
 
