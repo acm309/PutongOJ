@@ -20,6 +20,8 @@ import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
 import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
+import Admin from './views/Admin/Admin.vue'
+import AdminBoard from './views/Admin/Board.vue'
 
 Vue.use(VueRouter)
 
@@ -152,6 +154,14 @@ const routes = [
         language: route.query.language,
         judge: route.query.judge
       })
+    }]
+  }, {
+    path: '/admin',
+    component: Admin,
+    children: [{
+      name: 'admin',
+      component: AdminBoard,
+      path: ''
     }]
   }
 ]
