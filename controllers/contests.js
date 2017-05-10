@@ -133,7 +133,7 @@ async function update (ctx, next) {
     contest.clearRanklist()
   }
 
-  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+  ;['title', 'start', 'end', 'list', 'encrypt', 'argument', 'status'].forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
       contest[item] = ctx.request.body[item]
     }
@@ -141,9 +141,9 @@ async function update (ctx, next) {
 
   await contest.save()
 
-  const { title, start, end, list } = contest
+  const { title, start, end, list, status } = contest
   ctx.body = {
-    contest: { cid, title, start, end, list }
+    contest: { cid, title, start, end, list, status }
   }
 }
 
