@@ -60,6 +60,23 @@ const mutations = {
       }
     }
     state.contestRanklist = ranklist
+  },
+  deleteOneContestInList (state, payload) {
+    const contest = payload.contest
+    for (let i = 0; i < state.contestsList.length; i += 1) {
+      if (state.contestsList[i].cid === contest.cid) {
+        state.contestsList.splice(i, 1)
+        return
+      }
+    }
+  },
+  updateOneContestInList (state, payload) {
+    const contest = payload.contest
+    for (let i = 0; i < state.contestsList.length; i += 1) {
+      if (state.contestsList[i].cid === contest.cid) {
+        state.contestsList.splice(i, 1, contest)
+      }
+    }
   }
 }
 
@@ -92,6 +109,22 @@ const actions = {
         commit('updateContestRanklist', {
           contestRanklist: data.ranklist
         })
+      })
+  },
+  deleteContest ({commit}, payload) {
+    return axios.delete(`/contests/${payload.cid}`)
+      .then(({data}) => {
+        commit('deleteOneContestInList', {
+          contest: { cid: payload.cid }
+        })
+      })
+  },
+  updateContest ({commit}, payload) {
+    return axios.put(`/contests/${payload.cid}`, payload)
+      .then(({data}) => {
+        if (payload.updateList) {
+          commit('updateOneContestInList', data)
+        }
       })
   }
 }

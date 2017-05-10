@@ -27,7 +27,9 @@
           Contests
         </p>
         <ul class="menu-list">
-          <li><a>List</a></li>
+          <li><router-link
+              :to="{name: 'admin_contests_list'}"
+            >List</router-link></li>
           <li><a>Add</a></li>
         </ul>
         <p class="menu-label">
