@@ -23,6 +23,7 @@ import ContestStatus from './views/Contest/ContestStatus.vue'
 import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
+import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 
 Vue.use(VueRouter)
 
@@ -166,7 +167,15 @@ const routes = [
     }, {
       name: 'admin_news_list',
       component: AdminNewsList,
-      path: '/news'
+      path: 'news'
+    }, {
+      path: 'problems',
+      component: AdminProblemsList,
+      name: 'admin_problems_list',
+      props: (route) => ({
+        page: route.query.page,
+        limit: route.query.limit
+      })
     }]
   }
 ]
