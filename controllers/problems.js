@@ -88,7 +88,8 @@ async function update (ctx, next) {
   ctx.body = {
     problem: {
       pid,
-      title: problem.title
+      title: problem.title,
+      status: problem.status
     }
   }
 }
