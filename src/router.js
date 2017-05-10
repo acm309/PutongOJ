@@ -26,6 +26,7 @@ import AdminNewsList from './views/Admin/AdminNewsList.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
+import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
 Vue.use(VueRouter)
 
@@ -190,6 +191,10 @@ const routes = [
       path: 'users/privilege',
       component: AdminUsersPrivilege,
       name: 'admin_users_privilege'
+    }, {
+      path: 'users/password',
+      component: AdminUsersPassword,
+      name: 'admin_users_password'
     }]
   }
 ]

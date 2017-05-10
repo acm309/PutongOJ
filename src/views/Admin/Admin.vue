@@ -39,7 +39,9 @@
           <li><router-link
               :to="{name: 'admin_users_privilege'}"
             >Privilege</router-link></li>
-          <li><a>Password</a></li>
+          <li><router-link
+              :to="{name: 'admin_users_password'}"
+            >Password</router-link></li>
         </ul>
       </aside>
     </div>
