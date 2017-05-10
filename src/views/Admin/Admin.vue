@@ -36,7 +36,9 @@
           Users
         </p>
         <ul class="menu-list">
-          <li><a>Privilege</a></li>
+          <li><router-link
+              :to="{name: 'admin_users_privilege'}"
+            >Privilege</router-link></li>
           <li><a>Password</a></li>
         </ul>
       </aside>

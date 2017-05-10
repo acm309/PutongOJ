@@ -25,6 +25,7 @@ import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
+import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 
 Vue.use(VueRouter)
 
@@ -185,6 +186,10 @@ const routes = [
         page: route.query.page,
         limit: route.query.limit
       })
+    }, {
+      path: 'users/privilege',
+      component: AdminUsersPrivilege,
+      name: 'admin_users_privilege'
     }]
   }
 ]

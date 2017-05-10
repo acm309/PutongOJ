@@ -1,15 +1,18 @@
 import axios from 'axios'
+import queryString from 'query-string'
 
 const state = {
   user: {},
   solved: [],
-  unsolved: []
+  unsolved: [],
+  usersList: []
 }
 
 const getters = {
   user: (state) => state.user,
   solved: (state) => state.solved,
-  unsolved: (state) => state.unsolved
+  unsolved: (state) => state.unsolved,
+  usersList: (state) => state.usersList
 }
 
 const mutations = {
@@ -21,6 +24,17 @@ const mutations = {
   },
   updateUnsolved (state, payload) {
     state.unsolved = payload.unsolved
+  },
+  updateUsersList (state, payload) {
+    state.usersList = payload.usersList
+  },
+  updateOneUserInList (state, payload) {
+    const user = payload.user
+    for (let i = 0; i < state.usersList.length; i += 1) {
+      if (state.usersList[i].uid === user.uid) {
+        state.usersList.splice(i, 1, user)
+      }
+    }
   }
 }
 
@@ -44,8 +58,20 @@ const actions = {
   updateUser ({commit}, payload) {
     return axios.put(`/users/${payload.uid}`, payload)
       .then(({data}) => {
-        commit('updateUser', {
-          user: data.user
+        if (payload.updateList) {
+          commit('updateOneUserInList', data)
+        } else {
+          commit('updateUser', {
+            user: data.user
+          })
+        }
+      })
+  },
+  fetchUsersList ({commit}, payload) {
+    return axios.get('/users?' + queryString.stringify(payload))
+      .then(({data}) => {
+        commit('updateUsersList', {
+          usersList: data.users
         })
       })
   }
