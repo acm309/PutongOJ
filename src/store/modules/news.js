@@ -21,6 +21,26 @@ const mutations = {
   },
   updateNews (state, payload) {
     state.news = payload.news
+  },
+  updateOneNewsInList (state, payload) {
+    const news = payload.news
+    for (let i = 0; i < state.newsList.length; i += 1) {
+      if (state.newsList[i].nid === news.nid) {
+        state.newsList.splice(i, 1, news)
+        // state.newsList[i] = news // This is a common gotcha
+        return
+      }
+    }
+  },
+  deleteOneNewsInList (state, payload) {
+    const news = payload.news
+    for (let i = 0; i < state.newsList.length; i += 1) {
+      if (state.newsList[i].nid === news.nid) {
+        state.newsList.splice(i, 1)
+        // state.newsList[i] = news // This is a common gotcha
+        return
+      }
+    }
   }
 }
 
@@ -41,6 +61,22 @@ const actions = {
       .then(({data}) => {
         commit('updateNews', {
           news: data.news
+        })
+      })
+  },
+  updateNews ({commit}, payload) {
+    return axios.put(`/news/${payload.nid}`, payload)
+      .then(({data}) => {
+        if (payload.updateList) {
+          commit('updateOneNewsInList', data)
+        }
+      })
+  },
+  deleteNews ({commit}, payload) {
+    return axios.delete(`/news/${payload.nid}`)
+      .then(({data}) => {
+        commit('deleteOneNewsInList', {
+          news: {nid: payload.nid}
         })
       })
   }

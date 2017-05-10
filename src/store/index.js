@@ -74,7 +74,11 @@ const getters = {
     Priviate: 2,
     Password: 3
   }),
-  defaultLanguage: (state) => state.defaultLanguage
+  defaultLanguage: (state) => state.defaultLanguage,
+  status: (state) => ({
+    Reserve: 0,
+    Available: 2
+  })
 }
 
 const mutations = {

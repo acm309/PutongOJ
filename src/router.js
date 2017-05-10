@@ -22,6 +22,7 @@ import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
 import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
+import AdminNewsList from './views/Admin/AdminNewsList.vue'
 
 Vue.use(VueRouter)
 
@@ -162,6 +163,10 @@ const routes = [
       name: 'admin',
       component: AdminBoard,
       path: ''
+    }, {
+      name: 'admin_news_list',
+      component: AdminNewsList,
+      path: '/news'
     }]
   }
 ]
