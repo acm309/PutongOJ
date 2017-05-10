@@ -9,29 +9,39 @@
           News
         </p>
         <ul class="menu-list">
-          <li><a>List</a></li>
+          <li><router-link
+            :to="{name: 'admin_news_list'}"
+          >List</router-link></li>
           <li><a>Add</a></li>
         </ul>
         <p class="menu-label">
           Problems
         </p>
         <ul class="menu-list">
-          <li><a>List</a></li>
+          <li><router-link
+              :to="{name: 'admin_problems_list'}"
+            >List</router-link></li>
           <li><a>Add</a></li>
         </ul>
         <p class="menu-label">
           Contests
         </p>
         <ul class="menu-list">
-          <li><a>List</a></li>
+          <li><router-link
+              :to="{name: 'admin_contests_list'}"
+            >List</router-link></li>
           <li><a>Add</a></li>
         </ul>
         <p class="menu-label">
           Users
         </p>
         <ul class="menu-list">
-          <li><a>Privilege</a></li>
-          <li><a>Password</a></li>
+          <li><router-link
+              :to="{name: 'admin_users_privilege'}"
+            >Privilege</router-link></li>
+          <li><router-link
+              :to="{name: 'admin_users_password'}"
+            >Password</router-link></li>
         </ul>
       </aside>
     </div>

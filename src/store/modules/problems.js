@@ -22,6 +22,24 @@ const mutations = {
   },
   updateProblem (state, payload) {
     state.problem = payload.problem
+  },
+  deleteOneProblemInList (state, payload) {
+    const problem = payload.problem
+    for (let i = 0; i < state.problemsList.length; i += 1) {
+      if (state.problemsList[i].pid === problem.pid) {
+        state.problemsList.splice(i, 1)
+        return
+      }
+    }
+  },
+  updateOneProblemInList (state, payload) {
+    const problem = payload.problem
+    for (let i = 0; i < state.problemsList.length; i += 1) {
+      if (state.problemsList[i].pid === problem.pid) {
+        state.problemsList.splice(i, 1, problem)
+        return
+      }
+    }
   }
 }
 
@@ -43,6 +61,22 @@ const actions = {
         commit('updateProblem', {
           problem: data.problem
         })
+      })
+  },
+  deleteProblem ({commit}, payload) {
+    return axios.delete(`/problems/${payload.pid}`)
+      .then(({data}) => {
+        commit('deleteOneProblemInList', {
+          problem: {pid: payload.pid}
+        })
+      })
+  },
+  updateProblem ({commit}, payload) {
+    return axios.put(`/problems/${payload.pid}`, payload)
+      .then(({data}) => {
+        if (payload.updateList) {
+          commit('updateOneProblemInList', data)
+        }
       })
   }
 }

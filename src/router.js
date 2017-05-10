@@ -22,6 +22,11 @@ import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
 import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
+import AdminNewsList from './views/Admin/AdminNewsList.vue'
+import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
+import AdminContestsList from './views/Admin/AdminContestsList.vue'
+import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
+import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
 Vue.use(VueRouter)
 
@@ -162,6 +167,34 @@ const routes = [
       name: 'admin',
       component: AdminBoard,
       path: ''
+    }, {
+      name: 'admin_news_list',
+      component: AdminNewsList,
+      path: 'news'
+    }, {
+      path: 'problems',
+      component: AdminProblemsList,
+      name: 'admin_problems_list',
+      props: (route) => ({
+        page: route.query.page,
+        limit: route.query.limit
+      })
+    }, {
+      path: 'contests',
+      component: AdminContestsList,
+      name: 'admin_contests_list',
+      props: (route) => ({
+        page: route.query.page,
+        limit: route.query.limit
+      })
+    }, {
+      path: 'users/privilege',
+      component: AdminUsersPrivilege,
+      name: 'admin_users_privilege'
+    }, {
+      path: 'users/password',
+      component: AdminUsersPassword,
+      name: 'admin_users_password'
     }]
   }
 ]

@@ -38,6 +38,16 @@ Vue.filter('encryptPretty', function (code) {
   return `Unknown`
 })
 
+Vue.filter('statusPretty', function (code) {
+  const value = +code
+  for (let key in store.getters.status) {
+    if (store.getters.status[key] === code) {
+      return key
+    }
+  }
+  return `Unknown`
+})
+
 new Vue({
   el: '#app',
   router,
