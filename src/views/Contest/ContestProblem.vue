@@ -15,25 +15,47 @@
     <span slot="title"> {{pid}} -- {{problem.title}} </span>
     </oj-problemcontent>
     <hr>
-    <button class="button is-primary">Submit</button>
+    <button
+      class="button is-primary" @click="submit"
+      disabled="currentTime <= contest.start || currentTime >= contest.end"
+    >Submit</button>
+    <p v-if="currentTime <= contest.start || currentTime >= contest.end">
+      This contest is not on running, so you can't submit now.
+    </p>
+    <oj-submitcodemodal
+      v-if="active"
+      @close="active = false"
+      @submit="submitCode">
+      {{ this.pid }} -- {{ this.problem.title }}
+    </oj-submitcodemodal>
   </div>
 </template>
 
 <script>
 
 import ProblemContent from '../../components/ProblemContent.vue'
+import SubmitCodeModal from '../../components/SubmitCodeModal.vue'
 
 export default {
   components: {
-    'oj-problemcontent': ProblemContent
+    'oj-problemcontent': ProblemContent,
+    'oj-submitcodemodal': SubmitCodeModal
   },
   props: ['cid', 'pid', 'contest'],
+  data () {
+    return {
+      active: false
+    }
+  },
   computed: {
     defaultPid () {
       return this.$store.getters.contestDefaultPid
     },
     problem () {
       return this.$store.getters.problem
+    },
+    currentTime () {
+      return this.$store.getters.currentTime
     }
   },
   created () {
@@ -46,6 +68,17 @@ export default {
     })
   },
   methods: {
+    submit (problem) {
+      this.active = true
+    },
+    submitCode(payload) {
+      payload.mid = this.cid
+      payload.pid = this.problem.pid
+      this.$store.dispatch('submitSolution', payload)
+        .then(() => {
+          this.active = false
+        })
+    },
     chooseProblem (index) {
       this.$store.commit('updateContestDefaultPid', {
         pid: index

@@ -21,7 +21,7 @@
           ><a><span>Problem</span></a></router-link>
         <router-link
             tag="li"
-            :to="{name: 'contest_status', params: {cid: cid}, query: {uid: self.uid}}"
+            :to="{name: 'contest_status', params: {cid: cid}}"
           ><a><span>Status</span></a></router-link>
         <router-link
             tag="li"

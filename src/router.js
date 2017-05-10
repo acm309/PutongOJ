@@ -10,6 +10,7 @@ import FAQ from './views/FAQ.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
+import Statistics from './views/Statistics.vue'
 import User from './views/User/User.vue'
 import UserProfile from './views/User/UserProfle.vue'
 import UserEdit from './views/User/UserEdit.vue'
@@ -19,6 +20,8 @@ import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
 import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
+import Admin from './views/Admin/Admin.vue'
+import AdminBoard from './views/Admin/Board.vue'
 
 Vue.use(VueRouter)
 
@@ -84,6 +87,13 @@ const routes = [
       pid: route.params.pid
     })
   }, {
+    path: '/statistics/:pid',
+    component: Statistics,
+    name: 'statistics',
+    props: (route) => ({
+      pid: route.params.pid
+    })
+  }, {
     path: '/users/:uid',
     component: User,
     props: (route) => ({
@@ -144,6 +154,14 @@ const routes = [
         language: route.query.language,
         judge: route.query.judge
       })
+    }]
+  }, {
+    path: '/admin',
+    component: Admin,
+    children: [{
+      name: 'admin',
+      component: AdminBoard,
+      path: ''
     }]
   }
 ]

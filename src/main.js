@@ -28,6 +28,16 @@ Vue.filter('durationPretty', function (time) {
   return `${Math.floor(duration.asHours())}:${leftPad(m, 2, '0')}:${leftPad(s, 2, '0')}`
 })
 
+Vue.filter('encryptPretty', function (code) {
+  const value = +code
+  for (let key in store.getters.encrypt) {
+    if (store.getters.encrypt[key] === code) {
+      return key
+    }
+  }
+  return `Unknown`
+})
+
 new Vue({
   el: '#app',
   router,

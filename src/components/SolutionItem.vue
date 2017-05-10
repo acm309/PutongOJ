@@ -1,6 +1,10 @@
 <template lang="html">
   <tr>
-    <td>{{ solution.sid }}</td>
+    <td>
+      <slot name="sid">
+        {{ solution.sid }}
+      </slot>
+    </td>
     <td>
       <slot name="pid"> <router-link
       :to="{name: 'problem', params: {pid: solution.pid}}"

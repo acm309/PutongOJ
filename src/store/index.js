@@ -31,6 +31,20 @@ const getters = {
     10: 'System Error',
     11: 'Rejudge Pending'
   }),
+  abbrJudges: (state) => ({
+    // 0: 'PD',
+    1: 'Running',
+    2: 'CE',
+    3: 'AC',
+    4: 'RE',
+    5: 'WA',
+    6: 'TLE',
+    7: 'MLE',
+    8: 'OLE',
+    9: 'PE',
+    10: 'SE',
+    11: 'Rejudge'
+  }),
   languages: (state) => ({
     1: 'C',
     2: 'C++',
@@ -54,6 +68,11 @@ const getters = {
     PrimaryUser: 1,
     Teacher: 2,
     Admin: 3
+  }),
+  encrypt: (state) => ({
+    Public: 1,
+    Priviate: 2,
+    Password: 3
   }),
   defaultLanguage: (state) => state.defaultLanguage
 }

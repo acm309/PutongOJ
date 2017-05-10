@@ -56,7 +56,11 @@
           v-else
           :to="{name: 'register'}"
         >Register</router-link>
-        <a class="nav-item is-tab" v-if="self">Admin</a>
+        <router-link
+          class="nav-item is-tab"
+          v-if="self && isAdmin"
+          :to="{name: 'admin'}"
+        >Admin</router-link>
       </div>
     </div>
   </nav>
@@ -75,6 +79,9 @@ export default {
   computed: {
     self () {
       return this.$store.getters.self
+    },
+    isAdmin () {
+      return this.$store.getters.isAdmin
     }
   }
 }
