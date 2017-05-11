@@ -91,7 +91,7 @@ export default {
           body: `Problem ${this.problem.pid} ${this.problem.title} has been created`
         })
         this.$router.push({
-          name: 'problems',
+          name: 'problem',
           params: {
             pid: this.problem.pid
           }
