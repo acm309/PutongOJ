@@ -68,7 +68,7 @@ async function create (ctx, next) {
 
   news.save()
 
-  ctx.body = { nid, title, content }
+  ctx.body = {news: { nid, title, content }}
 }
 
 /** 指定nid, 更新一个已存在的 News */
