@@ -7,6 +7,7 @@ import Status from './views/Status.vue'
 import Contests from './views/Contests.vue'
 import Ranklist from './views/Ranklist.vue'
 import FAQ from './views/FAQ.vue'
+import NotFound from './views/NotFound.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
@@ -227,6 +228,10 @@ const routes = [
       component: AdminUsersPassword,
       name: 'admin_users_password'
     }]
+  }, {
+    path: '*',
+    component: NotFound,
+    name: 'not_found'
   }
 ]
 
