@@ -103,6 +103,10 @@ const actions = {
         step: 1000
       })
     }, 1000)
+  },
+  submitImage ({commit}, paylod) {
+    return axios.post('/submit', paylod.data)
+      .then(({data}) => data.path)
   }
 }
 

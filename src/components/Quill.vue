@@ -76,15 +76,12 @@ export default {
         this.isLoading = true
         let data = new FormData()
         data.append('file', this.$refs.file.files[0])
-        let self = this
-        window.axios.post( window.host + '/api/submit', data, {})
-              .then(function (res) {
-                self.editor.insertEmbed(index, 'image', res.data.path)
-                self.isActive = false
-                self.isLoading = false
-              })
-              .catch(function (err) {
-              });
+        this.$store.dispatch('submitImage', { data })
+          .then(path => {
+            this.editor.insertEmbed(index, 'image', path)
+            this.isActive = false
+            this.isLoading = false
+          })
       }
     }
   },

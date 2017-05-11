@@ -23,6 +23,7 @@ import ContestStatus from './views/Contest/ContestStatus.vue'
 import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
+import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
@@ -172,6 +173,10 @@ const routes = [
       name: 'admin_news_list',
       component: AdminNewsList,
       path: 'news'
+    }, {
+      name: 'admin_news_add',
+      component: AdminNewsAdd,
+      path: 'news/add'
     }, {
       path: 'problems',
       component: AdminProblemsList,

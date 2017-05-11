@@ -79,6 +79,12 @@ const actions = {
           news: {nid: payload.nid}
         })
       })
+  },
+  createNews ({commit}, payload) {
+    return axios.post('/news', payload)
+      .then(({data}) => {
+        commit('updateNews', data)
+      })
   }
 }
 

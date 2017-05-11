@@ -11,8 +11,11 @@
         <ul class="menu-list">
           <li><router-link
             :to="{name: 'admin_news_list'}"
+            exact
           >List</router-link></li>
-          <li><a>Add</a></li>
+          <li><router-link
+            :to="{name: 'admin_news_add'}"
+          >Add</router-link></li>
         </ul>
         <p class="menu-label">
           Problems
