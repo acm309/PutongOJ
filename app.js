@@ -9,6 +9,7 @@ const redisStore = require('koa-redis')
 const send = require('koa-send')
 const mongoose = require('mongoose')
 const cors = require('kcors')
+const http = require('http')
 
 const path = require('path')
 
@@ -16,6 +17,12 @@ const config = require('./config')
 const appRouter = require('./routes')
 
 const app = new Koa()
+const server = http.createServer(app.callback())
+
+if (process.env.NODE_ENV !== 'production') {
+  const monitor = require('koa-monitor')
+  app.use(convert(monitor(server, {path: '/monitor'})))
+}
 
 // 解决跨域请求问题，使得 cookie 能在不同域名间仍然能够传送
 app.use(convert(cors({
@@ -92,7 +99,7 @@ appRouter(app)
 if (process.env.NODE_ENV !== 'test') {
   console.log(`listening on port ${config.port}`)
 
-  app.listen(config.port)
+  server.listen(config.port)
 }
 
 module.exports = app
