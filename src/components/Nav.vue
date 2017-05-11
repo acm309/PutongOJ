@@ -73,7 +73,13 @@ export default {
       this.$store.commit('showLoginModal')
     },
     logout () {
+      const nick = this.self.nick
       this.$store.dispatch('logout')
+        .then(() => {
+          this.$store.dispatch('addMessage', {
+            body: `Goodbye, ${nick}`
+          })
+        })
     }
   },
   computed: {

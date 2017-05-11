@@ -49,6 +49,11 @@ export default {
         uid: this.uid,
         pwd: this.pwd
       }).then(() => {
+
+        this.$store.dispatch('addMessage', {
+          body: `Welcome! ${this.uid}`
+        })
+
         // 登录完成后记得清空，否则再次点击会显示上次登录时的用户名和密码
         this.uid = this.pwd = ''
         this.$store.commit('closeLoginModal')

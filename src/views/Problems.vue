@@ -44,7 +44,13 @@
               <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
             </a>
           </td>
-          <td> {{ ratio(problem) }} ({{ problem.solve }} / {{ problem.submit }}) </td>
+          <td> {{ ratio(problem) }}
+            (<router-link
+              :to="{name: 'status', query: {judge: judgeCode.Accepted, pid: problem.pid}}"
+            >{{ problem.solve }}</router-link> /
+            <router-link
+              :to="{name: 'status', query: {pid: problem.pid}}"
+            >{{ problem.submit }}</router-link>) </td>
         </tr>
       </tbody>
       <tfoot>
@@ -124,6 +130,9 @@ export default {
     solutionTitle () {
       // 代码提交框里的标题
       return `${this.submitProblem.pid} -- ${this.submitProblem.title}`
+    },
+    judgeCode () {
+      return this.$store.getters.judgeCode
     }
   },
   methods: {

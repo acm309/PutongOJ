@@ -69,6 +69,8 @@ const actions = {
       .then(({data}) => {
         if (payload.updateList) {
           commit('updateOneNewsInList', data)
+        } else {
+          commit('updateNews', data)
         }
       })
   },
@@ -78,6 +80,12 @@ const actions = {
         commit('deleteOneNewsInList', {
           news: {nid: payload.nid}
         })
+      })
+  },
+  createNews ({commit}, payload) {
+    return axios.post('/news', payload)
+      .then(({data}) => {
+        commit('updateNews', data)
       })
   }
 }

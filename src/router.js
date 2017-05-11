@@ -23,8 +23,12 @@ import ContestStatus from './views/Contest/ContestStatus.vue'
 import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
+import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
+import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
+import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
+import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
@@ -172,6 +176,17 @@ const routes = [
       component: AdminNewsList,
       path: 'news'
     }, {
+      name: 'admin_news_edit',
+      component: AdminNewsEdit,
+      path: 'news/:nid',
+      props: (route) => ({
+        nid: route.params.nid
+      })
+    }, {
+      name: 'admin_news_add',
+      component: AdminNewsAdd,
+      path: 'news/add'
+    }, {
       path: 'problems',
       component: AdminProblemsList,
       name: 'admin_problems_list',
@@ -180,6 +195,10 @@ const routes = [
         limit: route.query.limit
       })
     }, {
+      path: 'problems/add',
+      component: AdminProblemAdd,
+      name: 'admin_problems_add'
+    }, {
       path: 'contests',
       component: AdminContestsList,
       name: 'admin_contests_list',
@@ -187,6 +206,10 @@ const routes = [
         page: route.query.page,
         limit: route.query.limit
       })
+    }, {
+      path: 'contests/add',
+      component: AdminContestsAdd,
+      name: 'admin_contests_add'
     }, {
       path: 'users/privilege',
       component: AdminUsersPrivilege,

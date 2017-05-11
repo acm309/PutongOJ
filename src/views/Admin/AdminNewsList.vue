@@ -21,7 +21,9 @@
               aria-label="Click to change status"
               @click="changeStatus(news)"
             >{{ news.status | statusPretty }}</a></td>
-          <td><a>Edit</a></td>
+          <td><router-link
+              :to="{name: 'admin_news_edit', params: {nid: news.nid}}"
+            >Edit</router-link></td>
           <td><a @click="del(news)">Delete</a></td>
         </tr>
       </tbody>

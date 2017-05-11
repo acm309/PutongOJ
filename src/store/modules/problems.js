@@ -78,6 +78,14 @@ const actions = {
           commit('updateOneProblemInList', data)
         }
       })
+  },
+  createProblem ({commit}, payload) {
+    return axios.post('/problems', payload)
+      .then(({data}) => {
+        commit('updateProblem', {
+          problem: data.problem
+        })
+      })
   }
 }
 

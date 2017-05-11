@@ -11,8 +11,11 @@
         <ul class="menu-list">
           <li><router-link
             :to="{name: 'admin_news_list'}"
+            exact
           >List</router-link></li>
-          <li><a>Add</a></li>
+          <li><router-link
+            :to="{name: 'admin_news_add'}"
+          >Add</router-link></li>
         </ul>
         <p class="menu-label">
           Problems
@@ -20,8 +23,11 @@
         <ul class="menu-list">
           <li><router-link
               :to="{name: 'admin_problems_list'}"
+              exact
             >List</router-link></li>
-          <li><a>Add</a></li>
+          <li><router-link
+              :to="{name: 'admin_problems_add'}"
+            >Add</router-link></li>
         </ul>
         <p class="menu-label">
           Contests
@@ -29,9 +35,12 @@
         <ul class="menu-list">
           <li><router-link
               :to="{name: 'admin_contests_list'}"
+              exact
             >List</router-link></li>
-          <li><a>Add</a></li>
-        </ul>
+          <li><router-link
+              :to="{name: 'admin_contests_add'}"
+            >Add</router-link></li>
+      </ul>
         <p class="menu-label">
           Users
         </p>
