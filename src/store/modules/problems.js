@@ -76,6 +76,8 @@ const actions = {
       .then(({data}) => {
         if (payload.updateList) {
           commit('updateOneProblemInList', data)
+        } else {
+          commit('updateProblem', data)
         }
       })
   },

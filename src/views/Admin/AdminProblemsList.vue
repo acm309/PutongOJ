@@ -26,7 +26,9 @@
               aria-label="Click to change status"
               @click="changeStatus(problem)"
             >{{ problem.status | statusPretty }}</a></td>
-          <td><a>Edit</a></td>
+          <td><router-link
+              :to="{name: 'admin_problems_edit', params: {pid: problem.pid}}"
+            >Edit</router-link></td>
           <td><a
             @click="del(problem)"
           >Delete</a></td>

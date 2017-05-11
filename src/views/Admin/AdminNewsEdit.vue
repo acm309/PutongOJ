@@ -8,10 +8,7 @@
       @change="contentChange"
     >
     </oj-quill>
-    <br>
-    <br>
-    <br>
-    <hr>
+    <div class="split-line"></div>
     <button class="button is-primary" @click="updateNews">Submit</button>
   </div>
 </template>

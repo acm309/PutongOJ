@@ -27,6 +27,7 @@ import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
 import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
+import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
@@ -193,6 +194,13 @@ const routes = [
       props: (route) => ({
         page: route.query.page,
         limit: route.query.limit
+      })
+    }, {
+      path: 'problems/:pid',
+      component: AdminProblemsEdit,
+      name: 'admin_problems_edit',
+      props: (route) => ({
+        pid: route.params.pid
       })
     }, {
       path: 'problems/add',
