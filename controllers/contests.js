@@ -18,6 +18,10 @@ async function queryList (ctx, next) {
       `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
   }
 
+  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+    filter['status'] = ctx.config.status.Available
+  }
+
   const res = await Contest
     .paginate(filter, {
       limit: +ctx.query.limit || 30, // 加号表示使其变为数字
@@ -133,7 +137,7 @@ async function update (ctx, next) {
     contest.clearRanklist()
   }
 
-  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+  ;['title', 'start', 'end', 'list', 'encrypt', 'argument', 'status'].forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
       contest[item] = ctx.request.body[item]
     }
@@ -141,9 +145,9 @@ async function update (ctx, next) {
 
   await contest.save()
 
-  const { title, start, end, list } = contest
+  const { title, start, end, list, status } = contest
   ctx.body = {
-    contest: { cid, title, start, end, list }
+    contest: { cid, title, start, end, list, status }
   }
 }
 

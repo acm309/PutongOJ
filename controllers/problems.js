@@ -19,6 +19,10 @@ async function queryList (ctx, next) {
       `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
   }
 
+  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+    filter['status'] = ctx.config.status.Available
+  }
+
   const res = await Problem
     .paginate(filter, {
       limit: +ctx.query.limit || 30, // 加号表示使其变为数字
@@ -88,7 +92,8 @@ async function update (ctx, next) {
   ctx.body = {
     problem: {
       pid,
-      title: problem.title
+      title: problem.title,
+      status: problem.status
     }
   }
 }

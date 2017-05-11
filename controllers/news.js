@@ -4,8 +4,14 @@ const { extractPagination, isUndefined } = require('../utils')
 
 /** 返回新闻列表 */
 async function queryList (ctx, next) {
+  const filter = {}
+  // 限制用户的查询，非 admin 只能看到非 Reserve 的部分，而 Admin 可以看到所有
+  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+    filter['status'] = ctx.config.status.Available
+  }
+
   const res = await News
-    .paginate({}, {
+    .paginate(filter, {
       limit: +ctx.query.limit || 30, // 加号表示使其变为数字
       page: +ctx.query.page || 1,
       sort: {nid: -1},
@@ -82,7 +88,7 @@ async function update (ctx, next) {
     ctx.throw(400, 'No such a news')
   }
 
-  for (let field of ['title', 'content']) {
+  for (let field of ['title', 'content', 'status']) {
     if (!isUndefined(ctx.request.body[field])) {
       news[field] = ctx.request.body[field]
     }
@@ -90,9 +96,9 @@ async function update (ctx, next) {
 
   await news.save()
 
-  const { title, content } = news
+  const { title, content, status } = news
   ctx.body = {
-    news: { nid, title, content }
+    news: { nid, title, content, status }
   }
 }
 
