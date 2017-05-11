@@ -8,6 +8,7 @@ import contests from './contests'
 import user from './user'
 import session from './session'
 import statistics from './statistics'
+import messages from './messages'
 
 export default {
   news,
@@ -19,5 +20,6 @@ export default {
   // problem,
   user,
   session,
-  statistics
+  statistics,
+  messages
 }

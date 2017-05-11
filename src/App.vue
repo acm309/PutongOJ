@@ -7,6 +7,7 @@
     </div>
     <oj-loginmodal></oj-loginmodal>
     <oj-solutionmodal v-if="$store.getters.solutionModalActive"></oj-solutionmodal>
+    <oj-notification></oj-notification>
   </div>
 </template>
 
@@ -15,13 +16,15 @@
 import Nav from './components/Nav.vue'
 import LoginModal from './components/LoginModal.vue'
 import SolutionModal from './components/SolutionModal.vue'
+import Notifications from './components/Notifications.vue'
 
 export default {
   name: 'app',
   components: {
     'oj-nav': Nav,
     'oj-loginmodal': LoginModal,
-    'oj-solutionmodal': SolutionModal
+    'oj-solutionmodal': SolutionModal,
+    'oj-notification': Notifications
   },
   data () {
     return {
