@@ -24,6 +24,7 @@ import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
 import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
+import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
@@ -174,6 +175,13 @@ const routes = [
       name: 'admin_news_list',
       component: AdminNewsList,
       path: 'news'
+    }, {
+      name: 'admin_news_edit',
+      component: AdminNewsEdit,
+      path: 'news/:nid',
+      props: (route) => ({
+        nid: route.params.nid
+      })
     }, {
       name: 'admin_news_add',
       component: AdminNewsAdd,

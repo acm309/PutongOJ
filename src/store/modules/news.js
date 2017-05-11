@@ -69,6 +69,8 @@ const actions = {
       .then(({data}) => {
         if (payload.updateList) {
           commit('updateOneNewsInList', data)
+        } else {
+          commit('updateNews', data)
         }
       })
   },
