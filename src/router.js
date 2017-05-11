@@ -27,6 +27,7 @@ import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
+import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
@@ -197,6 +198,10 @@ const routes = [
         page: route.query.page,
         limit: route.query.limit
       })
+    }, {
+      path: 'contests/add',
+      component: AdminContestsAdd,
+      name: 'admin_contests_add'
     }, {
       path: 'users/privilege',
       component: AdminUsersPrivilege,
