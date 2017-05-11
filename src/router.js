@@ -24,6 +24,7 @@ import Admin from './views/Admin/Admin.vue'
 import AdminBoard from './views/Admin/Board.vue'
 import AdminNewsList from './views/Admin/AdminNewsList.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
+import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
@@ -179,6 +180,10 @@ const routes = [
         page: route.query.page,
         limit: route.query.limit
       })
+    }, {
+      path: 'problems/add',
+      component: AdminProblemAdd,
+      name: 'admin_problems_add'
     }, {
       path: 'contests',
       component: AdminContestsList,

@@ -20,8 +20,11 @@
         <ul class="menu-list">
           <li><router-link
               :to="{name: 'admin_problems_list'}"
+              exact
             >List</router-link></li>
-          <li><a>Add</a></li>
+          <li><router-link
+              :to="{name: 'admin_problems_add'}"
+            >Add</router-link></li>
         </ul>
         <p class="menu-label">
           Contests
