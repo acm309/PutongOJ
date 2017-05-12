@@ -25,6 +25,7 @@
               @keyup.enter="login"
             >
           </p>
+          <p class="help is-danger" v-if="error">{{ error }}</p>
         </div>
         <button class="button is-primary" @click="login"> Login </button>
         <button @click="closeModal" class="button">Cancel</button>
@@ -39,7 +40,8 @@ export default {
   data () {
     return {
       uid: '',
-      pwd: ''
+      pwd: '',
+      error: ''
     }
   },
   computed: {
@@ -52,6 +54,13 @@ export default {
       this.$store.commit('closeLoginModal')
     },
     login () {
+      if (!this.uid || !this.pwd) {
+        this.error = 'Username and Password should not be empty'
+        return
+      } else if (/[^\w\d]/ig.test(this.uid)) {
+        this.error = 'Username should only consist of letters or numbers'
+        return
+      }
       this.$store.dispatch('login', {
         uid: this.uid,
         pwd: this.pwd
@@ -64,7 +73,17 @@ export default {
         // 登录完成后记得清空，否则再次点击会显示上次登录时的用户名和密码
         this.uid = this.pwd = ''
         this.$store.commit('closeLoginModal')
+      }).catch((err) => {
+        this.error = err.message
       })
+    }
+  },
+  watch: {
+    "uid" (to, from) {
+      this.error = ''
+    },
+    "pwd" (to, from) {
+      this.error = ''
     }
   }
 }
