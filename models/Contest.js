@@ -5,6 +5,7 @@ const arrayDuplicated = require('array-duplicated')
 const Problem = require('./Problem')
 const Solution = require('./Solution')
 const User = require('./User')
+const config = require('../config')
 
 const ContestSchema = mongoose.Schema({
   cid: {
@@ -23,13 +24,16 @@ const ContestSchema = mongoose.Schema({
   creator: String,
   list: [Number],
   status: {
-    type: Number
+    type: Number,
+    default: config.status.Available
   },
   encrypt: {
-    type: Number
+    type: Number,
+    default: config.encrypt.Public
   },
   argument: {
-    type: String
+    type: mongoose.Schema.Types.Mixed,
+    default: null // 历史遗留原因
   }
 }, {
   collection: 'Contest'

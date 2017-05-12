@@ -44,6 +44,12 @@ config.status = {
   Available: 2
 }
 
+config.encrypt = {
+  Public: 1,
+  Private: 2,
+  Password: 3
+}
+
 config.root = path.resolve(__dirname, '..')
 config.DataRoot = path.resolve(config.root, './data/Data')
 

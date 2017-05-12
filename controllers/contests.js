@@ -66,7 +66,7 @@ async function queryOneContest (ctx, next) {
 */
 async function create (ctx, next) {
   // 必须的字段
-  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+  ;['title', 'start', 'end', 'list', 'encrypt'].forEach((item) => {
     if (isUndefined(ctx.request.body[item])) {
       ctx.throw(400, `Field "${item}" is required to create a contest`)
     }
@@ -78,6 +78,8 @@ async function create (ctx, next) {
   }
 
   const cid = await Ids.generateId('Contest')
+  ctx.request.body.start = new Date(ctx.request.body.start).getTime()
+  ctx.request.body.end = new Date(ctx.request.body.end).getTime()
   const { title, start, end, list, encrypt, argument } = ctx.request.body
 
   // 检查列表里的题是否都存在
@@ -92,7 +94,7 @@ async function create (ctx, next) {
   }
 
   const contest = new Contest({
-    cid, title, start, end, list, encrypt, argument
+    cid, title, start, end, list, encrypt, argument, creator: ctx.session.user.uid
   })
 
   await contest.save()
