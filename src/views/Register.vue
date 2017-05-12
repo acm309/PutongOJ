@@ -31,6 +31,7 @@
           <i class="fa fa-unlock-alt" aria-hidden="true"></i>
         </span>
       </p>
+      <p class="help is-danger" v-if="error">{{ error }}</p>
     </div>
     <button class="button is-primary" @click="register">Submit</button>
     <button class="button">Reset</button>
@@ -45,17 +46,56 @@ export default {
       uid: '',
       nick: '',
       pwd: '',
-      cm_pwd: ''
+      cm_pwd: '',
+      error: ''
     }
   },
   methods: {
     register () {
+      // 做一些简单的校验
+      if (!this.uid || !this.nick || !this.cm_pwd || !this.pwd) {
+        this.error = 'Please complete all the fields'
+        return
+      } else if (/[^\w\d]/ig.test(this.uid)) {
+        this.error = 'Username should only consist of letters or numbers'
+        return
+      } else if (this.pwd !== this.cm_pwd) {
+        this.error = 'Two passwords are not same'
+        return
+      }
       this.$store.dispatch('register', {
         uid: this.uid,
         nick: this.nick,
         pwd: this.pwd
+      }).then(() => {
+        this.$store.dispatch('addMessage', {
+          body: `Welcome, ${this.uid}`
+        })
+        this.$router.push({
+          name: 'user',
+          params: {
+            uid: this.uid
+          }
+        })
+      }).catch((err) => {
+        this.error = err.message
       })
     }
+  },
+  watch: {
+    uid (to, from) {
+      this.error = ''
+    },
+    nick (to, from) {
+      this.error = ''
+    },
+    pwd (to, from) {
+      this.error = ''
+    },
+    cm_pwd (to, from) {
+      this.error = ''
+    }
+
   }
 }
 </script>

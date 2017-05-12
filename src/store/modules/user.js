@@ -50,6 +50,9 @@ const actions = {
   register ({commit}, payload) {
     return axios.post('/users', payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateSelf', { // session module
           self: data.user
         })
