@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const { generatePwd } = require('../utils')
+const only = require('only')
 
 /**
   登录
@@ -23,11 +24,7 @@ async function login (ctx, next) {
   user.updateRecords(ctx.ip, Date.now())
   await user.save()
 
-  ctx.session.user = {
-    uid,
-    nick: user.nick,
-    privilege: user.privilege
-  }
+  ctx.session.user = only(user, 'uid nick privilege')
   ctx.body = { user: ctx.session.user }
 }
 

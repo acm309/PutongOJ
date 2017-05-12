@@ -3,6 +3,7 @@ const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
 const fse = require('fs-extra')
 const path = require('path')
+const only = require('only')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -134,24 +135,13 @@ async function create (ctx, next) {
         problem[item] = ctx.request.body[item]
       }
     })
+
   await problem.save()
   await problem.saveSample(ctx.config.DataRoot)
-  const { time, memory, description, inData, out, input, output,
-    hint, status } = problem
+
   ctx.body = {
-    problem: {
-      time,
-      memory,
-      description,
-      in: inData, // in 刚好是关键字，所以这里用 inData 表示
-      out,
-      input,
-      output,
-      hint,
-      status,
-      title,
-      pid
-    }
+    problem: only(problem,
+      ['pid', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status'])
   }
 }
 

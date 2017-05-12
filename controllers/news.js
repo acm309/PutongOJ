@@ -1,6 +1,7 @@
 const News = require('../models/News')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
+const only = require('only')
 
 /** 返回新闻列表 */
 async function queryList (ctx, next) {
@@ -96,9 +97,8 @@ async function update (ctx, next) {
 
   await news.save()
 
-  const { title, content, status } = news
   ctx.body = {
-    news: { nid, title, content, status }
+    news: only(news, 'nid title content status')
   }
 }
 

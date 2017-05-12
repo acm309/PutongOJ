@@ -2,6 +2,7 @@ const User = require('../models/User')
 const Solution = require('../models/Solution')
 const _ = require('ramda')
 const { generatePwd, isUndefined } = require('../utils')
+const only = require('only')
 
 async function queryUsers (ctx, next) {
   const filters = {}
@@ -93,11 +94,7 @@ async function register (ctx, next) {
   await user.save()
 
   ctx.body = {
-    user: {
-      uid,
-      nick,
-      privilege: user.privilege
-    }
+    user: only(user, 'uid nick privilege')
   }
 }
 
@@ -141,10 +138,8 @@ async function update (ctx, next) {
 
   await user.save()
 
-  const { nick, privilege, school, mail, motto } = user
-
   ctx.body = {
-    user: { uid, nick, privilege, school, mail, motto }
+    user: only(user, 'uid nick privilege school mail motto')
   }
 }
 

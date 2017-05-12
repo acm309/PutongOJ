@@ -2,6 +2,7 @@ const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
+const only = require('only')
 
 /** 返回比赛列表 */
 async function queryList (ctx, next) {
@@ -153,9 +154,8 @@ async function update (ctx, next) {
   await contest.clearOverview()
   await contest.clearRanklist()
 
-  const { title, start, end, list, status } = contest
   ctx.body = {
-    contest: { cid, title, start, end, list, status }
+    contest: only(contest, 'cid title start end list status')
   }
 }
 
