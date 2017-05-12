@@ -61,6 +61,18 @@ function redisSet (key, value) {
   })
 }
 
+function redisDel (key) {
+  return new Promise((resolve, reject) => {
+    client.del(key, function (err, reply) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(reply)
+      }
+    })
+  })
+}
+
 function isAccepted (code) {
   return code === config.judge.Accepted
 }
@@ -72,5 +84,6 @@ module.exports = {
   redisLPUSH,
   redisGet,
   redisSet,
+  redisDel,
   isAccepted
 }

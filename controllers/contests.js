@@ -134,10 +134,13 @@ async function update (ctx, next) {
         ctx.throw(400, `Problem ${ctx.request.body['list'][i]} not found`)
       }
     }
-    // 列表有更新，以前的记录(overview, ranklist)需要更新
-    contest.clearOverview()
-    contest.clearRanklist()
   }
+
+  ;['start', 'end'].forEach((item) => {
+    if (!isUndefined(ctx.request.body[item])) {
+      ctx.request.body[item] = new Date(ctx.request.body[item]).getTime()
+    }
+  })
 
   ;['title', 'start', 'end', 'list', 'encrypt', 'argument', 'status'].forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
@@ -146,6 +149,9 @@ async function update (ctx, next) {
   })
 
   await contest.save()
+  // 建议更新，以前的记录(overview, ranklist)需要更新
+  await contest.clearOverview()
+  await contest.clearRanklist()
 
   const { title, start, end, list, status } = contest
   ctx.body = {

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined, redisGet, redisSet, isAccepted } = require('../utils')
+const { isUndefined, redisGet, redisSet, redisDel, isAccepted } = require('../utils')
 const arrayDuplicated = require('array-duplicated')
 const Problem = require('./Problem')
 const Solution = require('./Solution')
@@ -77,11 +77,11 @@ ContestSchema.statics.validate = function ({
 
 // 以下两个函数用于清空记录，一般是比赛更新时调用，便于重新生成记录
 ContestSchema.methods.clearOverview = function () {
-  return redisSet(`contests:${this.cid}:overview`, JSON.stringify({}))
+  return redisDel(`contests:${this.cid}:overview`)
 }
 
 ContestSchema.methods.clearRanklist = function () {
-  return redisSet(`contests:${this.cid}:ranklist`, JSON.stringify({}))
+  return redisDel(`contests:${this.cid}:ranklist`)
 }
 
 // the solution means update
