@@ -27,7 +27,11 @@
           </p>
           <p class="help is-danger" v-if="error">{{ error }}</p>
         </div>
-        <button class="button is-primary" @click="login"> Login </button>
+        <button
+          class="button is-primary"
+          @click="login"
+          :class="{'is-loading': loading}"
+        > Login </button>
         <button @click="closeModal" class="button">Cancel</button>
       </div>
       <button class="modal-close" @click="closeModal"></button>
@@ -41,7 +45,8 @@ export default {
     return {
       uid: '',
       pwd: '',
-      error: ''
+      error: '',
+      loading: false
     }
   },
   computed: {
@@ -61,11 +66,12 @@ export default {
         this.error = 'Username should only consist of letters or numbers'
         return
       }
+      this.loading = true
       this.$store.dispatch('login', {
         uid: this.uid,
         pwd: this.pwd
       }).then(() => {
-
+        this.loading = false
         this.$store.dispatch('addMessage', {
           body: `Welcome! ${this.uid}`
         })
@@ -74,6 +80,7 @@ export default {
         this.uid = this.pwd = ''
         this.$store.commit('closeLoginModal')
       }).catch((err) => {
+        this.loading = false
         this.error = err.message
       })
     }

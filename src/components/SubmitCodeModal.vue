@@ -20,7 +20,11 @@
         </textarea>
       </section>
       <footer class="modal-card-foot">
-        <a class="button is-primary" @click="submit">Submit</a>
+        <a
+          class="button is-primary"
+          @click="submit"
+          :class="{'is-loading': loading}"
+        >Submit</a>
         <a class="button" @click="close">Cancel</a>
       </footer>
     </div>
@@ -29,6 +33,11 @@
 
 <script>
 export default {
+  props: {
+    loading: {
+      default: false
+    }
+  },
   data () {
     return {
       code: '',

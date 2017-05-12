@@ -33,7 +33,11 @@
       </p>
       <p class="help is-danger" v-if="error">{{ error }}</p>
     </div>
-    <button class="button is-primary" @click="register">Submit</button>
+    <button
+      class="button is-primary"
+      @click="register"
+      :class="{'is-loading': loading}"
+    >Submit</button>
     <button class="button">Reset</button>
   </div>
 </template>
@@ -43,6 +47,7 @@
 export default {
   data () {
     return {
+      loading: false,
       uid: '',
       nick: '',
       pwd: '',
@@ -63,6 +68,7 @@ export default {
         this.error = 'Two passwords are not same'
         return
       }
+      this.loading = true
       this.$store.dispatch('register', {
         uid: this.uid,
         nick: this.nick,
@@ -77,8 +83,10 @@ export default {
             uid: this.uid
           }
         })
+        this.loading = false
       }).catch((err) => {
         this.error = err.message
+        this.loading = false
       })
     }
   },
