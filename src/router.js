@@ -31,6 +31,7 @@ import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
+import AdminContestsEdit from './views/Admin/AdminContestsEdit.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
@@ -214,6 +215,13 @@ const routes = [
       props: (route) => ({
         page: route.query.page,
         limit: route.query.limit
+      })
+    }, {
+      path: 'contests/:cid',
+      component: AdminContestsEdit,
+      name: 'admin_contests_edit',
+      props: (route) => ({
+        cid: route.params.cid
       })
     }, {
       path: 'contests/add',

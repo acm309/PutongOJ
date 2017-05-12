@@ -124,6 +124,8 @@ const actions = {
       .then(({data}) => {
         if (payload.updateList) {
           commit('updateOneContestInList', data)
+        } else {
+          commit('updateContest', data)
         }
       })
   },
