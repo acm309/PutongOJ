@@ -1,13 +1,19 @@
 <template lang="html">
-  <div class="modal" :class="{'is-active': solutionModalActive}">
-    <div class="modal-background" @click="close"></div>
-    <div class="modal-content code-modal">
-      <pre>
-        <code v-html="code"></code>
-      </pre>
+  <transition
+    name="custom-classes-transition"
+    enter-active-class="animated fadeInUp"
+    leave-active-class="animated fadeOutDown"
+  >
+    <div class="modal is-active" v-if="solutionModalActive">
+      <div class="modal-background" @click="close"></div>
+      <div class="modal-content code-modal">
+        <pre>
+          <code v-html="code"></code>
+        </pre>
+      </div>
+      <button class="modal-close" @click="close"></button>
     </div>
-    <button class="modal-close" @click="close"></button>
-  </div>
+  </transition>
 </template>
 
 <script>

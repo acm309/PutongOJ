@@ -1,30 +1,37 @@
 <template lang="html">
-  <div class="modal" :class="{'is-active': loginModalActive}">
-    <div class="modal-background" @click="closeModal"></div>
-    <div class="modal-content box">
-      <div class="field">
-        <label class="label">Username</label>
-        <p class="control">
-          <input class="input" type="text" placeholder="Username" v-model="uid">
-        </p>
+  <transition
+  name="custom-classes-transition"
+  enter-active-class="animated fadeInUp"
+  leave-active-class="animated fadeOutDown"
+  >
+
+    <div class="modal is-active" v-if="loginModalActive">
+      <div class="modal-background" @click="closeModal"></div>
+      <div class="modal-content box">
+        <div class="field">
+          <label class="label">Username</label>
+          <p class="control">
+            <input class="input" type="text" placeholder="Username" v-model="uid">
+          </p>
+        </div>
+        <div class="field">
+          <label class="label">Password</label>
+          <p class="control">
+            <input
+              class="input"
+              type="password"
+              placeholder="Password"
+              v-model="pwd"
+              @keyup.enter="login"
+            >
+          </p>
+        </div>
+        <button class="button is-primary" @click="login"> Login </button>
+        <button @click="closeModal" class="button">Cancel</button>
       </div>
-      <div class="field">
-        <label class="label">Password</label>
-        <p class="control">
-          <input
-            class="input"
-            type="password"
-            placeholder="Password"
-            v-model="pwd"
-            @keyup.enter="login"
-          >
-        </p>
-      </div>
-      <button class="button is-primary" @click="login"> Login </button>
-      <button @click="closeModal" class="button">Cancel</button>
+      <button class="modal-close" @click="closeModal"></button>
     </div>
-    <button class="modal-close" @click="closeModal"></button>
-  </div>
+  </transition>
 </template>
 
 <script>

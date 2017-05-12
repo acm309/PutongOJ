@@ -82,12 +82,18 @@
         </a>
       </p>
     </div>
-    <oj-submitcodemodal
-      v-if="active"
-      @close="active = false"
-      @submit="submitCode">
-      {{ solutionTitle }}
-    </oj-submitcodemodal>
+    <transition
+    name="custom-classes-transition"
+    enter-active-class="animated fadeInUp"
+    leave-active-class="animated fadeOutDown"
+    >
+      <oj-submitcodemodal
+        v-if="active"
+        @close="active = false"
+        @submit="submitCode">
+        {{ solutionTitle }}
+      </oj-submitcodemodal>
+    </transition>
   </div>
 </template>
 

@@ -17,11 +17,17 @@
     <p v-if="!self">
       <a @click="login">Log in</a> to submit
     </p>
-    <oj-submitcodemodal
-      v-if="active"
-      @close="active=false"
-      @submit="submit"
-    >{{ problem.pid }} -- {{ problem.title }}</oj-submitcodemodal>
+    <transition
+      name="custom-classes-transition"
+      enter-active-class="animated fadeInUp"
+      leave-active-class="animated fadeOutDown"
+    >
+      <oj-submitcodemodal
+        v-if="active"
+        @close="active=false"
+        @submit="submit"
+      >{{ problem.pid }} -- {{ problem.title }}</oj-submitcodemodal>
+    </transition>
   </div>
 
 </template>

@@ -26,7 +26,7 @@ const actions = {
       setTimeout(() => {
         commit('removeMessage')
         resolve()
-      }, payload.time || 3000)
+      }, payload.time || 5000)
     })
   }
 }
