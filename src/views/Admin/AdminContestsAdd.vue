@@ -1,40 +1,39 @@
 <template lang="html">
   <div>
     <label class="label">Title</label>
-    <input type="text" class="input" placeholder="title">
+    <input type="text" class="input" placeholder="title" v-model="title">
     <label class="label">Start Time</label>
     <date-picker :date="startDate" :option="option"></date-picker>
     <label class="label">End Time</label>
     <date-picker :date="endDate" :option="option"></date-picker>
     <label class="label">Type</label>
     <div class="select">
-      <select>
-        <option>Public</option>
-        <option>Password</option>
-        <option>Private</option>
+      <select v-model="encryptType">
+        <option v-for="(value, key) in encrypt" :value="value">{{ key }}</option>
       </select>
     </div>
     <hr>
     <draggable
       v-model="problems" :option="{group: 'pids'}"
     >
-      <div v-for="pid in problems" class="notification">
-        {{ pid }}
+      <div v-for="(pid, index) in problems" class="notification">
+        <button class="delete" @click="remove(index)"></button>
+        {{ pid }} --- {{ pid }}
       </div>
     </draggable>
     <br>
     <div class="field is-grouped">
       <p class="control is-expanded">
-        <input class="input" type="text" placeholder="Add a pid">
+        <input class="input" type="number" placeholder="Add a pid" v-model="pid">
       </p>
       <p class="control">
-        <a class="button is-primary">
+        <a class="button is-primary" @click="addProblem">
           Add
         </a>
       </p>
     </div>
     <hr>
-    <button class="button is-primary">Submit</button>
+    <button class="button is-primary" @click="createContest">Submit</button>
   </div>
 </template>
 
@@ -46,6 +45,9 @@ import draggable from 'vuedraggable'
 export default {
   data () {
     return {
+      title: '',
+      encryptType: 1,
+      pid: 0,
       problems: [
         751,
         752,
@@ -57,11 +59,12 @@ export default {
       endDate: {
         time: ''
       },
+      // 更多应该参考 https://github.com/hilongjw/vue-datepicker
       option: {
         type: 'min',
         week: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
         month: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        format: 'YYYY-MM-DD hh:mm',
+        format: 'YYYY-MM-DD HH:mm',
         placeholder: 'when?',
         inputStyle: {
           'display': 'inline-block',
@@ -89,6 +92,41 @@ export default {
   components: {
     'date-picker': Datepicker,
     'draggable': draggable
+  },
+  computed: {
+    encrypt () {
+      return this.$store.getters.encrypt
+    },
+    contest () {
+      return this.$store.getters.contest
+    }
+  },
+  methods: {
+    addProblem () {
+      this.problems.push(this.pid)
+    },
+    remove (index) {
+      this.problems.splice(index, 1)
+    },
+    createContest () {
+      this.$store.dispatch('createContest', {
+        title: this.title,
+        start: this.startDate.time,
+        end: this.endDate.time,
+        encrypt: this.encryptType,
+        list: this.problems
+      }).then(() => {
+        this.$router.push({
+          name: 'contest',
+          params: {
+            cid: this.contest.cid
+          }
+        })
+        this.$store.dispatch('addMessage', {
+          body: `Contest ${this.contest.cid} -- ${this.contest.title} has been created!`
+        })
+      })
+    }
   }
 }
 </script>
