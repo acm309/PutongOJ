@@ -50,7 +50,9 @@ ContestSchema.statics.validate = function ({
   let error = ''
   let valid = true
   if (!isUndefined(title)) {
-    if (title.length > 50) {
+    if (title.length === 0) {
+      error = 'Title should not be empty'
+    } else if (title.length > 50) {
       error = 'The length of title should not be more than 50'
     }
   }

@@ -66,11 +66,16 @@ async function queryOneContest (ctx, next) {
     即时如此，mongoose 会自动转换，但你作其它事时可能需要注意
 */
 async function create (ctx, next) {
+  console.log(ctx.request.body)
   // 必须的字段
   ;['title', 'start', 'end', 'list', 'encrypt'].forEach((item) => {
-    if (isUndefined(ctx.request.body[item])) {
+    if (isUndefined(ctx.request.body[item]) || ctx.request.body[item] === '') {
       ctx.throw(400, `Field "${item}" is required to create a contest`)
     }
+  })
+
+  ;['start', 'end'].forEach((item) => {
+    ctx.request.body[item] = new Date(ctx.request.body[item]).getTime()
   })
 
   const verified = Contest.validate(ctx.request.body)
