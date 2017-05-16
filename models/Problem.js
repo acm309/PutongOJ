@@ -59,7 +59,10 @@ const ProblemSchema = mongoose.Schema({
     type: Number,
     default: 2 // TODO: fix this to a constant variable
   },
-  hint: String
+  hint: {
+    type: String,
+    default: ''
+  }
 }, {
   collection: 'Problem'
 })
@@ -77,7 +80,9 @@ ProblemSchema.statics.validate = function validate ({ title }) {
   let error = ''
   let valid = true
   if (!isUndefined(title)) {
-    if (title.length > 50) {
+    if (title.length === 0) {
+      error = 'Title should not be empty'
+    } else if (title.length > 50) {
       error = 'The length of title should not be more than 50'
     }
   }

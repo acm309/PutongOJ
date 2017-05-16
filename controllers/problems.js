@@ -146,7 +146,7 @@ async function create (ctx, next) {
 
   ctx.body = {
     problem: only(problem,
-      ['pid', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status'])
+      ['pid', 'title', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status'])
   }
 }
 
