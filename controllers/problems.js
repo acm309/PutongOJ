@@ -1,6 +1,6 @@
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const fse = require('fs-extra')
 const path = require('path')
 const only = require('only')
@@ -49,10 +49,15 @@ async function queryOneProblem (ctx, next) {
 
   const problem = await Problem
     .findOne({pid})
-    .select('-_id pid title memory time description input output in out hint')
+    .select('-_id pid title memory time description input output in out hint status')
     .exec()
 
   if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  // 是在一般页面中查询，而非在比赛中查询，此时需要验证用户是否可以查看
+  if (isUndefined(ctx.query.mid) && (problem.status === ctx.config.status.Reserve && !isAdmin(ctx.session.user))) {
     ctx.throw(400, 'No such a problem')
   }
 

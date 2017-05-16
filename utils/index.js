@@ -73,6 +73,10 @@ function redisDel (key) {
   })
 }
 
+function isAdmin (user) {
+  return user && user.privilege === config.privilege.Admin
+}
+
 function isAccepted (code) {
   return code === config.judge.Accepted
 }
@@ -85,5 +89,6 @@ module.exports = {
   redisGet,
   redisSet,
   redisDel,
-  isAccepted
+  isAccepted,
+  isAdmin
 }
