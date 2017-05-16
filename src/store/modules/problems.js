@@ -58,6 +58,9 @@ const actions = {
   fetchProblem ({commit}, payload) {
     return axios.get(`/problems/${payload.pid}?` + queryString.stringify(payload))
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateProblem', {
           problem: data.problem
         })

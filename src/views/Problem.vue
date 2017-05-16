@@ -53,6 +53,11 @@ export default {
       pid: this.pid
     }).then(() => {
       document.title = `Problem ${this.problem.pid} -- ${this.problem.title}`
+    }).catch((err) => {
+      this.$store.dispatch('addMessage', {
+        body: err.message,
+        type: 'danger'
+      })
     })
   },
   computed: {
