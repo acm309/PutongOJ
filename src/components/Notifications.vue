@@ -1,11 +1,16 @@
 <template lang="html">
   <div class="notifications">
-    <oj-notification
-      v-for="(msg, index) in messages"
-      :msg="msg"
-      :key="index"
+    <transition-group
+      enter-active-class="animated bounceInRight"
+      leave-active-class="animated bounceOutRight"
     >
-    </oj-notification>
+      <oj-notification
+        v-for="(msg, index) in messages"
+        :msg="msg"
+        :key="index"
+      >
+      </oj-notification>
+    </transition-group>
   </div>
 </template>
 

@@ -56,6 +56,11 @@ const actions = {
   },
   submitSolution ({commit}, payload) {
     return axios.post('/status', payload)
+      .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
+      })
   }
 }
 

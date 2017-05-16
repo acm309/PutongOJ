@@ -38,6 +38,14 @@ export default {
             nid: this.news.nid
           }
         })
+        this.$store.dispatch('addMessage', {
+          body: `News ${this.news.nid} -- "${this.news.title}" has been created!`
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
       })
     }
   },

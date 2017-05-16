@@ -82,12 +82,19 @@
         </a>
       </p>
     </div>
-    <oj-submitcodemodal
-      v-if="active"
-      @close="active = false"
-      @submit="submitCode">
-      {{ solutionTitle }}
-    </oj-submitcodemodal>
+    <transition
+    name="custom-classes-transition"
+    enter-active-class="animated fadeInUp"
+    leave-active-class="animated fadeOutDown"
+    >
+      <oj-submitcodemodal
+        v-if="active"
+        @close="active = false"
+        :loading="loading"
+        @submit="submitCode">
+        {{ solutionTitle }}
+      </oj-submitcodemodal>
+    </transition>
   </div>
 </template>
 
@@ -103,7 +110,8 @@ export default {
       field: 'pid',
       query: '',
       active: false,
-      submitProblem: {}
+      submitProblem: {},
+      loading: false
     }
   },
   components: {
@@ -171,15 +179,24 @@ export default {
       this.active = true // 打开代码提交框
     },
     submitCode (payload) {
+      this.loading = true
       this.$store.dispatch('submitSolution', Object.assign(payload, {
         pid: this.submitProblem.pid
       }))
       .then(() => {
+        this.loading = false
         this.$router.push({
           name: 'status',
           query: {
             uid: this.$store.getters.self.uid
           }
+        })
+      })
+      .catch((err) => {
+        this.loading = false
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
         })
       })
     }

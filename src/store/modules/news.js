@@ -67,6 +67,9 @@ const actions = {
   updateNews ({commit}, payload) {
     return axios.put(`/news/${payload.nid}`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         if (payload.updateList) {
           commit('updateOneNewsInList', data)
         } else {
@@ -85,6 +88,9 @@ const actions = {
   createNews ({commit}, payload) {
     return axios.post('/news', payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateNews', data)
       })
   }

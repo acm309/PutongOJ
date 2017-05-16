@@ -24,6 +24,9 @@ const actions = {
   login ({commit}, payload) {
     return axios.post(`/session`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateSelf', {
           self: data.user
         })

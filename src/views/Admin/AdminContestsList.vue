@@ -21,7 +21,9 @@
           <td><a
               @click="changeStatus(contest)"
             >{{ contest.status | statusPretty }}</a></td>
-          <td><a>Edit</a></td>
+          <td><router-link
+              :to="{name: 'admin_contests_edit', params: {cid: contest.cid}}"
+            >Edit</router-link></td>
           <td><a @click="del(contest)">Delete</a></td>
         </tr>
       </tbody>

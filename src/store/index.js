@@ -5,9 +5,6 @@ import modules from './modules'
 
 Vue.use(Vuex)
 
-axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
-axios.defaults.withCredentials = true
-
 const state = {
   currentTime: Date.now(),
   loginModalActive: false,
@@ -116,6 +113,23 @@ const store = new Vuex.Store({
   mutations,
   actions,
   modules
+})
+
+axios.defaults.baseURL = 'http://127.0.0.1:3000/api/'
+axios.defaults.withCredentials = true
+
+axios.defaults.validateStatus = function (status) {
+  return status >= 200 && status < 500
+}
+
+axios.interceptors.response.use(function (response) {
+  return response
+}, function (err) {
+  store.dispatch('addMessage', {
+    body: 'Network error or System Error! Check the Network and then ask the admin for help',
+    type: 'danger'
+  })
+  return Promise.reject(err)
 })
 
 store.dispatch('updateCurrentTime')

@@ -124,7 +124,15 @@ const actions = {
       .then(({data}) => {
         if (payload.updateList) {
           commit('updateOneContestInList', data)
+        } else {
+          commit('updateContest', data)
         }
+      })
+  },
+  createContest ({commit}, payload) {
+    return axios.post('/contests', payload)
+      .then(({data}) => {
+        commit('updateContest', data)
       })
   }
 }

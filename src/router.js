@@ -7,6 +7,7 @@ import Status from './views/Status.vue'
 import Contests from './views/Contests.vue'
 import Ranklist from './views/Ranklist.vue'
 import FAQ from './views/FAQ.vue'
+import NotFound from './views/NotFound.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
@@ -30,6 +31,7 @@ import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
 import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
+import AdminContestsEdit from './views/Admin/AdminContestsEdit.vue'
 import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
 import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
 
@@ -215,6 +217,13 @@ const routes = [
         limit: route.query.limit
       })
     }, {
+      path: 'contests/:cid',
+      component: AdminContestsEdit,
+      name: 'admin_contests_edit',
+      props: (route) => ({
+        cid: route.params.cid
+      })
+    }, {
       path: 'contests/add',
       component: AdminContestsAdd,
       name: 'admin_contests_add'
@@ -227,6 +236,10 @@ const routes = [
       component: AdminUsersPassword,
       name: 'admin_users_password'
     }]
+  }, {
+    path: '*',
+    component: NotFound,
+    name: 'not_found'
   }
 ]
 

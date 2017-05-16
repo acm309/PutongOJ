@@ -17,11 +17,17 @@
     <p v-if="!self">
       <a @click="login">Log in</a> to submit
     </p>
-    <oj-submitcodemodal
-      v-if="active"
-      @close="active=false"
-      @submit="submit"
-    >{{ problem.pid }} -- {{ problem.title }}</oj-submitcodemodal>
+    <transition
+      name="custom-classes-transition"
+      enter-active-class="animated fadeInUp"
+      leave-active-class="animated fadeOutDown"
+    >
+      <oj-submitcodemodal
+        v-if="active"
+        @close="active=false"
+        @submit="submit"
+      >{{ problem.pid }} -- {{ problem.title }}</oj-submitcodemodal>
+    </transition>
   </div>
 
 </template>
@@ -47,6 +53,11 @@ export default {
       pid: this.pid
     }).then(() => {
       document.title = `Problem ${this.problem.pid} -- ${this.problem.title}`
+    }).catch((err) => {
+      this.$store.dispatch('addMessage', {
+        body: err.message,
+        type: 'danger'
+      })
     })
   },
   computed: {

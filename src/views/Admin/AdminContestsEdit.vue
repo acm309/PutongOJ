@@ -33,7 +33,7 @@
       </p>
     </div>
     <hr>
-    <button class="button is-primary" @click="createContest">Submit</button>
+    <button class="button is-primary" @click="updateContest">Submit</button>
   </div>
 </template>
 
@@ -41,18 +41,68 @@
 
 import Datepicker from 'vue-datepicker'
 import draggable from 'vuedraggable'
+import moment from 'moment'
 
 export default {
+  components: {
+    'date-picker': Datepicker,
+    'draggable': draggable
+  },
+  props: ['cid'],
+  created () {
+    this.$store.dispatch('fetchContest', {
+      cid: this.cid
+    }).then(() => {
+      this.title = this.contest.title
+      this.encryptType = this.contest.encrypt
+      this.startDate.time = moment(this.contest.start).format('YYYY-MM-DD HH:mm')
+      this.endDate.time = moment(this.contest.end).format('YYYY-MM-DD HH:mm')
+      this.problems = this.contest.list
+    })
+  },
+  computed: {
+    contest () {
+      return this.$store.getters.contest
+    },
+    encrypt () {
+      return this.$store.getters.encrypt
+    }
+  },
+  methods: {
+    addProblem () {
+      this.problems.push(this.pid)
+    },
+    remove (index) {
+      this.problems.splice(index, 1)
+    },
+    updateContest () {
+      this.$store.dispatch('updateContest', {
+        cid: this.cid,
+        title: this.title,
+        start: this.startDate.time,
+        end: this.endDate.time,
+        encrypt: this.encryptType,
+        list: this.problems
+      }).then(() => {
+        this.$router.push({
+          name: 'contest',
+          params: {
+            cid: this.contest.cid
+          }
+        })
+        this.$store.dispatch('addMessage', {
+          body: `Contest ${this.contest.cid} -- ${this.contest.title} has been updated!`
+        })
+      })
+    }
+  },
   data () {
     return {
       title: '',
+      argument: '',
       encryptType: 1,
-      pid: 0,
-      problems: [
-        751,
-        752,
-        753
-      ],
+      problems: [],
+      pid: '',
       startDate: {
         time: ''
       },
@@ -87,45 +137,6 @@ export default {
         overlayOpacity: 0.5, // 0.5 as default
         dismissible: true // as true as default
       }
-    }
-  },
-  components: {
-    'date-picker': Datepicker,
-    'draggable': draggable
-  },
-  computed: {
-    encrypt () {
-      return this.$store.getters.encrypt
-    },
-    contest () {
-      return this.$store.getters.contest
-    }
-  },
-  methods: {
-    addProblem () {
-      this.problems.push(this.pid)
-    },
-    remove (index) {
-      this.problems.splice(index, 1)
-    },
-    createContest () {
-      this.$store.dispatch('createContest', {
-        title: this.title,
-        start: this.startDate.time,
-        end: this.endDate.time,
-        encrypt: this.encryptType,
-        list: this.problems
-      }).then(() => {
-        this.$router.push({
-          name: 'contest',
-          params: {
-            cid: this.contest.cid
-          }
-        })
-        this.$store.dispatch('addMessage', {
-          body: `Contest ${this.contest.cid} -- ${this.contest.title} has been created!`
-        })
-      })
     }
   }
 }
