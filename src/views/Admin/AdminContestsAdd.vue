@@ -16,15 +16,15 @@
     <draggable
       v-model="problems" :option="{group: 'pids'}"
     >
-      <div v-for="(pid, index) in problems" class="notification">
+      <div v-for="(problem, index) in problems" class="notification problem-meta">
         <button class="delete" @click="remove(index)"></button>
-        {{ pid }} --- {{ pid }}
+        {{ problem.pid }} --- {{ problem.title }}
       </div>
     </draggable>
     <br>
     <div class="field is-grouped">
       <p class="control is-expanded">
-        <input class="input" type="number" placeholder="Add a pid" v-model="pid">
+        <input class="input" type="number" placeholder="Add a pid" v-model="pid" @keyup.enter="addProblem">
       </p>
       <p class="control">
         <a class="button is-primary" @click="addProblem">
@@ -48,11 +48,7 @@ export default {
       title: '',
       encryptType: 1,
       pid: 0,
-      problems: [
-        751,
-        752,
-        753
-      ],
+      problems: [],
       startDate: {
         time: ''
       },
@@ -99,11 +95,35 @@ export default {
     },
     contest () {
       return this.$store.getters.contest
+    },
+    problem () {
+      return this.$store.getters.problem
     }
   },
   methods: {
     addProblem () {
-      this.problems.push(this.pid)
+      for (let problem of this.problems) {
+        if (problem.pid === +this.pid) {
+          this.$store.dispatch('addMessage', {
+            body: `${problem.pid} has been added in the list!`,
+            type: 'danger'
+          })
+          return
+        }
+      }
+      this.$store.dispatch('fetchProblem', {
+        pid: this.pid
+      }).then(() => {
+        this.problems.push({
+          pid: this.problem.pid,
+          title: this.problem.title
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
+      })
     },
     remove (index) {
       this.problems.splice(index, 1)
@@ -114,7 +134,7 @@ export default {
         start: this.startDate.time,
         end: this.endDate.time,
         encrypt: this.encryptType,
-        list: this.problems
+        list: this.problems.map((problem) => problem.pid)
       }).then(() => {
         this.$router.push({
           name: 'contest',
@@ -124,6 +144,11 @@ export default {
         })
         this.$store.dispatch('addMessage', {
           body: `Contest ${this.contest.cid} -- ${this.contest.title} has been created!`
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
         })
       })
     }

@@ -122,6 +122,9 @@ const actions = {
   updateContest ({commit}, payload) {
     return axios.put(`/contests/${payload.cid}`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         if (payload.updateList) {
           commit('updateOneContestInList', data)
         } else {
@@ -132,6 +135,9 @@ const actions = {
   createContest ({commit}, payload) {
     return axios.post('/contests', payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateContest', data)
       })
   }
