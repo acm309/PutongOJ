@@ -111,6 +111,11 @@ export default {
             pid: this.problem.pid
           }
         })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
       })
     }
   },
