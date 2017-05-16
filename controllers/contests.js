@@ -2,6 +2,7 @@ const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined } = require('../utils')
+const only = require('only')
 
 /** 返回比赛列表 */
 async function queryList (ctx, next) {
@@ -66,7 +67,7 @@ async function queryOneContest (ctx, next) {
 */
 async function create (ctx, next) {
   // 必须的字段
-  ;['title', 'start', 'end', 'list', 'encrypt', 'argument'].forEach((item) => {
+  ;['title', 'start', 'end', 'list', 'encrypt'].forEach((item) => {
     if (isUndefined(ctx.request.body[item])) {
       ctx.throw(400, `Field "${item}" is required to create a contest`)
     }
@@ -78,6 +79,8 @@ async function create (ctx, next) {
   }
 
   const cid = await Ids.generateId('Contest')
+  ctx.request.body.start = new Date(ctx.request.body.start).getTime()
+  ctx.request.body.end = new Date(ctx.request.body.end).getTime()
   const { title, start, end, list, encrypt, argument } = ctx.request.body
 
   // 检查列表里的题是否都存在
@@ -92,7 +95,7 @@ async function create (ctx, next) {
   }
 
   const contest = new Contest({
-    cid, title, start, end, list, encrypt, argument
+    cid, title, start, end, list, encrypt, argument, creator: ctx.session.user.uid
   })
 
   await contest.save()
@@ -132,10 +135,13 @@ async function update (ctx, next) {
         ctx.throw(400, `Problem ${ctx.request.body['list'][i]} not found`)
       }
     }
-    // 列表有更新，以前的记录(overview, ranklist)需要更新
-    contest.clearOverview()
-    contest.clearRanklist()
   }
+
+  ;['start', 'end'].forEach((item) => {
+    if (!isUndefined(ctx.request.body[item])) {
+      ctx.request.body[item] = new Date(ctx.request.body[item]).getTime()
+    }
+  })
 
   ;['title', 'start', 'end', 'list', 'encrypt', 'argument', 'status'].forEach((item) => {
     if (!isUndefined(ctx.request.body[item])) {
@@ -144,10 +150,12 @@ async function update (ctx, next) {
   })
 
   await contest.save()
+  // 建议更新，以前的记录(overview, ranklist)需要更新
+  await contest.clearOverview()
+  await contest.clearRanklist()
 
-  const { title, start, end, list, status } = contest
   ctx.body = {
-    contest: { cid, title, start, end, list, status }
+    contest: only(contest, 'cid title start end list status')
   }
 }
 

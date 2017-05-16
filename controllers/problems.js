@@ -1,8 +1,9 @@
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const fse = require('fs-extra')
 const path = require('path')
+const only = require('only')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -48,10 +49,15 @@ async function queryOneProblem (ctx, next) {
 
   const problem = await Problem
     .findOne({pid})
-    .select('-_id pid title memory time description input output in out hint')
+    .select('-_id pid title memory time description input output in out hint status')
     .exec()
 
   if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  // 是在一般页面中查询，而非在比赛中查询，此时需要验证用户是否可以查看
+  if (isUndefined(ctx.query.mid) && (problem.status === ctx.config.status.Reserve && !isAdmin(ctx.session.user))) {
     ctx.throw(400, 'No such a problem')
   }
 
@@ -134,24 +140,13 @@ async function create (ctx, next) {
         problem[item] = ctx.request.body[item]
       }
     })
+
   await problem.save()
   await problem.saveSample(ctx.config.DataRoot)
-  const { time, memory, description, inData, out, input, output,
-    hint, status } = problem
+
   ctx.body = {
-    problem: {
-      time,
-      memory,
-      description,
-      in: inData, // in 刚好是关键字，所以这里用 inData 表示
-      out,
-      input,
-      output,
-      hint,
-      status,
-      title,
-      pid
-    }
+    problem: only(problem,
+      ['pid', 'title', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status'])
   }
 }
 
