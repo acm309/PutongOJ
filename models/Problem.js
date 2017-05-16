@@ -17,11 +17,15 @@ const ProblemSchema = mongoose.Schema({
   },
   time: {
     type: Number,
-    default: 1000
+    default: 1000,
+    min: 100,
+    max: 10000
   },
   memory: {
     type: Number,
-    default: 32768
+    default: 32768,
+    min: 100,
+    max: 32768 * 4
   },
   create: {
     type: String,
@@ -76,7 +80,7 @@ ProblemSchema.methods.saveSample = async function saveSample (root) {
   ])
 }
 
-ProblemSchema.statics.validate = function validate ({ title }) {
+ProblemSchema.statics.validate = function validate ({ title, time, memory }) {
   let error = ''
   let valid = true
   if (!isUndefined(title)) {
@@ -84,6 +88,20 @@ ProblemSchema.statics.validate = function validate ({ title }) {
       error = 'Title should not be empty'
     } else if (title.length > 50) {
       error = 'The length of title should not be more than 50'
+    }
+  }
+  // wtf! +null is 0, and +NaN is also 0
+  if (!isUndefined(time)) {
+    if (isNaN(time) || time === null || typeof +time !== 'number') {
+      error = 'Time should not a number'
+    } else if (time < 100 || time > 10000) {
+      error = 'time should be larger than 100 and smaller than 10000'
+    }
+  } else if (!isUndefined(memory)) {
+    if (isNaN(memory) || memory === null || typeof +memory !== 'number') {
+      error = 'Memory should not a number'
+    } else if (memory < 100 || memory > 32768 * 4) {
+      error = `memory should be larger than 100 and smaller than ${32768 * 4}`
     }
   }
   if (error) {
