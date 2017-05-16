@@ -64,6 +64,7 @@ const actions = {
         commit('updateProblem', {
           problem: data.problem
         })
+        return data.problem
       })
   },
   deleteProblem ({commit}, payload) {
