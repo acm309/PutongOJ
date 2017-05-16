@@ -87,6 +87,9 @@ const actions = {
   createProblem ({commit}, payload) {
     return axios.post('/problems', payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateProblem', {
           problem: data.problem
         })

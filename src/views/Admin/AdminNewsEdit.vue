@@ -60,6 +60,11 @@ export default {
             nid: this.nid
           }
         })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
       })
     }
   }
