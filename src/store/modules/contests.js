@@ -140,6 +140,15 @@ const actions = {
         }
         commit('updateContest', data)
       })
+  },
+  // 别问我为什么叫它 argument, 因为上一个系统这么叫的
+  verifyArgument ({commit}, payload) {
+    return axios.post(`/contests/${payload.cid}/argument`, payload)
+      .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
+      })
   }
 }
 

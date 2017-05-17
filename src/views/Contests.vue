@@ -17,9 +17,7 @@
           :key="contest.cid"
         >
           <td>{{ contest.cid }}</td>
-          <td><router-link v-if="logined"
-              :to="{name: 'contest', params: {cid: contest.cid}}"
-            > {{ contest.title }} </router-link>
+          <td><a v-if="logined" @click="visitContest(contest)"> {{ contest.title }} </a>
             <a @click="login" v-else>{{ contest.title }}</a>
           </td>
           <td><b>{{ status(contest) }}</b></td>
@@ -28,12 +26,37 @@
         </tr>
       </tbody>
     </table>
+    <transition
+    enter-active-class="animated fadeInUp"
+    leave-active-class="animated fadeOutDown"
+    >
+      <div class="modal is-active" v-if="active">
+        <div class="modal-background" @click="active = false"></div>
+        <div class="modal-content box">
+          <div class="field">
+            <label class="label">This contest has been encrypted with a password.</label>
+            <p class="control">
+              <input type="password" v-model="pwd" class="input">
+            </p>
+          </div>
+          <button class="button is-primary" @click="verifyPwd">Submit</button>
+          <button class="button" @click="active = false">Cancel</button>
+        </div>
+        <button class="modal-close" @click="active = false"></button>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
 // TODO 权限检查
 export default {
+  data () {
+    return {
+      active: false,
+      pwd: ''
+    }
+  },
   created () {
     document.title = 'Contests'
     this.$store.dispatch('fetchContestsList')
@@ -44,6 +67,15 @@ export default {
     },
     logined () {
       return this.$store.getters.logined
+    },
+    currentTime () {
+      return this.$store.getters.currentTime
+    },
+    encrypt () {
+      return this.$store.getters.encrypt
+    },
+    contest () {
+      return this.$store.getters.contest
     }
   },
   methods: {
@@ -57,6 +89,56 @@ export default {
     },
     login () {
       this.$store.commit('showLoginModal')
+    },
+    visitContest (contest) {
+      this.$store.commit('updateContest', { contest })
+      if (this.currentTime < contest.start) {
+        this.$store.dispatch('addMessage', {
+          body: 'Contest is still on scheduled',
+          type: 'warning'
+        })
+      } else if (contest.encrypt === this.encrypt.Password) {
+        this.active = true
+      } else if (contest.encrypt === this.encrypt.Private) {
+        this.$store.dispatch('verifyArgument', { cid: contest.cid })
+          .then(() => {
+            this.$router.push({
+              name: 'contest',
+              params: {
+                cid: contest.cid
+              }
+            })
+          })
+          .catch((err) => {
+            this.$store.dispatch('addMessage', {
+              body: err.message,
+              type: 'danger'
+            })
+          })
+      } else {
+        this.$router.push({
+          name: 'contest',
+          cid: contest.cid
+        })
+      }
+    },
+    verifyPwd () {
+      this.$store.dispatch('verifyArgument', {
+        cid: this.contest.cid,
+        argument: this.pwd
+      }).then(() => {
+        this.$router.push({
+          name: 'contest',
+          params: {
+            cid: this.contest.cid
+          }
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
+      })
     }
   }
 }
