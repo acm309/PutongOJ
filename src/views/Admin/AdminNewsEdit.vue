@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Quill from '../../components/Quill.vue'
 
@@ -37,9 +38,7 @@ export default {
     })
   },
   computed: {
-    news () {
-      return this.$store.getters.news
-    }
+    ...mapGetters([ 'news' ])
   },
   methods: {
     contentChange (text) {

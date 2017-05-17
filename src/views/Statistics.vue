@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Highcharts from 'highcharts'
 
@@ -85,15 +86,11 @@ export default {
     }
   },
   computed: {
-    statistics () {
-      return this.$store.getters.statistics
-    },
-    solutions () {
-      return this.$store.getters.statisticsSolution
-    },
-    judges () {
-      return this.$store.getters.judges
-    }
+    ...mapGetters({
+      statistics: 'statistics',
+      solutions: 'statisticsSolution',
+      judges: 'judges'
+    })
   },
   mounted () {
     this.$store.dispatch('fetchStatistics', { pid: this.pid })

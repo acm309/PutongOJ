@@ -66,17 +66,15 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   computed: {
-    self () {
-      return this.$store.getters.self
-    },
-    isAdmin () {
-      return this.$store.getters.isAdmin
-    },
-    logined () {
-      return this.$store.getters.logined
-    }
+    ...mapGetters([
+      'self',
+      'isAdmin',
+      'logined'
+    ])
   }
 }
 </script>

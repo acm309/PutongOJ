@@ -49,7 +49,8 @@
 </template>
 
 <script>
-// TODO 权限检查
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -62,27 +63,15 @@ export default {
     this.$store.dispatch('fetchContestsList')
   },
   computed: {
-    contestsList () {
-      return this.$store.getters.contestsList
-    },
-    logined () {
-      return this.$store.getters.logined
-    },
-    currentTime () {
-      return this.$store.getters.currentTime
-    },
-    encrypt () {
-      return this.$store.getters.encrypt
-    },
-    contest () {
-      return this.$store.getters.contest
-    },
-    isAdmin () {
-      return this.$store.getters.isAdmin
-    },
-    self () {
-      return this.$store.getters.self
-    }
+    ...mapGetters([
+      'contestsList',
+      'logined',
+      'currentTime',
+      'encrypt',
+      'contest',
+      'isAdmin',
+      'self'
+    ])
   },
   methods: {
     goToContest (cid) {

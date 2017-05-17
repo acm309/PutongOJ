@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import SubmitCodeModal from '../../components/SubmitCodeModal.vue'
 
@@ -83,12 +84,10 @@ export default {
     })
   },
   computed: {
-    overview () {
-      return this.$store.getters.contestOverview
-    },
-    currentTime () {
-      return this.$store.getters.currentTime
-    }
+    ...mapGetters({
+      overview: 'contestOverview',
+      currentTime: 'currentTime'
+    })
   }
 }
 </script>

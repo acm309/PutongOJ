@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Pagination from '../../components/Pagination.vue'
 
@@ -44,12 +45,10 @@ export default {
     })
   },
   computed: {
-    contestsList () {
-      return this.$store.getters.contestsList
-    },
-    status () {
-      return this.$store.getters.status
-    }
+    ...mapGetters([
+      'contestsList',
+      'status'
+    ])
   },
   methods: {
     del (contest) {

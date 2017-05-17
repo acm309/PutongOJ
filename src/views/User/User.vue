@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
@@ -36,18 +37,12 @@ export default {
     this.refresh(this.uid)
   },
   computed: {
-    user () {
-      return this.$store.getters.user
-    },
-    solved () {
-      return this.$store.getters.solved
-    },
-    unsolved () {
-      return this.$store.getters.unsolved
-    },
-    self () {
-      return this.$store.getters.self
-    }
+    ...mapGetters([
+      'user',
+      'solved',
+      'unsolved',
+      'self'
+    ])
   },
   methods: {
     updateUser (payload) {

@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import TimeRemainder from '../../components/TimeRemainder.vue'
 
@@ -59,18 +60,12 @@ export default {
     })
   },
   computed: {
-    contest () {
-      return this.$store.getters.contest
-    },
-    defaultPid () {
-      return this.$store.getters.contestDefaultPid
-    },
-    self () {
-      return this.$store.getters.self
-    },
-    logined () {
-      return this.$store.getters.logined
-    }
+    ...mapGetters({
+      contest: 'contest',
+      defaultPid: 'contestDefaultPid',
+      self: 'self',
+      logined: 'logined'
+    })
   }
 }
 </script>

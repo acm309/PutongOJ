@@ -56,7 +56,8 @@
 </template>
 
 <script>
-// TODO: fields check
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -91,9 +92,7 @@ export default {
     }
   },
   computed: {
-    self () {
-      return this.$store.getters.self
-    }
+    ...mapGetters([ 'self' ])
   },
   watch: {
     'user' (to, from) {

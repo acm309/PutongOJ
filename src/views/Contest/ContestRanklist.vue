@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   props: ['cid', 'contest'],
   created () {
@@ -46,9 +48,7 @@ export default {
     })
   },
   computed: {
-    ranklist () {
-      return this.$store.getters.contestRanklist
-    }
+    ...mapGetters({ ranklist: 'contestRanklist' })
   }
 }
 </script>

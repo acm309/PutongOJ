@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Datepicker from 'vue-datepicker'
 import draggable from 'vuedraggable'
@@ -89,15 +90,11 @@ export default {
     })
   },
   computed: {
-    contest () {
-      return this.$store.getters.contest
-    },
-    encrypt () {
-      return this.$store.getters.encrypt
-    },
-    problem () {
-      return this.$store.getters.problem
-    }
+    ...mapGetters([
+      'contest',
+      'encrypt',
+      'problem'
+    ])
   },
   methods: {
     addProblem () {

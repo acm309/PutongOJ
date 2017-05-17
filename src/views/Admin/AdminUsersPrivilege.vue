@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
@@ -51,12 +53,10 @@ export default {
     })
   },
   computed: {
-    users () {
-      return this.$store.getters.usersList
-    },
-    privilege () {
-      return this.$store.getters.privilege
-    }
+    ...mapGetters({
+      users: 'usersList',
+      privilege: 'privilege'
+    })
   },
   methods: {
     remove (user) {

@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Pagination from '../../components/Pagination.vue'
 
@@ -93,15 +94,11 @@ export default {
     }
   },
   computed: {
-    status () {
-      return this.$store.getters.status
-    },
-    problemsList () {
-      return this.$store.getters.problemsList
-    },
-    pagination () {
-      return this.$store.getters.problemsPagination
-    }
+    ...mapGetters({
+      status: 'status',
+      problemsList: 'problemsList',
+      pagination: 'problemsPagination'
+    })
   }
 }
 </script>

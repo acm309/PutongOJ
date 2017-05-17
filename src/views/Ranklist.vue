@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import Pagination from '../components/Pagination.vue'
 
 export default {
@@ -74,12 +76,10 @@ export default {
     })
   },
   computed: {
-    ranklist () {
-      return this.$store.getters.ranklist
-    },
-    pagination () {
-      return this.$store.getters.ranklistPagination
-    }
+    ...mapGetters({
+      ranklist: 'ranklist',
+      pagination: 'ranklistPagination'
+    })
   },
   methods: {
     ratio (user) {
