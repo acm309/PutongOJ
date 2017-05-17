@@ -92,6 +92,9 @@ const actions = {
   fetchContest ({commit}, payload) {
     return axios.get(`/contests/${payload.cid}`)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateContest', data)
       })
   },
