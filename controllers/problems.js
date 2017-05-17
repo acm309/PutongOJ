@@ -123,6 +123,7 @@ async function create (ctx, next) {
   if (!verified.valid) {
     ctx.throw(400, verified.error)
   }
+
   // 必须的字段只有 title， 其它都有默认值
   const title = ctx.request.body['title']
   if (isUndefined(title)) {

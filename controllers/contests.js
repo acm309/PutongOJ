@@ -1,7 +1,7 @@
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
 /** 返回比赛列表 */
@@ -45,16 +45,30 @@ async function queryOneContest (ctx, next) {
 
   const contest = await Contest
     .findOne({cid})
-    // argument 有时候可能是密码，因此这里不返回
-    .select('-_id cid title encrypt start end list status')
+    // argument 有时候可能是密码，因此这里根据权限返回不返回
+    .select(`-_id cid title encrypt start end list status ${isAdmin(ctx.session.user) ? 'argument' : ''}`)
     .exec()
 
   // 查无此比赛
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  ctx.body = {
-    contest
+
+  ctx.body = { contest }
+
+  if (isAdmin(ctx.session.user)) {
+    return
+  }
+  // 接下来的验证用于 非 admin
+  // 尚未验证此比赛
+  if (contest.encrypt !== ctx.config.encrypt.Public &&
+    ctx.session.user.verifiedContests.indexOf(cid) === -1) {
+    ctx.throw(400, contest.encrypt === ctx.config.encrypt.Password
+      ? 'You need to input a password to visit this contest'
+      : 'You are not invited to attend this contest')
+  }
+  if (contest.start > Date.now()) {
+    ctx.throw(400, 'This contest is still on scheduled')
   }
 }
 
@@ -68,9 +82,13 @@ async function queryOneContest (ctx, next) {
 async function create (ctx, next) {
   // 必须的字段
   ;['title', 'start', 'end', 'list', 'encrypt'].forEach((item) => {
-    if (isUndefined(ctx.request.body[item])) {
+    if (isUndefined(ctx.request.body[item]) || ctx.request.body[item] === '') {
       ctx.throw(400, `Field "${item}" is required to create a contest`)
     }
+  })
+
+  ;['start', 'end'].forEach((item) => {
+    ctx.request.body[item] = new Date(ctx.request.body[item]).getTime()
   })
 
   const verified = Contest.validate(ctx.request.body)
@@ -218,6 +236,27 @@ async function ranklist (ctx, next) {
   }
 }
 
+// 验证有没有被邀请或输入正确密码
+async function verifyArgument (ctx, next) {
+  const cid = +ctx.params.cid
+  const contest = await Contest.findOne({cid}).exec()
+
+  if (contest.encrypt === ctx.config.encrypt.Password) {
+    if (contest.argument !== ctx.request.body.argument) {
+      ctx.throw(400, 'Wrong password')
+    }
+  }
+
+  if (contest.encrypt === ctx.config.encrypt.Private) {
+    const argument = ctx.request.body.argument
+    const regexp = new RegExp(`\b${ctx.session.user.uid}\b`, 'g')
+    if (!regexp.test(argument)) {
+      ctx.throw(400, "You're not invited to attend this contest")
+    }
+  }
+  ctx.body = {}
+}
+
 module.exports = {
   queryList,
   queryOneContest,
@@ -225,5 +264,6 @@ module.exports = {
   update,
   del,
   overview,
-  ranklist
+  ranklist,
+  verifyArgument
 }
