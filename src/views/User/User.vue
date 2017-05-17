@@ -27,11 +27,6 @@
 import { mapGetters } from 'vuex'
 
 export default {
-  data () {
-    return {
-      tab: 'profile'
-    }
-  },
   props: ['uid'],
   created () {
     this.refresh(this.uid)

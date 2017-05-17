@@ -29,9 +29,8 @@ Vue.filter('durationPretty', function (time) {
 })
 
 Vue.filter('encryptPretty', function (code) {
-  const value = +code
   for (let key in store.getters.encrypt) {
-    if (store.getters.encrypt[key] === code) {
+    if (store.getters.encrypt[key] === +code) {
       return key
     }
   }
@@ -39,9 +38,8 @@ Vue.filter('encryptPretty', function (code) {
 })
 
 Vue.filter('statusPretty', function (code) {
-  const value = +code
   for (let key in store.getters.status) {
-    if (store.getters.status[key] === code) {
+    if (store.getters.status[key] === +code) {
       return key
     }
   }

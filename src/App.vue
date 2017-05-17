@@ -36,11 +36,6 @@ export default {
     'oj-solutionmodal': SolutionModal,
     'oj-notification': Notifications,
     'oj-footer': Footer
-  },
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
-    }
   }
 }
 </script>

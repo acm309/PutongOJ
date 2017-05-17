@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default {
   data () {
@@ -74,6 +74,7 @@ export default {
     ])
   },
   methods: {
+    ...mapMutations({ login: 'showLoginModal' }),
     goToContest (cid) {
       this.$router.push({
         name: 'contest',
@@ -87,9 +88,6 @@ export default {
         return 'Ended'
       }
       return 'Running'
-    },
-    login () {
-      this.$store.commit('showLoginModal')
     },
     visitContest (contest) {
       // Admin 或 已经验证过了

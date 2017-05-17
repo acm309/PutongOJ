@@ -141,7 +141,6 @@ export default {
         }
 
         Highcharts.chart('highcharts', options)
-
       })
   }
 }
