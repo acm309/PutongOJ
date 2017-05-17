@@ -240,11 +240,10 @@ async function ranklist (ctx, next) {
 async function verifyArgument (ctx, next) {
   const cid = +ctx.params.cid
   const contest = await Contest.findOne({cid}).exec()
-  ctx.body = {}
 
   if (contest.encrypt === ctx.config.encrypt.Password) {
     if (contest.argument !== ctx.request.body.argument) {
-      ctx.body.error = 'Wrong password'
+      ctx.throw(400, 'Wrong password')
     }
   }
 
@@ -252,9 +251,10 @@ async function verifyArgument (ctx, next) {
     const argument = ctx.request.body.argument
     const regexp = new RegExp(`\b${ctx.session.user.uid}\b`, 'g')
     if (!regexp.test(argument)) {
-      ctx.body.error = "You're not invited to attend this contest"
+      ctx.throw(400, "You're not invited to attend this contest")
     }
   }
+  ctx.body = {}
 }
 
 module.exports = {
