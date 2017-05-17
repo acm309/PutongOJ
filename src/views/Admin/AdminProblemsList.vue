@@ -13,6 +13,7 @@
           <th>Status</th>
           <th>Edit</th>
           <th>Delete</th>
+          <th>Testdata</th>
         </tr>
       </thead>
       <tbody>
@@ -32,6 +33,10 @@
           <td><a
             @click="del(problem)"
           >Delete</a></td>
+          <td><router-link
+            :to="{name: 'admin_problems_testdata', params: {pid: problem.pid}}"
+          > Test Data
+          </router-link></td>
         </tr>
       </tbody>
     </table>

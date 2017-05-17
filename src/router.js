@@ -28,6 +28,7 @@ import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
 import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
+import AdminProblemsTestData from './views/Admin/AdminProblemsTestData.vue'
 import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
@@ -205,6 +206,13 @@ const routes = [
       path: 'problems/:pid',
       component: AdminProblemsEdit,
       name: 'admin_problems_edit',
+      props: (route) => ({
+        pid: route.params.pid
+      })
+    }, {
+      path: 'problems/:pid/testdata',
+      component: AdminProblemsTestData,
+      name: 'admin_problems_testdata',
       props: (route) => ({
         pid: route.params.pid
       })
