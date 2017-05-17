@@ -4,6 +4,7 @@ const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const fse = require('fs-extra')
 const path = require('path')
 const only = require('only')
+const send = require('koa-send')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -152,14 +153,21 @@ async function create (ctx, next) {
 }
 
 async function testData (ctx, next) {
+  if (!ctx.request.body.files.file) {
+    ctx.throw('You must upload a file')
+  }
   const dataPath = ctx.request.body.files.file.path
-  const type = ctx.query.type
-
+  const type = ctx.request.body.fields.type
   await fse.move(dataPath,
     path.resolve(ctx.config.DataRoot, `./${ctx.params.pid}/test.${type}`),
     {overwrite: true}
   )
   ctx.body = {}
+}
+
+async function sendTestData (ctx, next) {
+  const type = ctx.query.type
+  await send(ctx, `data/Data/${ctx.params.pid}/test.${type}`)
 }
 
 module.exports = {
@@ -168,5 +176,6 @@ module.exports = {
   update,
   del,
   create,
-  testData
+  testData,
+  sendTestData
 }

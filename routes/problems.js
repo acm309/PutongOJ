@@ -12,5 +12,6 @@ router.put('/:pid', idNumberRequired('pid'), loginRequired, adminRequired, probl
 router.del('/:pid', idNumberRequired('pid'), loginRequired, adminRequired, problems.del)
 router.post('/', loginRequired, adminRequired, problems.create)
 router.post('/:pid/testdata', idNumberRequired('pid'), loginRequired, adminRequired, problems.testData)
+router.get('/:pid/testdata', idNumberRequired('pid'), loginRequired, adminRequired, problems.sendTestData)
 
 module.exports = router
