@@ -238,6 +238,11 @@ async function ranklist (ctx, next) {
 
 // 验证有没有被邀请或输入正确密码
 async function verifyArgument (ctx, next) {
+  ctx.body = {}
+  if (isAdmin(ctx.session.user)) {
+    // admin 无需检查
+    return
+  }
   const cid = +ctx.params.cid
   const contest = await Contest.findOne({cid}).exec()
 
@@ -254,7 +259,6 @@ async function verifyArgument (ctx, next) {
       ctx.throw(400, "You're not invited to attend this contest")
     }
   }
-  ctx.body = {}
 }
 
 module.exports = {
