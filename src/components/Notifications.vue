@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Notification from './Notification.vue'
 
@@ -23,9 +24,7 @@ export default {
     'oj-notification': Notification
   },
   computed: {
-    messages () {
-      return this.$store.getters.messages
-    }
+    ...mapGetters([ 'messages' ])
   }
 }
 </script>

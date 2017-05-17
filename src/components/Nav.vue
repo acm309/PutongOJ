@@ -67,11 +67,11 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   methods: {
-    showLoginModal () {
-      this.$store.commit('showLoginModal')
-    },
+    ...mapMutations([ 'showLoginModal' ]),
     logout () {
       const nick = this.self.nick
       this.$store.dispatch('logout')
@@ -83,12 +83,7 @@ export default {
     }
   },
   computed: {
-    self () {
-      return this.$store.getters.self
-    },
-    isAdmin () {
-      return this.$store.getters.isAdmin
-    }
+    ...mapGetters([ 'self', 'isAdmin' ])
   }
 }
 </script>

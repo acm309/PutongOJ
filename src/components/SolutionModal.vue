@@ -17,20 +17,18 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   created () {
     this.$store.dispatch('fetchSolution', { sid: this.sid })
   },
   computed: {
-    solution () {
-      return this.$store.getters.solution
-    },
-    solutionModalActive () {
-      return this.$store.getters.solutionModalActive
-    },
-    sid () {
-      return this.$store.getters.sid
-    },
+    ...mapGetters([
+      'solution',
+      'solutionModalActive',
+      'sid'
+    ]),
     code () {
       if (this.solution && this.solution.code) {
         if (this.solution.error) {
@@ -41,9 +39,9 @@ export default {
     }
   },
   methods: {
-    close () {
-      this.$store.commit('closeSolutionModal')
-    }
+    ...mapMutations({
+      close: 'closeSolutionModal'
+    })
   }
 }
 </script>

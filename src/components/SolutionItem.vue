@@ -29,6 +29,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   props: ['solution'],
   methods: {
@@ -37,15 +39,11 @@ export default {
     }
   },
   computed: {
-    isAdmin() {
-      return this.$store.getters.isAdmin
-    },
-    self () {
-      return this.$store.getters.self
-    },
-    logined () {
-      return this.$store.getters.logined
-    }
+    ...mapGetters([
+      'isAdmin',
+      'self',
+      'logined'
+    ])
   }
 }
 </script>
