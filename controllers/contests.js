@@ -1,7 +1,7 @@
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
 /** 返回比赛列表 */
@@ -45,8 +45,8 @@ async function queryOneContest (ctx, next) {
 
   const contest = await Contest
     .findOne({cid})
-    // argument 有时候可能是密码，因此这里不返回
-    .select('-_id cid title encrypt start end list status')
+    // argument 有时候可能是密码，因此这里根据权限返回不返回
+    .select(`-_id cid title encrypt start end list status ${isAdmin(ctx.session.user) ? 'argument' : ''}`)
     .exec()
 
   // 查无此比赛
