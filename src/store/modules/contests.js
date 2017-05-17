@@ -92,6 +92,9 @@ const actions = {
   fetchContest ({commit}, payload) {
     return axios.get(`/contests/${payload.cid}`)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateContest', data)
       })
   },
@@ -122,6 +125,9 @@ const actions = {
   updateContest ({commit}, payload) {
     return axios.put(`/contests/${payload.cid}`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         if (payload.updateList) {
           commit('updateOneContestInList', data)
         } else {
@@ -132,7 +138,19 @@ const actions = {
   createContest ({commit}, payload) {
     return axios.post('/contests', payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         commit('updateContest', data)
+      })
+  },
+  // 别问我为什么叫它 argument, 因为上一个系统这么叫的
+  verifyArgument ({commit}, payload) {
+    return axios.post(`/contests/${payload.cid}/argument`, payload)
+      .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
       })
   }
 }

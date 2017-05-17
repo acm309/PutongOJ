@@ -58,24 +58,32 @@
       <router-view
         v-if="self && isAdmin"
       ></router-view>
-      <b v-else-if="self">
-        You are not an admin
-      </b>
-      <b
-        v-else
-      >You should login at least!</b>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  created () {
+    if (!this.logined || !this.isAdmin) {
+      this.$router.push({
+        name: 'home'
+      })
+      this.$store.dispatch('addMessage', {
+        body: 'You are not allowed to visit this page',
+        type: 'warning'
+      })
+    }
+  },
   computed: {
     self () {
       return this.$store.getters.self
     },
     isAdmin () {
       return this.$store.getters.isAdmin
+    },
+    logined () {
+      return this.$store.getters.logined
     }
   }
 }

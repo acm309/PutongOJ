@@ -49,9 +49,13 @@ export default {
   created () {
     this.$store.dispatch('fetchContest', {
       cid: this.cid
-    })
-    .then(() => {
+    }).then(() => {
       document.title = `Contest -- ${this.contest.title}`
+    }).catch((err) => {
+      this.$store.dispatch('addMessage', {
+        body: err.message,
+        type: 'danger'
+      })
     })
   },
   computed: {
@@ -63,6 +67,9 @@ export default {
     },
     self () {
       return this.$store.getters.self
+    },
+    logined () {
+      return this.$store.getters.logined
     }
   }
 }

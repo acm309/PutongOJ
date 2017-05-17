@@ -64,6 +64,7 @@ const actions = {
         commit('updateProblem', {
           problem: data.problem
         })
+        return data.problem
       })
   },
   deleteProblem ({commit}, payload) {
@@ -77,6 +78,9 @@ const actions = {
   updateProblem ({commit}, payload) {
     return axios.put(`/problems/${payload.pid}`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         if (payload.updateList) {
           commit('updateOneProblemInList', data)
         } else {

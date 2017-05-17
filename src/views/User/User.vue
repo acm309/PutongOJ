@@ -33,7 +33,7 @@ export default {
   },
   props: ['uid'],
   created () {
-    this.$store.dispatch('fetchUser', { uid: this.uid })
+    this.refresh(this.uid)
   },
   computed: {
     user () {
@@ -52,6 +52,22 @@ export default {
   methods: {
     updateUser (payload) {
       this.$store.dispatch('updateUser', payload)
+        .catch((err) => {
+          this.$store.dispatch('addMessage', {
+            body: err.message,
+            type: 'danger'
+          })
+        })
+    },
+    refresh (uid) {
+      this.$store.dispatch('fetchUser', { uid })
+        .catch((err) => {
+          this.$store.dispatch('addMessage', {
+            body: err.message,
+            type: 'danger'
+          })
+        })
+
     }
   },
   watch: {
@@ -59,7 +75,7 @@ export default {
       // 用户 A 如果在看 B 的资料时，突然点击导航栏想看自己的资料。此时，组件重复使用
       // 不会调用 created，所以要 watch
       if (to.params.uid !== from.params.uid) {
-        this.$store.dispatch('fetchUser', { uid: to.params.uid })
+        this.refresh(to.params.uid)
       }
     }
   }

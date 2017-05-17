@@ -198,16 +198,16 @@ const routes = [
         limit: route.query.limit
       })
     }, {
+      path: 'problems/add',
+      component: AdminProblemAdd,
+      name: 'admin_problems_add'
+    }, {
       path: 'problems/:pid',
       component: AdminProblemsEdit,
       name: 'admin_problems_edit',
       props: (route) => ({
         pid: route.params.pid
       })
-    }, {
-      path: 'problems/add',
-      component: AdminProblemAdd,
-      name: 'admin_problems_add'
     }, {
       path: 'contests',
       component: AdminContestsList,
@@ -217,16 +217,16 @@ const routes = [
         limit: route.query.limit
       })
     }, {
+      path: 'contests/add',
+      component: AdminContestsAdd,
+      name: 'admin_contests_add'
+    }, {
       path: 'contests/:cid',
       component: AdminContestsEdit,
       name: 'admin_contests_edit',
       props: (route) => ({
         cid: route.params.cid
       })
-    }, {
-      path: 'contests/add',
-      component: AdminContestsAdd,
-      name: 'admin_contests_add'
     }, {
       path: 'users/privilege',
       component: AdminUsersPrivilege,

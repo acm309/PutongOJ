@@ -8,17 +8,36 @@
     <date-picker :date="endDate" :option="option"></date-picker>
     <label class="label">Type</label>
     <div class="select">
-      <select v-model="encryptType">
+      <select v-model.number="encryptType">
         <option v-for="(value, key) in encrypt" :value="value">{{ key }}</option>
       </select>
+    </div>
+    <div class="field"
+      v-if="encryptType === encrypt.Password || encryptType === encrypt.Private"
+    >
+      <p class="control" v-if="encryptType === encrypt.Password">
+        <input
+          type="text"
+          v-model="argument.password"
+          class="input"
+        >
+      </p>
+      <p class="control" v-if="encryptType === encrypt.Private">
+        <label class="label">Each username for one line</label>
+        <textarea
+          type="text"
+          v-model="argument.userlist"
+          class="textarea"
+        > </textarea>
+      </p>
     </div>
     <hr>
     <draggable
       v-model="problems" :option="{group: 'pids'}"
     >
-      <div v-for="(pid, index) in problems" class="notification">
+      <div v-for="(problem, index) in problems" class="notification problem-meta">
         <button class="delete" @click="remove(index)"></button>
-        {{ pid }} --- {{ pid }}
+        {{ problem.pid }} --- {{ problem.title }}
       </div>
     </draggable>
     <br>
@@ -57,7 +76,16 @@ export default {
       this.encryptType = this.contest.encrypt
       this.startDate.time = moment(this.contest.start).format('YYYY-MM-DD HH:mm')
       this.endDate.time = moment(this.contest.end).format('YYYY-MM-DD HH:mm')
-      this.problems = this.contest.list
+      if (this.encryptType === this.encrypt.Password) {
+        this.argument.password = this.contest.argument
+      } else if (this.encryptType === this.encrypt.Private) {
+        this.argument.userlist = this.contest.argument
+      }
+      Promise.all(this.contest.list.map((pid) => {
+        return this.$store.dispatch('fetchProblem', { pid })
+      })).then((problems) => {
+        this.problems = problems
+      })
     })
   },
   computed: {
@@ -66,23 +94,65 @@ export default {
     },
     encrypt () {
       return this.$store.getters.encrypt
+    },
+    problem () {
+      return this.$store.getters.problem
     }
   },
   methods: {
     addProblem () {
-      this.problems.push(this.pid)
+      for (let problem of this.problems) {
+        if (problem.pid === +this.pid) {
+          this.$store.dispatch('addMessage', {
+            body: `${problem.pid} has been added in the list!`,
+            type: 'danger'
+          })
+          return
+        }
+      }
+      this.$store.dispatch('fetchProblem', {
+        pid: this.pid
+      }).then(() => {
+        this.problems.push({
+          pid: this.problem.pid,
+          title: this.problem.title
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
+      })
     },
     remove (index) {
       this.problems.splice(index, 1)
     },
     updateContest () {
+      if (this.encryptType === this.encrypt.Password && this.argument.password === '') {
+        this.$store.dispatch('addMessage', {
+          body: 'Password should not be empty',
+          type: 'danger'
+        })
+        return
+      } else if (this.encryptType === this.encrypt.Private && this.argument.userlist === '') {
+        this.$store.dispatch('addMessage', {
+          body: 'Userlist should not be empty',
+          type: 'danger'
+        })
+        return
+      }
+      let argument = ''
+      if (this.encryptType !== this.encrypt.Public) {
+        argument = this.encryptType === this.encrypt.Private ? this.argument.userlist : this.argument.password
+      }
       this.$store.dispatch('updateContest', {
         cid: this.cid,
         title: this.title,
         start: this.startDate.time,
         end: this.endDate.time,
         encrypt: this.encryptType,
-        list: this.problems
+        argument,
+        list: this.problems.map((problem) => problem.pid)
       }).then(() => {
         this.$router.push({
           name: 'contest',
@@ -99,7 +169,10 @@ export default {
   data () {
     return {
       title: '',
-      argument: '',
+      argument: {
+        password: '',
+        userlist: ''
+      },
       encryptType: 1,
       problems: [],
       pid: '',
