@@ -11,9 +11,8 @@ async function login (ctx, next) {
   }
 
   const { uid, pwd } = ctx.request.body
-  const user = await User
-    .findOne({uid})
-    .exec()
+  const user = await User.findOne({uid}).exec()
+
   if (!user) {
     ctx.throw(400, 'No such a user')
   }
@@ -43,13 +42,9 @@ async function logout (ctx, next) {
   检查当前登录状态
 */
 async function fetchSession (ctx, next) {
-  if (ctx.session.user) {
-    ctx.body = {
-      user: ctx.session.user
-    }
-  } else {
-    ctx.body = {}
-  }
+  ctx.body = ctx.session.user ? {
+    user: ctx.session.user
+  } : {}
 }
 
 module.exports = {

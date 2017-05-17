@@ -21,7 +21,7 @@ async function queryList (ctx, next) {
       `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
   }
 
-  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+  if (!isAdmin(ctx.session.user)) {
     filter['status'] = ctx.config.status.Available
   }
 
@@ -70,9 +70,8 @@ async function queryOneProblem (ctx, next) {
 /** 指定 pid, 更新一道已经存在的题目 */
 async function update (ctx, next) {
   const pid = +ctx.params.pid // router 那儿的中间件已经保证这是数字了
-  const problem = await Problem
-    .findOne({pid})
-    .exec()
+
+  const problem = await Problem.findOne({pid}).exec()
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')
@@ -107,9 +106,7 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const pid = +ctx.params.pid
-  const problem = await Problem
-    .findOne({pid})
-    .exec()
+  const problem = await Problem.findOne({pid}).exec()
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')

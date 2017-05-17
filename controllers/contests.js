@@ -19,7 +19,7 @@ async function queryList (ctx, next) {
       `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
   }
 
-  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+  if (!isAdmin(ctx.session.user)) {
     filter['status'] = ctx.config.status.Available
   }
 
@@ -87,9 +87,8 @@ async function create (ctx, next) {
     }
   })
 
-  ;['start', 'end'].forEach((item) => {
-    ctx.request.body[item] = new Date(ctx.request.body[item]).getTime()
-  })
+  ctx.request.body.start = new Date(ctx.request.body.start).getTime()
+  ctx.request.body.end = new Date(ctx.request.body.end).getTime()
 
   const verified = Contest.validate(ctx.request.body)
   if (!verified.valid) {
@@ -97,8 +96,6 @@ async function create (ctx, next) {
   }
 
   const cid = await Ids.generateId('Contest')
-  ctx.request.body.start = new Date(ctx.request.body.start).getTime()
-  ctx.request.body.end = new Date(ctx.request.body.end).getTime()
   const { title, start, end, list, encrypt, argument } = ctx.request.body
 
   // 检查列表里的题是否都存在
@@ -106,10 +103,9 @@ async function create (ctx, next) {
     list.map((pid) => Problem.findOne({pid}).exec())
   )
 
-  for (let i = 0; i < ps.length; i += 1) {
-    if (!ps[i]) { // 这道题没找到，说明没这题
-      ctx.throw(400, `Problem ${list[i]} not found`)
-    }
+  if (ps.some(x => !x)) { // 这道题没找到，说明没这题
+    const index = ps.find((item) => !item)
+    ctx.throw(400, `Problem ${list[index]} not found`)
   }
 
   const contest = new Contest({
@@ -119,9 +115,7 @@ async function create (ctx, next) {
   await contest.save()
 
   ctx.body = {
-    contest: {
-      cid, title, start, end, list, encrypt, argument
-    }
+    contest: only(contest, 'cid title start end list encrypt argument')
   }
 }
 
@@ -169,8 +163,7 @@ async function update (ctx, next) {
 
   await contest.save()
   // 建议更新，以前的记录(overview, ranklist)需要更新
-  await contest.clearOverview()
-  await contest.clearRanklist()
+  await Promise.all([ contest.clearOverview(), contest.clearRanklist() ])
 
   ctx.body = {
     contest: only(contest, 'cid title start end list status')
@@ -180,17 +173,13 @@ async function update (ctx, next) {
 async function del (ctx, next) {
   const cid = +ctx.params.cid
 
-  const contest = await Contest
-    .findOne({cid})
-    .exec()
+  const contest = await Contest.findOne({cid}).exec()
 
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
 
-  await Contest
-    .findOneAndRemove({cid})
-    .exec()
+  await Contest.findOneAndRemove({cid}).exec()
 
   ctx.body = {}
 }
@@ -202,16 +191,13 @@ async function overview (ctx, next) {
     ctx.throw(400, 'Cid should be a number')
   }
 
-  const contest = await Contest
-    .findOne({cid})
-    .exec()
+  const contest = await Contest.findOne({cid}).exec()
 
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
 
-  const overview = await contest
-    .fetchOverview()
+  const overview = await contest.fetchOverview()
 
   ctx.body = {
     overview
@@ -221,9 +207,7 @@ async function overview (ctx, next) {
 async function ranklist (ctx, next) {
   const cid = +ctx.params.cid
 
-  const contest = await Contest
-    .findOne({cid})
-    .exec()
+  const contest = await Contest.findOne({cid}).exec()
 
   if (!contest) {
     ctx.throw(400, 'No such a contest')

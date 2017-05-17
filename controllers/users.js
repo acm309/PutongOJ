@@ -60,8 +60,6 @@ async function queryOneUser (ctx, next) {
   注册用户
 */
 async function register (ctx, next) {
-  const { uid, nick, pwd } = ctx.request.body
-
   ;['uid', 'nick', 'pwd'].forEach((item) => {
     if (!ctx.request.body[item]) {
       ctx.throw(400, `Field "${item}" is needed!`)
@@ -73,6 +71,8 @@ async function register (ctx, next) {
   if (!verified.valid) {
     ctx.throw(400, verified.error)
   }
+
+  const { uid, nick, pwd } = ctx.request.body
 
   // 避免重复注册; uid 不可重，其它可重
   const uidExist = await User
@@ -104,9 +104,7 @@ async function register (ctx, next) {
 async function update (ctx, next) {
   const uid = ctx.params.uid
 
-  const user = await User
-    .findOne({uid})
-    .exec()
+  const user = await User.findOne({ uid }).exec()
 
   if (!user) {
     ctx.throw(400, 'No such a user')
