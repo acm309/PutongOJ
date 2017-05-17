@@ -61,6 +61,9 @@ const actions = {
   updateUser ({commit}, payload) {
     return axios.put(`/users/${payload.uid}`, payload)
       .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         if (payload.updateList) {
           commit('updateOneUserInList', data)
         } else {
