@@ -1,6 +1,20 @@
 body
   font-size: 12
 
+.oj-hero
+  min-height: 100vh
+  display: flex
+  flex-direction: column
+  align-items: stretch
+  .oj-head
+    flex-grow: 0
+  .oj-body
+    flex-grow: 1
+  .oj-foot
+    flex-grow: 0
+    .footer
+      padding: 2rem 1.5rem
+
 .textarea.code
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace
   height: auto
@@ -41,3 +55,6 @@ div.split-line
 
 .notification.problem-meta
   cursor: move
+
+.footer
+  margin-top: 5em
