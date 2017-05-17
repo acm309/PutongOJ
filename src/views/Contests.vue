@@ -76,6 +76,9 @@ export default {
     },
     contest () {
       return this.$store.getters.contest
+    },
+    isAdmin () {
+      return this.$store.getters.isAdmin
     }
   },
   methods: {
@@ -91,6 +94,14 @@ export default {
       this.$store.commit('showLoginModal')
     },
     visitContest (contest) {
+      if (this.isAdmin) {
+        this.$router.push({
+          name: 'contest',
+          params: {
+            cid: contest.cid
+          }
+        })
+      }
       this.$store.commit('updateContest', { contest })
       if (this.currentTime < contest.start) {
         this.$store.dispatch('addMessage', {
@@ -118,7 +129,7 @@ export default {
       } else {
         this.$router.push({
           name: 'contest',
-          cid: contest.cid
+          params: {cid: contest.cid}
         })
       }
     },
