@@ -228,6 +228,9 @@ async function verifyArgument (ctx, next) {
     return
   }
   const cid = +ctx.params.cid
+  if (ctx.session.user.verifiedContests.indexOf(cid) !== -1) {
+    return // 已经验证过了
+  }
   const contest = await Contest.findOne({cid}).exec()
 
   if (contest.encrypt === ctx.config.encrypt.Password) {
@@ -243,6 +246,7 @@ async function verifyArgument (ctx, next) {
       ctx.throw(400, "You're not invited to attend this contest")
     }
   }
+  ctx.session.user.verifiedContests.push(cid)
 }
 
 module.exports = {
