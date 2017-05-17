@@ -79,9 +79,18 @@ export default {
     },
     isAdmin () {
       return this.$store.getters.isAdmin
+    },
+    self () {
+      return this.$store.getters.self
     }
   },
   methods: {
+    goToContest (cid) {
+      this.$router.push({
+        name: 'contest',
+        params: { cid }
+      })
+    },
     status (contest) {
       if (this.$store.getters.currentTime < contest.start) {
         return 'Scheduled'
@@ -94,14 +103,12 @@ export default {
       this.$store.commit('showLoginModal')
     },
     visitContest (contest) {
-      if (this.isAdmin) {
-        this.$router.push({
-          name: 'contest',
-          params: {
-            cid: contest.cid
-          }
-        })
+      // Admin 或 已经验证过了
+      if (this.isAdmin || this.self.verifiedContests.indexOf(contest.cid) !== -1) {
+        this.goToContest(contest.cid)
+        return
       }
+
       this.$store.commit('updateContest', { contest })
       if (this.currentTime < contest.start) {
         this.$store.dispatch('addMessage', {
@@ -113,12 +120,8 @@ export default {
       } else if (contest.encrypt === this.encrypt.Private) {
         this.$store.dispatch('verifyArgument', { cid: contest.cid })
           .then(() => {
-            this.$router.push({
-              name: 'contest',
-              params: {
-                cid: contest.cid
-              }
-            })
+            this.goToContest(contest.cid)
+            this.$store.commit('addVerifiedContest', contest)
           })
           .catch((err) => {
             this.$store.dispatch('addMessage', {
@@ -127,10 +130,8 @@ export default {
             })
           })
       } else {
-        this.$router.push({
-          name: 'contest',
-          params: {cid: contest.cid}
-        })
+        this.goToContest(contest.cid)
+        this.$store.commit('addVerifiedContest', contest)
       }
     },
     verifyPwd () {
@@ -138,12 +139,8 @@ export default {
         cid: this.contest.cid,
         argument: this.pwd
       }).then(() => {
-        this.$router.push({
-          name: 'contest',
-          params: {
-            cid: this.contest.cid
-          }
-        })
+        this.goToContest(this.contest.cid)
+        this.$store.commit('addVerifiedContest', this.contest)
       }).catch((err) => {
         this.$store.dispatch('addMessage', {
           body: err.message,
