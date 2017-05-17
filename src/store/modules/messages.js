@@ -8,13 +8,13 @@ const getters = {
 
 const mutations = {
   addMessage (state, payload) {
-    state.messages.push({
+    state.messages.unshift({
       body: payload.body,
       type: payload.type || 'success'
     })
   },
   removeMessage (state, payload) {
-    state.messages.shift()
+    state.messages.pop()
   }
 }
 
