@@ -32,14 +32,14 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   created () {
     this.$store.dispatch('fetchNewsList')
   },
   computed: {
-    newsList () {
-      return this.$store.getters.newsList
-    }
+    ...mapGetters([ 'newsList' ])
   },
   methods: {
     changeStatus (news) {

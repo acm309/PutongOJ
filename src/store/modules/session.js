@@ -17,6 +17,9 @@ const mutations = {
   },
   deleteSelf (state, payload) {
     state.self = null
+  },
+  addVerifiedContest (state, payload) {
+    state.self.verifiedContests.push(payload.cid)
   }
 }
 

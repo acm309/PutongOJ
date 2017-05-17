@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Pagination from '../components/Pagination.vue'
 
@@ -24,7 +25,7 @@ export default {
     'oj-pagination': Pagination
   },
   props: [ 'page', 'limit' ],
-  created() {
+  created () {
     document.title = 'Home'
     this.$store.dispatch('fetchNewsList', {
       page: this.page,
@@ -40,12 +41,10 @@ export default {
     }
   },
   computed: {
-    newsList () {
-      return this.$store.getters.newsList
-    },
-    pagination () {
-      return this.$store.getters.newsPagination
-    }
+    ...mapGetters({
+      newsList: 'newsList',
+      pagination: 'newsPagination'
+    })
   }
 }
 </script>

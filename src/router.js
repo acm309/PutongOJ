@@ -28,6 +28,7 @@ import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
 import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
 import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
 import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
+import AdminProblemsTestData from './views/Admin/AdminProblemsTestData.vue'
 import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
 import AdminContestsList from './views/Admin/AdminContestsList.vue'
 import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
@@ -42,40 +43,22 @@ const routes = [
     path: '/',
     component: Home,
     name: 'home',
-    props: (route) => ({
-      page: route.query.page,
-      limit: route.query.limit
-    })
+    props: (route) => route.query
   }, {
     path: '/problems',
     component: Problems,
     name: 'problems',
-    props: (route) => ({
-      page: route.query.page,
-      limit: route.query.limit,
-      field: route.query.field,
-      query: route.query.query
-    })
+    props: (route) => route.query
   }, {
     path: '/status',
     component: Status,
     name: 'status',
-    props: (route) => ({
-      page: route.query.page,
-      limit: route.query.limit,
-      uid: route.query.uid,
-      pid: route.query.pid,
-      language: route.query.language,
-      judge: route.query.judge
-    })
+    props: (route) => route.query
   }, {
     path: '/ranklist',
     component: Ranklist,
     name: 'ranklist',
-    props: (route) => ({
-      page: route.query.page,
-      limit: route.query.limit
-    })
+    props: (route) => route.query
   }, {
     path: '/contests',
     component: Contests,
@@ -88,29 +71,21 @@ const routes = [
     path: '/news/:nid',
     component: News,
     name: 'news',
-    props: (route) => ({
-      nid: route.params.nid
-    })
+    props: true // passing params
   }, {
     path: '/problems/:pid',
     component: Problem,
     name: 'problem',
-    props: (route) => ({
-      pid: route.params.pid
-    })
+    props: true
   }, {
     path: '/statistics/:pid',
     component: Statistics,
     name: 'statistics',
-    props: (route) => ({
-      pid: route.params.pid
-    })
+    props: true
   }, {
     path: '/users/:uid',
     component: User,
-    props: (route) => ({
-      uid: route.params.uid
-    }),
+    props: true,
     children: [{
       path: '',
       component: UserProfile,
@@ -127,45 +102,28 @@ const routes = [
   }, {
     path: '/contests/:cid',
     component: Contest,
-    props: (route) => ({
-      cid: route.params.cid
-    }),
+    props: true,
     children: [{
       path: '',
       // Warning: 这是默认子路由，导航时这个 name 放在子路由里，别放在上一代路由里
       name: 'contest',
       component: ContestOverview,
-      props: (route) => ({
-        cid: route.params.cid
-      })
+      props: true
     }, {
       path: 'ranklist',
       name: 'contest_ranklist',
       component: ContestRanklist,
-      props: (route) => ({
-        cid: route.params.cid
-      })
+      props: true
     }, {
       path: 'problems/:pid',
       name: 'contest_problem',
       component: ContestProblem,
-      props: (route) => ({
-        cid: route.params.cid,
-        pid: route.params.pid
-      })
+      props: true
     }, {
       path: 'status',
       name: 'contest_status',
       component: ContestStatus,
-      props: (route) => ({
-        cid: route.params.cid,
-        page: route.query.page,
-        limit: route.query.limit,
-        uid: route.query.uid,
-        pid: route.query.pid,
-        language: route.query.language,
-        judge: route.query.judge
-      })
+      props: (route) => Object.assign({}, route.params, route.query)
     }]
   }, {
     path: '/admin',
@@ -182,9 +140,7 @@ const routes = [
       name: 'admin_news_edit',
       component: AdminNewsEdit,
       path: 'news/:nid',
-      props: (route) => ({
-        nid: route.params.nid
-      })
+      props: true
     }, {
       name: 'admin_news_add',
       component: AdminNewsAdd,
@@ -193,10 +149,7 @@ const routes = [
       path: 'problems',
       component: AdminProblemsList,
       name: 'admin_problems_list',
-      props: (route) => ({
-        page: route.query.page,
-        limit: route.query.limit
-      })
+      props: (route) => route.query
     }, {
       path: 'problems/add',
       component: AdminProblemAdd,
@@ -205,17 +158,17 @@ const routes = [
       path: 'problems/:pid',
       component: AdminProblemsEdit,
       name: 'admin_problems_edit',
-      props: (route) => ({
-        pid: route.params.pid
-      })
+      props: true
+    }, {
+      path: 'problems/:pid/testdata',
+      component: AdminProblemsTestData,
+      name: 'admin_problems_testdata',
+      props: true
     }, {
       path: 'contests',
       component: AdminContestsList,
       name: 'admin_contests_list',
-      props: (route) => ({
-        page: route.query.page,
-        limit: route.query.limit
-      })
+      props: (route) => route.query
     }, {
       path: 'contests/add',
       component: AdminContestsAdd,
@@ -224,9 +177,7 @@ const routes = [
       path: 'contests/:cid',
       component: AdminContestsEdit,
       name: 'admin_contests_edit',
-      props: (route) => ({
-        cid: route.params.cid
-      })
+      props: true
     }, {
       path: 'users/privilege',
       component: AdminUsersPrivilege,

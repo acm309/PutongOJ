@@ -13,6 +13,7 @@
           <th>Status</th>
           <th>Edit</th>
           <th>Delete</th>
+          <th>Testdata</th>
         </tr>
       </thead>
       <tbody>
@@ -32,6 +33,10 @@
           <td><a
             @click="del(problem)"
           >Delete</a></td>
+          <td><router-link
+            :to="{name: 'admin_problems_testdata', params: {pid: problem.pid}}"
+          > Test Data
+          </router-link></td>
         </tr>
       </tbody>
     </table>
@@ -44,6 +49,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Pagination from '../../components/Pagination.vue'
 
@@ -88,15 +94,11 @@ export default {
     }
   },
   computed: {
-    status () {
-      return this.$store.getters.status
-    },
-    problemsList () {
-      return this.$store.getters.problemsList
-    },
-    pagination () {
-      return this.$store.getters.problemsPagination
-    }
+    ...mapGetters({
+      status: 'status',
+      problemsList: 'problemsList',
+      pagination: 'problemsPagination'
+    })
   }
 }
 </script>

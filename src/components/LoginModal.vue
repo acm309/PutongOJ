@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   data () {
     return {
@@ -49,14 +51,12 @@ export default {
     }
   },
   computed: {
-    loginModalActive () {
-      return this.$store.getters.loginModalActive
-    }
+    ...mapGetters([ 'loginModalActive' ])
   },
   methods: {
-    closeModal () {
-      this.$store.commit('closeLoginModal')
-    },
+    ...mapMutations({
+      closeModal: 'closeLoginModal'
+    }),
     login () {
       if (!this.uid || !this.pwd) {
         this.error = 'Username and Password should not be empty'

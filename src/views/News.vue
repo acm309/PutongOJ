@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   props: ['nid'],
   created () {
@@ -22,9 +24,7 @@ export default {
     })
   },
   computed: {
-    news () {
-      return this.$store.getters.news
-    }
+    ...mapGetters([ 'news' ])
   }
 }
 </script>

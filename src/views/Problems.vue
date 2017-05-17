@@ -100,6 +100,8 @@
 
 <script>
 
+import { mapGetters } from 'vuex'
+
 import Pagination from '../components/Pagination.vue'
 import SubmitCodeModal from '../components/SubmitCodeModal.vue'
 
@@ -126,22 +128,16 @@ export default {
     })
   },
   computed: {
-    logined () {
-      return this.$store.getters.logined
-    },
-    problemsList () {
-      return this.$store.getters.problemsList
-    },
-    pagination () {
-      return this.$store.getters.problemsPagination
-    },
     solutionTitle () {
       // 代码提交框里的标题
       return `${this.submitProblem.pid} -- ${this.submitProblem.title}`
     },
-    judgeCode () {
-      return this.$store.getters.judgeCode
-    }
+    ...mapGetters({
+      logined: 'logined',
+      problemsList: 'problemsList',
+      pagination: 'problemsPagination',
+      judgeCode: 'judgeCode'
+    })
   },
   methods: {
     pageClick (page) {

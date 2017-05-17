@@ -49,7 +49,8 @@
 </template>
 
 <script>
-// TODO 权限检查
+import { mapGetters, mapMutations } from 'vuex'
+
 export default {
   data () {
     return {
@@ -62,23 +63,24 @@ export default {
     this.$store.dispatch('fetchContestsList')
   },
   computed: {
-    contestsList () {
-      return this.$store.getters.contestsList
-    },
-    logined () {
-      return this.$store.getters.logined
-    },
-    currentTime () {
-      return this.$store.getters.currentTime
-    },
-    encrypt () {
-      return this.$store.getters.encrypt
-    },
-    contest () {
-      return this.$store.getters.contest
-    }
+    ...mapGetters([
+      'contestsList',
+      'logined',
+      'currentTime',
+      'encrypt',
+      'contest',
+      'isAdmin',
+      'self'
+    ])
   },
   methods: {
+    ...mapMutations({ login: 'showLoginModal' }),
+    goToContest (cid) {
+      this.$router.push({
+        name: 'contest',
+        params: { cid }
+      })
+    },
     status (contest) {
       if (this.$store.getters.currentTime < contest.start) {
         return 'Scheduled'
@@ -87,10 +89,13 @@ export default {
       }
       return 'Running'
     },
-    login () {
-      this.$store.commit('showLoginModal')
-    },
     visitContest (contest) {
+      // Admin 或 已经验证过了
+      if (this.isAdmin || this.self.verifiedContests.indexOf(contest.cid) !== -1) {
+        this.goToContest(contest.cid)
+        return
+      }
+
       this.$store.commit('updateContest', { contest })
       if (this.currentTime < contest.start) {
         this.$store.dispatch('addMessage', {
@@ -102,12 +107,8 @@ export default {
       } else if (contest.encrypt === this.encrypt.Private) {
         this.$store.dispatch('verifyArgument', { cid: contest.cid })
           .then(() => {
-            this.$router.push({
-              name: 'contest',
-              params: {
-                cid: contest.cid
-              }
-            })
+            this.goToContest(contest.cid)
+            this.$store.commit('addVerifiedContest', contest)
           })
           .catch((err) => {
             this.$store.dispatch('addMessage', {
@@ -116,10 +117,8 @@ export default {
             })
           })
       } else {
-        this.$router.push({
-          name: 'contest',
-          cid: contest.cid
-        })
+        this.goToContest(contest.cid)
+        this.$store.commit('addVerifiedContest', contest)
       }
     },
     verifyPwd () {
@@ -127,12 +126,8 @@ export default {
         cid: this.contest.cid,
         argument: this.pwd
       }).then(() => {
-        this.$router.push({
-          name: 'contest',
-          params: {
-            cid: this.contest.cid
-          }
-        })
+        this.goToContest(this.contest.cid)
+        this.$store.commit('addVerifiedContest', this.contest)
       }).catch((err) => {
         this.$store.dispatch('addMessage', {
           body: err.message,

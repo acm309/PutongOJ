@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import ProblemContent from '../../components/ProblemContent.vue'
 import SubmitCodeModal from '../../components/SubmitCodeModal.vue'
@@ -48,15 +49,11 @@ export default {
     }
   },
   computed: {
-    defaultPid () {
-      return this.$store.getters.contestDefaultPid
-    },
-    problem () {
-      return this.$store.getters.problem
-    },
-    currentTime () {
-      return this.$store.getters.currentTime
-    }
+    ...mapGetters({
+      defaultPid: 'contestDefaultPid',
+      problem: 'problem',
+      currentTime: 'currentTime'
+    })
   },
   created () {
     this.$store.dispatch('fetchProblem', {

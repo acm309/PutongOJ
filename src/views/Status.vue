@@ -103,6 +103,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import SolutionItem from '../components/SolutionItem.vue'
 import Pagination from '../components/Pagination.vue'
@@ -123,18 +124,12 @@ export default {
   },
   props: [ 'page', 'limit', 'judge', 'language', 'uid', 'pid' ],
   computed: {
-    solutions () {
-      return this.$store.getters.solutionsList
-    },
-    pagination () {
-      return this.$store.getters.solutionsPagination
-    },
-    JUDGES () {
-      return this.$store.getters.judges
-    },
-    LANGUAGES () {
-      return this.$store.getters.languages
-    }
+    ...mapGetters({
+      solutions: 'solutionsList',
+      pagination: 'solutionsPagination',
+      JUDGES: 'judges',
+      LANGUAGES: 'languages'
+    })
   },
   created () {
     document.title = 'Status'

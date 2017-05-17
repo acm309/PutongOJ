@@ -58,33 +58,23 @@
       <router-view
         v-if="self && isAdmin"
       ></router-view>
+      <strong v-else>
+        You are not allowed to visit this page
+      </strong>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
-  created () {
-    if (!this.logined || !this.isAdmin) {
-      this.$router.push({
-        name: 'home'
-      })
-      this.$store.dispatch('addMessage', {
-        body: 'You are not allowed to visit this page',
-        type: 'warning'
-      })
-    }
-  },
   computed: {
-    self () {
-      return this.$store.getters.self
-    },
-    isAdmin () {
-      return this.$store.getters.isAdmin
-    },
-    logined () {
-      return this.$store.getters.logined
-    }
+    ...mapGetters([
+      'self',
+      'isAdmin',
+      'logined'
+    ])
   }
 }
 </script>

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import queryString from 'query-string'
 
 const state = {
   newsList: [],
@@ -46,7 +47,7 @@ const mutations = {
 
 const actions = {
   fetchNewsList ({commit}, payload) {
-    return axios.get('/news')
+    return axios.get('/news?' + queryString.stringify(payload))
       .then(({data}) => {
         commit('updateNewsList', {
           newsList: data.news

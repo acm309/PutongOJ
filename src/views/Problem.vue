@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
 
 import ProblemContent from '../components/ProblemContent.vue'
 import SubmitCodeModal from '../components/SubmitCodeModal.vue'
@@ -61,17 +62,13 @@ export default {
     })
   },
   computed: {
-    problem () {
-      return this.$store.getters.problem
-    },
-    self () {
-      return this.$store.getters.self
-    }
+    ...mapGetters([
+      'problem',
+      'self'
+    ])
   },
   methods: {
-    login () {
-      this.$store.commit('showLoginModal')
-    },
+    ...mapMutations({ login: 'showLoginModal' }),
     submit (payload) {
       this.$store.dispatch('submitSolution', Object.assign(payload, {
         pid: this.problem.pid

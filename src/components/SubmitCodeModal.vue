@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   props: {
     loading: {
@@ -59,9 +61,9 @@ export default {
     }
   },
   computed: {
-    LANGUAGES () {
-      return this.$store.getters.languages
-    }
+    ...mapGetters({
+      LANGUAGES: 'languages'
+    })
   },
   watch: {
     'language' (to, from) {

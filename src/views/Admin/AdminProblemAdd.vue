@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 import Quill from '../../components/Quill.vue'
 
@@ -105,9 +106,7 @@ export default {
     }
   },
   computed: {
-    problem () {
-      return this.$store.getters.problem
-    }
+    ...mapGetters([ 'problem' ])
   }
 }
 </script>

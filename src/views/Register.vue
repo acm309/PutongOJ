@@ -103,7 +103,6 @@ export default {
     cm_pwd (to, from) {
       this.error = ''
     }
-
   }
 }
 </script>

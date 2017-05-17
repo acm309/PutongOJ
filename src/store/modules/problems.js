@@ -98,6 +98,14 @@ const actions = {
           problem: data.problem
         })
       })
+  },
+  uploadTestData ({commit}, payload) {
+    return axios.post(`/problems/${payload.pid}/testdata`, payload.data)
+      .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
+      })
   }
 }
 
