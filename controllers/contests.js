@@ -53,8 +53,22 @@ async function queryOneContest (ctx, next) {
   if (!contest) {
     ctx.throw(400, 'No such a contest')
   }
-  ctx.body = {
-    contest
+
+  ctx.body = { contest }
+
+  if (isAdmin(ctx.session.user)) {
+    return
+  }
+  // 接下来的验证用于 非 admin
+  // 尚未验证此比赛
+  if (contest.encrypt !== ctx.config.encrypt.Public &&
+    ctx.session.user.verifiedContests.indexOf(cid) === -1) {
+    ctx.throw(400, contest.encrypt === ctx.config.encrypt.Password
+      ? 'You need to input a password to visit this contest'
+      : 'You are not invited to attend this contest')
+  }
+  if (contest.start > Date.now()) {
+    ctx.throw(400, 'This contest is still on scheduled')
   }
 }
 

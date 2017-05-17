@@ -25,6 +25,7 @@ async function login (ctx, next) {
   await user.save()
 
   ctx.session.user = only(user, 'uid nick privilege')
+  ctx.session.user.verifiedContests = [] // 验证过的比赛
   ctx.body = { user: ctx.session.user }
 }
 
