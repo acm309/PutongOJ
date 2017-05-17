@@ -25,7 +25,7 @@ export default {
     'oj-pagination': Pagination
   },
   props: [ 'page', 'limit' ],
-  created() {
+  created () {
     document.title = 'Home'
     this.$store.dispatch('fetchNewsList', {
       page: this.page,
