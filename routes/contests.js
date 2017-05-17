@@ -13,5 +13,6 @@ router.get('/:cid/ranklist', idNumberRequired('cid'), contests.ranklist)
 router.post('/', loginRequired, adminRequired, contests.create)
 router.put('/:cid', idNumberRequired('cid'), loginRequired, adminRequired, contests.update)
 router.del('/:cid', idNumberRequired('cid'), loginRequired, adminRequired, contests.del)
+router.post('/:cid/argument', idNumberRequired('cid'), loginRequired, contests.verifyArgument)
 
 module.exports = router

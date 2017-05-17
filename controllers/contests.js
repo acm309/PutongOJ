@@ -222,6 +222,27 @@ async function ranklist (ctx, next) {
   }
 }
 
+// 验证有没有被邀请或输入正确密码
+async function verifyArgument (ctx, next) {
+  const cid = +ctx.params.cid
+  const contest = await Contest.findOne({cid}).exec()
+  ctx.body = {}
+
+  if (contest.encrypt === ctx.config.encrypt.Password) {
+    if (contest.argument !== ctx.request.body.argument) {
+      ctx.body.error = 'Wrong password'
+    }
+  }
+
+  if (contest.encrypt === ctx.config.encrypt.Private) {
+    const argument = ctx.request.body.argument
+    const regexp = new RegExp(`\b${ctx.session.user.uid}\b`, 'g')
+    if (!regexp.test(argument)) {
+      ctx.body.error = "You're not invited to attend this contest"
+    }
+  }
+}
+
 module.exports = {
   queryList,
   queryOneContest,
@@ -229,5 +250,6 @@ module.exports = {
   update,
   del,
   overview,
-  ranklist
+  ranklist,
+  verifyArgument
 }
