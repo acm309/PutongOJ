@@ -10,7 +10,7 @@ const mutations = {
   addMessage (state, payload) {
     state.messages.unshift({
       body: payload.body,
-      type: payload.type || 'success'
+      type: payload.type || 'primary'
     })
   },
   removeMessage (state, payload) {
