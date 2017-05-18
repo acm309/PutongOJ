@@ -20,6 +20,9 @@ const mutations = {
   },
   addVerifiedContest (state, payload) {
     state.self.verifiedContests.push(payload.cid)
+  },
+  updateDefaultLanguage (state, payload) {
+    state.self.language = payload.language
   }
 }
 

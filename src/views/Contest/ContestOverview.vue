@@ -27,7 +27,7 @@
             >{{ problem.title }}</router-link></td>
           <td v-if="currentTime >= contest.start && currentTime <= contest.end">
             <a @click="submit(problem)">
-              <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+              <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
             </a>
           </td>
           <td>{{ ratio(problem) }}</td>
