@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+import NProgress from 'nprogress'
+
 import Home from './views/Home.vue'
 import Problems from './views/Problems.vue'
 import Status from './views/Status.vue'
@@ -194,9 +196,22 @@ const routes = [
   }
 ]
 
-export default new VueRouter({
+const router = new VueRouter({
   mode: 'history',
   routes,
   linkExactActiveClass: 'is-active',
   linkActiveClass: 'is-active'
 })
+
+NProgress.configure({ speed: 400 })
+
+router.beforeEach((to, from, next) => {
+  NProgress.start()
+  next()
+})
+
+router.afterEach(() => {
+  NProgress.done()
+})
+
+export default router
