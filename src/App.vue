@@ -4,7 +4,6 @@
       <div class="oj-head">
         <oj-nav></oj-nav>
       </div>
-      <br>
       <div class="oj-body">
         <div class="container">
           <router-view></router-view>

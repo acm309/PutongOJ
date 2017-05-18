@@ -7,8 +7,7 @@ Vue.use(Vuex)
 
 const state = {
   currentTime: Date.now(),
-  loginModalActive: false,
-  defaultLanguage: 1
+  loginModalActive: false
 }
 
 const getters = {
@@ -71,7 +70,6 @@ const getters = {
     Private: 2,
     Password: 3
   }),
-  defaultLanguage: (state) => state.defaultLanguage,
   status: (state) => ({
     Reserve: 0,
     Available: 2

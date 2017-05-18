@@ -8,14 +8,14 @@ var webpack = require('webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
-  entry: [
-    './src/main.js',
-    './src/assets/app.sass'
-  ],
+  entry: {
+    build: ['./src/main.js', './src/assets/app.sass'],
+    vendor: ['vue', 'vuex', 'vue-router', 'axios', 'moment', 'nprogress', 'left-pad', 'query-string']
+  },
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.js'
+    filename: '[name].js'
   },
   module: {
     rules: [
@@ -90,6 +90,11 @@ if (process.env.NODE_ENV === 'production') {
     new webpack.LoaderOptionsPlugin({
       minimize: true
     }),
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: Infinity,
+      filename: 'vendor.js'
+    })
   ])
 }

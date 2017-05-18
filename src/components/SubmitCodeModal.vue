@@ -47,7 +47,7 @@ export default {
     }
   },
   created () {
-    this.language = this.$store.getters.defaultLanguage
+    this.language = this.self.language
   },
   methods: {
     close () {
@@ -62,13 +62,14 @@ export default {
   },
   computed: {
     ...mapGetters({
-      LANGUAGES: 'languages'
+      LANGUAGES: 'languages',
+      self: 'self'
     })
   },
   watch: {
     'language' (to, from) {
       this.$store.commit('updateDefaultLanguage', {
-        language: + this.language
+        language: +this.language
       })
     }
   }

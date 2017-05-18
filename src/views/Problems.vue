@@ -45,7 +45,7 @@
             <a
               @click="submit(problem)"
               >
-              <i class="fa fa-paper-plane fa-lg" aria-hidden="true"></i>
+              <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
             </a>
           </td>
           <td> {{ ratio(problem) }}
