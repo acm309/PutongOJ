@@ -95,6 +95,8 @@ async function create (ctx, next) {
   await solution.save()
   await solution.pending()
 
+  ctx.session.user.language = solution.language // 设置为默认选择的语言
+
   ctx.body = {
     solution: {
       sid, pid, mid, code, language, length: code.length

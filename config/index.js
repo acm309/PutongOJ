@@ -50,6 +50,12 @@ config.encrypt = {
   Password: 3
 }
 
+config.language = {
+  C: 1,
+  Cpp: 2,
+  Java: 3
+}
+
 config.root = path.resolve(__dirname, '..')
 config.DataRoot = path.resolve(config.root, './data/Data')
 

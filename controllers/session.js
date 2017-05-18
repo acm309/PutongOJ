@@ -25,6 +25,7 @@ async function login (ctx, next) {
 
   ctx.session.user = only(user, 'uid nick privilege')
   ctx.session.user.verifiedContests = [] // 验证过的比赛
+  ctx.session.user.language = ctx.config.language.Cpp // 默认选择的语言
   ctx.body = { user: ctx.session.user }
 }
 
