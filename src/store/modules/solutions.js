@@ -6,7 +6,9 @@ const state = {
   solutionsPagination: {},
   solution: {},
   solutionModalActive: false,
-  sid: null
+  sid: null,
+  sim_s_id: null,
+  solutionSimActive: false
 }
 
 const getters = {
@@ -14,7 +16,9 @@ const getters = {
   solutionsPagination: (state) => state.solutionsPagination,
   solution: (state) => state.solution,
   solutionModalActive: (state) => state.solutionModalActive,
-  sid: (state) => state.sid
+  sid: (state) => state.sid,
+  sim_s_id: (state) => state.sim_s_id,
+  solutionSimActive: (state) => state.solutionSimActive
 }
 
 const mutations = {
@@ -33,6 +37,14 @@ const mutations = {
   },
   closeSolutionModal (state, payload) {
     state.solutionModalActive = false
+  },
+  showSim (state, payload) {
+    state.solutionSimActive = true
+    state.sid = payload.sid
+    state.sim_s_id = payload.sim_s_id
+  },
+  closeSim (state, payload) {
+    state.solutionSimActive = false
   }
 }
 
@@ -52,6 +64,7 @@ const actions = {
     return axios.get(`/status/${payload.sid}`)
       .then(({data}) => {
         commit('updateSolution', data)
+        return data.solution
       })
   },
   submitSolution ({commit}, payload) {
