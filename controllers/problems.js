@@ -1,4 +1,5 @@
 const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const fse = require('fs-extra')
@@ -35,9 +36,20 @@ async function queryList (ctx, next) {
       select: '-_id title pid solve submit status'
     })
 
+  let solved = []
+  if (ctx.session.user && res.docs.length) {
+    solved = await Solution
+      .where('uid', ctx.session.user.uid)
+      .where('judge', ctx.config.judge.Accepted)
+      .where('pid').gte(res.docs[0].pid).lte(res.docs[res.docs.length - 1].pid)
+      .distinct('pid')
+      .exec()
+  }
+
   ctx.body = {
     problems: res.docs,
-    pagination: extractPagination(res)
+    pagination: extractPagination(res),
+    solved
   }
 }
 

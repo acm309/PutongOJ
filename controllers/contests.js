@@ -1,5 +1,6 @@
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
@@ -199,8 +200,20 @@ async function overview (ctx, next) {
 
   const overview = await contest.fetchOverview()
 
+  const filters = ctx.session.user ? { uid: ctx.session.user.uid } : {}
+
+  const solved = await Solution
+    .find(Object.assign(filters, {
+      mid: contest.cid,
+      judge: ctx.config.judge.Accepted,
+      module: ctx.config.module.Contest
+    }))
+    .distinct('pid')
+    .exec()
+
   ctx.body = {
-    overview
+    overview,
+    solved
   }
 }
 
