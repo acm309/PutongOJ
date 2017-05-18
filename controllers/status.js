@@ -47,7 +47,7 @@ async function queryOneSolution (ctx, next) {
     ctx.throw(400, 'No such a solution')
   }
 
-  const select = 'sid uid pid judge time memory language length create code error ' + isAdmin(ctx.session.user) ? 'sim sim_s_id' : ''
+  const select = 'sid uid pid judge time memory language length create code error ' + (isAdmin(ctx.session.user) ? 'sim sim_s_id' : '')
 
   ctx.body = {
     solution: only(solution, select)
