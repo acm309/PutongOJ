@@ -23,20 +23,21 @@ import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
 import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
-import Admin from './views/Admin/Admin.vue'
-import AdminBoard from './views/Admin/Board.vue'
-import AdminNewsList from './views/Admin/AdminNewsList.vue'
-import AdminNewsAdd from './views/Admin/AdminNewsAdd.vue'
-import AdminNewsEdit from './views/Admin/AdminNewsEdit.vue'
-import AdminProblemsList from './views/Admin/AdminProblemsList.vue'
-import AdminProblemAdd from './views/Admin/AdminProblemAdd.vue'
-import AdminProblemsTestData from './views/Admin/AdminProblemsTestData.vue'
-import AdminProblemsEdit from './views/Admin/AdminProblemsEdit.vue'
-import AdminContestsList from './views/Admin/AdminContestsList.vue'
-import AdminContestsAdd from './views/Admin/AdminContestsAdd.vue'
-import AdminContestsEdit from './views/Admin/AdminContestsEdit.vue'
-import AdminUsersPrivilege from './views/Admin/AdminUsersPrivilege.vue'
-import AdminUsersPassword from './views/Admin/AdminUsersPassword.vue'
+
+const Admin = r => require.ensure([], () => r(require('./views/Admin/Admin.vue')), 'admin')
+const AdminBoard = r => require.ensure([], () => r(require('./views/Admin/Board.vue')), 'admin')
+const AdminNewsList = r => require.ensure([], () => r(require('./views/Admin/AdminNewsList.vue')), 'admin')
+const AdminNewsAdd = r => require.ensure([], () => r(require('./views/Admin/AdminNewsAdd.vue')), 'admin')
+const AdminNewsEdit = r => require.ensure([], () => r(require('./views/Admin/AdminNewsEdit.vue')), 'admin')
+const AdminProblemsList = r => require.ensure([], () => r(require('./views/Admin/AdminProblemsList.vue')), 'admin')
+const AdminProblemAdd = r => require.ensure([], () => r(require('./views/Admin/AdminProblemAdd.vue')), 'admin')
+const AdminProblemsTestData = r => require.ensure([], () => r(require('./views/Admin/AdminProblemsTestData.vue')), 'admin')
+const AdminProblemsEdit = r => require.ensure([], () => r(require('./views/Admin/AdminProblemsEdit.vue')), 'admin')
+const AdminContestsList = r => require.ensure([], () => r(require('./views/Admin/AdminContestsList.vue')), 'admin')
+const AdminContestsAdd = r => require.ensure([], () => r(require('./views/Admin/AdminContestsAdd.vue')), 'admin')
+const AdminContestsEdit = r => require.ensure([], () => r(require('./views/Admin/AdminContestsEdit.vue')), 'admin')
+const AdminUsersPrivilege = r => require.ensure([], () => r(require('./views/Admin/AdminUsersPrivilege.vue')), 'admin')
+const AdminUsersPassword = r => require.ensure([], () => r(require('./views/Admin/AdminUsersPassword.vue')), 'admin')
 
 Vue.use(VueRouter)
 
