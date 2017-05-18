@@ -6,7 +6,8 @@ const state = {
   contest: null,
   contestOverview: [],
   contestRanklist: [],
-  contestDefaultPid: 0
+  contestDefaultPid: 0,
+  contestOverviewSolved: []
 }
 
 const getters = {
@@ -14,7 +15,8 @@ const getters = {
   contest: (state) => state.contest,
   contestOverview: (state) => state.contestOverview,
   contestRanklist: (state) => state.contestRanklist,
-  contestDefaultPid: (state) => state.contestDefaultPid
+  contestDefaultPid: (state) => state.contestDefaultPid,
+  contestOverviewSolved: (state) => state.contestOverviewSolved
 }
 
 const mutations = {
@@ -77,6 +79,9 @@ const mutations = {
         state.contestsList.splice(i, 1, contest)
       }
     }
+  },
+  updateContestOverviewSolved (state, payload) {
+    state.contestOverviewSolved = payload.contestOverviewSolved
   }
 }
 
@@ -103,6 +108,9 @@ const actions = {
       .then(({data}) => {
         commit('updateContestOverview', {
           contestOverview: data.overview
+        })
+        commit('updateContestOverviewSolved', {
+          contestOverviewSolved: data.solved
         })
       })
   },

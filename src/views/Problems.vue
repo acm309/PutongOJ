@@ -32,7 +32,11 @@
       <tbody>
         <tr
           v-for="problem in problemsList">
-          <td></td>
+          <td><i
+            class="fa fa-check"
+            aria-hidden="true"
+            v-if="solved.indexOf(problem.pid) !== -1"
+          ></i></td>
           <td> {{ problem.pid }} </td>
           <td> <router-link
               :to="{name: 'problem', params: {pid: problem.pid}}"
@@ -136,7 +140,8 @@ export default {
       logined: 'logined',
       problemsList: 'problemsList',
       pagination: 'problemsPagination',
-      judgeCode: 'judgeCode'
+      judgeCode: 'judgeCode',
+      solved: 'problemsSolved'
     })
   },
   methods: {
@@ -158,7 +163,7 @@ export default {
     search () {
       this.pageClick(1) // 复用
     },
-    ratio(problem) {
+    ratio (problem) {
       if (problem.submit === 0) {
         return '0.00%'
       } else {
