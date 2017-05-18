@@ -1,7 +1,8 @@
 const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
+const only = require('only')
 
 /**
   返回一个 solution 的列表，以时间降序（从晚到早的排）
@@ -40,18 +41,16 @@ async function queryList (ctx, next) {
 */
 async function queryOneSolution (ctx, next) {
   const sid = +ctx.params.sid // router 那的中间件已经保证这是数字了
-  const solution = await Solution
-    .findOne({sid})
-    // 比上面函数里的 select 多了一个 code
-    .select('-_id sid uid pid judge time memory language length create sim sim_s_id code error')
-    .exec()
+  const solution = await Solution.findOne({sid}).exec()
 
   if (!solution) {
     ctx.throw(400, 'No such a solution')
   }
 
+  const select = 'sid uid pid judge time memory language length create code error ' + isAdmin(ctx.session.user) ? 'sim sim_s_id' : ''
+
   ctx.body = {
-    solution
+    solution: only(solution, select)
   }
 }
 
