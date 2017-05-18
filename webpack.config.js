@@ -89,6 +89,7 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
-    })
+    }),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
   ])
 }

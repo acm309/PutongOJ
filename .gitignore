@@ -3,6 +3,8 @@
 requests/
 data/
 public/uploads
+dist/*
+stats.json
 
 # macOS
 

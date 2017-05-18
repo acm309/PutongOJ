@@ -16,7 +16,14 @@
       >
       {{ solution.uid }}
     </router-link></td>
-    <td>{{ solution.judge | judgePretty }}</td>
+    <td :class="`is-judge-${solution.judge}`" >
+      {{ solution.judge | judgePretty }}
+      <span
+        class="tag is-danger sim"
+        v-if="isAdmin && solution.sim"
+        @click="showSim(solution.sid, solution.sim_s_id)"
+      >[{{ solution.sim }}%]{{ solution.sim_s_id }}</span>
+    </td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
     <td>
@@ -36,6 +43,12 @@ export default {
   methods: {
     showSource (solution) {
       this.$store.commit('showSolutionModal', solution)
+    },
+    showSim (s1, s2) {
+      this.$store.commit('showSim', {
+        sid: s1,
+        sim_s_id: s2
+      })
     }
   },
   computed: {

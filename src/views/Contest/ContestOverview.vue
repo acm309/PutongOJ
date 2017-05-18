@@ -17,7 +17,10 @@
       </tfoot>
       <tbody>
         <tr v-for="(problem, index) in overview">
-          <td></td>
+          <td><i
+            class="fa fa-check"
+            v-if="solved.indexOf(problem.pid) !== -1"
+            aria-hidden="true"></i></td>
           <td>{{ index }}</td>
           <td><router-link
             :to="{name: 'contest_problem', params: {cid: cid, pid: index}}"
@@ -86,7 +89,8 @@ export default {
   computed: {
     ...mapGetters({
       overview: 'contestOverview',
-      currentTime: 'currentTime'
+      currentTime: 'currentTime',
+      solved: 'contestOverviewSolved'
     })
   }
 }

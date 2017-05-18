@@ -17,7 +17,7 @@
     <hr>
     <button
       class="button is-primary" @click="submit"
-      disabled="currentTime <= contest.start || currentTime >= contest.end"
+      :disabled="currentTime <= contest.start || currentTime >= contest.end"
     >Submit</button>
     <p v-if="currentTime <= contest.start || currentTime >= contest.end">
       This contest is not on running, so you can't submit now.
@@ -68,11 +68,14 @@ export default {
     submit (problem) {
       this.active = true
     },
-    submitCode(payload) {
+    submitCode (payload) {
       payload.mid = this.cid
       payload.pid = this.problem.pid
       this.$store.dispatch('submitSolution', payload)
         .then(() => {
+          this.$router.push({
+            name: 'contest_status'
+          })
           this.active = false
         })
     },

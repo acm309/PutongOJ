@@ -17,16 +17,17 @@
     <oj-loginmodal></oj-loginmodal>
     <oj-solutionmodal v-if="$store.getters.solutionModalActive"></oj-solutionmodal>
     <oj-notification></oj-notification>
+    <oj-sim></oj-sim>
   </div>
 </template>
 
 <script>
-
 import Nav from './components/Nav.vue'
 import Footer from './components/Footer.vue'
 import LoginModal from './components/LoginModal.vue'
 import SolutionModal from './components/SolutionModal.vue'
 import Notifications from './components/Notifications.vue'
+import SimModal from './components/SolutionSimModal.vue'
 
 export default {
   name: 'app',
@@ -35,7 +36,8 @@ export default {
     'oj-loginmodal': LoginModal,
     'oj-solutionmodal': SolutionModal,
     'oj-notification': Notifications,
-    'oj-footer': Footer
+    'oj-footer': Footer,
+    'oj-sim': SimModal
   }
 }
 </script>

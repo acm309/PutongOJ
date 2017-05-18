@@ -4,13 +4,15 @@ import queryString from 'query-string'
 const state = {
   problemsList: [],
   problemsPagination: {},
-  problem: {}
+  problem: {},
+  problemsSolved: []
 }
 
 const getters = {
   problemsList: (state) => state.problemsList,
   problemsPagination: (state) => state.problemsPagination,
-  problem: (state) => state.problem
+  problem: (state) => state.problem,
+  problemsSolved: (state) => state.problemsSolved
 }
 
 const mutations = {
@@ -40,6 +42,9 @@ const mutations = {
         return
       }
     }
+  },
+  updateProblemsSolved (state, payload) {
+    state.problemsSolved = payload.problemsSolved
   }
 }
 
@@ -52,6 +57,9 @@ const actions = {
         })
         commit('updateProblemsPagination', {
           problemsPagination: data.pagination
+        })
+        commit('updateProblemsSolved', {
+          problemsSolved: data.solved
         })
       })
   },

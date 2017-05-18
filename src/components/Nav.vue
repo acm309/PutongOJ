@@ -28,22 +28,48 @@
           :to="{name: 'faq'}"
         >FAQ</router-link>
       </div>
-      <span class="nav-toggle">
+      <span class="nav-toggle" @click="active = !active">
         <span></span>
         <span></span>
         <span></span>
       </span>
-      <div class="nav-right nav-menu">
-        <a class="nav-item is-tab is-hidden-tablet is-active">Home</a>
-        <a class="nav-item is-tab is-hidden-tablet">Problems</a>
-        <a class="nav-item is-tab is-hidden-tablet">Status</a>
-        <a class="nav-item is-tab is-hidden-tablet">Ranklist</a>
-        <a class="nav-item is-tab is-hidden-tablet">Contests</a>
-        <a class="nav-item is-tab is-hidden-tablet">FAQ</a>
+      <div class="nav-right nav-menu" :class="{'is-active': active}">
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'home'}"
+          @click.native="active = false"
+          exact
+        >Home</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'problems'}"
+          @click.native="active = false"
+        >Problems</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'status'}"
+          @click.native="active = false"
+        >Status</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'ranklist'}"
+          @click.native="active = false"
+        >Ranklist</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'contests'}"
+          @click.native="active = false"
+        >Contests</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'faq'}"
+          @click.native="active = false"
+        >FAQ</router-link>
         <router-link
           class="nav-item is-tab"
           v-if="self"
           :to="{name: 'user', params: {uid: self.uid}}"
+          @click.native="active = false"
         > {{ self.uid }} </router-link>
         <a
           class="nav-item is-tab"
@@ -55,11 +81,13 @@
           class="nav-item is-tab"
           v-else
           :to="{name: 'register'}"
+          @click.native="active = false"
         >Register</router-link>
         <router-link
           class="nav-item is-tab"
           v-if="self && isAdmin"
           :to="{name: 'admin'}"
+          @click.native="active = false"
         >Admin</router-link>
       </div>
     </div>
@@ -70,6 +98,11 @@
 import { mapGetters, mapMutations } from 'vuex'
 
 export default {
+  data () {
+    return {
+      active: false
+    }
+  },
   methods: {
     ...mapMutations([ 'showLoginModal' ]),
     logout () {
