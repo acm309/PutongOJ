@@ -1,8 +1,9 @@
 # customary
 .tern-project
 requests/
-data/
+data/*
 public/uploads
+public/dist
 
 # macOS
 

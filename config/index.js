@@ -11,7 +11,7 @@ config.redisUrl = 'redis://localhost:6379'
 // 修改 /etc/mongod.conf； 注释 bind_ip 与 port
 config.mongoUrl = 'mongodb://127.0.0.1:27017/oj'
 
-// 一下常量一部分来自历史原因
+// 以下常量一部分来自历史原因
 // 一部分参考自: https://github.com/ZJGSU-Open-Source/GoOnlineJudge/blob/master/config/config.go
 config.privilege = {
   PrimaryUser: 1,
@@ -40,14 +40,20 @@ config.module = {
 }
 
 config.status = {
-  Reserve: 0,
+  Reserve: 0, // 是否开放给普通用户
   Available: 2
 }
 
 config.encrypt = {
   Public: 1,
-  Private: 2,
+  Private: 2, // 只有在特定列表中的人才能访问
   Password: 3
+}
+
+config.language = {
+  C: 1,
+  Cpp: 2,
+  Java: 3
 }
 
 config.root = path.resolve(__dirname, '..')

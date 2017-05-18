@@ -14,7 +14,7 @@ async function statistics (ctx, next) {
     ctx.throw(400, 'Pid should be a number')
   }
 
-  const problem = await Problem.findOne({pid})
+  const problem = await Problem.findOne({pid}).exec()
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')

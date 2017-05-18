@@ -1,9 +1,11 @@
 const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
 const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const fse = require('fs-extra')
 const path = require('path')
 const only = require('only')
+const send = require('koa-send')
 
 /** 返回题目列表 */
 async function queryList (ctx, next) {
@@ -20,7 +22,7 @@ async function queryList (ctx, next) {
       `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
   }
 
-  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+  if (!isAdmin(ctx.session.user)) {
     filter['status'] = ctx.config.status.Available
   }
 
@@ -34,9 +36,20 @@ async function queryList (ctx, next) {
       select: '-_id title pid solve submit status'
     })
 
+  let solved = []
+  if (ctx.session.user && res.docs.length) {
+    solved = await Solution
+      .where('uid', ctx.session.user.uid)
+      .where('judge', ctx.config.judge.Accepted)
+      .where('pid').gte(res.docs[0].pid).lte(res.docs[res.docs.length - 1].pid)
+      .distinct('pid')
+      .exec()
+  }
+
   ctx.body = {
     problems: res.docs,
-    pagination: extractPagination(res)
+    pagination: extractPagination(res),
+    solved
   }
 }
 
@@ -69,9 +82,8 @@ async function queryOneProblem (ctx, next) {
 /** 指定 pid, 更新一道已经存在的题目 */
 async function update (ctx, next) {
   const pid = +ctx.params.pid // router 那儿的中间件已经保证这是数字了
-  const problem = await Problem
-    .findOne({pid})
-    .exec()
+
+  const problem = await Problem.findOne({pid}).exec()
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')
@@ -106,9 +118,7 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const pid = +ctx.params.pid
-  const problem = await Problem
-    .findOne({pid})
-    .exec()
+  const problem = await Problem.findOne({pid}).exec()
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')
@@ -152,14 +162,21 @@ async function create (ctx, next) {
 }
 
 async function testData (ctx, next) {
+  if (!ctx.request.body.files.file) {
+    ctx.throw('You must upload a file')
+  }
   const dataPath = ctx.request.body.files.file.path
-  const type = ctx.query.type
-
+  const type = ctx.request.body.fields.type
   await fse.move(dataPath,
     path.resolve(ctx.config.DataRoot, `./${ctx.params.pid}/test.${type}`),
     {overwrite: true}
   )
   ctx.body = {}
+}
+
+async function sendTestData (ctx, next) {
+  const type = ctx.query.type
+  await send(ctx, `data/Data/${ctx.params.pid}/test.${type}`)
 }
 
 module.exports = {
@@ -168,5 +185,6 @@ module.exports = {
   update,
   del,
   create,
-  testData
+  testData,
+  sendTestData
 }

@@ -1,13 +1,13 @@
 const News = require('../models/News')
 const Ids = require('../models/ID')
-const { extractPagination, isUndefined } = require('../utils')
+const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
 /** 返回新闻列表 */
 async function queryList (ctx, next) {
   const filter = {}
   // 限制用户的查询，非 admin 只能看到非 Reserve 的部分，而 Admin 可以看到所有
-  if (!ctx.session.user || ctx.session.user.privilege !== ctx.config.privilege.Admin) {
+  if (!isAdmin(ctx.session.user)) {
     filter['status'] = ctx.config.status.Available
   }
 
@@ -69,7 +69,7 @@ async function create (ctx, next) {
 
   news.save()
 
-  ctx.body = {news: { nid, title, content }}
+  ctx.body = { news: { nid, title, content } }
 }
 
 /** 指定nid, 更新一个已存在的 News */
@@ -81,9 +81,7 @@ async function update (ctx, next) {
 
   const nid = +ctx.params.nid
 
-  const news = await News
-    .findOne({nid})
-    .exec()
+  const news = await News.findOne({ nid }).exec()
 
   if (!news) {
     ctx.throw(400, 'No such a news')
@@ -105,9 +103,7 @@ async function update (ctx, next) {
 async function del (ctx, next) {
   const nid = +ctx.params.nid
 
-  const news = await News
-    .findOne({nid})
-    .exec()
+  const news = await News.findOne({nid}).exec()
 
   if (!news) {
     ctx.throw(400, 'No such a news')
