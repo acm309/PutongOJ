@@ -13,7 +13,6 @@ import NotFound from './views/NotFound.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
-import Statistics from './views/Statistics.vue'
 import User from './views/User/User.vue'
 import UserProfile from './views/User/UserProfle.vue'
 import UserEdit from './views/User/UserEdit.vue'
@@ -23,6 +22,8 @@ import ContestOverview from './views/Contest/ContestOverview.vue'
 import ContestRanklist from './views/Contest/ContestRanklist.vue'
 import ContestProblem from './views/Contest/ContestProblem.vue'
 import ContestStatus from './views/Contest/ContestStatus.vue'
+
+const Statistics = r => require.ensure([], () => r(require('./views/Statistics.vue')), 'statistics')
 
 const Admin = r => require.ensure([], () => r(require('./views/Admin/Admin.vue')), 'admin')
 const AdminBoard = r => require.ensure([], () => r(require('./views/Admin/Board.vue')), 'admin')
