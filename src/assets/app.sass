@@ -1,10 +1,16 @@
+@import "./bulma-0.4.1/sass/utilities/initial-variables.sass"
+
+$primary: $purple
+
+@import "./bulma-0.4.1/bulma.sass"
+
 $pending: 0
 $runnning: 1
 $compile-error: 2
 $accepted: 3
 
-body
-  font-size: 12
+html
+  font-size: 15px
 
 .oj-hero
   min-height: 100vh
@@ -32,15 +38,15 @@ body
     vertical-align: middle
     &.is-first.is-success
       font-weight: bold
-      background-color: hsl(217, 71%, 53%)
-      color: white
+      background-color: $blue
+      color: $white
     &.is-success
       font-weight: bold
-      background-color: hsl(141, 71%, 48%)
-      color: white
+      background-color: $green
+      color: $white
     &.is-danger
       font-weight: bold
-      color: hsl(14, 100%, 53%)
+      color: $orange
 
 .modal-content.code-modal
   max-width: 80vw
@@ -76,13 +82,13 @@ div.split-line
 @for $i from 0 through 11
   .is-judge-#{$i}
     font-weight: bold
-    color: hsl(217, 71%, 53%)
+    color: $blue
 
 .is-judge-#{$accepted}
-  color: hsl(348, 100%, 61%)
+  color: $red
 
 .is-judge-#{$compile-error}
-  color: hsl(271, 100%, 71%)
+  color: $purple
 
 .is-judge-#{$pending}, .is-judge-#{$runnning}
   color: hsl(0, 0%, 21%)
@@ -91,7 +97,7 @@ div.split-line
   cursor: pointer
 
 .is-contest-Scheduled
-  color: hsl(217, 71%, 53%)
+  color: $blue
 
 .is-contest-Running
-  color: hsl(348, 100%, 61%)
+  color: $red
