@@ -2,7 +2,7 @@
   <article class="media">
     <figure class="media-left">
       <p class="image is-128-128">
-        <img src="http://bulma.io/images/placeholders/128x128.png">
+        <img src="/dist/avatar.png">
       </p>
     </figure>
     <div class="media-content">
@@ -12,37 +12,37 @@
         </p>
         <a class="panel-block is-active">
           <span class="panel-icon">
-            <i class="fa fa-book"></i>
+            <i class="fa fa-heart" aria-hidden="true"></i>
           </span>
           <b>Nick:&nbsp;</b> {{ user.nick }}
         </a>
         <a class="panel-block">
           <span class="panel-icon">
-            <i class="fa fa-book"></i>
+            <i class="fa fa-pencil" aria-hidden="true"></i>
           </span>
           <b>Motto:&nbsp;</b> {{ user.motto }}
         </a>
         <a class="panel-block">
           <span class="panel-icon">
-            <i class="fa fa-book"></i>
+            <i class="fa fa-envelope" aria-hidden="true"></i>
           </span>
           <b>Mail:&nbsp;</b>{{ user.mail }}
         </a>
         <a class="panel-block">
           <span class="panel-icon">
-            <i class="fa fa-book"></i>
+            <i class="fa fa-book" aria-hidden="true"></i>
           </span>
           <b>School:&nbsp;</b>{{ user.school }}
         </a>
         <a class="panel-block">
           <span class="panel-icon">
-            <i class="fa fa-code-fork"></i>
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
           </span>
           <b>Solved:&nbsp;</b> {{ solved.length }}
         </a>
         <a class="panel-block">
           <span class="panel-icon">
-            <i class="fa fa-code-fork"></i>
+            <i class="fa fa-minus-square" aria-hidden="true"></i>
           </span>
           <b>Unsolved:&nbsp;</b> {{ unsolved.length }}
         </a>
