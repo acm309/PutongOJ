@@ -16,7 +16,7 @@
       >
       {{ solution.uid }}
     </router-link></td>
-    <td>{{ solution.judge | judgePretty }}</td>
+    <td :class="`is-judge-${solution.judge}`" >{{ solution.judge | judgePretty }}</td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
     <td>

@@ -1,3 +1,8 @@
+$pending: 0
+$runnning: 1
+$compile-error: 2
+$accepted: 3
+
 body
   font-size: 12
 
@@ -58,3 +63,18 @@ div.split-line
 
 .footer
   margin-top: 5em
+
+// judges
+@for $i from 0 through 11
+  .is-judge-#{$i}
+    font-weight: bold
+    color: hsl(217, 71%, 53%)
+
+.is-judge-#{$accepted}
+  color: hsl(348, 100%, 61%)
+
+.is-judge-#{$compile-error}
+  color: hsl(271, 100%, 71%)
+
+.is-judge-#{$pending}, .is-judge-#{$runnning}
+  color: hsl(0, 0%, 21%)
