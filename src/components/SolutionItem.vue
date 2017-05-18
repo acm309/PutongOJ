@@ -16,7 +16,13 @@
       >
       {{ solution.uid }}
     </router-link></td>
-    <td :class="`is-judge-${solution.judge}`" >{{ solution.judge | judgePretty }}</td>
+    <td :class="`is-judge-${solution.judge}`" >
+      {{ solution.judge | judgePretty }}
+      <span
+        class="tag is-danger sim"
+        v-if="isAdmin && solution.sim"
+      >[{{ solution.sim }}%]{{ solution.sim_s_id }}</span>
+    </td>
     <td>{{ solution.time }} MS</td>
     <td>{{ solution.memory }} KB</td>
     <td>
