@@ -20,7 +20,7 @@
           <td><a v-if="logined" @click="visitContest(contest)"> {{ contest.title }} </a>
             <a @click="login" v-else>{{ contest.title }}</a>
           </td>
-          <td><b>{{ status(contest) }}</b></td>
+          <td><b :class="`is-contest-${status(contest)}`">{{ status(contest) }}</b></td>
           <td>{{ contest.start | timePretty }}</td>
           <td>{{ contest.encrypt | encryptPretty }}</td>
         </tr>
