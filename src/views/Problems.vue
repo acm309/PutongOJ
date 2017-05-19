@@ -40,7 +40,9 @@
           <td> {{ problem.pid }} </td>
           <td> <router-link
               :to="{name: 'problem', params: {pid: problem.pid}}"
-            > {{ problem.title }} </router-link></td>
+            > {{ problem.title }} </router-link>
+            <oj-reserve :status="problem.status"></oj-reserve>
+          </td>
           <td>
             <a
               @click="submit(problem)"
@@ -103,11 +105,11 @@
 </template>
 
 <script>
-
 import { mapGetters } from 'vuex'
 
 import Pagination from '../components/Pagination.vue'
 import SubmitCodeModal from '../components/SubmitCodeModal.vue'
+import ReservedSpan from '../components/ReservedSpan.vue'
 
 export default {
   props: [ 'page', 'limit' ],
@@ -122,7 +124,8 @@ export default {
   },
   components: {
     'oj-pagination': Pagination,
-    'oj-submitcodemodal': SubmitCodeModal
+    'oj-submitcodemodal': SubmitCodeModal,
+    'oj-reserve': ReservedSpan
   },
   created () {
     document.title = 'Problems'

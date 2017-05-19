@@ -19,6 +19,7 @@
           <td>{{ contest.cid }}</td>
           <td><a v-if="logined" @click="visitContest(contest)"> {{ contest.title }} </a>
             <a @click="login" v-else>{{ contest.title }}</a>
+            <oj-reserve :status="contest.status"></oj-reserve>
           </td>
           <td><b :class="`is-contest-${status(contest)}`">{{ status(contest) }}</b></td>
           <td>{{ contest.start | timePretty }}</td>
@@ -51,12 +52,17 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 
+import ReservedSpan from '../components/ReservedSpan.vue'
+
 export default {
   data () {
     return {
       active: false,
       pwd: ''
     }
+  },
+  components: {
+    'oj-reserve': ReservedSpan
   },
   created () {
     document.title = 'Contests'

@@ -3,7 +3,7 @@
     <h1 class="title is-1">News List</h1>
     <hr>
     <div class="notification" v-for="news in newsList" :key="news.nid">
-      <p>{{ news.title }}</p>
+      <p>{{ news.title }} <oj-reserve :status="news.status"></oj-reserve></p>
       <router-link
         :to="{name: 'news', params: {nid: news.nid}}"
       >Read More</router-link> {{ news.create | timePretty }}
@@ -19,10 +19,12 @@
 import { mapGetters } from 'vuex'
 
 import Pagination from '../components/Pagination.vue'
+import ReservedSpan from '../components/ReservedSpan.vue'
 
 export default {
   components: {
-    'oj-pagination': Pagination
+    'oj-pagination': Pagination,
+    'oj-reserve': ReservedSpan
   },
   props: [ 'page', 'limit' ],
   created () {
