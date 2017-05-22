@@ -38,8 +38,14 @@
           </td>
           <td>{{ user.nick }}</td>
           <td>{{ user.motto }}</td>
-          <td>{{ user.solve }}</td>
-          <td>{{ user.submit }}</td>
+          <td>
+            <router-link
+              :to="{name: 'status', query: {uid: user.uid, judge: judgeCode.Accepted}}"
+            >{{ user.solve }}</router-link></td>
+          <td>
+            <router-link
+              :to="{name: 'status', query: {uid: user.uid}}"
+            >{{ user.submit }}</router-link></td>
           <td>{{ ratio(user) }}</td>
         </tr>
       </tbody>
@@ -78,7 +84,8 @@ export default {
   computed: {
     ...mapGetters({
       ranklist: 'ranklist',
-      pagination: 'ranklistPagination'
+      pagination: 'ranklistPagination',
+      judgeCode: 'judgeCode'
     })
   },
   methods: {

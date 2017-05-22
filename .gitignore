@@ -3,7 +3,12 @@
 requests/
 data/
 public/uploads
-dist/*
+dist/images/*
+dist/0.js*
+dist/1.js*
+dist/build.css*
+dist/build.js*
+dist/vendor.js*
 stats.json
 
 # macOS
