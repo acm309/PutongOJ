@@ -76,7 +76,8 @@ ProblemSchema.plugin(mongoosePaginate)
 ProblemSchema.methods.saveSample = async function saveSample (root) {
   await Promise.all([
     fse.outputFile(path.resolve(root, `./${this.pid}/sample.in`), this.in),
-    fse.outputFile(path.resolve(root, `./${this.pid}/sample.out`), this.out)
+    fse.outputFile(path.resolve(root, `./${this.pid}/sample.out`), this.out),
+    fse.ensureDir(path.resolve(root, `./${this.pid}/ac`))
   ])
 }
 
