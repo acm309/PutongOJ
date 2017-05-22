@@ -37,7 +37,7 @@
 export default {
   props: ['problem'],
   mounted () {
-    new window.Clipboard(".copy")
+    new window.Clipboard('.copy')
   }
 }
 </script>

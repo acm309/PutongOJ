@@ -85,10 +85,10 @@ export default {
     }
   },
   watch: {
-    "uid" (to, from) {
+    'uid' (to, from) {
       this.error = ''
     },
-    "pwd" (to, from) {
+    'pwd' (to, from) {
       this.error = ''
     }
   }

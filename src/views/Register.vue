@@ -60,34 +60,30 @@ export default {
       // 做一些简单的校验
       if (!this.uid || !this.nick || !this.cm_pwd || !this.pwd) {
         this.error = 'Please complete all the fields'
-        return
       } else if (/[^\w\d]/ig.test(this.uid)) {
         this.error = 'Username should only consist of letters or numbers'
-        return
       } else if (this.pwd !== this.cm_pwd) {
         this.error = 'Two passwords are not same'
-        return
+      } else {
+        this.loading = true
+        this.$store.dispatch('register', {
+          uid: this.uid,
+          nick: this.nick,
+          pwd: this.pwd
+        }).then(() => {
+          this.$store.dispatch('addMessage', {
+            body: `Welcome, ${this.uid}`
+          })
+          this.$router.push({
+            name: 'user',
+            params: { uid: this.uid }
+          })
+          this.loading = false
+        }).catch((err) => {
+          this.error = err.message
+          this.loading = false
+        })
       }
-      this.loading = true
-      this.$store.dispatch('register', {
-        uid: this.uid,
-        nick: this.nick,
-        pwd: this.pwd
-      }).then(() => {
-        this.$store.dispatch('addMessage', {
-          body: `Welcome, ${this.uid}`
-        })
-        this.$router.push({
-          name: 'user',
-          params: {
-            uid: this.uid
-          }
-        })
-        this.loading = false
-      }).catch((err) => {
-        this.error = err.message
-        this.loading = false
-      })
     }
   },
   watch: {

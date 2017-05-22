@@ -62,13 +62,13 @@ export default {
   },
   props: {
     page: {
-      default: 1,
+      default: 1
     },
     limit: {
       default: 30
     }
   },
-  created() {
+  created () {
     document.title = 'Ranklist'
     this.$store.dispatch('fetchRanklist', {
       page: this.page,
@@ -93,9 +93,7 @@ export default {
     pageClick (page) {
       this.$router.push({
         name: 'ranklist',
-        query: {
-          page
-        }
+        query: { page }
       })
       // 同一组件，需要重新 dispatch
       // https://router.vuejs.org/en/essentials/dynamic-matching.html

@@ -66,7 +66,7 @@ export default {
   methods: {
     upload (type) {
       this.loading = true
-      const data = new FormData()
+      const data = new window.FormData()
       data.append('file', this.$refs[type].files[0])
       data.append('type', type)
       this.$store.dispatch('uploadTestData', {

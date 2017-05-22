@@ -44,14 +44,13 @@ export default {
   methods: {
     changeStatus (news) {
       const status = this.$store.getters.status
-      if (news.status === status.Reserve) {
-        news.status = status.Available
-      } else {
-        news.status = status.Reserve
-      }
-      this.$store.dispatch('updateNews', Object.assign(news, {
+      news.status = news.status === status.Reserve
+        ? status.Available
+        : status.Reserve
+      this.$store.dispatch('updateNews', {
+        ...news,
         updateList: true
-      }))
+      })
     },
     del (news) {
       this.$store.dispatch('deleteNews', news)

@@ -99,7 +99,7 @@ export default {
   },
   methods: {
     addProblem () {
-      for (let problem of this.problems) {
+      for (const problem of this.problems) {
         if (problem.pid === +this.pid) {
           this.$store.dispatch('addMessage', {
             body: `${problem.pid} has been added in the list!`,

@@ -95,12 +95,12 @@ export default {
   mounted () {
     this.$store.dispatch('fetchStatistics', { pid: this.pid })
       .then(() => {
-        let data_set = []
-        this.sum = 0;
-        for (let key in this.statistics) {
-          data_set.push({
+        const dataSet = []
+        this.sum = 0
+        for (const key in this.statistics) {
+          dataSet.push({
             name: this.$store.getters.abbrJudges[key],
-            y: + this.statistics[key]
+            y: +this.statistics[key]
           })
           this.sum += (+this.statistics[key])
         }
@@ -136,7 +136,7 @@ export default {
               },
               series: [{
                   colorByPoint: true,
-                  data: data_set
+                  data: dataSet
               }]
         }
 

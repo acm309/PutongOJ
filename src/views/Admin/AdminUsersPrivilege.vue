@@ -61,9 +61,10 @@ export default {
   methods: {
     remove (user) {
       user.privilege = this.privilege.PrimaryUser
-      this.$store.dispatch('updateUser', Object.assign(user, {
+      this.$store.dispatch('updateUser', {
+        ...user,
         updateList: true
-      }))
+      })
     },
     addUser () {
       this.$store.dispatch('updateUser', {

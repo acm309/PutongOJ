@@ -81,6 +81,9 @@
 
 <script>
 export default {
+  created () {
+    document.title = 'FAQ'
+  }
 }
 </script>
 

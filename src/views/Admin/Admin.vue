@@ -75,6 +75,9 @@ export default {
       'isAdmin',
       'logined'
     ])
+  },
+  created () {
+    document.title = 'Admin'
   }
 }
 </script>
