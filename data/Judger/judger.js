@@ -8,7 +8,6 @@ mongoose.Promise = global.Promise
 const Solution = require('../../models/Solution')
 const User = require('../../models/User')
 const Problem = require('../../models/Problem')
-const Contest = require('../../models/Contest')
 const shell = require('shelljs')
 const path = require('path')
 const fse = require('fs-extra')
@@ -33,15 +32,15 @@ logger.info('Start successfully:')
 
 function transToCode (judge) {
   return {
-    "Compile Error": 2,
-    "Accepted": 3,
-    "Runtime Error": 4,
-    "Wrong Answer": 5,
-    "Time Limit Exceeded": 6,
-    "Memory Limit Exceeded": 7,
-    "Output Limit Exceeded": 8,
-    "Presentation Error": 9,
-    "System Error": 10,
+    'Compile Error': 2,
+    'Accepted': 3,
+    'Runtime Error': 4,
+    'Wrong Answer': 5,
+    'Time Limit Exceeded': 6,
+    'Memory Limit Exceeded': 7,
+    'Output Limit Exceeded': 8,
+    'Presentation Error': 9,
+    'System Error': 10
   }[judge]
 }
 
@@ -55,7 +54,7 @@ async function init (root) {
 
 function brpop (...args) {
   return new Promise((resolve, reject) => {
-    client.brpop(...args, function(err, res) {
+    client.brpop(...args, function (err, res) {
       if (err) reject(err)
       resolve(res)
     })
@@ -87,9 +86,9 @@ async function judgeRun ({ pid, language, code }, { time: timeLimit, memory: mem
 
   error = error.join('\n')
 
-  if (judge !== 'Accepted'
-    || !fse.existsSync(`../Data/${pid}/test.in`)
-    || !fse.existsSync(`../Data/${pid}/test.out`)) {
+  if (judge !== 'Accepted' ||
+  !fse.existsSync(`../Data/${pid}/test.in`) ||
+  !fse.existsSync(`../Data/${pid}/test.out`)) {
     return {
       judge,
       time: +time,
@@ -100,7 +99,7 @@ async function judgeRun ({ pid, language, code }, { time: timeLimit, memory: mem
 
   await Promise.all([
     fse.copy(`../Data/${pid}/test.in`, './test/in.in'),
-    fse.copy(`../Data/${pid}/test.out`, './test/out.out'),
+    fse.copy(`../Data/${pid}/test.out`, './test/out.out')
     // fse.writeFile(`./test/${filename}`, code) // file has been writen just now
   ])
   shell.exec(`./Core -c ${'./test/' + filename} -t ${timeLimit} -m ${memoryLimit} -d ./test/`)
@@ -165,8 +164,6 @@ async function main () {
       ;[solution.sim, solution.sim_s_id] = [ sim, sim_s_id ]
       logger.info(`Sim test for Solution ${solution.sid}: ${sim}% for ${sim_s_id}`)
       await addToACCategory(solution)
-
-      
     }
     await solution.save()
     logger.info(`Solution ${solution.pid} has been judged and the judge code is ${result.judge}`)
@@ -176,17 +173,32 @@ async function main () {
       await redisLPUSH('contests', solution.sid)
     }
 
+    const ac = await Solution.findOne({
+      sid: {$ne: solution.sid}, // 这一条不算进去
+      uid: user.uid,
+      pid: solution.pid,
+      judge: config.judge.Accepted
+    }).exec()
+
+    const submit = await Solution.findOne({
+      sid: {$ne: solution.sid},
+      pid: solution.pid,
+      uid: user.uid
+    }).exec()
 
     const update = {
       $inc: {
-        submit: 1,
-        solve: solution.judge === config.judge.Accepted ? 1 : 0
+        submit: submit ? 0 : 1, // 提交过了就不更新了,
+        solve: !ac && solution.judge === config.judge.Accepted
+          ? 1 : 0 // 没有ac 过，但这次 ac 了 所有更新
       }
     }
+
     await Promise.all([
-      User.findOneAndUpdate({ uid: user.uid }, update).exec(),
-      Problem.findOneAndUpdate({ pid: problem.pid }, update).exec(),
+      Problem.findOneAndUpdate({pid: solution.pid}, update).exec(),
+      User.findOneAndUpdate({uid: solution.uid}, update).exec()
     ])
+
     logger.info(`Solve and submit have been updated`)
   }
 }
