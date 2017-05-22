@@ -2,9 +2,10 @@
 
 $primary: #7C4DFF
 
-$family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "PingFang SC", "Hiragino Sans GB", "Source Han Sans CN", "Source Han Sans SC", "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti", SimHei, "WenQuanYi Zen Hei Sharp", "Arial", sans-serif !default
+// 修改时 删去 !default
+$family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "PingFang SC", "Hiragino Sans GB", "Source Han Sans CN", "Source Han Sans SC", "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti", SimHei, "WenQuanYi Zen Hei Sharp", "Arial", sans-serif
 
-$family-monospace: "source code pro", "Consolas", "Lucida Console", "Monaco", "Andale Mono", monospace !default
+$family-monospace: "source code pro", "Consolas", "Lucida Console", "Monaco", "Andale Mono", monospace
 
 @import "./bulma-0.4.1/bulma.sass"
 @import "./utils/nprogress.sass"
@@ -37,8 +38,11 @@ html
       padding: 2rem 1.5rem
 
 .textarea.code
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace
+  font-family: $family-monospace
   height: auto
+
+code, pre
+  font-family: $family-monospace
 
 .contest-ranklist
   overflow: scroll
