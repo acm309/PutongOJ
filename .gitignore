@@ -2,8 +2,7 @@
 .tern-project
 requests/
 data/Data/*
-!data/Data/751
-!data/Data/752
+!data/Data/1000
 
 # macOS
 
