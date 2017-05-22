@@ -25,9 +25,9 @@ function isUndefined (item) {
   return typeof item === 'undefined'
 }
 
-function redisLPUSH (value) {
+function redisLPUSH (tag, value) {
   return new Promise((resolve, reject) => {
-    client.lpush('solutions', value, function (err, reply) {
+    client.lpush(tag, value, function (err, reply) {
       if (err) {
         reject(err)
       } else {

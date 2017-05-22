@@ -74,7 +74,7 @@ const SolutionSchema = mongoose.Schema({
 SolutionSchema.plugin(mongoosePaginate)
 
 SolutionSchema.methods.pending = async function () {
-  await redisLPUSH(this.sid)
+  await redisLPUSH('solutions', this.sid)
 }
 
 SolutionSchema.methods.isAccepted = function () {
