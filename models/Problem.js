@@ -97,7 +97,8 @@ ProblemSchema.statics.validate = function validate ({ title, time, memory }) {
     } else if (time < 100 || time > 10000) {
       error = 'time should be larger than 100 and smaller than 10000'
     }
-  } else if (!isUndefined(memory)) {
+  }
+  if (!isUndefined(memory)) {
     if (isNaN(memory) || memory === null || typeof +memory !== 'number') {
       error = 'Memory should not a number'
     } else if (memory < 100 || memory > 32768 * 4) {

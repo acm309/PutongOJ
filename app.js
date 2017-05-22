@@ -16,6 +16,8 @@ const path = require('path')
 const config = require('./config')
 const appRouter = require('./routes')
 
+const { browserSupport } = require('./middlewares')
+
 const app = new Koa()
 const server = http.createServer(app.callback())
 
@@ -23,6 +25,8 @@ if (process.env.NODE_ENV !== 'production') {
   const monitor = require('koa-monitor')
   app.use(convert(monitor(server, {path: '/monitor'})))
 }
+
+app.use(browserSupport)
 
 // 解决跨域请求问题，使得 cookie 能在不同域名间仍然能够传送
 app.use(convert(cors({

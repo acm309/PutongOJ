@@ -93,6 +93,7 @@ async function create (ctx, next) {
     : new Solution({ sid, pid, uid, mid, code, language: +language, length: code.length, module: ctx.config.module.Contest })
 
   await solution.save()
+  // 使其开始判题
   await solution.pending()
 
   ctx.session.user.language = solution.language // 设置为默认选择的语言
