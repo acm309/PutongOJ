@@ -42,6 +42,15 @@ export default {
   methods: {
     updateUser (payload) {
       this.$store.dispatch('updateUser', payload)
+        .then(() => {
+          this.$store.dispatch('addMessage', {
+            body: 'Successfully updated'
+          })
+          this.$router.push({
+            name: 'user',
+            params: { uid: this.self.uid }
+          })
+        })
         .catch((err) => {
           this.$store.dispatch('addMessage', {
             body: err.message,
@@ -57,7 +66,6 @@ export default {
             type: 'danger'
           })
         })
-
     }
   },
   watch: {

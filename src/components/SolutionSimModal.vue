@@ -15,18 +15,14 @@
               @click.native="closeSim"
               :to="{name: 'user', params: { uid: solution.uid }}"
             >{{ solution.uid }}</router-link>
-            <pre>
-              <code v-html="code(solution)"></code>
-            </pre>
+            <pre><code v-html="code(solution)"></code></pre>
           </div>
           <div>
             Author: <router-link
               @click.native="closeSim"
               :to="{name: 'user', params: { uid: sim_solution.uid }}"
             >{{ sim_solution.uid }}</router-link>
-            <pre>
-              <code v-html="code(sim_solution)"></code>
-            </pre>
+            <pre><code v-html="code(sim_solution)"></code></pre>
           </div>
         </div>
         <button class="modal-close" @click="closeSim"></button>
