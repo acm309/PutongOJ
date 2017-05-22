@@ -100,7 +100,7 @@ UserSchema.statics.validate = function validate ({
   }
 
   if (!isUndefined(mail)) {
-    if (!Isemail.validate(mail)) {
+    if (mail !== '' && !Isemail.validate(mail)) {
       error = `"${mail}" is not a standard email address`
     }
   }
