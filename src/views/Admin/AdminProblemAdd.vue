@@ -11,7 +11,7 @@
         MS
       </p>
     </div>
-    <label class="label">Time</label>
+    <label class="label">Memory</label>
     <div class="field is-grouped">
       <p class="control is-expanded">
         <input class="input" type="number" placeholder="Memory" v-model="memory">
