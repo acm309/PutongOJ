@@ -131,7 +131,9 @@ async function simTest (solution) {
 }
 
 async function addToACCategory (solution) {
-  let p = path.resolve(`../Data/${solution.pid}/ac/${solution.sid}.${extension[solution.language]}`)
+  await fse.ensureDir(path.resolve(`../Data/${solution.pid}/ac`))
+
+  const p = path.resolve(`../Data/${solution.pid}/ac/${solution.sid}.${extension[solution.language]}`)
   await fse.ensureFile(p)
   await fse.writeFile(p, solution.code)
   logger.info(`Solution ${solution.sid} has been added to ac category of ${solution.pid}`)
