@@ -70,9 +70,10 @@ export default {
   methods: {
     ...mapMutations({ login: 'showLoginModal' }),
     submit (payload) {
-      this.$store.dispatch('submitSolution', Object.assign(payload, {
+      this.$store.dispatch('submitSolution', {
+        ...payload,
         pid: this.problem.pid
-      }))
+      })
       .then(() => {
         // 跳转到 status 页面查看提交结果
         this.$router.push({

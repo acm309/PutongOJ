@@ -82,9 +82,9 @@ export default {
       } else if (this.encryptType === this.encrypt.Private) {
         this.argument.userlist = this.contest.argument
       }
-      Promise.all(this.contest.list.map((pid) => {
-        return this.$store.dispatch('fetchProblem', { pid })
-      })).then((problems) => {
+      Promise.all(this.contest.list.map(pid =>
+        this.$store.dispatch('fetchProblem', { pid })
+      )).then((problems) => {
         this.problems = problems
       })
     })

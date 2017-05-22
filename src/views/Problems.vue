@@ -30,23 +30,23 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="problem in problemsList">
-          <td><i
-            class="fa fa-check"
-            aria-hidden="true"
-            v-if="solved.indexOf(problem.pid) !== -1"
-          ></i></td>
+        <tr v-for="problem in problemsList">
+          <td>
+            <i
+              class="fa fa-check"
+              aria-hidden="true"
+              v-if="solved.indexOf(problem.pid) !== -1">
+            </i>
+          </td>
           <td> {{ problem.pid }} </td>
-          <td> <router-link
-              :to="{name: 'problem', params: {pid: problem.pid}}"
-            > {{ problem.title }} </router-link>
+          <td>
+            <router-link :to="{name: 'problem', params: {pid: problem.pid}}">
+              {{ problem.title }}
+            </router-link>
             <oj-reserve :status="problem.status"></oj-reserve>
           </td>
           <td>
-            <a
-              @click="submit(problem)"
-              >
+            <a @click="submit(problem)">
               <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
             </a>
           </td>
@@ -56,7 +56,8 @@
             >{{ problem.solve }}</router-link> /
             <router-link
               :to="{name: 'status', query: {pid: problem.pid}}"
-            >{{ problem.submit }}</router-link>) </td>
+            >{{ problem.submit }}</router-link>)
+          </td>
         </tr>
       </tbody>
       <tfoot>
@@ -89,9 +90,9 @@
       </p>
     </div>
     <transition
-    name="custom-classes-transition"
-    enter-active-class="animated fadeInUp"
-    leave-active-class="animated fadeOutDown"
+      name="custom-classes-transition"
+      enter-active-class="animated fadeInUp"
+      leave-active-class="animated fadeOutDown"
     >
       <oj-submitcodemodal
         v-if="active"
@@ -144,7 +145,8 @@ export default {
       problemsList: 'problemsList',
       pagination: 'problemsPagination',
       judgeCode: 'judgeCode',
-      solved: 'problemsSolved'
+      solved: 'problemsSolved',
+      self: 'self'
     })
   },
   methods: {
@@ -174,25 +176,26 @@ export default {
       }
     },
     submit (problem) {
-      if (!this.logined) {
+      if (this.logined) {
+        this.submitProblem = problem
+        this.active = true // 打开代码提交框
+      } else {
         // 先登录
         this.$store.commit('showLoginModal')
-        return
       }
-      this.submitProblem = problem
-      this.active = true // 打开代码提交框
     },
     submitCode (payload) {
       this.loading = true
-      this.$store.dispatch('submitSolution', Object.assign(payload, {
+      this.$store.dispatch('submitSolution', {
+        ...payload,
         pid: this.submitProblem.pid
-      }))
+      })
       .then(() => {
         this.loading = false
         this.$router.push({
           name: 'status',
           query: {
-            uid: this.$store.getters.self.uid
+            uid: this.self.uid
           }
         })
       })

@@ -34,7 +34,7 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import Pagination from '../../components/Pagination.vue'
+// import Pagination from '../../components/Pagination.vue'
 
 export default {
   props: ['page', 'limit'],
@@ -55,11 +55,9 @@ export default {
       this.$store.dispatch('deleteContest', contest)
     },
     changeStatus (contest) {
-      if (contest.status === this.status.Available) {
-        contest.status = this.status.Reserve
-      } else {
-        contest.status = this.status.Available
-      }
+      contest.status = contest.status === this.status.Available
+        ? this.status.Reserve
+        : this.status.Available
       this.$store.dispatch('updateContest', Object.assign(contest, {
         updateList: true
       }))

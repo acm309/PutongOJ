@@ -54,17 +54,17 @@ export default {
       default: ''
     }
   },
-  data() {
+  data () {
     return {
       editor: null,
       choose: 'upload',
       isActive: false,
       url: '',
-      isLoading: false,
+      isLoading: false
     }
   },
   methods: {
-    submit() {
+    submit () {
       let index = 0
       if (this.editor.getSelection()) {
         index = this.editor.getSelection().index
@@ -74,7 +74,7 @@ export default {
         this.isActive = false
       } else if (this.choose === 'upload') {
         this.isLoading = true
-        let data = new FormData()
+        const data = new window.FormData()
         data.append('file', this.$refs.file.files[0])
         this.$store.dispatch('submitImage', { data })
           .then(path => {
@@ -85,7 +85,7 @@ export default {
       }
     }
   },
-  mounted() { // 注意用 mounted 而不是 created
+  mounted () { // 注意用 mounted 而不是 created
     var toolbarOptions = [
       ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
       // ['image'],
@@ -102,32 +102,32 @@ export default {
       [{ 'align': [] }],
       ['clean'],                                        // remove formatting button
       // ['formula'],
-      ['image'],
-    ];
+      ['image']
+    ]
     let self = this
-    function imageHandler(image) {
+    function imageHandler (image) {
       self.isActive = true
     }
     this.editor = new Quill(this.$refs.editor, {
       theme: 'snow',
       modules: {
         // formula: true,
-        toolbar: toolbarOptions,
+        toolbar: toolbarOptions
       }
     })
     Vue.nextTick(() => {
       this.editor.root.innerHTML = this.initContent
     })
     let toolbar = this.editor.getModule('toolbar')
-    toolbar.addHandler('image', imageHandler);
+    toolbar.addHandler('image', imageHandler)
     this.editor.on('text-change', function () {
       if (self.editor.root) {
-        self.$emit("change", self.editor.root.innerHTML)
+        self.$emit('change', self.editor.root.innerHTML)
       }
     })
   },
   watch: {
-    initContent(to, from) {
+    initContent (to, from) {
       if (to) {
         this.editor.root.innerHTML = to
       }

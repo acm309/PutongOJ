@@ -85,11 +85,9 @@ export default {
       this.$store.dispatch('deleteProblem', problem)
     },
     changeStatus (problem) {
-      if (problem.status === this.status.Available) {
-        problem.status = this.status.Reserve
-      } else {
-        problem.status = this.status.Available
-      }
+      problem.status = problem.status === this.status.Available
+        ? this.status.Reserve
+        : this.status.Available
       this.$store.dispatch('updateProblem', problem)
     }
   },

@@ -78,15 +78,9 @@ export default {
     },
     createProblem () {
       this.$store.dispatch('createProblem', {
-        description: this.description,
-        input: this.input,
-        output: this.output,
+        ...this.$data,
         in: this.sampleInput,
-        out: this.sampleOutput,
-        hint: this.hint,
-        title: this.title,
-        time: this.time,
-        memory: this.memory
+        out: this.sampleOutput
       }).then(() => {
         this.$store.dispatch('addMessage', {
           body: `Problem ${this.problem.pid} ${this.problem.title} has been created`

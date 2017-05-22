@@ -86,9 +86,10 @@ export default {
         motto: this.motto || undefined,
         mail: this.mail || undefined
       }
-      this.$emit('updateUser', this.pwd === '' ? payload : Object.assign({
+      this.$emit('updateUser', this.pwd === '' ? payload : {
+        ...payload,
         pwd: this.pwd
-      }, payload))
+      })
     }
   },
   computed: {
