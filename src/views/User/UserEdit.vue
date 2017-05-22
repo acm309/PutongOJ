@@ -82,9 +82,9 @@ export default {
         uid: this.uid,
         nick: this.nick,
         // 如果不加 undefined，下列属性会当作空字符串传过去
-        school: this.school || undefined,
-        motto: this.motto || undefined,
-        mail: this.mail || undefined
+        school: this.school,
+        motto: this.motto,
+        mail: this.mail
       }
       this.$emit('updateUser', this.pwd === '' ? payload : {
         ...payload,
