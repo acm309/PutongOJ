@@ -60,6 +60,7 @@ export default {
     },
     refresh (uid) {
       this.$store.dispatch('fetchUser', { uid })
+        .then(() => { document.title = uid })
         .catch((err) => {
           this.$store.dispatch('addMessage', {
             body: err.message,
