@@ -36,10 +36,10 @@
   },
   "devDependencies": {
     "chai": "3.5.0",
-    "koa-monitor": "^0.3.0",
+    "koa-monitor": "0.3.0",
     "mocha": "3.3.0",
     "nodemon": "1.11.0",
-    "only": "^0.0.2",
+    "only": "0.0.2",
     "supertest": "3.0.0"
   }
 }
