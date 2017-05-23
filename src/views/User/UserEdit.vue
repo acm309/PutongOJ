@@ -89,6 +89,19 @@ export default {
       this.$emit('updateUser', this.pwd === '' ? payload : {
         ...payload,
         pwd: this.pwd
+      }).then(() => {
+        this.$store.dispatch('addMessage', {
+          body: 'Update successfully'
+        })
+        this.$router.push({
+          name: 'user',
+          params: { uid: this.uid }
+        })
+      }).catch((err) => {
+        this.$store.dispatch('addMessage', {
+          body: err.message,
+          type: 'danger'
+        })
       })
     }
   },
