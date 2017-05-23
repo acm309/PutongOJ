@@ -29,9 +29,9 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(browserSupport)
 
 // 解决跨域请求问题，使得 cookie 能在不同域名间仍然能够传送
-app.use(convert(cors({
+app.use(cors({
   credentials: true
-})))
+}))
 
 // 注入 config，在后续路由或中间件中，可以直接使用 ctx.config 访问
 app.use(async function (ctx, next) {
@@ -51,9 +51,9 @@ app.use(koaBody({
   urlencoded: true
 }))
 
-app.use(convert(staticCache(path.resolve(__dirname, 'public'), {
+app.use(staticCache(path.join(__dirname, 'public'), {
   maxAge: 7 * 24 * 60 * 60 // 7 天不更新，也就是缓存期限
-})))
+}))
 
 app.use(serve('public'))
 
