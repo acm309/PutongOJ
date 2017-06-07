@@ -66,6 +66,10 @@ const ProblemSchema = mongoose.Schema({
   hint: {
     type: String,
     default: ''
+  },
+  tags: {
+    type: [String],
+    default: []
   }
 }, {
   collection: 'Problem'
