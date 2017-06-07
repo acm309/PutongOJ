@@ -18,8 +18,14 @@ async function queryList (ctx, next) {
     // 使用 string 而不是 function 是因为，这里的 function 是不能访问到外部变量的
     // 用模板字符串生成筛选条件
     // 正则可以匹配更多的内容
-    filter.$where =
-      `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
+    if (ctx.query.field === 'tag') {
+      filter.tags = {
+        $in: [ new RegExp(ctx.query.query, 'i') ]
+      }
+    } else {
+      filter.$where =
+        `${new RegExp(ctx.query.query, 'i')}.test(this["${ctx.query.field}"])`
+    }
   }
 
   if (!isAdmin(ctx.session.user)) {
@@ -33,7 +39,7 @@ async function queryList (ctx, next) {
       sort: {pid: 1},
       // '-_id' 结果不包含 _id
       // http://stackoverflow.com/questions/9598505/mongoose-retrieving-data-without-id-field
-      select: '-_id title pid solve submit status'
+      select: '-_id title pid solve submit status tags'
     })
 
   let solved = []
@@ -62,7 +68,7 @@ async function queryOneProblem (ctx, next) {
 
   const problem = await Problem
     .findOne({pid})
-    .select('-_id pid title memory time description input output in out hint status')
+    // .select('-_id pid title memory time description input output in out hint status tags')
     .exec()
 
   if (!problem) {
@@ -96,13 +102,15 @@ async function update (ctx, next) {
 
   // 可更新的字段
   const fields = ['title', 'time', 'memory', 'input', 'output', 'in', 'out',
-    'description', 'hint', 'status']
+    'description', 'hint', 'status', 'tags']
 
   fields.forEach((field) => {
     if (!isUndefined(ctx.request.body[field])) {
       problem[field] = ctx.request.body[field]
     }
   })
+
+  problem.tags = problem.tags.map(tag => tag.toLowerCase())
 
   await problem.save()
   await problem.saveSample(ctx.config.DataRoot)
@@ -146,18 +154,20 @@ async function create (ctx, next) {
   })
   // 可选的其它字段
   ;['time', 'memory', 'description', 'in', 'out', 'input', 'output',
-    'hint', 'status'].forEach((item) => {
+    'hint', 'status', 'tags'].forEach((item) => {
       if (!isUndefined(ctx.request.body[item])) {
         problem[item] = ctx.request.body[item]
       }
     })
+
+  problem.tags = problem.tags.map(tag => tag.toLowerCase()())
 
   await problem.save()
   await problem.saveSample(ctx.config.DataRoot)
 
   ctx.body = {
     problem: only(problem,
-      ['pid', 'title', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status'])
+      ['pid', 'title', 'time', 'memory', 'description', 'in', 'out', 'input', 'output', 'hint', 'status', 'tags'])
   }
 }
 
