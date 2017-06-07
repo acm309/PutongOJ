@@ -37,6 +37,25 @@
     <label class="label">Sample Output</label>
     <textarea name="name" rows="8" cols="80" class="textarea code" v-model="sampleOutput"></textarea>
     <hr>
+    <label class="label">Tags</label>
+    <draggable v-model="tags">
+      <div v-for="(tag, index) in tags" class="notification problem-meta">
+        <button class="delete" @click="remove(index)"></button>
+        {{ tag }}
+      </div>
+    </draggable>
+    <br>
+    <div class="field is-grouped">
+      <p class="control is-expanded">
+        <input class="input" type="text" placeholder="Add a new tag" v-model="tag">
+      </p>
+      <p class="control">
+        <a class="button is-primary" @click="addTag">
+          Add
+        </a>
+      </p>
+    </div>
+    <hr>
     <button class="button is-primary" @click="updateProblem">Submit</button>
   </div>
 </template>
@@ -44,11 +63,14 @@
 <script>
 import { mapGetters } from 'vuex'
 
+import draggable from 'vuedraggable'
+
 import Quill from '../../components/Quill.vue'
 
 export default {
   components: {
-    'oj-quill': Quill
+    'oj-quill': Quill,
+    'draggable': draggable
   },
   props: ['pid'],
   data () {
@@ -60,7 +82,9 @@ export default {
       input: '',
       output: '',
       sampleInput: '',
-      sampleOutput: ''
+      sampleOutput: '',
+      tags: [],
+      tag: ''
     }
   },
   created () {
@@ -75,6 +99,7 @@ export default {
       this.output = this.problem.output
       this.sampleInput = this.problem.in
       this.sampleOutput = this.problem.out
+      this.tags = this.problem.tags
     })
   },
   methods: {
@@ -101,7 +126,8 @@ export default {
         hint: this.hint,
         title: this.title,
         time: this.time,
-        memory: this.memory
+        memory: this.memory,
+        tags: this.tags
       }).then(() => {
         this.$store.dispatch('addMessage', {
           body: `Problem ${this.problem.pid} ${this.problem.title} has been updated`
@@ -118,6 +144,19 @@ export default {
           type: 'danger'
         })
       })
+    },
+    addTag () {
+      if (this.tag.trim() === '') {
+        this.$store.dispatch('addMessage', {
+          body: `Tag name should not be empty`,
+          type: 'danger'
+        })
+      } else {
+        this.tags.push(this.tag)
+      }
+    },
+    remove (index) {
+      this.tags.splice(index, 1)
     }
   },
   computed: {

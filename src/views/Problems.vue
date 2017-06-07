@@ -9,8 +9,9 @@
       <p class="control">
         <span class="select">
           <select v-model="field">
-            <option value="pid">PID</option>
-            <option value="title">title</option>
+            <option value="pid">Pid</option>
+            <option value="title">Title</option>
+            <option value="tag">Tag</option>
           </select>
         </span>
       </p>
@@ -26,7 +27,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
+          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th> <th>Tags</th>
         </tr>
       </thead>
       <tbody>
@@ -58,11 +59,17 @@
               :to="{name: 'status', query: {pid: problem.pid}}"
             >{{ problem.submit }}</router-link>)
           </td>
+          <td>
+            <template  v-for="tag in problem.tags">
+              <span class="tag is-primary">{{ tag.toUpperCase() }}</span>
+              {{ ' ' }}
+            </template>
+          </td>
         </tr>
       </tbody>
       <tfoot>
         <tr>
-          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th>
+          <th>#</th> <th>PID</th> <th>Title</th> <th>Submit</th> <th>Ratio</th> <th>Tags</th>
         </tr>
       </tfoot>
     </table>
@@ -75,8 +82,9 @@
       <p class="control">
         <span class="select">
           <select v-model="field">
-            <option value="pid">PID</option>
-            <option value="title">title</option>
+            <option value="pid">Pid</option>
+            <option value="title">Title</option>
+            <option value="tag">Tag</option>
           </select>
         </span>
       </p>
@@ -167,6 +175,11 @@ export default {
     },
     search () {
       this.pageClick(1) // 复用
+    },
+    searchTag (tag) {
+      this.field = 'tag'
+      this.query = tag
+      this.pageClick(1)
     },
     ratio (problem) {
       if (problem.submit === 0) {
