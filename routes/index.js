@@ -22,8 +22,11 @@ api
   .use('/api', statistics.routes(), statistics.allowedMethods())
   .use('/api', session.routes(), session.allowedMethods())
 
-module.exports = function (app) {
-  app
-    .use(api.routes())
-    .use(api.allowedMethods())
+module.exports = function () {
+  return async function (ctx, next) {
+    ctx.app
+      .use(api.routes())
+      .use(api.allowedMethods())
+    await next()
+  }
 }

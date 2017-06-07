@@ -14,7 +14,7 @@ const http = require('http')
 const path = require('path')
 
 const config = require('./config')
-const appRouter = require('./routes')
+const router = require('./routes')
 
 const { browserSupport } = require('./middlewares')
 
@@ -98,7 +98,7 @@ app.use(async function (ctx, next) {
 mongoose.connect(config.mongoUrl)
 mongoose.Promise = global.Promise
 
-appRouter(app)
+app.use(router())
 
 if (process.env.NODE_ENV !== 'test') {
   console.log(`listening on port ${config.port}`)
