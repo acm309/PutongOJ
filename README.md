@@ -12,7 +12,7 @@
 
 ## 安装 Node.js
 
-要求 Node.js 版本大于等于 7.6.0。如果低于此版本，就已更新。
+要求 Node.js 版本大于等于 7.6.0。如果低于此版本，就请更新。
 
 如果没有安装过 Node.js，可以参考 [官网](https://nodejs.org/en/) 或这篇 [博客](https://my.oschina.net/blogshi/blog/260953)。
 
@@ -67,6 +67,21 @@ mongoUrl: 'mongodb://localhost:27017/oj' // mongodb 的连接字符串
 
 ```bash
 npm run start
+```
+
+## 判题端
+
+1.
+```sh
+cd data/Judger
+sudo node judger.js
+# 需要 root 权限
+```
+
+2.
+```sh
+cd data/RanklistUpdater
+node updater.js
 ```
 
 # TODO
