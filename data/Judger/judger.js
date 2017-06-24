@@ -23,6 +23,7 @@ mongoose.connect(config.mongoUrl)
 
 logger.default.transports.console.colorize = true
 
+// 判题端 (Core) 需要 root 权限
 if (!isRoot()) {
   logger.error('You must run this program as root')
   process.exit(0)
@@ -114,6 +115,7 @@ async function judgeRun ({ pid, language, code }, { time: timeLimit, memory: mem
   }
 }
 
+// 用 sim 检测，返回相似度 (sim) 以及 最相似的那个提交 (sim_s_id)
 async function simTest (solution) {
   const dir = path.resolve(`../Data/${solution.pid}/ac/`)
   // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
@@ -130,6 +132,7 @@ async function simTest (solution) {
   }
 }
 
+// 所有正确的提交需要放到一个文件夹下
 async function addToACCategory (solution) {
   await fse.ensureDir(path.resolve(`../Data/${solution.pid}/ac`))
 
