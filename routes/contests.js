@@ -1,18 +1,23 @@
 const Router = require('koa-router')
 const contests = require('../controllers/contests')
-const { loginRequired, adminRequired, idNumberRequired } = require('../middlewares')
+const { loginRequired, adminRequired } = require('../middlewares')
 
 const router = new Router({
   prefix: '/contests'
 })
 
-router.get('/', contests.queryList)
-router.get('/:cid', idNumberRequired('cid'), loginRequired, contests.queryOneContest)
-router.get('/:cid/overview', idNumberRequired('cid'), contests.overview)
-router.get('/:cid/ranklist', idNumberRequired('cid'), contests.ranklist)
-router.post('/', loginRequired, adminRequired, contests.create)
-router.put('/:cid', idNumberRequired('cid'), loginRequired, adminRequired, contests.update)
-router.del('/:cid', idNumberRequired('cid'), loginRequired, adminRequired, contests.del)
-router.post('/:cid/argument', idNumberRequired('cid'), loginRequired, contests.verifyArgument)
+router
+  .get('/', contests.queryList)
+  .post('/', loginRequired, adminRequired, contests.create)
+
+// 先验证 cid 再运行其它中间件
+router
+  .param('cid', contests.validateCid)
+  .get('/:cid', loginRequired, contests.queryOneContest)
+  .get('/:cid/overview', contests.overview)
+  .get('/:cid/ranklist', contests.ranklist)
+  .put('/:cid', loginRequired, adminRequired, contests.update)
+  .del('/:cid', loginRequired, adminRequired, contests.del)
+  .post('/:cid/argument', loginRequired, contests.verifyArgument)
 
 module.exports = router

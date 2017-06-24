@@ -5,6 +5,20 @@ const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
+/** 用于检查 url 中 cid 的合法性 */
+async function validateCid (cid, ctx, next) {
+  if (isNaN(+cid)) {
+    ctx.throw(400, 'Contest id (cid) should be a number')
+  }
+  const contest = await Contest.findOne({cid}).exec()
+
+  if (!contest) {
+    ctx.throw(400, 'No such a contest')
+  }
+  ctx.contest = contest
+  return next()
+}
+
 /** 返回比赛列表 */
 async function queryList (ctx, next) {
   const filter = {} // 用于 mongoose 的筛选
@@ -42,20 +56,13 @@ async function queryList (ctx, next) {
 
 /** 指定cid, 返回一个比赛的具体信息 */
 async function queryOneContest (ctx, next) {
-  const cid = +ctx.params.cid // router 那儿的中间件已经保证这是数字了
-
-  const contest = await Contest
-    .findOne({cid})
-    // argument 有时候可能是密码，因此这里根据权限返回不返回
-    .select(`-_id cid title encrypt start end list status ${isAdmin(ctx.session.user) ? 'argument' : ''}`)
-    .exec()
-
-  // 查无此比赛
-  if (!contest) {
-    ctx.throw(400, 'No such a contest')
+  const cid = +ctx.params.cid // 之前(validateCid)已经保证这是一个数字了
+  const contest = ctx.contest
+  ctx.body = {
+    contest: only(contest,
+      // argument 有时候可能是密码，因此这里根据权限返回不返回
+      `cid title encrypt start end list status ${isAdmin(ctx.session.user) ? 'argument' : ''}`)
   }
-
-  ctx.body = { contest }
 
   if (isAdmin(ctx.session.user)) {
     return
@@ -121,16 +128,7 @@ async function create (ctx, next) {
 }
 
 async function update (ctx, next) {
-  const cid = +ctx.params.cid
-
-  const contest = await Contest
-    .findOne({cid})
-    .exec()
-
-  // 查无此比赛
-  if (!contest) {
-    ctx.throw(400, 'No such a contest')
-  }
+  const contest = ctx.contest
 
   const verified = Contest.validate(ctx.request.body)
   if (!verified.valid) {
@@ -173,8 +171,7 @@ async function update (ctx, next) {
 
 async function del (ctx, next) {
   const cid = +ctx.params.cid
-
-  const contest = await Contest.findOne({cid}).exec()
+  const contest = ctx.contest
 
   if (!contest) {
     ctx.throw(400, 'No such a contest')
@@ -186,17 +183,7 @@ async function del (ctx, next) {
 }
 
 async function overview (ctx, next) {
-  const cid = +ctx.params.cid
-
-  if (isNaN(cid)) {
-    ctx.throw(400, 'Cid should be a number')
-  }
-
-  const contest = await Contest.findOne({cid}).exec()
-
-  if (!contest) {
-    ctx.throw(400, 'No such a contest')
-  }
+  const contest = ctx.contest
 
   const overview = await contest.fetchOverview()
 
@@ -218,13 +205,7 @@ async function overview (ctx, next) {
 }
 
 async function ranklist (ctx, next) {
-  const cid = +ctx.params.cid
-
-  const contest = await Contest.findOne({cid}).exec()
-
-  if (!contest) {
-    ctx.throw(400, 'No such a contest')
-  }
+  const contest = ctx.contest
 
   const ranklist = await contest.fetchRanklist()
 
@@ -241,10 +222,10 @@ async function verifyArgument (ctx, next) {
     return
   }
   const cid = +ctx.params.cid
+  const contest = ctx.contest
   if (ctx.session.user.verifiedContests.indexOf(cid) !== -1) {
     return // 已经验证过了
   }
-  const contest = await Contest.findOne({cid}).exec()
 
   if (contest.encrypt === ctx.config.encrypt.Password) {
     if (contest.argument !== ctx.request.body.argument) {
@@ -270,5 +251,6 @@ module.exports = {
   del,
   overview,
   ranklist,
-  verifyArgument
+  verifyArgument,
+  validateCid
 }
