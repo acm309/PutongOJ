@@ -4,6 +4,16 @@ const _ = require('ramda')
 const { generatePwd, isUndefined } = require('../utils')
 const only = require('only')
 
+/** 验证 uid 对应的用户是否存在 是否合法 */
+async function validateUid (uid, ctx, next) {
+  const user = await User.findOne({ uid }).exec()
+  if (!user) {
+    ctx.throw(400, 'No such a user')
+  }
+  ctx.user = user
+  return next()
+}
+
 async function queryUsers (ctx, next) {
   const filters = {}
   // 可用于筛选的条件，目前仅有此项
@@ -24,16 +34,7 @@ async function queryUsers (ctx, next) {
 */
 async function queryOneUser (ctx, next) {
   const uid = ctx.params.uid
-
-  const user = await User
-    .findOne({uid})
-    .select('-_id uid nick solve submit status timerecord iprecord school mail motto privilege')
-    .lean()
-    .exec()
-
-  if (!user) {
-    ctx.throw(400, 'No such a user')
-  }
+  const user = ctx.user
 
   let solved = await Solution
     .find({uid, judge: ctx.config.judge.Accepted})
@@ -50,7 +51,7 @@ async function queryOneUser (ctx, next) {
   unsolved = _.filter((pid) => !solved.includes(pid), unsolved)
 
   ctx.body = {
-    user,
+    user: only(user, 'uid nick solve submit status timerecord iprecord school mail motto privilege'),
     solved,
     unsolved
   }
@@ -102,9 +103,8 @@ async function register (ctx, next) {
   更新一个已存在用户
 */
 async function update (ctx, next) {
-  const uid = ctx.params.uid
-
-  const user = await User.findOne({ uid }).exec()
+  const user = ctx.user
+  const uid = user.uid
 
   if (!user) {
     ctx.throw(400, 'No such a user')
@@ -145,5 +145,6 @@ module.exports = {
   queryOneUser,
   register,
   update,
-  queryUsers
+  queryUsers,
+  validateUid
 }

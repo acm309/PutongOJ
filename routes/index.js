@@ -27,6 +27,6 @@ module.exports = function () {
     ctx.app
       .use(api.routes())
       .use(api.allowedMethods())
-    await next()
+    return next()
   }
 }

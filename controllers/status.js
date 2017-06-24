@@ -4,6 +4,20 @@ const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
+/** 验证 sid 是否为数字以及 sid 对应的 Solution 是否存在 */
+async function validateSid (sid, ctx, next) {
+  if (isNaN(+sid)) {
+    ctx.throw(400, 'Solution id (sid) should be a number')
+  }
+
+  const solution = await Solution.findOne({sid}).exec()
+  if (!solution) {
+    ctx.throw(400, 'No such a solution')
+  }
+  ctx.solution = solution
+  return next()
+}
+
 /**
   返回一个 solution 的列表，以时间降序（从晚到早的排）
 */
@@ -40,12 +54,7 @@ async function queryList (ctx, next) {
   返回一个具体的solution
 */
 async function queryOneSolution (ctx, next) {
-  const sid = +ctx.params.sid // router 那的中间件已经保证这是数字了
-  const solution = await Solution.findOne({sid}).exec()
-
-  if (!solution) {
-    ctx.throw(400, 'No such a solution')
-  }
+  const solution = ctx.solution
 
   const select = 'sid uid pid judge time memory language length create code error ' + (isAdmin(ctx.session.user) ? 'sim sim_s_id' : '')
 
@@ -109,14 +118,7 @@ async function create (ctx, next) {
   更新提交，其实就是 rejudge
 */
 async function rejudge (ctx, next) {
-  const sid = +ctx.params.sid
-  const solution = await Solution
-    .findOne({sid})
-    .exec()
-
-  if (!solution) {
-    ctx.throw(400, 'No such a solution')
-  }
+  const solution = ctx.solution
 
   await solution.save()
 
@@ -129,5 +131,6 @@ module.exports = {
   queryList,
   queryOneSolution,
   create,
-  rejudge
+  rejudge,
+  validateSid
 }
