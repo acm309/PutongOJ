@@ -1,5 +1,4 @@
 const Solution = require('../models/Solution')
-const Problem = require('../models/Problem')
 
 /**
   针对某一题的排名
@@ -10,21 +9,11 @@ const Problem = require('../models/Problem')
 async function statistics (ctx, next) {
   const pid = +ctx.params.pid
 
-  if (isNaN(pid)) {
-    ctx.throw(400, 'Pid should be a number')
-  }
-
-  const problem = await Problem.findOne({pid}).exec()
-
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
-
   // 聚合查询，所有 solutions 里每个用户只出现一次
   const solutions = await Solution.aggregate([
     { $match: {
       pid,
-      judge: 3 // TODO: fix this number to a constant variable
+      judge: ctx.config.judge.Accepted
     }},
     { $sort: {
       time: 1,
