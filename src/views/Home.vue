@@ -2,7 +2,7 @@
   <div>
     <h1 class="title is-1">News List</h1>
     <hr>
-    <div class="notification" v-for="news in newsList" :key="news.nid">
+    <div class="notification animated flipInX" v-for="news in newsList" :key="news.nid">
       <p>{{ news.title }} <oj-reserve :status="news.status"></oj-reserve></p>
       <router-link
         :to="{name: 'news', params: {nid: news.nid}}"

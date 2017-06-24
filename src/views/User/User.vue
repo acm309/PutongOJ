@@ -1,5 +1,5 @@
 <template lang="html">
-  <div>
+  <div class="animated bounceInUp">
     <div class="tabs" v-if="self && self.uid === user.uid">
       <ul>
         <router-link

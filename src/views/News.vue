@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="">
+  <div class="animated bounceInRight">
     <div class="content">
       <h1>{{ news.title }}</h1>
       <h6>{{ news.create | timePretty }}</h6>
