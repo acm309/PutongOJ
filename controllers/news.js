@@ -3,6 +3,21 @@ const Ids = require('../models/ID')
 const { extractPagination, isUndefined, isAdmin } = require('../utils')
 const only = require('only')
 
+/** 验证 nid */
+async function validateNid (nid, ctx, next) {
+  if (isNaN(+nid)) {
+    ctx.throw(400, 'News id (nid) should be a number')
+  }
+
+  const news = await News.findOne({ nid }).exec()
+  if (!news) {
+    ctx.throw(400, 'No such a news')
+  }
+
+  ctx.news = news
+  return next()
+}
+
 /** 返回新闻列表 */
 async function queryList (ctx, next) {
   const filter = {}
@@ -29,19 +44,10 @@ async function queryList (ctx, next) {
 
 /** 指定nid, 返回一条具体的新闻 */
 async function queryOneNews (ctx, next) {
-  const nid = +ctx.params.nid // router 那儿的中间件已经保证这是数字了
-
-  const news = await News
-    .findOne({nid})
-    .select('-_id title nid status create content')
-    .exec()
-
-  if (!news) {
-    ctx.throw(400, 'No such a problem')
-  }
+  const news = ctx.news
 
   ctx.body = {
-    news
+    news: only(news, 'title nid status create content')
   }
 }
 
@@ -79,13 +85,7 @@ async function update (ctx, next) {
     ctx.throw(400, verified.error)
   }
 
-  const nid = +ctx.params.nid
-
-  const news = await News.findOne({ nid }).exec()
-
-  if (!news) {
-    ctx.throw(400, 'No such a news')
-  }
+  const news = ctx.news
 
   for (let field of ['title', 'content', 'status']) {
     if (!isUndefined(ctx.request.body[field])) {
@@ -103,12 +103,6 @@ async function update (ctx, next) {
 async function del (ctx, next) {
   const nid = +ctx.params.nid
 
-  const news = await News.findOne({nid}).exec()
-
-  if (!news) {
-    ctx.throw(400, 'No such a news')
-  }
-
   await News.deleteOne({nid}).exec()
 
   ctx.body = {}
@@ -119,5 +113,6 @@ module.exports = {
   queryOneNews,
   create,
   update,
-  del
+  del,
+  validateNid
 }
