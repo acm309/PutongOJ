@@ -55,7 +55,12 @@ const UserSchema = mongoose.Schema({
 
 UserSchema.plugin(mongoosePaginate)
 
-UserSchema.methods.updateRecords = function updateRecords (ip, time) {
+/**
+  Update a user's iprecord and timerecord
+  @param {String} - ip
+  @param {Number} [time=Date.now()]
+*/
+UserSchema.methods.updateRecords = function updateRecords (ip, time = Date.now()) {
   this.iprecord.pop()
   this.iprecord.unshift(ip)
 

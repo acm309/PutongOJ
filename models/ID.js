@@ -12,6 +12,21 @@ const IdSchema = mongoose.Schema({
   collection: 'ids'
 })
 
+/**
+  Return a new id for required field
+  @param {String} [field=''] - the required field
+  @returns {Number} - a new id
+  @example
+    Before:
+      ids collection in db:
+        { "id" : 1, "name" : "News" }
+    After:
+      // return 2
+      ids.generateId('News')
+      ids collection in db:
+        { "id" : 2, "name" : "News" }
+
+*/
 IdSchema.statics.generateId = function (field = '') {
   field = field.toLocaleLowerCase()
   field = field[0].toLocaleUpperCase() + field.slice(1)

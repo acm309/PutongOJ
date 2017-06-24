@@ -6,8 +6,6 @@ mongoose.Promise = global.Promise
 mongoose.connect(config.mongoUrl)
 
 const Solution = require('../../models/Solution')
-const User = require('../../models/User')
-const Problem = require('../../models/Problem')
 const Contest = require('../../models/Contest')
 const logger = require('winston')
 
@@ -17,7 +15,7 @@ logger.info('Start successfully')
 
 function brpop (...args) {
   return new Promise((resolve, reject) => {
-    client.brpop(...args, function(err, res) {
+    client.brpop(...args, function (err, res) {
       if (err) reject(err)
       resolve(res)
     })
@@ -42,8 +40,8 @@ async function run () {
   const cid = solution.mid
   const contest = await Contest.findOne({ cid }).exec()
   await Promise.all([
-          contest.fetchRanklist(solution),
-          contest.fetchOverview(solution)
+    contest.fetchRanklist(solution),
+    contest.fetchOverview(solution)
   ])
   logger.info(`Success updated for contest ${contest.cid}`)
 }

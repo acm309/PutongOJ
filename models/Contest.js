@@ -41,6 +41,13 @@ const ContestSchema = mongoose.Schema({
 
 ContestSchema.plugin(mongoosePaginate)
 
+/**
+  Verify whether the target properties in the param object are validate.
+  If they are validate, the `valid` property in the returned object is true.
+  Otherwise, the valid property is false and the returned owns an `error` property (String) explaining why it is not valid.
+  @param {Object}
+  @returns {Object}
+*/
 ContestSchema.statics.validate = function ({
   title,
   list,
@@ -92,6 +99,10 @@ ContestSchema.methods.clearRanklist = function () {
 // 这个结果已经包括了 solution 了参数
 
 // get 与 set 分开，可能需要两者合并为一个原子操作保证安全
+/**
+  @param {Object} [solution] - the solution object
+  @returns {Object} the overview object
+*/
 ContestSchema.methods.fetchOverview = async function (solution) {
   let res = await redisGet(`contests:${this.cid}:overview`)
   if (res === null) {
@@ -127,6 +138,10 @@ ContestSchema.methods.fetchOverview = async function (solution) {
   return res
 }
 
+/**
+  @param {Object} [solution] - the solution object
+  @returns {Object} the ranklist object
+*/
 ContestSchema.methods.fetchRanklist = async function (solution) {
   const statusUpdate = (status, solution) => { // 里面用到了 this, 故意使用箭头函数
     // 提交过且正确了，接下来的不用管了
