@@ -1,3 +1,7 @@
+/**
+  Check whether the user is logined or not.
+  Throw an error when the user is logined.
+*/
 async function loginRequired (ctx, next) {
   if (!ctx.session.user) {
     ctx.throw(400, 'Please Login first')
@@ -5,6 +9,10 @@ async function loginRequired (ctx, next) {
   await next()
 }
 
+/**
+  Check whether the user is an admin.
+  Throw an error when the user is not an admin.
+*/
 async function adminRequired (ctx, next) {
   if (ctx.session.user.privilege !== ctx.config.privilege.Admin) {
     ctx.throw(400, 'Only admins are allowed to do this')
@@ -12,6 +20,10 @@ async function adminRequired (ctx, next) {
   await next()
 }
 
+/**
+  @deprecated
+  This same feature has been achieved by validatePid/validateNid/... in controllers
+*/
 function idNumberRequired (item) {
   return async function (ctx, next) {
     if (isNaN(+ctx.params[item])) {
@@ -21,6 +33,10 @@ function idNumberRequired (item) {
   }
 }
 
+/**
+  @returns {Object}
+  @description Return a object containing the browser type, version and recommendation for users
+*/
 async function browserSupport (ctx, next) {
   const browserDetect = function (ua) {
     var Sys = {}
