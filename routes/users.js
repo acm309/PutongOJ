@@ -6,9 +6,13 @@ const router = new Router({
   prefix: '/users'
 })
 
-router.get('/:uid', users.queryOneUser)
-router.post('/', users.register)
-router.put('/:uid', loginRequired, users.update)
-router.get('/', loginRequired, adminRequired, users.queryUsers)
+router
+  .param('uid', users.validateUid)
+  .get('/:uid', users.queryOneUser)
+  .put('/:uid', loginRequired, users.update)
+
+router
+  .post('/', users.register)
+  .get('/', loginRequired, adminRequired, users.queryUsers)
 
 module.exports = router
