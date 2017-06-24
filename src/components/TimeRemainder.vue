@@ -12,27 +12,33 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   props: ['start', 'end'],
   computed: {
     now () {
-      if (this.$store.getters.currentTime >= this.end) {
+      // 先确定比赛是否开始了
+      if (this.currentTime < this.start) {
+        return 0
+      } else if (this.currentTime >= this.end) {
         return this.end - this.start
       }
-      return this.$store.getters.currentTime - this.start
+      return this.currentTime - this.start
     },
     remaining () {
       return this.end - this.start - this.now
     },
     status () {
-      if (this.$store.getters.currentTime >= this.end) {
+      if (this.currentTime >= this.end) {
         return 'Ended'
       }
-      if (this.$store.getters.currentTime <= this.start) {
+      if (this.currentTime <= this.start) {
         return 'Scheduled'
       }
       return 'Running'
-    }
+    },
+    ...mapGetters([ 'currentTime' ])
   }
 }
 </script>
