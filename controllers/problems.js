@@ -7,6 +7,21 @@ const path = require('path')
 const only = require('only')
 const send = require('koa-send')
 
+/** 验证 pid 是否为数字 以及 pid 对应的题目是否存在 */
+async function validatePid (pid, ctx, next) {
+  if (isNaN(+pid)) {
+    ctx.throw(400, 'Problem id (pid) should be a number')
+  }
+
+  const problem = await Problem.findOne({ pid }).exec()
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  ctx.problem = problem
+  return next()
+}
+
 /** 返回题目列表 */
 async function queryList (ctx, next) {
   const filter = {} // 用于 mongoose 的筛选
@@ -61,19 +76,7 @@ async function queryList (ctx, next) {
 
 /** 指定pid, 返回一个具体的题目 */
 async function queryOneProblem (ctx, next) {
-  const pid = +ctx.params.pid
-  if (isNaN(pid)) {
-    ctx.throw(400, 'Pid should be a number')
-  }
-
-  const problem = await Problem
-    .findOne({pid})
-    // .select('-_id pid title memory time description input output in out hint status tags')
-    .exec()
-
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
+  const problem = ctx.problem
 
   // 是在一般页面中查询，而非在比赛中查询，此时需要验证用户是否可以查看
   if (isUndefined(ctx.query.mid) && (problem.status === ctx.config.status.Reserve && !isAdmin(ctx.session.user))) {
@@ -87,9 +90,7 @@ async function queryOneProblem (ctx, next) {
 
 /** 指定 pid, 更新一道已经存在的题目 */
 async function update (ctx, next) {
-  const pid = +ctx.params.pid // router 那儿的中间件已经保证这是数字了
-
-  const problem = await Problem.findOne({pid}).exec()
+  const problem = ctx.problem
 
   if (!problem) {
     ctx.throw(400, 'No such a problem')
@@ -116,21 +117,12 @@ async function update (ctx, next) {
   await problem.saveSample(ctx.config.DataRoot)
 
   ctx.body = {
-    problem: {
-      pid,
-      title: problem.title,
-      status: problem.status
-    }
+    problem: only(problem, 'pid title status')
   }
 }
 
 async function del (ctx, next) {
   const pid = +ctx.params.pid
-  const problem = await Problem.findOne({pid}).exec()
-
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
 
   await Problem.deleteOne({pid}).exec()
   ctx.body = {}
@@ -196,5 +188,6 @@ module.exports = {
   del,
   create,
   testData,
-  sendTestData
+  sendTestData,
+  validatePid
 }
