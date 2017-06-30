@@ -10,6 +10,17 @@ const send = require('koa-send')
 const mongoose = require('mongoose')
 const cors = require('kcors')
 const http = require('http')
+const winston = require('winston')
+const moment = require('moment')
+winston.configure({
+  transports: [
+    new (winston.transports.File)({
+      filename: 'oj-error.log',
+      json: false,
+      timestamp: () => moment().format('YYYY-MM-DD HH:mm:ss')
+    })
+  ]
+})
 
 const path = require('path')
 
@@ -82,6 +93,7 @@ app.use(async function (ctx, next) {
       error: err.message || 'Unknown message, please contact the admin'
     }
     console.log(err.message, err.stack)
+    winston.error(`${ctx.method} ${ctx.url} \n${err.stack}`)
   }
 })
 

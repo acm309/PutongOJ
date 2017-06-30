@@ -1466,6 +1466,10 @@ mocha@3.3.0:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
+moment@2.18.1:
+  version "2.18.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
+
 mongodb-core@2.1.10:
   version "2.1.10"
   resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.10.tgz#eb290681d196d3346a492161aa2ea0905e63151b"
