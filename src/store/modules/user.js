@@ -1,5 +1,4 @@
 import axios from 'axios'
-import queryString from 'query-string'
 
 const state = {
   user: {},
@@ -74,7 +73,7 @@ const actions = {
       })
   },
   fetchUsersList ({commit}, payload) {
-    return axios.get('/users?' + queryString.stringify(payload))
+    return axios.get('/users', { params: payload })
       .then(({data}) => {
         commit('updateUsersList', {
           usersList: data.users

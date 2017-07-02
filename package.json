@@ -26,7 +26,6 @@
     "moment": "2.18.1",
     "node-sass": "^4.5.0",
     "nprogress": "0.2.0",
-    "query-string": "4.3.4",
     "quill": "1.2.4",
     "sass-loader": "^5.0.1",
     "style-loader": "0.17.0",

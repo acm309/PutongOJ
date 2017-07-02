@@ -1,5 +1,4 @@
 import axios from 'axios'
-import queryString from 'query-string'
 
 const state = {
   problemsList: [],
@@ -50,7 +49,7 @@ const mutations = {
 
 const actions = {
   fetchProblemsList ({commit}, payload) {
-    return axios.get('/problems?' + queryString.stringify(payload))
+    return axios.get('/problems', { params: payload })
       .then(({data}) => {
         commit('updateProblemsList', {
           problemsList: data.problems
@@ -64,7 +63,7 @@ const actions = {
       })
   },
   fetchProblem ({commit}, payload) {
-    return axios.get(`/problems/${payload.pid}?` + queryString.stringify(payload))
+    return axios.get(`/problems/${payload.pid}`, { params: payload })
       .then(({data}) => {
         if (data.error) {
           throw new Error(data.error)
