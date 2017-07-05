@@ -10,6 +10,7 @@ const ranklist = require('./ranklist')
 const status = require('./status')
 const statistics = require('./statistics')
 const session = require('./session')
+const testdata = require('./testdata')
 
 api
   .use('/api', contests.routes(), contests.allowedMethods())
@@ -27,6 +28,8 @@ module.exports = function () {
     ctx.app
       .use(api.routes())
       .use(api.allowedMethods())
+      .use(testdata.routes())
+      .use(testdata.allowedMethods())
     return next()
   }
 }

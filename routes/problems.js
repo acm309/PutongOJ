@@ -11,8 +11,6 @@ router
   .get('/:pid', problems.queryOneProblem)
   .put('/:pid', loginRequired, adminRequired, problems.update)
   .del('/:pid', loginRequired, adminRequired, problems.del)
-  .post('/:pid/testdata', loginRequired, adminRequired, problems.testData)
-  .get('/:pid/testdata', loginRequired, adminRequired, problems.sendTestData)
 
 router
   .get('/', problems.queryList)
