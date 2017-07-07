@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="animated fadeInRight">
+  <div>
     <div class="content">
       <oj-problemcontent :problem="problem">
       </oj-problemcontent>
