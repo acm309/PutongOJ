@@ -13,6 +13,10 @@ Vue.filter('timePretty', function (time) {
   return moment(parseInt(time)).format('YYYY-MM-DD HH:mm:ss')
 })
 
+Vue.filter('timeFromNow', function (time) {
+  return moment(parseInt(time)).fromNow()
+})
+
 Vue.filter('judgePretty', function (judgeCode) {
   return store.getters.judges[judgeCode]
 })

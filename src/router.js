@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 import NProgress from 'nprogress'
 
 import Home from './views/Home.vue'
+import Discuss from './views/Discusses.vue'
 import Problems from './views/Problems.vue'
 import Status from './views/Status.vue'
 import Contests from './views/Contests.vue'
@@ -48,6 +49,10 @@ const routes = [
     component: Home,
     name: 'home',
     props: (route) => route.query
+  }, {
+    path: '/discusses',
+    component: Discuss,
+    name: 'discusses'
   }, {
     path: '/problems',
     component: Problems,

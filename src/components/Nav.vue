@@ -9,6 +9,10 @@
         >Home</router-link>
         <router-link
           class="nav-item is-tab is-hidden-mobile"
+          :to="{name: 'discusses'}"
+        >Discuss</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-mobile"
           :to="{name: 'problems'}"
         >Problems</router-link>
         <router-link

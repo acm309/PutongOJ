@@ -9,6 +9,7 @@ import user from './user'
 import session from './session'
 import statistics from './statistics'
 import messages from './messages'
+import discusses from './discusses'
 
 export default {
   news,
@@ -21,5 +22,6 @@ export default {
   user,
   session,
   statistics,
-  messages
+  messages,
+  discusses
 }
