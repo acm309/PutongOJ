@@ -4,7 +4,11 @@
       <tbody>
         <tr v-for="discuss in discussesList">
           <td># {{ discuss.did }}</td>
-          <td>{{ discuss.title }}</td>
+          <td>
+            <router-link :to="{name: 'discuss', params: { did: discuss.did }}">
+              {{ discuss.title }}
+            </router-link>
+          </td>
           <td>
             <router-link
               :to="{name: 'user', params: { uid: discuss.uid }}"
@@ -59,7 +63,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([ 'discussesList', 'logined' ])
+    ...mapGetters([ 'discussesList', 'logined', 'discuss' ])
   },
   created () {
     this.$store.dispatch('fetchDiscussesList')
@@ -81,9 +85,15 @@ export default {
         this.$store.dispatch('addMessage', {
           body: 'Okay'
         })
-      }).catch(() => {
+        this.$router.push({
+          name: 'discuss',
+          params: {
+            did: this.discuss.did
+          }
+        })
+      }).catch((err) => {
         this.$store.dispatch('addMessage', {
-          body: 'Title and content can not be empty',
+          body: err.message,
           type: 'danger'
         })
       })

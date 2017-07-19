@@ -8,7 +8,8 @@ const state = {
 
 const getters = {
   discussesList: (state) => state.discussesList,
-  commentsList: (state) => state.commentsList
+  commentsList: (state) => state.commentsList,
+  discuss: (state) => state.discuss
 }
 
 const mutations = {
@@ -25,20 +26,37 @@ const mutations = {
 
 const actions = {
   fetchDiscussesList ({commit}, payload) {
-    axios.get('/discusses')
+    return axios.get('/discusses')
       .then(({data}) => {
         commit('updateDiscussesList', {
           discussesList: data.discusses.sort((x, y) => x.update < y.update)
         })
       })
   },
+  fetchCommentsList ({commit}, payload) {
+    return axios.get(`/discusses/${payload.did}`)
+      .then(({data}) => {
+        commit('updateCommentsList', {
+          commentsList: data.comments
+        })
+        commit('updateDiscuss', data)
+      })
+  },
   createDiscuss ({commit}, payload) {
-    axios.post('/discusses', payload)
+    return axios.post('/discusses', payload)
       .then(({data}) => {
         if (data.error) {
           throw new Error(data.error)
         }
         commit('updateDiscuss', data)
+      })
+  },
+  createComment ({commit}, payload) {
+    return axios.post('/comments', payload)
+      .then(({data}) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
       })
   }
 }

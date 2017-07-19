@@ -4,7 +4,7 @@ import VueRouter from 'vue-router'
 import NProgress from 'nprogress'
 
 import Home from './views/Home.vue'
-import Discuss from './views/Discusses.vue'
+import Discusses from './views/Discusses.vue'
 import Problems from './views/Problems.vue'
 import Status from './views/Status.vue'
 import Contests from './views/Contests.vue'
@@ -14,6 +14,7 @@ import NotFound from './views/NotFound.vue'
 
 import News from './views/News.vue'
 import Problem from './views/Problem.vue'
+import Discuss from './views/Discuss.vue'
 import User from './views/User/User.vue'
 import UserProfile from './views/User/UserProfle.vue'
 import UserEdit from './views/User/UserEdit.vue'
@@ -51,7 +52,7 @@ const routes = [
     props: (route) => route.query
   }, {
     path: '/discusses',
-    component: Discuss,
+    component: Discusses,
     name: 'discusses'
   }, {
     path: '/problems',
@@ -85,6 +86,11 @@ const routes = [
     path: '/problems/:pid',
     component: Problem,
     name: 'problem',
+    props: true
+  }, {
+    path: '/discusses/:did',
+    component: Discuss,
+    name: 'discuss',
     props: true
   }, {
     path: '/statistics/:pid',
