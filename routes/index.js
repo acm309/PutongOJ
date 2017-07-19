@@ -12,6 +12,7 @@ const statistics = require('./statistics')
 const session = require('./session')
 const testdata = require('./testdata')
 const discusses = require('./discusses')
+const comments = require('./comments')
 
 api
   .use('/api', contests.routes(), contests.allowedMethods())
@@ -24,6 +25,7 @@ api
   .use('/api', statistics.routes(), statistics.allowedMethods())
   .use('/api', session.routes(), session.allowedMethods())
   .use('/api', discusses.routes(), discusses.allowedMethods())
+  .use('/api', comments.routes(), comments.allowedMethods())
 
 module.exports = function () {
   return async function (ctx, next) {

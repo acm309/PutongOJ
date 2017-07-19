@@ -49,7 +49,7 @@ async function queryOneDiscuss (ctx, next) {
   const comments = await Comment
     .find({did})
     .select('-_id cmid did uid content create')
-    .sort({ create: -1 })
+    .sort({ create: 1 })
     .exec()
   ctx.body = {
     discuss,
