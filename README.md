@@ -84,6 +84,10 @@ cd data/RanklistUpdater
 node updater.js
 ```
 
+## 初始用户
+
+默认的 admin 用户密码为 `kplkplkpl`。请务必在使用后立即更改。
+
 # TODO
 
 - [ ] 说明文档
