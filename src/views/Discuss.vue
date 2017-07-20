@@ -8,8 +8,7 @@
           <p>
             <strong>{{ comment.uid }}</strong>
             <span class="is-pulled-right"> {{ comment.create | timeFromNow }}</span>
-            <br>
-            {{ comment.content }}
+            <pre>{{ comment.content }}</pre>
           </p>
         </div>
       </div>
