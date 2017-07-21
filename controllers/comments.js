@@ -1,4 +1,5 @@
 const Comment = require('../models/Comment')
+const Discuss = require('../models/Discuss')
 const Ids = require('../models/ID')
 const only = require('only')
 
@@ -7,7 +8,9 @@ async function create (ctx, next) {
   const cmid = await Ids.generateId('Comment')
   const uid = ctx.session.user.uid
   const comment = new Comment({ did, cmid, content, uid })
-  await comment.save()
+  const discuss = await Discuss.findOne({ did }).exec()
+  discuss.update = Date.now()
+  await Promise.all([ discuss.save(), comment.save() ])
   ctx.body = {
     comment: only(comment, 'cmid did content uid')
   }

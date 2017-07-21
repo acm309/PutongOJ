@@ -15,12 +15,11 @@ async function queryList (ctx, next) {
 async function create (ctx, next) {
   const did = await Ids.generateId('Discuss')
   const cmid = await Ids.generateId('Comment')
-  const uid = 'admin'
+  const uid = ctx.session.user.uid
   const discuss = new Discuss({
     did,
     title: ctx.request.body.title,
-    uid
-    // uid: ctx.session.user.uid
+    uid: ctx.session.user.uid
   })
 
   const comment = new Comment({
