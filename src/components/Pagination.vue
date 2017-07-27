@@ -3,53 +3,55 @@
     <ul class="pagination-list">
       <li>
         <a
-          @click="pageClick(1)"
           class="pagination-link"
-          :class="{'is-current': 1 === pagination.page}"
-        > 1 </a>
+          @click="pageClick(1)"
+          :disabled="pagination.page === 1">
+          <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+        </a>
       </li>
-      <!--  1 ... 4 5 6 ... 9 (current 5) -->
-      <li v-if="pagination.page - 1 >= distance + 1">
+      <li v-if="pagination.page - distance > 1">
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
-      <li v-if="pagination.page - 1 > 1">
+      <li v-for="i in distance" v-if="pagination.page - distance - 1 + i >= 1">
         <a
           class="pagination-link"
-          @click="pageClick(pagination.page - 1)"
-        >{{ pagination.page - 1 }}</a>
+          @click="pageClick(pagination.page - distance - 1 + i)"
+          >{{ pagination.page - distance - 1 + i }}</a>
       </li>
-      <li v-if="pagination.page !== 1 && pagination.page !== pagination.pages">
+      <li>
         <a
           class="pagination-link is-current"
           @click="pageClick(pagination.page)"
-        >{{ pagination.page }}</a>
+          >{{ pagination.page }}</a>
       </li>
-      <li v-if="pagination.page + 1 < pagination.pages">
+      <li v-for="i in distance" v-if="pagination.page + i <= pagination.pages">
         <a
           class="pagination-link"
-          @click="pageClick(pagination.page + 1)"
-        >{{ pagination.page + 1 }}</a>
+          @click="pageClick(pagination.page + i)"
+          >{{ pagination.page + i }}</a>
       </li>
-      <li v-if="pagination.pages - pagination.page >= distance + 1">
+      <li v-if="pagination.page + distance < pagination.pages">
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
-      <li v-if="pagination.pages !== 1">
+      <li>
         <a
           class="pagination-link"
           @click="pageClick(pagination.pages)"
-          :class="{'is-current': pagination.pages === pagination.page}"
-        >{{ pagination.pages }}</a>
+          :disabled="pagination.page === pagination.pages">
+          <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+        </a>
       </li>
     </ul>
   </nav>
 </template>
 
 <script>
+// the idea of pagination derives from http://acdream.info/problem?pid=1196
 export default {
   props: ['pagination'],
   data () {
     return {
-      distance: 2
+      distance: 3
     }
   },
   methods: {
