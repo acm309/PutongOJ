@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "array-duplicated": "1.0.1",
+    "forever": "0.15.3",
     "fs-extra": "3.0.0",
     "is-root": "1.0.0",
     "isemail": "2.2.1",
