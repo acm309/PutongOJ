@@ -28,6 +28,8 @@ import SolutionModal from './components/SolutionModal.vue'
 import Notifications from './components/Notifications.vue'
 import SimModal from './components/SolutionSimModal.vue'
 
+import { mapActions } from 'vuex'
+
 export default {
   name: 'app',
   components: {
@@ -37,6 +39,14 @@ export default {
     'oj-notification': Notifications,
     'oj-footer': Footer,
     'oj-sim': SimModal
+  },
+  methods: {
+    ...mapActions([ 'fetchSession', 'updateCurrentTime', 'fetchServerTime' ])
+  },
+  created () {
+    this.fetchSession()
+    this.fetchServerTime()
+      .then(() => this.updateCurrentTime())
   }
 }
 </script>

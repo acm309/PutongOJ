@@ -77,6 +77,9 @@ const getters = {
 }
 
 const mutations = {
+  setCurrentTime (state, payload) {
+    state.currentTime = payload.servertime
+  },
   updateCurrentTime (state, payload) {
     state.currentTime += payload.step
   },
@@ -102,6 +105,10 @@ const actions = {
   submitImage ({commit}, paylod) {
     return axios.post('/submit', paylod.data)
       .then(({data}) => data.path)
+  },
+  fetchServerTime ({commit}) {
+    return axios.get('/servertime')
+      .then(({data}) => commit('setCurrentTime', data))
   }
 }
 
@@ -129,8 +136,5 @@ axios.interceptors.response.use(function (response) {
   })
   return Promise.reject(err)
 })
-
-store.dispatch('updateCurrentTime')
-store.dispatch('fetchSession')
 
 export default store
