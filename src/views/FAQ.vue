@@ -52,12 +52,12 @@
           <tr>
             <td>C</td>
             <td>gcc (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4</td>
-            <td>gcc -o Main -static -w -lm -std=c99 -O2 -DONLINE_JUDGE</td>
+            <td>gcc -o Main -w -lm -std=c99 -O2 -DONLINE_JUDGE</td>
           </tr>
           <tr>
             <td>C++</td>
             <td>g++ (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4</td>
-            <td>g++ -o Main -static -w -lm -std++=c99 -O2 -DONLINE_JUDGE</td>
+            <td>g++ -o Main -static -w -lm -O2 -std=c++11 -DONLINE_JUDGE</td>
           </tr>
           <tr>
             <td>Java</td>
