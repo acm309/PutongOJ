@@ -46,6 +46,11 @@
         >Home</router-link>
         <router-link
           class="nav-item is-tab is-hidden-tablet"
+          :to="{name: 'discusses'}"
+          @click.native="active = false"
+        >Discuss</router-link>
+        <router-link
+          class="nav-item is-tab is-hidden-tablet"
           :to="{name: 'problems'}"
           @click.native="active = false"
         >Problems</router-link>
