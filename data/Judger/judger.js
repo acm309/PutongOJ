@@ -71,21 +71,28 @@ async function fetchSid (tag) {
   return +result[1]
 }
 
-async function judgeRun ({ pid, language, code }, { time: timeLimit, memory: memoryLimit }) {
+async function judgeRun ({ pid, language, code },
+  { time: timeLimit, memory: memoryLimit, in: sampleIn, out: sampleOut }) {
   const filename = ['Main.c', 'Main.cpp', 'Main.java'][language - 1]
-  await Promise.all([
-    fse.copy(`../Data/${pid}/sample.in`, './test/in.in'),
-    fse.copy(`../Data/${pid}/sample.out`, './test/out.out'),
-    fse.writeFile(`./test/${filename}`, code)
-  ])
+  let [judge, time, memory, error, content] = ['Accepted', 0, 0, '', ''] // default
+  if (sampleIn.trim() || sampleIn.trim()) {
+    // if both sampleIn and sampleOut are empty
+    // then do nothing
+    await Promise.all([
+      fse.copy(`../Data/${pid}/sample.in`, './test/in.in'),
+      fse.copy(`../Data/${pid}/sample.out`, './test/out.out'),
+      fse.writeFile(`./test/${filename}`, code)
+    ])
 
-  // run in root
-  // ./Core -c ./test/main.cpp -t 1000 -m 65535 -d ./test/
-  shell.exec(`./Core -c ${'./test/' + filename} -t ${timeLimit} -m ${memoryLimit} -d ./test/`)
-  let content = await fse.readFile('./test/result.txt', {encoding: 'utf8'})
-  let [judge, time, memory, ...error] = content.trim().split('\n')
-
-  error = error.join('\n')
+    // run in root
+    // ./Core -c ./test/main.cpp -t 1000 -m 65535 -d ./test/
+    shell.exec(`./Core -c ${'./test/' + filename} -t ${timeLimit} -m ${memoryLimit} -d ./test/`)
+    content = await fse.readFile('./test/result.txt', {encoding: 'utf8'})
+    ;[judge, time, memory, ...error] = content.trim().split('\n')
+    error = error.join('\n')
+  } else {
+    await fse.writeFile(`./test/${filename}`, code)
+  }
 
   if (judge !== 'Accepted' ||
   !fse.existsSync(`../Data/${pid}/test.in`) ||
