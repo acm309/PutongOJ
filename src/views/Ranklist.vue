@@ -37,7 +37,7 @@
             </router-link>
           </td>
           <td>{{ user.nick }}</td>
-          <td>{{ user.motto }}</td>
+          <td class="narrow-cell">{{ user.motto }}</td>
           <td>
             <router-link
               :to="{name: 'status', query: {uid: user.uid, judge: judgeCode.Accepted}}"
