@@ -94,7 +94,6 @@
 </template>
 
 <script>
-// TODO 换默认头像
 export default {
   props: [ 'user', 'solved', 'unsolved' ]
 }
