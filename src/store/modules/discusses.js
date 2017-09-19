@@ -29,7 +29,7 @@ const actions = {
     return axios.get('/discusses')
       .then(({data}) => {
         commit('updateDiscussesList', {
-          discussesList: data.discusses.sort((x, y) => x.update < y.update)
+          discussesList: data.discusses.sort((x, y) => y.update - x.update)
         })
       })
   },
