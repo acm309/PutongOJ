@@ -75,7 +75,7 @@ async function judgeRun ({ pid, language, code },
   { time: timeLimit, memory: memoryLimit, in: sampleIn, out: sampleOut }) {
   const filename = ['Main.c', 'Main.cpp', 'Main.java'][language - 1]
   let [judge, time, memory, error, content] = ['Accepted', 0, 0, '', ''] // default
-  if (sampleIn.trim() || sampleIn.trim()) {
+  if (sampleIn.trim() || sampleOut.trim()) {
     // if both sampleIn and sampleOut are empty
     // then do nothing
     await Promise.all([
