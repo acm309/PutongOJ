@@ -4,6 +4,8 @@
 
 [DEMO](http://acm.cjlu.edu.cn)
 
+**Version 2 is under development**
+
 # Installation
 
 ## 前提
