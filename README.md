@@ -1,4 +1,4 @@
-# PutongOJ-Vue
+# PutongOJ-FE
 
 [Putong OJ](https://github.com/lazzzis/PutongOJ) 的前端部分
 
