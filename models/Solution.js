@@ -1,14 +1,15 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { redisLPUSH, isUndefined, isAccepted } = require('../utils')
 const config = require('../config')
+const ids = require('./ID')
 
-const SolutionSchema = mongoose.Schema({
+const solutionSchema = mongoose.Schema({
   sid: {
     type: Number,
     index: {
-      unique: true // 建立索引，加快查询速度
-    }
+      unique: true
+    },
+    default: -1
   },
   pid: {
     type: Number,
@@ -31,7 +32,7 @@ const SolutionSchema = mongoose.Schema({
     default: 0
   },
   create: {
-    type: String,
+    type: Number,
     default: Date.now
   },
   length: Number,
@@ -41,7 +42,7 @@ const SolutionSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: 2 // TODO: fix this number to a constant variable
+    default: 2
   },
   language: {
     type: Number,
@@ -71,30 +72,35 @@ const SolutionSchema = mongoose.Schema({
   collection: 'Solution'
 })
 
-SolutionSchema.plugin(mongoosePaginate)
+solutionSchema.plugin(mongoosePaginate)
 
-SolutionSchema.methods.pending = async function () {
-  await redisLPUSH('solutions', this.sid)
-}
+/**
+ * @example
+ * const s = await Solution.findOne({ sid }).exec()
+ * if (s.isAccepted) console.log(`${s.sid} has been Accepted`)
+ * else console.log(`Try again to solve it`)
+ */
+solutionSchema.virtual('isAccepted').get(function () {
+  return this.judge === config.judge.Accepted
+})
 
-SolutionSchema.methods.isAccepted = function () {
-  return isAccepted(this.code)
-}
+solutionSchema.virtual('isPending').get(function () {
+  return this.judge === config.judge.Pending
+})
 
-SolutionSchema.statics.validate = function validate ({
-  code
-}) {
-  let valid = true
-  let error = ''
-  if (!isUndefined(code)) {
-    if (code.length < 20 || code.length > 10000) {
-      error = 'The length of code should be between 20 and 10000'
-    }
+solutionSchema.pre('save', function (next) {
+  // 保存
+  if (this.sid === -1) {
+    // 表示新的提交被创建了，因此赋予一个新的 id
+    ids
+      .generateId('Solution')
+      .then(id => {
+        this.sid = id
+      })
+      .then(next)
+  } else {
+    next()
   }
-  if (error) {
-    valid = false
-  }
-  return { valid, error }
-}
+})
 
-module.exports = mongoose.model('Solution', SolutionSchema)
+module.exports = mongoose.model('Solution', solutionSchema)

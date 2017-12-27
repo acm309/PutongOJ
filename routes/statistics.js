@@ -1,13 +1,10 @@
-const Router = require('koa-router')
 const statistics = require('../controllers/statistics')
-const problems = require('../controllers/problems')
+const Router = require('koa-router')
 
-const router = new Router({
+const rotuer = new Router({
   prefix: '/statistics'
 })
 
-router
-  .param('pid', problems.validatePid)
-  .get('/:pid', statistics.statistics)
+rotuer.get('/:pid', statistics.list)
 
-module.exports = router
+module.exports = rotuer

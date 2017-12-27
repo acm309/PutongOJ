@@ -1,19 +1,20 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined } = require('../utils')
+const ids = require('./ID')
 
-const NewsSchema = mongoose.Schema({
+const newSchema = mongoose.Schema({
   nid: {
     type: Number,
     index: {
       unique: true
-    }
+    },
+    default: -1
   },
   title: String,
   content: String,
   status: {
     type: Number,
-    default: 2 // TODO: fix this number to a constant variable
+    default: 2
   },
   create: {
     type: Number,
@@ -23,23 +24,21 @@ const NewsSchema = mongoose.Schema({
   collection: 'News'
 })
 
-NewsSchema.plugin(mongoosePaginate)
+newSchema.plugin(mongoosePaginate)
 
-NewsSchema.statics.validate = function ({ title }) {
-  let valid = true
-  let error = ''
-  if (!isUndefined(title)) {
-    if (title.length > 50) {
-      error = 'The length of title should be less than 50'
-    } else if (title.length === 0) {
-      error = 'The title can not be empty'
-    }
+newSchema.pre('save', function (next) {
+  // 保存
+  if (this.nid === -1) {
+    // 表示新的新闻被创建了，因此赋予一个新的 id
+    ids
+      .generateId('News')
+      .then(id => {
+        this.nid = id
+      })
+      .then(next)
+  } else {
+    next()
   }
+})
 
-  if (error) {
-    valid = false
-  }
-  return { valid, error }
-}
-
-module.exports = mongoose.model('News', NewsSchema)
+module.exports = mongoose.model('News', newSchema)

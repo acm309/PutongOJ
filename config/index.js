@@ -1,24 +1,4 @@
-const path = require('path')
-
-const config = {
-  port: 3000
-}
-
-config.redisUrl = 'redis://localhost:6379'
-
-// 连接前记得配置 mongod, 如果是远端数据库
-// http://stackoverflow.com/questions/13312358/mongo-couldnt-connect-to-server-127-0-0-127017
-// 修改 /etc/mongod.conf； 注释 bind_ip 与 port
-// config.mongoUrl = 'mongodb://192.168.1.177:27017/oj'
-config.mongoUrl = 'mongodb://localhost:27017/oj'
-
-// 以下常量一部分来自历史原因
-// 一部分参考自: https://github.com/ZJGSU-Open-Source/GoOnlineJudge/blob/master/config/config.go
-config.privilege = {
-  PrimaryUser: 1,
-  Teacher: 2,
-  Admin: 3
-}
+const config = {}
 
 config.judge = {
   Pending: 0,
@@ -37,27 +17,20 @@ config.judge = {
 
 config.module = {
   Problem: 1,
-  Contest: 2 // 这是比赛的提交还是普通的提交，这个设置完全是历史遗留原因，我也不知道这个字段有用么？
+  Contest: 2
 }
 
-config.status = {
-  Reserve: 0, // 是否开放给普通用户
-  Available: 2
+const dev = {
+  port: 8888,
+  dbURL: 'mongodb://127.0.0.1:27017/devoj'
 }
 
-config.encrypt = {
-  Public: 1,
-  Private: 2, // 只有在特定列表中的人才能访问
-  Password: 3
+const prod = {
+  port: 80,
+  dbURL: 'mongodb://127.0.0.1:27017/oj'
 }
 
-config.language = {
-  C: 1,
-  Cpp: 2,
-  Java: 3
-}
-
-config.root = path.resolve(__dirname, '..')
-config.DataRoot = path.resolve(config.root, './data/Data')
-
-module.exports = config
+module.exports = Object.assign(
+  process.env.NODE_ENV === 'production' ? prod : dev,
+  config
+)

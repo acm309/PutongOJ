@@ -3,6 +3,8 @@
 requests/
 data/Data/*
 !data/Data/1000
+public/uploads/*
+!public/uploads/.gitkeep
 
 # macOS
 

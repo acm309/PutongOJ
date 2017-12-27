@@ -1,19 +1,11 @@
+const news = require('../controllers/news.js')
 const Router = require('koa-router')
-const news = require('../controllers/news')
-const { loginRequired, adminRequired } = require('../middlewares')
 
 const router = new Router({
   prefix: '/news'
 })
 
-router
-  .param('nid', news.validateNid)
-  .get('/:nid', news.queryOneNews)
-  .put('/:nid', loginRequired, adminRequired, news.update)
-  .del('/:nid', loginRequired, adminRequired, news.del)
-
-router
-  .get('/', news.queryList)
-  .post('/', loginRequired, adminRequired, news.create)
+router.get('/list', news.list)
+router.get('/:nid', news.findOne)
 
 module.exports = router
