@@ -1,58 +1,15 @@
+// The Vue build version to load with the `import` command
+// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import App from './App.vue'
-
-import moment from 'moment'
-import leftPad from 'left-pad'
-
+import App from './App'
 import router from './router'
-import store from './store'
 
-Vue.filter('timePretty', function (time) {
-  // parseInt 不能少，尽管有时 time 是一个看似数字的字符串
-  // http://stackoverflow.com/questions/17371302/new-datemilliseconds-returns-invalid-date
-  return moment(parseInt(time)).format('YYYY-MM-DD HH:mm:ss')
-})
+Vue.config.productionTip = false
 
-Vue.filter('timeFromNow', function (time) {
-  return moment(parseInt(time)).fromNow()
-})
-
-Vue.filter('judgePretty', function (judgeCode) {
-  return store.getters.judges[judgeCode]
-})
-
-Vue.filter('languagePretty', function (languageCode) {
-  return store.getters.languages[languageCode]
-})
-
-Vue.filter('durationPretty', function (time) {
-  const duration = moment.duration(parseInt(time))
-  const m = duration.minutes()
-  const s = duration.seconds()
-  return `${Math.floor(duration.asHours())}:${leftPad(m, 2, '0')}:${leftPad(s, 2, '0')}`
-})
-
-Vue.filter('encryptPretty', function (code) {
-  for (let key in store.getters.encrypt) {
-    if (store.getters.encrypt[key] === +code) {
-      return key
-    }
-  }
-  return `Unknown`
-})
-
-Vue.filter('statusPretty', function (code) {
-  for (let key in store.getters.status) {
-    if (store.getters.status[key] === +code) {
-      return key
-    }
-  }
-  return `Unknown`
-})
-
+/* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  store,
-  render: h => h(App)
+  template: '<App/>',
+  components: { App }
 })
