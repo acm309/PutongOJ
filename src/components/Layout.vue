@@ -40,7 +40,10 @@
       <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px'}">
         <slot></slot>
       </Content>
-     <Footer class="layout-footer-center">2011-2016 &copy; TalkingData</Footer>
+     <Footer class="layout-footer-center">
+       <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309 <Icon type="social-github"></Icon>.</a>
+       The source code is licensed <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
+     </Footer>
     </Layout>
   </div>
 </template>
