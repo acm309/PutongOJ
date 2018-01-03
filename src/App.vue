@@ -1,13 +1,18 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <navigate></navigate>
     <router-view/>
   </div>
 </template>
 
 <script>
+import Navigate from '@/components/Navigate'
+
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    Navigate
+  }
 }
 </script>
 
@@ -18,6 +23,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>
