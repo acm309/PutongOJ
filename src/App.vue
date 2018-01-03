@@ -1,17 +1,18 @@
 <template>
   <div id="app">
-    <navigate></navigate>
-    <router-view/>
+    <oj-layout>
+      <router-view/>
+    </oj-layout>
   </div>
 </template>
 
 <script>
-import Navigate from '@/components/Navigate'
+import Layout from '@/components/Layout'
 
 export default {
   name: 'app',
   components: {
-    Navigate
+    'oj-layout': Layout
   }
 }
 </script>
