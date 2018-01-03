@@ -1,14 +1,14 @@
 <template lang="html">
   <div class="nav-cont layout">
     <Layout>
-      <Header :style="{position: 'fixed', width: '100%'}">
+      <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
         <Menu mode="horizontal" theme="light" active-name="1">
           <div class="left">
             <MenuItem name="1">
               <Icon type="ios-home"></Icon>Home
             </MenuItem>
             <MenuItem name="2">
-              <Icon type="ios-keypad"></Icon>Problems
+              <Icon type="ios-keypad"></Icon>Problem
             </MenuItem>
             <MenuItem name="3">
               <Icon type="refresh"></Icon>Status
@@ -20,7 +20,7 @@
               <Icon type="android-bar"></Icon>Contest
             </MenuItem>
             <MenuItem name="6">
-              <Icon type="clipboard"></Icon>FAQ
+              <Icon type="help-circled"></Icon>FAQ
             </MenuItem>
             <Submenu name="7">
               <template slot="title">
@@ -37,7 +37,8 @@
           <Button type="text">Register</Button>
         </div>
       </Header>
-      <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px'}">
+      <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px',
+      padding: '20px 40px'}">
         <slot></slot>
       </Content>
      <Footer class="layout-footer-center">
