@@ -1,8 +1,8 @@
 <template lang="html">
   <div>
-    <Tabs value="name1">
-      <TabPane label="Description" name="name1"></TabPane>
-      <TabPane label="Submit" name="name2"></TabPane>
+    <Tabs :value="current" @on-click="change">
+      <TabPane label="Description" name="problemInfo"></TabPane>
+      <TabPane label="Submit" name="problemSubmit"></TabPane>
       <TabPane label="My Submissions" name="name3"></TabPane>
       <TabPane label="Statistics" name="name4"></TabPane>
       <TabPane label="Edit" name="name5"></TabPane>
@@ -14,6 +14,19 @@
 
 <script>
 export default {
+  data: () => ({
+    current: 'problemInfo'
+  }),
+  methods: {
+    change (name) {
+      this.$router.push({ name })
+    }
+  },
+  watch: {
+    '$route' (to, from) {
+      if (to != from) this.current = this.$route.name
+    }
+  }
 }
 </script>
 

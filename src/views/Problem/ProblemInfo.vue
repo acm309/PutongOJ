@@ -16,7 +16,7 @@
     <br>
     <h2>Hint</h2>
     <div class="cont" v-html="problem.hint"></div>
-    <Button type="ghost" shape="circle" icon="ios-paperplane">Submit</Button>
+    <Button type="ghost" shape="circle" icon="ios-paperplane" @click="submit">Submit</Button>
   </div>
 </template>
 
@@ -31,6 +31,14 @@ export default {
   },
   created () {
     this.$store.dispatch('problem/findOne', this.$route.params)
+  },
+  methods: {
+    submit () {
+      this.$router.push({
+        name: 'problemSubmit',
+        params: this.$router.params
+      })
+    }
   }
 }
 </script>

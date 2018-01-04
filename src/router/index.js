@@ -4,6 +4,7 @@ import Home from '@/views/Home'
 import ProblemList from '@/views/problemList'
 import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
+import ProblemSubmit from '@/views/Problem/Submit'
 
 Vue.use(Router)
 
@@ -24,8 +25,12 @@ export default new Router({
       component: Problem,
       children: [{
         path: '',
-        name: 'problem.info',
+        name: 'problemInfo',
         component: ProblemInfo
+      }, {
+        path: 'submit',
+        name: 'problemSubmit',
+        component: ProblemSubmit
       }]
     }
   ]

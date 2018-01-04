@@ -27,7 +27,7 @@
         <td>{{  }}</td>
         <td>{{ item.pid }}</td>
         <td>
-          <router-link :to="{ name: 'problem.info', params: { pid: item.pid } }">
+          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
             <Button type="text">{{ item.title }}</Button>
           </router-link>
         <td>
