@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home'
+import ProblemList from '@/views/problemList'
 import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 
@@ -12,7 +13,13 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
-    }, {
+    },
+    {
+      path: '/problems',
+      name: 'problemList',
+      component: ProblemList
+    },
+    {
       path: '/problem/:pid',
       component: Problem,
       children: [{

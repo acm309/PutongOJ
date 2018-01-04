@@ -10,7 +10,84 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/user': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/user/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/session': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/session/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/problem': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/problem/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/news': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/news/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/status': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/status/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/statistics': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/statistics/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/ranklist': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/contest': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/contest/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/submit': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/submit/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/uploads': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/uplodas/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
