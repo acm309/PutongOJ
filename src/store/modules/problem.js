@@ -33,7 +33,6 @@ const store = {
     },
     find ({ commit }, payload) {
       return api.problem.find(payload).then(({ data }) => {
-        console.log(data)
         commit(types.GET_PROBLEM_LIST, data.res.docs)
         commit(types.GET_SUM_PROBLEM, data.res.total)
       })

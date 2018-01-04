@@ -1,20 +1,48 @@
 <template lang="html">
   <div class="prolist-wrap">
     <Row style="margin-bottom: 20px">
-      <Col span="16"><Page :total="100" show-elevator></Page></Col>
+      <Col span="16"><Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page></Col>
       <Col :span="2">
         <Select v-model="type">
           <Option v-for="item in options" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
       </Col>
       <Col :span="4">
-        <Input v-model="content" icon="search" placeholder="Please input..."></Input>
+        <Input v-model="content" icon="search" placeholder="Please input..." @keyup.enter.native="search"></Input>
       </Col>
       <Col :span="2">
-        <Button type="primary">Search</Button>
+        <Button type="primary" @click="search">Search</Button>
       </Col>
     </Row>
-    <Table :columns="table" :data="list"></Table>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>PID</th>
+        <th>Title</th>
+        <th>Ratio</th>
+        <th>Tags</th>
+        <th>Delete</th>
+      </tr>
+      <tr v-for="(item, index) in list">
+        <td>{{  }}</td>
+        <td>{{ item.pid }}</td>
+        <td>
+          <router-link :to="{ name: 'problem.info', params: { pid: item.pid } }">
+            <Button type="text">{{ item.title }}</Button>
+          </router-link>
+        <td>
+          <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
+          (<Button type="text">{{ item.solve }}</Button> /
+          <Button type="text">{{ item.submit }}</Button>)
+        </td>
+        <td>
+          <template v-for="(item2, index2) in item.tags">
+            <Tag>{{ item2 }}</Tag>
+          </template>
+        </td>
+        <td><Button type="text" @click="del(item.pid)">Delete</Button></td>
+      </tr>
+    </table>
   </div>
 </template>
 
@@ -39,16 +67,6 @@ export default {
         {
           value: 'tag',
           label: 'Tag'
-        }
-      ],
-      table: [
-        {
-          title: 'PID',
-          key: 'pid'
-        },
-        {
-          title: 'Title',
-          key: 'title'
         }
       ],
       type: this.$route.query.type || 'pid',
@@ -99,28 +117,22 @@ export default {
     pageChange (val) {
       this.reload({ page: val })
     },
+    clear () {
+      this.content = ''
+      console.log(this.content)
+    },
     del (val) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        api.problem.delete({pid: val})
-      }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!',
-          duration: 2000,
-          showClose: true
-        })
-        this.fetch()
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除',
-          duration: 2000,
-          showClose: true
-        })
+      this.$Modal.confirm({
+        title: '提示',
+        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+        onOk: () => {
+          api.problem.delete({pid: val}).then(() => {
+            this.$Message.success('删除成功！')
+          })
+        },
+        onCancel: () => {
+          this.$Message.info('已取消删除！')
+        }
       })
     }
   },
@@ -134,16 +146,35 @@ export default {
 
 <style lang="stylus">
   .prolist-wrap
-    .pro-main
-      margin-bottom: 20px
-    .eltable
-      margin-bottom: 20px
-    .el-table th
-      padding: 8px 0
-    .el-table td
-      padding: 2px 0
-    .size
-      font-size: 24px
-      color: #B12CCC
-      cursor: pointer
+    table
+      width: 100%
+      border-collapse: collapse
+      border-spacing: 0
+      th:nth-child(1)
+        padding-left: 10px
+        width: 5%
+      th:nth-child(2)
+        width: 10%
+      th:nth-child(3)
+        width: 20%
+      th:nth-child(4)
+        width: 20%
+      th:nth-child(5)
+        width: 10%
+      th:nth-child(6)
+        width: 10%
+      tr
+        border-bottom: 1px solid #ebeef5
+        height: 40px
+        line-height: 40px
+        font-size: 14px
+        td:nth-child(1)
+          padding-left: 10px
+      th
+        text-align:left
+      .ivu-btn
+        vertical-align: baseline
+        color: #e040fb
+        padding: 0 1px
+        font-size: 14px
 </style>

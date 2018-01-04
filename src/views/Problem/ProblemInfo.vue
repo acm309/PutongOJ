@@ -1,44 +1,59 @@
 <template lang="html">
-  <div>
-    <h1>752: A + B</h1>
-    <p>Time Limit: <b>1000</b>ms Memory Limit: <b>32768</b>KB</p>
-    <br>
+  <div class="proinfo-wrap">
+    <h1>{{ problem.pid }}:  {{ problem.title }}</h1>
+    <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
     <h2 class="text-primary">Description</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </br>
-    <img src="https://i.pinimg.com/originals/af/d9/3c/afd93c0a76d7b000bf731eb9ebf260b5.png" alt="">
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <br>
+    <div class="cont" v-html="problem.description"></div>
     <h2>Input</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <br>
+    <div class="cont" v-html="problem.input"></div>
     <h2>Output</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-    <br>
+    <div class="cont" v-html="problem.output"></div>
     <h2>Sample Input</h2>
-    <pre><code>{{ '1 2\n3 4\n' }}</code></pre>
+    <pre><code>{{ problem.in }}</code></pre>
     <br>
     <h2>Sample Output</h2>
-    <pre><code>{{ '3\n7\n' }}</code></pre>
+    <pre><code>{{ problem.out }}</code></pre>
     <br>
+    <h2>Hint</h2>
+    <div class="cont" v-html="problem.hint"></div>
     <Button type="ghost" shape="circle" icon="ios-paperplane">Submit</Button>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
+  computed: {
+    ...mapGetters('problem', {
+      problem: 'problem'
+    })
+  },
+  created () {
+    this.$store.dispatch('problem/findOne', this.$route.params)
+  }
 }
 </script>
 
 <style lang="stylus" scoped>
-h1, h2
-  color: #9799CA
-img
-  display: block
-  max-width: 80%
-  margin: 0 auto
-pre
-  padding: 10px
-  border-radius: 5px
-  background-color: #CFD8DC
+.proinfo-wrap
+  h1
+    color: #9799CA
+    margin-top: 10px
+    margin-bottom: 8px
+    text-align: center
+  h5
+    margin-bottom: 10px
+    text-align:center
+  h2
+    border-bottom: 1px solid #e8e8e8
+    padding: 10px 0
+    color: #9799CA
+  .cont
+    margin-top: 10px
+    margin-bottom: 20px
+  pre
+    padding: 10px
+    border-radius: 5px
+    background-color: #CFD8DC
 </style>

@@ -58,6 +58,7 @@
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
     "lodash.pickby": "^4.6.0",
+    "moment": "^2.20.1",
     "nightwatch": "^0.9.12",
     "node-notifier": "^5.1.2",
     "only": "^0.0.2",

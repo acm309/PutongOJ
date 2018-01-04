@@ -6,8 +6,12 @@ import router from './router'
 import store from './store'
 import iView from 'iview'
 import '@/my-theme/index.less'
+import { formate, timePretty, timeContest } from '@/util/formate'
 
 Vue.use(iView)
+Vue.filter('formate', formate)
+Vue.filter('timePretty', timePretty)
+Vue.filter('timeContest', timeContest)
 
 Vue.config.productionTip = false
 
