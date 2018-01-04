@@ -10,7 +10,7 @@
             <MenuItem name="problemList">
                 <Icon type="ios-keypad"></Icon>Problem
             </MenuItem>
-            <MenuItem name="3">
+            <MenuItem name="status">
               <Icon type="refresh"></Icon>Status
             </MenuItem>
             <MenuItem name="4">

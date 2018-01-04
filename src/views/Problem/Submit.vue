@@ -3,9 +3,10 @@
     <Form :model="form">
       <FormItem label="Language" label-position="left">
         <Select v-model="form.language">
-            <Option :value="1">C++ (G++)</Option>
-            <Option :value="2">C (GCC)</Option>
+            <Option :value="2">C++ (G++)</Option>
+            <Option :value="1">C (GCC)</Option>
             <Option :value="3">Java (openJDK)</Option>
+            <Option :value="0">ALL</Option>
         </Select>
       </FormItem>
       <FormItem>

@@ -24,7 +24,7 @@ export default {
   },
   watch: {
     '$route' (to, from) {
-      if (to != from) this.current = this.$route.name
+      if (to !== from) this.current = this.$route.name
     }
   }
 }
