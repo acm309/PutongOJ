@@ -20,6 +20,17 @@ const list = async (ctx) => {
   }
 }
 
+// 返回一个提交
+const findOne = async (ctx) => {
+  const opt = parseInt(ctx.query.sid)
+  const doc = await Solution.findOne({ sid: opt }).exec()
+
+  ctx.body = {
+    doc
+  }
+}
+
 module.exports = {
-  list
+  list,
+  findOne
 }
