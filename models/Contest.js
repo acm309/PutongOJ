@@ -30,6 +30,16 @@ const contestSchema = mongoose.Schema({
   argument: {
     type: mongoose.Schema.Types.Mixed, // 这个字段干啥的？
     default: null
+  },
+  ranklist: {
+    list: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
+    },
+    primes: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({})
+    }
   }
 }, {
   collection: 'Contest'
