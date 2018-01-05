@@ -8,6 +8,9 @@
     </p>
     <hr>
     <pre class="error"><code>{{ error }}</code></pre>
+    <Button type="ghost" shape="circle" icon="document"
+      v-clipboard:copy="code" v-clipboard:success="onCopy"
+    >Click to copy code</Button>
     <pre><code v-html="code"></code></pre>
   </div>
 </template>
@@ -15,6 +18,7 @@
 <script>
 import 'highlight.js/styles/github.css'
 import highlight from 'highlight.js'
+// https://github.com/isagalaev/highlight.js/issues/1284
 
 export default {
   data: () => ({
@@ -78,7 +82,13 @@ int main () {
     return 0;
 }
 `).value
-  })
+  }),
+  methods: {
+    onCopy () {
+      // TODO 现在复制的代码是 highlight 之后的代码，也就是会有 html 标签的代码
+      this.$Message.success('Copied!')
+    }
+  }
 }
 </script>
 

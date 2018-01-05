@@ -8,10 +8,18 @@
     <div class="cont" v-html="problem.input"></div>
     <h2>Output</h2>
     <div class="cont" v-html="problem.output"></div>
-    <h2>Sample Input</h2>
+    <h2>Sample Input
+      <Tooltip content="Click to copy" placement="top">
+        <Icon type="document" v-clipboard:copy="problem.in" v-clipboard:success="onCopy"></Icon>
+      </Tooltip>
+    </h2>
     <pre><code>{{ problem.in }}</code></pre>
     <br>
-    <h2>Sample Output</h2>
+    <h2>Sample Output
+      <Tooltip content="Click to copy" placement="top">
+        <Icon type="document" v-clipboard:copy="problem.out" v-clipboard:success="onCopy"></Icon>
+      </Tooltip>
+    </h2>
     <pre><code>{{ problem.out }}</code></pre>
     <br>
     <h2>Hint</h2>
@@ -38,6 +46,9 @@ export default {
         name: 'problemSubmit',
         params: this.$router.params
       })
+    },
+    onCopy () {
+      this.$Message.success('Copied!')
     }
   }
 }
@@ -63,5 +74,5 @@ export default {
   pre
     padding: 10px
     border-radius: 5px
-    background-color: #CFD8DC
+    background-color: #ECEFF1
 </style>

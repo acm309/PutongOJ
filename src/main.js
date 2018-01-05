@@ -5,10 +5,12 @@ import App from './App'
 import router from './router'
 import store from './store'
 import iView from 'iview'
+import VueClipboard from 'vue-clipboard2'
 import '@/my-theme/index.less'
 import { formate, timePretty, timeContest } from '@/util/formate'
 
 Vue.use(iView)
+Vue.use(VueClipboard)
 Vue.filter('formate', formate)
 Vue.filter('timePretty', timePretty)
 Vue.filter('timeContest', timeContest)
