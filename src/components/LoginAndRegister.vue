@@ -1,5 +1,5 @@
 <template lang="html">
-  <Modal :value="visible" @on-ok="submitForm" @on-cancel="triggerLogin" :closable="false">
+  <Modal :value="visible" @on-cancel="triggerLogin" :closable="false">
     <Tabs v-model="mode">
       <TabPane label="Login" name="login">
         <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">
@@ -29,7 +29,7 @@
       </TabPane>
     </Tabs>
     <div slot="footer">
-      <Button type="primary" size="large" long>Submit</Button>
+      <Button type="primary" size="large" long @click="submit">Submit</Button>
     </div>
   </Modal>
 </template>
@@ -44,14 +44,14 @@ export default {
     // 自定义验证规则
     const validatePass1 = (rule, value, callback) => {
       // 5-20位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
-      const error = !/[0-9a-zA-Z]{5,20}$/.test(value) ?
-        new Error('密码长度需5-20位，只能包含字母或字符') : null
-      callback(error)
+      const error = !/[0-9a-zA-Z]{5,20}$/.test(value)
+        ? new Error('密码长度需5-20位，只能包含字母或字符') : null
+      error ? callback(error) : callback()
     }
     // 验证密码是否重复
     const validatePass2 = (rule, value, callback) => {
       const error = value !== this.regForm.pwd ? new Error('两次密码输入不一致') : null
-      callback(error)
+      error ? callback(error) : callback()
     }
     const basicRules = {
       uid: [
@@ -95,12 +95,13 @@ export default {
     ...mapActions('session', {
       login: 'login'
     }),
-    submitForm () {
+    submit () {
       if (this.mode === 'login') {
         this.$refs['loginForm'].validate((valid) => {
           if (valid) { // 验证通过
             this.login(only(this.form, 'uid pwd'))
               .then(() => this.$Message.success('Welcome!'))
+              .then(() => this.triggerLogin())
           }
         })
       } else {

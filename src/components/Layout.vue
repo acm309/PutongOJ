@@ -33,7 +33,18 @@
           </div>
         </Menu>
         <div class="right">
-          <Button type="text" @click="login">Login / Register</Button>
+          <Dropdown v-if="isLogined" @on-click="profileAction">
+            <a href="javascript:void(0)">
+                {{ profile.uid }}
+                <Icon type="arrow-down-b"></Icon>
+            </a>
+            <DropdownMenu slot="list">
+                <DropdownItem>Profile</DropdownItem>
+                <DropdownItem name="logout">Logout</DropdownItem>
+                <!-- <DropdownItem>冰糖葫芦</DropdownItem> -->
+            </DropdownMenu>
+          </Dropdown>
+          <Button type="text" @click="login" v-else>Login / Register</Button>
         </div>
       </Header>
       <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px', padding: '20px 40px'}">
@@ -49,7 +60,7 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
 import Dialog from './LoginAndRegister'
 
@@ -63,7 +74,18 @@ export default {
     }),
     routerTo (name) {
       this.$router.push({ name })
+    },
+    profileAction (name) {
+      if (name === 'logout') {
+        this.$store.dispatch('session/logout').then(() => this.$Message.info('bye bye!'))
+      }
     }
+  },
+  computed: {
+    ...mapGetters('session', {
+      isLogined: 'isLogined',
+      profile: 'profile'
+    })
   }
 }
 </script>

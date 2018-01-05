@@ -9,15 +9,16 @@ const state = {
 
 const getters = {
   loginDialog: state => state.loginDialog,
-  profile: state => state.profile
+  profile: state => state.profile,
+  isLogined: state => state.profile != null
 }
 
 const mutations = {
   [types.LOGIN]: (state, payload) => {
-    state.profile = payload.user // TODO
+    state.profile = payload.profile // TODO
   },
   [types.LOGOUT]: (state) => {
-    // 登出的时候要清除token
+    state.profile = null
   },
   [types.TRIGGER_LOGIN]: (state) => {
     state.loginDialog = !state.loginDialog
@@ -31,8 +32,10 @@ const actions = {
       return data
     })
   },
-  'session.fetch' ({ commit }) {
-
+  logout ({ commit }) {
+    return api.logout().then(() => {
+      commit(types.LOGOUT)
+    })
   }
 }
 

@@ -65,6 +65,9 @@ const api = {
   login (data) {
     return instance.post('/session', data)
   },
+  logout (data) {
+    return instance.delete('/session')
+  },
   // 获取提交列表
   getSolutions (data) {
     return instance.get('/status/list', { params: data })
