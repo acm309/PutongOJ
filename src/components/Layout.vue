@@ -33,8 +33,13 @@
           </div>
         </Menu>
         <div class="right">
-          <Button type="text">Login</Button>
-          <Button type="text">Register</Button>
+          <Button type="text" @click="showDialog">Login / Register</Button>
+          <Modal v-model="modal" width="360">
+            <Tabs v-model="event">
+              <TabPane label="Login" name="login"></TabPane>
+              <TabPane label="Register" name="register"></TabPane>
+            </Tabs>
+          </Modal>
         </div>
       </Header>
       <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px', padding: '20px 40px'}">
@@ -49,11 +54,23 @@
 </template>
 
 <script>
+import Dialog from './Dialog.vue'
+
 export default {
+  data: () => ({
+    modal: false,
+    event: 'login'
+  }),
   methods: {
     routerTo (name) {
       this.$router.push({ name: name })
+    },
+    showDialog () {
+      this.modal = true
     }
+  },
+  components: {
+    Dialog
   }
 }
 </script>

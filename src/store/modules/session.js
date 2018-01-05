@@ -7,13 +7,11 @@ const state = {
   profile: null
 }
 
-// getters
 const getters = {
   loginDialog: state => state.loginDialog,
   profile: state => state.profile
 }
 
-// mutations
 const mutations = {
   [types.LOGIN]: (state, payload) => {
     state.profile = payload.user // TODO
@@ -26,7 +24,6 @@ const mutations = {
   }
 }
 
-// actions
 const actions = {
   login ({ commit }, opt) {
     return api.login(opt).then(({ data }) => { // 解构赋值拿到data
