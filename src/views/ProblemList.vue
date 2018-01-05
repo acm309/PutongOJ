@@ -1,7 +1,9 @@
 <template lang="html">
   <div class="prolist-wrap">
     <Row style="margin-bottom: 20px">
-      <Col span="16"><Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page></Col>
+      <Col span="16">
+        <Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page>
+      </Col>
       <Col :span="2">
         <Select v-model="type">
           <Option v-for="item in options" :value="item.value" :key="item.value">{{ item.label }}</Option>

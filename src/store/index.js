@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import * as types from './types'
 import session from './modules/session'
 import problem from './modules/problem'
 import news from './modules/news'
@@ -14,26 +13,11 @@ Vue.use(Vuex)
 
 // 初始化时用sessionStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {
-  isShow: false
-}
-
-const getters = {
-  isShow: state => state.isShow
-}
-
-const mutations = {
-  [types.SHOW_DIALOG]: (state) => {
-    state.isShow = true
-  },
-  [types.CLOSE_DIALOG]: (state) => {
-    state.isShow = false
-  }
+  info: ''
 }
 
 export default new Vuex.Store({
   state,
-  getters,
-  mutations,
   modules: {
     session,
     problem,

@@ -15,5 +15,19 @@ export default {
 }
 </script>
 
-<style>
+<style lang="stylus">
+a
+  text-decoration: none
+ul, li
+  list-style-type: none
+.ac
+  color: red
+.wa, .re, .tle, .mle, .ole, .se, .rp
+  color: #11b811
+.ce
+  color: #6633FF
+.pe
+  color: orange
+.pd, .rj
+  color: black
 </style>

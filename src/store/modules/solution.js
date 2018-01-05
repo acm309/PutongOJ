@@ -5,17 +5,20 @@ const store = {
   namespaced: true,
   state: {
     list: [],
-    one: {},
+    solution: {},
     sum: 0,
     codeDialog: false
   },
   getters: {
     list: state => state.list,
-    one: state => state.one,
+    solution: state => state.solution,
     sum: state => state.sum,
     codeDialog: state => state.codeDialog
   },
   mutations: {
+    [types.GET_SOLUTION]: (state, payload) => {
+      state.solution = payload
+    },
     [types.UPDATE_SOLUTION_LIST]: (state, payload) => {
       state.list = payload
     },
@@ -24,7 +27,7 @@ const store = {
     },
     [types.SHOW_CODE]: (state, payload) => {
       state.codeDialog = true
-      state.one = payload
+      state.solution = payload
     },
     [types.CLOSE_CODE]: (state) => {
       state.codeDialog = false
@@ -35,6 +38,11 @@ const store = {
       return api.getSolutions(payload).then(({ data }) => {
         commit(types.UPDATE_SOLUTION_LIST, data.res.docs)
         commit(types.UPDATE_SUM_SOLUTIONS, data.res.total)
+      })
+    },
+    findOne ({ commit }, payload) {
+      return api.findOneSolution(payload).then(({ data }) => {
+        commit(types.GET_SOLUTION, data.doc)
       })
     }
   }

@@ -80,6 +80,10 @@ const api = {
   getSolutions (data) {
     return instance.get('/status/list', { params: data })
   },
+  // 获取一次提交
+  findOneSolution (data) {
+    return instance.get(`/status/${data.sid}`, { params: data })
+  },
   // 获取题目提交信息
   getStatistics (data) {
     return instance.get(`/statistics/${data.pid}`, { params: data })

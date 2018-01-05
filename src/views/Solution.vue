@@ -1,88 +1,40 @@
 <template lang="html">
   <div>
-    <h1>Compile Error</h1>
+    <h1>{{ result[solution.judge] }}</h1>
     <p>
-      <span>Memory: 1000 kb</span>
-      <span>Runtime: 100 ms</span>
-      <span>Author: Admin</span>
+      <span>Memory: {{ solution.memory }} KB</span>
+      <span>Runtime: {{ solution.time }} MS</span>
+      <span>Author: {{ solution.uid }}</span>
     </p>
     <hr>
-    <pre class="error"><code>{{ error }}</code></pre>
-    <Button type="ghost" shape="circle" icon="document"
-      v-clipboard:copy="code" v-clipboard:success="onCopy"
-    >Click to copy code</Button>
-    <pre><code v-html="code"></code></pre>
+    <pre class="error"><code>{{ solution.error }}</code></pre>
+    <Button type="ghost" shape="circle" icon="document" v-clipboard:copy="code" v-clipboard:success="onCopy">
+      Click to copy code
+    </Button>
+    <pre><code v-html="solution.code"></code></pre>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import constant from '../util/constant'
 import 'highlight.js/styles/github.css'
-import highlight from 'highlight.js'
+// import highlight from 'highlight.js'
 // https://github.com/isagalaev/highlight.js/issues/1284
 
 export default {
   data: () => ({
-    error: `Errors:
-  1  http://eslint.org/docs/rules/eqeqeq
-
-You may use special comments to disable some warnings.
-Use // eslint-disable-next-line to ignore the next line.
-Use /* eslint-disable */ to ignore all warnings in a file.
-
-
-WAIT  Compiling...                                                                                                                                                               6:35:43 PM
-
-95% emitting
-
-WARNING  Compiled with 2 warnings                                                                                                                                                6:35:44 PM
-
-
-✘  http://eslint.org/docs/rules/eqeqeq  Expected '!==' and instead saw '!='
-src/views/Problem/Problem.vue:27:14
-      if (to != from) this.current = this.$route.name`,
-    code: highlight.highlight('c++', `#include <iostream>
-#include <string>
-#include "json.hpp"
-
-// for convenience
-using json = nlohmann::json;
-using namespace std;
-
-json get_meta_json() {
-    FILE *ce_msg = fopen("meta.json", "r");
-    std::string message = "";
-    char tmp[1024];
-    while (fgets(tmp, sizeof(tmp), ce_msg)) {
-        message += tmp;
-    }
-
-    return json::parse(message);
-}
-
-int main () {
-    json j;
-    for (int i = 0; i < 5; i++) {
-        json obj = json::object();
-        obj["uuid"] = "a864ede1-a264-4585-93a7-8612d1c5b338";
-        obj["time"] = 0;
-        obj["memory"] = 752;
-        obj["result"] = "WRONG ANSWER";
-        if (i & 1) obj["error"] = "no such file";
-        j.push_back(obj);
-    }
-    string s = j.dump(2);
-    cout << s << endl;
-    cout << j[0]["uuid"] << endl;
-
-    json meta = get_meta_json();
-    for (auto& testcase : meta["testcases"]) {
-        cout << testcase << endl;
-    }
-
-    return 0;
-}
-`).value
+    result: constant.result
+    // code: highlight.highlight('c++', `${this.solution.code}`).value
   }),
+  computed: {
+    ...mapGetters('solution', [
+      'solution'
+    ])
+  },
+  created () {
+    this.$store.dispatch('solution/findOne', this.$route.params)
+  },
   methods: {
     onCopy () {
       // TODO 现在复制的代码是 highlight 之后的代码，也就是会有 html 标签的代码
