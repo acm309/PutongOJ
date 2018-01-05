@@ -19,16 +19,15 @@ const mutations = {
   [types.LOGOUT]: (state) => {
     // 登出的时候要清除token
   },
-  [types.SHOW_LOGIN]: (state) => {
+  [types.TRIGGER_LOGIN]: (state) => {
     state.loginDialog = !state.loginDialog
   }
 }
 
 const actions = {
   login ({ commit }, opt) {
-    return api.login(opt).then(({ data }) => { // 解构赋值拿到data
+    return api.login(opt).then(({ data }) => {
       commit(types.LOGIN, data)
-      commit(types.SHOW_LOGIN)
       return data
     })
   },
@@ -38,6 +37,7 @@ const actions = {
 }
 
 export default {
+  namespaced: true,
   state,
   getters,
   actions,

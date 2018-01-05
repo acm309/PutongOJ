@@ -1,6 +1,5 @@
 // session
-export const SHOW_DIALOG = 'SHOW_DIALOG'
-export const CLOSE_DIALOG = 'CLOSE_DIALOG'
+export const TRIGGER_LOGIN = 'TRIGGER_LOGIN'
 export const LOGIN = 'LOGIN'
 export const LOGOUT = 'LOGOUT'
 export const SHOW_LOGIN = 'SHOW_LOGIN'
