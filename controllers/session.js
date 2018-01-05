@@ -18,7 +18,9 @@ const login = async (ctx) => {
   }
 
   ctx.session.profile = only(user, 'uid nick')
-  ctx.body = {}
+  ctx.body = {
+    profile: ctx.session.profile
+  }
 }
 
 const logout = async (ctx) => {
