@@ -61,21 +61,6 @@ const api = {
   getUserInfo (data) {
     return instance.get(`/user/${data.uid}`, { params: data })
   },
-  // 用户登录
-  login (data) {
-    return instance.post('/session', data)
-  },
-  logout (data) {
-    return instance.delete('/session')
-  },
-  // 获取提交列表
-  getSolutions (data) {
-    return instance.get('/status/list', { params: data })
-  },
-  // 获取一次提交
-  findOneSolution (data) {
-    return instance.get(`/status/${data.sid}`, { params: data })
-  },
   // 获取题目提交信息
   getStatistics (data) {
     return instance.get(`/statistics/${data.pid}`, { params: data })
@@ -86,6 +71,10 @@ const api = {
   },
   testdata: {
     create: (data) => instance.post('...', data) // TODO
+  },
+  solution: {
+    findOne: (data) => instance.get(`/status/${data.sid}`, { params: data }),
+    find: (data) => instance.get('/status/list', { params: data })
   },
   problem: {
     findOne: (data) => instance.get(`/problem/${data.pid}`, data),
@@ -105,7 +94,15 @@ const api = {
   news: {
     findOne: (data) => instance.get(`/news/${data.pid}`, { params: data }),
     find: (data) => instance.get('/news/list', { params: data })
+  },
+  session: {
+    create: (data) => instance.post('/session', data),
+    delete: (data) => instance.delete('/session')
   }
 }
+
+// alias
+api.login = api.session.create
+api.logout = api.session.delete
 
 export default api
