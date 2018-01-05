@@ -22,6 +22,11 @@ const store = {
     },
     [types.GET_SUM_PROBLEM]: (state, payload) => {
       state.sum = payload
+    },
+    [types.DELETE_PROBLEM]: (state, { pid }) => {
+      // 从列表里删除
+      // 如果没有这一步，那么会出现：数据库里已经删除，但前端页面（不刷新的情况下）还有
+      state.list = state.list.filter((p) => p.pid !== +pid)
     }
   },
   actions: {
@@ -35,6 +40,11 @@ const store = {
       return api.problem.find(payload).then(({ data }) => {
         commit(types.GET_PROBLEM_LIST, data.res.docs)
         commit(types.GET_SUM_PROBLEM, data.res.total)
+      })
+    },
+    'delete' ({commit}, payload) {
+      return api.problem.delete(payload).then(() => {
+        commit(types.DELETE_PROBLEM, payload)
       })
     }
   }

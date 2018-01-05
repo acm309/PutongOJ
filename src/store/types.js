@@ -6,10 +6,13 @@ export const SHOW_LOGIN = 'SHOW_LOGIN'
 export const SHOW_REGISTER = 'SHOW_REGISTER'
 export const UPDATE_PROFILE = 'UPDATE_PROFILE'
 
+// problem
 export const GET_PROBLEM = 'GET_PROBLEM'
 export const GET_PROBLEM_LIST = 'GET_PROBLEM_LIST'
 export const GET_SUM_PROBLEM = 'GET_SUM_PROBLEM'
 export const UPDATE_PROBLEM = 'UPDATE_PROBLEM'
+export const DELETE_PROBLEM = 'DELETE_PROBLEM'
+
 export const UPDATE_NEWS = 'UPDATE_NEWS'
 export const UPDATE_NEW_LIST = 'UPDATE_NEW_LIST'
 export const GET_SOLUTION = 'GET_SOLUTION'

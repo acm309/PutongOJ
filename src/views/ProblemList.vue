@@ -25,7 +25,7 @@
         <th>Tags</th>
         <th>Delete</th>
       </tr>
-      <tr v-for="(item, index) in list">
+      <tr v-for="(item, index) in list" :key="item.pid">
         <td>{{  }}</td>
         <td>{{ item.pid }}</td>
         <td>
@@ -49,10 +49,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
-import api from '@/api'
 
 export default {
   data () {
@@ -81,7 +80,7 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters('problem', [
+    ...mapState('problem', [
       'list',
       'sum'
     ]),
@@ -121,14 +120,13 @@ export default {
     },
     clear () {
       this.content = ''
-      console.log(this.content)
     },
-    del (val) {
+    del (pid) {
       this.$Modal.confirm({
         title: '提示',
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
         onOk: () => {
-          api.problem.delete({pid: val}).then(() => {
+          this.$store.dispatch('problem/delete', { pid }).then(() => {
             this.$Message.success('删除成功！')
           })
         },
