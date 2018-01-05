@@ -1,30 +1,32 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined } = require('../utils')
-const Isemail = require('isemail')
 
-const UserSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
   uid: {
     type: String,
     index: {
-      unique: true // 建立索引，加快查询速度
+      unique: true
     }
   },
   nick: {
     type: String,
     required: true
   },
-  create: {
+  pwd: {
     type: String,
+    required: true
+  },
+  // token: {
+  //   type: String,
+  //   required: true
+  // },
+  create: {
+    type: Number,
     default: Date.now
   },
   privilege: {
-    type: Number,
-    default: 1 // TODO: fix this number to a constant variable
-  },
-  pwd: {
     type: String,
-    require: true
+    default: 1
   },
   timerecord: {
     type: [Number],
@@ -36,13 +38,9 @@ const UserSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: 2 // TODO: fix this number to a constant variable
+    default: 2
   },
   solve: {
-    type: Number,
-    default: 0
-  },
-  submit: {
     type: Number,
     default: 0
   },
@@ -53,81 +51,6 @@ const UserSchema = mongoose.Schema({
   collection: 'User'
 })
 
-UserSchema.plugin(mongoosePaginate)
+userSchema.plugin(mongoosePaginate)
 
-/**
-  Update a user's iprecord and timerecord
-  @param {String} - ip
-  @param {Number} [time=Date.now()]
-*/
-UserSchema.methods.updateRecords = function updateRecords (ip, time = Date.now()) {
-  this.iprecord.pop()
-  this.iprecord.unshift(ip)
-
-  this.timerecord.pop()
-  this.timerecord.unshift(time)
-}
-
-/**
-  校验字段是否符合要求；
-  参数里的所有字段都是可选的，只有提供了才会检查
-*/
-UserSchema.statics.validate = function validate ({
-    uid,
-    pwd,
-    nick,
-    privilege,
-    mail,
-    school,
-    motto
-}) {
-  let error = ''
-  let valid = true
-
-  if (!isUndefined(uid)) {
-    if (uid.length < 5 || uid.length > 20) {
-      error = 'The length of uid should be between 6 and 20'
-    } else if (/[^\d\w]/i.test(uid)) {
-      error = 'Uid should only be comprised of letters and numbers'
-    }
-  }
-
-  if (!isUndefined(nick)) {
-    if (nick.length < 3 || nick.length > 40) {
-      error = 'The length of nick should be between 6 and 40'
-    }
-  }
-
-  if (!isUndefined(pwd)) {
-    if (pwd.length < 5 || pwd.length > 25) {
-      error = 'The length of pwd should be between 6 and 25'
-    }
-  }
-
-  if (!isUndefined(mail)) {
-    if (mail !== '' && !Isemail.validate(mail)) {
-      error = `"${mail}" is not a standard email address`
-    }
-  }
-
-  if (!isUndefined(school)) {
-    if (school > 50) {
-      error = `The name of school should be longer than 50 letters`
-    }
-  }
-
-  if (!isUndefined(motto)) {
-    if (motto.length > 50) {
-      error = `The length of motto should be larger than 50`
-    }
-  }
-
-  if (error) valid = false
-
-  return {
-    valid,
-    error
-  }
-}
-
-module.exports = mongoose.model('User', UserSchema)
+module.exports = mongoose.model('User', userSchema)

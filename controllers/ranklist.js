@@ -1,28 +1,25 @@
-const User = require('../models/User')
-const { extractPagination } = require('../utils')
+const only = require('only')
+const User = require('../models/User.js')
+const { purify } = require('../utils/helper')
 
-/**
-  返回当前排行榜
-  以 solved 为第一维度降序，
-  以 submit 为第二维度降序
- */
-async function ranklist (ctx, next) {
-  const res = await User
-    .paginate({}, {
-      limit: +ctx.query.limit || 30, // 加号表示使其变为数字
-      page: +ctx.query.page || 1,
-      sort: { solve: -1, submit: 1 },
-      // '-_id' 结果不包含 _id
-      // http://stackoverflow.com/questions/9598505/mongoose-retrieving-data-without-id-field
-      select: '-_id uid nick motto solve submit'
-    })
+// 返回排名列表
+const list = async (ctx) => {
+  const opt = ctx.request.query
+  const page = parseInt(opt.page) || 1
+  const pageSize = parseInt(opt.pageSize) || 30
+  const filter = purify(only(opt, 'mid'))
+  const res = await User.paginate(filter, {
+    sort: { solve: -1, submit: 1 },
+    page,
+    limit: pageSize,
+    select: '-_id -pwd -privilege'
+  })
 
   ctx.body = {
-    ranklist: res.docs,
-    pagination: extractPagination(res)
+    res
   }
 }
 
 module.exports = {
-  ranklist
+  list
 }

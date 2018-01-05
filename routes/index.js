@@ -1,39 +1,25 @@
 const Router = require('koa-router')
-const api = new Router()
 
-const contests = require('./contests')
-const problems = require('./problems')
-const news = require('./news')
-const home = require('./home')
-const users = require('./users')
-const ranklist = require('./ranklist')
-const status = require('./status')
-const statistics = require('./statistics')
+const router = new Router()
+
 const session = require('./session')
-const testdata = require('./testdata')
-const discusses = require('./discusses')
-const comments = require('./comments')
+const problem = require('./problem')
+const news = require('./news')
+const status = require('./status')
+const user = require('./user')
+const statistics = require('./statistics')
+const ranklist = require('./ranklist')
+const contest = require('./contest')
+const utils = require('./utils')
 
-api
-  .use('/api', contests.routes(), contests.allowedMethods())
-  .use('/api', problems.routes(), problems.allowedMethods())
-  .use('/api', news.routes(), news.allowedMethods())
-  .use('/api', home.routes(), home.allowedMethods())
-  .use('/api', users.routes(), users.allowedMethods())
-  .use('/api', ranklist.routes(), ranklist.allowedMethods())
-  .use('/api', status.routes(), status.allowedMethods())
-  .use('/api', statistics.routes(), statistics.allowedMethods())
-  .use('/api', session.routes(), session.allowedMethods())
-  .use('/api', discusses.routes(), discusses.allowedMethods())
-  .use('/api', comments.routes(), comments.allowedMethods())
+router.use(session.routes(), session.allowedMethods()) // allowedMethods:当前接口运行的method
+router.use(problem.routes(), problem.allowedMethods())
+router.use(news.routes(), news.allowedMethods())
+router.use(status.routes(), status.allowedMethods())
+router.use(user.routes(), user.allowedMethods())
+router.use(statistics.routes(), statistics.allowedMethods())
+router.use(ranklist.routes(), ranklist.allowedMethods())
+router.use(contest.routes(), contest.allowedMethods())
+router.use(utils.routes(), utils.allowedMethods())
 
-module.exports = function () {
-  return async function (ctx, next) {
-    ctx.app
-      .use(api.routes())
-      .use(api.allowedMethods())
-      .use(testdata.routes())
-      .use(testdata.allowedMethods())
-    return next()
-  }
-}
+module.exports = router

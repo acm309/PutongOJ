@@ -25,13 +25,12 @@ const IdSchema = mongoose.Schema({
       ids.generateId('News')
       ids collection in db:
         { "id" : 2, "name" : "News" }
-
 */
 IdSchema.statics.generateId = function (field = '') {
   field = field.toLocaleLowerCase()
   field = field[0].toLocaleUpperCase() + field.slice(1)
   return this
-    .findOneAndUpdate({name: field}, {$inc: {id: 1}})
+    .findOneAndUpdate({name: field}, {$inc: {id: 1}}) // $inc表示该字段自增
     .exec()
     .then((obj) => obj.id + 1) // 记得取 id 字段加 1 才是新的可用的 id
 }

@@ -1,19 +1,15 @@
 const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate')
-const { isUndefined } = require('../utils')
-const fse = require('fs-extra')
-const path = require('path')
+const mongoosePaginate = require('mongoose-paginate') // 分页
+const ids = require('./ID')
 
-const ProblemSchema = mongoose.Schema({
+const problemSchema = mongoose.Schema({
+  isdone: Boolean,
   pid: {
     type: Number,
     index: {
-      unique: true // 建立索引，加快查询速度
-    }
-  },
-  title: {
-    type: String,
-    required: true
+      unique: true
+    },
+    default: -1 // 表示新题目
   },
   time: {
     type: Number,
@@ -27,8 +23,12 @@ const ProblemSchema = mongoose.Schema({
     min: 100,
     max: 32768 * 4
   },
-  create: {
+  title: {
     type: String,
+    required: true
+  },
+  create: {
+    type: Number,
     default: Date.now
   },
   description: {
@@ -51,6 +51,10 @@ const ProblemSchema = mongoose.Schema({
     type: String,
     default: ''
   },
+  hint: {
+    type: String,
+    default: ''
+  },
   solve: {
     type: Number,
     default: 0
@@ -60,14 +64,10 @@ const ProblemSchema = mongoose.Schema({
     default: 0
   },
   status: {
-    type: Number,
-    default: 2 // TODO: fix this to a constant variable
-  },
-  hint: {
     type: String,
-    default: ''
+    default: 2
   },
-  tags: {
+  tages: {
     type: [String],
     default: []
   }
@@ -75,45 +75,30 @@ const ProblemSchema = mongoose.Schema({
   collection: 'Problem'
 })
 
-ProblemSchema.plugin(mongoosePaginate)
+problemSchema.plugin(mongoosePaginate)
 
-ProblemSchema.methods.saveSample = async function saveSample (root) {
-  await Promise.all([
-    fse.outputFile(path.resolve(root, `./${this.pid}/sample.in`), this.in),
-    fse.outputFile(path.resolve(root, `./${this.pid}/sample.out`), this.out),
-    fse.ensureDir(path.resolve(root, `./${this.pid}/ac`))
-  ])
-}
+problemSchema.pre('validate', function (next) {
+  // 验证字段
+  if (this.time > 10000) {
+    next(new Error('Time should not be longer than 10000 ms'))
+  } else {
+    next()
+  }
+})
 
-ProblemSchema.statics.validate = function validate ({ title, time, memory }) {
-  let error = ''
-  let valid = true
-  if (!isUndefined(title)) {
-    if (title.length === 0) {
-      error = 'Title should not be empty'
-    } else if (title.length > 50) {
-      error = 'The length of title should not be more than 50'
-    }
+problemSchema.pre('save', function (next) {
+  // 保存
+  if (this.pid === -1) {
+    // 表示新的题目被创建了，因此赋予一个新的 id
+    ids
+      .generateId('Problem')
+      .then(id => {
+        this.pid = id
+      })
+      .then(next)
+  } else {
+    next()
   }
-  // wtf! +null is 0, and +NaN is also 0
-  if (!isUndefined(time)) {
-    if (isNaN(time) || time === null || typeof +time !== 'number') {
-      error = 'Time should not a number'
-    } else if (time < 100 || time > 10000) {
-      error = 'time should be larger than 100 and smaller than 10000'
-    }
-  }
-  if (!isUndefined(memory)) {
-    if (isNaN(memory) || memory === null || typeof +memory !== 'number') {
-      error = 'Memory should not a number'
-    } else if (memory < 100 || memory > 32768 * 4) {
-      error = `memory should be larger than 100 and smaller than ${32768 * 4}`
-    }
-  }
-  if (error) {
-    valid = false
-  }
-  return { valid, error }
-}
+})
 
-module.exports = mongoose.model('Problem', ProblemSchema)
+module.exports = mongoose.model('Problemlist', problemSchema)
