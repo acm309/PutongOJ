@@ -80,8 +80,8 @@
 <script>
 // import Solution from '@/components/Solution'
 import { mapGetters } from 'vuex'
-import constant from '../util/constant'
 import only from 'only'
+import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 
 export default {

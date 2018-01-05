@@ -1,5 +1,5 @@
 import * as types from '../types'
-import api from '../../api.js'
+import api from '@/api'
 
 const store = {
   namespaced: true,
@@ -48,7 +48,6 @@ const store = {
         commit(types.UPDATE_USER, data.info)
         commit(types.UPDATE_SOLVED, data.solved)
         commit(types.UPDATE_UNSOLVED, data.unsolved)
-        // console.log(data.info)
       })
     }
   }

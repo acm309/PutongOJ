@@ -1,5 +1,5 @@
 import * as types from '../types'
-import api from '../../api.js'
+import api from '@/api'
 
 const store = {
   namespaced: true,

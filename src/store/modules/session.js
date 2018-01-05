@@ -1,5 +1,5 @@
 import * as types from '../types'
-import api from '../../api.js'
+import api from '@/api'
 
 // 初始化时用sessionStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {

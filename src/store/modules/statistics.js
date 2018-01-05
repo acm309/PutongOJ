@@ -1,6 +1,6 @@
 import * as types from '../types.js'
-import api from '../../api.js'
-import { statisTableObj } from '../../util/constant.js'
+import api from '@/api'
+import { statisTableObj } from '@/util/constant'
 
 const store = {
   namespaced: true,

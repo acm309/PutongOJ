@@ -26,7 +26,6 @@ import highlight from 'highlight.js'
 export default {
   data: () => ({
     result: constant.result
-    // code: highlight.highlight('c++', `${this.solution.code}`).value
   }),
   computed: {
     ...mapGetters('solution', [
@@ -41,7 +40,6 @@ export default {
   },
   methods: {
     onCopy () {
-      // TODO 现在复制的代码是 highlight 之后的代码，也就是会有 html 标签的代码
       this.$Message.success('Copied!')
     }
   }
