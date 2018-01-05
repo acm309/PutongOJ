@@ -34,10 +34,34 @@
         </Menu>
         <div class="right">
           <Button type="text" @click="showDialog">Login / Register</Button>
-          <Modal v-model="modal" width="360">
-            <Tabs v-model="event">
-              <TabPane label="Login" name="login"></TabPane>
-              <TabPane label="Register" name="register"></TabPane>
+          <Modal v-model="modal" @on-ok="submitForm">
+            <Tabs v-model="session">
+              <TabPane label="Login" name="login">
+                <Form ref="loginForm" :model="loginForm" :rules="loginRules" :label-width="100">
+                  <FormItem class="loginuid" label="Username" prop="uid">
+                    <Input v-model="loginForm.uid"></Input>
+                  </FormItem>
+                  <FormItem class="loginpwd" label="Password" prop="pwd">
+                    <Input v-model="loginForm.pwd" type="password"></Input>
+                  </FormItem>
+                </Form>
+              </TabPane>
+              <TabPane label="Register" name="register">
+                <Form ref="registerForm" :model="registerForm" :rules="registerRules" :label-width="100">
+                  <FormItem label="Username" prop="uid">
+                    <Input v-model="registerForm.uid"></Input>
+                  </FormItem>
+                  <FormItem label="Nickname" prop="nick">
+                    <Input v-model="registerForm.nick"></Input>
+                  </FormItem>
+                  <FormItem label="Password" prop="pwd">
+                    <Input v-model="registerForm.pwd" type="password"></Input>
+                  </FormItem>
+                  <FormItem label="CheckPwd" prop="checkPwd">
+                    <Input v-model="registerForm.checkPwd" type="password"></Input>
+                  </FormItem>
+                </Form>
+              </TabPane>
             </Tabs>
           </Modal>
         </div>
@@ -54,23 +78,97 @@
 </template>
 
 <script>
-import Dialog from './Dialog.vue'
-
 export default {
-  data: () => ({
-    modal: false,
-    event: 'login'
-  }),
+  data () {
+    // 自定义验证规则
+    let validatePass1 = (rule, value, callback) => {
+      // 5-20位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
+      let reg = /[0-9a-zA-Z]{5,20}$/
+      if (!reg.test(value)) {
+        callback(new Error('密码长度需5-20位，只能包含字母或字符'))
+      } else {
+        callback()
+      }
+    }
+    // 验证密码是否重复
+    let validatePass2 = (rule, value, callback) => {
+      if (value !== this.regForm.pwd) {
+        callback(new Error('两次密码输入不一致'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      modal: false,
+      session: 'login',
+      loginForm: {
+        uid: '',
+        pwd: ''
+      },
+      registerForm: {
+        uid: '',
+        nick: '',
+        pwd: '',
+        checkPwd: ''
+      },
+      loginRules: {
+        uid: [
+          { required: true, message: '用户名不能少', trigger: 'change' },
+          { min: 5, max: 20, message: '用户名在5到20位之间', trigger: 'change' }
+        ],
+        pwd: [
+          { required: true, message: '请输入密码', trigger: 'change' }
+        ]
+      },
+      registerRules: {
+        uid: [
+          { required: true, message: '用户名不能少', trigger: 'change' },
+          { min: 5, max: 20, message: '用户名在5到20位之间', trigger: 'change' }
+        ],
+        nick: [
+          { required: true, message: '昵称不能少', trigger: 'change' }
+        ],
+        pwd: [
+          { required: true, message: '请输入密码', trigger: 'change' },
+          { validator: validatePass1, trigger: 'change' }
+        ],
+        checkPwd: [
+          { required: true, message: '请再次输入密码', trigger: 'change' },
+          { validator: validatePass2, trigger: 'change' }
+        ]
+      }
+    }
+  },
   methods: {
     routerTo (name) {
       this.$router.push({ name: name })
     },
     showDialog () {
       this.modal = true
+    },
+    submitForm () {
+      if (this.session === 'login') {
+        this.$refs['loginForm'].validate((valid) => {
+          if (valid) { // 验证通过
+            this.$Message.info('Login!')
+          } else {
+            // 验证不通过
+            this.$Message.error('This is an error tip')
+            return false
+          }
+        })
+      } else {
+        this.$refs['registerForm'].validate((valid) => {
+          if (valid) { // 验证通过
+            this.$Message.info('Register!')
+          } else {
+            // 验证不通过
+            this.$Message.error('This is an error tip')
+            return false
+          }
+        })
+      }
     }
-  },
-  components: {
-    Dialog
   }
 }
 </script>
@@ -104,4 +202,14 @@ export default {
       margin-bottom: 6px
   .layout-footer-center
     text-align: center
+.ivu-tabs-nav-container
+  font-size: 16px
+.ivu-tabs-nav
+  .ivu-tabs-tab
+    padding: 8px 16px 12px 16px
+.ivu-form-item
+  margin-right: 20px
+.loginuid
+  margin-top: 60px
+  margin-bottom: 30px
 </style>
