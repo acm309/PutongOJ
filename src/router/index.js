@@ -10,6 +10,7 @@ import ProblemSubmit from '@/views/Problem/Submit'
 
 // status & solution
 import Status from '@/views/Status'
+import Solution from '@/views/Solution'
 
 Vue.use(Router)
 
@@ -45,6 +46,11 @@ export default new Router({
       path: '/status',
       name: 'status',
       component: Status
+    },
+    {
+      path: '/status/:sid',
+      name: 'solution',
+      component: Solution
     }
   ]
 })
