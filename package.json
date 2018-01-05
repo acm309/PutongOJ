@@ -1,7 +1,6 @@
 {
-  "name": "project",
-  "version": "1.0.0",
-  "description": "A Vue.js project",
+  "name": "putongoj-fe",
+  "version": "2.0.0-beta",
   "author": "Kerminate <kepeilin@outlook.com>",
   "private": true,
   "scripts": {
