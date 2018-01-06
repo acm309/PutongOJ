@@ -1,5 +1,5 @@
 <template lang="html">
-  <div>
+  <div class="solution-wrap">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
       <span>Memory: {{ solution.memory }} KB</span>
@@ -47,12 +47,15 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-span
-  margin-right: 20px
-pre
-  border: 1px solid #e040fb
-  border-radius: 4px
-  padding: 10px
-  &.error
-    background-color: #FFF9C4
+.solution-wrap
+  h1
+    margin-bottom: 6px
+  span
+    margin-right: 20px
+  pre
+    border: 1px solid #e040fb
+    border-radius: 4px
+    padding: 10px
+    &.error
+      background-color: #FFF9C4
 </style>
