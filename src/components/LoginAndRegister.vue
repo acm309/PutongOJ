@@ -50,7 +50,7 @@ export default {
     }
     // 验证密码是否重复
     const validatePass2 = (rule, value, callback) => {
-      const error = value !== this.regForm.pwd ? new Error('两次密码输入不一致') : null
+      const error = value !== this.form.pwd ? new Error('两次密码输入不一致') : null
       error ? callback(error) : callback()
     }
     const basicRules = {
@@ -92,22 +92,26 @@ export default {
     ...mapMutations('session', {
       triggerLogin: TRIGGER_LOGIN
     }),
-    ...mapActions('session', {
-      login: 'login'
-    }),
+    ...mapActions('session', [ 'login' ]),
+    ...mapActions('user', [ 'register' ]),
     submit () {
       if (this.mode === 'login') {
         this.$refs['loginForm'].validate((valid) => {
           if (valid) { // 验证通过
             this.login(only(this.form, 'uid pwd'))
-              .then(() => this.$Message.success('Welcome!'))
+              .then(() => this.$Message.success(`Welcome, ${this.form.uid} !`))
               .then(() => this.triggerLogin())
           }
         })
       } else {
         this.$refs['registerForm'].validate((valid) => {
           if (valid) { // 验证通过
-            this.$Message.info('Register!')
+            this.register(this.form)
+              .then(() => {
+                // 注册好后，自动登录
+                this.mode = 'login'
+                this.submit()
+              })
           }
         })
       }

@@ -53,10 +53,6 @@ const instance = {}
 })
 
 const api = {
-  // 用户注册
-  register (data) {
-    return instance.post('/user', data)
-  },
   // 获取用户信息
   getUserInfo (data) {
     return instance.get(`/user/${data.uid}`, { params: data })
@@ -71,6 +67,9 @@ const api = {
   },
   testdata: {
     create: (data) => instance.post('...', data) // TODO
+  },
+  user: {
+    create: (data) => instance.post('/user', data)
   },
   solution: {
     findOne: (data) => instance.get(`/status/${data.sid}`, { params: data }),
@@ -105,5 +104,6 @@ const api = {
 // alias
 api.login = api.session.create
 api.logout = api.session.delete
+api.register = api.user.create
 
 export default api

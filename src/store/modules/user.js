@@ -36,12 +36,7 @@ const store = {
   },
   actions: {
     register ({ commit }, payload) {
-      return api.register(payload).then(({ data }) => {
-        if (data.success) {
-          commit(types.SHOW_REGISTER)
-        }
-        return data
-      })
+      return api.register(payload)
     },
     find ({ commit }, payload) {
       return api.getUserInfo(payload).then(({ data }) => {
