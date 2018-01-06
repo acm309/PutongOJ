@@ -38,7 +38,8 @@ const create = async (ctx) => {
     pid: +pid,
     uid,
     code,
-    language
+    language,
+    length: Buffer.from(code).length // 这个属性是不是没啥用?
   })
 
   try {
