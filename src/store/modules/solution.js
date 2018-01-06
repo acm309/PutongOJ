@@ -44,6 +44,9 @@ const store = {
       return api.solution.findOne(payload).then(({ data }) => {
         commit(types.GET_SOLUTION, data.doc)
       })
+    },
+    create ({ commit }, payload) {
+      return api.solution.create(payload)
     }
   }
 }

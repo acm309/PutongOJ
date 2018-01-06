@@ -6,11 +6,10 @@
             <Option :value="2">C++ (G++)</Option>
             <Option :value="1">C (GCC)</Option>
             <Option :value="3">Java (openJDK)</Option>
-            <Option :value="0">ALL</Option>
         </Select>
       </FormItem>
       <FormItem>
-        <Button type="primary">Submit</Button>
+        <Button type="primary" @click="submit">Submit</Button>
         <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
       </FormItem>
       <FormItem>
@@ -31,6 +30,14 @@ export default {
   methods: {
     reset () {
       this.form.code = ''
+    },
+    submit () {
+      this.$store.dispatch('solution/create', {
+        ...this.form,
+        pid: this.$route.params.pid
+      }).then(() => {
+        this.$Message.info('success!')
+      })
     }
   }
 }
