@@ -7,5 +7,6 @@ const router = new Router({
 
 router.get('/list', status.list)
 router.get('/:sid', status.findOne)
+router.post('/', status.create)
 
 module.exports = router

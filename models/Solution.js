@@ -88,6 +88,19 @@ solutionSchema.virtual('isPending').get(function () {
   return this.judge === config.judge.Pending
 })
 
+solutionSchema.pre('validate', function (next) {
+  // 验证字段
+  if (isNaN(this.pid)) {
+    next(new Error('Pid should be a number'))
+  } else if (this.code.length <= 5) {
+    next(new Error('The length of code should be greater than 5'))
+  } else if (this.code.length >= 5000) {
+    next(new Error('The length of code should be less than 5000'))
+  } else {
+    next()
+  }
+})
+
 solutionSchema.pre('save', function (next) {
   // 保存
   if (this.sid === -1) {
