@@ -127,7 +127,7 @@ export default {
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
         onOk: () => {
           this.$store.dispatch('problem/delete', { pid }).then(() => {
-            this.$Message.success('删除成功！')
+            this.$Message.success(`成功删除 ${pid}！`)
           })
         },
         onCancel: () => {
