@@ -29,7 +29,10 @@ const findOne = async (ctx) => {
 }
 
 // 注册
-const reg = async (ctx) => {
+const create = async (ctx) => {
+  if (!ctx.request.body.pwd || ctx.request.body.pwd.length <= 5) {
+    ctx.throw(400, 'the length of the password must be greater than 5')
+  }
   const user = new User({
     uid: ctx.request.body.uid,
     nick: ctx.request.body.nick,
@@ -39,21 +42,18 @@ const reg = async (ctx) => {
   // user.create = moment(objectIdToTimestamp(user._id)).format('YYYY-MM-DD HH:mm:ss')
   const doc = await User.findOne({ uid: user.uid }).exec()
   if (doc) {
-    console.log('用户已经存在')
-    ctx.body = {
-      success: false
-    }
-  } else {
-    await user.save()
-
-    console.log('注册成功')
-    ctx.body = {
-      success: true
-    }
+    ctx.throw(400, '用户名已被占用!')
   }
+  try {
+    await user.save()
+  } catch (err) {
+    ctx.throw(400, err.message)
+  }
+
+  ctx.body = {}
 }
 
 module.exports = {
   findOne,
-  reg
+  create
 }

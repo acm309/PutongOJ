@@ -53,4 +53,19 @@ const userSchema = mongoose.Schema({
 
 userSchema.plugin(mongoosePaginate)
 
+userSchema.pre('validate', function (next) {
+  // 验证字段
+  if (this.uid.length < 5) {
+    next(new Error('The length of the username must be greater than 4'))
+  } else if (this.uid.length >= 50) {
+    next(new Error('The length of the username must be less than 50'))
+  } else if (this.nick.length < 4) {
+    next(new Error('The length of the nick must be greater than 3'))
+  } else if (this.nick.length >= 50) {
+    next(new Error('The length of the nick must be less than 50'))
+  } else {
+    next()
+  }
+})
+
 module.exports = mongoose.model('User', userSchema)
