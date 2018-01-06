@@ -50,27 +50,29 @@
         <th>PID</th>
         <th>Username</th>
         <th>Judge</th>
-        <th>Time</th>
-        <th>Memory</th>
+        <th>Time/ms</th>
+        <th>Memory/kb</th>
         <th>Language</th>
-        <th>Length</th>
         <th>Submit Time</th>
       </tr>
       <tr v-for="(item, index) in list">
         <td>{{ item.sid }}</td>
-        <td>{{ item.pid }}</td>
+        <td>
+          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+            {{ item.pid }}
+          </router-link>
+        </td>
         <td>
           <Button type="text">{{ item.uid }}</Button>
         </td>
         <td :class="color[item.judge]">{{ result[item.judge] }}</td>
-        <td>{{ item.time }} MS</td>
+        <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
         <td>
           <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-            <Button @click="" type="text">{{ lang[item.language] }}</Button>
+            {{ lang[item.language] }}
           </router-link>
         </td>
-        <td>{{ item.length }} B</td>
         <td>{{ item.create | timePretty }}</td>
       </tr>
     </table>
@@ -129,14 +131,9 @@ export default {
       this.language = query.language || ''
     },
     reload (payload = {}) {
-      // console.log(this.$route.query)
-      // console.log(this.query)
-      const query = Object.assign(this.query, purify(payload))
-      // console.log(query)
-      // console.log(this.$route.query)
       this.$router.push({
         name: 'status',
-        query
+        query: purify(Object.assign(this.query, payload))
       })
     },
     search (val) {
