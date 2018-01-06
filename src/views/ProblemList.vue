@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 

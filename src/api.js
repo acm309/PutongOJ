@@ -16,32 +16,32 @@ const instance = {}
         if (err.response && err.response.status >= 500) {
           Vue.prototype.$Message.error({
             content: `Σ(;ﾟдﾟ)  服务器崩坏，需要联系管理员维修`,
-            duration: 10000
+            duration: 6.5
           })
         } else if (err.response && err.response.status === 403) {
           Vue.prototype.$Message.error({
             content: `╮(╯_╰)╭ 你没有相关权限进行此操作`,
-            duration: 10000
+            duration: 6.5
           })
         } else if (err.response && err.response.status === 401) {
           Vue.prototype.$Message.error({
             content: `(〃∀〃) 请先登录`,
-            duration: 10000
+            duration: 6.5
           })
         } else if (err.response && err.response.status === 400) {
           Vue.prototype.$Message.error({
             content: `${err.response.data.error}`,
-            duration: 10000
+            duration: 6.5
           })
         } else if (!err.response) {
           Vue.prototype.$Message.error({
             content: `_(:з」∠)_  网络异常，检查你的网线`,
-            duration: 10000
+            duration: 6.5
           })
         } else {
           Vue.prototype.$Message.error({
             content: err.message,
-            duration: 10000
+            duration: 6.5
           })
         }
         return Promise.reject(new Error('I throw this on purpose'))
@@ -74,7 +74,8 @@ const api = {
   },
   solution: {
     findOne: (data) => instance.get(`/status/${data.sid}`, { params: data }),
-    find: (data) => instance.get('/status/list', { params: data })
+    find: (data) => instance.get('/status/list', { params: data }),
+    create: (data) => instance.post('/status', data)
   },
   problem: {
     findOne: (data) => instance.get(`/problem/${data.pid}`, data),
