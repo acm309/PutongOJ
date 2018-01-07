@@ -5,7 +5,7 @@
       <TabPane label="Submit" name="problemSubmit"></TabPane>
       <TabPane label="My Submissions" name="name3"></TabPane>
       <TabPane label="Statistics" name="problemStatistics"></TabPane>
-      <TabPane label="Edit" name="name5"></TabPane>
+      <TabPane label="Edit" name="problemEdit"></TabPane>
       <TabPane label="Test Data" name="name6"></TabPane>
     </Tabs>
     <router-view></router-view>
@@ -19,7 +19,7 @@ export default {
   }),
   methods: {
     change (name) {
-      this.$router.push({ name })
+      this.$router.push({ name: name, params: { pid: this.$route.params.pid } })
     }
   },
   watch: {

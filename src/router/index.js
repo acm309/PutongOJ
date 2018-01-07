@@ -8,6 +8,7 @@ import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/Submit'
 import ProblemStatistics from '@/views/Problem/Statistics'
+import ProblemEdit from '@/views/Problem/problemEdit'
 
 // status & solution
 import Status from '@/views/Status'
@@ -45,6 +46,11 @@ export default new Router({
           path: 'statistics',
           name: 'problemStatistics',
           component: ProblemStatistics
+        },
+        {
+          path: 'edit',
+          name: 'problemEdit',
+          component: ProblemEdit
         }
       ]
     },
