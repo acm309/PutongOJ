@@ -47,6 +47,9 @@ const store = {
     },
     [types.GET_CONTEST_PRIME]: (state, payload) => {
       state.first = payload
+    },
+    [types.DELETE_CONTEST]: (state, { cid }) => {
+      state.list = state.list.filter((p) => p.cid !== +cid)
     }
   },
   actions: {
@@ -69,6 +72,11 @@ const store = {
       return api.contest.rank(payload).then(({data}) => {
         commit(types.GET_CONTEST_RANK, data.res)
         commit(types.GET_CONTEST_PRIME, data.prime)
+      })
+    },
+    delete ({ commit }, payload) {
+      return api.contest.delete(payload).then(() => {
+        commit(types.DELETE_CONTEST, payload)
       })
     }
   }

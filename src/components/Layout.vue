@@ -16,7 +16,7 @@
             <MenuItem name="4">
               <Icon type="stats-bars"></Icon>Ranklist
             </MenuItem>
-            <MenuItem name="5">
+            <MenuItem name="contestList">
               <Icon type="android-bar"></Icon>Contest
             </MenuItem>
             <MenuItem name="6">
