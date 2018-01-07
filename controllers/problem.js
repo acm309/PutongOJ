@@ -86,7 +86,8 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    success: true
+    success: true,
+    pid: problem.pid
   }
 }
 
