@@ -65,7 +65,6 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    success: true,
     pid: problem.pid
   }
 }
