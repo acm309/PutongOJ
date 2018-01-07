@@ -4,6 +4,7 @@ const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const User = require('../models/User')
 const logger = require('../utils/logger')
+const config = require('../config')
 
 // 返回竞赛列表
 const list = async (ctx) => {
@@ -63,116 +64,42 @@ const findOne = async (ctx) => {
 }
 
 // 返回比赛排行榜
+// https://paste.ubuntu.com/26296673/
+// 注意将 paste ubuntu 中的几处错误:
+// 1. created 改为 create
+// 2. 没有 ac 的题目是没有 create 属性的
 const ranklist = async (ctx) => {
-  let res = []
-  let prime = []
-  const cid = parseInt(ctx.query.cid)
-  const users = await Solution.find({mid: cid}).distinct('uid').exec()
-  const contest = await Contest.findOne({cid}).exec()
-  const start = contest.start
-
-  contest.list.forEach((value, index) => {
-    prime[index] = ''
+  const ranklist = {}
+  const solutions = await Solution.find({
+    mid: +ctx.params.cid
   })
-
-  users.forEach((value, index) => {
-    let prolist = []
-    res[index] = { uid: value }
-    contest.list.forEach((item, ind) => {
-      prolist[ind] = {
-        pid: item,
-        submit: 0,
-        solve: false,
-        create: 0
-      }
-    })
-    res[index].list = prolist
-  })
-
-  const process = users.map((value, index) => {
-    return Solution.aggregate([
-      { $match: {
-        mid: cid,
-        uid: value,
-        judge: 3
-      }},
-      { $group: {
-        _id: '$pid',
-        pid: { $first: '$pid' },
-        create: { $first: '$create' }
-      }}
-    ]).exec()
-      .then((solution) => {
-        let solve = []
-        solution.forEach((value, index) => {
-          solve[index] = only(value, 'pid create')
-        })
-        res[index].solve = solve
-      })
-      .then(() => {
-        return Solution.find({mid: cid, uid: value, judge: {$ne: 3}}).exec()
-      })
-      .then((solution) => {
-        let error = []
-        solution.forEach((value, index) => {
-          error[index] = only(value, 'pid create')
-        })
-        res[index].error = error
-      })
-      .then(() => {
-        return User.findOne({uid: value}).exec()
-      })
-      .then((item) => {
-        res[index].nick = item.nick
-      })
-  })
-  await Promise.all(process)
-
-  res.forEach((value, index) => {
-    value.ac = value.solve.length
-    value.time = 0
-    value.error.forEach((item, ind) => {
-      value.list[contest.list.indexOf(item.pid)].submit++
-    })
-    value.solve.forEach((item, ind) => {
-      value.list[contest.list.indexOf(item.pid)].create = item.create - start
-      value.list[contest.list.indexOf(item.pid)].solve = true
-    })
-    value.list.forEach((item, ind) => {
-      if (item.solve) {
-        // 直接相加导致字符串连接（不知道为啥）
-        value.time += parseInt(item.submit * 20 * 60 * 1000) + parseInt(item.create)
-      }
-    })
-  })
-
-  res.sort(function (a, b) {
-    if (a.ac !== b.ac) {
-      return a.ac < b.ac ? 1 : -1 // 如果仅仅return a.ac < b.ac 排序会错误，原因暂时不知道
+  for (const solution of solutions) {
+    const { uid } = solution
+    const row = (uid in ranklist) ? ranklist[uid] : { uid }
+    const { pid } = solution
+    const item = (pid in row) ? row[pid] : {}
+    if ('wa' in item) {
+      if (item.wa >= 0) continue
+      if (solution.judge === config.judge.Accepted) {
+        item.wa = -item.wa
+        item.create = solution.create
+      } else item.wa --
     } else {
-      return a.time > b.time ? 1 : -1
+      if (solution.judge === config.judge.Accepted) {
+        item.wa = 0
+        item.create = solution.create
+      } else item.wa = -1
     }
-  })
-
-  const rate = await Solution.aggregate([
-    { $match: {
-      mid: cid,
-      judge: 3
-    }},
-    { $group: {
-      _id: '$pid',
-      pid: { $first: '$pid' },
-      uid: { $first: '$uid' }
-    }}
-  ])
-
-  rate.forEach((value, index) => {
-    prime[contest.list.indexOf(value.pid)] = value.uid
-  })
-
+    row[pid] = item
+    ranklist[uid] = row
+  }
+  await Object.keys(ranklist).map(uid =>
+      User
+        .findOne({ uid })
+        .exec()
+        .then(user => { ranklist[user.uid].nick = user.nick }))
   ctx.body = {
-    res,
-    prime
+    ranklist
   }
 }
 
