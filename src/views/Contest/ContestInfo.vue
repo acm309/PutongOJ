@@ -1,23 +1,23 @@
 <template lang="html">
   <div class="conin-wrap">
-    <Card>
-      <Row>
+    <Card class="card">
+      <Row type="flex" justify="center">
         <Col :span="6">Begin: {{ contest.start | timePretty }}</Col>
         <Col :span="12" v-if="Date.now() < contest.start">Ready</Col>
         <Col :span="12" v-if="Date.now() > contest.start && Date.now() < contest.end">Running</Col>
         <Col :span="12" v-if="Date.now() > contest.end">Ended</Col>
         <Col :span="6">End: {{ contest.end | timePretty }}</Col>
       </Row>
-      <el-progress :text-inside="true" :stroke-width="18" :percentage="timePercentage"></el-progress>
+        <Progress :stroke-width="18" :percent="timePercentage"></Progress>
     </Card>
     <Tabs :value="display" @tab-click="handleClick">
-      <TabPane label="Overview" name="contest.overview"></TabPane>
-      <TabPane label="Problem" name="contest.problem"></TabPane>
-      <TabPane label="Status" name="contest.status"></TabPane>
-      <TabPane label="Ranklist" name="contest.ranklist"></TabPane>
-      <TabPane label="Edit" name="contest.edit"></TabPane>
-      <router-view></router-view>
+      <TabPane label="Overview" name="contestOverview"></TabPane>
+      <TabPane label="Problem" name="contestProblem"></TabPane>
+      <TabPane label="Status" name="contestStatus"></TabPane>
+      <TabPane label="Ranklist" name="contestRanklist"></TabPane>
+      <TabPane label="Edit" name="contestEdit"></TabPane>
     </Tabs>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     ...mapGetters('contest', {
-      contest: 'one'
+      contest: 'contest'
     }),
     timePercentage () {
       if (Date.now() < this.contest.start) {
@@ -48,13 +48,14 @@ export default {
   created () {
     this.display = this.$route.name
     this.$store.dispatch('contest/findOne', this.$route.params)
+    console.log(Date.now())
   },
   methods: {
-    handleClick (tab) {
-      if (tab.name === 'contest.problem') {
-        this.$router.push({ name: tab.name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })
+    handleClick (name) {
+      if (name === 'contestProblem') {
+        this.$router.push({ name: name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })
       } else {
-        this.$router.push({ name: tab.name, params: { cid: this.$route.params.cid } })
+        this.$router.push({ name: name, params: { cid: this.$route.params.cid } })
       }
     }
   },
@@ -69,8 +70,15 @@ export default {
 <style lang="stylus">
   .conin-wrap
     margin-bottom: 20px
-    .Card
+    .card
       margin-bottom: 20px
-      .Row
-        margin-bottom: 20px
+    .ivu-col
+      text-align: center
+      margin-bottom: 20px
+      font-size: 16px
+    .ivu-progress-success, .ivu-progress-wrong
+      .ivu-progress-bg
+        background-color: #e040fb
+      .ivu-progress-text
+        color: #e040fb
 </style>

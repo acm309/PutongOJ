@@ -6,7 +6,7 @@ const store = {
   state: {
     list: [],
     sum: 0,
-    one: {},
+    contest: {},
     overview: [],
     totalProblems: 0,
     problems: [],
@@ -16,7 +16,7 @@ const store = {
   getters: {
     list: state => state.list,
     sum: state => state.sum,
-    one: state => state.one,
+    contest: state => state.contest,
     overview: state => state.overview,
     totalProblems: state => state.totalProblems,
     problems: state => state.problems,
@@ -31,7 +31,7 @@ const store = {
       state.sum = payload
     },
     [types.GET_CONTEST]: (state, payload) => {
-      state.one = payload
+      state.contest = payload
     },
     [types.GET_CONTEST_OVERVIEW]: (state, payload) => {
       state.overview = payload
