@@ -46,6 +46,12 @@ const store = {
       return api.problem.delete(payload).then(() => {
         commit(types.DELETE_PROBLEM, payload)
       })
+    },
+    update ({commit}, payload) {
+      return api.problem.update(payload)
+    },
+    create ({commit}, payload) {
+      return api.problem.create(payload).then(({ data }) => data.pid)
     }
   }
 }

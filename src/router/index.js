@@ -20,6 +20,9 @@ import ContestProblem from '@/views/Contest/ContestProblem'
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
 
+// admin
+import ProblemCreate from '@/views/Admin/ProblemCreate'
+
 Vue.use(Router)
 
 export default new Router({
@@ -33,6 +36,11 @@ export default new Router({
       path: '/problems',
       name: 'problemList',
       component: ProblemList
+    },
+    {
+      path: '/problems/create', // 这个路由是不是要这样设计? 可能要讨论一下
+      name: 'problemCreate',
+      component: ProblemCreate
     },
     {
       path: '/problem/:pid',
@@ -76,7 +84,7 @@ export default new Router({
       component: ContestList
     },
     {
-      path: '/contest/:cid',
+      path: '/contests/:cid',
       component: Contest,
       children: [
         {

@@ -26,7 +26,7 @@
               <template slot="title">
                   <Icon type="paper-airplane"></Icon>Admin
               </template>
-              <MenuItem name="2-1">Create Problems</MenuItem>
+              <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="2-2">Create Contests</MenuItem>
               <MenuItem name="2-3">User Management</MenuItem>
             </Submenu>
