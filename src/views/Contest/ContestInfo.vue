@@ -48,7 +48,6 @@ export default {
   created () {
     this.display = this.$route.name
     this.$store.dispatch('contest/findOne', this.$route.params)
-    console.log(Date.now())
   },
   methods: {
     handleClick (name) {

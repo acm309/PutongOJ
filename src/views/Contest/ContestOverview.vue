@@ -14,7 +14,7 @@
         <td></td>
         <td>{{ index + 1 }}</td>
         <td>
-          <router-link :to="{ name: '', params: { cid: cid, id: index + 1 } }">
+          <router-link :to="{ name: 'contestProblem', params: { cid: cid, id: index + 1 } }">
             <Button type="text">{{ item.title }}</Button>
           </router-link>
         <td>
@@ -43,7 +43,6 @@ export default {
   },
   created () {
     this.$store.dispatch('contest/find', this.$route.params)
-    console.log(this.contest)
   }
 }
 </script>

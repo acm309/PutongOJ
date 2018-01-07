@@ -65,7 +65,7 @@ const store = {
         commit(types.GET_CONTEST_OVERVIEW, data.res)
         commit(types.GET_CONTEST_TOTAL_PRO, data.total)
         commit(types.GET_CONTEST_PRO, data.pro)
-        return data.res
+        return data
       })
     },
     getRank ({ commit }, payload) {
