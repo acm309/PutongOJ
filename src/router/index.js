@@ -12,7 +12,7 @@ import ProblemEdit from '@/views/Problem/problemEdit'
 
 // contests
 import ContestList from '@/views/ContestList'
-import ContestInfo from '@/views/Contest/ContestInfo'
+import Contest from '@/views/Contest/Contest'
 import ContestOverview from '@/views/Contest/ContestOverview'
 import ContestProblem from '@/views/Contest/ContestProblem'
 
@@ -77,7 +77,7 @@ export default new Router({
     },
     {
       path: '/contest/:cid',
-      component: ContestInfo,
+      component: Contest,
       children: [
         {
           path: '',

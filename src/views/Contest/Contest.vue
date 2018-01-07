@@ -10,7 +10,7 @@
       </Row>
         <Progress :stroke-width="18" :percent="timePercentage"></Progress>
     </Card>
-    <Tabs :value="display" @tab-click="handleClick">
+    <Tabs :value="display" @on-click="handleClick">
       <TabPane label="Overview" name="contestOverview"></TabPane>
       <TabPane label="Problem" name="contestProblem"></TabPane>
       <TabPane label="Status" name="contestStatus"></TabPane>
@@ -67,17 +67,17 @@ export default {
 </script>
 
 <style lang="stylus">
-  .conin-wrap
+.conin-wrap
+  margin-bottom: 20px
+  .card
     margin-bottom: 20px
-    .card
-      margin-bottom: 20px
-    .ivu-col
-      text-align: center
-      margin-bottom: 20px
-      font-size: 16px
-    .ivu-progress-success, .ivu-progress-wrong
-      .ivu-progress-bg
-        background-color: #e040fb
-      .ivu-progress-text
-        color: #e040fb
+  .ivu-col
+    text-align: center
+    margin-bottom: 20px
+    font-size: 16px
+  .ivu-progress-success, .ivu-progress-wrong
+    .ivu-progress-bg
+      background-color: #e040fb
+    .ivu-progress-text
+      color: #e040fb
 </style>
