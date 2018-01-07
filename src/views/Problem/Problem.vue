@@ -4,7 +4,7 @@
       <TabPane label="Description" name="problemInfo"></TabPane>
       <TabPane label="Submit" name="problemSubmit"></TabPane>
       <TabPane label="My Submissions" name="name3"></TabPane>
-      <TabPane label="Statistics" name="name4"></TabPane>
+      <TabPane label="Statistics" name="problemStatistics"></TabPane>
       <TabPane label="Edit" name="name5"></TabPane>
       <TabPane label="Test Data" name="name6"></TabPane>
     </Tabs>

@@ -50,6 +50,8 @@ export default {
 .solution-wrap
   h1
     margin-bottom: 6px
+  p
+    margin-bottom: 4px
   span
     margin-right: 20px
   pre
