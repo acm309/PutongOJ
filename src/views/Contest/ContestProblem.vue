@@ -1,13 +1,11 @@
 <template lang="html">
   <div class="conpro-wrap">
-    <Row type="flex" justify="start">
-      <Col :span="16">
-        <Page :total="totalProblems"
-          @on-change="pageChange"
-          :current.sync="proIndex">
-        </Page>
-      </Col>
-    </Row>
+    <Button
+      class="page-button"
+      v-for="i in totalProblems" :key="i"
+      type="ghost" shape="circle" @click="pageChange(i)">
+      {{ i }}
+    </Button>
     <h1>{{ this.$route.params.id }}:  {{ problem.title }}</h1>
     <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
     <h2 class="text-primary">Description</h2>
@@ -96,6 +94,8 @@ export default {
 
 <style lang="stylus">
 .conpro-wrap
+  .page-button
+    margin-left: 1em
   h1
     color: #9799CA
     margin-top: 10px
