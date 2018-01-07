@@ -1,7 +1,7 @@
 const Koa = require('koa')
 const koaLogger = require('koa-logger')
 const bodyparser = require('koa-body')
-const staticServe = require('koa-static-cache')
+const staticServe = require('koa-static')
 const path = require('path')
 const session = require('koa-session')
 const config = require('./config')
@@ -32,7 +32,7 @@ app.use(bodyparser({
 }))
 
 app.use(staticServe(path.join(__dirname, 'public'), {
-  maxAge: 7 * 24 * 60 * 60 // 7 天不更新，也就是缓存期限
+  maxage: 7 * 24 * 60 * 60 // 7 天不更新，也就是缓存期限
 }))
 
 app.use(async (ctx, next) => {
