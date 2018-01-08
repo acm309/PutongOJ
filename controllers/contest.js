@@ -71,7 +71,6 @@ const findOne = async (ctx) => {
 const ranklist = async (ctx) => {
   const ranklist = {}
   const cid = parseInt(ctx.query.cid)
-  console.log(cid)
   const solutions = await Solution.find({
     mid: cid
   })
@@ -141,7 +140,6 @@ const update = async (ctx) => {
   fileds.forEach((filed) => {
     contest[filed] = opt[filed]
   })
-  console.log(contest)
   try {
     await contest.save()
     logger.info(`One problem is updated" ${contest.cid} -- ${contest.title}`)
@@ -157,9 +155,7 @@ const update = async (ctx) => {
 
 // 删除一个比赛
 const del = async (ctx) => {
-  console.log(ctx.params)
   const cid = ctx.params.cid
-  console.log(cid)
 
   try {
     await Contest.deleteOne({cid}).exec()
