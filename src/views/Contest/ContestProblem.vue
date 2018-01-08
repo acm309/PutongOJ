@@ -32,7 +32,7 @@ export default {
       totalProblems: 'contest/totalProblems'
     })
   },
-  mounted () {
+  created () {
     this.fetch()
   },
   methods: {
@@ -56,9 +56,10 @@ export default {
     },
     submit () {
       this.$router.push({
-        name: '',
+        name: 'contestSubmit',
         params: this.$router.params
       })
+      console.log(this.$route.params)
     }
   },
   watch: {

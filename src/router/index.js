@@ -15,6 +15,7 @@ import ContestList from '@/views/ContestList'
 import Contest from '@/views/Contest/Contest'
 import ContestOverview from '@/views/Contest/ContestOverview'
 import ContestProblem from '@/views/Contest/ContestProblem'
+import ContestSubmit from '@/views/Contest/ContestSubmit'
 
 // status & solution
 import Status from '@/views/Status'
@@ -96,6 +97,11 @@ export default new Router({
           path: 'problem/:id',
           name: 'contestProblem',
           component: ContestProblem
+        },
+        {
+          path: 'problem/:id/submit',
+          name: 'contestSubmit',
+          component: ContestSubmit
         }
         // {
         //   path: 'status',

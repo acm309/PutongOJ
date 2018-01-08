@@ -13,6 +13,7 @@
     <Tabs :value="display" @on-click="handleClick">
       <TabPane label="Overview" name="contestOverview"></TabPane>
       <TabPane label="Problem" name="contestProblem"></TabPane>
+      <TabPane label="Submit" name="contestSubmit"></TabPane>
       <TabPane label="Status" name="contestStatus"></TabPane>
       <TabPane label="Ranklist" name="contestRanklist"></TabPane>
       <TabPane label="Edit" name="contestEdit"></TabPane>
@@ -51,8 +52,9 @@ export default {
   },
   methods: {
     handleClick (name) {
-      if (name === 'contestProblem') {
+      if (name === 'contestProblem' || name === 'contestSubmit') {
         this.$router.push({ name: name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })
+        console.log(name)
       } else {
         this.$router.push({ name: name, params: { cid: this.$route.params.cid } })
       }
