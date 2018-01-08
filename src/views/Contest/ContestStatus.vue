@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="status-wrap">
+  <div>
     <Row class="filter">
       <Col :offset="1" :span="5">
         <Col :span="6"><label>User</label></Col>
@@ -39,7 +39,7 @@
         <Button type="primary" @click="search" icon="search">Search</Button>
       </Col>
     </Row>
-    <Row class="pagination">
+    <Row class="pagination" type="flex" justify="start">
       <Col :span="16">
         <Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page>
       </Col>
@@ -58,8 +58,8 @@
       <tr v-for="(item, index) in list">
         <td>{{ item.sid }}</td>
         <td>
-          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-            {{ item.pid }}
+          <router-link :to="{ name: 'contestProblem', params: { cid: mid, id: getId(item.pid) } }">
+            {{ getId(item.pid) }}
           </router-link>
         </td>
         <td>
@@ -80,7 +80,6 @@
 </template>
 
 <script>
-// import Solution from '@/components/Solution'
 import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
@@ -89,6 +88,7 @@ import { purify } from '@/util/helper'
 export default {
   data () {
     return {
+      mid: this.$route.params.cid,
       uid: this.$route.query.uid || '',
       pid: this.$route.query.pid || '',
       judge: this.$route.query.judge || '',
@@ -106,16 +106,26 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters('solution', [
-      'list',
-      'sum'
-    ]),
+    ...mapGetters({
+      list: 'solution/list',
+      sum: 'solution/sum',
+      problems: 'contest/problems'
+    }),
     query () {
-      const opt = only(this.$route.query, 'page pageSize uid pid language judge')
+      const opt = Object.assign(
+        only(this.$route.query, 'page pageSize uid pid language judge'),
+        {
+          mid: this.$route.params.cid,
+          pid: this.problems[this.$route.query.pid - 1]
+        }
+      )
       return purify(opt)
     }
   },
   methods: {
+    getId (pid) {
+      return this.problems.indexOf(pid) + 1
+    },
     fetch () {
       this.$store.dispatch('solution/find', this.query)
       const query = this.$route.query
@@ -128,7 +138,7 @@ export default {
     },
     reload (payload = {}) {
       this.$router.push({
-        name: 'status',
+        name: 'contestStatus',
         query: purify(Object.assign(this.query, payload))
       })
     },
@@ -154,55 +164,56 @@ export default {
         this.fetch()
       }
     }
-  },
-  components: {
-    // Solution
   }
 }
 </script>
 
-<style lang="stylus">
-.status-wrap
-  .filter
-    margin-bottom: 20px
-    label
-      height: 32px
-      line-height: 32px
-    .ivu-col
-      text-align: center
-    .ivu-select-item
-      text-align: left
-  .pagination
+<style lang="stylus" scoped>
+.filter
+  margin-bottom: 20px
+  label
+    height: 32px
+    line-height: 32px
+  .ivu-col
+    text-align: center
+    margin-bottom: 0
+    font-size: 14px
+  .ivu-select-item
+    text-align: left
+.pagination
+  margin-left: 10px
+  .ivu-col
+    text-align: left
     margin-bottom: 10px
-  table
-    width: 100%
-    border-collapse: collapse
-    border-spacing: 0
-    th:nth-child(1)
+table
+  width: 100%
+  border-collapse: collapse
+  border-spacing: 0
+  th:nth-child(1)
+    padding-left: 10px
+  //   width: 5%
+  // th:nth-child(2)
+  //   width: 10%
+  // th:nth-child(3)
+  //   width: 20%
+  // th:nth-child(4)
+  //   width: 20%
+  // th:nth-child(5)
+  //   width: 10%
+  // th:nth-child(6)
+  //   width: 10%
+  tr
+    border-bottom: 1px solid #ebeef5
+    height: 40px
+    line-height: 40px
+    font-size: 14px
+    td:nth-child(1)
       padding-left: 10px
-    //   width: 5%
-    // th:nth-child(2)
-    //   width: 10%
-    // th:nth-child(3)
-    //   width: 20%
-    // th:nth-child(4)
-    //   width: 20%
-    // th:nth-child(5)
-    //   width: 10%
-    // th:nth-child(6)
-    //   width: 10%
-    tr
-      border-bottom: 1px solid #ebeef5
-      height: 40px
-      line-height: 40px
-      font-size: 14px
-      td:nth-child(1)
-        padding-left: 10px
-    th
-      text-align:left
-    .ivu-btn
-      vertical-align: baseline
-      color: #e040fb
-      padding: 0 1px
-      font-size: 14px
+  th
+    text-align:left
+  .ivu-btn
+    vertical-align: baseline
+    color: #e040fb
+    padding: 0 1px
+    font-size: 14px
 </style>

@@ -54,7 +54,6 @@ export default {
     handleClick (name) {
       if (name === 'contestProblem' || name === 'contestSubmit') {
         this.$router.push({ name: name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })
-        console.log(name)
       } else {
         this.$router.push({ name: name, params: { cid: this.$route.params.cid } })
       }

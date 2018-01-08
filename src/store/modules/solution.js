@@ -6,14 +6,12 @@ const store = {
   state: {
     list: [],
     solution: {},
-    sum: 0,
-    codeDialog: false
+    sum: 0
   },
   getters: {
     list: state => state.list,
     solution: state => state.solution,
-    sum: state => state.sum,
-    codeDialog: state => state.codeDialog
+    sum: state => state.sum
   },
   mutations: {
     [types.GET_SOLUTION]: (state, payload) => {
@@ -24,13 +22,6 @@ const store = {
     },
     [types.UPDATE_SUM_SOLUTIONS]: (state, payload) => {
       state.sum = payload
-    },
-    [types.SHOW_CODE]: (state, payload) => {
-      state.codeDialog = true
-      state.solution = payload
-    },
-    [types.CLOSE_CODE]: (state) => {
-      state.codeDialog = false
     }
   },
   actions: {
