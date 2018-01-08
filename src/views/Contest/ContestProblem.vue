@@ -1,11 +1,10 @@
 <template lang="html">
   <div class="conpro-wrap">
-    <Button
-      class="page-button"
-      v-for="i in totalProblems" :key="i"
-      type="ghost" shape="circle" @click="pageChange(i)">
-      {{ i }}
-    </Button>
+    <ul>
+      <li v-for="i in totalProblems" :key="i" :class="{'active': i === proIndex}" @click="pageChange(i)">
+        {{ i }}
+      </li>
+    </ul>
     <problem :problem="problem">
       <h1 slot="title">{{ this.$route.params.id }}:  {{ problem.title }}</h1>
     </problem>
@@ -70,8 +69,24 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-.conpro-wrap
-  .page-button
-    margin-left: 1em
+<style lang="stylus" scoped>
+ul
+  margin-left: 10px
+  li
+    display: inline-block
+    vertical-align: middle
+    min-width: 32px
+    height: 32px
+    line-height: 30px
+    margin-right: 8px
+    text-align: center
+    list-style: none
+    background-color: #fff
+    border: 1px solid #dddee1
+    border-radius: 4px
+    cursor: pointer
+  .active
+    color: #fff
+    background-color: #e040fb
+    border-color: #e040fb
 </style>
