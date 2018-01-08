@@ -70,8 +70,10 @@ const findOne = async (ctx) => {
 // 2. 没有 ac 的题目是没有 create 属性的
 const ranklist = async (ctx) => {
   const ranklist = {}
+  const cid = parseInt(ctx.query.cid)
+  console.log(cid)
   const solutions = await Solution.find({
-    mid: +ctx.params.cid
+    mid: cid
   })
   for (const solution of solutions) {
     const { uid } = solution
@@ -93,13 +95,17 @@ const ranklist = async (ctx) => {
     row[pid] = item
     ranklist[uid] = row
   }
-  await Object.keys(ranklist).map(uid =>
+  await Object.keys(ranklist).map((uid) =>
       User
         .findOne({ uid })
         .exec()
         .then(user => { ranklist[user.uid].nick = user.nick }))
+
+  const contest = await Contest.findOne({ cid }).exec()
+  console.log(ranklist)
   ctx.body = {
-    ranklist
+    ranklist,
+    contest
   }
 }
 
