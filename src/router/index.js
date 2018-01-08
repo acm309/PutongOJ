@@ -17,6 +17,8 @@ import ContestOverview from '@/views/Contest/ContestOverview'
 import ContestProblem from '@/views/Contest/ContestProblem'
 import ContestSubmit from '@/views/Contest/ContestSubmit'
 import ContestStatus from '@/views/Contest/ContestStatus'
+import ContestRanklist from '@/views/Contest/ContestRanklist'
+
 // status & solution
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
@@ -107,12 +109,12 @@ export default new Router({
           path: 'status',
           name: 'contestStatus',
           component: ContestStatus
+        },
+        {
+          path: 'ranklist',
+          name: 'contestRanklist',
+          component: ContestRanklist
         }
-        // {
-        //   path: 'ranklist',
-        //   name: 'contest.ranklist',
-        //   component: ContestRanklist
-        // },
         // {
         //   path: 'edit',
         //   name: 'contest.edit',

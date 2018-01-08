@@ -10,8 +10,7 @@ const store = {
     overview: [],
     totalProblems: 0,
     problems: [],
-    ranklist: [],
-    first: []
+    ranklist: []
   },
   getters: {
     list: state => state.list,
@@ -20,8 +19,7 @@ const store = {
     overview: state => state.overview,
     totalProblems: state => state.totalProblems,
     problems: state => state.problems,
-    ranklist: state => state.ranklist,
-    first: state => state.first
+    ranklist: state => state.ranklist
   },
   mutations: {
     [types.UPDATE_CONTEST_LIST]: (state, payload) => {
@@ -45,9 +43,6 @@ const store = {
     [types.GET_CONTEST_RANK]: (state, payload) => {
       state.ranklist = payload
     },
-    [types.GET_CONTEST_PRIME]: (state, payload) => {
-      state.first = payload
-    },
     [types.DELETE_CONTEST]: (state, { cid }) => {
       state.list = state.list.filter((p) => p.cid !== +cid)
     }
@@ -69,9 +64,12 @@ const store = {
       })
     },
     getRank ({ commit }, payload) {
-      return api.contest.rank(payload).then(({data}) => {
-        commit(types.GET_CONTEST_RANK, data.res)
-        commit(types.GET_CONTEST_PRIME, data.prime)
+      return api.contest.rank(payload).then(({ data }) => {
+        const ranklist = normalize(data.ranklist, data.contest)
+        commit(types.GET_CONTEST_PRO, data.contest.list)
+        commit(types.GET_CONTEST_RANK, ranklist)
+        console.log(data.contest.list)
+        console.log(ranklist)
       })
     },
     delete ({ commit }, payload) {
@@ -80,6 +78,54 @@ const store = {
       })
     }
   }
+}
+
+function normalize (ranklist, contest) {
+  const list = Object.values(ranklist)
+  list.map(row => { // 每一行，也就是每一个用户的成绩
+    let solved = 0 // 记录 ac 几道题
+    let penalty = 0 // 罚时，尽在 ac 时计算
+    for (const pid of contest.list) {
+      if (row[pid] == null) continue // 这道题没有交过
+      const submission = row[pid]
+      if (submission.wa >= 0) { // ac 了
+        solved++
+        penalty += submission.create - contest.start + submission.wa * 20 * 60 * 1000
+      }
+    }
+    row.solved = solved
+    row.penalty = penalty
+  })
+
+  // 排序, 先按照 solved, 在按照 penalty
+  list.sort((x, y) => {
+    if (x.solved !== y.solved) {
+      return -(x.solved - y.solved)
+    }
+    return x.penalty - y.penalty
+  })
+
+  // 接下来计算 primes
+  const quickest = {} // 每到题最早提交的 ac 时间
+  for (const pid of contest.list) {
+    quickest[pid] = Infinity // init
+  }
+  list.forEach(row => {
+    for (const pid of contest.list) {
+      if (row[pid] != null && row[pid].wa >= 0) {
+        quickest[pid] = Math.min(quickest[pid], row[pid].create)
+      }
+    }
+  })
+  list.forEach(row => {
+    for (const pid of contest.list) {
+      if (row[pid] == null || row[pid].wa < 0) continue
+      if (quickest[pid] === row[pid].create) { // 这就是最早提交的那个
+        row[pid].prime = true // 打上标记
+      }
+    }
+  })
+  return list
 }
 
 export default store
