@@ -95,17 +95,13 @@ const ranklist = async (ctx) => {
     row[pid] = item
     ranklist[uid] = row
   }
-  await Object.keys(ranklist).map((uid) =>
+  await Promise.all(Object.keys(ranklist).map((uid) =>
       User
         .findOne({ uid })
         .exec()
-        .then(user => { ranklist[user.uid].nick = user.nick }))
-
-  const contest = await Contest.findOne({ cid }).exec()
-  console.log(ranklist)
+        .then(user => { ranklist[user.uid].nick = user.nick })))
   ctx.body = {
-    ranklist,
-    contest
+    ranklist
   }
 }
 
