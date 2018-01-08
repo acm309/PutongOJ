@@ -63,13 +63,10 @@ const store = {
         return data
       })
     },
-    getRank ({ commit }, payload) {
+    getRank ({ commit, getters }, payload) {
       return api.contest.rank(payload).then(({ data }) => {
-        const ranklist = normalize(data.ranklist, data.contest)
-        commit(types.GET_CONTEST_PRO, data.contest.list)
+        const ranklist = normalize(data.ranklist, getters.contest)
         commit(types.GET_CONTEST_RANK, ranklist)
-        console.log(data.contest.list)
-        console.log(ranklist)
       })
     },
     delete ({ commit }, payload) {
@@ -81,8 +78,7 @@ const store = {
 }
 
 function normalize (ranklist, contest) {
-  const list = Object.values(ranklist)
-  list.map(row => { // 每一行，也就是每一个用户的成绩
+  const list = Object.values(ranklist).map(row => { // 每一行，也就是每一个用户的成绩
     let solved = 0 // 记录 ac 几道题
     let penalty = 0 // 罚时，尽在 ac 时计算
     for (const pid of contest.list) {
@@ -95,6 +91,7 @@ function normalize (ranklist, contest) {
     }
     row.solved = solved
     row.penalty = penalty
+    return row
   })
 
   // 排序, 先按照 solved, 在按照 penalty
