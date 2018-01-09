@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="conadd-wrap" v-if="contest">
+  <div>
     <!-- <pre>{{ jobs }} </pre> -->
     <!-- 这个注释故意留着，有时候偶用于调试蛮方便的 -->
     <Row type="flex" justify="start">
@@ -62,7 +62,7 @@
       </Col>
     </Row>
     <Row>
-      <Col :span="21">
+      <Col :span="21" class="add">
         <Input v-model="pid" placeholder="Add a pid" @keyup.enter.native="add"></Input>
       </Col>
       <Col :span="2">
@@ -79,8 +79,7 @@
 <script>
 import draggable from 'vuedraggable'
 import only from 'only'
-import api from '@/api'
-import { mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 
 export default {
   data () {
@@ -100,28 +99,18 @@ export default {
           label: 'Password'
         }
       ],
-      pid: ''
+      pid: '',
+      contest: {
+        title: '',
+        start: '',
+        end: '',
+        list: [],
+        encrypt: ''
+      }
     }
-  },
-  computed: {
-    ...mapGetters('contest', ['contest', 'overview'])
-  },
-  created () {
-    // 这里必须保证此时 overview 是存在的
-    // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
-    let p = Promise.resolve()
-    if (this.overview.length === 0) {
-      p = this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
-    }
-    p.then(() => this.$store.dispatch('contest/find', only(this.$route.params, 'cid')))
-      .then(() => {
-        this.overview.forEach((item) => {
-          // https://vuejs.org/2016/02/06/common-gotchas/
-          this.$set(this.jobs, item.pid, item.title)
-        })
-      })
   },
   methods: {
+    ...mapActions('contest', [ 'create' ]),
     add () {
       this.$store.dispatch('problem/findOne', only(this, 'pid'))
         .then((data) => {
@@ -131,10 +120,18 @@ export default {
         })
     },
     submit () {
-      api.contest.update(this.contest).then(({ data }) => {
-        this.$Message.success('提交成功！')
-        this.$router.push({name: 'contestOverview', params: only(data, 'cid')})
-      })
+      if (!this.contest.title) {
+        this.$Message.error('Title can not be empty')
+      } else if (!this.contest.start || !this.contest.end) {
+        this.$Message.error('Time can not be empty')
+      } else {
+        this
+          .create(this.contest)
+          .then((cid) => {
+            this.$Message.success(`Contest "${this.contest.title}" has been created!`)
+            this.$router.push({ name: 'contestOverview', params: { cid } })
+          })
+      }
     },
     removeJob (index) {
       this.contest.list.splice(index, 1)
@@ -142,18 +139,16 @@ export default {
   },
   components: {
     draggable
-  },
-  beforeDestroy () {
-    this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-.ivu-row
+.ivu-row, .ivu-row-flex
   margin-bottom: 14px
 .ivu-col
   text-align: left
+  font-size: 16px
 .label
   line-height: 32px
   hr
@@ -174,12 +169,6 @@ export default {
   cursor: pointer
   &:hover
     font-size: 20px
+.add
+  margin-bottom: 20px
 </style>
-
-<docs>
-  这里，所有的更改都到了 store 里的 contest 上，这个方法并不一定最佳实践。
-  一个可能的影响是:
-    如果用户，在表单上修改了比赛的开始时间，比如从 1 月 1 日跳到 2 月 1 日，但是他没点 Submit，也就是说这个数据没有写到数据库，但是如果此时 前端的 contest 已经变了，你可以看到上方的进度条已经变了。如果，此时，用户（没有点 Submit）就点了去看排行榜之类的，那么他看到的都是基于开始时间是 2 月 1 日的。
-  因此，这个时候用户看到的是有问题的！
-  为了，解决这个问题，我在这里，beforeDestroy 处，再次请求了一次比赛。这样，不管用户最终有没有提交修改后的比赛表单，都能保持前端数据与数据库的保持同步。
-</docs>

@@ -27,7 +27,7 @@
                   <Icon type="paper-airplane"></Icon>Admin
               </template>
               <MenuItem name="problemCreate">Create Problems</MenuItem>
-              <MenuItem name="2-2">Create Contests</MenuItem>
+              <MenuItem name="contestCreate">Create Contests</MenuItem>
               <MenuItem name="2-3">User Management</MenuItem>
             </Submenu>
           </div>

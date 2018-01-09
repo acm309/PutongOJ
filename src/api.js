@@ -69,6 +69,7 @@ const api = {
     create: (data) => instance.post('...', data) // TODO
   },
   user: {
+    findOne: (data) => instance.get(`/user/${data.uid}`, { params: data }),
     create: (data) => instance.post('/user', data),
     update: (data) => instance.put(`/user/${data.uid}`, data)
   },

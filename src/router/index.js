@@ -28,6 +28,7 @@ import UserInfo from '@/views/UserInfo'
 
 // admin
 import ProblemCreate from '@/views/Admin/ProblemCreate'
+import ContestCreate from '@/views/Admin/ContestCreate'
 
 Vue.use(Router)
 
@@ -98,6 +99,11 @@ export default new Router({
       path: '/contest',
       name: 'contestList',
       component: ContestList
+    },
+    {
+      path: '/contest/create',
+      name: 'contestCreate',
+      component: ContestCreate
     },
     {
       path: '/contests/:cid',

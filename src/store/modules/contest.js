@@ -69,6 +69,9 @@ const store = {
         commit(types.GET_CONTEST_RANK, ranklist)
       })
     },
+    create ({commit}, payload) {
+      return api.contest.create(payload).then(({ data }) => data.cid)
+    },
     delete ({ commit }, payload) {
       return api.contest.delete(payload).then(() => {
         commit(types.DELETE_CONTEST, payload)

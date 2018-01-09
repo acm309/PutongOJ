@@ -39,7 +39,7 @@ const store = {
       return api.register(payload)
     },
     findOne ({ commit }, payload) {
-      return api.getUserInfo(payload).then(({ data }) => {
+      return api.user.findOne(payload).then(({ data }) => {
         commit(types.UPDATE_USER, data.info)
         commit(types.UPDATE_SOLVED, data.solved)
         commit(types.UPDATE_UNSOLVED, data.unsolved)
