@@ -1,5 +1,7 @@
 <template lang="html">
-  <div class="conadd-wrap">
+  <div class="conadd-wrap" v-if="contest">
+    <!-- <pre>{{ jobs }} </pre> -->
+    <!-- 这个注释故意留着，有时候偶用于调试蛮方便的 -->
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Title</Col>
       <Col :span="21">
@@ -52,7 +54,7 @@
         <draggable v-model="contest.list">
           <transition-group name="list">
             <div v-for="(item, index) in contest.list" :key="index" class="list-item">
-              <div>{{ item }} -- {{ jobs.get(+item) }}</div>
+              <div>{{ item }} -- {{ jobs[item] }}</div>
               <Icon type="close-circled" @click.native="removeJob(index)"></Icon>
             </div>
           </transition-group>
@@ -84,7 +86,7 @@ import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
-      jobs: new Map(),
+      jobs: {},
       options: [
         {
           value: 1,
@@ -110,12 +112,13 @@ export default {
     // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
     let p = Promise.resolve()
     if (isEmpty(this.overview)) {
-      p = this.$store.dispatch('contest/overview', only(this.$route.params, 'cid'))
+      p = this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
     }
     p.then(() => this.$store.dispatch('contest/find', only(this.$route.params, 'cid')))
       .then(() => {
         this.overview.forEach((item) => {
-          this.jobs.set(+item.pid, item.title)
+          // https://vuejs.org/2016/02/06/common-gotchas/
+          this.$set(this.jobs, item.pid, item.title)
         })
       })
   },
@@ -124,7 +127,7 @@ export default {
       this.$store.dispatch('problem/findOne', only(this, 'pid'))
         .then((data) => {
           this.contest.list.push(data.pid)
-          this.jobs.set(data.pid, data.title)
+          this.$set(this.jobs, item.pid, item.title)
           this.pid = ''
         })
     },
