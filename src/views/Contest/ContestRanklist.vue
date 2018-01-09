@@ -1,8 +1,8 @@
 <template lang="html">
   <div>
     <i-switch size="large" @on-change="change">
-        <Icon type="android-done" slot="open"></Icon>
-        <Icon type="android-close" slot="close"></Icon>
+      <Icon type="android-done" slot="open"></Icon>
+      <Icon type="android-close" slot="close"></Icon>
     </i-switch> 自动刷新 (每 10 秒一次)
     <div class="conrank-wrap">
       <table>

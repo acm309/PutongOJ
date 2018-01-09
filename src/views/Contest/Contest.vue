@@ -77,9 +77,8 @@ export default {
     text-align: center
     margin-bottom: 20px
     font-size: 16px
-  .ivu-progress-success, .ivu-progress-wrong
-    .ivu-progress-bg
-      background-color: #e040fb
-    .ivu-progress-text
-      color: #e040fb
+  .ivu-progress-bg
+    background-color: #e040fb
+  .ivu-progress-text
+    color: #e040fb
 </style>

@@ -78,7 +78,6 @@
 
 <script>
 import draggable from 'vuedraggable'
-import isEmpty from 'lodash.isempty'
 import only from 'only'
 import api from '@/api'
 import { mapGetters } from 'vuex'
@@ -111,7 +110,7 @@ export default {
     // 这里必须保证此时 overview 是存在的
     // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
     let p = Promise.resolve()
-    if (isEmpty(this.overview)) {
+    if (this.overview.length === 0) {
       p = this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
     }
     p.then(() => this.$store.dispatch('contest/find', only(this.$route.params, 'cid')))
@@ -127,7 +126,7 @@ export default {
       this.$store.dispatch('problem/findOne', only(this, 'pid'))
         .then((data) => {
           this.contest.list.push(data.pid)
-          this.$set(this.jobs, item.pid, item.title)
+          this.$set(this.jobs, data.pid, data.title)
           this.pid = ''
         })
     },

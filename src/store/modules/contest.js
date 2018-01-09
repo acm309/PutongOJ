@@ -6,7 +6,7 @@ const store = {
   state: {
     list: [],
     sum: 0,
-    contest: null,
+    contest: {},
     overview: [],
     totalProblems: 0,
     problems: [],
