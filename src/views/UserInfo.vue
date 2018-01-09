@@ -17,16 +17,16 @@
         <Row class="border" type="flex" justify="center">
           <Col :span="12">
             <h1>{{ user.solve }}</h1>
-            <h3>Solved</h3>
+            <h4>Solved</h4>
           </Col>
           <Col :span="12">
             <h1>{{ user.submit }}</h1>
-            <h3>Submit</h3>
+            <h4>Submit</h4>
           </Col>
         </Row>
       </Col>
       <Col :offset="1" :span="17">
-        <Tabs value="overview">
+        <Tabs v-model="display">
           <TabPane label="Overview" name="overview">
             <div class="solved">
               <div class="solved-name">Solved</div>
@@ -42,22 +42,10 @@
             </div>
           </TabPane>
           <TabPane label="Edit" name="edit" class="edit">
-            <Row>
+            <Row class="nick">
               <Col :span="2" class="label">Nick</Col>
               <Col :span="12">
                 <Input v-model="user.nick"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">Password</Col>
-              <Col :span="12">
-                <Input v-model="user.pwd"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">CheckPwd</Col>
-              <Col :span="12">
-                <Input v-model="user.checkpwd"></Input>
               </Col>
             </Row>
             <Row>
@@ -78,6 +66,11 @@
                 <Input v-model="user.mail"></Input>
               </Col>
             </Row>
+            <Row class="submit">
+              <Col :offset="6" :span="6">
+                <Button type="primary" size="large" @click="submit">Submit</Button>
+              </Col>
+            </Row>
           </TabPane>
         </Tabs>
       </Col>
@@ -89,6 +82,9 @@
 import { mapGetters } from 'vuex'
 
 export default {
+  data: () => ({
+    display: 'overview'
+  }),
   computed: {
     ...mapGetters('user', {
       user: 'user',
@@ -98,6 +94,14 @@ export default {
   },
   created () {
     this.$store.dispatch('user/findOne', this.$route.params)
+  },
+  methods: {
+    submit () {
+      this.$store.dispatch('user/update', this.user).then(() => {
+        this.$Message.success('修改成功！')
+        this.display = 'overview'
+      })
+    }
   }
 }
 </script>
@@ -114,13 +118,14 @@ export default {
     padding: 10px 0
     border-top: 1px solid #dfe2e8
     border-bottom: 1px solid #dfe2e8
-    h1, h3
+    h1, h4
       text-align: center
   .solved, .unsolved
     margin-bottom: 30px
-  button
+  .ivu-btn-text
     margin-left: 10px
     padding: 0
+    font-size: 14px
   a
     color: #B12CCC
   .image
@@ -134,4 +139,8 @@ export default {
   .edit
     .ivu-row
       margin-bottom: 14px
+    .nick
+      margin-top: 10px
+    .submit
+      margin-top: 30px
 </style>

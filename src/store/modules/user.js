@@ -44,6 +44,9 @@ const store = {
         commit(types.UPDATE_SOLVED, data.solved)
         commit(types.UPDATE_UNSOLVED, data.unsolved)
       })
+    },
+    update ({ commit }, payoad) {
+      return api.user.update(payoad)
     }
   }
 }

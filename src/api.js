@@ -69,7 +69,8 @@ const api = {
     create: (data) => instance.post('...', data) // TODO
   },
   user: {
-    create: (data) => instance.post('/user', data)
+    create: (data) => instance.post('/user', data),
+    update: (data) => instance.put(`/user/${data.uid}`, data)
   },
   solution: {
     findOne: (data) => instance.get(`/status/${data.sid}`, { params: data }),
