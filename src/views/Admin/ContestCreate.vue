@@ -2,6 +2,13 @@
   <div>
     <!-- <pre>{{ jobs }} </pre> -->
     <!-- 这个注释故意留着，有时候偶用于调试蛮方便的 -->
+    <h1>注意事项</h1>
+    <br>
+    <Steps :current="5" :style="{ color: 'black'}">
+      <Step title="难度区分" content="正常情况下要有一两道几乎所有人能做出来的题目" status="process"></Step>
+      <Step title="题目正确性" content="不要拿未测试的题目进入比赛" icon="ios-star" status="process"></Step>
+    </Steps>
+    <br>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Title</Col>
       <Col :span="21">
