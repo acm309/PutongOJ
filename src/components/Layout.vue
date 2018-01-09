@@ -13,7 +13,7 @@
             <MenuItem name="status">
               <Icon type="refresh"></Icon>Status
             </MenuItem>
-            <MenuItem name="4">
+            <MenuItem name="ranklist">
               <Icon type="stats-bars"></Icon>Ranklist
             </MenuItem>
             <MenuItem name="contestList">

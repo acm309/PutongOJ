@@ -20,9 +20,10 @@ import ContestStatus from '@/views/Contest/ContestStatus'
 import ContestRanklist from '@/views/Contest/ContestRanklist'
 import ContestEdit from '@/views/Contest/ContestEdit'
 
-// status & solution
+// status & solution & ranklist
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
+import Ranklist from '@/views/Ranklist'
 
 // admin
 import ProblemCreate from '@/views/Admin/ProblemCreate'
@@ -81,6 +82,11 @@ export default new Router({
       path: '/status/:sid',
       name: 'solution',
       component: Solution
+    },
+    {
+      path: '/ranklist',
+      name: 'ranklist',
+      component: Ranklist
     },
     {
       path: '/contest',
