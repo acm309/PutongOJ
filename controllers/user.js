@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const Solution = require('../models/Solution')
+const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
 
 // 查询用户具体信息
@@ -20,7 +21,7 @@ const findOne = async (ctx) => {
       .exec()
   ])
 
-  console.log(info)
+  // console.log(info)
   ctx.body = {
     info,
     solved,
@@ -53,7 +54,30 @@ const create = async (ctx) => {
   ctx.body = {}
 }
 
+// 修改用户信息
+const update = async (ctx) => {
+  const opt = ctx.request.body
+  const uid = opt.uid
+  const user = await User.findOne({ uid }).exec()
+  const fileds = ['nick', 'motto', 'school', 'mail']
+  fileds.forEach((filed) => {
+    user[filed] = opt[filed]
+  })
+  try {
+    await user.save()
+    logger.info(`One user is updated" ${user.uid}`)
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+
+  ctx.body = {
+    success: true,
+    uid: user.uid
+  }
+}
+
 module.exports = {
   findOne,
-  create
+  create,
+  update
 }

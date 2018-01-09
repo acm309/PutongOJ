@@ -9,5 +9,6 @@ router.get('/:uid', user.findOne)
 
 // register
 router.post('/', user.create)
+router.put('/:uid', user.update)
 
 module.exports = router
