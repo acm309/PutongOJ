@@ -110,19 +110,11 @@ export default {
     margin-bottom: 20px
     border-collapse: collapse
     border-spacing: 0
+    td
+      word-break: break-all
+      line-height: 20px
     th:nth-child(1)
       padding-left: 10px
-    //   width: 5%
-    // th:nth-child(2)
-    //   width: 10%
-    // th:nth-child(3)
-    //   width: 20%
-    // th:nth-child(4)
-    //   width: 20%
-    // th:nth-child(5)
-    //   width: 10%
-    // th:nth-child(6)
-    //   width: 10%
     tr
       border-bottom: 1px solid #ebeef5
       height: 40px
@@ -132,6 +124,7 @@ export default {
         padding-left: 10px
     th
       text-align:left
+      padding-right: 1em
     .ivu-btn
       vertical-align: baseline
       color: #e040fb
