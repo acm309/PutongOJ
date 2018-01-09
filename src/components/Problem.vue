@@ -39,24 +39,23 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.proinfo-wrap
-  h1
-    color: #9799CA
-    margin-top: 10px
-    margin-bottom: 8px
-    text-align: center
-  h5
-    margin-bottom: 10px
-    text-align:center
-  h2
-    border-bottom: 1px solid #e8e8e8
-    padding: 10px 0
-    color: #9799CA
-  .cont
-    margin-top: 10px
-    margin-bottom: 20px
-  pre
-    padding: 10px
-    border-radius: 5px
-    background-color: #ECEFF1
+h1
+  color: #9799CA
+  margin-top: 10px
+  margin-bottom: 8px
+  text-align: center
+h5
+  margin-bottom: 10px
+  text-align:center
+h2
+  border-bottom: 1px solid #e8e8e8
+  padding: 10px 0
+  color: #9799CA
+.cont
+  margin-top: 10px
+  margin-bottom: 20px
+pre
+  padding: 10px
+  border-radius: 5px
+  background-color: #ECEFF1
 </style>

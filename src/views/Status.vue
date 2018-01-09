@@ -63,7 +63,9 @@
           </router-link>
         </td>
         <td>
-          <Button type="text">{{ item.uid }}</Button>
+          <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+            <Button type="text">{{ item.uid }}</Button>
+          </router-link>
         </td>
         <td :class="color[item.judge]">{{ result[item.judge] }}</td>
         <td>{{ item.time }}</td>

@@ -6,14 +6,14 @@ const store = {
   state: {
     registerDialog: false,
     list: [],
-    one: {},
+    user: {},
     solved: [],
     unsolved: []
   },
   getters: {
     registerDialog: state => state.registerDialog,
     list: state => state.list,
-    one: state => state.one,
+    user: state => state.user,
     solved: state => state.solved,
     unsolved: state => state.unsolved
   },
@@ -22,7 +22,7 @@ const store = {
       state.registerDialog = !state.registerDialog
     },
     [types.UPDATE_USER]: (state, payload) => {
-      state.one = payload
+      state.user = payload
     },
     [types.UPDATE_USERS_LIST]: (state, payload) => {
       state.list = payload
@@ -38,7 +38,7 @@ const store = {
     register ({ commit }, payload) {
       return api.register(payload)
     },
-    find ({ commit }, payload) {
+    findOne ({ commit }, payload) {
       return api.getUserInfo(payload).then(({ data }) => {
         commit(types.UPDATE_USER, data.info)
         commit(types.UPDATE_SOLVED, data.solved)
