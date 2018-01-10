@@ -6,11 +6,14 @@
         <Col :span="2">
           <Icon type="chatbox-working"></Icon>
         </Col>
-        <Col :span="16">
+        <Col :span="20">
           <router-link :to="{ name: 'newsInfo', params: { nid: item.nid } }">
             <span>{{ item.title }}</span>
           </router-link>
           <p>{{ item.create | timePretty }}</p>
+        </Col>
+        <Col :span="2">
+          <Icon type="close-circled" @click.native="del(item.nid)"></Icon>
         </Col>
       </Row>
     </Card>
@@ -59,6 +62,24 @@ export default {
     },
     pageChange (val) {
       this.reload({ page: val })
+    },
+    del (nid) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '<p>此操作将永久删除该消息, 是否继续?</p>',
+        onOk: () => {
+          this.$store.dispatch('news/delete', { nid }).then(() => {
+            this.$Message.success(`成功删除 ${nid}！`)
+            this.$router.push({
+              name: 'home',
+              query: { page: this.page }
+            })
+          })
+        },
+        onCancel: () => {
+          this.$Message.info('已取消删除！')
+        }
+      })
     }
   },
   watch: { // 浏览器后退时回退页面
@@ -85,4 +106,10 @@ export default {
       color: rgba(201, 31, 242, 0.5)
     p
       margin-top: 10px
+    .ivu-icon-close-circled
+      line-height: 20px
+      color: #c3c2c2
+      cursor: pointer
+      &:hover
+        font-size: 20px
 </style>

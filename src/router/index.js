@@ -20,12 +20,16 @@ import ContestStatus from '@/views/Contest/ContestStatus'
 import ContestRanklist from '@/views/Contest/ContestRanklist'
 import ContestEdit from '@/views/Contest/ContestEdit'
 
+// news
+import News from '@/views/News/News'
+import NewsInfo from '@/views/News/NewsInfo'
+import NewsEdit from '@/views/News/NewsEdit'
+
 // status & solution & ranklist & user & news
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
 import Ranklist from '@/views/Ranklist'
 import UserInfo from '@/views/UserInfo'
-import NewsInfo from '@/views/NewsInfo'
 
 // admin
 import ProblemCreate from '@/views/Admin/ProblemCreate'
@@ -43,8 +47,19 @@ export default new Router({
     },
     {
       path: '/news/:nid',
-      name: 'newsInfo',
-      component: NewsInfo
+      component: News,
+      children: [
+        {
+          path: '',
+          name: 'newsInfo',
+          component: NewsInfo
+        },
+        {
+          path: 'edit',
+          name: 'newsEdit',
+          component: NewsEdit
+        }
+      ]
     },
     {
       path: '/news/create',

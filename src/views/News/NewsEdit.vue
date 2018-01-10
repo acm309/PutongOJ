@@ -1,6 +1,6 @@
 <template lang="html">
   <div>
-    <h1>新增消息</h1>
+    <h1>修改消息</h1>
     <oj-news-edit></oj-news-edit>
     <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
@@ -11,32 +11,23 @@ import NewsEdit from '@/components/NewsEdit'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  data: () => ({
-    addNews: {
-      title: '',
-      content: ''
-    }
-  }),
   computed: {
     ...mapGetters('news', [
       'news'
     ])
   },
-  created () {
-    this.$store.commit('news/UPDATE_NEWS', this.addNews)
-  },
   methods: {
     ...mapActions('news', [
-      'create'
+      'update'
     ]),
     submit () {
       if (!this.news.title) {
         this.$Message.error('Title can not be empty')
       } else {
         this
-          .create(this.news)
+          .update(this.news)
           .then((nid) => {
-            this.$Message.success(`News "${this.news.title}" has been created!`)
+            this.$Message.success(`News "${this.news.title}" has been updated!`)
             this.$router.push({ name: 'newsInfo', params: { nid } })
           })
       }

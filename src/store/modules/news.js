@@ -5,7 +5,7 @@ const store = {
   namespaced: true,
   state: {
     list: [],
-    new: {},
+    news: {},
     sum: 0
   },
   getters: {
@@ -40,7 +40,7 @@ const store = {
       })
     },
     update ({commit}, payload) {
-      return api.news.update(payload)
+      return api.news.update(payload).then(({ data }) => data.nid)
     },
     create ({commit}, payload) {
       return api.news.create(payload).then(({ data }) => data.nid)
