@@ -16,6 +16,7 @@ export const DELETE_PROBLEM = 'DELETE_PROBLEM'
 // news
 export const UPDATE_NEWS = 'UPDATE_NEWS'
 export const UPDATE_NEW_LIST = 'UPDATE_NEW_LIST'
+export const UPDATE_NEWS_SUM = 'UPDATE_NEWS_SUM'
 
 // solution
 export const GET_SOLUTION = 'GET_SOLUTION'

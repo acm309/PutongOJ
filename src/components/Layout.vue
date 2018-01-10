@@ -4,7 +4,7 @@
       <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
         <Menu mode="horizontal" theme="light" @on-select="routerTo" active-name="1">
           <div class="left">
-            <MenuItem name="1">
+            <MenuItem name="home">
               <Icon type="ios-home"></Icon>Home
             </MenuItem>
             <MenuItem name="problemList">
@@ -28,7 +28,7 @@
               </template>
               <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="contestCreate">Create Contests</MenuItem>
-              <MenuItem name="2-3">User Management</MenuItem>
+              <MenuItem name="userManage">User Management</MenuItem>
             </Submenu>
           </div>
         </Menu>

@@ -20,7 +20,7 @@ import ContestStatus from '@/views/Contest/ContestStatus'
 import ContestRanklist from '@/views/Contest/ContestRanklist'
 import ContestEdit from '@/views/Contest/ContestEdit'
 
-// status & solution & ranklist & user
+// status & solution & ranklist & user & news
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
 import Ranklist from '@/views/Ranklist'
