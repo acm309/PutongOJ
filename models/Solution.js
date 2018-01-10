@@ -67,6 +67,10 @@ const solutionSchema = mongoose.Schema({
   module: {
     type: Number,
     default: config.module.Problem
+  },
+  testcases: {
+    type: mongoose.Schema.Types.Mixed,
+    default: []
   }
 }, {
   collection: 'Solution'

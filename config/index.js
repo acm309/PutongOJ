@@ -22,7 +22,7 @@ config.module = {
 
 const dev = {
   port: 8888,
-  dbURL: 'mongodb://127.0.0.1:27017/devoj'
+  dbURL: process.env.DBURL
 }
 
 const prod = {
