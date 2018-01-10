@@ -28,6 +28,7 @@
               </template>
               <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="contestCreate">Create Contests</MenuItem>
+              <MenuItem name="newsCreate">Create News</MenuItem>
               <MenuItem name="userManage">User Management</MenuItem>
             </Submenu>
           </div>
@@ -41,7 +42,6 @@
             <DropdownMenu slot="list">
                 <DropdownItem>Profile</DropdownItem>
                 <DropdownItem name="logout">Logout</DropdownItem>
-                <!-- <DropdownItem>冰糖葫芦</DropdownItem> -->
             </DropdownMenu>
           </Dropdown>
           <Button type="text" @click="login" v-else>Login / Register</Button>

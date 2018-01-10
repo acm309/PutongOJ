@@ -30,6 +30,7 @@ import NewsInfo from '@/views/NewsInfo'
 // admin
 import ProblemCreate from '@/views/Admin/ProblemCreate'
 import ContestCreate from '@/views/Admin/ContestCreate'
+import NewsCreate from '@/views/Admin/NewsCreate'
 
 Vue.use(Router)
 
@@ -44,6 +45,11 @@ export default new Router({
       path: '/news/:nid',
       name: 'newsInfo',
       component: NewsInfo
+    },
+    {
+      path: '/news/create',
+      name: 'newsCreate',
+      component: NewsCreate
     },
     {
       path: '/problems',

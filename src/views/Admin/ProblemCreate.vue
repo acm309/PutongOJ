@@ -13,7 +13,7 @@
     <oj-problem-edit
       :problem="problem"
     />
-    <Button type="primary" @click="submit">Submit</Button>
+    <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
 </template>
 

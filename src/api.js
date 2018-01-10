@@ -53,10 +53,6 @@ const instance = {}
 })
 
 const api = {
-  // 获取用户信息
-  getUserInfo (data) {
-    return instance.get(`/user/${data.uid}`, { params: data })
-  },
   // 获取题目提交信息
   getStatistics (data) {
     return instance.get(`/statistics/${data.pid}`, { params: data })
@@ -94,8 +90,11 @@ const api = {
     delete: (data) => instance.delete(`/contest/${data.cid}`, data)
   },
   news: {
-    findOne: (data) => instance.get(`/news/${data.pid}`, { params: data }),
-    find: (data) => instance.get('/news/list', { params: data })
+    findOne: (data) => instance.get(`/news/${data.nid}`, { params: data }),
+    find: (data) => instance.get('/news/list', { params: data }),
+    create: (data) => instance.post('/news/', data),
+    update: (data) => instance.put(`/news/${data.nid}`, data),
+    delete: (data) => instance.delete(`/news/${data.nid}`, data)
   },
   session: {
     create: (data) => instance.post('/session', data),

@@ -12,7 +12,7 @@ import { mapGetters } from 'vuex'
 export default {
   computed: {
     ...mapGetters('news', {
-      news: 'new'
+      news: 'news'
     })
   },
   created () {

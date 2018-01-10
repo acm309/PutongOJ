@@ -10,18 +10,21 @@ const store = {
   },
   getters: {
     list: state => state.list,
-    new: state => state.new,
+    news: state => state.news,
     sum: state => state.sum
   },
   mutations: {
     [types.UPDATE_NEWS]: (state, payload) => {
-      state.new = payload
+      state.news = payload
     },
     [types.UPDATE_NEW_LIST]: (state, payload) => {
       state.list = payload
     },
     [types.UPDATE_NEWS_SUM]: (state, payload) => {
       state.sum = payload
+    },
+    [types.DELETE_NEWS]: (state, { nid }) => {
+      state.list = state.list.filter((p) => p.nid !== +nid)
     }
   },
   actions: {
@@ -34,6 +37,17 @@ const store = {
       return api.news.find(payload).then(({ data }) => {
         commit(types.UPDATE_NEW_LIST, data.res.docs)
         commit(types.UPDATE_NEWS_SUM, data.res.total)
+      })
+    },
+    update ({commit}, payload) {
+      return api.news.update(payload)
+    },
+    create ({commit}, payload) {
+      return api.news.create(payload).then(({ data }) => data.nid)
+    },
+    delete ({commit}, payload) {
+      return api.news.delete(payload).then(() => {
+        commit(types.DELETE_NEWS, payload)
       })
     }
   }

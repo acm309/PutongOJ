@@ -42,16 +42,16 @@ const store = {
         commit(types.GET_SUM_PROBLEM, data.res.total)
       })
     },
-    delete ({commit}, payload) {
-      return api.problem.delete(payload).then(() => {
-        commit(types.DELETE_PROBLEM, payload)
-      })
-    },
     update ({commit}, payload) {
       return api.problem.update(payload)
     },
     create ({commit}, payload) {
       return api.problem.create(payload).then(({ data }) => data.pid)
+    },
+    delete ({commit}, payload) {
+      return api.problem.delete(payload).then(() => {
+        commit(types.DELETE_PROBLEM, payload)
+      })
     }
   }
 }

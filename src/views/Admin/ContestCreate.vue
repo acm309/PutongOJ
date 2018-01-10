@@ -79,7 +79,7 @@
     <Row>
       <Col :span="23"><hr></Col>
     </Row>
-    <Button type="primary" @click="submit">Submit</Button>
+    <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
 </template>
 

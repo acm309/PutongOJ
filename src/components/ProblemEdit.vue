@@ -88,17 +88,17 @@ export default {
 </script>
 
 <style lang="stylus">
-  .proadd-wrap
+.proadd-wrap
+  margin-bottom: 20px
+  .ivu-input-wrapper
+    margin-bottom: 14px
+  .label
+    text-align:left
+    margin-bottom: 10px
+  #editor1, #editor2, #editor3, #editor4
+    text-align: left
+    height: 220px
+    margin-bottom: 10px
+  .el-textarea
     margin-bottom: 20px
-    .ivu-input-wrapper
-      margin-bottom: 14px
-    .label
-      text-align:left
-      margin-bottom: 10px
-    #editor1, #editor2, #editor3, #editor4
-      text-align: left
-      height: 220px
-      margin-bottom: 10px
-    .el-textarea
-      margin-bottom: 20px
 </style>
