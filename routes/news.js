@@ -5,7 +5,7 @@ const router = new Router({
   prefix: '/news'
 })
 
-router.get('/list', news.list)
+router.get('/list', news.find)
 router.get('/:nid', news.findOne)
 
 module.exports = router
