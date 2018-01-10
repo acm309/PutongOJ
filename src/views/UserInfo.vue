@@ -3,18 +3,17 @@
     <Row>
       <Col :span="6">
         <img src="../assets/logo.png" alt="">
-        <h1 style="margin-bottom: 20px">{{ user.nick }}</h1>
-          {{ `${user.uid}` }}
-        </br>
+        <h1 style="margin-bottom: 20px">{{ user.uid }}</h1>
+        <Icon type="person"></Icon>&nbsp;&nbsp;{{ `Nick: ${user.nick}` }}
         <div class="motto" v-if="user.motto">
-          {{ `${user.motto}` }}
+          <Icon type="edit"></Icon>&nbsp;&nbsp;{{ `Motto: ${user.motto}` }}
         </div>
-        <!-- <div v-if="user.mail">
+        <div v-if="user.mail">
           <Icon type="email"></Icon>&nbsp;&nbsp;{{ `Mail: ${user.mail}` }}
         </div>
         <div v-if="user.school">
           <Icon type="university"></Icon>&nbsp;&nbsp;{{ `School: ${user.school}` }}
-        </div> -->
+        </div>
         <Row class="border" type="flex" justify="center">
           <Col :span="12">
             <h1>{{ user.solve }}</h1>

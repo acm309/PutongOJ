@@ -1,7 +1,7 @@
 <template lang="html">
   <div class="home-wrap">
     <div class="news">NewsList</div>
-    <Card v-for="(item, index) in list">
+    <Card v-for="(item, index) in list" :key="item.nid">
       <Row type="flex" align="middle">
         <Col :span="2">
           <Icon type="chatbox-working"></Icon>
@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     fetch () {
-      this.$store.dispatch('news/find', this.query).then(console.log(this.sum))
+      this.$store.dispatch('news/find', this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       if (query.pageSize) this.pageSize = parseInt(query.pageSize)
