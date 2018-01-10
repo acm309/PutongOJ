@@ -182,17 +182,21 @@ export default {
     border-spacing: 0
     th:nth-child(1)
       padding-left: 10px
-    //   width: 5%
-    // th:nth-child(2)
-    //   width: 10%
-    // th:nth-child(3)
-    //   width: 20%
-    // th:nth-child(4)
-    //   width: 20%
-    // th:nth-child(5)
-    //   width: 10%
-    // th:nth-child(6)
-    //   width: 10%
+      width: 8%
+    th:nth-child(2)
+      width: 8%
+    th:nth-child(3)
+      width: 10%
+    th:nth-child(4)
+      width: 15%
+    th:nth-child(5)
+      width: 8%
+    th:nth-child(6)
+      width: 8%
+    th:nth-child(7)
+      width: 8%
+    th:nth-child(8)
+      width: 15%
     tr
       border-bottom: 1px solid #ebeef5
       height: 40px

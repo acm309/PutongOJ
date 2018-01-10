@@ -121,25 +121,25 @@ export default {
     border-collapse: collapse
     border-spacing: 0
     th:nth-child(1)
-      padding-left: 10px
-    //   width: 5%
-    // th:nth-child(2)
-    //   width: 10%
-    // th:nth-child(3)
-    //   width: 20%
-    // th:nth-child(4)
-    //   width: 20%
-    // th:nth-child(5)
-    //   width: 10%
-    // th:nth-child(6)
-    //   width: 10%
+      padding-left: 30px
+      width: 5%
+    th:nth-child(2)
+      width: 30%
+    th:nth-child(3)
+      width: 10%
+    th:nth-child(4)
+      width: 15%
+    th:nth-child(5)
+      width: 10%
+    th:nth-child(6)
+      width: 10%
     tr
       border-bottom: 1px solid #ebeef5
       height: 40px
       line-height: 40px
       font-size: 14px
       td:nth-child(1)
-        padding-left: 10px
+        padding-left: 30px
     th
       text-align:left
     .ivu-btn
