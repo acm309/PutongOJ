@@ -16,12 +16,17 @@ const getters = {
 const mutations = {
   [types.LOGIN]: (state, payload) => {
     state.profile = payload.profile // TODO
+    window.localStorage.setItem('token', payload.token)
   },
   [types.LOGOUT]: (state) => {
     state.profile = null
+    window.localStorage.removeItem('token')
   },
   [types.TRIGGER_LOGIN]: (state) => {
     state.loginDialog = !state.loginDialog
+  },
+  [types.UPDATE_PROFILE]: (state, payload) => {
+    state.profile = payload
   }
 }
 
@@ -35,6 +40,13 @@ const actions = {
   logout ({ commit }) {
     return api.logout().then(() => {
       commit(types.LOGOUT)
+    })
+  },
+  fetch ({ commit }) {
+    return api.session.fetch().then(({ data }) => {
+      if (data.status === 'success') {
+        commit(types.UPDATE_PROFILE, data.profile)
+      }
     })
   }
 }

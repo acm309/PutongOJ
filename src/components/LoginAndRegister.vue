@@ -7,7 +7,7 @@
             <Input v-model="form.uid"></Input>
           </FormItem>
           <FormItem class="loginpwd" label="Password" prop="pwd">
-            <Input v-model="form.pwd" type="password"></Input>
+            <Input v-model="form.pwd" type="password" @keyup.enter.native="submit"></Input>
           </FormItem>
         </Form>
       </TabPane>
@@ -101,8 +101,10 @@ export default {
         this.$refs['loginForm'].validate((valid) => {
           if (valid) { // 验证通过
             this.login(only(this.form, 'uid pwd'))
-              .then(() => this.$Message.success(`Welcome, ${this.form.uid} !`))
-              .then(() => this.triggerLogin())
+              .then(() => {
+                this.$Message.success(`Welcome, ${this.form.uid} !`)
+                this.triggerLogin()
+              })
           }
         })
       } else {

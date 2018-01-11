@@ -11,9 +11,9 @@ import contest from './modules/contest'
 
 Vue.use(Vuex)
 
-// 初始化时用sessionStorage.getItem('token')，这样子刷新页面就无需重新登录
+// 初始化时用localStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {
-  info: ''
+  token: window.localStorage.getItem('token')
 }
 
 export default new Vuex.Store({

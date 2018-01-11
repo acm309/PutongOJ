@@ -75,8 +75,7 @@ export default {
       type: this.$route.query.type || 'pid',
       content: this.$route.query.content || '',
       page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      uid: ''
+      pageSize: parseInt(this.$route.query.pageSize) || 30
     }
   },
   created () {
@@ -90,12 +89,13 @@ export default {
       profile: 'session/profile'
     }),
     query () {
+      let uid
       if (this.profile) {
-        this.uid = this.profile.uid
+        uid = this.profile.uid
       }
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize type content'),
-        { uid: this.uid }
+        { uid }
       )
       return opt
     }
@@ -150,6 +150,9 @@ export default {
   watch: { // 浏览器后退时回退页面
     '$route' (to, from) {
       if (to !== from) this.fetch()
+    },
+    'profile' (val) {
+      this.$store.dispatch('problem/find', this.query)
     }
   }
 }

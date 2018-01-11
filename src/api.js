@@ -98,7 +98,8 @@ const api = {
   },
   session: {
     create: (data) => instance.post('/session', data),
-    delete: (data) => instance.delete('/session')
+    delete: (data) => instance.delete('/session'),
+    fetch: (data) => instance.get('/session')
   }
 }
 

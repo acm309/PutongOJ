@@ -9,6 +9,9 @@ import Layout from '@/components/Layout'
 
 export default {
   name: 'app',
+  created () {
+    this.$store.dispatch('session/fetch')
+  },
   components: {
     'oj-layout': Layout
   }
