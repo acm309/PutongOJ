@@ -1,7 +1,9 @@
 const only = require('only')
 const User = require('../models/User')
 const { generatePwd } = require('../utils/helper')
+const { createToken } = require('../utils/helper')
 
+// 登录
 const login = async (ctx) => {
   const uid = ctx.request.body.uid
   const pwd = generatePwd(ctx.request.body.pwd)
@@ -17,20 +19,33 @@ const login = async (ctx) => {
     ctx.throw(400, 'Wrong password')
   }
 
+  let token = createToken(uid)
+
   ctx.session.profile = only(user, 'uid nick')
   ctx.body = {
-    profile: ctx.session.profile
+    profile: ctx.session.profile,
+    token
   }
 }
 
+// 登出
 const logout = async (ctx) => {
   delete ctx.session.profile
   ctx.body = {}
 }
 
+// 检查登录状态
 const profile = async (ctx) => {
+  const profile = ctx.session.profile ? ctx.session.profile : null
+  let status
+  if (profile != null) {
+    status = 'success'
+  } else {
+    status = 'fail'
+  }
   ctx.body = {
-    profile: ctx.session.profile
+    profile,
+    status
   }
 }
 

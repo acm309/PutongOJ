@@ -1,5 +1,6 @@
 const only = require('only')
 const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
@@ -33,8 +34,16 @@ const list = async (ctx) => {
     select: '-_id -hint -description -in -out -input -output' // -表示不要的字段
   })
 
+  const uid = opt.uid
+  let solved = []
+  solved = await Solution
+    .find({ uid, judge: 3 })
+    .distinct('pid')
+    .exec()
+
   ctx.body = {
-    res
+    res,
+    solved
   }
 }
 
