@@ -92,8 +92,10 @@ export default {
     ...mapMutations('session', {
       triggerLogin: TRIGGER_LOGIN
     }),
-    ...mapActions('session', [ 'login' ]),
-    ...mapActions('user', [ 'register' ]),
+    ...mapActions({
+      login: 'session/login',
+      register: 'user/register'
+    }),
     submit () {
       if (this.mode === 'login') {
         this.$refs['loginForm'].validate((valid) => {

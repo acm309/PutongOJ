@@ -26,7 +26,9 @@
         <th>Delete</th>
       </tr>
       <tr v-for="(item, index) in list" :key="item.pid">
-        <td>{{  }}</td>
+        <td>
+          <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
+        </td>
         <td>{{ item.pid }}</td>
         <td>
           <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
@@ -49,7 +51,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 
@@ -73,20 +75,29 @@ export default {
       type: this.$route.query.type || 'pid',
       content: this.$route.query.content || '',
       page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30
+      pageSize: parseInt(this.$route.query.pageSize) || 30,
+      uid: ''
     }
   },
   created () {
     this.fetch()
   },
   computed: {
-    ...mapState('problem', [
-      'list',
-      'sum'
-    ]),
+    ...mapGetters({
+      list: 'problem/list',
+      sum: 'problem/sum',
+      solved: 'problem/solved',
+      profile: 'session/profile'
+    }),
     query () {
-      const opt = only(this.$route.query, 'page pageSize type content')
-      return purify(opt)
+      if (this.profile) {
+        this.uid = this.profile.uid
+      }
+      const opt = Object.assign(
+        only(this.$route.query, 'page pageSize type content'),
+        { uid: this.uid }
+      )
+      return opt
     }
   },
   methods: {

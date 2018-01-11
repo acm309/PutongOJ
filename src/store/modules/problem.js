@@ -6,12 +6,14 @@ const store = {
   state: {
     list: [],
     problem: {},
-    sum: 0
+    sum: 0,
+    solved: []
   },
   getters: {
     list: state => state.list,
     problem: state => state.problem,
-    sum: state => state.sum
+    sum: state => state.sum,
+    solved: state => state.solved
   },
   mutations: {
     [types.GET_PROBLEM]: (state, payload) => {
@@ -19,6 +21,9 @@ const store = {
     },
     [types.GET_PROBLEM_LIST]: (state, payload) => {
       state.list = payload
+    },
+    [types.GET_PROBLEM_SOLVED]: (state, payload) => {
+      state.solved = payload
     },
     [types.GET_SUM_PROBLEM]: (state, payload) => {
       state.sum = payload
@@ -40,6 +45,7 @@ const store = {
       return api.problem.find(payload).then(({ data }) => {
         commit(types.GET_PROBLEM_LIST, data.res.docs)
         commit(types.GET_SUM_PROBLEM, data.res.total)
+        commit(types.GET_PROBLEM_SOLVED, data.solved)
       })
     },
     update ({commit}, payload) {
