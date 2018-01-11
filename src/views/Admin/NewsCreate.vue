@@ -8,7 +8,7 @@
 
 <script>
 import NewsEdit from '@/components/NewsEdit'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   data: () => ({
@@ -26,15 +26,11 @@ export default {
     this.$store.commit('news/UPDATE_NEWS', this.addNews)
   },
   methods: {
-    ...mapActions('news', [
-      'create'
-    ]),
     submit () {
       if (!this.news.title) {
         this.$Message.error('Title can not be empty')
       } else {
-        this
-          .create(this.news)
+        this.$store.dispatch('news/create', this.news)
           .then((nid) => {
             this.$Message.success(`News "${this.news.title}" has been created!`)
             this.$router.push({ name: 'newsInfo', params: { nid } })

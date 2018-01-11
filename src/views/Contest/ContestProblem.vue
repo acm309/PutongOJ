@@ -59,7 +59,6 @@ export default {
         name: 'contestSubmit',
         params: this.$router.params
       })
-      console.log(this.$route.params)
     }
   },
   watch: {

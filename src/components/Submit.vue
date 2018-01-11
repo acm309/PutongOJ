@@ -1,48 +1,33 @@
 <template lang="html">
   <div>
-    <Form :model="form">
+    <Form v-model="solution">
       <FormItem label="Language" label-position="left">
-        <Select v-model="form.language">
+        <Select v-model="solution.language">
           <Option :value="2">C++ (G++)</Option>
           <Option :value="1">C (GCC)</Option>
           <Option :value="3">Java (openJDK)</Option>
         </Select>
       </FormItem>
       <FormItem>
-        <Button type="primary" @click="submit">Submit</Button>
-        <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
-      </FormItem>
-      <FormItem>
-         <Input v-model="form.code" type="textarea" :autosize="{minRows:15,maxRows: 20}" placeholder="Paste your code here"></Input>
+         <Input v-model="solution.code" type="textarea" :autosize="{minRows:15,maxRows: 20}" placeholder="Paste your code here"></Input>
        </FormItem>
     </Form>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
-  data: () => ({
-    form: {
-      code: '',
-      language: 1
-    }
-  }),
-  props: ['resource'],
-  methods: {
-    reset () {
-      this.form.code = ''
-    },
-    submit () {
-      this.$store.dispatch(this.resource, {
-        ...this.form,
-        pid: this.$route.params.pid
-      }).then(() => {
-        this.$Message.info('success!')
-      })
-    }
+  computed: {
+    ...mapGetters('solution', [
+      'solution'
+    ])
   }
 }
 </script>
 
-<style>
+<style lang="stylus" scoped>
+.ivu-form-item-label
+  font-size: 16px
 </style>

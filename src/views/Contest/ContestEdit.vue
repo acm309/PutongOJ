@@ -113,13 +113,12 @@ export default {
     if (this.overview.length === 0) {
       p = this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
     }
-    p.then(() => this.$store.dispatch('contest/find', only(this.$route.params, 'cid')))
-      .then(() => {
-        this.overview.forEach((item) => {
-          // https://vuejs.org/2016/02/06/common-gotchas/
-          this.$set(this.jobs, item.pid, item.title)
-        })
+    p.then(() => {
+      this.overview.forEach((item) => {
+        // https://vuejs.org/2016/02/06/common-gotchas/
+        this.$set(this.jobs, item.pid, item.title)
       })
+    })
   },
   methods: {
     add () {

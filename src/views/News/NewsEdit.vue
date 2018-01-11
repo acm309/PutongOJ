@@ -8,7 +8,7 @@
 
 <script>
 import NewsEdit from '@/components/NewsEdit'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   computed: {
@@ -17,15 +17,11 @@ export default {
     ])
   },
   methods: {
-    ...mapActions('news', [
-      'update'
-    ]),
     submit () {
       if (!this.news.title) {
         this.$Message.error('Title can not be empty')
       } else {
-        this
-          .update(this.news)
+        this.$store.dispatch('news/update', this.news)
           .then((nid) => {
             this.$Message.success(`News "${this.news.title}" has been updated!`)
             this.$router.push({ name: 'newsInfo', params: { nid } })
