@@ -1,3 +1,4 @@
+require('../../config/db')
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 
@@ -12,7 +13,7 @@ async function helper (problem) {
   if (!fse.existsSync(path.resolve(__dirname, `../../data/${pid}/test.in`))) {
     return
   }
-
+  console.log(problem.pid)
   const solutions = await Solution.find({ pid })
   const meta = {
     testcases: []
@@ -22,16 +23,17 @@ async function helper (problem) {
     uuid: newid
   })
   await Promise.all([
-    fse.move(path.resolve(__dirname, `../../data/${pid}/test.in`), path.resolve(__dirname, `../../data/${pid}/${newid}.in`)),
-    fse.move(path.resolve(__dirname, `../../data/${pid}/test.out`), path.resolve(__dirname, `../../data/${pid}/${newid}.out`))
+    fse.copy(path.resolve(__dirname, `../../data/${pid}/test.in`), path.resolve(__dirname, `../../data/${pid}/${newid}.in`)),
+    fse.copy(path.resolve(__dirname, `../../data/${pid}/test.out`), path.resolve(__dirname, `../../data/${pid}/${newid}.out`)),
+    fse.writeJson(path.resolve(__dirname, `../../data/${pid}/meta.json`), meta, { spaces: 2 })
   ])
   solutions.forEach((solution) => {
-    solution.testcases.push({
+    solution.testcases = [{
       uuid: newid,
       judge: solution.judge,
       time: solution.time,
       memory: solution.memory
-    })
+    }]
   })
   await Promise.all(solutions.map(s => s.save()))
 }
@@ -40,3 +42,7 @@ async function main () {
   const problems = await Problem.find().exec()
   await Promise.all(problems.map(helper))
 }
+
+main()
+  .then(() => console.log('ok'))
+  .catch((err) => console.log(err))

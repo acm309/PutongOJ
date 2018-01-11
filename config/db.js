@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const logger = require('../utils/logger')
 const config = require('.')
 
+mongoose.Promise = global.Promise
+
 // 连接MongoDB数据库
 mongoose.connect(config.dbURL, {
   useMongoClient: true

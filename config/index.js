@@ -1,4 +1,6 @@
-const config = {}
+const config = {
+  redisURL: process.env.redisURL
+}
 
 config.judge = {
   Pending: 0,
