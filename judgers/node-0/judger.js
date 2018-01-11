@@ -55,17 +55,20 @@ async function judge (problem, solution) {
   const meta = fse.readJsonSync(path.resolve(dir, 'meta.json'))
   await fse.copy(path.resolve(dir, 'meta.json'), path.resolve(__dirname, 'meta.json'))
 
-  await fse.emptyDir(path.resolve(__dirname, 'temp'))
+  await Promise.all([
+    fse.emptyDir(path.resolve(__dirname, 'temp')),
+    fse.emptyDir(path.resolve(__dirname, 'testdata'))
+  ])
 
   // 把所有 testcases 复制过来
   // 输入
   await Promise.all(meta.testcases.map((test) => {
-    return fse.copy(path.resolve(dir, `${test.uuid}.in`), path.resolve(dir, `testdata/${test.uuid}.in`))
+    return fse.copy(path.resolve(dir, `${test.uuid}.in`), path.resolve(__dirname, `testdata/${test.uuid}.in`))
   }))
 
   // 输出
   await Promise.all(meta.testcases.map((test) => {
-    return fse.copy(path.resolve(dir, `${test.uuid}.out`), path.resolve(dir, `testdata/${test.uuid}.out`))
+    return fse.copy(path.resolve(dir, `${test.uuid}.out`), path.resolve(__dirname, `testdata/${test.uuid}.out`))
   }))
 
   logger.warn('TODO: implement language detection')
