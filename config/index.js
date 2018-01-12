@@ -2,6 +2,12 @@ const config = {
   redisURL: process.env.redisURL
 }
 
+config.privilege = {
+  PrimaryUser: 1,
+  Teacher: 2,
+  Admin: 3
+}
+
 config.judge = {
   Pending: 0,
   Running: 1,

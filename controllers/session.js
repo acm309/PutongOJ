@@ -21,7 +21,7 @@ const login = async (ctx) => {
 
   let token = createToken(uid)
 
-  ctx.session.profile = only(user, 'uid nick')
+  ctx.session.profile = only(user, 'uid nick privilege')
   ctx.body = {
     profile: ctx.session.profile,
     token
