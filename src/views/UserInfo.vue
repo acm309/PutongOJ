@@ -66,6 +66,18 @@
                 <Input v-model="user.mail"></Input>
               </Col>
             </Row>
+            <Row>
+              <Col :span="2" class="label">Password</Col>
+              <Col :span="12">
+                <Input v-model="newPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">CheckPwd</Col>
+              <Col :span="12">
+                <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
+              </Col>
+            </Row>
             <Row class="submit">
               <Col :offset="6" :span="6">
                 <Button type="primary" size="large" @click="submit">Submit</Button>
@@ -80,10 +92,13 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { purify } from '@/util/helper'
 
 export default {
   data: () => ({
-    display: 'overview'
+    display: 'overview',
+    newPwd: '',
+    checkPwd: ''
   }),
   computed: {
     ...mapGetters('user', {
@@ -97,10 +112,18 @@ export default {
   },
   methods: {
     submit () {
-      this.$store.dispatch('user/update', this.user).then(() => {
-        this.$Message.success('修改成功！')
-        this.display = 'overview'
-      })
+      if (this.newPwd === this.checkPwd) {
+        const user = purify(Object.assign(
+          this.user,
+          { newPwd: this.newPwd }
+        ))
+        this.$store.dispatch('user/update', user).then(() => {
+          this.$Message.success('修改成功！')
+          this.display = 'overview'
+        })
+      } else {
+        this.$Message.info('两次密码不一致，请重新输入！')
+      }
     }
   }
 }

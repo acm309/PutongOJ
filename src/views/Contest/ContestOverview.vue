@@ -11,7 +11,9 @@
         <th>Ratio</th>
       </tr>
       <tr v-for="(item, index) in overview" :key="item.pid">
-        <td></td>
+        <td>
+          <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
+        </td>
         <td>{{ index + 1 }}</td>
         <td>
           <router-link :to="{ name: 'contestProblem', params: { cid: cid, id: index + 1 } }">
@@ -36,13 +38,39 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('contest', {
-      contest: 'contest',
-      overview: 'overview'
-    })
+    ...mapGetters({
+      contest: 'contest/contest',
+      overview: 'contest/overview',
+      solved: 'contest/solved',
+      profile: 'session/profile'
+    }),
+    query () {
+      let uid
+      if (this.profile) {
+        uid = this.profile.uid
+      }
+      const opt = {
+        cid: this.$route.params.cid,
+        uid
+      }
+      return opt
+    }
   },
   created () {
-    this.$store.dispatch('contest/find', this.$route.params)
+    this.fetch()
+  },
+  methods: {
+    fetch () {
+      this.$store.dispatch('contest/find', this.query)
+    }
+  },
+  watch: { // 浏览器后退时回退页面
+    '$route' (to, from) {
+      if (to !== from) this.fetch()
+    },
+    'profile' (val) {
+      this.$store.dispatch('contest/find', this.query)
+    }
   }
 }
 </script>

@@ -10,7 +10,8 @@ const store = {
     overview: [],
     totalProblems: 0,
     problems: [],
-    ranklist: []
+    ranklist: [],
+    solved: []
   },
   getters: {
     list: state => state.list,
@@ -19,7 +20,8 @@ const store = {
     overview: state => state.overview,
     totalProblems: state => state.totalProblems,
     problems: state => state.problems,
-    ranklist: state => state.ranklist
+    ranklist: state => state.ranklist,
+    solved: state => state.solved
   },
   mutations: {
     [types.UPDATE_CONTEST_LIST]: (state, payload) => {
@@ -33,6 +35,9 @@ const store = {
     },
     [types.GET_CONTEST_OVERVIEW]: (state, payload) => {
       state.overview = payload
+    },
+    [types.GET_CONTEST_SOLVED]: (state, payload) => {
+      state.solved = payload
     },
     [types.GET_CONTEST_TOTAL_PRO]: (state, payload) => {
       state.totalProblems = payload
@@ -51,7 +56,8 @@ const store = {
     find ({ commit }, payload) {
       return api.contest.find(payload).then(({ data }) => {
         commit(types.UPDATE_CONTEST_LIST, data.res.docs)
-        commit(types.UPDATE_SUM_CONTEST, data.total)
+        commit(types.UPDATE_SUM_CONTEST, data.res.total)
+        commit(types.GET_CONTEST_SOLVED, data.solved)
       })
     },
     findOne ({ commit }, payload) {

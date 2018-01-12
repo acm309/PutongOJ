@@ -35,6 +35,7 @@ import UserInfo from '@/views/UserInfo'
 import ProblemCreate from '@/views/Admin/ProblemCreate'
 import ContestCreate from '@/views/Admin/ContestCreate'
 import NewsCreate from '@/views/Admin/NewsCreate'
+import UserManage from '@/views/Admin/UserManage'
 
 Vue.use(Router)
 
@@ -121,6 +122,11 @@ export default new Router({
       path: '/user/:uid',
       name: 'userInfo',
       component: UserInfo
+    },
+    {
+      path: '/user/manage',
+      name: 'userManage',
+      component: UserManage
     },
     {
       path: '/contest',
