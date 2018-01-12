@@ -59,10 +59,19 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const uid = opt.uid
   const user = await User.findOne({ uid }).exec()
-  const fileds = ['nick', 'motto', 'school', 'mail']
-  fileds.forEach((filed) => {
-    user[filed] = opt[filed]
-  })
+  const num = Object.keys(opt).length
+  if (num === 2) { // 管理员重置密码
+    user.pwd = generatePwd(opt.pwd)
+  } else { // 普通用户修改自身信息
+    const fileds = ['nick', 'motto', 'school', 'mail']
+    fileds.forEach((filed) => {
+      user[filed] = opt[filed]
+    })
+    if (opt.newPwd) {
+      user.pwd = generatePwd(opt.newPwd)
+    }
+  }
+
   try {
     await user.save()
     logger.info(`One user is updated" ${user.uid}`)

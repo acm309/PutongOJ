@@ -18,7 +18,7 @@ app.keys = ['some secret hurr'] // TODO: config this at config.js
 
 app.use(session({
   key: 'koa:oj:sess',
-  maxAge: 1 * 60 * 1000, // ms
+  maxAge: 10 * 60 * 1000, // ms
   httpOnly: true, /** (boolean) httpOnly or not (default true) */
   signed: true /** (boolean) signed or not (default true) */
 }, app))

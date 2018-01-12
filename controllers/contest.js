@@ -17,15 +17,24 @@ const list = async (ctx) => {
     limit: pageSize
   })
 
+  const uid = opt.uid
+  let solved = []
+  solved = await Solution
+    .find({ uid, judge: 3 })
+    .distinct('pid')
+    .exec()
+
   ctx.body = {
-    res
+    res,
+    solved
   }
 }
 
 // 返回一个竞赛
 const findOne = async (ctx) => {
-  const opt = parseInt(ctx.query.cid)
-  const doc = await Contest.findOne({ cid: opt }).exec()
+  const opt = ctx.request.query
+  const cid = parseInt(opt.cid)
+  const doc = await Contest.findOne({ cid }).exec()
 
   const list = doc.list
   const total = list.length
@@ -36,13 +45,13 @@ const findOne = async (ctx) => {
         res[index] = only(problem, 'title pid')
       })
       .then(() => {
-        return Solution.count({pid, mid: opt}).exec()
+        return Solution.count({pid, mid: cid}).exec()
       })
       .then((count) => {
         res[index].submit = count
       })
       .then(() => {
-        return Solution.count({pid, mid: opt, judge: 3}).exec()
+        return Solution.count({pid, mid: cid, judge: 3}).exec()
       })
       .then((count) => {
         res[index].solve = count
