@@ -12,7 +12,13 @@
     <Button type="ghost" shape="circle" icon="document" v-clipboard:copy="solution.code" v-clipboard:success="onCopy">
       Click to copy code
     </Button>
-    <pre><code v-html="prettyCode"></code></pre>
+    <pre><code v-html="prettyCode(solution.code)"></code></pre>
+    <div v-if="isAdmin && solution.sim">
+      <hr>
+      Similarity: {{ solution.sim }}</br>
+      From: {{ solution.simSolution.sid }}% by {{ solution.simSolution.uid }}
+      <pre><code v-html="prettyCode(solution.simSolution.code)"></code></pre>
+    </div>
   </div>
 </template>
 
@@ -28,17 +34,16 @@ export default {
     result: constant.result
   }),
   computed: {
-    ...mapGetters('solution', [
-      'solution'
-    ]),
-    prettyCode () {
-      return highlight.highlight('c++', `${this.solution.code}`).value
-    }
+    ...mapGetters('solution', [ 'solution' ]),
+    ...mapGetters('session', [ 'isAdmin' ])
   },
   created () {
     this.$store.dispatch('solution/findOne', this.$route.params)
   },
   methods: {
+    prettyCode (code) {
+      return highlight.highlight('c++', `${this.solution.code}`).value
+    },
     onCopy () {
       this.$Message.success('Copied!')
     }
