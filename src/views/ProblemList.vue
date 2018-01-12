@@ -23,7 +23,7 @@
         <th>Title</th>
         <th>Ratio</th>
         <th>Tags</th>
-        <th>Delete</th>
+        <th v-if="isAdmin">Delete</th>
       </tr>
       <tr v-for="(item, index) in list" :key="item.pid">
         <td>
@@ -44,7 +44,9 @@
             <Tag>{{ item2 }}</Tag>
           </template>
         </td>
-        <td><Button type="text" @click="del(item.pid)">Delete</Button></td>
+        <td  v-if="isAdmin">
+          <Button type="text" @click="del(item.pid)">Delete</Button>
+        </td>
       </tr>
     </table>
   </div>
@@ -86,7 +88,8 @@ export default {
       list: 'problem/list',
       sum: 'problem/sum',
       solved: 'problem/solved',
-      profile: 'session/profile'
+      profile: 'session/profile',
+      isAdmin: 'session/isAdmin'
     }),
     query () {
       let uid
@@ -98,6 +101,13 @@ export default {
         { uid }
       )
       return opt
+    },
+    privilege () {
+      if (this.profile) {
+        return this.profile.privilege
+      } else {
+        return 1
+      }
     }
   },
   methods: {

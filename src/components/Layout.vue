@@ -22,9 +22,9 @@
             <MenuItem name="6">
               <Icon type="help-circled"></Icon>FAQ
             </MenuItem>
-            <Submenu name="7">
+            <Submenu v-if="isAdmin" name="admin">
               <template slot="title">
-                  <Icon type="paper-airplane"></Icon>Admin
+                <Icon type="paper-airplane"></Icon>Admin
               </template>
               <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="contestCreate">Create Contests</MenuItem>
@@ -36,12 +36,12 @@
         <div class="right">
           <Dropdown v-if="isLogined" @on-click="profileAction">
             <a href="javascript:void(0)">
-                {{ profile.uid }}
-                <Icon type="arrow-down-b"></Icon>
+              {{ profile.uid }}
+              <Icon type="arrow-down-b"></Icon>
             </a>
             <DropdownMenu slot="list">
-                <DropdownItem>Profile</DropdownItem>
-                <DropdownItem name="logout">Logout</DropdownItem>
+              <DropdownItem name="profile">Profile</DropdownItem>
+              <DropdownItem name="logout">Logout</DropdownItem>
             </DropdownMenu>
           </Dropdown>
           <Button type="text" @click="login" v-else>Login / Register</Button>
@@ -68,6 +68,13 @@ export default {
   components: {
     Dialog
   },
+  computed: {
+    ...mapGetters({
+      isLogined: 'session/isLogined',
+      profile: 'session/profile',
+      isAdmin: 'session/isAdmin'
+    })
+  },
   methods: {
     ...mapMutations('session', {
       login: TRIGGER_LOGIN
@@ -78,14 +85,10 @@ export default {
     profileAction (name) {
       if (name === 'logout') {
         this.$store.dispatch('session/logout').then(() => this.$Message.info('bye bye!'))
+      } else if (name === 'profile') {
+        this.$router.push({ name: 'userInfo', params: { uid: this.profile.uid } })
       }
     }
-  },
-  computed: {
-    ...mapGetters('session', {
-      isLogined: 'isLogined',
-      profile: 'profile'
-    })
   }
 }
 </script>

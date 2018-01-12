@@ -4,13 +4,17 @@ import api from '@/api'
 // 初始化时用sessionStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {
   loginDialog: false,
-  profile: null
+  profile: null,
+  isAdmin: false
 }
 
 const getters = {
   loginDialog: state => state.loginDialog,
   profile: state => state.profile,
-  isLogined: state => state.profile != null
+  isLogined: state => state.profile != null,
+  isAdmin: (state, getters, rootState, rootGetters) => (
+    getters.isLogined && parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Admin)
+  )
 }
 
 const mutations = {
@@ -31,7 +35,7 @@ const mutations = {
 }
 
 const actions = {
-  login ({ commit }, opt) {
+  login ({ commit, rootGetters }, opt) {
     return api.login(opt).then(({ data }) => {
       commit(types.LOGIN, data)
       return data
@@ -42,7 +46,7 @@ const actions = {
       commit(types.LOGOUT)
     })
   },
-  fetch ({ commit }) {
+  fetch ({ commit, rootGetters }) {
     return api.session.fetch().then(({ data }) => {
       if (data.status === 'success') {
         commit(types.UPDATE_PROFILE, data.profile)

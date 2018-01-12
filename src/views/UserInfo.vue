@@ -41,7 +41,7 @@
               </Button>
             </div>
           </TabPane>
-          <TabPane label="Edit" name="edit" class="edit">
+          <TabPane label="Edit" name="edit" class="edit" v-if="profile && profile.uid === user.uid">
             <Row class="nick">
               <Col :span="2" class="label">Nick</Col>
               <Col :span="12">
@@ -101,10 +101,11 @@ export default {
     checkPwd: ''
   }),
   computed: {
-    ...mapGetters('user', {
-      user: 'user',
-      solved: 'solved',
-      unsolved: 'unsolved'
+    ...mapGetters({
+      user: 'user/user',
+      solved: 'user/solved',
+      unsolved: 'user/unsolved',
+      profile: 'session/profile'
     })
   },
   created () {

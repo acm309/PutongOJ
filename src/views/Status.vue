@@ -70,11 +70,12 @@
         <td :class="color[item.judge]">{{ result[item.judge] }}</td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
-        <td>
+        <td v-if="isAdmin">
           <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
             {{ lang[item.language] }}
           </router-link>
         </td>
+        <td v-else>{{ lang[item.language] }}</td>
         <td>{{ item.create | timePretty }}</td>
       </tr>
     </table>
@@ -108,10 +109,11 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters('solution', [
-      'list',
-      'sum'
-    ]),
+    ...mapGetters({
+      list: 'solution/list',
+      sum: 'solution/sum',
+      isAdmin: 'session/isAdmin'
+    }),
     query () {
       const opt = only(this.$route.query, 'page pageSize uid pid language judge')
       return purify(opt)
@@ -156,9 +158,6 @@ export default {
         this.fetch()
       }
     }
-  },
-  components: {
-    // Solution
   }
 }
 </script>

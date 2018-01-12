@@ -16,7 +16,7 @@
       <TabPane label="Submit" name="contestSubmit"></TabPane>
       <TabPane label="Status" name="contestStatus"></TabPane>
       <TabPane label="Ranklist" name="contestRanklist"></TabPane>
-      <TabPane label="Edit" name="contestEdit"></TabPane>
+      <TabPane label="Edit" name="contestEdit" v-if="isAdmin"></TabPane>
     </Tabs>
     <router-view v-if="contest"></router-view>
     <!-- 为了确保之后的 children 能拿到 contest -->
@@ -33,8 +33,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('contest', {
-      contest: 'contest'
+    ...mapGetters({
+      contest: 'contest/contest',
+      isAdmin: 'session/isAdmin'
     }),
     timePercentage () {
       if (Date.now() < this.contest.start) {

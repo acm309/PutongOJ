@@ -16,8 +16,17 @@ const state = {
   token: window.localStorage.getItem('token')
 }
 
+const getters = {
+  privilege: state => ({
+    PrimaryUser: 1,
+    Teacher: 2,
+    Admin: 3
+  })
+}
+
 export default new Vuex.Store({
   state,
+  getters,
   modules: {
     session,
     problem,
