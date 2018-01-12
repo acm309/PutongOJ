@@ -18,6 +18,7 @@ const Problem = require('../../models/Problem')
 const logger = require('../../utils/logger')
 const config = require('../..//config')
 const redis = require('../../config/redis')
+const extensions = ['', 'c', 'cpp', 'java']
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
@@ -45,6 +46,23 @@ function judgeCode (code) {
     return config.judge.SystemError
   } else {
     return config.judge.RuntimeError
+  }
+}
+
+// 用 sim 检测，返回相似度 (sim) 以及 最相似的那个提交 (sim_s_id)
+async function simTest (solution) {
+  const dir = path.resolve(__dirname, `../../data/${solution.pid}/ac/`)
+  // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
+  await fse.removeSync('./simfile')
+  shell.exec(`./sim.sh ./test/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
+  if (fse.existsSync('./simfile')) {
+    const simfile = await fse.readFile('./simfile')
+    const result = simfile.toString().match(/(\d+)\s+(\d+)/)
+    ;[solution.sim, solution.sim_s_id] = [+result[1], +result[2]]
+  }
+  return {
+    sim: solution.sim || 0,
+    sim_s_id: solution.sim_s_id || 0
   }
 }
 
@@ -107,6 +125,13 @@ async function main () {
     const problem = await Problem.findOne({ pid: solution.pid }).exec()
     logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: solution.uid>`)
     judge(problem, solution)
+    if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能
+      const sim = await simTest()
+      if (sim.sim !== 0) { // 有 "抄袭可能"
+        solution.sim = sim.sim
+        solution.sim_s_id = sim.sim_s_id
+      }
+    }
     await solution.save()
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
     logger.warn(`TODO: sim test and update user info`)

@@ -1,5 +1,6 @@
 const status = require('../controllers/status')
 const Router = require('koa-router')
+const { auth } = require('../utils/middlewares')
 
 const router = new Router({
   prefix: '/status'
@@ -7,6 +8,6 @@ const router = new Router({
 
 router.get('/list', status.list)
 router.get('/:sid', status.findOne)
-router.post('/', status.create)
+router.post('/', auth.login, status.create)
 
 module.exports = router

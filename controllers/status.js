@@ -1,6 +1,6 @@
 const only = require('only')
 const Solution = require('../models/Solution')
-const { purify } = require('../utils/helper')
+const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 
 // 返回提交列表
@@ -24,7 +24,13 @@ const list = async (ctx) => {
 // 返回一个提交
 const findOne = async (ctx) => {
   const opt = parseInt(ctx.query.sid)
-  const doc = await Solution.findOne({ sid: opt }).exec()
+  const doc = await Solution.findOne({ sid: opt }).lean().exec()
+
+  // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
+  if (isAdmin(ctx.session.profile) && doc.sim) {
+    const simSolution = await Solution.findOne({ sid: doc.sim_s_id }).lean().exec()
+    doc.simSolution = simSolution
+  }
 
   ctx.body = {
     doc

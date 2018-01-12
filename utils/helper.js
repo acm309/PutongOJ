@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const pickBy = require('lodash.pickby')
 const jwt = require('jsonwebtoken')
+const config = require('../config')
 
 function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
@@ -8,6 +9,11 @@ function purify (obj) {
 
 function generatePwd (pwd) {
   return crypto.createHash('md5').update(pwd).digest('hex') + crypto.createHash('sha1').update(pwd).digest('hex')
+}
+
+function isAdmin (profile) {
+  if (profile == null || profile.privilege == null) return false
+  return +(profile.privilege) === config.privilege.Admin
 }
 
 const createToken = async (ctx, next) => {
@@ -23,5 +29,6 @@ const createToken = async (ctx, next) => {
 module.exports = {
   generatePwd,
   purify,
-  createToken
+  createToken,
+  isAdmin
 }
