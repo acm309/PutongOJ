@@ -1,6 +1,6 @@
 const only = require('only')
 const Solution = require('../models/Solution')
-const { purify, isAdmin } = require('../utils/helper')
+const { purify, isAdmin, pushToJudge } = require('../utils/helper')
 const logger = require('../utils/logger')
 
 // 返回提交列表
@@ -50,7 +50,8 @@ const create = async (ctx) => {
 
   try {
     await solution.save()
-    logger.info(`One problem is updated" ${solution.pid} -- ${solution.uid}`)
+    pushToJudge(solution.sid)
+    logger.info(`One problem is created" ${solution.pid} -- ${solution.uid}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

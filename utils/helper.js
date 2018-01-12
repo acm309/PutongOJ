@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const pickBy = require('lodash.pickby')
 const jwt = require('jsonwebtoken')
 const config = require('../config')
+const redis = require('../config/redis')
 
 function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
@@ -26,9 +27,14 @@ const createToken = async (ctx, next) => {
   return token
 }
 
+const pushToJudge = (sid) => {
+  redis.lpush('oj:solutions', sid)
+}
+
 module.exports = {
   generatePwd,
   purify,
   createToken,
-  isAdmin
+  isAdmin,
+  pushToJudge
 }

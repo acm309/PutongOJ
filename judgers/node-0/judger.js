@@ -42,6 +42,8 @@ function judgeCode (code) {
     return config.judge.WrongAnswer
   } else if (code === 7) {
     return config.judge.OutputLimitExceed
+  } else if (code === 8) {
+    return config.judge.CompileError
   } else if (code === 14) {
     return config.judge.SystemError
   } else {
@@ -124,9 +126,9 @@ async function main () {
     const solution = await Solution.findOne({ sid }).exec()
     const problem = await Problem.findOne({ pid: solution.pid }).exec()
     logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: solution.uid>`)
-    judge(problem, solution)
+    await judge(problem, solution)
     if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能
-      const sim = await simTest()
+      const sim = await simTest(solution)
       if (sim.sim !== 0) { // 有 "抄袭可能"
         solution.sim = sim.sim
         solution.sim_s_id = sim.sim_s_id
