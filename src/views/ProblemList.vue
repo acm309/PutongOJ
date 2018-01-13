@@ -23,9 +23,12 @@
         <th>Title</th>
         <th>Ratio</th>
         <th>Tags</th>
+        <th v-if="isAdmin">Status</th>
         <th v-if="isAdmin">Delete</th>
       </tr>
+      <!-- <template v-for="(item, index) in list" :key="item.pid"> -->
       <tr v-for="(item, index) in list" :key="item.pid">
+        <!-- <template v-if="item.status === this.status.Available"> -->
         <td>
           <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
         </td>
@@ -44,9 +47,15 @@
             <Tag>{{ item2 }}</Tag>
           </template>
         </td>
+        <td>
+          <Tooltip content="Click to change status" placement="right">
+            <Button type="text" @click="change(item)">{{ problemStatus[item.status] }}</Button>
+          </Tooltip>
+        </td>
         <td  v-if="isAdmin">
           <Button type="text" @click="del(item.pid)">Delete</Button>
         </td>
+        <!-- </template> -->
       </tr>
     </table>
   </div>
@@ -56,6 +65,7 @@
 import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
+import constant from '@/util/constant'
 
 export default {
   data () {
@@ -77,7 +87,8 @@ export default {
       type: this.$route.query.type || 'pid',
       content: this.$route.query.content || '',
       page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30
+      pageSize: parseInt(this.$route.query.pageSize) || 30,
+      problemStatus: constant.status
     }
   },
   created () {
@@ -89,6 +100,7 @@ export default {
       sum: 'problem/sum',
       solved: 'problem/solved',
       profile: 'session/profile',
+      status: 'status',
       isAdmin: 'session/isAdmin'
     }),
     query () {
@@ -142,6 +154,12 @@ export default {
     clear () {
       this.content = ''
     },
+    change (problem) {
+      problem.status = problem.status === this.status.Reserve
+        ? this.status.Available
+        : this.status.Reserve
+      this.$store.dispatch('problem/update', problem)
+    },
     del (pid) {
       this.$Modal.confirm({
         title: '提示',
@@ -186,6 +204,8 @@ export default {
       th:nth-child(5)
         width: 10%
       th:nth-child(6)
+        width: 10%
+      th:nth-child(7)
         width: 10%
       tr
         border-bottom: 1px solid #ebeef5

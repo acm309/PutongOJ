@@ -28,6 +28,9 @@ const store = {
     [types.GET_SUM_PROBLEM]: (state, payload) => {
       state.sum = payload
     },
+    [types.UPDATE_PROBLEM]: (state, payload) => {
+      state.problem = payload
+    },
     [types.DELETE_PROBLEM]: (state, { pid }) => {
       // 从列表里删除
       // 如果没有这一步，那么会出现：数据库里已经删除，但前端页面（不刷新的情况下）还有
@@ -37,7 +40,7 @@ const store = {
   actions: {
     findOne ({ commit }, payload) {
       return api.problem.findOne(payload).then(({ data }) => {
-        commit(types.GET_PROBLEM, data)
+        commit(types.GET_PROBLEM, data.problem)
         return data
       })
     },

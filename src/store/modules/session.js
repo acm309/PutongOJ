@@ -13,7 +13,11 @@ const getters = {
   profile: state => state.profile,
   isLogined: state => state.profile != null,
   isAdmin: (state, getters, rootState, rootGetters) => (
-    getters.isLogined && parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Admin)
+    getters.isLogined &&
+    (
+      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Root) ||
+      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Teacher)
+    )
   )
 }
 

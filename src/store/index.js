@@ -20,7 +20,11 @@ const getters = {
   privilege: state => ({
     PrimaryUser: 1,
     Teacher: 2,
-    Admin: 3
+    Root: 3
+  }),
+  status: state => ({
+    Reserve: 0,
+    Available: 2
   })
 }
 

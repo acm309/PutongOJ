@@ -31,13 +31,13 @@
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Password</Col>
       <Col :span="21">
-        <Input v-model="newPwd" placeholder="Leave it blank if it is not changed"></Input>
+        <Input v-model="newPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
       </Col>
     </Row>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">CheckPwd</Col>
       <Col :span="21">
-        <Input v-model="checkPwd" placeholder="Leave it blank if it is not changed"></Input>
+        <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
       </Col>
     </Row>
     <Button type="primary" @click="submit">Submit</Button>

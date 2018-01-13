@@ -131,6 +131,11 @@ const contestType = {
   3: 'Password'
 }
 
+const status = {
+  0: 'Reserve', // 是否开放给普通用户
+  2: 'Available'
+}
+
 module.exports = {
   result,
   language,
@@ -139,5 +144,6 @@ module.exports = {
   color,
   statisTableObj,
   contestStatus,
-  contestType
+  contestType,
+  status
 }
