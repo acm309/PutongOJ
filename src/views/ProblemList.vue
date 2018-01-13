@@ -157,11 +157,9 @@ export default {
       this.content = ''
     },
     change (problem) {
-      problem.status = problem.status === this.status.Reserve
+      problem.status = +problem.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
-      console.log(typeof problem.status + ' ' + problem.status)
-      console.log(typeof this.status.Reserve + ' ' + this.status.Reserve + ' ' + this.status.Available)
       this.$store.dispatch('problem/update', problem).then(() => {
         this.$store.dispatch('problem/find', this.query)
       })

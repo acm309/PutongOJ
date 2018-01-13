@@ -52,7 +52,9 @@ const store = {
       })
     },
     update ({commit}, payload) {
-      return api.problem.update(payload)
+      return api.problem.update(payload).then(({ data }) => {
+        // commit()
+      })
     },
     create ({commit}, payload) {
       return api.problem.create(payload).then(({ data }) => data.pid)
