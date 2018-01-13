@@ -5,7 +5,7 @@ const config = {
 config.privilege = {
   PrimaryUser: 1,
   Teacher: 2,
-  Admin: 3
+  Root: 3
 }
 
 config.judge = {

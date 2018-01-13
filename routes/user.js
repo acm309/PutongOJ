@@ -5,10 +5,10 @@ const router = new Router({
   prefix: '/user'
 })
 
-router.get('/:uid', user.findOne)
+router.get('/:uid', user.preload, user.findOne)
 
 // register
 router.post('/', user.create)
-router.put('/:uid', user.update)
+router.put('/:uid', user.preload, user.update)
 
 module.exports = router

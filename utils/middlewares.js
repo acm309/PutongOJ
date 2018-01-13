@@ -1,4 +1,4 @@
-const { isAdmin } = require('./helper')
+const { isAdmin, isRoot } = require('./helper')
 
 const login = async (ctx, next) => {
   if (!ctx.session || ctx.session.profile == null) ctx.throw(401, 'Login required')
@@ -13,9 +13,18 @@ const admin = async (ctx, next) => {
   }
 }
 
+const root = async (ctx, next) => {
+  if (ctx.session.profile && isRoot(ctx.session.profile)) {
+    return next()
+  } else {
+    ctx.throw(403, 'Permission denied')
+  }
+}
+
 module.exports = {
   auth: {
     login,
-    admin
+    admin,
+    root
   }
 }

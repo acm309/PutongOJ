@@ -51,7 +51,9 @@ const list = async (ctx) => {
 const findOne = async (ctx) => {
   const problem = ctx.state.problem
 
-  ctx.body = problem
+  ctx.body = {
+    problem
+  }
 }
 
 // 新建一个题目

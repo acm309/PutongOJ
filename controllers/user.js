@@ -3,6 +3,14 @@ const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
 
+const preload = async (ctx, next) => {
+  const uid = ctx.params.uid
+  const user = await User.findOne({ uid }).exec()
+  if (user == null) ctx.throw(400, 'No such a user')
+  ctx.state.user = user
+  return next()
+}
+
 // 查询用户具体信息
 const findOne = async (ctx) => {
   const uid = ctx.query.uid
@@ -21,7 +29,6 @@ const findOne = async (ctx) => {
       .exec()
   ])
 
-  // console.log(info)
   ctx.body = {
     info,
     solved,
@@ -57,8 +64,7 @@ const create = async (ctx) => {
 // 修改用户信息
 const update = async (ctx) => {
   const opt = ctx.request.body
-  const uid = opt.uid
-  const user = await User.findOne({ uid }).exec()
+  const user = ctx.state.user
   const fileds = ['nick', 'motto', 'school', 'mail']
   fileds.forEach((filed) => {
     user[filed] = opt[filed]
@@ -81,6 +87,7 @@ const update = async (ctx) => {
 }
 
 module.exports = {
+  preload,
   findOne,
   create,
   update

@@ -14,7 +14,20 @@ function generatePwd (pwd) {
 
 function isAdmin (profile) {
   if (profile == null || profile.privilege == null) return false
-  return +(profile.privilege) === config.privilege.Admin
+  if (parseInt(profile.privilege) === config.privilege.Root || parseInt(profile.privilege) === config.privilege.Teacher) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function isRoot (profile) {
+  if (profile == null || profile.privilege == null) return false
+  if (parseInt(profile.privilege) === config.privilege.Root) {
+    return true
+  } else {
+    return false
+  }
 }
 
 const createToken = async (ctx, next) => {
@@ -36,5 +49,6 @@ module.exports = {
   purify,
   createToken,
   isAdmin,
+  isRoot,
   pushToJudge
 }

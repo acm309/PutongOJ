@@ -31,8 +31,7 @@ const find = async (ctx) => {
 
 // 返回一条消息
 const findOne = async (ctx) => {
-  const opt = parseInt(ctx.query.nid)
-  const res = await News.findOne({nid: opt}).exec()
+  const res = ctx.state.news
   ctx.body = {
     res
   }
