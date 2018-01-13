@@ -91,10 +91,9 @@ async function judge (problem, solution) {
     return fse.copy(path.resolve(dir, `${test.uuid}.out`), path.resolve(__dirname, `testdata/${test.uuid}.out`))
   }))
 
-  logger.warn('TODO: implement language detection')
-  fse.writeFileSync(path.resolve(__dirname, `temp/Main.cpp`), solution.code)
+  fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code)
 
-  shell.exec(`./Judge -l 2 -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`)
+  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`)
 
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(path.resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
@@ -106,8 +105,12 @@ async function judge (problem, solution) {
   const result = fse.readJsonSync(path.resolve(__dirname, 'temp/result.json'))
 
   solution.judge = -1
+  solution.time = 0
+  solution.memory = 0
   for (const item of result) {
     item.result = judgeCode(item.result)
+    solution.time = Math.max(solution.time, item.time)
+    solution.memory = Math.max(solution.memory, item.memory)
     if (item.result !== config.judge.Accepted && solution.judge === -1) {
       solution.judge = item.result
     }
@@ -136,7 +139,6 @@ async function main () {
     }
     await solution.save()
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
-    logger.warn(`TODO: sim test and update user info`)
   }
 }
 
