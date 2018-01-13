@@ -26,37 +26,39 @@
         <th v-if="isAdmin">Status</th>
         <th v-if="isAdmin">Delete</th>
       </tr>
-      <!-- <template v-for="(item, index) in list" :key="item.pid"> -->
-      <tr v-for="(item, index) in list" :key="item.pid">
-        <!-- <template v-if="item.status === this.status.Available"> -->
-        <td>
-          <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
-        </td>
-        <td>{{ item.pid }}</td>
-        <td>
-          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-            <Button type="text">{{ item.title }}</Button>
-          </router-link>
-        <td>
-          <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
-          (<Button type="text">{{ item.solve }}</Button> /
-          <Button type="text">{{ item.submit }}</Button>)
-        </td>
-        <td>
-          <template v-for="(item2, index2) in item.tags">
-            <Tag>{{ item2 }}</Tag>
-          </template>
-        </td>
-        <td>
-          <Tooltip content="Click to change status" placement="right">
-            <Button type="text" @click="change(item)">{{ problemStatus[item.status] }}</Button>
-          </Tooltip>
-        </td>
-        <td  v-if="isAdmin">
-          <Button type="text" @click="del(item.pid)">Delete</Button>
-        </td>
-        <!-- </template> -->
-      </tr>
+      <template v-for="(item, index) in list">
+        <tr v-if="isAdmin || item.status === status.Available + ''">
+          <td>
+            <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
+          </td>
+          <td>{{ item.pid }}</td>
+          <td>
+            <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+              <Button type="text">{{ item.title }}</Button>
+            </router-link>
+            <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
+              <strong v-show="item.status === status.Reserve + ''">Reserved</strong>
+            </Tooltip>
+          <td>
+            <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
+            (<Button type="text">{{ item.solve }}</Button> /
+            <Button type="text">{{ item.submit }}</Button>)
+          </td>
+          <td>
+            <template v-for="(item2, index2) in item.tags">
+              <Tag>{{ item2 }}</Tag>
+            </template>
+          </td>
+          <td v-if="isAdmin">
+            <Tooltip content="Click to change status" placement="right">
+              <Button type="text" @click="change(item)">{{ problemStatus[item.status] }}</Button>
+            </Tooltip>
+          </td>
+          <td v-if="isAdmin">
+            <Button type="text" @click="del(item.pid)">Delete</Button>
+          </td>
+        </tr>
+      </template>
     </table>
   </div>
 </template>
@@ -158,7 +160,11 @@ export default {
       problem.status = problem.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
-      this.$store.dispatch('problem/update', problem)
+      console.log(typeof problem.status + ' ' + problem.status)
+      console.log(typeof this.status.Reserve + ' ' + this.status.Reserve + ' ' + this.status.Available)
+      this.$store.dispatch('problem/update', problem).then(() => {
+        this.$store.dispatch('problem/find', this.query)
+      })
     },
     del (pid) {
       this.$Modal.confirm({
