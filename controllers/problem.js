@@ -84,7 +84,7 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
-  const fileds = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out']
+  const fileds = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status']
   fileds.forEach((filed) => {
     problem[filed] = opt[filed]
   })
