@@ -19,7 +19,7 @@ const store = {
     contest: state => state.contest,
     overview: state => state.overview,
     totalProblems: state => state.totalProblems,
-    problems: state => state.problems,
+    problems: state => state.contest.list,
     ranklist: state => state.ranklist,
     solved: state => state.solved
   },
@@ -42,9 +42,6 @@ const store = {
     [types.GET_CONTEST_TOTAL_PRO]: (state, payload) => {
       state.totalProblems = payload
     },
-    [types.GET_CONTEST_PRO]: (state, payload) => {
-      state.problems = payload
-    },
     [types.GET_CONTEST_RANK]: (state, payload) => {
       state.ranklist = payload
     },
@@ -65,7 +62,6 @@ const store = {
         commit(types.GET_CONTEST, data.doc)
         commit(types.GET_CONTEST_OVERVIEW, data.res)
         commit(types.GET_CONTEST_TOTAL_PRO, data.total)
-        commit(types.GET_CONTEST_PRO, data.pro)
         return data
       })
     },

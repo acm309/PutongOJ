@@ -109,9 +109,12 @@ export default {
     })
   },
   created () {
-    this.$store.dispatch('user/findOne', this.$route.params)
+    this.fetch()
   },
   methods: {
+    fetch () {
+      this.$store.dispatch('user/findOne', this.$route.params)
+    },
     submit () {
       if (this.newPwd === this.checkPwd) {
         const user = purify(Object.assign(
@@ -124,6 +127,13 @@ export default {
         })
       } else {
         this.$Message.info('两次密码不一致，请重新输入！')
+      }
+    }
+  },
+  watch: {
+    '$route' (to, from) {
+      if (to !== from) {
+        this.fetch()
       }
     }
   }
