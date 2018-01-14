@@ -9,8 +9,8 @@ const router = new Router({
 router.get('/list', contest.list)
 router.get('/:cid', contest.findOne)
 router.get('/:cid/rank', contest.ranklist)
-router.post('/', auth.admin, contest.create)
-router.put('/:cid', auth.admin, contest.update)
-router.del('/:cid', auth.admin, contest.del)
+router.post('/', auth.login, auth.admin, contest.create)
+router.put('/:cid', auth.login, auth.admin, contest.update)
+router.del('/:cid', auth.login, auth.admin, contest.del)
 
 module.exports = router
