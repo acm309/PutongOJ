@@ -5,6 +5,7 @@ const router = new Router({
   prefix: '/user'
 })
 
+router.get('/list', user.find)
 router.get('/:uid', user.preload, user.findOne)
 
 // register

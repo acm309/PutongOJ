@@ -11,6 +11,14 @@ const preload = async (ctx, next) => {
   return next()
 }
 
+// 查询所有用户
+const find = async (ctx) => {
+  const res = await User.find({}).exec()
+  ctx.body = {
+    res
+  }
+}
+
 // 查询用户具体信息
 const findOne = async (ctx) => {
   const uid = ctx.query.uid
@@ -88,6 +96,7 @@ const update = async (ctx) => {
 
 module.exports = {
   preload,
+  find,
   findOne,
   create,
   update
