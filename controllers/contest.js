@@ -143,7 +143,7 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const contest = await Contest.findOne({cid: opt.cid}).exec()
-  const fileds = ['title', 'encrypt', 'list', 'argument', 'start', 'end']
+  const fileds = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
   fileds.forEach((filed) => {

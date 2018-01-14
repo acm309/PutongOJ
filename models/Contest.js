@@ -55,9 +55,7 @@ contestSchema.pre('validate', function (next) {
     }
   })
 
-  if (new Date(this.end).getTime() < Date.now()) {
-    next(new Error('The game time should be in the future!'))
-  } else if (new Date(this.start).getTime() >= new Date(this.end).getTime()) {
+  if (new Date(this.start).getTime() >= new Date(this.end).getTime()) {
     next(new Error('The race end time can not be earlier than the start time!'))
   } else {
     next()
