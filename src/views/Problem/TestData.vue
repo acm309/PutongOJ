@@ -35,9 +35,12 @@
     </table>
     <h1>Create New</h1>
     <p>In</p>
-    <Input v-model="newTest.in" type="textarea"></Input>
+    <Input v-model="newTest.in" type="textarea" :autosize="{minRows: 5,maxRows: 25}"></Input>
     <p>Out</p>
-    <Input v-model="newTest.out" type="textarea"></Input>
+    <Input v-model="newTest.out" type="textarea" :autosize="{minRows: 5,maxRows: 25}"></Input>
+    <br>
+    <br>
+    <Button type="primary"> Submit </Button>
   </div>
 </template>
 
