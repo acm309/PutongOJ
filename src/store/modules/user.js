@@ -38,6 +38,11 @@ const store = {
     register ({ commit }, payload) {
       return api.register(payload)
     },
+    find ({ commit }) {
+      return api.user.find().then(({ data }) => {
+        commit(types.UPDATE_USERS_LIST, data.res)
+      })
+    },
     findOne ({ commit }, payload) {
       return api.user.findOne(payload).then(({ data }) => {
         commit(types.UPDATE_USER, data.info)

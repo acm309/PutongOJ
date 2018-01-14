@@ -39,6 +39,20 @@
         </Select>
       </Col>
     </Row>
+    <Row v-if="contest.encrypt === 2">
+      <Transfer
+        :data="transData"
+        :target-keys="targetKeys"
+        :list-style="listStyle"
+        :operations="['To left','To right']"
+        filterable
+        :filter-method="filterMethod"
+        @on-change="handleChange">
+        <div :style="{float: 'right', margin: '5px'}">
+          <Button type="ghost" size="small" @click="">Refresh</Button>
+        </div>
+    </Transfer>
+    </Row>
     <Row v-if="contest.encrypt === 3">
       <Col :span="23">
         <Input v-model="contest.argument"></Input>
@@ -76,6 +90,7 @@
 <script>
 import draggable from 'vuedraggable'
 import only from 'only'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
@@ -95,10 +110,31 @@ export default {
           label: 'Password'
         }
       ],
-      pid: ''
+      pid: '',
+      targetKeys: [],
+      listStyle: {
+        width: '400px',
+        height: '500px'
+      }
     }
   },
   props: ['contest', 'overview'],
+  computed: {
+    ...mapGetters({
+      list: 'user/list'
+    }),
+    transData () {
+      let data = []
+      this.list.forEach((item, index) => {
+        data.push({
+          key: index + 1 + '',
+          label: item.uid,
+          disabled: true
+        })
+      })
+      return data
+    }
+  },
   created () {
     // 这里必须保证此时 overview 是存在的
     // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
@@ -114,6 +150,7 @@ export default {
         })
       })
     }
+    this.$store.dispatch('user/find')
   },
   methods: {
     add () {
@@ -126,6 +163,12 @@ export default {
     },
     removeJob (index) {
       this.contest.list.splice(index, 1)
+    },
+    filterMethod (data, query) {
+      // return data.label.indexOf(query) > -1
+    },
+    handleChange (newTargetKeys) {
+      this.targetKeys = newTargetKeys
     }
   },
   components: {

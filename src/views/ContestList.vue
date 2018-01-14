@@ -74,6 +74,7 @@ export default {
       list: 'contest/list',
       sum: 'contest/sum',
       status: 'status',
+      profile: 'session/profile',
       isLogined: 'session/isLogined',
       isAdmin: 'session/isAdmin'
     }),
@@ -113,7 +114,13 @@ export default {
           this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
         } else {
           if (+item.encrypt === 2) {
-            console.log(2)
+            const arg = item.argument
+            const arr = arg.split('\r\n')
+            if (arr.indexOf(this.profile.uid) !== -1) {
+              this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+            } else {
+              this.$Message.error("You're not invited to attend this contest!")
+            }
           } else if (+item.encrypt === 3) {
             this.$Modal.confirm({
               render: (h) => {
@@ -127,7 +134,7 @@ export default {
                       if (item.argument === val) {
                         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
                       } else {
-                        this.$Message.error('密码错误！')
+                        this.$Message.error('Wrong password!')
                       }
                     }
                   }
