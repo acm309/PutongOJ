@@ -11,9 +11,7 @@ import ProblemEdit from '@/components/ProblemEdit'
 
 export default {
   computed: {
-    ...mapGetters('problem', [
-      'problem'
-    ])
+    ...mapGetters('problem', [ 'problem' ])
   },
   created () {
     this.$store.dispatch('problem/findOne', { pid: this.$route.params.pid })

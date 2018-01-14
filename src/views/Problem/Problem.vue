@@ -20,13 +20,11 @@ export default {
     current: 'problemInfo'
   }),
   computed: {
-    ...mapGetters({
-      isAdmin: 'session/isAdmin'
-    })
+    ...mapGetters('session', [ 'isAdmin' ])
   },
   methods: {
     change (name) {
-      this.$router.push({ name: name, params: { pid: this.$route.params.pid } })
+      this.$router.push({ name, params: { pid: this.$route.params.pid } })
     }
   },
   watch: {
