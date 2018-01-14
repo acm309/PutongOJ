@@ -44,6 +44,10 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
+  submit: {
+    type: Number,
+    default: 0
+  },
   motto: String,
   mail: String,
   school: String
