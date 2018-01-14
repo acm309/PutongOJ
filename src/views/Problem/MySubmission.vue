@@ -91,7 +91,7 @@ export default {
     },
     reload (payload = {}) {
       this.$router.push({
-        name: 'Mysubmission',
+        name: 'mySubmission',
         query: purify(Object.assign(this.query, payload))
       })
     },

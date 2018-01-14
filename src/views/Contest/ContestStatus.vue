@@ -118,10 +118,12 @@ export default {
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize uid pid language judge'),
         {
-          mid: this.$route.params.cid,
-          pid: this.problems[this.$route.query.pid - 1]
+          mid: this.$route.params.cid
         }
       )
+      if (this.$route.query.pid) {
+        opt.pid = this.problems[this.$route.query.pid - 1]
+      }
       return purify(opt)
     }
   },

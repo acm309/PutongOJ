@@ -14,9 +14,9 @@
         <tr v-if="isAdmin || item.status === status.Available">
           <td>{{ item.cid }}</td>
           <td>
-            <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }">
-              <Button type="text">{{ item.title }}</Button>
-            </router-link>
+            <!-- <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }"> -->
+              <Button type="text" @click="visit(item)">{{ item.title }}</Button>
+            <!-- </router-link> -->
             <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
@@ -28,7 +28,9 @@
             <span>{{ item.create | timePretty }}</span>
           </td>
           <td>
-            <span>{{ type[item.encrypt] }}</span>
+            <span :class="{'public': +item.encrypt === 1, 'private': +item.encrypt === 2}">
+              {{ type[item.encrypt] }}
+            </span>
           </td>
           <td v-if="isAdmin">
             <Tooltip content="Click to change status" placement="right">
@@ -63,7 +65,8 @@ export default {
       pageSize: parseInt(this.$route.query.pageSize) || 20,
       contestStatus: constant.contestStatus,
       type: constant.contestType,
-      contestVisible: constant.status
+      contestVisible: constant.status,
+      enterPsd: ''
     }
   },
   computed: {
@@ -71,6 +74,7 @@ export default {
       list: 'contest/list',
       sum: 'contest/sum',
       status: 'status',
+      isLogined: 'session/isLogined',
       isAdmin: 'session/isAdmin'
     }),
     query () {
@@ -98,11 +102,41 @@ export default {
         query
       })
     },
-    sizeChange (val) {
-      this.reload({ pageSize: val })
-    },
     pageChange (val) {
       this.reload({ page: val })
+    },
+    visit (item) {
+      if (!this.isLogined) {
+        this.$store.commit('session/TRIGGER_LOGIN')
+      } else {
+        if (this.isAdmin || +item.encrypt === 1) {
+          this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+        } else {
+          if (+item.encrypt === 2) {
+            console.log(2)
+          } else if (+item.encrypt === 3) {
+            this.$Modal.confirm({
+              render: (h) => {
+                return h('Input', {
+                  props: {
+                    value: this.enterPsd,
+                    placeholder: 'Please enter password.'
+                  },
+                  on: {
+                    click: (val) => {
+                      if (item.argument === val) {
+                        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+                      } else {
+                        this.$Message.error('密码错误！')
+                      }
+                    }
+                  }
+                })
+              }
+            })
+          }
+        }
+      }
     },
     change (contest) {
       contest.status = contest.status === this.status.Reserve
@@ -135,7 +169,7 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .con-wrap
   margin-bottom: 20px
   table
@@ -178,4 +212,8 @@ export default {
   .end
     font-weight: bold
     color: black
+  .public
+    color: red
+  .private
+    color: green
 </style>

@@ -9,7 +9,8 @@ import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
 import ProblemStatistics from '@/views/Problem/Statistics'
 import ProblemEdit from '@/views/Problem/problemEdit'
-import Mysubmission from '@/views/Problem/Mysubmission'
+import MySubmission from '@/views/Problem/Mysubmission'
+import TestData from '@/views/Problem/TestData'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -93,9 +94,9 @@ export default new Router({
           component: ProblemSubmit
         },
         {
-          path: 'mysubmission',
-          name: 'mysubmission',
-          component: Mysubmission
+          path: 'mySubmission',
+          name: 'mySubmission',
+          component: MySubmission
         },
         {
           path: 'statistics',
@@ -106,6 +107,11 @@ export default new Router({
           path: 'edit',
           name: 'problemEdit',
           component: ProblemEdit
+        },
+        {
+          path: 'testData',
+          name: 'testData',
+          component: TestData
         }
       ]
     },
