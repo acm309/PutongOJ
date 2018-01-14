@@ -10,35 +10,36 @@
         <th v-if="isAdmin">Visible</th>
         <th v-if="isAdmin">Delete</th>
       </tr>
-      <tr v-for="(item, index) in list" :key="item.pid">
-        <td>{{ item.cid }}</td>
-        <td>
-          <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }">
-            <Button type="text">{{ item.title }}</Button>
-          </router-link>
-          <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
-            <strong v-show="item.status === status.Reserve + ''">Reserved</strong>
-          </Tooltip>
-        <td>
-          <!-- <span>{{ contestStatus[item.status] }}</span> -->
-          <span class="run" v-if="item.end > Date.now()">Running</span>
-          <span class="end" v-else >Ended</span>
-        </td>
-        <td>
-          <span>{{ item.create | timePretty }}</span>
-        </td>
-        <td>
-          <span>{{ type[item.encrypt] }}</span>
-        </td>
-        <td v-if="isAdmin">
-          <Tooltip content="Click to change status" placement="right">
-            <Button type="text" @click="change(item)">{{ contestVisible[item.status] }}</Button>
-          </Tooltip>
-        </td>
-        <td v-if="isAdmin">
-          <Button type="text" @click="del(item.cid)">Delete</Button>
-        </td>
-      </tr>
+      <template v-for="(item, index) in list">
+        <tr v-if="isAdmin || item.status === status.Available">
+          <td>{{ item.cid }}</td>
+          <td>
+            <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }">
+              <Button type="text">{{ item.title }}</Button>
+            </router-link>
+            <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
+              <strong v-show="item.status === status.Reserve">Reserved</strong>
+            </Tooltip>
+          <td>
+            <span class="run" v-if="item.end > Date.now()">Running</span>
+            <span class="end" v-else >Ended</span>
+          </td>
+          <td>
+            <span>{{ item.create | timePretty }}</span>
+          </td>
+          <td>
+            <span>{{ type[item.encrypt] }}</span>
+          </td>
+          <td v-if="isAdmin">
+            <Tooltip content="Click to change status" placement="right">
+              <Button type="text" @click="change(item)">{{ contestVisible[item.status] }}</Button>
+            </Tooltip>
+          </td>
+          <td v-if="isAdmin">
+            <Button type="text" @click="del(item.cid)">Delete</Button>
+          </td>
+        </tr>
+      </template>
     </table>
     <Page :total="sum"
       @on-change="pageChange"
@@ -104,7 +105,7 @@ export default {
       this.reload({ page: val })
     },
     change (contest) {
-      contest.status = +contest.status === this.status.Reserve
+      contest.status = contest.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
       this.$store.dispatch('contest/update', contest).then(() => {
@@ -154,6 +155,8 @@ export default {
     th:nth-child(5)
       width: 10%
     th:nth-child(6)
+      width: 10%
+    th:nth-child(7)
       width: 10%
     tr
       border-bottom: 1px solid #ebeef5

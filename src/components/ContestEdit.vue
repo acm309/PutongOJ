@@ -118,9 +118,9 @@ export default {
   methods: {
     add () {
       this.$store.dispatch('problem/findOne', only(this, 'pid'))
-        .then((data) => {
-          this.contest.list.push(data.pid)
-          this.$set(this.jobs, data.pid, data.title)
+        .then(({ problem }) => {
+          this.contest.list.push(problem.pid)
+          this.$set(this.jobs, problem.pid, problem.title)
           this.pid = ''
         })
     },

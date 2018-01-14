@@ -115,13 +115,6 @@ export default {
         { uid }
       )
       return opt
-    },
-    privilege () {
-      if (this.profile) {
-        return this.profile.privilege
-      } else {
-        return 1
-      }
     }
   },
   methods: {
