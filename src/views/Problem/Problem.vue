@@ -3,7 +3,7 @@
     <Tabs :value="current" @on-click="change">
       <TabPane label="Description" name="problemInfo"></TabPane>
       <TabPane label="Submit" name="problemSubmit"></TabPane>
-      <TabPane label="My Submissions" name="name3"></TabPane>
+      <TabPane label="My Submissions" name="mysubmission"></TabPane>
       <TabPane label="Statistics" name="problemStatistics"></TabPane>
       <TabPane label="Edit" name="problemEdit" v-if="isAdmin"></TabPane>
       <TabPane label="Test Data" name="name6" v-if="isAdmin"></TabPane>

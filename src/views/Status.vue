@@ -70,7 +70,7 @@
         <td :class="color[item.judge]">{{ result[item.judge] }}</td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
-        <td v-if="isAdmin">
+        <td v-if="isAdmin || (profile && profile.uid === item.uid)">
           <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
             {{ lang[item.language] }}
           </router-link>
@@ -83,7 +83,6 @@
 </template>
 
 <script>
-// import Solution from '@/components/Solution'
 import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
@@ -112,6 +111,7 @@ export default {
     ...mapGetters({
       list: 'solution/list',
       sum: 'solution/sum',
+      profile: 'session/profile',
       isAdmin: 'session/isAdmin'
     }),
     query () {

@@ -68,11 +68,12 @@
         <td :class="color[item.judge]">{{ result[item.judge] }}</td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
-        <td>
+        <td v-if="isAdmin || (profile && profile.uid === item.uid)">
           <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
             {{ lang[item.language] }}
           </router-link>
         </td>
+        <td v-else>{{ lang[item.language] }}</td>
         <td>{{ item.create | timePretty }}</td>
       </tr>
     </table>
@@ -109,7 +110,9 @@ export default {
     ...mapGetters({
       list: 'solution/list',
       sum: 'solution/sum',
-      problems: 'contest/problems'
+      problems: 'contest/problems',
+      profile: 'session/profile',
+      isAdmin: 'session/isAdmin'
     }),
     query () {
       const opt = Object.assign(
