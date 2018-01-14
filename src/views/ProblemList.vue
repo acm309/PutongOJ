@@ -23,7 +23,7 @@
         <th>Title</th>
         <th>Ratio</th>
         <th>Tags</th>
-        <th v-if="isAdmin">Status</th>
+        <th v-if="isAdmin">Visible</th>
         <th v-if="isAdmin">Delete</th>
       </tr>
       <template v-for="(item, index) in list">
@@ -51,7 +51,7 @@
           </td>
           <td v-if="isAdmin">
             <Tooltip content="Click to change status" placement="right">
-              <Button type="text" @click="change(item)">{{ problemStatus[item.status] }}</Button>
+              <Button type="text" @click="change(item)">{{ problemVisible[item.status] }}</Button>
             </Tooltip>
           </td>
           <td v-if="isAdmin">
@@ -90,7 +90,7 @@ export default {
       content: this.$route.query.content || '',
       page: parseInt(this.$route.query.page) || 1,
       pageSize: parseInt(this.$route.query.pageSize) || 30,
-      problemStatus: constant.status
+      problemVisible: constant.status
     }
   },
   created () {

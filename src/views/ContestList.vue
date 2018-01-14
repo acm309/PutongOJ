@@ -7,7 +7,8 @@
         <th>Status</th>
         <th>Start Time</th>
         <th>Type</th>
-        <th>Delete</th>
+        <th v-if="isAdmin">Visible</th>
+        <th v-if="isAdmin">Delete</th>
       </tr>
       <tr v-for="(item, index) in list" :key="item.pid">
         <td>{{ item.cid }}</td>
@@ -15,8 +16,13 @@
           <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }">
             <Button type="text">{{ item.title }}</Button>
           </router-link>
+          <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
+            <strong v-show="item.status === status.Reserve + ''">Reserved</strong>
+          </Tooltip>
         <td>
-          <span>{{ status[item.status] }}</span>
+          <!-- <span>{{ contestStatus[item.status] }}</span> -->
+          <span class="run" v-if="item.end > Date.now()">Running</span>
+          <span class="end" v-else >Ended</span>
         </td>
         <td>
           <span>{{ item.create | timePretty }}</span>
@@ -24,7 +30,12 @@
         <td>
           <span>{{ type[item.encrypt] }}</span>
         </td>
-        <td>
+        <td v-if="isAdmin">
+          <Tooltip content="Click to change status" placement="right">
+            <Button type="text" @click="change(item)">{{ contestVisible[item.status] }}</Button>
+          </Tooltip>
+        </td>
+        <td v-if="isAdmin">
           <Button type="text" @click="del(item.cid)">Delete</Button>
         </td>
       </tr>
@@ -49,15 +60,18 @@ export default {
     return {
       currentPage: parseInt(this.$route.query.page) || 1,
       pageSize: parseInt(this.$route.query.pageSize) || 20,
-      status: constant.contestStatus,
-      type: constant.contestType
+      contestStatus: constant.contestStatus,
+      type: constant.contestType,
+      contestVisible: constant.status
     }
   },
   computed: {
-    ...mapGetters('contest', [
-      'list',
-      'sum'
-    ]),
+    ...mapGetters({
+      list: 'contest/list',
+      sum: 'contest/sum',
+      status: 'status',
+      isAdmin: 'session/isAdmin'
+    }),
     query () {
       const opt = only(this.$route.query, 'page pageSize type content')
       return pickBy(
@@ -88,6 +102,14 @@ export default {
     },
     pageChange (val) {
       this.reload({ page: val })
+    },
+    change (contest) {
+      contest.status = +contest.status === this.status.Reserve
+        ? this.status.Available
+        : this.status.Reserve
+      this.$store.dispatch('contest/update', contest).then(() => {
+        this.$store.dispatch('contest/find', this.query)
+      })
     },
     del (cid) {
       this.$Modal.confirm({
@@ -147,4 +169,10 @@ export default {
       color: #e040fb
       padding: 0 1px
       font-size: 14px
+  .run
+    font-weight: bold
+    color: red
+  .end
+    font-weight: bold
+    color: black
 </style>
