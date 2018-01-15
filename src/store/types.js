@@ -20,6 +20,11 @@ export const UPDATE_NEW_LIST = 'UPDATE_NEW_LIST'
 export const UPDATE_NEWS_SUM = 'UPDATE_NEWS_SUM'
 export const DELETE_NEWS = 'DELETE_NEWS'
 
+// group
+export const UPDATE_GROUP = 'UPDATE_GROUP'
+export const UPDATE_GROUP_LIST = 'UPDATE_GROUP_LIST'
+export const DELETE_GROUP = 'DELETE_GROUP'
+
 // solution
 export const GET_SOLUTION = 'GET_SOLUTION'
 export const UPDATE_SOLUTION_LIST = 'UPDATE_SOLUTION_LIST'

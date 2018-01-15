@@ -71,6 +71,14 @@ module.exports = {
         target: 'http://127.0.0.1:8888',
         changeOrigin: true
       },
+      '/group': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/group/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
       '/submit': {
         target: 'http://127.0.0.1:8888',
         changeOrigin: true

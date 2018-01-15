@@ -98,6 +98,13 @@ const api = {
     update: (data) => instance.put(`/news/${data.nid}`, data),
     delete: (data) => instance.delete(`/news/${data.nid}`, data)
   },
+  group: {
+    findOne: (data) => instance.get(`/group/${data.gid}`, { params: data }),
+    find: (data) => instance.get('/group/list', { params: data }),
+    create: (data) => instance.post('/group/', data),
+    update: (data) => instance.put(`/group/${data.gid}`, data),
+    delete: (data) => instance.delete(`/group/${data.gid}`, data)
+  },
   session: {
     create: (data) => instance.post('/session', data),
     delete: (data) => instance.delete('/session'),
