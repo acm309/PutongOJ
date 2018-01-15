@@ -1,8 +1,8 @@
 # customary
 .tern-project
 requests/
-data/Data/*
-!data/Data/1000
+data/*
+!data/1000
 public/uploads/*
 !public/uploads/.gitkeep
 
