@@ -32,14 +32,8 @@ const contestSchema = mongoose.Schema({
     default: null
   },
   ranklist: {
-    list: {
-      type: mongoose.Schema.Types.Mixed,
-      default: () => ({})
-    },
-    primes: {
-      type: mongoose.Schema.Types.Mixed,
-      default: () => ({})
-    }
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
   }
 }, {
   collection: 'Contest'

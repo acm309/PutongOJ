@@ -15,6 +15,7 @@ const shell = require('shelljs')
 require('../../config/db')
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
+const User = require('../../models/User')
 const logger = require('../../utils/logger')
 const config = require('../..//config')
 const redis = require('../../config/redis')
@@ -122,6 +123,40 @@ async function judge (problem, solution) {
   return solution
 }
 
+/**
+ * 如果用户之前没有提交过这题，那么 user.submit += 1
+ * 如果用户之前没有 ac 过这题，那么 user.solved += 1
+ */
+async function userUpdate (solution) {
+  const user = await User.findOne({ uid: solution.uid }).exec()
+  if (user == null) {
+    logger.error(`Excuse me? No such a user with uid "${solution.uid}"`)
+    return
+  }
+  // 这道题之前提交过了么?
+  const isSubmittedBefore = await Solution.count({
+    uid: user.uid,
+    pid: solution.pid,
+    sid: { $ne: solution.sid } // 把自身排除
+  }).exec()
+  if (isSubmittedBefore === 0) {
+    user.submit += 1
+  }
+  if (solution.judge === config.judge.Accepted) {
+    // 之前 ac 过了么
+    const isAcBefore = await Solution.count({
+      uid: user.uid,
+      pid: solution.pid,
+      sid: { $ne: solution.pid },
+      judge: config.judge.Accepted
+    }).exec()
+    if (isAcBefore === 0) {
+      user.solve += 1
+    }
+  }
+  return user.save()
+}
+
 async function main () {
   while (1) {
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year
@@ -138,6 +173,7 @@ async function main () {
       }
     }
     await solution.save()
+    await userUpdate(solution)
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
   }
 }
