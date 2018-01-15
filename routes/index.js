@@ -12,6 +12,7 @@ const ranklist = require('./ranklist')
 const contest = require('./contest')
 const group = require('./group')
 const utils = require('./utils')
+const testcase = require('./testcase')
 
 router.use(session.routes(), session.allowedMethods()) // allowedMethods:当前接口运行的method
 router.use(problem.routes(), problem.allowedMethods())
@@ -23,5 +24,6 @@ router.use(ranklist.routes(), ranklist.allowedMethods())
 router.use(contest.routes(), contest.allowedMethods())
 router.use(group.routes(), group.allowedMethods())
 router.use(utils.routes(), utils.allowedMethods())
+router.use(testcase.routes(), testcase.allowedMethods())
 
 module.exports = router

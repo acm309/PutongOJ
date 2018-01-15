@@ -1,4 +1,6 @@
 const only = require('only')
+const fse = require('fs-extra')
+const path = require('path')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
@@ -75,6 +77,13 @@ const create = async (ctx) => {
   } catch (e) {
     ctx.throw(400, e.message)
   }
+
+  const dir = path.resolve(__dirname, `../data/${problem.pid}`)
+  fse.ensureDirSync(dir)
+  fse.outputJsonSync(path.resolve(dir, 'meta.json'), {
+    testcases: []
+  }, { spaces: 2 })
+  logger.info(`Testcase info for problem ${problem.pid} is created`)
 
   ctx.body = {
     pid: problem.pid
