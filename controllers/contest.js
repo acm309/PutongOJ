@@ -5,6 +5,7 @@ const Solution = require('../models/Solution')
 const User = require('../models/User')
 const logger = require('../utils/logger')
 const config = require('../config')
+const { isAdmin } = require('../utils/helper')
 
 // 返回竞赛列表
 const list = async (ctx) => {
@@ -14,7 +15,8 @@ const list = async (ctx) => {
   const res = await Contest.paginate({}, {
     sort: { cid: -1 },
     page,
-    limit: pageSize
+    limit: pageSize,
+    select: '-_id -creator -argument' // -表示不要的字段
   })
 
   const uid = opt.uid
@@ -34,8 +36,12 @@ const list = async (ctx) => {
 const findOne = async (ctx) => {
   const opt = ctx.request.query
   const cid = parseInt(opt.cid)
-  const doc = await Contest.findOne({ cid }).exec()
+  let doc = await Contest.findOne({ cid }).exec()
 
+  // 普通用户不能获取argument的值
+  if (!ctx.session.profile || !isAdmin(ctx.session.profile)) {
+    doc = only(doc, 'title start end encrypt list create status cid')
+  }
   const list = doc.list
   const total = list.length
   let res = []
@@ -73,10 +79,6 @@ const findOne = async (ctx) => {
 }
 
 // 返回比赛排行榜
-// https://paste.ubuntu.com/26296673/
-// 注意将 paste ubuntu 中的几处错误:
-// 1. created 改为 create
-// 2. 没有 ac 的题目是没有 create 属性的
 const ranklist = async (ctx) => {
   const ranklist = {}
   const cid = parseInt(ctx.query.cid)
@@ -179,8 +181,12 @@ const del = async (ctx) => {
 // 进入比赛前验证用户
 const verify = async (ctx) => {
   const opt = ctx.request.body
-  const enc = parseInt(opt.encrypt)
-  const arg = opt.argument
+  const cid = opt.cid
+  // 普通用户的前端页面里没有argument的值，需要重新在数据库中找一遍
+  const contest = await Contest.findOne({ cid }).exec()
+
+  const enc = parseInt(contest.encrypt)
+  const arg = contest.argument
   let res
   if (enc === 2) {
     const uid = opt.uid
