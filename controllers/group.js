@@ -14,7 +14,7 @@ const preload = async (ctx, next) => {
 // 返回group列表
 const find = async (ctx) => {
   const res = await Group.find({}).exec()
-  console.log(res)
+
   ctx.body = {
     res
   }
