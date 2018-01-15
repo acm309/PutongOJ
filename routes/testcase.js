@@ -3,8 +3,8 @@
  * 但有几个注意事项:
  * 所有的请求仅管理员有权操作，所以必须增加中间件验证身份
  */
-const testcase = require('../controllers/testcase.js')
 const Router = require('koa-router')
+const testcase = require('../controllers/testcase')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
@@ -12,9 +12,8 @@ const router = new Router({
 })
 
 router.get('/:pid', testcase.find)
-router.get('/:pid/:uuid', testcase.findOne)
+router.get('/:pid/:uuid', testcase.fetch)
 router.post('/:pid', auth.login, auth.admin, testcase.create)
-router.put('/:pid/:uuid', auth.login, auth.admin, testcase.update)
 router.del('/:pid/:uuid', auth.login, auth.admin, testcase.del)
 
 module.exports = router

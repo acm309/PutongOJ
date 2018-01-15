@@ -1,5 +1,5 @@
-const contest = require('../controllers/contest.js')
 const Router = require('koa-router')
+const contest = require('../controllers/contest')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({

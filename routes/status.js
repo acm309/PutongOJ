@@ -1,5 +1,5 @@
-const status = require('../controllers/status')
 const Router = require('koa-router')
+const status = require('../controllers/status')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({

@@ -1,5 +1,5 @@
-const news = require('../controllers/news.js')
 const Router = require('koa-router')
+const news = require('../controllers/news')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({

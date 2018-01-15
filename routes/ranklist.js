@@ -1,5 +1,5 @@
-const ranklist = require('../controllers/ranklist.js')
 const Router = require('koa-router')
+const ranklist = require('../controllers/ranklist')
 
 const router = new Router({
   prefix: '/ranklist'

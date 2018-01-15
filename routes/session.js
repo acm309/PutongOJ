@@ -1,5 +1,5 @@
-const session = require('../controllers/session')
 const Router = require('koa-router')
+const session = require('../controllers/session')
 
 const router = new Router({
   prefix: '/session'
