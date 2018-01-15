@@ -40,7 +40,17 @@
         <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
       </Col>
     </Row>
-    <Button type="primary" @click="submit">Submit</Button>
+    <Button type="primary" @click="submit" class="user-button">Submit</Button>
+    <h1>管理用户组</h1>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">Group</Col>
+      <Col :span="4">
+        <Input v-model="gid"></Input>
+      </Col>
+      <Col :offset="1" :span="2">
+        <Button type="primary" @click="search">Search</Button>
+      </Col>
+    </Row>
   </div>
 </template>
 
@@ -52,7 +62,8 @@ export default {
   data: () => ({
     uid: '',
     newPwd: '',
-    checkPwd: ''
+    checkPwd: '',
+    gid: ''
   }),
   computed: {
     ...mapGetters({
@@ -85,4 +96,8 @@ h1
   margin-bottom: 20px
 .ivu-row-flex
   margin-bottom: 10px
+.user-button
+  margin-bottom: 20px
+.label
+  line-height: 32px
 </style>

@@ -22,14 +22,18 @@
           <FormItem label="Password" prop="pwd">
             <Input v-model="form.pwd" type="password"></Input>
           </FormItem>
-          <FormItem label="CheckPwd" prop="checkPwd">
+          <FormItem label="CheckPwd" prop="checkPwd" class="checkpwd">
             <Input v-model="form.checkPwd" type="password"></Input>
           </FormItem>
         </Form>
       </TabPane>
     </Tabs>
     <div slot="footer">
-      <Button type="primary" size="large" long @click="submit">Submit</Button>
+      <Row type="flex" justify="center">
+        <Col :span="20">
+          <Button type="primary" size="large" long @click="submit">Submit</Button>
+        </Col>
+      </Row>
     </div>
   </Modal>
 </template>
@@ -132,7 +136,9 @@ export default {
     padding: 8px 16px 12px 16px
 .ivu-form-item
   margin-right: 20px
+.checkpwd
+  margin-bottom: 5px
 .loginuid
-  margin-top: 60px
+  margin-top: 56px
   margin-bottom: 30px
 </style>
