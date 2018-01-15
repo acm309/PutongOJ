@@ -1,5 +1,5 @@
-const News = require('../models/News')
 const only = require('only')
+const News = require('../models/News')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {

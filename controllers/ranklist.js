@@ -1,5 +1,5 @@
 const only = require('only')
-const User = require('../models/User.js')
+const User = require('../models/User')
 const { purify } = require('../utils/helper')
 
 // 返回排名列表
