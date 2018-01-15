@@ -176,11 +176,39 @@ const del = async (ctx) => {
   ctx.body = {}
 }
 
+// 进入比赛前验证用户
+const verify = async (ctx) => {
+  const opt = ctx.request.body
+  const enc = parseInt(opt.encrypt)
+  const arg = opt.argument
+  let res
+  if (enc === 2) {
+    const uid = opt.uid
+    const arr = arg.split('\r\n')
+    if (arr.indexOf(uid) !== -1) {
+      res = true
+    } else {
+      res = false
+    }
+  } else {
+    const pwd = opt.pwd
+    if (arg === pwd) {
+      res = true
+    } else {
+      res = false
+    }
+  }
+  ctx.body = {
+    res
+  }
+}
+
 module.exports = {
   list,
   findOne,
   ranklist,
   create,
   update,
-  del
+  del,
+  verify
 }
