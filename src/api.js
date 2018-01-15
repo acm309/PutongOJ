@@ -88,7 +88,8 @@ const api = {
     create: (data) => instance.post('/contest/', data),
     update: (data) => instance.put(`/contest/${data.cid}`, data),
     rank: (data) => instance.get(`/contest/${data.cid}/rank`, { params: data }),
-    delete: (data) => instance.delete(`/contest/${data.cid}`, data)
+    delete: (data) => instance.delete(`/contest/${data.cid}`, data),
+    verify: (data) => instance.post(`/contest/${data.cid}/verify`, data)
   },
   news: {
     findOne: (data) => instance.get(`/news/${data.nid}`, { params: data }),

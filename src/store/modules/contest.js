@@ -81,6 +81,9 @@ const store = {
       return api.contest.delete(payload).then(() => {
         commit(types.DELETE_CONTEST, payload)
       })
+    },
+    verify ({ commit }, payload) {
+      return api.contest.verify(payload).then(({ data }) => data.res)
     }
   }
 }

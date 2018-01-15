@@ -28,7 +28,7 @@
             <span>{{ item.create | timePretty }}</span>
           </td>
           <td>
-            <span :class="{'public': +item.encrypt === 1, 'private': +item.encrypt === 2}">
+            <span :class="{'password': +item.encrypt === 3, 'private': +item.encrypt === 2, 'public': +item.encrypt === 1}">
               {{ type[item.encrypt] }}
             </span>
           </td>
@@ -114,29 +114,41 @@ export default {
           this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
         } else {
           if (+item.encrypt === 2) {
-            const arg = item.argument
-            const arr = arg.split('\r\n')
-            if (arr.indexOf(this.profile.uid) !== -1) {
-              this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-            } else {
-              this.$Message.error("You're not invited to attend this contest!")
-            }
+            const opt = Object.assign(
+              item,
+              { uid: this.profile.uid }
+            )
+            this.$store.dispatch('contest/verify', opt).then((data) => {
+              if (data) {
+                this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+              } else {
+                this.$Message.error("You're not invited to attend this contest!")
+              }
+            })
           } else if (+item.encrypt === 3) {
             this.$Modal.confirm({
               render: (h) => {
                 return h('Input', {
                   props: {
-                    value: this.enterPsd,
                     placeholder: 'Please enter password.'
                   },
                   on: {
-                    click: (val) => {
-                      if (item.argument === val) {
-                        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-                      } else {
-                        this.$Message.error('Wrong password!')
-                      }
+                    input: (val) => {
+                      this.enterPsd = val
                     }
+                  }
+                })
+              },
+              onOk: () => {
+                const opt = Object.assign(
+                  item,
+                  { pwd: this.enterPsd }
+                )
+                this.$store.dispatch('contest/verify', opt).then((data) => {
+                  if (data) {
+                    this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+                  } else {
+                    this.$Message.error('Wrong password!')
                   }
                 })
               }
@@ -220,7 +232,11 @@ export default {
     font-weight: bold
     color: black
   .public
-    color: red
-  .private
+    font-weight: 500
+  .password
     color: green
+    font-weight: 500
+  .private
+    color: red
+    font-weight: 500
 </style>
