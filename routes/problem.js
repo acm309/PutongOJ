@@ -6,7 +6,7 @@ const router = new Router({
   prefix: '/problem'
 })
 
-router.get('/list', problem.list)
+router.get('/list', problem.find)
 router.get('/:pid', problem.preload, problem.findOne)
 router.post('/', auth.login, auth.admin, problem.create)
 router.put('/:pid', auth.login, auth.admin, problem.preload, problem.update)

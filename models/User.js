@@ -16,10 +16,6 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  // token: {
-  //   type: String,
-  //   required: true
-  // },
   create: {
     type: Number,
     default: Date.now
@@ -45,6 +41,10 @@ const userSchema = mongoose.Schema({
     default: 0
   },
   submit: {
+    type: Number,
+    default: 0
+  },
+  gid: {
     type: Number,
     default: 0
   },

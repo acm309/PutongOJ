@@ -6,7 +6,7 @@ const router = new Router({
   prefix: '/status'
 })
 
-router.get('/list', status.list)
+router.get('/list', status.find)
 router.get('/:sid', status.findOne)
 router.post('/', auth.login, status.create)
 

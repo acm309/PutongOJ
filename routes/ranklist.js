@@ -5,6 +5,6 @@ const router = new Router({
   prefix: '/ranklist'
 })
 
-router.get('/list', ranklist.list)
+router.get('/list', ranklist.find)
 
 module.exports = router

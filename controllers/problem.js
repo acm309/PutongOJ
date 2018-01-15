@@ -13,7 +13,7 @@ const preload = async (ctx, next) => {
 }
 
 // 返回题目列表
-const list = async (ctx) => {
+const find = async (ctx) => {
   const opt = ctx.request.query
   const filter = {}
   const page = parseInt(opt.page) || 1
@@ -25,6 +25,7 @@ const list = async (ctx) => {
       filter[opt.type] = opt.content
     }
   }
+  // TODO
 
   // 使用mongoose-paginate包简化
   const res = await Problem.paginate(filter, {
@@ -117,7 +118,7 @@ const del = async (ctx) => {
 
 module.exports = {
   preload,
-  list,
+  find,
   findOne,
   create,
   update,

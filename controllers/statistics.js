@@ -1,7 +1,7 @@
 const Solution = require('../models/Solution')
 
 // 获取statistics信息
-const list = async (ctx) => {
+const find = async (ctx) => {
   const opt = ctx.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 20
@@ -79,5 +79,5 @@ const list = async (ctx) => {
 }
 
 module.exports = {
-  list
+  find
 }

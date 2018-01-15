@@ -8,7 +8,7 @@ const config = require('../config')
 const { isAdmin } = require('../utils/helper')
 
 // 返回竞赛列表
-const list = async (ctx) => {
+const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 20
@@ -210,7 +210,7 @@ const verify = async (ctx) => {
 }
 
 module.exports = {
-  list,
+  find,
   findOne,
   ranklist,
   create,

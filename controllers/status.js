@@ -4,7 +4,7 @@ const { purify, isAdmin, pushToJudge } = require('../utils/helper')
 const logger = require('../utils/logger')
 
 // 返回提交列表
-const list = async (ctx) => {
+const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
@@ -60,7 +60,7 @@ const create = async (ctx) => {
 }
 
 module.exports = {
-  list,
+  find,
   findOne,
   create
 }

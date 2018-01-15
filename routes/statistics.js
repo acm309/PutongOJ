@@ -5,6 +5,6 @@ const rotuer = new Router({
   prefix: '/statistics'
 })
 
-rotuer.get('/:pid', statistics.list)
+rotuer.get('/:pid', statistics.find)
 
 module.exports = rotuer

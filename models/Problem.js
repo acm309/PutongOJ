@@ -101,4 +101,4 @@ problemSchema.pre('save', function (next) {
   }
 })
 
-module.exports = mongoose.model('Problemlist', problemSchema)
+module.exports = mongoose.model('Problem', problemSchema)

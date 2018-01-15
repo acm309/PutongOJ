@@ -6,7 +6,7 @@ const router = new Router({
   prefix: '/contest'
 })
 
-router.get('/list', contest.list)
+router.get('/list', contest.find)
 router.get('/:cid', contest.findOne)
 router.get('/:cid/rank', contest.ranklist)
 router.post('/', auth.login, auth.admin, contest.create)

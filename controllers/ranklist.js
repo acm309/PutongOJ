@@ -3,7 +3,7 @@ const User = require('../models/User.js')
 const { purify } = require('../utils/helper')
 
 // 返回排名列表
-const list = async (ctx) => {
+const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
@@ -21,5 +21,5 @@ const list = async (ctx) => {
 }
 
 module.exports = {
-  list
+  find
 }
