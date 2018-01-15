@@ -45,12 +45,28 @@
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Group</Col>
       <Col :span="4">
-        <Input v-model="gid"></Input>
+        <Select v-model="gid" filterable>
+          <Option v-for="item in list" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
+        </Select>
       </Col>
       <Col :offset="1" :span="2">
         <Button type="primary" @click="search">Search</Button>
       </Col>
     </Row>
+    <Transfer
+      :data="transData"
+      :target-keys="targetKeys"
+      :render-format="format"
+      :list-style="listStyle"
+      :operations="['To left','To right']"
+      filterable
+      :filter-method="filterMethod"
+      @on-change="handleChange"
+      class="tranfer">
+      <div :style="{float: 'right', margin: '5px'}">
+        <Button type="ghost" size="small" @click="saveUser">Save</Button>
+      </div>
+    </Transfer>
   </div>
 </template>
 
@@ -63,12 +79,32 @@ export default {
     uid: '',
     newPwd: '',
     checkPwd: '',
-    gid: ''
+    gid: '',
+    targetKeys: [],
+    listStyle: {
+      width: '350px',
+      height: '400px'
+    }
   }),
   computed: {
     ...mapGetters({
-      user: 'user/user'
-    })
+      user: 'user/user',
+      list: 'group/list'
+    }),
+    transData () {
+      let data = []
+      this.list.forEach((item, index) => {
+        data.push({
+          key: index + '',
+          label: item.gid,
+          disabled: false
+        })
+      })
+      return data
+    }
+  },
+  created () {
+    this.fetchGroup()
   },
   methods: {
     search () {
@@ -86,6 +122,26 @@ export default {
       } else {
         this.$Message.info('两次密码不一致，请重新输入！')
       }
+    },
+    fetchGroup () {
+      this.$store.dispatch('group/find')
+    },
+    format (item) {
+      return item.label
+    },
+    filterMethod (data, query) {
+      return data.label.indexOf(query) > -1
+    },
+    handleChange (newTargetKeys) {
+      this.targetKeys = newTargetKeys
+    },
+    saveUser () {
+      let user = []
+      this.targetKeys.forEach((item) => {
+        user.push(this.list[+item])
+      })
+      // TODO
+      this.$Message.success('保存当前用户组成功！')
     }
   }
 }
@@ -100,4 +156,8 @@ h1
   margin-bottom: 20px
 .label
   line-height: 32px
+.ivu-col-offset-1
+  margin-left: 1%
+.tranfer
+  margin-top: 20px
 </style>
