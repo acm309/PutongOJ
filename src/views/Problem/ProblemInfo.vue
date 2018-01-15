@@ -14,9 +14,7 @@ export default {
     Problem
   },
   computed: {
-    ...mapGetters('problem', {
-      problem: 'problem'
-    })
+    ...mapGetters('problem', [ 'problem' ])
   },
   created () {
     this.$store.dispatch('problem/findOne', this.$route.params)

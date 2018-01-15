@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     prettyCode (code) {
-      return highlight.highlight('c++', `${this.solution.code}`).value
+      return highlight.highlight(constant.language[this.solution.language], `${this.solution.code}`).value
     },
     onCopy () {
       this.$Message.success('Copied!')
