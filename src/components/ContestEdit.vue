@@ -39,19 +39,20 @@
         </Select>
       </Col>
     </Row>
-    <Row v-if="contest.encrypt === 2">
+    <Row class="transfer" v-if="contest.encrypt === 2">
       <Transfer
         :data="transData"
         :target-keys="targetKeys"
+        :render-format="format"
         :list-style="listStyle"
         :operations="['To left','To right']"
         filterable
         :filter-method="filterMethod"
         @on-change="handleChange">
         <div :style="{float: 'right', margin: '5px'}">
-          <Button type="ghost" size="small" @click="">Refresh</Button>
+          <Button type="ghost" size="small" @click="saveUser">Save</Button>
         </div>
-    </Transfer>
+      </Transfer>
     </Row>
     <Row v-if="contest.encrypt === 3">
       <Col :span="23">
@@ -115,7 +116,8 @@ export default {
       listStyle: {
         width: '400px',
         height: '500px'
-      }
+      },
+      userList: []
     }
   },
   props: ['contest', 'overview'],
@@ -127,9 +129,9 @@ export default {
       let data = []
       this.list.forEach((item, index) => {
         data.push({
-          key: index + 1 + '',
+          key: index + '',
           label: item.uid,
-          disabled: true
+          disabled: false
         })
       })
       return data
@@ -150,7 +152,17 @@ export default {
         })
       })
     }
-    this.$store.dispatch('user/find')
+    this.$store.dispatch('user/find').then(() => {
+      this.list.forEach((item) => {
+        this.userList.push(item.uid)
+      })
+      if (+this.contest.encrypt === 2) {
+        const arg = this.contest.argument.split('\r\n')
+        arg.forEach((item) => {
+          this.targetKeys.push(this.userList.indexOf(item) + '')
+        })
+      }
+    })
   },
   methods: {
     add () {
@@ -164,11 +176,23 @@ export default {
     removeJob (index) {
       this.contest.list.splice(index, 1)
     },
+    format (item) {
+      return item.label
+    },
     filterMethod (data, query) {
-      // return data.label.indexOf(query) > -1
+      return data.label.indexOf(query) > -1
     },
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
+    },
+    saveUser () {
+      let user = []
+      this.targetKeys.forEach((item) => {
+        user.push(this.userList[+item])
+      })
+      const res = user.join('\r\n')
+      this.contest.argument = res
+      this.$Message.success('保存当前用户组成功！')
     }
   },
   components: {
@@ -191,6 +215,8 @@ export default {
     height: 1px
   .ivu-btn
     margin-left: 20px
+.transfer
+  margin-bottom: 30px
 .list-item
   display: flex
   justify-content: space-between

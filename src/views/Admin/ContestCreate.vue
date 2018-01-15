@@ -25,7 +25,8 @@ export default {
         start: '',
         end: '',
         list: [],
-        encrypt: ''
+        encrypt: '',
+        argument: ''
       }
     }
   },

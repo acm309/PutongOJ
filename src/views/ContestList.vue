@@ -106,6 +106,19 @@ export default {
     pageChange (val) {
       this.reload({ page: val })
     },
+    enter (item) {
+      const opt = Object.assign(
+        item,
+        { pwd: this.enterPsd }
+      )
+      this.$store.dispatch('contest/verify', opt).then((data) => {
+        if (data) {
+          this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+        } else {
+          this.$Message.error('Wrong password!')
+        }
+      })
+    },
     visit (item) {
       if (!this.isLogined) {
         this.$store.commit('session/TRIGGER_LOGIN')
@@ -135,6 +148,14 @@ export default {
                   on: {
                     input: (val) => {
                       this.enterPsd = val
+                    },
+                    // 键盘事件无法触发
+                    keyup: (event) => {
+                      if (event.target !== event.currentTarget) return
+                      if (event.keyCode !== 13) return
+                      this.enter(item)
+                      event.stopPropagation()
+                      event.preventDefault()
                     }
                   }
                 })
