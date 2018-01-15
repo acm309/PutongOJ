@@ -11,9 +11,9 @@ const router = new Router({
   prefix: '/testcase'
 })
 
-router.get('/:pid', /* auth.login, auth.admin , */ testcase.find)
-router.get('/:pid/:uuid', /* auth.login, auth.admin , */ testcase.fetch)
-router.post('/:pid', /* auth.login, auth.admin, */ testcase.create)
-router.del('/:pid/:uuid', /* auth.login, auth.admin, */ testcase.del)
+router.get('/:pid', auth.login, auth.admin, testcase.find)
+router.get('/:pid/:uuid', auth.login, auth.admin, testcase.fetch)
+router.post('/:pid', auth.login, auth.admin, testcase.create)
+router.del('/:pid/:uuid', auth.login, auth.admin, testcase.del)
 
 module.exports = router
