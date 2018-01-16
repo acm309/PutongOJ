@@ -61,8 +61,11 @@ const api = {
   getRanklist (data) {
     return instance.get('/ranklist/list', { params: data })
   },
-  testdata: {
-    create: (data) => instance.post('...', data) // TODO
+  testcase: {
+    findOne: (data) => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
+    find: (data) => instance.get(`/testcase/${data.pid}`, { params: data }),
+    create: (data) => instance.post(`/testcase/${data.pid}`, data),
+    delete: (data) => instance.del(`/testcase/${data.pid}/${data.uuid}`, data)
   },
   user: {
     findOne: (data) => instance.get(`/user/${data.uid}`, { params: data }),

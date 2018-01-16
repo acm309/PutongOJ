@@ -10,7 +10,7 @@ import ProblemSubmit from '@/views/Problem/ProblemSubmit'
 import ProblemStatistics from '@/views/Problem/Statistics'
 import ProblemEdit from '@/views/Problem/problemEdit'
 import MySubmission from '@/views/Problem/Mysubmission'
-import TestData from '@/views/Problem/TestData'
+import Testcase from '@/views/Problem/Testcase'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -109,9 +109,9 @@ export default new Router({
           component: ProblemEdit
         },
         {
-          path: 'testData',
-          name: 'testData',
-          component: TestData
+          path: 'testcase',
+          name: 'testcase',
+          component: Testcase
         }
       ]
     },

@@ -79,6 +79,14 @@ module.exports = {
         target: 'http://127.0.0.1:8888',
         changeOrigin: true
       },
+      '/testcase': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
+      '/testcase/*': {
+        target: 'http://127.0.0.1:8888',
+        changeOrigin: true
+      },
       '/submit': {
         target: 'http://127.0.0.1:8888',
         changeOrigin: true
