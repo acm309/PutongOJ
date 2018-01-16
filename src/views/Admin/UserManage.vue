@@ -110,15 +110,11 @@ export default {
       group: 'group/group'
     }),
     transData () {
-      let data = []
-      this.userSum.forEach((item, index) => {
-        data.push({
+      return this.userSum.map((item, index) => ({
           key: index + '',
-          label: item.uid,
-          disabled: false
+          label: item.uid + ' | ' + item.nick
         })
-      })
-      return data
+      )
     }
   },
   created () {
@@ -194,10 +190,7 @@ export default {
       }
     },
     saveGroup () {
-      let user = []
-      this.targetKeys.forEach((item) => {
-        user.push(this.userList[+item])
-      })
+      const user = this.targetKeys.map((item) => this.userList[+item])
       const group = Object.assign(
         only(this.group, 'gid title'),
         { list: user }
