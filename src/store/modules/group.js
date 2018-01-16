@@ -13,7 +13,7 @@ const store = {
   },
   mutations: {
     [types.UPDATE_GROUP]: (state, payload) => {
-      state.news = payload
+      state.group = payload
     },
     [types.UPDATE_GROUP_LIST]: (state, payload) => {
       state.list = payload
@@ -31,6 +31,7 @@ const store = {
     find ({ commit }, payload) {
       return api.group.find(payload).then(({ data }) => {
         commit(types.UPDATE_GROUP_LIST, data.res)
+        return data.res
       })
     },
     update ({commit}, payload) {

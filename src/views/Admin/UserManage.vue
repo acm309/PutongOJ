@@ -7,7 +7,7 @@
         <Input v-model="uid"></Input>
       </Col>
       <Col :offset="1" :span="2">
-        <Button type="primary" @click="search">Search</Button>
+        <Button type="primary" @click="findUser">Search</Button>
       </Col>
     </Row>
     <Row type="flex" justify="start">
@@ -40,17 +40,33 @@
         <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
       </Col>
     </Row>
-    <Button type="primary" @click="submit" class="user-button">Submit</Button>
+    <Button type="primary" @click="saveUser" class="user-button">Submit</Button>
     <h1>管理用户组</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Group</Col>
       <Col :span="4">
-        <Select v-model="gid" filterable>
-          <Option v-for="item in list" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
+        <Select v-model="group.gid" filterable>
+          <Option v-for="item in groupList" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
         </Select>
       </Col>
       <Col :offset="1" :span="2">
-        <Button type="primary" @click="search">Search</Button>
+        <Dropdown @on-click="manageGroup">
+          <Button type="primary">
+            Manage
+            <Icon type="arrow-down-b"></Icon>
+          </Button>
+          <DropdownMenu slot="list">
+            <DropdownItem name="search">Search</DropdownItem>
+            <DropdownItem name="create">Create</DropdownItem>
+            <DropdownItem name="delete">Delete</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">Title</Col>
+      <Col :span="4">
+        <Input v-model="group.title"></Input>
       </Col>
     </Row>
     <Transfer
@@ -63,16 +79,15 @@
       :filter-method="filterMethod"
       @on-change="handleChange"
       class="tranfer">
-      <div :style="{float: 'right', margin: '5px'}">
-        <Button type="ghost" size="small" @click="saveUser">Save</Button>
-      </div>
     </Transfer>
+    <Button type="primary" @click="saveGroup">Submit</Button>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
+import only from 'only'
 
 export default {
   data: () => ({
@@ -84,19 +99,22 @@ export default {
     listStyle: {
       width: '350px',
       height: '400px'
-    }
+    },
+    userList: []
   }),
   computed: {
     ...mapGetters({
       user: 'user/user',
-      list: 'group/list'
+      userSum: 'user/list',
+      groupList: 'group/list',
+      group: 'group/group'
     }),
     transData () {
       let data = []
-      this.list.forEach((item, index) => {
+      this.userSum.forEach((item, index) => {
         data.push({
           key: index + '',
-          label: item.gid,
+          label: item.uid,
           disabled: false
         })
       })
@@ -107,10 +125,10 @@ export default {
     this.fetchGroup()
   },
   methods: {
-    search () {
+    findUser () {
       this.$store.dispatch('user/findOne', { uid: this.uid })
     },
-    submit () {
+    saveUser () {
       if (this.newPwd === this.checkPwd) {
         const user = purify(Object.assign(
           this.user,
@@ -124,7 +142,15 @@ export default {
       }
     },
     fetchGroup () {
-      this.$store.dispatch('group/find')
+      this.$store.dispatch('user/find')
+        .then(() => {
+          this.$store.dispatch('group/find')
+        })
+        .then(() => {
+          this.userSum.forEach((item) => {
+            this.userList.push(item.uid)
+          })
+        })
     },
     format (item) {
       return item.label
@@ -135,13 +161,57 @@ export default {
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
-    saveUser () {
+    manageGroup (name) {
+      if (name === 'search') {
+        this.targetKeys = []
+        this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
+          this.group.list.forEach((item) => {
+            this.targetKeys.push(this.userList.indexOf(item) + '')
+          })
+        })
+      } else if (name === 'create') {
+        this.group.gid = ''
+        this.group.title = ''
+        this.group.list = []
+        this.targetKeys = []
+      } else if (name === 'delete') {
+        if (!this.group || !this.group.gid) {
+          this.$Message.info('未选择要删除的Group!')
+        } else {
+          this.$Modal.confirm({
+            title: '提示',
+            content: `<p>此操作将永久删除Group--${this.group.title}, 是否继续?</p>`,
+            onOk: () => {
+              this.$store.dispatch('group/delete', { gid: this.group.gid }).then(() => {
+                this.$Message.success(`成功删除 ${this.group.title}！`)
+              })
+            },
+            onCancel: () => {
+              this.$Message.info('已取消删除！')
+            }
+          })
+        }
+      }
+    },
+    saveGroup () {
       let user = []
       this.targetKeys.forEach((item) => {
-        user.push(this.list[+item])
+        user.push(this.userList[+item])
       })
-      // TODO
-      this.$Message.success('保存当前用户组成功！')
+      const group = Object.assign(
+        only(this.group, 'gid title'),
+        { list: user }
+      )
+      if (this.group.gid !== '') {
+        this.$store.dispatch('group/update', group).then(() => {
+          this.$Message.success('更新当前用户组成功！')
+        })
+      } else {
+        this.$store.dispatch('group/create', group).then(() => {
+          this.$Message.success('新建当前用户组成功！')
+        })
+      }
+      this.$store.dispatch('group/find')
     }
   }
 }
@@ -160,4 +230,5 @@ h1
   margin-left: 1%
 .tranfer
   margin-top: 20px
+  margin-bottom: 20px
 </style>
