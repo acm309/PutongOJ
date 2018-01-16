@@ -18,8 +18,8 @@ const store = {
     [types.UPDATE_TESTCASE_LIST]: (state, payload) => {
       state.list = payload
     },
-    [types.DELETE_TESTCASE]: (state, { gid }) => {
-      state.list = state.list.filter((p) => p.gid !== +gid)
+    [types.DELETE_TESTCASE]: (state, payload) => {
+      state.list = payload
     }
   },
   actions: {
@@ -38,8 +38,8 @@ const store = {
       return api.testcase.create(payload)
     },
     delete ({commit}, payload) {
-      return api.testcase.delete(payload).then(() => {
-        commit(types.DELETE_TESTCASE, payload)
+      return api.testcase.delete(payload).then(({ data }) => {
+        commit(types.DELETE_TESTCASE, data)
       })
     }
   }

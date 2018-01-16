@@ -4,6 +4,12 @@ function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
 }
 
+// TODO: 后期这里应该会改 URL
+function testcaseUrl (pid, uuid, type='in') {
+  return `/testcase/${pid}/${uuid}?type=${type}`
+}
+
 export {
-  purify
+  purify,
+  testcaseUrl
 }

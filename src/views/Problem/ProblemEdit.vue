@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="proadd-wrap">
+  <div>
     <oj-problem-edit :problem="problem" />
     <Button type="primary" @click="submit">Submit</Button>
   </div>
@@ -31,17 +31,4 @@ export default {
 </script>
 
 <style lang="stylus">
-  .proadd-wrap
-    margin-bottom: 20px
-    .ivu-input-wrapper
-      margin-bottom: 14px
-    .label
-      text-align:left
-      margin-bottom: 10px
-    #editor1, #editor2, #editor3, #editor4
-      text-align: left
-      height: 220px
-      margin-bottom: 10px
-    .el-textarea
-      margin-bottom: 20px
 </style>

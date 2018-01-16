@@ -9,9 +9,9 @@
         <th>Delete</th>
       </tr>
       <tr v-for="item in list.testcases">
-        <td>1</td>
-        <td><a href="#" target="_blank" @click="search(item)">test.in {{ item.uuid }}</a></td>
-        <td><a href="#" target="_blank">test.out {{ item.uuid }}</a></td>
+        <td>{{ item.uuid.slice(0, 8) }}</td>
+        <td><a :href="testcaseUrl(item, 'in')" target="_blank" @click="search(item)">test.in</a></td>
+        <td><a :href="testcaseUrl(item, 'out')" target="_blank">test.out</a></td>
         <td>
           <Button type="text" @click="del(item)">Delete</Button>
         </td>
@@ -30,6 +30,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { testcaseUrl } from '@/util/helper'
 
 export default {
   data: () => ({
@@ -83,6 +84,9 @@ export default {
         this.test.in = ''
         this.test.out = ''
       })
+    },
+    testcaseUrl ({ uuid }, type) {
+      return testcaseUrl(this.$route.params.pid, uuid, type)
     }
   }
 }
