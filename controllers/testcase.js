@@ -54,7 +54,9 @@ const fetch = async (ctx, next) => {
   if (!fse.existsSync(path.resolve(testDir, `${uuid}.${type}`))) {
     ctx.throw(400, 'No such a testcase')
   }
-  return send(ctx, `${uuid}.${type}`, { root: testDir })
+  await send(ctx, `${uuid}.${type}`, { root: testDir })
+  // 使其在浏览器中打开
+  ctx.type = 'text/plain; charset=utf-8'
 }
 
 // 返回该题拥有的测试数据
@@ -63,7 +65,6 @@ const find = async (ctx, next) => {
   const meta = await fse.readJson(
     path.resolve(__dirname, `../data/${pid}/meta.json`)
   )
-  console.log(meta)
   ctx.body = meta
 }
 
