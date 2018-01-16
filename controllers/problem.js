@@ -79,10 +79,18 @@ const create = async (ctx) => {
   }
 
   const dir = path.resolve(__dirname, `../data/${problem.pid}`)
-  fse.ensureDirSync(dir)
+  fse.ensureDirSync(dir) // 如果dir这个文件夹不存在，就创建它
+
+  /**
+   * outputJsonSync (file, object, options)
+   * @param {string} file
+   * @param {Object} object
+   * @param {Object} options
+   */
+  // 把object写入到file中，如果file不存在，就创建它
   fse.outputJsonSync(path.resolve(dir, 'meta.json'), {
     testcases: []
-  }, { spaces: 2 })
+  }, { spaces: 2 }) // 缩进2个空格
   logger.info(`Testcase info for problem ${problem.pid} is created`)
 
   ctx.body = {

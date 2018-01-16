@@ -15,12 +15,14 @@ const create = async (ctx, next) => {
   // 输出
   const testout = ctx.request.body.out
   const testDir = path.resolve(__dirname, `../data/${pid}`)
-  const id = uuid()
+  const id = uuid() // 快速生成RFC4122 UUID
+  // 将文件读取到meta对象
   const meta = await fse.readJson(path.resolve(testDir, `meta.json`))
   meta.testcases.push({
     uuid: id
   })
   await Promise.all([
+    // 将test.in等文件写入本地文件，如果父级目录不存在(即testDir)，创建它
     fse.outputFile(path.resolve(testDir, `${id}.in`), testin),
     fse.outputFile(path.resolve(testDir, `${id}.out`), testout),
     fse.outputJson(path.resolve(testDir, `meta.json`), meta, { spaces: 2 })
@@ -61,6 +63,7 @@ const find = async (ctx, next) => {
   const meta = await fse.readJson(
     path.resolve(__dirname, `../data/${pid}/meta.json`)
   )
+  console.log(meta)
   ctx.body = meta
 }
 
