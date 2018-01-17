@@ -1,5 +1,16 @@
 <template lang="html">
   <div class="rank-wrap">
+    <Row style="margin-bottom: 20px" type="flex" justify="end">
+      <Col :span="1"><label>Group</label></Col>
+      <Col :span="3">
+        <Select v-model="group">
+          <Option v-for="item in groupList" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
+        </Select>
+      </Col>
+      <Col :span="2">
+        <Button type="primary" @click="search">Search</Button>
+      </Col>
+    </Row>
     <table>
       <tr>
         <th>Rank</th>
@@ -45,26 +56,29 @@
 <script>
 import { mapGetters } from 'vuex'
 import only from 'only'
-import pickBy from 'lodash.pickby'
+import { purify } from '@/util/helper'
 
 export default {
   data () {
     return {
       page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30
+      pageSize: parseInt(this.$route.query.pageSize) || 30,
+      group: '',
+      groupList: []
     }
   },
   computed: {
-    ...mapGetters('ranklist', [
-      'list',
-      'sum'
-    ]),
+    ...mapGetters({
+      list: 'ranklist/list',
+      sum: 'ranklist/sum',
+      groups: 'group/list'
+    }),
     query () {
-      const opt = only(this.$route.query, 'page pageSize')
-      return pickBy(
-        opt,
-        x => x != null && x !== ''
+      const opt = Object.assign(
+        only(this.$route.query, 'page pageSize'),
+        { gid: this.group }
       )
+      return purify(opt)
     }
   },
   created () {
@@ -73,6 +87,15 @@ export default {
   methods: {
     fetch () {
       this.$store.dispatch('ranklist/find', this.query)
+      this.$store.dispatch('group/find').then(() => {
+        this.groupList = [{
+          gid: '',
+          title: 'ALL'
+        }]
+        this.groups.map((item) => {
+          this.groupList.push(item)
+        })
+      })
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 30
@@ -84,14 +107,17 @@ export default {
         query
       })
     },
-    sizeChange (val) {
-      this.reload({ pageSize: val })
-    },
     pageChange (val) {
       this.reload({ page: val })
     },
     indexMethod (index) {
       return index + 1 + (this.page - 1) * this.pageSize
+    },
+    search () {
+      this.reload({
+        gid: this.group,
+        page: 1
+      })
     }
   },
   watch: {
@@ -105,6 +131,8 @@ export default {
 <style lang="stylus">
 .rank-wrap
   margin-bottom: 20px
+  label
+    line-height: 30px
   table
     width: 100%
     margin-bottom: 20px

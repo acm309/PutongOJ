@@ -8,14 +8,16 @@ const store = {
     list: [],
     user: {},
     solved: [],
-    unsolved: []
+    unsolved: [],
+    group: []
   },
   getters: {
     registerDialog: state => state.registerDialog,
     list: state => state.list,
     user: state => state.user,
     solved: state => state.solved,
-    unsolved: state => state.unsolved
+    unsolved: state => state.unsolved,
+    group: state => state.group
   },
   mutations: {
     [types.SHOW_REGISTER]: (state) => {
@@ -32,6 +34,9 @@ const store = {
     },
     [types.UPDATE_UNSOLVED]: (state, payload) => {
       state.unsolved = payload
+    },
+    [types.UPDATE_USER_GROUP]: (state, payload) => {
+      state.group = payload
     }
   },
   actions: {
@@ -48,6 +53,7 @@ const store = {
         commit(types.UPDATE_USER, data.info)
         commit(types.UPDATE_SOLVED, data.solved)
         commit(types.UPDATE_UNSOLVED, data.unsolved)
+        commit(types.UPDATE_USER_GROUP, data.group)
       })
     },
     update ({ commit }, payoad) {

@@ -136,7 +136,7 @@ export default new Router({
       component: UserInfo
     },
     {
-      path: '/user/manage',
+      path: '/manage/user',
       name: 'userManage',
       component: UserManage
     },

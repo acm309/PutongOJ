@@ -5,7 +5,7 @@ function purify (obj) {
 }
 
 // TODO: 后期这里应该会改 URL
-function testcaseUrl (pid, uuid, type='in') {
+function testcaseUrl (pid, uuid, type = 'in') {
   return `/testcase/${pid}/${uuid}?type=${type}`
 }
 
