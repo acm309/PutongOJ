@@ -45,6 +45,7 @@ export default {
         { pid: this.problem.pid }
       )).then(() => {
         this.$Message.info(`submit pid:${this.problem.pid} success!`)
+        this.$router.push({ name: 'mySubmission', params: { pid: this.$route.params.pid } })
       })
     }
   },

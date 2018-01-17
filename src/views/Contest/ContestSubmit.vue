@@ -43,8 +43,12 @@ export default {
     submit () {
       this.$store.dispatch('solution/create', Object.assign(
         this.solution,
-        { pid: this.problems[+this.$route.params.id - 1] }
+        {
+          pid: this.problems[+this.$route.params.id - 1],
+          mid: this.$route.params.cid
+        }
       )).then(() => {
+        this.$router.push({ name: 'contestStatus', params: { cid: this.$route.params.cid } })
         this.$Message.info(`submit id:${this.$route.params.id} pid:${this.problems[+this.$route.params.id]} success!`)
       })
     }

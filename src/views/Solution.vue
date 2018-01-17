@@ -31,7 +31,8 @@ import highlight from 'highlight.js'
 
 export default {
   data: () => ({
-    result: constant.result
+    result: constant.result,
+    language: constant.language
   }),
   computed: {
     ...mapGetters('solution', [ 'solution' ]),
@@ -42,7 +43,7 @@ export default {
   },
   methods: {
     prettyCode (code) {
-      return highlight.highlight(constant.language[this.solution.language], `${this.solution.code}`).value
+      return highlight.highlight(this.language[this.solution.language], `${this.solution.code}`).value
     },
     onCopy () {
       this.$Message.success('Copied!')
