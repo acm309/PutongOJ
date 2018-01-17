@@ -21,13 +21,16 @@ const find = async (ctx) => {
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
   if (opt.content) {
-    if (opt.type === 'pid') {
-      filter[opt.type] = parseInt(opt.content)
+    if (opt.type === 'tag') {
+      filter.tags = {
+        $in: [new RegExp(opt.content, 'i')]
+      }
     } else {
-      filter[opt.type] = opt.content
+      filter.$where =
+        `${new RegExp(opt.content, 'i')}.test(this["${opt.type}"])`
+      // filter[opt.content] = {'$regex': new RegExp(opt.content, 'i')} 这种方法为啥不行
     }
   }
-  // TODO
 
   // 使用mongoose-paginate包简化
   const res = await Problem.paginate(filter, {

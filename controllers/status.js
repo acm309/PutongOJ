@@ -24,6 +24,7 @@ const find = async (ctx) => {
 // 返回一个提交
 const findOne = async (ctx) => {
   const opt = parseInt(ctx.query.sid)
+  // 使用lean doc就是一个js对象，没有save等方法
   const doc = await Solution.findOne({ sid: opt }).lean().exec()
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
@@ -38,7 +39,8 @@ const findOne = async (ctx) => {
 }
 
 const create = async (ctx) => {
-  const { pid, code, language } = ctx.request.body
+  const opt = ctx.request.body
+  const { pid, code, language } = opt
   const { uid } = ctx.session.profile
   const solution = new Solution({
     pid: +pid,
@@ -48,10 +50,14 @@ const create = async (ctx) => {
     length: Buffer.from(code).length // 这个属性是不是没啥用?
   })
 
+  if (opt.mid) {
+    solution.mid = parseInt(opt.mid)
+  }
+
   try {
     await solution.save()
     pushToJudge(solution.sid)
-    logger.info(`One problem is created" ${solution.pid} -- ${solution.uid}`)
+    logger.info(`One solution is created" ${solution.pid} -- ${solution.uid}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
