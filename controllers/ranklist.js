@@ -7,7 +7,7 @@ const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
-  const filter = purify(only(opt, 'mid'))
+  const filter = purify(only(opt, 'gid'))
   const res = await User.paginate(filter, {
     sort: { solve: -1, submit: 1 },
     page,

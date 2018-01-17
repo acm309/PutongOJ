@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const Solution = require('../models/Solution')
+const Group = require('../models/Group')
 const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
 
@@ -37,10 +38,20 @@ const findOne = async (ctx) => {
       .exec()
   ])
 
+  let group = []
+  const process = info.gid.map((gid, index) => {
+    return Group.findOne({gid}).exec()
+      .then((gid) => {
+        group.push(gid.title)
+      })
+  })
+  await Promise.all(process)
+
   ctx.body = {
     info,
     solved,
-    unsolved
+    unsolved,
+    group
   }
 }
 

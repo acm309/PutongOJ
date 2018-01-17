@@ -45,7 +45,7 @@ const userSchema = mongoose.Schema({
     default: 0
   },
   gid: {
-    type: Number,
+    type: [Number],
     default: 0
   },
   motto: String,

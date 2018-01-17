@@ -1,5 +1,6 @@
-const only = require('only')
 const Group = require('../models/Group')
+const User = require('../models/User')
+const only = require('only')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
@@ -46,6 +47,25 @@ const create = async (ctx) => {
   } catch (e) {
     ctx.throw(400, e.message)
   }
+
+  const process = opt.list.map((uid, index) => {
+    return User.findOne({uid}).exec()
+      .then((user) => {
+        user.gid.push(group.gid)
+        return user
+      })
+      .then((user) => {
+        user.save()
+        return user
+      })
+      .then((user) => {
+        logger.info(`User is updated" ${user.uid} -- ${user.gid}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(process)
 
   ctx.body = {
     gid: group.gid
