@@ -150,7 +150,7 @@ export default {
                       this.enterPsd = val
                     },
                     // 键盘事件无法触发
-                    keyup: (event) => {
+                    'on-keyup': (event) => {
                       if (event.target !== event.currentTarget) return
                       if (event.keyCode !== 13) return
                       this.enter(item)
