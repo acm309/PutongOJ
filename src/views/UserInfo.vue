@@ -5,6 +5,9 @@
         <img src="../assets/logo.png" alt="">
         <h1 style="margin-bottom: 20px">{{ user.uid }}</h1>
         <Icon type="person"></Icon>&nbsp;&nbsp;{{ `Nick: ${user.nick}` }}
+        <div class="group" v-if="group.length > 0">
+          <Icon type="person-stalker"></Icon>&nbsp;&nbsp;{{ `Group: ${group}` }}
+        </div>
         <div class="motto" v-if="user.motto">
           <Icon type="edit"></Icon>&nbsp;&nbsp;{{ `Motto: ${user.motto}` }}
         </div>
@@ -105,6 +108,7 @@ export default {
       user: 'user/user',
       solved: 'user/solved',
       unsolved: 'user/unsolved',
+      group: 'user/group',
       profile: 'session/profile'
     })
   },

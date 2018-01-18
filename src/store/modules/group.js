@@ -28,8 +28,8 @@ const store = {
         commit(types.UPDATE_GROUP, data.res)
       })
     },
-    find ({ commit }, payload) {
-      return api.group.find(payload).then(({ data }) => {
+    find ({ commit }) {
+      return api.group.find().then(({ data }) => {
         commit(types.UPDATE_GROUP_LIST, data.res)
         return data.res
       })

@@ -15,7 +15,6 @@ Vue.use(Vuex)
 
 // 初始化时用localStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {
-  token: window.localStorage.getItem('token')
 }
 
 const getters = {
