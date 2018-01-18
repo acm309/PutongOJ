@@ -111,10 +111,9 @@ export default {
     }),
     transData () {
       return this.userSum.map((item, index) => ({
-          key: index + '',
-          label: item.uid + ' | ' + item.nick
-        })
-      )
+        key: index + '',
+        label: item.uid + ' | ' + item.nick
+      }))
     }
   },
   created () {

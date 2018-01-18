@@ -14,9 +14,7 @@
         <tr v-if="isAdmin || item.status === status.Available">
           <td>{{ item.cid }}</td>
           <td>
-            <!-- <router-link :to="{ name: 'contestOverview', params: { cid: item.cid } }"> -->
-              <Button type="text" @click="visit(item)">{{ item.title }}</Button>
-            <!-- </router-link> -->
+            <Button type="text" @click="visit(item)">{{ item.title }}</Button>
             <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
@@ -149,13 +147,9 @@ export default {
                     input: (val) => {
                       this.enterPsd = val
                     },
-                    // 键盘事件无法触发
-                    'on-keyup': (event) => {
-                      if (event.target !== event.currentTarget) return
-                      if (event.keyCode !== 13) return
+                    'on-enter': () => {
                       this.enter(item)
-                      event.stopPropagation()
-                      event.preventDefault()
+                      this.$Modal.remove()
                     }
                   }
                 })

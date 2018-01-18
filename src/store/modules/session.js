@@ -24,7 +24,6 @@ const getters = {
 const mutations = {
   [types.LOGIN]: (state, payload) => {
     state.profile = payload.profile // TODO
-    window.localStorage.setItem('token', payload.token)
   },
   [types.LOGOUT]: (state) => {
     state.profile = null
