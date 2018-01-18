@@ -1,4 +1,5 @@
 import Home from '@/views/Home'
+import NotFound from '@/views/404'
 
 // problems
 import ProblemList from '@/views/ProblemList'
@@ -154,10 +155,12 @@ export default [
   {
     path: '/contests/:cid',
     component: Contest,
+    meta: { requiresLogin: true },
     children: [
       {
         path: '',
         name: 'contestOverview',
+        meta: { requiresLogin: true },
         component: ContestOverview
       },
       {
@@ -187,5 +190,10 @@ export default [
         component: ContestEdit
       }
     ]
+  },
+  {
+    path: '*',
+    name: 'notFound',
+    component: NotFound
   }
 ]

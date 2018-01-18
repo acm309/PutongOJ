@@ -6,13 +6,23 @@ import store from '../store'
 Vue.use(Router)
 
 const router = new Router({
-  mode: 'history',
+  // mode: 'history',
   routes
 })
 
 // 全局身份确认
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAdmin) {
+  if (to.meta.requiresLogin) {
+    const isLogined = store.getters['session/isLogined']
+    if (isLogined) {
+      next()
+    } else {
+      store.commit('session/TRIGGER_LOGIN')
+      next({
+        name: 'contestList'
+      })
+    }
+  } else if (to.meta.requiresAdmin) {
     const isAdmin = store.getters['session/isAdmin']
     if (isAdmin) {
       next()
