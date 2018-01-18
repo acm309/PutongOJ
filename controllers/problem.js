@@ -28,7 +28,7 @@ const find = async (ctx) => {
     } else {
       filter.$where =
         `${new RegExp(opt.content, 'i')}.test(this["${opt.type}"])`
-      // filter[opt.content] = {'$regex': new RegExp(opt.content, 'i')} 这种方法为啥不行
+      // filter[opt.type] = {'$regex': new RegExp(opt.content, 'i')} 这种方法为啥不行
     }
   }
 

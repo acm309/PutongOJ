@@ -1,6 +1,6 @@
+const only = require('only')
 const Group = require('../models/Group')
 const User = require('../models/User')
-const only = require('only')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {

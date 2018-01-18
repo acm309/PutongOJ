@@ -1,6 +1,8 @@
 const Router = require('koa-router')
 
-const router = new Router()
+const router = new Router({
+  prefix: '/api'
+})
 
 const session = require('./session')
 const problem = require('./problem')

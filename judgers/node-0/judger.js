@@ -92,7 +92,7 @@ async function judge (problem, solution) {
     return fse.copy(path.resolve(dir, `${test.uuid}.out`), path.resolve(__dirname, `testdata/${test.uuid}.out`))
   }))
 
-  fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code)
+  fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
 
   shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`)
 
@@ -162,7 +162,7 @@ async function main () {
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year
     const sid = +res[1]
     const solution = await Solution.findOne({ sid }).exec()
-    const problem = await Problem.findOne({ pid: solution.pid }).exec()
+    const problem = await Problem.findOne({ pid: solution.pid }).exec() // TODO
     logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: solution.uid>`)
     await judge(problem, solution)
     if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能

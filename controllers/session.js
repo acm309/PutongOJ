@@ -1,7 +1,6 @@
 const only = require('only')
 const User = require('../models/User')
 const { generatePwd } = require('../utils/helper')
-const { createToken } = require('../utils/helper')
 
 // 登录
 const login = async (ctx) => {
@@ -19,12 +18,9 @@ const login = async (ctx) => {
     ctx.throw(400, 'Wrong password')
   }
 
-  let token = createToken(uid)
-
   ctx.session.profile = only(user, 'uid nick privilege')
   ctx.body = {
-    profile: ctx.session.profile,
-    token
+    profile: ctx.session.profile
   }
 }
 
