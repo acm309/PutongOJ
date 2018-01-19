@@ -19,11 +19,12 @@
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
           <td>
-            <span class="run" v-if="item.end > Date.now()">Running</span>
-            <span class="end" v-else >Ended</span>
+            <span class="ready" v-if="item.start > Date.now()">Ready</span>
+            <span class="run" v-if="item.start < Date.now() && item.end > Date.now()">Running</span>
+            <span class="end" v-if="item.end < Date.now()" >Ended</span>
           </td>
           <td>
-            <span>{{ item.create | timePretty }}</span>
+            <span>{{ item.start | timePretty }}</span>
           </td>
           <td>
             <span :class="{'password': +item.encrypt === 3, 'private': +item.encrypt === 2, 'public': +item.encrypt === 1}">
@@ -120,56 +121,56 @@ export default {
     visit (item) {
       if (!this.isLogined) {
         this.$store.commit('session/TRIGGER_LOGIN')
-      } else {
-        if (this.isAdmin || +item.encrypt === 1) {
-          this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-        } else {
-          if (+item.encrypt === 2) {
+      } else if (this.isAdmin) {
+        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+      } else if (item.start > Date.now()) {
+        this.$Message.error("This contest hasn't started yet!")
+      } else if (+item.encrypt === 1) {
+        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+      } else if (+item.encrypt === 2) {
+        const opt = Object.assign(
+          item,
+          { uid: this.profile.uid }
+        )
+        this.$store.dispatch('contest/verify', opt).then((data) => {
+          if (data) {
+            this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
+          } else {
+            this.$Message.error("You're not invited to attend this contest!")
+          }
+        })
+      } else if (+item.encrypt === 3) {
+        this.$Modal.confirm({
+          render: (h) => {
+            return h('Input', {
+              props: {
+                placeholder: 'Please enter password.'
+              },
+              on: {
+                input: (val) => {
+                  this.enterPsd = val
+                },
+                'on-enter': () => {
+                  this.enter(item)
+                  this.$Modal.remove()
+                }
+              }
+            })
+          },
+          onOk: () => {
             const opt = Object.assign(
               item,
-              { uid: this.profile.uid }
+              { pwd: this.enterPsd }
             )
             this.$store.dispatch('contest/verify', opt).then((data) => {
               if (data) {
                 this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
               } else {
-                this.$Message.error("You're not invited to attend this contest!")
-              }
-            })
-          } else if (+item.encrypt === 3) {
-            this.$Modal.confirm({
-              render: (h) => {
-                return h('Input', {
-                  props: {
-                    placeholder: 'Please enter password.'
-                  },
-                  on: {
-                    input: (val) => {
-                      this.enterPsd = val
-                    },
-                    'on-enter': () => {
-                      this.enter(item)
-                      this.$Modal.remove()
-                    }
-                  }
-                })
-              },
-              onOk: () => {
-                const opt = Object.assign(
-                  item,
-                  { pwd: this.enterPsd }
-                )
-                this.$store.dispatch('contest/verify', opt).then((data) => {
-                  if (data) {
-                    this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-                  } else {
-                    this.$Message.error('Wrong password!')
-                  }
-                })
+                this.$Message.error('Wrong password!')
               }
             })
           }
-        }
+        })
       }
     },
     change (contest) {
@@ -240,6 +241,9 @@ export default {
       color: #e040fb
       padding: 0 1px
       font-size: 14px
+  .ready
+    font-weight: bold
+    color: blue
   .run
     font-weight: bold
     color: red
