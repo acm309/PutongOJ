@@ -7,8 +7,8 @@ const router = new Router({
 })
 
 router.get('/list', contest.find)
-router.get('/:cid', contest.findOne)
-router.get('/:cid/rank', contest.ranklist)
+router.get('/:cid', contest.preload, contest.findOne)
+router.get('/:cid/rank', contest.preload, contest.ranklist)
 router.post('/', auth.login, auth.admin, contest.create)
 router.put('/:cid', auth.login, auth.admin, contest.update)
 router.del('/:cid', auth.login, auth.admin, contest.del)

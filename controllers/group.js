@@ -48,7 +48,7 @@ const create = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  const process = opt.list.map((uid, index) => {
+  const procedure = opt.list.map((uid, index) => {
     return User.findOne({uid}).exec()
       .then((user) => {
         user.gid.push(group.gid)
@@ -65,7 +65,7 @@ const create = async (ctx) => {
         ctx.throw(400, e.message)
       })
   })
-  await Promise.all(process)
+  await Promise.all(procedure)
 
   ctx.body = {
     gid: group.gid

@@ -7,6 +7,19 @@ const logger = require('../utils/logger')
 const config = require('../config')
 const { isAdmin } = require('../utils/helper')
 
+const preload = async (ctx, next) => {
+  const cid = parseInt(ctx.params.cid)
+  if (isNaN(cid)) ctx.throw(400, 'Cid has to be a number')
+  const contest = await Contest.findOne({ cid }).exec()
+  if (contest == null) ctx.throw(400, 'No such a contest')
+  if (isAdmin(ctx.session.profile)) return next()
+  if (contest.start > Date.now()) {
+    ctx.throw(400, "This contest hasn't started yet")
+  }
+  ctx.state.contest = contest
+  return next()
+}
+
 // 返回竞赛列表
 const find = async (ctx) => {
   const opt = ctx.request.query
@@ -36,16 +49,16 @@ const find = async (ctx) => {
 const findOne = async (ctx) => {
   const opt = ctx.request.query
   const cid = parseInt(opt.cid)
-  let doc = await Contest.findOne({ cid }).exec()
+  let contest = ctx.state.contest
 
   // 普通用户不能获取argument的值
   if (!ctx.session.profile || !isAdmin(ctx.session.profile)) {
-    doc = only(doc, 'title start end encrypt list create status cid')
+    contest = only(contest, 'title start end encrypt list create status cid')
   }
-  const list = doc.list
+  const list = contest.list
   const total = list.length
   let res = []
-  const process = list.map((pid, index) => {
+  const procedure = list.map((pid, index) => {
     return Problem.findOne({pid}).exec()
       .then((problem) => {
         res[index] = only(problem, 'title pid')
@@ -63,7 +76,7 @@ const findOne = async (ctx) => {
         res[index].solve = count
       })
   })
-  await Promise.all(process)
+  await Promise.all(procedure)
 
   let pro = []
   res.forEach((value, index) => {
@@ -71,7 +84,7 @@ const findOne = async (ctx) => {
   })
 
   ctx.body = {
-    doc,
+    doc: contest,
     res,
     total,
     pro
@@ -210,6 +223,7 @@ const verify = async (ctx) => {
 }
 
 module.exports = {
+  preload,
   find,
   findOne,
   ranklist,
