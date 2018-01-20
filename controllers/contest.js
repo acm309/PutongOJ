@@ -16,6 +16,10 @@ const preload = async (ctx, next) => {
   if (contest.start > Date.now()) {
     ctx.throw(400, "This contest hasn't started yet")
   }
+  if (contest.encrypt === 1 && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+    ctx.session.profile.verifyContest.push(contest.cid)
+    console.log(ctx.session.profile.verifyContest)
+  }
   ctx.state.contest = contest
   return next()
 }
@@ -82,6 +86,10 @@ const findOne = async (ctx) => {
   res.forEach((value, index) => {
     pro.push(res[index].pid)
   })
+
+  if (ctx.session.profile.verifyContest.indexOf(cid) === -1) {
+    ctx.session.profile.verifyContest.push(cid)
+  }
 
   ctx.body = {
     doc: contest,

@@ -19,6 +19,7 @@ const login = async (ctx) => {
   }
 
   ctx.session.profile = only(user, 'uid nick privilege')
+  ctx.session.profile.verifyContest = []
   ctx.body = {
     profile: ctx.session.profile
   }
