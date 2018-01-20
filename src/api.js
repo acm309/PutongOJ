@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Vue from 'vue'
+// import store from '@/store'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -13,6 +14,11 @@ const instance = {}
 ;['get', 'post', 'put', 'delete'].forEach((key) => {
   instance[key] = function (...args) { // 闭包给原函数捕获异常
     return axios[key](...args)
+      // .then((data) => {
+      //   if (data.profile) {
+      //     store.commit('session/LOGIN', data)
+      //   }
+      // })
       .catch((err) => {
         console.log(err)
         if (err.response && err.response.status >= 500) {
