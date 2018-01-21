@@ -121,7 +121,7 @@ export default {
     visit (item) {
       if (!this.isLogined) {
         this.$store.commit('session/TRIGGER_LOGIN')
-      } else if (this.isAdmin || this.profile.verifyContest.indexOf(item.cid) !== -1) {
+      } else if (this.isAdmin || this.profile.verifyContest.indexOf(+item.cid) !== -1) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > Date.now()) {
         this.$Message.error("This contest hasn't started yet!")

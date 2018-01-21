@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routes'
 import store from '../store'
+import NProgress from 'nprogress'
 
 Vue.use(Router)
 
@@ -10,8 +11,11 @@ const router = new Router({
   routes
 })
 
+NProgress.configure({ easing: 'ease', speed: 500 })
+
 // 全局身份确认
 router.beforeEach((to, from, next) => {
+  NProgress.start()
   if (to.meta.requiresLogin) {
     const isLogined = store.getters['session/isLogined']
     if (isLogined) {
@@ -34,6 +38,10 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach(() => {
+  NProgress.done()
 })
 
 export default router
