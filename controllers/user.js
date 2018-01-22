@@ -14,16 +14,16 @@ const preload = async (ctx, next) => {
 
 // 查询所有用户
 const find = async (ctx) => {
-  const res = await User.find({}).exec()
+  const list = await User.find({}).exec()
   ctx.body = {
-    res
+    list
   }
 }
 
 // 查询用户具体信息
 const findOne = async (ctx) => {
   const uid = ctx.query.uid
-  const [info, solved, unsolved] = await Promise.all([
+  const [user, solved, unsolved] = await Promise.all([
     User
       .findOne({ uid })
       .select('-_id -pwd')
@@ -39,7 +39,7 @@ const findOne = async (ctx) => {
   ])
 
   let group = []
-  const process = info.gid.map((gid, index) => {
+  const process = user.gid.map((gid, index) => {
     return Group.findOne({gid}).exec()
       .then((gid) => {
         group.push(gid.title)
@@ -48,7 +48,7 @@ const findOne = async (ctx) => {
   await Promise.all(process)
 
   ctx.body = {
-    info,
+    user,
     solved,
     unsolved,
     group

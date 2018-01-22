@@ -60,21 +60,21 @@ const find = async (ctx) => {
     }}
   ]).exec()
 
-  const sum = sumDoc.length
+  const sumCharts = sumDoc.length
 
-  let counted = []
+  let countList = []
   for (let i = 2; i <= 10; i++) {
-    counted.push(Solution.count({pid, judge: i}).exec())
+    countList.push(Solution.count({pid, judge: i}).exec())
   }
-  counted = await Promise.all(counted)
+  countList = await Promise.all(countList)
 
-  const total = await counted.reduce((sum, item) => sum + item)
+  const sumStatis = await countList.reduce((sum, item) => sum + item)
 
   ctx.body = {
     list,
-    sum,
-    counted,
-    total
+    sumCharts,
+    countList,
+    sumStatis
   }
 }
 

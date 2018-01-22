@@ -33,7 +33,7 @@ const find = async (ctx) => {
   }
 
   // 使用mongoose-paginate包简化
-  const res = await Problem.paginate(filter, {
+  const list = await Problem.paginate(filter, {
     sort: { pid: 1 },
     page,
     limit: pageSize,
@@ -48,7 +48,7 @@ const find = async (ctx) => {
     .exec()
 
   ctx.body = {
-    res,
+    list,
     solved
   }
 }

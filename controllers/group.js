@@ -14,10 +14,10 @@ const preload = async (ctx, next) => {
 
 // 返回group列表
 const find = async (ctx) => {
-  const res = await Group.find({}).exec()
+  const list = await Group.find({}).exec()
 
   ctx.body = {
-    res
+    list
   }
 }
 
@@ -26,7 +26,7 @@ const findOne = async (ctx) => {
   const group = ctx.state.group
 
   ctx.body = {
-    res: group
+    group
   }
 }
 
@@ -88,7 +88,6 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    success: true,
     gid: group.gid
   }
 }

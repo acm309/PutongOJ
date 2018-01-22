@@ -30,7 +30,7 @@ function isRoot (profile) {
 }
 
 const pushToJudge = (sid) => {
-  redis.lpush('oj:solutions', sid)
+  redis.lpush('oj:solutions', sid) // 将sid往列表的头部插入
 }
 
 module.exports = {

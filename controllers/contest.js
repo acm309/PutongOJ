@@ -12,13 +12,18 @@ const preload = async (ctx, next) => {
   if (isNaN(cid)) ctx.throw(400, 'Cid has to be a number')
   const contest = await Contest.findOne({ cid }).exec()
   if (contest == null) ctx.throw(400, 'No such a contest')
-  if (isAdmin(ctx.session.profile)) return next()
+  if (isAdmin(ctx.session.profile)) {
+    ctx.state.contest = contest
+    return next()
+  }
   if (contest.start > Date.now()) {
     ctx.throw(400, "This contest hasn't started yet")
   }
+  if (contest.encrypt !== 1 && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+    ctx.throw(400, 'You do not have permission to enter this competition!')
+  }
   if (contest.encrypt === 1 && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
     ctx.session.profile.verifyContest.push(contest.cid)
-    console.log(ctx.session.profile.verifyContest)
   }
   ctx.state.contest = contest
   return next()
@@ -29,7 +34,7 @@ const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 20
-  const res = await Contest.paginate({}, {
+  const list = await Contest.paginate({}, {
     sort: { cid: -1 },
     page,
     limit: pageSize,
@@ -44,7 +49,7 @@ const find = async (ctx) => {
     .exec()
 
   ctx.body = {
-    res,
+    list,
     solved
   }
 }
@@ -60,42 +65,32 @@ const findOne = async (ctx) => {
     contest = only(contest, 'title start end encrypt list create status cid')
   }
   const list = contest.list
-  const total = list.length
-  let res = []
+  const totalProblems = list.length
+  let overview = []
   const procedure = list.map((pid, index) => {
     return Problem.findOne({pid}).exec()
       .then((problem) => {
-        res[index] = only(problem, 'title pid')
+        overview[index] = only(problem, 'title pid')
       })
       .then(() => {
         return Solution.count({pid, mid: cid}).exec()
       })
       .then((count) => {
-        res[index].submit = count
+        overview[index].submit = count
       })
       .then(() => {
         return Solution.count({pid, mid: cid, judge: 3}).exec()
       })
       .then((count) => {
-        res[index].solve = count
+        overview[index].solve = count
       })
   })
   await Promise.all(procedure)
 
-  let pro = []
-  res.forEach((value, index) => {
-    pro.push(res[index].pid)
-  })
-
-  if (ctx.session.profile.verifyContest.indexOf(cid) === -1) {
-    ctx.session.profile.verifyContest.push(cid)
-  }
-
   ctx.body = {
-    doc: contest,
-    res,
-    total,
-    pro
+    contest,
+    overview,
+    totalProblems
   }
 }
 
@@ -157,7 +152,6 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    success: true,
     cid: contest.cid
   }
 }
@@ -180,7 +174,6 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    success: true,
     cid: contest.cid
   }
 }
@@ -208,25 +201,29 @@ const verify = async (ctx) => {
 
   const enc = parseInt(contest.encrypt)
   const arg = contest.argument
-  let res
+  let isVerify
   if (enc === 2) {
     const uid = opt.uid
     const arr = arg.split('\r\n')
     if (arr.indexOf(uid) !== -1) {
-      res = true
+      isVerify = true
     } else {
-      res = false
+      isVerify = false
     }
   } else {
     const pwd = opt.pwd
     if (arg === pwd) {
-      res = true
+      isVerify = true
     } else {
-      res = false
+      isVerify = false
     }
   }
+  if (isVerify) {
+    ctx.session.profile.verifyContest.push(contest.cid)
+  }
   ctx.body = {
-    res
+    isVerify,
+    profile: ctx.session.profile
   }
 }
 

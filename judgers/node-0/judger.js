@@ -17,7 +17,7 @@ const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 const User = require('../../models/User')
 const logger = require('../../utils/logger')
-const config = require('../..//config')
+const config = require('../../config')
 const redis = require('../../config/redis')
 const extensions = ['', 'c', 'cpp', 'java']
 
@@ -94,7 +94,7 @@ async function judge (problem, solution) {
 
   fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
 
-  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`)
+  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`) // 默认输出限制是8M还是80M
 
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(path.resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
@@ -159,10 +159,13 @@ async function userUpdate (solution) {
 
 async function main () {
   while (1) {
-    const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year
+    // 移出并获取oj:solutions列表中的最后一个元素
+    const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 1年代表阻塞时间？
     const sid = +res[1]
     const solution = await Solution.findOne({ sid }).exec()
-    const problem = await Problem.findOne({ pid: solution.pid }).exec() // TODO
+    const problem = await Problem.findOne({ pid: solution.pid }).exec()
+    solution.judge = config.judge.Running
+    await solution.save() // 将判题状态改为正在判题
     logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: solution.uid>`)
     await judge(problem, solution)
     if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能

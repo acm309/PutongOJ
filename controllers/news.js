@@ -17,7 +17,7 @@ const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 5
-  const res = await News.paginate(filter, {
+  const list = await News.paginate(filter, {
     sort: { nid: -1 },
     page,
     limit: pageSize,
@@ -25,15 +25,15 @@ const find = async (ctx) => {
   })
 
   ctx.body = {
-    res
+    list
   }
 }
 
 // 返回一条消息
 const findOne = async (ctx) => {
-  const res = ctx.state.news
+  const news = ctx.state.news
   ctx.body = {
-    res
+    news
   }
 }
 
@@ -75,7 +75,6 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    success: true,
     nid: news.nid
   }
 }

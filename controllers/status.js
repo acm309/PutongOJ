@@ -9,7 +9,7 @@ const find = async (ctx) => {
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
   const filter = purify(only(opt, 'uid pid judge language mid'))
-  const res = await Solution.paginate(filter, {
+  const list = await Solution.paginate(filter, {
     sort: { sid: -1 },
     page,
     limit: pageSize,
@@ -17,27 +17,28 @@ const find = async (ctx) => {
   })
 
   ctx.body = {
-    res
+    list
   }
 }
 
 // 返回一个提交
 const findOne = async (ctx) => {
   const opt = parseInt(ctx.query.sid)
-  // 使用lean doc就是一个js对象，没有save等方法
-  const doc = await Solution.findOne({ sid: opt }).lean().exec()
+  // 使用lean solution就是一个js对象，没有save等方法
+  const solution = await Solution.findOne({ sid: opt }).lean().exec()
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
-  if (isAdmin(ctx.session.profile) && doc.sim) {
-    const simSolution = await Solution.findOne({ sid: doc.sim_s_id }).lean().exec()
-    doc.simSolution = simSolution
+  if (isAdmin(ctx.session.profile) && solution.sim) {
+    const simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
+    solution.simSolution = simSolution
   }
 
   ctx.body = {
-    doc
+    solution
   }
 }
 
+// 创建一个提交
 const create = async (ctx) => {
   const opt = ctx.request.body
   const { pid, code, language } = opt

@@ -8,7 +8,7 @@ const find = async (ctx) => {
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 30
   const filter = purify(only(opt, 'gid'))
-  const res = await User.paginate(filter, {
+  const list = await User.paginate(filter, {
     sort: { solve: -1, submit: 1 },
     page,
     limit: pageSize,
@@ -16,7 +16,7 @@ const find = async (ctx) => {
   })
 
   ctx.body = {
-    res
+    list
   }
 }
 
