@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="solution-wrap">
+  <div class="solution-wrap" v-if="solution">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
       <span>Memory: {{ solution.memory }} KB</span>
