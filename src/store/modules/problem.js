@@ -46,14 +46,14 @@ const store = {
     },
     find ({ commit }, payload) {
       return api.problem.find(payload).then(({ data }) => {
-        commit(types.GET_PROBLEM_LIST, data.res.docs)
-        commit(types.GET_SUM_PROBLEM, data.res.total)
+        commit(types.GET_PROBLEM_LIST, data.list.docs)
+        commit(types.GET_SUM_PROBLEM, data.list.total)
         commit(types.GET_PROBLEM_SOLVED, data.solved)
       })
     },
     update ({commit}, payload) {
       return api.problem.update(payload).then(({ data }) => {
-        // commit()
+        return data
       })
     },
     create ({commit}, payload) {

@@ -52,16 +52,16 @@ const store = {
   actions: {
     find ({ commit }, payload) {
       return api.contest.find(payload).then(({ data }) => {
-        commit(types.UPDATE_CONTEST_LIST, data.res.docs)
-        commit(types.UPDATE_SUM_CONTEST, data.res.total)
+        commit(types.UPDATE_CONTEST_LIST, data.list.docs)
+        commit(types.UPDATE_SUM_CONTEST, data.list.total)
         commit(types.GET_CONTEST_SOLVED, data.solved)
       })
     },
     findOne ({ commit }, payload) {
       return api.contest.findOne(payload).then(({ data }) => {
-        commit(types.GET_CONTEST, data.doc)
-        commit(types.GET_CONTEST_OVERVIEW, data.res)
-        commit(types.GET_CONTEST_TOTAL_PRO, data.total)
+        commit(types.GET_CONTEST, data.contest)
+        commit(types.GET_CONTEST_OVERVIEW, data.overview)
+        commit(types.GET_CONTEST_TOTAL_PRO, data.totalProblems)
         return data
       })
     },
@@ -83,7 +83,7 @@ const store = {
       })
     },
     verify ({ commit }, payload) {
-      return api.contest.verify(payload).then(({ data }) => data.res)
+      return api.contest.verify(payload).then(({ data }) => data.isVerify)
     }
   }
 }

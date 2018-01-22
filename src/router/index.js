@@ -2,20 +2,19 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routes'
 import store from '../store'
-import NProgress from 'nprogress'
+import iView from 'iview'
 
 Vue.use(Router)
+Vue.use(iView)
 
 const router = new Router({
   // mode: 'history',
   routes
 })
 
-NProgress.configure({ easing: 'ease', speed: 500 })
-
 // 全局身份确认
 router.beforeEach((to, from, next) => {
-  NProgress.start()
+  iView.LoadingBar.start()
   if (to.meta.requiresLogin) {
     const isLogined = store.getters['session/isLogined']
     if (isLogined) {
@@ -41,7 +40,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach(() => {
-  NProgress.done()
+  iView.LoadingBar.finish()
 })
 
 export default router

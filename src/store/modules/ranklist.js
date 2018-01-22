@@ -22,8 +22,8 @@ const store = {
   actions: {
     find ({ commit }, payload) {
       return api.getRanklist(payload).then(({ data }) => {
-        commit(types.UPDATE_RANKLIST, data.res.docs)
-        commit(types.UPDATE_SUM_RANKLIST, data.res.total)
+        commit(types.UPDATE_RANKLIST, data.list.docs)
+        commit(types.UPDATE_SUM_RANKLIST, data.list.total)
       })
     }
   }

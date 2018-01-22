@@ -34,13 +34,13 @@ const store = {
     [types.UPDATE_STATISTICS_TABLE]: (state, payload) => {
       let obj = {
         name: 'Total Submissions',
-        num: payload.total
+        num: payload.sumStatis
       }
       state.table.push(obj)
       for (let i = 0; i < statisTableObj.length; i++) {
         let obk = {}
         obk.name = statisTableObj[i]
-        obk.num = payload.counted[i]
+        obk.num = payload.countList[i]
         state.table.push(obk)
       }
     }
@@ -49,10 +49,10 @@ const store = {
     find ({ commit }, payload) {
       return api.getStatistics(payload).then(({ data }) => {
         commit(types.UPDATE_STATISTICS_LIST, data.list)
-        commit(types.UPDATE_COUNT_LIST, data.counted)
-        commit(types.UPDATE_STATISTICS_CHARTS, data.total)
+        commit(types.UPDATE_COUNT_LIST, data.countList)
+        commit(types.UPDATE_STATISTICS_CHARTS, data.sumCharts)
         commit(types.UPDATE_STATISTICS_TABLE, data)
-        commit(types.UPDATE_STATISTICS_TOTAL, data.sum)
+        commit(types.UPDATE_STATISTICS_TOTAL, data.sumStatis)
       })
     }
   }

@@ -6,7 +6,7 @@ import ProblemList from '@/views/ProblemList'
 import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
-import ProblemStatistics from '@/views/Problem/Statistics'
+// import ProblemStatistics from '@/views/Problem/Statistics'
 import ProblemEdit from '@/views/Problem/problemEdit'
 import MySubmission from '@/views/Problem/Mysubmission'
 import Testcase from '@/views/Problem/Testcase'
@@ -37,6 +37,8 @@ import ProblemCreate from '@/views/Admin/ProblemCreate'
 import ContestCreate from '@/views/Admin/ContestCreate'
 import NewsCreate from '@/views/Admin/NewsCreate'
 import UserManage from '@/views/Admin/UserManage'
+
+const ProblemStatistics = r => require.ensure([], () => r(require('@/views/Problem/Statistics')), 'statistics')
 
 export default [
   {

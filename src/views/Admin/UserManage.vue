@@ -45,8 +45,8 @@
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Group</Col>
       <Col :span="4">
-        <Select v-model="group.gid" filterable>
-          <Option v-for="item in groupList" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
+        <Select v-model="ind" filterable>
+          <Option v-for="(item, index) in groupList" :value="index" :key="item.gid">{{ item.title }}</Option>
         </Select>
       </Col>
       <Col :offset="1" :span="2">
@@ -94,7 +94,7 @@ export default {
     uid: '',
     newPwd: '',
     checkPwd: '',
-    gid: '',
+    ind: 0,
     targetKeys: [],
     listStyle: {
       width: '350px',
@@ -157,6 +157,8 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
+      this.group.gid = this.groupList[this.ind].gid
+      this.group.title = this.groupList[this.ind].title
       if (name === 'search') {
         this.targetKeys = []
         this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
@@ -201,9 +203,9 @@ export default {
       } else {
         this.$store.dispatch('group/create', group).then(() => {
           this.$Message.success('新建当前用户组成功！')
+          this.$store.dispatch('group/find')
         })
       }
-      this.$store.dispatch('group/find')
     }
   }
 }

@@ -45,12 +45,12 @@ const store = {
     },
     find ({ commit }) {
       return api.user.find().then(({ data }) => {
-        commit(types.UPDATE_USERS_LIST, data.res)
+        commit(types.UPDATE_USERS_LIST, data.list)
       })
     },
     findOne ({ commit }, payload) {
       return api.user.findOne(payload).then(({ data }) => {
-        commit(types.UPDATE_USER, data.info)
+        commit(types.UPDATE_USER, data.user)
         commit(types.UPDATE_SOLVED, data.solved)
         commit(types.UPDATE_UNSOLVED, data.unsolved)
         commit(types.UPDATE_USER_GROUP, data.group)

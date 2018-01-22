@@ -27,13 +27,13 @@ const store = {
   actions: {
     find ({ commit }, payload) {
       return api.solution.find(payload).then(({ data }) => {
-        commit(types.UPDATE_SOLUTION_LIST, data.res.docs)
-        commit(types.UPDATE_SUM_SOLUTIONS, data.res.total)
+        commit(types.UPDATE_SOLUTION_LIST, data.list.docs)
+        commit(types.UPDATE_SUM_SOLUTIONS, data.list.total)
       })
     },
     findOne ({ commit }, payload) {
       return api.solution.findOne(payload).then(({ data }) => {
-        commit(types.GET_SOLUTION, data.doc)
+        commit(types.GET_SOLUTION, data.solution)
       })
     },
     create ({ commit }, payload) {

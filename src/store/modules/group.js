@@ -25,13 +25,13 @@ const store = {
   actions: {
     findOne ({ commit }, payload) {
       return api.group.findOne(payload).then(({ data }) => {
-        commit(types.UPDATE_GROUP, data.res)
+        commit(types.UPDATE_GROUP, data.group)
       })
     },
     find ({ commit }) {
       return api.group.find().then(({ data }) => {
-        commit(types.UPDATE_GROUP_LIST, data.res)
-        return data.res
+        commit(types.UPDATE_GROUP_LIST, data.list)
+        return data.list
       })
     },
     update ({commit}, payload) {

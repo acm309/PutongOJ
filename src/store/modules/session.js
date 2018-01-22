@@ -23,11 +23,10 @@ const getters = {
 
 const mutations = {
   [types.LOGIN]: (state, payload) => {
-    state.profile = payload.profile // TODO
+    state.profile = payload // TODO
   },
   [types.LOGOUT]: (state) => {
     state.profile = null
-    window.localStorage.removeItem('token')
   },
   [types.TRIGGER_LOGIN]: (state) => {
     state.loginDialog = !state.loginDialog
@@ -40,7 +39,7 @@ const mutations = {
 const actions = {
   login ({ commit, rootGetters }, opt) {
     return api.login(opt).then(({ data }) => {
-      commit(types.LOGIN, data)
+      commit(types.LOGIN, data.profile)
       return data
     })
   },

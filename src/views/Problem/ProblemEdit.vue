@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     submit () {
-      this.$store.dispatch('problem/update', this.problem).then(({ data }) => {
+      this.$store.dispatch('problem/update', this.problem).then((data) => {
         this.$Message.success('提交成功！')
         this.$router.push({name: 'problemInfo', params: { pid: data.pid }})
       })

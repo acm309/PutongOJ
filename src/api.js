@@ -16,7 +16,7 @@ const instance = {}
     return axios[key](...args)
       .then((data) => {
         if (data.data.profile) {
-          store.commit('session/LOGIN', data.data)
+          store.commit('session/LOGIN', data.data.profile)
         }
         return data
       })

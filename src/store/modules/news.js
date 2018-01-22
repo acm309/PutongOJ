@@ -30,13 +30,13 @@ const store = {
   actions: {
     findOne ({ commit }, payload) {
       return api.news.findOne(payload).then(({ data }) => {
-        commit(types.UPDATE_NEWS, data.res)
+        commit(types.UPDATE_NEWS, data.news)
       })
     },
     find ({ commit }, payload) {
       return api.news.find(payload).then(({ data }) => {
-        commit(types.UPDATE_NEW_LIST, data.res.docs)
-        commit(types.UPDATE_NEWS_SUM, data.res.total)
+        commit(types.UPDATE_NEW_LIST, data.list.docs)
+        commit(types.UPDATE_NEWS_SUM, data.list.total)
       })
     },
     update ({commit}, payload) {
