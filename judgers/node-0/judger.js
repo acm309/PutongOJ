@@ -94,7 +94,7 @@ async function judge (problem, solution) {
 
   fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
 
-  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`) // 默认输出限制是8M还是80M
+  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`) //
 
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(path.resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
@@ -160,7 +160,7 @@ async function userUpdate (solution) {
 async function main () {
   while (1) {
     // 移出并获取oj:solutions列表中的最后一个元素
-    const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 1年代表阻塞时间？
+    const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
     const sid = +res[1]
     const solution = await Solution.findOne({ sid }).exec()
     const problem = await Problem.findOne({ pid: solution.pid }).exec()
@@ -182,5 +182,5 @@ async function main () {
 }
 
 main()
-  .then(() => 'starting')
+  .then(() => logger.info('starting'))
   .catch(e => logger.error(e))
