@@ -28,7 +28,7 @@ export default {
     'oj-contest-edit': ContestEdit
   },
   beforeDestroy () {
-    this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
+    this.$store.dispatch('contest/findOne', only(this.contest, 'cid'))
   }
 }
 </script>
