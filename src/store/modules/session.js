@@ -50,9 +50,7 @@ const actions = {
   },
   fetch ({ commit, rootGetters }) {
     return api.session.fetch().then(({ data }) => {
-      if (data.status === 'success') {
-        commit(types.UPDATE_PROFILE, data.profile)
-      }
+      commit(types.UPDATE_PROFILE, data.profile)
     })
   }
 }

@@ -21,11 +21,12 @@ Vue.prototype.$Message.config({
 
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  store,
-  template: '<App/>',
-  components: { App }
-})
+store.dispatch('session/fetch').then(() =>
+  /* eslint-disable no-new */
+  new Vue({
+    el: '#app',
+    router,
+    store,
+    template: '<App/>',
+    components: { App }
+  }))
