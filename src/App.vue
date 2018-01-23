@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Spin size="large" fix v-if="loading"></Spin>
+    <Spin size="large" v-if="loading"></Spin>
     <oj-layout v-else></oj-layout>
   </div>
 </template>
