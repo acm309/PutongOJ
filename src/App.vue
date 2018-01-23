@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <oj-layout></oj-layout>
+    <Spin size="large" fix v-if="loading"></Spin>
+    <oj-layout v-else></oj-layout>
   </div>
 </template>
 
@@ -9,8 +10,13 @@ import Layout from '@/components/Layout'
 
 export default {
   name: 'app',
+  data: () => ({
+    loading: true
+  }),
   created () {
-    this.$store.dispatch('session/fetch')
+    this.$store.dispatch('session/fetch').then(() => {
+      this.loading = false
+    })
   },
   components: {
     'oj-layout': Layout
