@@ -5,7 +5,7 @@ const store = {
   namespaced: true,
   state: {
     list: [],
-    solution: {},
+    solution: null,
     sum: 0
   },
   getters: {
