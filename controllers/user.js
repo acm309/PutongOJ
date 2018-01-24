@@ -1,8 +1,10 @@
 const User = require('../models/User')
 const Solution = require('../models/Solution')
 const Group = require('../models/Group')
+const config = require('../config')
 const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
+const { isAdmin, isRoot } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const uid = ctx.params.uid
@@ -12,9 +14,15 @@ const preload = async (ctx, next) => {
   return next()
 }
 
-// 查询所有用户
+// 查询用户组
 const find = async (ctx) => {
-  const list = await User.find({}).exec()
+  const filter = {}
+  if (ctx.query.privilege && ctx.query.privilege === 'admin') {
+    filter.privilege = {
+      $in: [config.privilege.Root + '', config.privilege.Teacher + '']
+    }
+  }
+  const list = await User.find(filter)
   ctx.body = {
     list
   }
@@ -41,8 +49,9 @@ const findOne = async (ctx) => {
   let group = []
   const process = user.gid.map((gid, index) => {
     return Group.findOne({gid}).exec()
-      .then((gid) => {
-        group.push(gid.title)
+      .then((item) => {
+        console.log(item.title)
+        group.push(item.title)
       })
   })
   await Promise.all(process)
@@ -82,6 +91,12 @@ const create = async (ctx) => {
 
 // 修改用户信息
 const update = async (ctx) => {
+  if (!isAdmin(ctx.session.profile) && ctx.session.profile.uid !== ctx.state.user.uid) {
+    ctx.throw(400, 'You do not have permission to change this user information!')
+  }
+  if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
+    ctx.throw(400, "You do not have permission to change Root's information!")
+  }
   const opt = ctx.request.body
   const user = ctx.state.user
   const fileds = ['nick', 'motto', 'school', 'mail']
