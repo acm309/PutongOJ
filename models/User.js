@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
     default: Date.now
   },
   privilege: {
-    type: String,
+    type: Number,
     default: 1
   },
   timerecord: {

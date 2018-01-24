@@ -4,7 +4,7 @@ const Group = require('../models/Group')
 const config = require('../config')
 const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
-const { isAdmin, isRoot } = require('../utils/helper')
+const { isAdmin, isRoot, isUndefined } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const uid = ctx.params.uid
@@ -17,12 +17,15 @@ const preload = async (ctx, next) => {
 // 查询用户组
 const find = async (ctx) => {
   const filter = {}
-  if (ctx.query.privilege && ctx.query.privilege === 'admin') {
+  if (!isUndefined(ctx.query.privilege) && ctx.query.privilege === 'admin') {
     filter.privilege = {
-      $in: [config.privilege.Root + '', config.privilege.Teacher + '']
+      $in: [config.privilege.Root, config.privilege.Teacher]
     }
   }
-  const list = await User.find(filter)
+  const list = await User
+    .find(filter)
+    .select('uid nick privilege')
+    .exec()
   ctx.body = {
     list
   }
@@ -101,8 +104,13 @@ const update = async (ctx) => {
   const user = ctx.state.user
   const fileds = ['nick', 'motto', 'school', 'mail']
   fileds.forEach((filed) => {
-    user[filed] = opt[filed]
+    if (!isUndefined(opt[filed])) {
+      user[filed] = opt[filed]
+    }
   })
+  if (!isUndefined(opt.privilege)) {
+    user.privilege = parseInt(opt.privilege)
+  }
   if (opt.newPwd) {
     user.pwd = generatePwd(opt.newPwd)
   }

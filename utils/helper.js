@@ -29,6 +29,10 @@ function isRoot (profile) {
   }
 }
 
+function isUndefined (item) {
+  return typeof item === 'undefined'
+}
+
 const pushToJudge = (sid) => {
   redis.lpush('oj:solutions', sid) // 将sid往列表的头部插入
 }
@@ -38,5 +42,6 @@ module.exports = {
   purify,
   isAdmin,
   isRoot,
+  isUndefined,
   pushToJudge
 }
