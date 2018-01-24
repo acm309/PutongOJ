@@ -78,7 +78,7 @@ const api = {
   },
   user: {
     findOne: (data) => instance.get(`/user/${data.uid}`, { params: data }),
-    find: (data) => instance.get('/user/list'),
+    find: (data) => instance.get('/user/list', { params: data }),
     create: (data) => instance.post('/user', data),
     update: (data) => instance.put(`/user/${data.uid}`, data)
   },

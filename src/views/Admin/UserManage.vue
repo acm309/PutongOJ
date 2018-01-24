@@ -2,7 +2,7 @@
   <div>
     <h1>修改用户信息</h1>
     <Row type="flex" justify="start">
-      <Col :span="2" class="label">Uid</Col>
+      <Col :span="2" class="label">Username</Col>
       <Col :span="4">
         <Input v-model="uid"></Input>
       </Col>
@@ -40,7 +40,7 @@
         <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
       </Col>
     </Row>
-    <Button type="primary" @click="saveUser" class="user-button">Submit</Button>
+    <Button type="primary" @click="saveUser" class="submit">Submit</Button>
     <h1>管理用户组</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Group</Col>
@@ -80,7 +80,32 @@
       @on-change="handleChange"
       class="tranfer">
     </Transfer>
-    <Button type="primary" @click="saveGroup">Submit</Button>
+    <Button type="primary" @click="saveGroup" class="submit">Submit</Button>
+    <h1>增删管理员</h1>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">Username</Col>
+      <Col :span="4">
+        <Input v-model="admin"></Input>
+      </Col>
+      <Col :offset="1" :span="2">
+        <Button type="primary" @click="add">Add</Button>
+      </Col>
+    </Row>
+    <table>
+      <tr>
+        <th>Username</th>
+        <th>Nick</th>
+        <th>Remove</th>
+      </tr>
+      <template v-for="(item, index) in adminList">
+          <td>{{ item.uid }}</td>
+          <td>{{ item.nick }}</td>
+          <td>
+            <Button type="text" @click="remove(item.uid)">Remove</Button>
+          </td>
+        </tr>
+      </template>
+    </table>
   </div>
 </template>
 
@@ -100,12 +125,14 @@ export default {
       width: '350px',
       height: '400px'
     },
-    userList: []
+    userList: [],
+    admin: ''
   }),
   computed: {
     ...mapGetters({
       user: 'user/user',
       userSum: 'user/list',
+      adminList: 'user/adminList',
       groupList: 'group/list',
       group: 'group/group'
     }),
@@ -118,6 +145,7 @@ export default {
   },
   created () {
     this.fetchGroup()
+    this.fetchAdmin()
   },
   methods: {
     findUser () {
@@ -206,7 +234,12 @@ export default {
           this.$store.dispatch('group/find')
         })
       }
-    }
+    },
+    fetchAdmin () {
+      this.$store.dispatch('user/find', { privilege: 'admin' })
+    },
+    add () {},
+    remove () {}
   }
 }
 </script>
@@ -216,7 +249,7 @@ h1
   margin-bottom: 20px
 .ivu-row-flex
   margin-bottom: 10px
-.user-button
+.submit
   margin-bottom: 20px
 .label
   line-height: 32px
@@ -225,4 +258,29 @@ h1
 .tranfer
   margin-top: 20px
   margin-bottom: 20px
+table
+  width: 100%
+  border-collapse: collapse
+  border-spacing: 0
+  th:nth-child(1)
+    padding-left: 10px
+  //   width: 5%
+  // th:nth-child(2)
+  //   width: 10%
+  // th:nth-child(3)
+  //   width: 20%
+  tr
+    border-bottom: 1px solid #ebeef5
+    height: 40px
+    line-height: 40px
+    font-size: 14px
+    td:nth-child(1)
+      padding-left: 10px
+  th
+    text-align:left
+  .ivu-btn
+    vertical-align: baseline
+    color: #e040fb
+    padding: 0 1px
+    font-size: 14px
 </style>

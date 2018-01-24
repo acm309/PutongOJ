@@ -9,7 +9,8 @@ const store = {
     user: {},
     solved: [],
     unsolved: [],
-    group: []
+    group: [],
+    adminList: []
   },
   getters: {
     registerDialog: state => state.registerDialog,
@@ -17,7 +18,8 @@ const store = {
     user: state => state.user,
     solved: state => state.solved,
     unsolved: state => state.unsolved,
-    group: state => state.group
+    group: state => state.group,
+    adminList: state => state.adminList
   },
   mutations: {
     [types.SHOW_REGISTER]: (state) => {
@@ -28,6 +30,9 @@ const store = {
     },
     [types.UPDATE_USERS_LIST]: (state, payload) => {
       state.list = payload
+    },
+    [types.UPDATE_USERS_ADMIN_LIST]: (state, payload) => {
+      state.adminList = payload
     },
     [types.UPDATE_SOLVED]: (state, payload) => {
       state.solved = payload
@@ -43,9 +48,13 @@ const store = {
     register ({ commit }, payload) {
       return api.register(payload)
     },
-    find ({ commit }) {
-      return api.user.find().then(({ data }) => {
-        commit(types.UPDATE_USERS_LIST, data.list)
+    find ({ commit }, payload) {
+      return api.user.find(payload).then(({ data }) => {
+        if (payload) {
+          commit(types.UPDATE_USERS_ADMIN_LIST, data.list)
+        } else {
+          commit(types.UPDATE_USERS_LIST, data.list)
+        }
       })
     },
     findOne ({ commit }, payload) {

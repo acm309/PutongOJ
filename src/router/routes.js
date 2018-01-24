@@ -6,10 +6,10 @@ import ProblemList from '@/views/ProblemList'
 import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
-// import ProblemStatistics from '@/views/Problem/Statistics'
-import ProblemEdit from '@/views/Problem/problemEdit'
 import MySubmission from '@/views/Problem/Mysubmission'
-import Testcase from '@/views/Problem/Testcase'
+// import ProblemStatistics from '@/views/Problem/Statistics'
+// import ProblemEdit from '@/views/Problem/problemEdit'
+// import Testcase from '@/views/Problem/Testcase'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -19,12 +19,12 @@ import ContestProblem from '@/views/Contest/ContestProblem'
 import ContestSubmit from '@/views/Contest/ContestSubmit'
 import ContestStatus from '@/views/Contest/ContestStatus'
 import ContestRanklist from '@/views/Contest/ContestRanklist'
-import ContestEdit from '@/views/Contest/ContestEdit'
+// import ContestEdit from '@/views/Contest/ContestEdit'
 
 // news
 import News from '@/views/News/News'
 import NewsInfo from '@/views/News/NewsInfo'
-import NewsEdit from '@/views/News/NewsEdit'
+// import NewsEdit from '@/views/News/NewsEdit'
 
 // status & solution & ranklist & user & news
 import Status from '@/views/Status'
@@ -33,12 +33,21 @@ import Ranklist from '@/views/Ranklist'
 import UserInfo from '@/views/UserInfo'
 
 // admin
-import ProblemCreate from '@/views/Admin/ProblemCreate'
-import ContestCreate from '@/views/Admin/ContestCreate'
-import NewsCreate from '@/views/Admin/NewsCreate'
-import UserManage from '@/views/Admin/UserManage'
+// import ProblemCreate from '@/views/Admin/ProblemCreate'
+// import ContestCreate from '@/views/Admin/ContestCreate'
+// import NewsCreate from '@/views/Admin/NewsCreate'
+// import UserManage from '@/views/Admin/UserManage'
 
+// 路由懒加载
 const ProblemStatistics = r => require.ensure([], () => r(require('@/views/Problem/Statistics')), 'statistics')
+const ProblemEdit = r => require.ensure([], () => r(require('@/views/Problem/ProblemEdit')), 'admin')
+const Testcase = r => require.ensure([], () => r(require('@/views/Problem/Testcase')), 'admin')
+const ContestEdit = r => require.ensure([], () => r(require('@/views/Contest/ContestEdit')), 'admin')
+const NewsEdit = r => require.ensure([], () => r(require('@/views/News/NewsEdit')), 'admin')
+const ProblemCreate = r => require.ensure([], () => r(require('@/views/Admin/ProblemCreate')), 'admin')
+const ContestCreate = r => require.ensure([], () => r(require('@/views/Admin/ContestCreate')), 'admin')
+const NewsCreate = r => require.ensure([], () => r(require('@/views/Admin/NewsCreate')), 'admin')
+const UserManage = r => require.ensure([], () => r(require('@/views/Admin/UserManage')), 'admin')
 
 export default [
   {
