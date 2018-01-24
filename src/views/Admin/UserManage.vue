@@ -98,10 +98,11 @@
         <th>Remove</th>
       </tr>
       <template v-for="(item, index) in adminList">
+        <tr>
           <td>{{ item.uid }}</td>
           <td>{{ item.nick }}</td>
-          <td>
-            <Button type="text" @click="remove(item.uid)">Remove</Button>
+          <td v-if="item.uid !== 'admin'">
+            <Button type="text" @click="remove(item)">Remove</Button>
           </td>
         </tr>
       </template>
@@ -134,7 +135,8 @@ export default {
       userSum: 'user/list',
       adminList: 'user/adminList',
       groupList: 'group/list',
-      group: 'group/group'
+      group: 'group/group',
+      privilege: 'privilege'
     }),
     transData () {
       return this.userSum.map((item, index) => ({
@@ -238,8 +240,35 @@ export default {
     fetchAdmin () {
       this.$store.dispatch('user/find', { privilege: 'admin' })
     },
-    add () {},
-    remove () {}
+    add () {
+      const user = {
+        uid: this.admin,
+        privilege: this.privilege.Teacher
+      }
+      this.$store.dispatch('user/update', user).then(() => {
+        this.$Message.success(`成功设置${this.admin}用户为管理员！`)
+        this.fetchAdmin()
+      })
+    },
+    remove (item) {
+      const user = Object.assign(
+        only(item, 'uid nick'),
+        { privilege: this.privilege.PrimaryUser }
+      )
+      this.$Modal.confirm({
+        title: '提示',
+        content: `<p>此操作将删除${user.uid}用户的管理员权限, 是否继续?</p>`,
+        onOk: () => {
+          this.$store.dispatch('user/update', user).then(() => {
+            this.$Message.success(`成功设置${user.uid}用户为普通用户！`)
+            this.fetchAdmin()
+          })
+        },
+        onCancel: () => {
+          this.$Message.info('已取消删除！')
+        }
+      })
+    }
   }
 }
 </script>
