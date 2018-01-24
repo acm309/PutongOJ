@@ -52,11 +52,7 @@ const create = async (ctx) => {
     return User.findOne({uid}).exec()
       .then((user) => {
         user.gid.push(group.gid)
-        return user
-      })
-      .then((user) => {
-        user.save()
-        return user
+        return user.save()
       })
       .then((user) => {
         logger.info(`User is updated" ${user.uid} -- ${user.gid}`)
