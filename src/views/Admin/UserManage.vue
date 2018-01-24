@@ -85,7 +85,7 @@
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Username</Col>
       <Col :span="4">
-        <Input v-model="admin"></Input>
+        <Input v-model="admin" @keyup.enter.native="add"></Input>
       </Col>
       <Col :offset="1" :span="2">
         <Button type="primary" @click="add">Add</Button>
@@ -101,8 +101,8 @@
         <tr>
           <td>{{ item.uid }}</td>
           <td>{{ item.nick }}</td>
-          <td v-if="item.uid !== 'admin'">
-            <Button type="text" @click="remove(item)">Remove</Button>
+          <td>
+            <Button v-if="item.uid !== 'admin'" type="text" @click="remove(item)">Remove</Button>
           </td>
         </tr>
       </template>
@@ -248,6 +248,7 @@ export default {
       this.$store.dispatch('user/update', user).then(() => {
         this.$Message.success(`成功设置${this.admin}用户为管理员！`)
         this.fetchAdmin()
+        this.admin = ''
       })
     },
     remove (item) {
