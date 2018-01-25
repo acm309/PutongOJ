@@ -28,12 +28,17 @@
 </template>
 
 <script>
+import { Tooltip } from 'iview'
+
 export default {
   props: ['problem'],
   methods: {
     onCopy () {
       this.$Message.success('Copied!')
     }
+  },
+  components: {
+    Tooltip
   }
 }
 </script>

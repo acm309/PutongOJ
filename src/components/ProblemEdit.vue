@@ -64,7 +64,8 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { Row, Col, Input } from 'iview'
+import api from '@/api'
 import { VueEditor } from 'vue2-editor'
 
 export default {
@@ -73,7 +74,7 @@ export default {
     handleImageAdded (file, Editor, cursorLocation) {
       const formData = new window.FormData()
       formData.append('image', file)
-      axios.post('/submit', formData) // TODO
+      api.getImage(formData)
         .then(({ data }) => {
           const url = data.url // Get url from response
           Editor.insertEmbed(cursorLocation, 'image', url)
@@ -82,7 +83,10 @@ export default {
     }
   },
   components: {
-    VueEditor
+    VueEditor,
+    Row,
+    Col,
+    Input
   }
 }
 </script>

@@ -43,12 +43,19 @@
 </template>
 
 <script>
+import { Row, Col, Page, Button } from 'iview'
 import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 
 export default {
+  components: {
+    Row,
+    Col,
+    Page,
+    Button
+  },
   data () {
     return {
       page: parseInt(this.$route.query.page) || 1,

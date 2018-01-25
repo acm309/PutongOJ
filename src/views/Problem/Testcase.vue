@@ -29,10 +29,15 @@
 </template>
 
 <script>
+import { Button, Input } from 'iview'
 import { mapGetters } from 'vuex'
 import { testcaseUrl } from '@/util/helper'
 
 export default {
+  components: {
+    Button,
+    Input
+  },
   data: () => ({
     test: {
       pid: '',

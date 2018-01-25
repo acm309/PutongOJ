@@ -13,7 +13,9 @@
 - ~~修改题目或比赛，新建题目或比赛，不在当前页面提交，直接点击Menu的其他栏，会报错~~
 - ~~管理员页面的路由懒加载~~
 - ~~比赛创建后跳转到新建比赛页面报错，获取不了数据~~
-- 将iview改为按需引用，使用webpack-bundle-analyzer检测打包文件
+- 将iview改为按需引用
+- 优化引入echarts
+- 使用webpack-bundle-analyzer检测打包文件
 - 比赛封榜
 - 修改teacher权限，禁止修改admin用户的信息
 - 查询用户资料时报错，后端取不到group的title?

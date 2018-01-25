@@ -18,12 +18,16 @@
 </template>
 
 <script>
+import { Steps, Step, Button } from 'iview'
 import ProblemEdit from '@/components/ProblemEdit'
 import { mapActions } from 'vuex'
 
 export default {
   components: {
-    'oj-problem-edit': ProblemEdit
+    'oj-problem-edit': ProblemEdit,
+    Steps,
+    Step,
+    Button
   },
   data: () => ({
     problem: {

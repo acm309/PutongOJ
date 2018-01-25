@@ -89,6 +89,7 @@
 </template>
 
 <script>
+import { Row, Col, DatePicker, Input, Button } from 'iview'
 import draggable from 'vuedraggable'
 import only from 'only'
 import { mapGetters } from 'vuex'
@@ -196,7 +197,12 @@ export default {
     }
   },
   components: {
-    draggable
+    draggable,
+    Row,
+    Col,
+    DatePicker,
+    Input,
+    Button
   }
 }
 </script>

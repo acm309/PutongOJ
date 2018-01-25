@@ -39,9 +39,14 @@
 </template>
 
 <script>
+import { Switch, Button } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
+  components: {
+    'i-switch': Switch,
+    Button
+  },
   data: () => ({
     timer: null
   }),

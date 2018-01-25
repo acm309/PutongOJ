@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import { Button } from 'iview'
 import { mapGetters } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
@@ -30,6 +31,9 @@ import highlight from 'highlight.js'
 // https://github.com/isagalaev/highlight.js/issues/1284
 
 export default {
+  components: {
+    Button
+  },
   data: () => ({
     result: constant.result,
     language: constant.language

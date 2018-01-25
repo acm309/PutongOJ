@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { Button } from 'iview'
 import NewsEdit from '@/components/NewsEdit'
 import { mapGetters } from 'vuex'
 
@@ -30,7 +31,8 @@ export default {
     }
   },
   components: {
-    'oj-news-edit': NewsEdit
+    'oj-news-edit': NewsEdit,
+    Button
   }
 }
 </script>
