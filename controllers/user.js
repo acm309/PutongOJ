@@ -49,10 +49,10 @@ const findOne = async (ctx) => {
       .exec()
   ])
 
-  const process = user.gid.map((gid) => Group.findOne({gid})
+  const procedure = user.gid.map((gid) => Group.findOne({gid})
     .exec()
     .then(item => item.title))
-  const group = await Promise.all(process)
+  const group = await Promise.all(procedure)
 
   ctx.body = {
     user,

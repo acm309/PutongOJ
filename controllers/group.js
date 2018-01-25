@@ -88,10 +88,40 @@ const update = async (ctx) => {
   }
 }
 
-// 删除一道题目
+// 删除一个group
 const del = async (ctx) => {
-  const gid = ctx.params.gid
+  const gid = parseInt(ctx.params.gid)
+  const group = ctx.state.group
+  const list = group.list
 
+  // 删除user表里的gid
+  const procedure = list.map((uid, index) => {
+    return User.findOne({uid}).exec()
+      .then((user) => {
+        const ind = user.gid.indexOf(gid)
+        if (ind !== -1) {
+          user.gid.splice(ind, 1)
+        }
+        return user.save()
+      })
+      .then((user) => {
+        logger.info(`User's group is deleted" ${user.uid} -- ${gid}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(procedure)
+
+  // 清空所有用户的gid
+  // const users = await User.find({})
+  // users.forEach((user) => {
+  //   user.gid.splice(0, user.gid.length)
+  //   console.log(user.gid)
+  // })
+  // await Promise.all(users.map(s => s.save()))
+
+  // 删除group表里的gid
   try {
     await Group.deleteOne({ gid }).exec()
     logger.info(`One Group is delete ${gid}`)

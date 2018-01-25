@@ -10,6 +10,6 @@ router.get('/list', group.find)
 router.get('/:gid', group.preload, group.findOne)
 router.post('/', auth.login, auth.admin, group.create)
 router.put('/:gid', auth.login, auth.admin, group.preload, group.update)
-router.del('/:gid', auth.login, group.del)
+router.del('/:gid', auth.login, auth.admin, group.preload, group.del)
 
 module.exports = router
