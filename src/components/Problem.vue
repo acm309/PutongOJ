@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { Tooltip } from 'iview'
+import { Tooltip, Icon } from 'iview'
 
 export default {
   props: ['problem'],
@@ -38,7 +38,8 @@ export default {
     }
   },
   components: {
-    Tooltip
+    Tooltip,
+    Icon
   }
 }
 </script>

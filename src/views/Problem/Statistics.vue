@@ -15,7 +15,8 @@
           </td>
         </tr>
       </table>
-      <div id="myChart" class="charts"></div>
+      <!-- <div id="myChart" class="echarts"></div> -->
+      <chart :options="pie" ref="pie" auto-resize></chart>
       <table>
         <tr v-for="(item, index) in countList">
           <td class="t1">{{ name[index] }}</td>
@@ -70,13 +71,19 @@
 
 <script>
 import { Button, Page } from 'iview'
+import ECharts from 'vue-echarts/components/ECharts.vue'
+import 'echarts/lib/chart/pie'
+import 'echarts/lib/component/title'
+import 'echarts/lib/component/tooltip'
+import 'echarts/lib/component/legend'
 import { mapGetters } from 'vuex'
 import constant from '@/util/constant.js'
-import echarts from 'echarts'
+// import echarts from 'echarts'
 // let echarts = require('echarts/lib/echarts')
 
 export default {
   components: {
+    'chart': ECharts,
     Button,
     Page
   },
@@ -95,28 +102,9 @@ export default {
       'countList',
       'sumCharts',
       'sumStatis'
-    ])
-  },
-  created () {
-    this.getStatistics()
-    this.pid = this.$route.params.pid
-  },
-  mounted () {
-    let drawLine = this.drawLine()
-    window.onresize = () => drawLine.resize() // 重绘，窗口大小改动时
-  },
-  methods: {
-    getStatistics () {
-      let opt = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        pid: this.$route.params.pid
-      }
-      this.$store.dispatch('statistics/find', opt)
-    },
-    drawLine () {
-      let myChart = echarts.init(document.getElementById('myChart'))
-      myChart.setOption({
+    ]),
+    pie () {
+      const data = {
         title: {
           text: 'Statistics for ' + this.$route.params.pid,
           x: 'center',
@@ -140,21 +128,109 @@ export default {
             radius: '55%',
             center: ['50%', '50%'],
             data: [
-              {value: this.countList[0], name: 'CE'},
-              {value: this.countList[1], name: 'AC'},
-              {value: this.countList[2], name: 'RE'},
-              {value: this.countList[3], name: 'WA'},
-              {value: this.countList[4], name: 'TLE'},
-              {value: this.countList[5], name: 'MLE'},
-              {value: this.countList[6], name: 'OLE'},
-              {value: this.countList[7], name: 'PE'},
-              {value: this.countList[8], name: 'SE'}
+              {value: this.countList[0] || 0, name: 'CE'},
+              {value: this.countList[1] || 0, name: 'AC'},
+              {value: this.countList[2] || 0, name: 'RE'},
+              {value: this.countList[3] || 0, name: 'WA'},
+              {value: this.countList[4] || 0, name: 'TLE'},
+              {value: this.countList[5] || 0, name: 'MLE'},
+              {value: this.countList[6] || 0, name: 'OLE'},
+              {value: this.countList[7] || 0, name: 'PE'},
+              {value: this.countList[8] || 0, name: 'SE'}
             ]
           }
         ]
+      }
+      return data
+    }
+  },
+  created () {
+    // this.getStatistics()
+    this.pid = this.$route.params.pid
+  },
+  mounted () {
+    // let drawLine = this.drawLine()
+    // window.onresize = () => drawLine.resize() // 重绘，窗口大小改动时
+    // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
+    let dataIndex = -1
+    let pie = this.$refs.pie
+    let dataLen = this.countList.length
+    let opt = {
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      pid: this.$route.params.pid
+    }
+    this.$store.dispatch('statistics/find', opt)
+      .then(() => {
+        pie.dispatchAction({
+          type: 'downplay',
+          seriesIndex: 0,
+          dataIndex
+        })
+        dataIndex = (dataIndex + 1) % dataLen
+        pie.dispatchAction({
+          type: 'highlight',
+          seriesIndex: 0,
+          dataIndex
+        })
+        // 显示 tooltip
+        pie.dispatchAction({
+          type: 'showTip',
+          seriesIndex: 0,
+          dataIndex
+        })
       })
-      return myChart
+  },
+  methods: {
+    getStatistics () {
+      let opt = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        pid: this.$route.params.pid
+      }
+      this.$store.dispatch('statistics/find', opt)
     },
+    // drawLine () {
+    //   let myChart = echarts.init(document.getElementById('myChart'))
+    //   myChart.setOption({
+    //     title: {
+    //       text: 'Statistics for ' + this.$route.params.pid,
+    //       x: 'center',
+    //       y: 'top'
+    //     },
+    //     tooltip: {
+    //       trigger: 'item',
+    //       formatter: '{b} </br>{d}%'
+    //     },
+    //     legend: {
+    //       orient: 'horizontal',
+    //       x: 'center',
+    //       y: 'bottom',
+    //       data: ['CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE']
+    //     },
+    //     calculable: true,
+    //     series: [
+    //       {
+    //         name: 'Statistics',
+    //         type: 'pie',
+    //         radius: '55%',
+    //         center: ['50%', '50%'],
+    //         data: [
+    //           {value: this.countList[0], name: 'CE'},
+    //           {value: this.countList[1], name: 'AC'},
+    //           {value: this.countList[2], name: 'RE'},
+    //           {value: this.countList[3], name: 'WA'},
+    //           {value: this.countList[4], name: 'TLE'},
+    //           {value: this.countList[5], name: 'MLE'},
+    //           {value: this.countList[6], name: 'OLE'},
+    //           {value: this.countList[7], name: 'PE'},
+    //           {value: this.countList[8], name: 'SE'}
+    //         ]
+    //       }
+    //     ]
+    //   })
+    //   return myChart
+    // },
     handleCurrentChange (val) {
       this.currentPage = val
       this.getStatistics()
@@ -197,7 +273,7 @@ export default {
         .t2
           width: 40%
           text-align: center
-      .charts
+      .echarts
         height: 420px
         width: 95%
         margin-top: 10px
