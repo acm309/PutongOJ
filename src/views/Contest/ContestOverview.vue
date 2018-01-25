@@ -29,12 +29,13 @@
 </template>
 
 <script>
-import { Button } from 'iview'
+import { Button, Icon } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    Button
+    Button,
+    Icon
   },
   data () {
     return {

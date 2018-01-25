@@ -39,13 +39,14 @@
 </template>
 
 <script>
-import { Switch, Button } from 'iview'
+import { Switch, Button, Icon } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
   components: {
     'i-switch': Switch,
-    Button
+    Button,
+    Icon
   },
   data: () => ({
     timer: null
