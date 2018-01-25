@@ -187,8 +187,10 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
-      this.group.gid = this.groupList[this.ind].gid
-      this.group.title = this.groupList[this.ind].title
+      if (this.group.gid !== undefined) {
+        this.group.gid = this.groupList[this.ind].gid
+        this.group.title = this.groupList[this.ind].title
+      }
       if (name === 'search') {
         this.targetKeys = []
         this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
