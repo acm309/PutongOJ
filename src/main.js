@@ -7,8 +7,7 @@ import store from './store'
 // import iView from 'iview'
 import { Message } from 'iView'
 import VueClipboard from 'vue-clipboard2'
-// import '@/my-theme/index.less'
-import 'iview/dist/styles/iview.css'
+import '@/my-theme/index.less'
 import { formate, timePretty, timeContest } from '@/util/formate'
 import {
   Row,
