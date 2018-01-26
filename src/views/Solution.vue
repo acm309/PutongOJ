@@ -26,8 +26,17 @@
 import { mapGetters } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
-import highlight from 'highlight.js'
+// import highlight from 'highlight.js'
 // https://github.com/isagalaev/highlight.js/issues/1284
+import highlight from 'highlight.js/lib/highlight'
+import cpp from 'highlight.js/lib/languages/cpp'
+import python from 'highlight.js/lib/languages/python'
+import java from 'highlight.js/lib/languages/java'
+import 'highlight.js/styles/atom-one-light.css'
+
+highlight.registerLanguage('cpp', cpp)
+highlight.registerLanguage('java', java)
+highlight.registerLanguage('python', python)
 
 export default {
   data: () => ({
