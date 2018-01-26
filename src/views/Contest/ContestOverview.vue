@@ -29,9 +29,14 @@
 </template>
 
 <script>
+import { Button, Icon } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
+  components: {
+    Button,
+    Icon
+  },
   data () {
     return {
       cid: this.$route.params.cid

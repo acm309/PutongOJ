@@ -13,8 +13,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { Button } from 'iview'
 import Problem from '@/components/Problem'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
@@ -23,7 +24,8 @@ export default {
     }
   },
   components: {
-    Problem
+    Problem,
+    Button
   },
   computed: {
     ...mapGetters({

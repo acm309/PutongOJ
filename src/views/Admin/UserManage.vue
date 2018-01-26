@@ -111,11 +111,25 @@
 </template>
 
 <script>
+import { Row, Col, Input, Button, Select, Option, Dropdown, DropdownMenu, DropdownItem, Icon, Transfer } from 'iview'
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 import only from 'only'
 
 export default {
+  components: {
+    Row,
+    Col,
+    Input,
+    Button,
+    Select,
+    Option,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    Icon,
+    Transfer
+  },
   data: () => ({
     uid: '',
     newPwd: '',
@@ -187,8 +201,10 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
-      this.group.gid = this.groupList[this.ind].gid
-      this.group.title = this.groupList[this.ind].title
+      if (this.group.gid !== undefined) {
+        this.group.gid = this.groupList[this.ind].gid
+        this.group.title = this.groupList[this.ind].title
+      }
       if (name === 'search') {
         this.targetKeys = []
         this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
@@ -294,11 +310,6 @@ table
   border-spacing: 0
   th:nth-child(1)
     padding-left: 10px
-  //   width: 5%
-  // th:nth-child(2)
-  //   width: 10%
-  // th:nth-child(3)
-  //   width: 20%
   tr
     border-bottom: 1px solid #ebeef5
     height: 40px

@@ -20,7 +20,15 @@
 </template>
 
 <script>
+import { Card, Row, Col, Button } from 'iview'
+
 export default {
+  components: {
+    Card,
+    Row,
+    Col,
+    Button
+  },
   methods: {
     home () {
       this.$router.push({

@@ -60,13 +60,26 @@
 </template>
 
 <script>
+import { Layout, Header, Menu, MenuItem, Submenu, Dropdown, DropdownMenu, DropdownItem, Button, Icon, Content, Footer } from 'iview'
 import { mapMutations, mapGetters } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
 import Dialog from './LoginAndRegister'
 
 export default {
   components: {
-    Dialog
+    Dialog,
+    Layout,
+    Header,
+    Menu,
+    MenuItem,
+    Submenu,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    Button,
+    Icon,
+    Content,
+    Footer
   },
   computed: {
     ...mapGetters({

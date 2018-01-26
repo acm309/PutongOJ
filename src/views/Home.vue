@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { Card, Row, Col, Icon, Page } from 'iview'
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 import only from 'only'
@@ -87,6 +88,13 @@ export default {
     '$route' (to, from) {
       if (to !== from) this.fetch()
     }
+  },
+  components: {
+    Card,
+    Row,
+    Col,
+    Icon,
+    Page
   }
 }
 </script>

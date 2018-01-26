@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { Steps, Step } from 'iview'
 import ContestEdit from '@/components/ContestEdit'
 
 export default {
@@ -46,7 +47,9 @@ export default {
     }
   },
   components: {
-    'oj-contest-edit': ContestEdit
+    'oj-contest-edit': ContestEdit,
+    Steps,
+    Step
   }
 }
 </script>

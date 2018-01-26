@@ -6,12 +6,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { Button } from 'iview'
 import Problem from '@/components/Problem.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    Problem
+    Problem,
+    Button
   },
   computed: {
     ...mapGetters('problem', [ 'problem' ])

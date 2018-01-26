@@ -62,14 +62,12 @@ const instance = {}
 })
 
 const api = {
-  // 获取题目提交信息
-  getStatistics (data) {
-    return instance.get(`/statistics/${data.pid}`, { params: data })
-  },
+  // 获取题目提交图表信息
+  getStatistics: (data) => instance.get(`/statistics/${data.pid}`, { params: data }),
   // 获取排名列表
-  getRanklist (data) {
-    return instance.get('/ranklist/list', { params: data })
-  },
+  getRanklist: (data) => instance.get('/ranklist/list', { params: data }),
+  // 图片上传
+  getImage: (data) => instance.post('/submit', data),
   testcase: {
     findOne: (data) => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
     find: (data) => instance.get(`/testcase/${data.pid}`, { params: data }),

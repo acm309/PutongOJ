@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { Form, FormItem, Select, Option, Input } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -27,6 +28,13 @@ export default {
   created () {
     // 清空solution对象（否则如果先在status里点击他人代码，再进入submit页面，会显示之前看到的代码而不是空）
     this.$store.commit('solution/GET_SOLUTION', {})
+  },
+  components: {
+    Form,
+    FormItem,
+    Select,
+    Option,
+    Input
   }
 }
 </script>

@@ -6,8 +6,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { Button } from 'iview'
 import ProblemEdit from '@/components/ProblemEdit'
+import { mapGetters } from 'vuex'
 
 export default {
   computed: {
@@ -25,7 +26,8 @@ export default {
     }
   },
   components: {
-    'oj-problem-edit': ProblemEdit
+    'oj-problem-edit': ProblemEdit,
+    Button
   }
 }
 </script>
