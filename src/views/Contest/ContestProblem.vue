@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import { Button } from 'iview'
 import Problem from '@/components/Problem'
 import { mapGetters } from 'vuex'
 
@@ -24,8 +23,7 @@ export default {
     }
   },
   components: {
-    Problem,
-    Button
+    Problem
   },
   computed: {
     ...mapGetters({

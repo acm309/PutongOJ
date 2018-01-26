@@ -83,22 +83,12 @@
 </template>
 
 <script>
-import { Row, Col, Input, Select, Option, Button, Page } from 'iview'
 import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 
 export default {
-  components: {
-    Row,
-    Col,
-    Input,
-    Select,
-    Option,
-    Button,
-    Page
-  },
   data () {
     return {
       uid: this.$route.query.uid || '',

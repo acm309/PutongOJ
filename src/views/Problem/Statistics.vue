@@ -70,7 +70,6 @@
 </template>
 
 <script>
-import { Button, Page } from 'iview'
 import ECharts from 'vue-echarts/components/ECharts.vue'
 import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/title'
@@ -83,9 +82,7 @@ import constant from '@/util/constant.js'
 
 export default {
   components: {
-    'chart': ECharts,
-    Button,
-    Page
+    'chart': ECharts
   },
   data () {
     return {

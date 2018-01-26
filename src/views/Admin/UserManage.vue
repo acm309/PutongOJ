@@ -111,25 +111,11 @@
 </template>
 
 <script>
-import { Row, Col, Input, Button, Select, Option, Dropdown, DropdownMenu, DropdownItem, Icon, Transfer } from 'iview'
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 import only from 'only'
 
 export default {
-  components: {
-    Row,
-    Col,
-    Input,
-    Button,
-    Select,
-    Option,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Icon,
-    Transfer
-  },
   data: () => ({
     uid: '',
     newPwd: '',

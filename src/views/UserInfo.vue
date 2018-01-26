@@ -94,20 +94,10 @@
 </template>
 
 <script>
-import { Row, Col, Input, Icon, Tabs, TabPane, Button } from 'iview'
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 
 export default {
-  components: {
-    Row,
-    Col,
-    Input,
-    Icon,
-    Tabs,
-    TabPane,
-    Button
-  },
   data: () => ({
     display: 'overview',
     newPwd: '',

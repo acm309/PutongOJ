@@ -52,18 +52,12 @@
 </template>
 
 <script>
-import { Button, Tooltip, Page } from 'iview'
 import { mapGetters } from 'vuex'
 import constant from '../util/constant'
 import only from 'only'
 import pickBy from 'lodash.pickby'
 
 export default {
-  components: {
-    Button,
-    Tooltip,
-    Page
-  },
   data () {
     return {
       currentPage: parseInt(this.$route.query.page) || 1,

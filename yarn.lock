@@ -2145,11 +2145,11 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
 
-echarts@^3.8.5:
-  version "3.8.5"
-  resolved "https://registry.yarnpkg.com/echarts/-/echarts-3.8.5.tgz#58e4a51d2743c6fb75257b0dc0a9cf9f5378ac0e"
+echarts@^4.0.1:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/echarts/-/echarts-4.0.2.tgz#c405e9e479af982383c8ae2b5946e52d058c6220"
   dependencies:
-    zrender "3.7.4"
+    zrender "4.0.1"
 
 editorconfig@^0.13.2:
   version "0.13.3"
@@ -6042,6 +6042,10 @@ requires-port@1.0.x, requires-port@1.x.x, requires-port@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
 
+resize-detector@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/resize-detector/-/resize-detector-0.0.5.tgz#3ccd9f57e9196166fc22a2854d4982be45fbf63b"
+
 resolve-cwd@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/resolve-cwd/-/resolve-cwd-2.0.0.tgz#00a9f7387556e27038eae232caa372a6a59b665a"
@@ -6987,6 +6991,14 @@ vue-clipboard2@^0.0.8:
     clipboard "^1.5.16"
     vue "^2.0.0"
 
+vue-echarts@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/vue-echarts/-/vue-echarts-3.0.1.tgz#874171cc44ceba3ef62e3df0df2192925765d055"
+  dependencies:
+    echarts "^4.0.1"
+    lodash "^4.17.4"
+    resize-detector "0.0.5"
+
 vue-hot-reload-api@^2.2.0:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.2.4.tgz#683bd1d026c0d3b3c937d5875679e9a87ec6cd8f"
@@ -7419,6 +7431,6 @@ yauzl@2.4.1:
   dependencies:
     fd-slicer "~1.0.1"
 
-zrender@3.7.4:
-  version "3.7.4"
-  resolved "https://registry.yarnpkg.com/zrender/-/zrender-3.7.4.tgz#f847d53948481ef6d42906d1ea9aeec7acbefdf2"
+zrender@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/zrender/-/zrender-4.0.1.tgz#961e77abc5042eaa624b5230f8d673bf648298e9"

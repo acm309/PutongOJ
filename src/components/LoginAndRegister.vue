@@ -39,24 +39,11 @@
 </template>
 
 <script>
-import { Modal, Row, Menu, Col, Tabs, TabPane, Form, FormItem, Input, Button } from 'iview'
 import { mapState, mapActions, mapMutations } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
 import only from 'only'
 
 export default {
-  components: {
-    Modal,
-    Row,
-    Menu,
-    Col,
-    Tabs,
-    TabPane,
-    Form,
-    FormItem,
-    Input,
-    Button
-  },
   data () {
     // 自定义验证规则
     const validatePass1 = (rule, value, callback) => {

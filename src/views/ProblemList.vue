@@ -64,24 +64,12 @@
 </template>
 
 <script>
-import { Row, Col, Page, Select, Option, Icon, Input, Button, Tooltip } from 'iview'
 import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 import constant from '@/util/constant'
 
 export default {
-  components: {
-    Row,
-    Col,
-    Page,
-    Select,
-    Option,
-    Icon,
-    Input,
-    Button,
-    Tooltip
-  },
   data () {
     return {
       options: [

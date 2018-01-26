@@ -1,9 +1,9 @@
 <template lang="html">
   <div>
-    <i-switch size="large" @on-change="change">
+    <Switch size="large" @on-change="change">
       <Icon type="android-done" slot="open"></Icon>
       <Icon type="android-close" slot="close"></Icon>
-    </i-switch> 自动刷新 (每 10 秒一次)
+    </Switch> 自动刷新 (每 10 秒一次)
     <div class="conrank-wrap">
       <table>
         <tr>
@@ -39,15 +39,9 @@
 </template>
 
 <script>
-import { Switch, Button, Icon } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: {
-    'i-switch': Switch,
-    Button,
-    Icon
-  },
   data: () => ({
     timer: null
   }),

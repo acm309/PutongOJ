@@ -13,14 +13,9 @@
 </template>
 
 <script>
-import { Tabs, TabPane } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: {
-    Tabs,
-    TabPane
-  },
   data: () => ({
     current: 'problemInfo'
   }),

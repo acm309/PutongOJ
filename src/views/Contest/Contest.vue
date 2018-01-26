@@ -24,18 +24,9 @@
 </template>
 
 <script>
-import { Card, Row, Col, Progress, Tabs, TabPane } from 'iview'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: {
-    Card,
-    Row,
-    Col,
-    Progress,
-    Tabs,
-    TabPane
-  },
   data () {
     return {
       display: ''

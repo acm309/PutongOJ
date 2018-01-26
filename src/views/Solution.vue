@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import { Button } from 'iview'
 import { mapGetters } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
@@ -40,9 +39,6 @@ highlight.registerLanguage('java', java)
 highlight.registerLanguage('python', python)
 
 export default {
-  components: {
-    Button
-  },
   data: () => ({
     result: constant.result,
     language: constant.language

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import { Button } from 'iview'
 import ProblemEdit from '@/components/ProblemEdit'
 import { mapGetters } from 'vuex'
 
@@ -26,8 +25,7 @@ export default {
     }
   },
   components: {
-    'oj-problem-edit': ProblemEdit,
-    Button
+    'oj-problem-edit': ProblemEdit
   }
 }
 </script>

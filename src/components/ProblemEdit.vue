@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import { Row, Col, Input } from 'iview'
 import api from '@/api'
 import { VueEditor } from 'vue2-editor'
 
@@ -83,10 +82,7 @@ export default {
     }
   },
   components: {
-    VueEditor,
-    Row,
-    Col,
-    Input
+    VueEditor
   }
 }
 </script>

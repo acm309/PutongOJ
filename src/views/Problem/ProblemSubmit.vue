@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import { Button } from 'iview'
 import Submit from '@/components/Submit'
 import { mapGetters } from 'vuex'
 
@@ -51,8 +50,7 @@ export default {
     }
   },
   components: {
-    Submit,
-    Button
+    Submit
   }
 }
 </script>

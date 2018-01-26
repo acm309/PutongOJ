@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { Tooltip, Icon } from 'iview'
 
 export default {
   props: ['problem'],
@@ -36,10 +35,6 @@ export default {
     onCopy () {
       this.$Message.success('Copied!')
     }
-  },
-  components: {
-    Tooltip,
-    Icon
   }
 }
 </script>
