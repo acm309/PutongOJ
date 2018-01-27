@@ -131,15 +131,15 @@ const ranklist = async (ctx) => {
     .then(user => { ranklist[user.uid].nick = user.nick })))
 
   if (Date.now() + deadline < ctx.state.contest.end) {
-    // 最新的ranklist推到redis里
+    // 若比赛未进入最后一小时，最新的ranklist推到redis里
     const str = JSON.stringify(ranklist)
-    await redis.lset('oj:ranklist', 0, str)
+    await redis.lset(`oj:ranklist:${ctx.state.contest.cid}`, 0, str)
     res = ranklist
   } else if (!isAdmin(ctx.session.profile) &&
     Date.now() + deadline > ctx.state.contest.end &&
     Date.now() < ctx.state.contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
-    const mid = await redis.lindex('oj:ranklist', 0)
+    const mid = await redis.lindex(`oj:ranklist:${ctx.state.contest.cid}`, 0)
     res = JSON.parse(mid)
     Object.entries(ranklist).map((item) => {
       const uid = item[0]
