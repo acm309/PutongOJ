@@ -5,7 +5,8 @@ const Solution = require('../models/Solution')
 const User = require('../models/User')
 const logger = require('../utils/logger')
 const config = require('../config')
-const { isAdmin } = require('../utils/helper')
+const redis = require('../config/redis')
+const { isAdmin, pushToRank } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const cid = parseInt(ctx.params.cid)
@@ -97,6 +98,8 @@ const findOne = async (ctx) => {
 // 返回比赛排行榜
 const ranklist = async (ctx) => {
   const ranklist = {}
+  let res
+  const deadline = 60 * 60 * 1000
   const cid = parseInt(ctx.query.cid)
   const solutions = await Solution.find({
     mid: cid
@@ -127,11 +130,20 @@ const ranklist = async (ctx) => {
     .exec()
     .then(user => { ranklist[user.uid].nick = user.nick })))
 
-  if (Date.now() > ctx.state.contest.end || isAdmin(ctx.session.profile)) {
+  if (Date.now() + deadline < ctx.state.contest.end) {
+    pushToRank(JSON.stringify(ranklist))
+    res = ranklist
+  } else if (!isAdmin(ctx.session.profile) &&
+    Date.now() + deadline > ctx.state.contest.end &&
+    Date.now() < ctx.state.contest.end) {
+    const mid = await redis.rpop('oj:ranklist')
+    pushToRank(mid)
+    res = JSON.parse(mid)
   } else {
+    res = ranklist
   }
   ctx.body = {
-    ranklist
+    ranklist: res
   }
 }
 
