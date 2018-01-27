@@ -5,7 +5,7 @@ import store from '@/store'
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
 axios.defaults.withCredentials = true
-axios.defaults.timeout = 5000 // 5000ms的超时验证
+axios.defaults.timeout = 10000 // 5000ms的超时验证
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 const instance = {}

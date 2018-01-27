@@ -1,9 +1,9 @@
 <template lang="html">
   <div>
-    <Switch size="large" @on-change="change">
+    <i-switch size="large" @on-change="change">
       <Icon type="android-done" slot="open"></Icon>
       <Icon type="android-close" slot="close"></Icon>
-    </Switch> 自动刷新 (每 10 秒一次)
+    </i-switch> 自动刷新 (每 10 秒一次)
     <div class="conrank-wrap">
       <table>
         <tr>
