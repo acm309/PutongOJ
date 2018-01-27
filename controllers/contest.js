@@ -6,7 +6,7 @@ const User = require('../models/User')
 const logger = require('../utils/logger')
 const config = require('../config')
 const redis = require('../config/redis')
-const { isAdmin, pushToRank } = require('../utils/helper')
+const { isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const cid = parseInt(ctx.params.cid)
@@ -131,15 +131,33 @@ const ranklist = async (ctx) => {
     .then(user => { ranklist[user.uid].nick = user.nick })))
 
   if (Date.now() + deadline < ctx.state.contest.end) {
-    pushToRank(JSON.stringify(ranklist))
+    // 最新的ranklist推到redis里
+    const str = JSON.stringify(ranklist)
+    await redis.lset('oj:ranklist', 0, str)
     res = ranklist
   } else if (!isAdmin(ctx.session.profile) &&
     Date.now() + deadline > ctx.state.contest.end &&
     Date.now() < ctx.state.contest.end) {
-    const mid = await redis.rpop('oj:ranklist')
-    pushToRank(mid)
+    // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
+    const mid = await redis.lindex('oj:ranklist', 0)
     res = JSON.parse(mid)
+    Object.entries(ranklist).map((item) => {
+      const uid = item[0]
+      const problems = item[1]
+      Object.entries(problems).map((value) => {
+        const pid = value[0]
+        const sub = value[1]
+        if (sub.wa < 0) {
+          res[uid][pid] = {
+            wa: sub.wa
+          }
+        }
+      })
+    })
+    const str = JSON.stringify(res)
+    await redis.lset('oj:ranklist', 0, str)
   } else {
+    // 比赛结束
     res = ranklist
   }
   ctx.body = {

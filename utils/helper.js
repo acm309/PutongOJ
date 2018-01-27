@@ -37,16 +37,11 @@ const pushToJudge = (sid) => {
   redis.lpush('oj:solutions', sid) // 将sid往列表的头部插入
 }
 
-const pushToRank = (ranklist) => {
-  redis.lpush('oj:ranklist', ranklist)
-}
-
 module.exports = {
   generatePwd,
   purify,
   isAdmin,
   isRoot,
   isUndefined,
-  pushToJudge,
-  pushToRank
+  pushToJudge
 }
