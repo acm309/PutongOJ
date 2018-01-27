@@ -41,16 +41,8 @@ const find = async (ctx) => {
     select: '-_id -creator -argument' // -表示不要的字段
   })
 
-  const uid = opt.uid
-  let solved = []
-  solved = await Solution
-    .find({ uid, judge: 3 })
-    .distinct('pid')
-    .exec()
-
   ctx.body = {
-    list,
-    solved
+    list
   }
 }
 
@@ -87,10 +79,18 @@ const findOne = async (ctx) => {
   })
   await Promise.all(procedure)
 
+  const uid = opt.uid
+  let solved = []
+  solved = await Solution
+    .find({ uid, mid: cid, judge: 3 })
+    .distinct('pid')
+    .exec()
+
   ctx.body = {
     contest,
     overview,
-    totalProblems
+    totalProblems,
+    solved
   }
 }
 
@@ -122,10 +122,14 @@ const ranklist = async (ctx) => {
     ranklist[uid] = row
   }
   await Promise.all(Object.keys(ranklist).map((uid) =>
-      User
-        .findOne({ uid })
-        .exec()
-        .then(user => { ranklist[user.uid].nick = user.nick })))
+    User
+    .findOne({ uid })
+    .exec()
+    .then(user => { ranklist[user.uid].nick = user.nick })))
+
+  if (Date.now() > ctx.state.contest.end || isAdmin(ctx.session.profile)) {
+  } else {
+  }
   ctx.body = {
     ranklist
   }
