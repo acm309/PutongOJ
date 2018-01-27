@@ -104,7 +104,15 @@ export default {
     }
   },
   created () {
-    this.fetch()
+    // 这里必须保证此时'contest/problems'是存在的
+    // 如果用户没有点过 overview tab 时，就会出现 'contest/problems' 不存在的情况
+    let p = Promise.resolve()
+    if (typeof this.problems === 'undefined') {
+      p = this.$store.dispatch('contest/findOne', { cid: this.$route.params.cid })
+    }
+    p.then(() => {
+      this.fetch()
+    })
   },
   computed: {
     ...mapGetters({

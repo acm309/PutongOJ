@@ -54,7 +54,6 @@ const store = {
       return api.contest.find(payload).then(({ data }) => {
         commit(types.UPDATE_CONTEST_LIST, data.list.docs)
         commit(types.UPDATE_SUM_CONTEST, data.list.total)
-        commit(types.GET_CONTEST_SOLVED, data.solved)
       })
     },
     findOne ({ commit }, payload) {
@@ -62,6 +61,7 @@ const store = {
         commit(types.GET_CONTEST, data.contest)
         commit(types.GET_CONTEST_OVERVIEW, data.overview)
         commit(types.GET_CONTEST_TOTAL_PRO, data.totalProblems)
+        commit(types.GET_CONTEST_SOLVED, data.solved)
         return data
       })
     },

@@ -48,8 +48,8 @@ export default {
           mid: this.$route.params.cid
         }
       )).then(() => {
-        this.$router.push({ name: 'contestStatus', params: { cid: this.$route.params.cid } })
-        this.$Message.info(`submit id:${this.$route.params.id} pid:${this.problems[+this.$route.params.id]} success!`)
+        this.$router.push({ name: 'contestStatus', params: { cid: this.$route.params.cid, id: this.$route.params.id } })
+        this.$Message.info(`submit id:${this.$route.params.id} success!`)
       })
     }
   },

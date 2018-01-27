@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     fetch () {
-      this.$store.dispatch('contest/find', this.query)
+      this.$store.dispatch('contest/findOne', this.query)
     }
   },
   watch: { // 浏览器后退时回退页面
@@ -69,7 +69,7 @@ export default {
       if (to !== from) this.fetch()
     },
     'profile' (val) {
-      this.$store.dispatch('contest/find', this.query)
+      this.$store.dispatch('contest/findOne', this.query)
     }
   }
 }

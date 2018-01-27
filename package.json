@@ -10,7 +10,8 @@
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "dll": "webpack --config ./build/webpack.dll.config.js"
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -37,6 +38,7 @@
     "babel-register": "^6.22.0",
     "chalk": "^2.0.1",
     "chromedriver": "^2.27.2",
+    "clean-webpack-plugin": "^0.1.18",
     "copy-webpack-plugin": "^4.0.1",
     "cross-spawn": "^5.0.1",
     "css-loader": "^0.28.0",
@@ -52,6 +54,7 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.4",
     "friendly-errors-webpack-plugin": "^1.6.1",
+    "happypack": "^4.0.1",
     "highlight.js": "^9.12.0",
     "html-webpack-plugin": "^2.30.1",
     "jest": "^21.2.0",
