@@ -122,10 +122,10 @@ const webpackConfig = merge(baseWebpackConfig, {
     ]),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     // 启用DllPlugin和DllReferencePlugin预编译库文件
-    new webpack.DllReferencePlugin({
-      context: __dirname,
-      manifest: require('./vendor-manifest.json')
-    })
+    // new webpack.DllReferencePlugin({
+    //   context: __dirname,
+    //   manifest: require('./vendor-manifest.json')
+    // })
   ]
 })
 

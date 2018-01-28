@@ -66,10 +66,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       }
     ]),
     // 启用DllPlugin和DllReferencePlugin预编译库文件
-    new webpack.DllReferencePlugin({
-      context: __dirname,
-      manifest: require('./vendor-manifest.json')
-    })
+    // new webpack.DllReferencePlugin({
+    //   context: __dirname,
+    //   manifest: require('./vendor-manifest.json')
+    // })
   ]
 })
 
