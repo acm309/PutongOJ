@@ -13,7 +13,6 @@ import testcase from './modules/testcase'
 
 Vue.use(Vuex)
 
-// 初始化时用localStorage.getItem('token')，这样子刷新页面就无需重新登录
 const state = {
 }
 
@@ -29,9 +28,20 @@ const getters = {
   })
 }
 
+const actions = {
+  changeDomTitle ({ commit, rootState }, payload) {
+    if (payload && payload.title) {
+      window.document.title = payload.title
+    } else {
+      // window.document.title = state.route.meta.title
+    }
+  }
+}
+
 export default new Vuex.Store({
   state,
   getters,
+  actions,
   modules: {
     session,
     problem,

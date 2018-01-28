@@ -7,7 +7,7 @@
 
 <script>
 import Problem from '@/components/Problem.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -17,9 +17,12 @@ export default {
     ...mapGetters('problem', [ 'problem' ])
   },
   created () {
-    this.$store.dispatch('problem/findOne', this.$route.params)
+    this.$store.dispatch('problem/findOne', this.$route.params).then(() => {
+      this.changeDomTitle({ title: this.problem.title })
+    })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     submit () {
       this.$router.push({
         name: 'problemSubmit',

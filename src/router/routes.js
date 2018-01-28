@@ -53,7 +53,8 @@ export default [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
+    meta: { title: 'Home' }
   },
   {
     path: '/news/:nid',
@@ -62,32 +63,34 @@ export default [
       {
         path: '',
         name: 'newsInfo',
-        component: NewsInfo
+        component: NewsInfo,
+        meta: { title: 'News' }
       },
       {
         path: 'edit',
         name: 'newsEdit',
-        meta: { requiresAdmin: true },
-        component: NewsEdit
+        component: NewsEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
       }
     ]
   },
   {
     path: '/news/create',
     name: 'newsCreate',
-    meta: { requiresAdmin: true },
-    component: NewsCreate
+    component: NewsCreate,
+    meta: { title: 'Admin', requiresAdmin: true }
   },
   {
     path: '/problems',
     name: 'problemList',
-    component: ProblemList
+    component: ProblemList,
+    meta: { title: 'problem List' }
   },
   {
     path: '/problems/create', // 这个路由是不是要这样设计? 可能要讨论一下
     name: 'problemCreate',
-    meta: { requiresAdmin: true },
-    component: ProblemCreate
+    component: ProblemCreate,
+    meta: { title: 'Admin', requiresAdmin: true }
   },
   {
     path: '/problem/:pid',
@@ -96,72 +99,82 @@ export default [
       {
         path: '',
         name: 'problemInfo',
-        component: ProblemInfo
+        component: ProblemInfo,
+        meta: { title: 'Problem Info' }
       },
       {
         path: 'submit',
         name: 'problemSubmit',
-        component: ProblemSubmit
+        component: ProblemSubmit,
+        meta: { title: 'Problem Info' }
       },
       {
         path: 'mySubmission',
         name: 'mySubmission',
-        component: MySubmission
+        component: MySubmission,
+        meta: { title: 'Problem Info' }
       },
       {
         path: 'statistics',
         name: 'problemStatistics',
-        component: ProblemStatistics
+        component: ProblemStatistics,
+        meta: { title: 'Problem Info' }
       },
       {
         path: 'edit',
         name: 'problemEdit',
-        meta: { requiresAdmin: true },
-        component: ProblemEdit
+        component: ProblemEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
       },
       {
         path: 'testcase',
         name: 'testcase',
-        component: Testcase
+        component: Testcase,
+        meta: { title: 'Admin', requiresAdmin: true }
       }
     ]
   },
   {
     path: '/status',
     name: 'status',
-    component: Status
+    component: Status,
+    meta: { title: 'Status' }
   },
   {
     path: '/status/:sid',
     name: 'solution',
-    component: Solution
+    component: Solution,
+    meta: { title: 'Solution Info' }
   },
   {
     path: '/ranklist',
     name: 'ranklist',
-    component: Ranklist
+    component: Ranklist,
+    meta: { title: 'Ranklist' }
   },
   {
     path: '/user/:uid',
     name: 'userInfo',
-    component: UserInfo
+    component: UserInfo,
+    meta: { title: 'User Info' }
   },
   {
     path: '/manage/user',
     name: 'userManage',
-    meta: { requiresAdmin: true },
-    component: UserManage
+    component: UserManage,
+    meta: { title: 'Admin', requiresAdmin: true }
   },
   {
     path: '/contest',
     name: 'contestList',
-    component: ContestList
+    component: ContestList,
+    meta: { title: 'Contest List' }
   },
   {
     path: '/contest/create',
     name: 'contestCreate',
-    meta: { requiresAdmin: true },
-    component: ContestCreate
+    component: ContestCreate,
+    meta: { title: 'Admin', requiresAdmin: true }
   },
   {
     path: '/contests/:cid',
@@ -171,33 +184,37 @@ export default [
       {
         path: '',
         name: 'contestOverview',
-        meta: { requiresLogin: true },
-        component: ContestOverview
+        component: ContestOverview,
+        meta: { title: 'contest Info', requiresLogin: true }
       },
       {
         path: 'problem/:id',
         name: 'contestProblem',
-        component: ContestProblem
+        component: ContestProblem,
+        meta: { title: 'contest Info', requiresLogin: true }
       },
       {
         path: 'problem/:id/submit',
         name: 'contestSubmit',
-        component: ContestSubmit
+        component: ContestSubmit,
+        meta: { title: 'contest Info', requiresLogin: true }
       },
       {
         path: 'status',
         name: 'contestStatus',
-        component: ContestStatus
+        component: ContestStatus,
+        meta: { title: 'contest Info', requiresLogin: true }
       },
       {
         path: 'ranklist',
         name: 'contestRanklist',
-        component: ContestRanklist
+        component: ContestRanklist,
+        meta: { title: 'contest Info', requiresLogin: true }
       },
       {
         path: 'edit',
         name: 'contestEdit',
-        meta: { requiresAdmin: true },
+        meta: { title: 'Admin', requiresAdmin: true },
         component: ContestEdit
       }
     ]
@@ -205,6 +222,7 @@ export default [
   {
     path: '*',
     name: 'notFound',
-    component: NotFound
+    component: NotFound,
+    meta: { title: '404' }
   }
 ]

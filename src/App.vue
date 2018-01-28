@@ -6,11 +6,20 @@
 
 <script>
 import Layout from '@/components/Layout'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'app',
   components: {
     'oj-layout': Layout
+  },
+  methods: {
+    ...mapActions(['changeDomTitle'])
+  },
+  watch: {
+    '$route' () {
+      this.changeDomTitle()
+    }
   }
 }
 </script>

@@ -82,7 +82,6 @@ Vue.filter('formate', formate)
 Vue.filter('timePretty', timePretty)
 Vue.filter('timeContest', timeContest)
 
-// Vue.prototype.$Message = Message
 Vue.prototype.$Message.config({
   duration: 3.5 // 默认的 1.5s 也太短了
 })
