@@ -4,84 +4,84 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
-// import iView from 'iview'
-import { Message } from 'iView'
+import iView from 'iview'
 import VueClipboard from 'vue-clipboard2'
 import '@/my-theme/index.less'
 import { formate, timePretty, timeContest } from '@/util/formate'
-import {
-  Row,
-  Col,
-  Input,
-  Icon,
-  Tabs,
-  TabPane,
-  Button,
-  Select,
-  Option,
-  Page,
-  Tooltip,
-  Card,
-  Progress,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Transfer,
-  Steps,
-  Step,
-  DatePicker,
-  Layout,
-  Header,
-  Menu,
-  MenuItem,
-  Submenu,
-  Content,
-  Footer,
-  Modal,
-  Form,
-  FormItem,
-  Switch
-} from 'iview'
+// import {
+//   Row,
+//   Col,
+//   Input,
+//   Icon,
+//   Tabs,
+//   TabPane,
+//   Button,
+//   Select,
+//   Option,
+//   Page,
+//   Tooltip,
+//   Card,
+//   Progress,
+//   Dropdown,
+//   DropdownMenu,
+//   DropdownItem,
+//   Transfer,
+//   Steps,
+//   Step,
+//   DatePicker,
+//   Layout,
+//   Header,
+//   Menu,
+//   MenuItem,
+//   Message,
+//   Submenu,
+//   Content,
+//   Footer,
+//   Modal,
+//   Form,
+//   FormItem,
+//   Switch
+// } from 'iview'
+//
+// Vue.component('Row', Row)
+// Vue.component('Col', Col)
+// Vue.component('Input', Input)
+// Vue.component('Icon', Icon)
+// Vue.component('Tabs', Tabs)
+// Vue.component('TabPane', TabPane)
+// Vue.component('Button', Button)
+// Vue.component('Select', Select)
+// Vue.component('Option', Option)
+// Vue.component('Page', Page)
+// Vue.component('Tooltip', Tooltip)
+// Vue.component('Card', Card)
+// Vue.component('Progress', Progress)
+// Vue.component('Dropdown', Dropdown)
+// Vue.component('DropdownMenu', DropdownMenu)
+// Vue.component('DropdownItem', DropdownItem)
+// Vue.component('Transfer', Transfer)
+// Vue.component('Steps', Steps)
+// Vue.component('Step', Step)
+// Vue.component('DatePicker', DatePicker)
+// Vue.component('Layout', Layout)
+// Vue.component('Header', Header)
+// Vue.component('Menu', Menu)
+// Vue.component('MenuItem', MenuItem)
+// Vue.component('Submenu', Submenu)
+// Vue.component('Content', Content)
+// Vue.component('Footer', Footer)
+// Vue.component('Modal', Modal)
+// Vue.component('Form', Form)
+// Vue.component('FormItem', FormItem)
+// Vue.component('i-switch', Switch)
 
-Vue.component('Row', Row)
-Vue.component('Col', Col)
-Vue.component('Input', Input)
-Vue.component('Icon', Icon)
-Vue.component('Tabs', Tabs)
-Vue.component('TabPane', TabPane)
-Vue.component('Button', Button)
-Vue.component('Select', Select)
-Vue.component('Option', Option)
-Vue.component('Page', Page)
-Vue.component('Tooltip', Tooltip)
-Vue.component('Card', Card)
-Vue.component('Progress', Progress)
-Vue.component('Dropdown', Dropdown)
-Vue.component('DropdownMenu', DropdownMenu)
-Vue.component('DropdownItem', DropdownItem)
-Vue.component('Transfer', Transfer)
-Vue.component('Steps', Steps)
-Vue.component('Step', Step)
-Vue.component('DatePicker', DatePicker)
-Vue.component('Layout', Layout)
-Vue.component('Header', Header)
-Vue.component('Menu', Menu)
-Vue.component('MenuItem', MenuItem)
-Vue.component('Submenu', Submenu)
-Vue.component('Content', Content)
-Vue.component('Footer', Footer)
-Vue.component('Modal', Modal)
-Vue.component('Form', Form)
-Vue.component('FormItem', FormItem)
-Vue.component('i-switch', Switch)
-
-// Vue.use(iView)
+Vue.use(iView)
 Vue.use(VueClipboard)
 Vue.filter('formate', formate)
 Vue.filter('timePretty', timePretty)
 Vue.filter('timeContest', timeContest)
 
-Vue.prototype.$Message = Message
+// Vue.prototype.$Message = Message
 Vue.prototype.$Message.config({
   duration: 3.5 // 默认的 1.5s 也太短了
 })
