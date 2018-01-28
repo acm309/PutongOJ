@@ -141,12 +141,8 @@ const ranklist = async (ctx) => {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
     const mid = await redis.lindex(`oj:ranklist:${ctx.state.contest.cid}`, 0)
     res = JSON.parse(mid)
-    Object.entries(ranklist).map((item) => {
-      const uid = item[0]
-      const problems = item[1]
-      Object.entries(problems).map((value) => {
-        const pid = value[0]
-        const sub = value[1]
+    Object.entries(ranklist).map(([uid, problems]) => {
+      Object.entries(problems).map(([pid, sub]) => {
         if (sub.wa < 0) {
           res[uid][pid] = {
             wa: sub.wa
