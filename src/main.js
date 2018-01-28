@@ -75,6 +75,7 @@ Vue.component('FormItem', FormItem)
 Vue.component('i-switch', Switch)
 
 Vue.prototype.$Message = Message
+Vue.prototype.$Modal = Modal
 
 Vue.use(VueClipboard)
 Vue.filter('formate', formate)
