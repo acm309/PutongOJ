@@ -221,7 +221,7 @@ export default [
     ]
   },
   {
-    path: 'faq',
+    path: '/faq',
     name: 'faq',
     component: FAQ,
     meta: { title: 'FAQ' }

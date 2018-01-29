@@ -2,7 +2,7 @@
   <div class="nav-wrap">
     <Layout>
       <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
-        <Menu mode="horizontal" theme="light" @on-select="routerTo" active-name="1">
+        <Menu mode="horizontal" theme="light" @on-select="routerTo" :active-name="actived">
           <div class="left">
             <MenuItem name="home">
               <Icon type="ios-home"></Icon>Home
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
+import { mapMutations, mapGetters, mapState } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
 import Dialog from './LoginAndRegister'
 
@@ -73,6 +73,9 @@ export default {
       isLogined: 'session/isLogined',
       profile: 'session/profile',
       isAdmin: 'session/isAdmin'
+    }),
+    ...mapState({
+      actived: state => state.route.name
     })
   },
   methods: {
