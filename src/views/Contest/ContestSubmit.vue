@@ -9,7 +9,7 @@
 
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   data: () => ({
@@ -31,9 +31,11 @@ export default {
     }
     p.then(() => {
       this.title = this.overview[+this.$route.params.id - 1].title
+      this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
     })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     reset () {
       this.$store.commit('solution/GET_SOLUTION', Object.assign(
         this.solution,

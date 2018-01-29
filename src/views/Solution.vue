@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
 // import highlight from 'highlight.js'
@@ -48,9 +48,12 @@ export default {
     ...mapGetters('session', [ 'isAdmin' ])
   },
   created () {
-    this.$store.dispatch('solution/findOne', this.$route.params)
+    this.$store.dispatch('solution/findOne', this.$route.params).then(() => {
+      this.changeDomTitle({ title: `Solution ${this.solution.pid}` })
+    })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     prettyCode (code) {
       return highlight.highlight(this.language[this.solution.language], `${this.solution.code}`).value
     },

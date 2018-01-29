@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routes'
 import store from '../store'
+import { sync } from 'vuex-router-sync'
 // import iView from 'iview'
 import { LoadingBar } from 'iview'
 
@@ -45,5 +46,7 @@ router.afterEach(() => {
   // iView.LoadingBar.finish()
   LoadingBar.finish()
 })
+
+sync(store, router)
 
 export default router

@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
@@ -60,6 +60,7 @@ export default {
   },
   created () {
     this.fetch()
+    this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
   },
   computed: {
     ...mapGetters({
@@ -83,6 +84,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     fetch () {
       this.$store.dispatch('solution/find', this.query)
       const query = this.$route.query

@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   data () {
@@ -58,8 +58,10 @@ export default {
   },
   created () {
     this.fetch()
+    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     fetch () {
       this.$store.dispatch('contest/findOne', this.query)
     }

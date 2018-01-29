@@ -18,7 +18,7 @@ export default {
   },
   created () {
     this.$store.dispatch('problem/findOne', this.$route.params).then(() => {
-      this.changeDomTitle({ title: this.problem.title })
+      this.changeDomTitle({ title: `Problem ${this.problem.pid}` })
     })
   },
   methods: {

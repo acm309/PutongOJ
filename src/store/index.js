@@ -33,7 +33,7 @@ const actions = {
     if (payload && payload.title) {
       window.document.title = payload.title
     } else {
-      // window.document.title = state.route.meta.title
+      window.document.title = state.route.meta.title
     }
   }
 }

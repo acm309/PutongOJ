@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
@@ -112,6 +112,7 @@ export default {
     }
     p.then(() => {
       this.fetch()
+      this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
     })
   },
   computed: {
@@ -136,6 +137,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     getId (pid) {
       return this.problems.indexOf(pid) + 1
     },

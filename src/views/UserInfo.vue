@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { purify } from '@/util/helper'
 
 export default {
@@ -116,8 +116,11 @@ export default {
     this.fetch()
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     fetch () {
-      this.$store.dispatch('user/findOne', this.$route.params)
+      this.$store.dispatch('user/findOne', this.$route.params).then(() => {
+        this.changeDomTitle({ title: this.user.uid })
+      })
     },
     submit () {
       if (this.newPwd === this.checkPwd) {

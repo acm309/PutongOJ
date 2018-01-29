@@ -9,7 +9,7 @@
 
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   data: () => ({
@@ -30,9 +30,11 @@ export default {
     }
     p.then(() => {
       this.title = this.problem.title
+      this.changeDomTitle({ title: `Problem ${this.problem.pid}` })
     })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     reset () {
       this.$store.commit('solution/GET_SOLUTION', Object.assign(
         this.solution,

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   data: () => ({
@@ -50,11 +50,13 @@ export default {
   },
   created () {
     this.getRank()
+    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   beforeDestroy () {
     clearInterval(this.timer)
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     getRank () {
       this.$store.dispatch('contest/getRank', this.$route.params)
     },

@@ -14,7 +14,7 @@
 
 <script>
 import Problem from '@/components/Problem'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   data () {
@@ -34,8 +34,10 @@ export default {
   },
   created () {
     this.fetch()
+    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   methods: {
+    ...mapActions(['changeDomTitle']),
     fetch () {
       this.proIndex = parseInt(this.$route.params.id)
       this.$store.dispatch('contest/findOne', this.$route.params).then((data) => {

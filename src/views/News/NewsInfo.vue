@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
   computed: {
@@ -16,7 +16,12 @@ export default {
     })
   },
   created () {
-    this.$store.dispatch('news/findOne', this.$route.params)
+    this.$store.dispatch('news/findOne', this.$route.params).then(() => {
+      this.changeDomTitle({ title: `News -- ${this.news.title}` })
+    })
+  },
+  methods: {
+    ...mapActions(['changeDomTitle'])
   }
 }
 </script>
