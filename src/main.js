@@ -39,7 +39,8 @@ import {
   Modal,
   Form,
   FormItem,
-  Switch
+  Switch,
+  Tag
 } from 'iview'
 
 Vue.component('Row', Row)
@@ -73,6 +74,7 @@ Vue.component('Modal', Modal)
 Vue.component('Form', Form)
 Vue.component('FormItem', FormItem)
 Vue.component('i-switch', Switch)
+Vue.component('Tag', Tag)
 
 Vue.prototype.$Message = Message
 Vue.prototype.$Modal = Modal

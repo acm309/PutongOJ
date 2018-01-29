@@ -19,7 +19,7 @@
             <MenuItem name="contestList">
               <Icon type="android-bar"></Icon>Contest
             </MenuItem>
-            <MenuItem name="6">
+            <MenuItem name="faq">
               <Icon type="help-circled"></Icon>FAQ
             </MenuItem>
             <Submenu v-if="isAdmin" name="admin">
