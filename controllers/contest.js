@@ -124,6 +124,8 @@ const ranklist = async (ctx) => {
     row[pid] = item
     ranklist[uid] = row
   }
+  ctx.state.contest.ranklist = ranklist
+  await ctx.state.contest.save()
   await Promise.all(Object.keys(ranklist).map((uid) =>
     User
     .findOne({ uid })
