@@ -16,12 +16,14 @@
 - ~~将iview改为按需引用~~
 - ~~优化引入echarts~~
 - ~~比赛列表里某些题目不是在比赛中完成而是在平常做的也在列表中打上了完成记号~~
-- 使用webpack-bundle-analyzer检测打包文件
-- 比赛封榜
-- confirm组件报错，在usermanage页面，移除管理员时报错，应该是按需引用的问题
+- ~~比赛封榜~~
+- ~~confirm组件报错，在usermanage页面，移除管理员时报错，应该是按需引用的问题~~
 - ~~修改teacher权限，禁止修改admin用户的信息~~
 - ~~查询用户资料时报错，后端取不到group的title?~~
 - ~~查询管理员组时，没有数据返回~~
+- 使用webpack-bundle-analyzer检测打包文件
+- admin查看用户代码，显示测试数据通过情况
+- 网站窗口的小图片
 
 ## Build Setup
 
