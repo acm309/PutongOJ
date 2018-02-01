@@ -48,7 +48,6 @@ const findOne = async (ctx) => {
       .distinct('pid')
       .exec()
   ])
-
   const procedure = user.gid.map((gid) => Group.findOne({gid})
     .exec()
     .then(item => item.title))
