@@ -187,7 +187,7 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
-      if (this.group.gid !== undefined) {
+      if (this.group.gid === undefined) {
         this.group.gid = this.groupList[this.ind].gid
         this.group.title = this.groupList[this.ind].title
       }
