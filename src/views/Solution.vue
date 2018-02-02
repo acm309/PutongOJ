@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="solution-wrap" v-if="solution">
+  <div v-if="solution">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
       <span>Memory: {{ solution.memory }} KB</span>
@@ -7,6 +7,24 @@
       <span>Author: {{ solution.uid }}</span>
     </p>
     <hr>
+    <h2>Testcases</h2>
+    <table>
+      <tr>
+        <th>Uuid</th>
+        <th>Time/ms</th>
+        <th>Memory/kb</th>
+        <th>Result</th>
+      </tr>
+      <template v-for="(item, index) in solution.testcases">
+        <tr>
+          <td>{{ item.uuid.slice(0, 8) }}</td>
+          <td>{{ item.time }}</td>
+          <td>{{ item.memory }}</td>
+          <td :class="color[item.result]">{{ result[item.result] }}</td>
+        </tr>
+      </template>
+    </table>
+    <!-- <hr> -->
     <pre class="error" v-if="solution.error"><code>{{ solution.error }}</code></pre>
     <br>
     <Button type="ghost" shape="circle" icon="document" v-clipboard:copy="solution.code" v-clipboard:success="onCopy">
@@ -41,7 +59,8 @@ highlight.registerLanguage('python', python)
 export default {
   data: () => ({
     result: constant.result,
-    language: constant.language
+    language: constant.language,
+    color: constant.color
   }),
   computed: {
     ...mapGetters('solution', [ 'solution' ]),
@@ -65,17 +84,33 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.solution-wrap
-  h1
-    margin-bottom: 6px
-  p
-    margin-bottom: 4px
-  span
-    margin-right: 20px
-  pre
-    border: 1px solid #e040fb
-    border-radius: 4px
-    padding: 10px
-    &.error
-      background-color: #FFF9C4
+h1
+  margin-bottom: 6px
+p
+  margin-bottom: 4px
+span
+  margin-right: 20px
+hr
+  margin-bottom: 10px
+table
+  width: 100%
+  border-collapse: collapse
+  border-spacing: 0
+  th:nth-child(1)
+    padding-left: 10px
+  tr
+    border-bottom: 1px solid #ebeef5
+    height: 40px
+    line-height: 40px
+    font-size: 14px
+    td:nth-child(1)
+      padding-left: 10px
+  th
+    text-align:left
+pre
+  border: 1px solid #e040fb
+  border-radius: 4px
+  padding: 10px
+  &.error
+    background-color: #FFF9C4
 </style>

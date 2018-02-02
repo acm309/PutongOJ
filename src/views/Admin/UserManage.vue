@@ -107,6 +107,30 @@
         </tr>
       </template>
     </table>
+    <h1>管理标签组</h1>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">Tag</Col>
+      <Col :span="4">
+        <Select v-model="ind" filterable>
+          <Option v-for="(item, index) in tagList" :value="index" :key="item.tid">{{ item.title }}</Option>
+        </Select>
+      </Col>
+      <Col :offset="1" :span="2">
+        <Button type="primary">Edit</Button>
+      </Col>
+    </Row>
+    <!-- <Transfer
+      :data="transData"
+      :target-keys="targetKeys"
+      :render-format="format"
+      :list-style="listStyle"
+      :operations="['To left','To right']"
+      filterable
+      :filter-method="filterMethod"
+      @on-change="handleChange"
+      class="tranfer">
+    </Transfer> -->
+    <Button type="primary" @click="" class="submit">Submit</Button>
   </div>
 </template>
 
@@ -127,7 +151,8 @@ export default {
       height: '400px'
     },
     userList: [],
-    admin: ''
+    admin: '',
+    problemList: []
   }),
   computed: {
     ...mapGetters({
@@ -136,7 +161,10 @@ export default {
       adminList: 'user/adminList',
       groupList: 'group/list',
       group: 'group/group',
-      privilege: 'privilege'
+      privilege: 'privilege',
+      tagList: 'tag/list',
+      tag: 'tag/tag',
+      problemSum: 'problem/list'
     }),
     transData () {
       return this.userSum.map((item, index) => ({
@@ -148,6 +176,7 @@ export default {
   created () {
     this.fetchGroup()
     this.fetchAdmin()
+    this.fetchTag()
   },
   methods: {
     findUser () {
@@ -167,6 +196,7 @@ export default {
       }
     },
     fetchGroup () {
+      // this.showLoading()
       this.$store.dispatch('user/find')
         .then(() => {
           this.$store.dispatch('group/find')
@@ -175,6 +205,7 @@ export default {
           this.userSum.forEach((item) => {
             this.userList.push(item.uid)
           })
+          this.$Spin.hide()
         })
     },
     format (item) {
@@ -187,16 +218,16 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
-      if (this.group.gid === undefined) {
-        this.group.gid = this.groupList[this.ind].gid
-        this.group.title = this.groupList[this.ind].title
-      }
+      this.group.gid = this.groupList[this.ind].gid
+      this.group.title = this.groupList[this.ind].title
       if (name === 'search') {
+        this.showLoading()
         this.targetKeys = []
         this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
           this.group.list.forEach((item) => {
             this.targetKeys.push(this.userList.indexOf(item) + '')
           })
+          this.$Spin.hide()
         })
       } else if (name === 'create') {
         this.group.gid = ''
@@ -211,7 +242,9 @@ export default {
             title: '提示',
             content: `<p>此操作将永久删除Group--${this.group.title}, 是否继续?</p>`,
             onOk: () => {
+              this.showLoading()
               this.$store.dispatch('group/delete', { gid: this.group.gid }).then(() => {
+                this.$Spin.hide()
                 this.$Message.success(`成功删除 ${this.group.title}！`)
               })
             },
@@ -223,19 +256,24 @@ export default {
       }
     },
     saveGroup () {
+      this.isLoading = true
       const user = this.targetKeys.map((item) => this.userList[+item])
       const group = Object.assign(
         only(this.group, 'gid title'),
         { list: user }
       )
       if (this.group.gid !== '') {
+        this.showLoading()
         this.$store.dispatch('group/update', group).then(() => {
+          this.$Spin.hide()
           this.$Message.success('更新当前用户组成功！')
         })
       } else {
+        this.showLoading()
         this.$store.dispatch('group/create', group).then(() => {
-          this.$Message.success('新建当前用户组成功！')
           this.$store.dispatch('group/find')
+          this.$Spin.hide()
+          this.$Message.success('新建当前用户组成功！')
         })
       }
     },
@@ -271,6 +309,33 @@ export default {
           this.$Message.info('已取消删除！')
         }
       })
+    },
+    showLoading () {
+      this.$Spin.show({
+        render: (h) => {
+          return h('div', [
+            h('Icon', {
+              'class': 'loading',
+              props: {
+                type: 'load-c',
+                size: 18
+              }
+            }),
+            h('div', 'Loading')
+          ])
+        }
+      })
+    },
+    fetchTag () {
+      this.$store.dispatch('problem/find')
+        .then(() => {
+          this.$store.dispatch('tag/find')
+        })
+        .then(() => {
+          this.problemSum.forEach((item) => {
+            this.problemList.push(item.pid)
+          })
+        })
     }
   }
 }
@@ -292,6 +357,7 @@ h1
   margin-bottom: 20px
 table
   width: 100%
+  margin-bottom: 20px
   border-collapse: collapse
   border-spacing: 0
   th:nth-child(1)
@@ -310,4 +376,6 @@ table
     color: #e040fb
     padding: 0 1px
     font-size: 14px
+.loading
+  animation: ani-demo-spin 1s linear infinite
 </style>

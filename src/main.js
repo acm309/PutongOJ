@@ -40,7 +40,8 @@ import {
   Form,
   FormItem,
   Switch,
-  Tag
+  Tag,
+  Spin
 } from 'iview'
 
 Vue.component('Row', Row)
@@ -75,9 +76,11 @@ Vue.component('Form', Form)
 Vue.component('FormItem', FormItem)
 Vue.component('i-switch', Switch)
 Vue.component('Tag', Tag)
+Vue.component('Spin', Spin)
 
 Vue.prototype.$Message = Message
 Vue.prototype.$Modal = Modal
+Vue.prototype.$Spin = Spin
 
 Vue.use(VueClipboard)
 Vue.filter('formate', formate)
