@@ -48,6 +48,10 @@ const userSchema = mongoose.Schema({
     type: [Number],
     default: []
   },
+  tags: {
+    type: [String],
+    default: []
+  },
   motto: String,
   mail: String,
   school: String
