@@ -2,40 +2,36 @@ const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate') // 分页
 const ids = require('./ID')
 
-const groupSchema = mongoose.Schema({
-  gid: {
+const tagSchema = mongoose.Schema({
+  tid: {
     type: Number,
     index: {
       unique: true
     },
-    default: -1 // 表示新组
+    default: -1 // 表示新标签
   },
   title: {
     type: String,
     required: true
   },
   list: {
-    type: [String],
+    type: [Number],
     default: []
-  },
-  create: {
-    type: Number,
-    default: Date.now
   }
 }, {
-  collection: 'Group'
+  collection: 'Tag'
 })
 
-groupSchema.plugin(mongoosePaginate)
+tagSchema.plugin(mongoosePaginate)
 
-groupSchema.pre('save', function (next) {
+tagSchema.pre('save', function (next) {
   // 保存
-  if (this.gid === -1) {
+  if (this.tid === -1) {
     // 表示新的题目被创建了，因此赋予一个新的 id
     ids
-      .generateId('Group')
+      .generateId('Tag')
       .then(id => {
-        this.gid = id
+        this.tid = id
       })
       .then(next)
   } else {
@@ -43,4 +39,4 @@ groupSchema.pre('save', function (next) {
   }
 })
 
-module.exports = mongoose.model('Group', groupSchema)
+module.exports = mongoose.model('Tag', tagSchema)

@@ -73,9 +73,48 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const group = ctx.state.group
   const fileds = ['title', 'list']
+  const list = group.list
+  const gid = group.gid
+
+  // 删除user表里的原user的gid
+  const delProcedure = list.map((uid, index) => {
+    return User.findOne({ uid }).exec()
+      .then((user) => {
+        const ind = user.gid.indexOf(gid)
+        if (ind !== -1) {
+          user.gid.splice(ind, 1)
+        }
+        return user.save()
+      })
+      .then((user) => {
+        logger.info(`User's old group is deleted" ${user.uid} -- ${gid}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(delProcedure)
+
   fileds.forEach((filed) => {
     group[filed] = opt[filed]
   })
+
+  // 新增user表里user的gid
+  const addProcedure = opt.list.map((uid, index) => {
+    return User.findOne({ uid }).exec()
+      .then((user) => {
+        user.gid.push(gid)
+        return user.save()
+      })
+      .then((user) => {
+        logger.info(`User's new group is updated" ${user.uid} -- ${gid}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(addProcedure)
+
   try {
     await group.save()
     logger.info(`One group is updated" ${group.gid} -- ${group.title}`)
