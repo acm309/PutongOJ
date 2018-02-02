@@ -7,9 +7,6 @@ import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
 import MySubmission from '@/views/Problem/Mysubmission'
-// import ProblemStatistics from '@/views/Problem/Statistics'
-// import ProblemEdit from '@/views/Problem/problemEdit'
-// import Testcase from '@/views/Problem/Testcase'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -19,12 +16,10 @@ import ContestProblem from '@/views/Contest/ContestProblem'
 import ContestSubmit from '@/views/Contest/ContestSubmit'
 import ContestStatus from '@/views/Contest/ContestStatus'
 import ContestRanklist from '@/views/Contest/ContestRanklist'
-// import ContestEdit from '@/views/Contest/ContestEdit'
 
 // news
 import News from '@/views/News/News'
 import NewsInfo from '@/views/News/NewsInfo'
-// import NewsEdit from '@/views/News/NewsEdit'
 
 // status & solution & ranklist & user & news & faq
 import Status from '@/views/Status'
@@ -32,12 +27,6 @@ import Solution from '@/views/Solution'
 import Ranklist from '@/views/Ranklist'
 import UserInfo from '@/views/UserInfo'
 import FAQ from '@/views/FAQ'
-
-// admin
-// import ProblemCreate from '@/views/Admin/ProblemCreate'
-// import ContestCreate from '@/views/Admin/ContestCreate'
-// import NewsCreate from '@/views/Admin/NewsCreate'
-// import UserManage from '@/views/Admin/UserManage'
 
 // 路由懒加载
 const ProblemStatistics = r => require.ensure([], () => r(require('@/views/Problem/Statistics')), 'statistics')
@@ -48,7 +37,11 @@ const NewsEdit = r => require.ensure([], () => r(require('@/views/News/NewsEdit'
 const ProblemCreate = r => require.ensure([], () => r(require('@/views/Admin/ProblemCreate')), 'admin')
 const ContestCreate = r => require.ensure([], () => r(require('@/views/Admin/ContestCreate')), 'admin')
 const NewsCreate = r => require.ensure([], () => r(require('@/views/Admin/NewsCreate')), 'admin')
-const UserManage = r => require.ensure([], () => r(require('@/views/Admin/UserManage')), 'admin')
+const UserManage = r => require.ensure([], () => r(require('@/views/Admin/UserManage/Usermanage')), 'admin')
+const UserEdit = r => require.ensure([], () => r(require('@/views/Admin/UserManage/UserEdit')), 'admin')
+const GroupEdit = r => require.ensure([], () => r(require('@/views/Admin/UserManage/GroupEdit')), 'admin')
+const AdminEdit = r => require.ensure([], () => r(require('@/views/Admin/UserManage/AdminEdit')), 'admin')
+const TagEdit = r => require.ensure([], () => r(require('@/views/Admin/UserManage/TagEdit')), 'admin')
 
 export default [
   {
@@ -161,9 +154,40 @@ export default [
   },
   {
     path: '/manage/user',
-    name: 'userManage',
     component: UserManage,
-    meta: { title: 'Admin', requiresAdmin: true }
+    meta: { title: 'Admin', requiresAdmin: true },
+    children: [
+      {
+        path: '',
+        name: 'usermanage',
+        component: UserManage,
+        meta: { title: 'Admin', requiresAdmin: true }
+      },
+      {
+        path: '/userEdit',
+        name: 'userEdit',
+        component: UserEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
+      },
+      {
+        path: '/groupEdit',
+        name: 'groupEdit',
+        component: GroupEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
+      },
+      {
+        path: '/adminEdit',
+        name: 'adminEdit',
+        component: AdminEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
+      },
+      {
+        path: '/tagEdit',
+        name: 'tagEdit',
+        component: TagEdit,
+        meta: { title: 'Admin', requiresAdmin: true }
+      }
+    ]
   },
   {
     path: '/contest',

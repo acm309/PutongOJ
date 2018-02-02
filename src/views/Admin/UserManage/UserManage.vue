@@ -1,12 +1,10 @@
 <template lang="html">
   <div>
     <Tabs :value="actived" @on-click="change">
-      <TabPane label="Description" name="problemInfo"></TabPane>
-      <TabPane label="Submit" name="problemSubmit"></TabPane>
-      <TabPane label="My Submissions" name="mySubmission"></TabPane>
-      <TabPane label="Statistics" name="problemStatistics"></TabPane>
-      <TabPane label="Edit" name="problemEdit" v-if="isAdmin"></TabPane>
-      <TabPane label="Test Data" name="testcase" v-if="isAdmin"></TabPane>
+      <TabPane label="UserEdit" name="userEdit"></TabPane>
+      <TabPane label="GroupEdit" name="groupEdit"></TabPane>
+      <TabPane label="AdminEdit" name="adminEdit"></TabPane>
+      <TabPane label="TagEdit" name="tagEdit"></TabPane>
     </Tabs>
     <router-view></router-view>
   </div>
@@ -24,7 +22,7 @@ export default {
   },
   methods: {
     change (name) {
-      this.$router.push({ name, params: { pid: this.$route.params.pid } })
+      this.$router.push({ name })
     }
   },
   watch: {

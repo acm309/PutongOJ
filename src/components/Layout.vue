@@ -29,7 +29,7 @@
               <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="contestCreate">Create Contests</MenuItem>
               <MenuItem name="newsCreate">Create News</MenuItem>
-              <MenuItem name="userManage">User Management</MenuItem>
+              <MenuItem name="userEdit">User Management</MenuItem>
             </Submenu>
           </div>
         </Menu>
