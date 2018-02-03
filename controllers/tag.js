@@ -4,10 +4,7 @@ const Problem = require('../models/Problem')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
-  console.log(ctx.request.body)
-  const tid = parseInt(ctx.params.tid)
-  console.log(tid)
-  if (isNaN(tid)) ctx.throw(400, 'Tid has to be a number')
+  const tid = ctx.params.tid
   const tag = await Tag.findOne({ tid }).exec()
   if (tag == null) ctx.throw(400, 'No such a tag')
   ctx.state.tag = tag
@@ -32,60 +29,21 @@ const findOne = async (ctx) => {
   }
 }
 
-// 新建一个tag
-// const create = async (ctx) => {
-//   const opt = ctx.request.body
-
-//   const group = new Group(Object.assign(
-//     only(opt, 'title list'),
-//     { // gid 会自动生成
-//       create: Date.now()
-//     }
-//   ))
-
-//   try {
-//     await group.save()
-//     logger.info(`New group is created" ${group.gid} -- ${group.title}`)
-//   } catch (e) {
-//     ctx.throw(400, e.message)
-//   }
-
-//   const procedure = opt.list.map((uid, index) => {
-//     return User.findOne({ uid }).exec()
-//       .then((user) => {
-//         user.gid.push(group.gid)
-//         return user.save()
-//       })
-//       .then((user) => {
-//         logger.info(`User is updated" ${user.uid} -- ${user.gid}`)
-//       })
-//       .catch((e) => {
-//         ctx.throw(400, e.message)
-//       })
-//   })
-//   await Promise.all(procedure)
-
-//   ctx.body = {
-//     gid: group.gid
-//   }
-// }
-
 // 更新一个tag
 const update = async (ctx) => {
   const opt = ctx.request.body
   const tag = ctx.state.tag
-  const fileds = ['title', 'list']
-  const list = tag.list
+  const newList = opt.list
+  const oldList = tag.list
   const tid = tag.tid
 
-  console.log(tag)
   // 删除tag表里的原problem表的tid
-  const delProcedure = list.map((pid, index) => {
+  const delProcedure = oldList.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        const ind = problem.tag.indexOf(tag.title)
+        const ind = problem.tages.indexOf(tid)
         if (ind !== -1) {
-          problem.tag.splice(ind, 1)
+          problem.tages.splice(ind, 1)
         }
         return problem.save()
       })
@@ -98,16 +56,13 @@ const update = async (ctx) => {
   })
   await Promise.all(delProcedure)
 
-  fileds.forEach((filed) => {
-    tag[filed] = opt[filed]
-  })
+  tag.list = newList
 
-  // 新增user表里user的tid
-  const addProcedure = opt.list.map((pid, index) => {
+  // 新增tag表里user的tid
+  const addProcedure = newList.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        console.log(problem)
-        problem.tag.push(tag.title)
+        problem.tages.push(tid)
         return problem.save()
       })
       .then((problem) => {
@@ -131,47 +86,9 @@ const update = async (ctx) => {
   }
 }
 
-// 删除一个tag
-const del = async (ctx) => {
-  const tid = parseInt(ctx.params.tid)
-  const tag = ctx.state.tag
-  const list = tag.list
-
-  // 删除user表里的gid
-  const procedure = list.map((uid, index) => {
-    return User.findOne({ uid }).exec()
-      .then((user) => {
-        const ind = user.gid.indexOf(tid)
-        if (ind !== -1) {
-          user.tid.splice(ind, 1)
-        }
-        return user.save()
-      })
-      .then((user) => {
-        logger.info(`User's tag is deleted" ${user.uid} -- ${tid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
-  })
-  await Promise.all(procedure)
-
-  // 删除tag表里的tid
-  try {
-    await Tag.deleteOne({ tid }).exec()
-    logger.info(`One Tag is delete ${tid}`)
-  } catch (e) {
-    ctx.throw(400, e.message)
-  }
-
-  ctx.body = {}
-}
-
 module.exports = {
   preload,
   find,
   findOne,
-  // create,
-  update,
-  del
+  update
 }

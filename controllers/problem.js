@@ -22,7 +22,7 @@ const find = async (ctx) => {
   const pageSize = parseInt(opt.pageSize) || 30
   if (opt.content) {
     if (opt.type === 'tag') {
-      filter.tags = {
+      filter.tages = {
         $in: [new RegExp(opt.content, 'i')]
       }
     } else {
@@ -32,13 +32,23 @@ const find = async (ctx) => {
     }
   }
 
-  // 使用mongoose-paginate包简化
-  const list = await Problem.paginate(filter, {
-    sort: { pid: 1 },
-    page,
-    limit: pageSize,
-    select: '-_id -hint -description -in -out -input -output' // -表示不要的字段
-  })
+  let list
+  if (page !== -1) {
+    // 使用mongoose-paginate包简化
+    list = await Problem.paginate(filter, {
+      sort: { pid: 1 },
+      page,
+      limit: pageSize,
+      select: '-_id -hint -description -in -out -input -output' // -表示不要的字段
+    })
+  } else {
+    const docs = await Problem.find({}).exec()
+    const total = await Problem.find({}).count()
+    list = {
+      docs,
+      total
+    }
+  }
 
   const uid = opt.uid
   let solved = []

@@ -48,7 +48,7 @@ const userSchema = mongoose.Schema({
     type: [Number],
     default: []
   },
-  tags: {
+  tages: {
     type: [String],
     default: []
   },
