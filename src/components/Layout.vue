@@ -2,7 +2,7 @@
   <div class="nav-wrap">
     <Layout>
       <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
-        <Menu mode="horizontal" theme="light" @on-select="routerTo" :active-name="actived">
+        <Menu mode="horizontal" theme="light" @on-select="routerTo" :active-name="active">
           <div class="left">
             <MenuItem name="home">
               <Icon type="ios-home"></Icon>Home
@@ -75,7 +75,7 @@ export default {
       isAdmin: 'session/isAdmin'
     }),
     ...mapState({
-      actived: state => state.route.name
+      active: state => state.route.name
     })
   },
   methods: {

@@ -1,6 +1,6 @@
 <template lang="html">
   <div class="usermanage">
-    <Tabs :value="actived" @on-click="change">
+    <Tabs :value="active" @on-click="change">
       <TabPane label="UserEdit" name="userEdit"></TabPane>
       <TabPane label="GroupEdit" name="groupEdit"></TabPane>
       <TabPane label="AdminEdit" name="adminEdit"></TabPane>
@@ -17,7 +17,7 @@ export default {
   computed: {
     ...mapGetters('session', [ 'isAdmin' ]),
     ...mapState({
-      actived: state => state.route.name
+      active: state => state.route.name
     })
   },
   methods: {
