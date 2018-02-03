@@ -5,7 +5,7 @@
       <Col :span="2" class="label">Tag</Col>
       <Col :span="4">
         <Select v-model="ind" filterable>
-          <Option v-for="(item, index) in tagList" :value="index" :key="item.tid">{{ item.title }}</Option>
+          <Option v-for="(item, index) in tagList" :value="index" :key="item.tid">{{ item.tid }}</Option>
         </Select>
       </Col>
       <Col :offset="1" :span="2">
@@ -59,11 +59,14 @@ export default {
   },
   methods: {
     fetchTag () {
-      this.$store.dispatch('problem/find')
+      this.showLoading()
+      const opt = { page: -1 }
+      this.$store.dispatch('problem/find', opt)
         .then(() => {
           this.$store.dispatch('tag/find')
         })
         .then(() => {
+          this.$Spin.hide()
           this.problemSum.forEach((item) => {
             this.problemList.push(item.pid)
           })
@@ -80,26 +83,41 @@ export default {
     },
     search () {
       this.tag.tid = this.tagList[this.ind].tid
-      this.tag.title = this.tagList[this.ind].title
-      // this.showLoading()
+      this.showLoading()
       this.targetKeys = []
       this.$store.dispatch('tag/findOne', { tid: this.tag.tid }).then(() => {
         this.tag.list.forEach((item) => {
           this.targetKeys.push(this.problemList.indexOf(item) + '')
         })
-        // this.$Spin.hide()
+        this.$Spin.hide()
       })
     },
     save () {
       const problems = this.targetKeys.map((item) => this.problemList[+item])
       const tag = Object.assign(
-        only(this.tag, 'tid title'),
+        only(this.tag, 'tid'),
         { list: problems }
       )
-      // this.showLoading()
+      this.showLoading()
       this.$store.dispatch('tag/update', tag).then(() => {
-        // this.$Spin.hide()
+        this.$Spin.hide()
         this.$Message.success('更新当前标签组成功！')
+      })
+    },
+    showLoading () {
+      this.$Spin.show({
+        render: (h) => {
+          return h('div', [
+            h('Icon', {
+              'class': 'loading',
+              props: {
+                type: 'load-c',
+                size: 18
+              }
+            }),
+            h('div', 'Loading')
+          ])
+        }
       })
     }
   }

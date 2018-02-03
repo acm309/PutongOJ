@@ -41,12 +41,18 @@
             </Tooltip>
           <td>
             <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
-            (<Button type="text">{{ item.solve }}</Button> /
-            <Button type="text">{{ item.submit }}</Button>)
+            (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: 3 } }">
+              <Button type="text">{{ item.solve }}</Button>
+            </router-link> /
+            <router-link :to="{ name: 'status', query: { pid: item.pid } }">
+              <Button type="text">{{ item.submit }}</Button>
+            </router-link>)
           </td>
           <td>
-            <template v-for="(item2, index2) in item.tags">
-              <Tag>{{ item2 }}</Tag>
+            <template v-for="(item2, index2) in item.tages">
+              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
+                <Tag>{{ item2 }}</Tag>
+              </router-link>
             </template>
           </td>
           <td v-if="isAdmin">

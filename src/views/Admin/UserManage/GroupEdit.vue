@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     fetchGroup () {
-      // this.showLoading()
+      this.showLoading()
       this.$store.dispatch('user/find')
         .then(() => {
           this.$store.dispatch('group/find')

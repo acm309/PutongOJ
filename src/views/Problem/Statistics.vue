@@ -15,7 +15,6 @@
           </td>
         </tr>
       </table>
-      <!-- <div id="myChart" class="echarts"></div> -->
       <chart :options="pie" ref="pie" auto-resize></chart>
       <table>
         <tr v-for="(item, index) in countList">
