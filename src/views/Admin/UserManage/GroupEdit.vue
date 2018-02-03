@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     fetchGroup () {
-      this.showLoading()
+      this.$Spin.showLoading()
       this.$store.dispatch('user/find')
         .then(() => {
           this.$store.dispatch('group/find')
@@ -101,7 +101,7 @@ export default {
       this.group.gid = this.groupList[this.ind].gid
       this.group.title = this.groupList[this.ind].title
       if (name === 'search') {
-        this.showLoading()
+        this.$Spin.showLoading()
         this.targetKeys = []
         this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
           this.group.list.forEach((item) => {
@@ -142,35 +142,19 @@ export default {
         { list: user }
       )
       if (this.group.gid !== '') {
-        this.showLoading()
+        this.$Spin.showLoading()
         this.$store.dispatch('group/update', group).then(() => {
           this.$Spin.hide()
           this.$Message.success('更新当前用户组成功！')
         })
       } else {
-        this.showLoading()
+        this.$Spin.showLoading()
         this.$store.dispatch('group/create', group).then(() => {
           this.$store.dispatch('group/find')
           this.$Spin.hide()
           this.$Message.success('新建当前用户组成功！')
         })
       }
-    },
-    showLoading () {
-      this.$Spin.show({
-        render: (h) => {
-          return h('div', [
-            h('Icon', {
-              'class': 'loading',
-              props: {
-                type: 'load-c',
-                size: 18
-              }
-            }),
-            h('div', 'Loading')
-          ])
-        }
-      })
     }
   }
 }

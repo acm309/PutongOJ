@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     fetchTag () {
-      this.showLoading()
+      this.$Spin.showLoading()
       const opt = { page: -1 }
       this.$store.dispatch('problem/find', opt)
         .then(() => {
@@ -83,7 +83,7 @@ export default {
     },
     search () {
       this.tag.tid = this.tagList[this.ind].tid
-      this.showLoading()
+      this.$Spin.showLoading()
       this.targetKeys = []
       this.$store.dispatch('tag/findOne', { tid: this.tag.tid }).then(() => {
         this.tag.list.forEach((item) => {
@@ -98,26 +98,10 @@ export default {
         only(this.tag, 'tid'),
         { list: problems }
       )
-      this.showLoading()
+      this.$Spin.showLoading()
       this.$store.dispatch('tag/update', tag).then(() => {
         this.$Spin.hide()
         this.$Message.success('更新当前标签组成功！')
-      })
-    },
-    showLoading () {
-      this.$Spin.show({
-        render: (h) => {
-          return h('div', [
-            h('Icon', {
-              'class': 'loading',
-              props: {
-                type: 'load-c',
-                size: 18
-              }
-            }),
-            h('div', 'Loading')
-          ])
-        }
       })
     }
   }

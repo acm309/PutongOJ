@@ -81,6 +81,22 @@ Vue.component('Spin', Spin)
 Vue.prototype.$Message = Message
 Vue.prototype.$Modal = Modal
 Vue.prototype.$Spin = Spin
+Vue.prototype.$Spin.showLoading = function () {
+  Vue.prototype.$Spin.show({
+    render: (h) => {
+      return h('div', [
+        h('Icon', {
+          'class': 'loading',
+          props: {
+            type: 'load-c',
+            size: 18
+          }
+        }),
+        h('div', 'Loading')
+      ])
+    }
+  })
+}
 
 Vue.use(VueClipboard)
 Vue.filter('formate', formate)
