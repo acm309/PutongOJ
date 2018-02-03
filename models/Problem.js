@@ -67,7 +67,7 @@ const problemSchema = mongoose.Schema({
     type: String,
     default: 2
   },
-  tages: {
+  tags: {
     type: [String],
     default: []
   }

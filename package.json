@@ -17,6 +17,7 @@
     "koa-session": "^5.5.1",
     "koa-static": "^4.0.2",
     "lodash.pickby": "^4.6.0",
+    "lodash.pull": "^4.1.0",
     "lodash.remove": "^4.7.0",
     "mongoose": "^4.13.7",
     "mongoose-paginate": "^5.0.3",

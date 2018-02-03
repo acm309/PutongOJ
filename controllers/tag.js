@@ -1,4 +1,4 @@
-// const only = require('only')
+const pull = require('lodash.pull')
 const Tag = require('../models/Tag')
 const Problem = require('../models/Problem')
 const logger = require('../utils/logger')
@@ -41,10 +41,7 @@ const update = async (ctx) => {
   const delProcedure = oldList.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        const ind = problem.tages.indexOf(tid)
-        if (ind !== -1) {
-          problem.tages.splice(ind, 1)
-        }
+        pull(problem.tags, tid)
         return problem.save()
       })
       .then((problem) => {
@@ -62,7 +59,7 @@ const update = async (ctx) => {
   const addProcedure = newList.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        problem.tages.push(tid)
+        problem.tags.push(tid)
         return problem.save()
       })
       .then((problem) => {

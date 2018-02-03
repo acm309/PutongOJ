@@ -1,4 +1,5 @@
 const only = require('only')
+const pull = require('lodash.pull')
 const Group = require('../models/Group')
 const User = require('../models/User')
 const logger = require('../utils/logger')
@@ -80,10 +81,7 @@ const update = async (ctx) => {
   const delProcedure = list.map((uid, index) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
-        const ind = user.gid.indexOf(gid)
-        if (ind !== -1) {
-          user.gid.splice(ind, 1)
-        }
+        pull(user.gid, gid)
         return user.save()
       })
       .then((user) => {
@@ -137,10 +135,7 @@ const del = async (ctx) => {
   const procedure = list.map((uid, index) => {
     return User.findOne({uid}).exec()
       .then((user) => {
-        const ind = user.gid.indexOf(gid)
-        if (ind !== -1) {
-          user.gid.splice(ind, 1)
-        }
+        pull(user.gid, gid)
         return user.save()
       })
       .then((user) => {
