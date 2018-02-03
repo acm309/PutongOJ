@@ -1,4 +1,5 @@
 const pull = require('lodash.pull')
+const difference = require('lodash.difference')
 const Tag = require('../models/Tag')
 const Problem = require('../models/Problem')
 const logger = require('../utils/logger')
@@ -29,7 +30,7 @@ const findOne = async (ctx) => {
   }
 }
 
-// 更新一个tag
+// 更新一个 tag
 const update = async (ctx) => {
   const opt = ctx.request.body
   const tag = ctx.state.tag
@@ -37,8 +38,14 @@ const update = async (ctx) => {
   const oldList = tag.list
   const tid = tag.tid
 
-  // 删除tag表里的原problem表的tid
-  const delProcedure = oldList.map((pid, index) => {
+  // 这些 pid 被移除了 tid
+  const pidsOfRemovedTids = difference(oldList, newList)
+
+  // 这些 pid 被新增了 tid
+  const pidsOfImportedTids = difference(newList, oldList)
+
+  // 删除 tag 表里的原 problem 表的 tid
+  const delProcedure = pidsOfRemovedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         pull(problem.tags, tid)
@@ -53,10 +60,8 @@ const update = async (ctx) => {
   })
   await Promise.all(delProcedure)
 
-  tag.list = newList
-
-  // 新增tag表里user的tid
-  const addProcedure = newList.map((pid, index) => {
+  // 新增 tag 表里 user 的 tid
+  const addProcedure = pidsOfImportedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         problem.tags.push(tid)
@@ -70,6 +75,8 @@ const update = async (ctx) => {
       })
   })
   await Promise.all(addProcedure)
+
+  tag.list = newList
 
   try {
     await tag.save()

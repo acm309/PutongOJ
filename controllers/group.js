@@ -1,5 +1,6 @@
 const only = require('only')
 const pull = require('lodash.pull')
+const difference = require('lodash.difference')
 const Group = require('../models/Group')
 const User = require('../models/User')
 const logger = require('../utils/logger')
@@ -73,12 +74,17 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const group = ctx.state.group
-  const fileds = ['title', 'list']
-  const list = group.list
+  const fields = ['title', 'list']
   const gid = group.gid
 
-  // 删除user表里的原user的gid
-  const delProcedure = list.map((uid, index) => {
+  // 这些 uid 不再属于这个用户组
+  const removedUids = difference(group.list, opt.list)
+
+  // 这些 uid 被新增进这个用户组
+  const importedUids = difference(opt.list, group.list)
+
+  // 删除 user 表里的原 user 的 gid
+  const delProcedure = removedUids.map((uid, index) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
         pull(user.gid, gid)
@@ -93,12 +99,12 @@ const update = async (ctx) => {
   })
   await Promise.all(delProcedure)
 
-  fileds.forEach((filed) => {
-    group[filed] = opt[filed]
+  fields.forEach((field) => {
+    group[field] = opt[field]
   })
 
-  // 新增user表里user的gid
-  const addProcedure = opt.list.map((uid, index) => {
+  // 新增 user 表里 user 的 gid
+  const addProcedure = importedUids.map((uid, index) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
         user.gid.push(gid)
