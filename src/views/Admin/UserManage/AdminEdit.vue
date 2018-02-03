@@ -85,12 +85,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-h1
-  margin-bottom: 20px
-.ivu-row-flex
-  margin-bottom: 10px
-.label
-  line-height: 32px
 .ivu-col-offset-1
   margin-left: 1%
 table

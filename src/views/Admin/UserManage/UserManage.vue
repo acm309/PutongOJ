@@ -1,5 +1,5 @@
 <template lang="html">
-  <div>
+  <div class="usermanage">
     <Tabs :value="actived" @on-click="change">
       <TabPane label="UserEdit" name="userEdit"></TabPane>
       <TabPane label="GroupEdit" name="groupEdit"></TabPane>
@@ -33,5 +33,14 @@ export default {
 }
 </script>
 
-<style>
+<style lang="stylus">
+.usermanage
+  h1
+    margin-bottom: 20px
+  .ivu-row-flex
+    margin-bottom: 10px
+  .label
+    line-height: 32px
+  .submit
+    margin-bottom: 20px
 </style>
