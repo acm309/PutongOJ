@@ -1,6 +1,6 @@
 <template lang="html">
   <div>
-    <Tabs :value="actived" @on-click="change">
+    <Tabs :value="active" @on-click="change">
       <TabPane label="Description" name="problemInfo"></TabPane>
       <TabPane label="Submit" name="problemSubmit"></TabPane>
       <TabPane label="My Submissions" name="mySubmission"></TabPane>
@@ -19,7 +19,7 @@ export default {
   computed: {
     ...mapGetters('session', [ 'isAdmin' ]),
     ...mapState({
-      actived: state => state.route.name
+      active: state => state.route.name
     })
   },
   methods: {
