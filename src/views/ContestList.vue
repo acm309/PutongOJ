@@ -205,13 +205,12 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 .con-wrap
   margin-bottom: 20px
   table
-    width: 100%
     margin-bottom: 20px
-    border-collapse: collapse
-    border-spacing: 0
     th:nth-child(1)
       padding-left: 30px
       width: 5%
@@ -227,20 +226,8 @@ export default {
       width: 10%
     th:nth-child(7)
       width: 10%
-    tr
-      border-bottom: 1px solid #ebeef5
-      height: 40px
-      line-height: 40px
-      font-size: 14px
-      td:nth-child(1)
-        padding-left: 30px
-    th
-      text-align:left
-    .ivu-btn
-      vertical-align: baseline
-      color: #e040fb
-      padding: 0 1px
-      font-size: 14px
+    td:nth-child(1)
+      padding-left: 30px
   .ready
     font-weight: bold
     color: blue

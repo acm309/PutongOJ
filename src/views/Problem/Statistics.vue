@@ -199,71 +199,46 @@ export default {
 </script>
 
 <style lang="stylus">
-  .statis-wrap
-    display: flex
-    justify-content: space-around
-    .left
-      margin-bottom: 20px
-      margin-right: 3%
-      width: 32%
-      table
-        width: 100%
-        border-collapse: collapse
-        tr:hover
-          background: #f5f7fa
-        tr
-          height: 37px
-          border-bottom: 1px solid #e6ebf5
-        td
-          .t2
-            cursor: pointer
-            color: #e040fb
-        .t1
-          width: 60%
-          padding-left: 30px
-          text-align: left
+@import '../../styles/common'
+
+.statis-wrap
+  display: flex
+  justify-content: space-around
+  .left
+    margin-bottom: 20px
+    margin-right: 3%
+    width: 32%
+    table
+      tr:hover
+        background: #f5f7fa
+      tr
+        height: 37px
+        border-bottom: 1px solid #e6ebf5
+      td
         .t2
-          width: 40%
-          text-align: center
-      .echarts
-        height: 420px
-        width: 95%
-        margin-top: 10px
-        margin-bottom: 20px
-    .right
-      width: 65%
+          cursor: pointer
+          color: #e040fb
+      .t1
+        width: 60%
+        padding-left: 30px
+        text-align: left
+      .t2
+        width: 40%
+        text-align: center
+    .echarts
+      height: 420px
+      width: 95%
+      margin-top: 10px
       margin-bottom: 20px
-      margin-right: 0
-      table
-        width: 100%
-        margin-bottom: 20px
-        border-collapse: collapse
-        border-spacing: 0
-        th:nth-child(1)
-          padding-left: 10px
-        //   width: 5%
-        // th:nth-child(2)
-        //   width: 10%
-        // th:nth-child(3)
-        //   width: 20%
-        // th:nth-child(4)
-        //   width: 20%
-        // th:nth-child(5)
-        //   width: 10%
-        // th:nth-child(6)
-        //   width: 10%
-        tr
-          border-bottom: 1px solid #ebeef5
-          height: 40px
-          line-height: 40px
-          font-size: 14px
-          td:nth-child(1)
-            padding-left: 10px
-        th
-          text-align:left
-    .ivu-btn
-      vertical-align: baseline
-      color: #e040fb
-      padding: 0 1px
-      font-size: 14px
+  .right
+    width: 65%
+    margin-bottom: 20px
+    margin-right: 0
+    table
+      margin-bottom: 20px
+  .ivu-btn
+    vertical-align: baseline
+    color: #e040fb
+    padding: 0 1px
+    font-size: 14px
 </style>

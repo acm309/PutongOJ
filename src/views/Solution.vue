@@ -84,6 +84,8 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 h1
   margin-bottom: 6px
 p
@@ -92,21 +94,6 @@ span
   margin-right: 20px
 hr
   margin-bottom: 10px
-table
-  width: 100%
-  border-collapse: collapse
-  border-spacing: 0
-  th:nth-child(1)
-    padding-left: 10px
-  tr
-    border-bottom: 1px solid #ebeef5
-    height: 40px
-    line-height: 40px
-    font-size: 14px
-    td:nth-child(1)
-      padding-left: 10px
-  th
-    text-align:left
 pre
   border: 1px solid #e040fb
   border-radius: 4px

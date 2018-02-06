@@ -173,11 +173,7 @@ export default {
     width: 100%
     display: block
   .motto // motto 可能非常长，以至于一页放不下
-    // word-break: break-all
     word-wrap: break-word
-    // white-space:nowrap
-    // text-overflow:ellipsis
-    // overflow: hidden
   .edit
     .ivu-row
       margin-bottom: 14px

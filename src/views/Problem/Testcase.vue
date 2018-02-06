@@ -93,24 +93,5 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-table
-  width: 100%
-  border-collapse: collapse
-  border-spacing: 0
-  th:nth-child(1)
-    padding-left: 10px
-  tr
-    border-bottom: 1px solid #ebeef5
-    height: 40px
-    line-height: 40px
-    font-size: 14px
-    td:nth-child(1)
-      padding-left: 10px
-  th
-    text-align:left
-  .ivu-btn
-    vertical-align: baseline
-    color: #e040fb
-    padding: 0 1px
-    font-size: 14px
+@import '../../styles/common'
 </style>
