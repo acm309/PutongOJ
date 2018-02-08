@@ -31,7 +31,7 @@
         <td>{{ item.nick }}</td>
         <td>{{ item.motto }}</td>
         <td>
-          <router-link :to="{ name: 'status', params: { uid: item.uid, judge: 3 } }">
+          <router-link :to="{ name: 'status', params: { uid: item.uid, judge: judge.Accepted } }">
             <Button type="text">{{ item.solve }}</Button>
           </router-link>
         </td>
@@ -71,7 +71,8 @@ export default {
     ...mapGetters({
       list: 'ranklist/list',
       sum: 'ranklist/sum',
-      groups: 'group/list'
+      groups: 'group/list',
+      judge: 'judge'
     }),
     query () {
       const opt = Object.assign(

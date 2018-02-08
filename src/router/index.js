@@ -3,11 +3,9 @@ import Router from 'vue-router'
 import routes from './routes'
 import store from '../store'
 import { sync } from 'vuex-router-sync'
-// import iView from 'iview'
 import { LoadingBar } from 'iview'
 
 Vue.use(Router)
-// Vue.use(iView)
 
 const router = new Router({
   // mode: 'history',
@@ -16,7 +14,6 @@ const router = new Router({
 
 // 全局身份确认
 router.beforeEach((to, from, next) => {
-  // iView.LoadingBar.start()
   LoadingBar.start()
   if (to.meta.requiresLogin) {
     const isLogined = store.getters['session/isLogined']
@@ -43,7 +40,6 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach(() => {
-  // iView.LoadingBar.finish()
   LoadingBar.finish()
 })
 

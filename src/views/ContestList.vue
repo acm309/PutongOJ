@@ -27,7 +27,7 @@
             <span>{{ item.start | timePretty }}</span>
           </td>
           <td>
-            <span :class="{'password': +item.encrypt === 3, 'private': +item.encrypt === 2, 'public': +item.encrypt === 1}">
+            <span :class="{'password': +item.encrypt === encrypt.Password, 'private': +item.encrypt === encrypt.Private, 'public': +item.encrypt === encrypt.Public}">
               {{ type[item.encrypt] }}
             </span>
           </td>
@@ -73,6 +73,7 @@ export default {
       list: 'contest/list',
       sum: 'contest/sum',
       status: 'status',
+      encrypt: 'encrypt',
       profile: 'session/profile',
       isLogined: 'session/isLogined',
       isAdmin: 'session/isAdmin'
@@ -125,9 +126,9 @@ export default {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > Date.now()) {
         this.$Message.error("This contest hasn't started yet!")
-      } else if (+item.encrypt === 1) {
+      } else if (+item.encrypt === this.encrypt.Public) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-      } else if (+item.encrypt === 2) {
+      } else if (+item.encrypt === this.encrypt.Private) {
         const opt = Object.assign(
           item,
           { uid: this.profile.uid }
@@ -139,7 +140,7 @@ export default {
             this.$Message.error("You're not invited to attend this contest!")
           }
         })
-      } else if (+item.encrypt === 3) {
+      } else if (+item.encrypt === this.encrypt.Password) {
         this.$Modal.confirm({
           render: (h) => {
             return h('Input', {

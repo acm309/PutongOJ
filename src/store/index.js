@@ -26,6 +26,25 @@ const getters = {
   status: state => ({
     Reserve: 0,
     Available: 2
+  }),
+  encrypt: state => ({
+    Public: 1,
+    Private: 2,
+    Password: 3
+  }),
+  judge: state => ({
+    Pending: 0,
+    Running: 1,
+    CompileError: 2,
+    Accepted: 3,
+    RuntimeError: 4,
+    WrongAnswer: 5,
+    TimeLimitExceeded: 6,
+    MemoryLimitExceed: 7,
+    OutputLimitExceed: 8,
+    PresentationError: 9,
+    SystemError: 10,
+    RejudgePending: 11
   })
 }
 

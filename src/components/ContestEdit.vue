@@ -39,7 +39,7 @@
         </Select>
       </Col>
     </Row>
-    <Row class="transfer" v-if="contest.encrypt === 2">
+    <Row class="transfer" v-if="contest.encrypt === encrypt.Private">
       <Transfer
         :data="transData"
         :target-keys="targetKeys"
@@ -54,7 +54,7 @@
         </div>
       </Transfer>
     </Row>
-    <Row v-if="contest.encrypt === 3">
+    <Row v-if="contest.encrypt === encrypt.Password">
       <Col :span="23">
         <Input v-model="contest.argument"></Input>
       </Col>
@@ -123,7 +123,8 @@ export default {
   props: ['contest', 'overview'],
   computed: {
     ...mapGetters({
-      list: 'user/list'
+      list: 'user/list',
+      encrypt: 'encrypt'
     }),
     transData () {
       let data = []
@@ -156,7 +157,7 @@ export default {
       this.list.forEach((item) => {
         this.userList.push(item.uid)
       })
-      if (+this.contest.encrypt === 2) {
+      if (+this.contest.encrypt === this.encrypt.Private) {
         const arg = this.contest.argument.split('\r\n')
         arg.forEach((item) => {
           this.targetKeys.push(this.userList.indexOf(item) + '')
