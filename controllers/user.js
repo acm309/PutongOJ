@@ -40,11 +40,11 @@ const findOne = async (ctx) => {
       .select('-_id -pwd')
       .exec(),
     Solution
-      .find({ uid, judge: 3 })
+      .find({ uid, judge: config.judge.Accepted })
       .distinct('pid')
       .exec(),
     Solution
-      .find({ uid, judge: {$ne: 3} })
+      .find({ uid, judge: { $ne: config.judge.Accepted } })
       .distinct('pid')
       .exec()
   ])

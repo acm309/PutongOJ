@@ -1,4 +1,5 @@
 const Solution = require('../models/Solution')
+const config = require('../config')
 
 // 获取statistics信息
 const find = async (ctx) => {
@@ -7,11 +8,11 @@ const find = async (ctx) => {
   const pageSize = parseInt(opt.pageSize) || 20
   const pid = parseInt(opt.pid)
 
-  // distinct不能喝sort同时使用，故使用聚合
+  // distinct不能和sort同时使用，故使用聚合
   const list = await Solution.aggregate([
     { $match: {
       pid,
-      judge: 3
+      judge: config.judge.Accepted
     }},
     { $sort: {
       time: 1,
@@ -41,7 +42,7 @@ const find = async (ctx) => {
   const sumDoc = await Solution.aggregate([
     { $match: {
       pid,
-      judge: 3
+      judge: config.judge.Accepted
     }},
     { $sort: {
       time: 1,

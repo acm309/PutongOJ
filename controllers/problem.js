@@ -3,6 +3,7 @@ const fse = require('fs-extra')
 const path = require('path')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
+const config = require('../config')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
@@ -28,7 +29,6 @@ const find = async (ctx) => {
     } else {
       filter.$where =
         `${new RegExp(opt.content, 'i')}.test(this["${opt.type}"])`
-      // filter[opt.type] = {'$regex': new RegExp(opt.content, 'i')} 这种方法为啥不行
     }
   }
 
@@ -53,7 +53,7 @@ const find = async (ctx) => {
   const uid = opt.uid
   let solved = []
   solved = await Solution
-    .find({ uid, judge: 3 })
+    .find({ uid, judge: config.judge.Accepted })
     .distinct('pid')
     .exec()
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
+const config = require('../config')
 
 const userSchema = mongoose.Schema({
   uid: {
@@ -34,7 +35,7 @@ const userSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: 2
+    default: config.status.Available // 默认新建的题目显示
   },
   solve: {
     type: Number,
@@ -64,7 +65,7 @@ userSchema.pre('validate', function (next) {
   } else if (this.uid.length >= 50) {
     next(new Error('The length of the username must be less than 50'))
   } else if (this.nick.length < 1) {
-    next(new Error('The length of the nick must be greater than 3'))
+    next(new Error('The length of the nick must be greater than 1'))
   } else if (this.nick.length >= 50) {
     next(new Error('The length of the nick must be less than 50'))
   } else {

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
+const config = require('../config')
 const ids = require('./ID')
 
 const newSchema = mongoose.Schema({
@@ -14,7 +15,7 @@ const newSchema = mongoose.Schema({
   content: String,
   status: {
     type: Number,
-    default: 2
+    default: config.status.Available // 默认新建的消息显示
   },
   create: {
     type: Number,

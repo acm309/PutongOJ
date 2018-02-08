@@ -20,10 +20,10 @@ const preload = async (ctx, next) => {
   if (contest.start > Date.now()) {
     ctx.throw(400, "This contest hasn't started yet")
   }
-  if (contest.encrypt !== 1 && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+  if (contest.encrypt !== config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
     ctx.throw(400, 'You do not have permission to enter this competition!')
   }
-  if (contest.encrypt === 1 && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+  if (contest.encrypt === config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
     ctx.session.profile.verifyContest.push(contest.cid)
   }
   ctx.state.contest = contest
@@ -72,7 +72,7 @@ const findOne = async (ctx) => {
         overview[index].submit = count
       })
       .then(() => {
-        return Solution.count({pid, mid: cid, judge: 3}).exec()
+        return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).exec()
       })
       .then((count) => {
         overview[index].solve = count
@@ -83,7 +83,7 @@ const findOne = async (ctx) => {
   const uid = opt.uid
   let solved = []
   solved = await Solution
-    .find({ uid, mid: cid, judge: 3 })
+    .find({ uid, mid: cid, judge: config.judge.Accepted })
     .distinct('pid')
     .exec()
 
@@ -101,7 +101,7 @@ const ranklist = async (ctx) => {
   const ranklist = ctx.state.contest.ranklist
   let res
   const deadline = 60 * 60 * 1000
-  const cid = parseInt(ctx.query.cid)
+  // const cid = parseInt(ctx.query.cid)
   // const solutions = await Solution.find({ mid: cid }).exec()
   // 临时注释，但请暂时不要删除
   // for (const solution of solutions) {
@@ -135,13 +135,13 @@ const ranklist = async (ctx) => {
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
     const str = JSON.stringify(ranklist)
-    await redis.lset(`oj:ranklist:${ctx.state.contest.cid}`, 0, str)
+    await redis.lset(`oj:ranklist:${ctx.state.contest.cid}`, 0, str) // 将该列表里索引为0的值设置为最新的ranklist
     res = ranklist
   } else if (!isAdmin(ctx.session.profile) &&
     Date.now() + deadline > contest.end &&
     Date.now() < contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
-    const mid = await redis.lindex(`oj:ranklist:${contest.cid}`, 0)
+    const mid = await redis.lindex(`oj:ranklist:${contest.cid}`, 0) // 获得该列表中索引为0的值
     res = JSON.parse(mid)
     Object.entries(ranklist).map(([uid, problems]) => {
       Object.entries(problems).map(([pid, sub]) => {
@@ -153,7 +153,7 @@ const ranklist = async (ctx) => {
       })
     })
     const str = JSON.stringify(res)
-    await redis.lset('oj:ranklist', 0, str)
+    await redis.lset('oj:ranklist', 0, str) // 将更新后的ranklist更新到该表中
   } else {
     // 比赛结束
     res = ranklist
@@ -192,11 +192,11 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const contest = await Contest.findOne({cid: opt.cid}).exec()
-  const fileds = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
+  const fields = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
-  fileds.forEach((filed) => {
-    contest[filed] = opt[filed]
+  fields.forEach((field) => {
+    contest[field] = opt[field]
   })
   try {
     await contest.save()
@@ -215,7 +215,7 @@ const del = async (ctx) => {
   const cid = ctx.params.cid
 
   try {
-    await Contest.deleteOne({cid}).exec()
+    await Contest.deleteOne({ cid }).exec()
     logger.info(`One Contest is delete ${cid}`)
   } catch (e) {
     ctx.throw(400, e.message)
@@ -234,7 +234,7 @@ const verify = async (ctx) => {
   const enc = parseInt(contest.encrypt)
   const arg = contest.argument
   let isVerify
-  if (enc === 2) {
+  if (enc === config.encrypt.Private) {
     const uid = opt.uid
     const arr = arg.split('\r\n')
     if (arr.indexOf(uid) !== -1) {
