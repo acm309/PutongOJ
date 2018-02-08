@@ -48,10 +48,6 @@ const userSchema = mongoose.Schema({
     type: [Number],
     default: []
   },
-  tages: {
-    type: [String],
-    default: []
-  },
   motto: String,
   mail: String,
   school: String
@@ -64,7 +60,7 @@ userSchema.plugin(mongoosePaginate)
 userSchema.pre('validate', function (next) {
   // 验证字段 做了这样限制 之前不符合此规则的用户无法被查询 TODO
   if (this.uid.length < 3) {
-    next(new Error('The length of the username must be greater than 4'))
+    next(new Error('The length of the username must be greater than 3'))
   } else if (this.uid.length >= 50) {
     next(new Error('The length of the username must be less than 50'))
   } else if (this.nick.length < 1) {

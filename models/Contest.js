@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
+const config = require('../config')
 const ids = require('./ID')
 
 const contestSchema = mongoose.Schema({
@@ -13,7 +14,7 @@ const contestSchema = mongoose.Schema({
   title: String,
   status: {
     type: Number,
-    default: 2
+    default: config.judge.Pending
   },
   create: {
     type: Number,
@@ -49,7 +50,9 @@ contestSchema.pre('validate', function (next) {
     }
   })
 
-  if (new Date(this.start).getTime() >= new Date(this.end).getTime()) {
+  if (this.title.length >= 80) {
+    next(new Error('The length of the title should not be greater than 80'))
+  } else if (new Date(this.start).getTime() >= new Date(this.end).getTime()) {
     next(new Error('The race end time can not be earlier than the start time!'))
   } else {
     next()

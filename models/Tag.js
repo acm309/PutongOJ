@@ -18,4 +18,12 @@ const tagSchema = mongoose.Schema({
 
 tagSchema.plugin(mongoosePaginate)
 
+tagSchema.pre('validate', function (next) {
+  if (this.list.length === 0) {
+    next(new Error('The list should not be empty'))
+  } else {
+    next()
+  }
+})
+
 module.exports = mongoose.model('Tag', tagSchema)

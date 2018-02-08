@@ -81,6 +81,8 @@ problemSchema.pre('validate', function (next) {
   // 验证字段
   if (this.time > 10000) {
     next(new Error('Time should not be longer than 10000 ms'))
+  } else if (this.memory > 32768 * 5) {
+    next(new Error(`Memory should not be greater than ${32768 * 5} kb`))
   } else {
     next()
   }

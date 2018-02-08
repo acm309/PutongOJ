@@ -42,7 +42,7 @@ const solutionSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: 2
+    default: config.judge.Pending
   },
   language: {
     type: Number,

@@ -28,6 +28,18 @@ const groupSchema = mongoose.Schema({
 
 groupSchema.plugin(mongoosePaginate)
 
+groupSchema.pre('validate', function (next) {
+  if (this.title == null || this.title.length <= 3) {
+    next(new Error('The length of the title should be greater than 3'))
+  } if (this.title.length >= 80) {
+    next(new Error('The length of the title should not be greater than 80'))
+  } else if (this.list.length === 0) {
+    next(new Error('The list should not be empty'))
+  } else {
+    next()
+  }
+})
+
 groupSchema.pre('save', function (next) {
   // 保存
   if (this.gid === -1) {
