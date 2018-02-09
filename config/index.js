@@ -28,6 +28,19 @@ config.module = {
   Contest: 2
 }
 
+// 是否开放给普通用户
+config.status = {
+  Reserve: 0,
+  Available: 2
+}
+
+// 比赛类型
+config.encrypt = {
+  Public: 1,
+  Private: 2,
+  Password: 3
+}
+
 const dev = {
   port: 8888,
   dbURL: process.env.DBURL

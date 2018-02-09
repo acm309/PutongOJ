@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate') // 分页
+const config = require('../config')
 const ids = require('./ID')
 
 const problemSchema = mongoose.Schema({
@@ -65,7 +66,7 @@ const problemSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    default: 2
+    default: config.status.Available // 默认新建的题目显示
   },
   tags: {
     type: [String],

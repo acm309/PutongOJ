@@ -1,4 +1,5 @@
 const Solution = require('../models/Solution')
+const config = require('../config')
 
 // 获取statistics信息
 const find = async (ctx) => {
@@ -11,7 +12,7 @@ const find = async (ctx) => {
   const list = await Solution.aggregate([
     { $match: {
       pid,
-      judge: 3
+      judge: config.judge.Accepted
     }},
     { $sort: {
       time: 1,
@@ -41,7 +42,7 @@ const find = async (ctx) => {
   const sumDoc = await Solution.aggregate([
     { $match: {
       pid,
-      judge: 3
+      judge: config.judge.Accepted
     }},
     { $sort: {
       time: 1,

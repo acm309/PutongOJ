@@ -14,7 +14,7 @@ const contestSchema = mongoose.Schema({
   title: String,
   status: {
     type: Number,
-    default: config.judge.Pending
+    default: config.status.Available // 默认新建的比赛显示
   },
   create: {
     type: Number,
@@ -26,10 +26,10 @@ const contestSchema = mongoose.Schema({
   list: [Number],
   encrypt: {
     type: Number,
-    default: 1
+    default: config.encrypt.Public
   },
   argument: {
-    type: mongoose.Schema.Types.Mixed, // 这个字段干啥的？
+    type: mongoose.Schema.Types.Mixed,
     default: null
   },
   ranklist: {
