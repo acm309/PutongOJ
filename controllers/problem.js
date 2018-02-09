@@ -1,6 +1,7 @@
 const only = require('only')
 const fse = require('fs-extra')
 const path = require('path')
+const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
@@ -22,7 +23,7 @@ const find = async (ctx) => {
   const pageSize = parseInt(opt.pageSize) || 30
   if (opt.content) {
     if (opt.type === 'tag') {
-      filter.tages = {
+      filter.tags = {
         $in: [new RegExp(opt.content, 'i')]
       }
     } else {
@@ -43,17 +44,16 @@ const find = async (ctx) => {
     })
   } else {
     const docs = await Problem.find({}).exec()
-    const total = await Problem.find({}).count()
     list = {
       docs,
-      total
+      total: docs.length
     }
   }
 
   const uid = opt.uid
   let solved = []
   solved = await Solution
-    .find({ uid, judge: 3 })
+    .find({ uid, judge: config.judge.Accepted })
     .distinct('pid')
     .exec()
 
@@ -100,7 +100,7 @@ const create = async (ctx) => {
    * @param {Object} object
    * @param {Object} options
    */
-  // 把object写入到file中，如果file不存在，就创建它
+  // 把 object 写入到 file 中，如果 file 不存在，就创建它
   fse.outputJsonSync(path.resolve(dir, 'meta.json'), {
     testcases: []
   }, { spaces: 2 }) // 缩进2个空格
@@ -115,9 +115,9 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
-  const fileds = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status']
-  fileds.forEach((filed) => {
-    problem[filed] = opt[filed]
+  const fields = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status']
+  fields.forEach((field) => {
+    problem[field] = opt[field]
   })
   try {
     await problem.save()

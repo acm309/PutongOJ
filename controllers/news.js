@@ -63,9 +63,9 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const news = ctx.state.news
-  const fileds = ['title', 'content']
-  fileds.forEach((filed) => {
-    news[filed] = opt[filed]
+  const fields = ['title', 'content']
+  fields.forEach((field) => {
+    news[field] = opt[field]
   })
   try {
     await news.save()

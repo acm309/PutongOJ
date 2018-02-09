@@ -101,7 +101,7 @@ const ranklist = async (ctx) => {
   const ranklist = ctx.state.contest.ranklist
   let res
   const deadline = 60 * 60 * 1000
-  const cid = parseInt(ctx.query.cid)
+  // const cid = parseInt(ctx.query.cid)
   // const solutions = await Solution.find({ mid: cid }).exec()
   // 临时注释，但请暂时不要删除
   // for (const solution of solutions) {

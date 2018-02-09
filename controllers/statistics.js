@@ -7,7 +7,7 @@ const find = async (ctx) => {
   const pageSize = parseInt(opt.pageSize) || 20
   const pid = parseInt(opt.pid)
 
-  // distinct不能喝sort同时使用，故使用聚合
+  // distinct 不能和 sort 同时使用，故使用聚合
   const list = await Solution.aggregate([
     { $match: {
       pid,
