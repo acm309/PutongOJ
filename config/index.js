@@ -41,6 +41,10 @@ config.encrypt = {
   Password: 3
 }
 
+config.deploy = {
+  judgers: 1
+}
+
 const dev = {
   port: 8888,
   dbURL: process.env.DBURL

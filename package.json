@@ -29,10 +29,12 @@
     "lodash.difference": "^4.5.0",
     "lodash.pickby": "^4.6.0",
     "lodash.pull": "^4.1.0",
+    "lodash.range": "^3.2.0",
     "lodash.remove": "^4.7.0",
     "mongoose": "^4.13.7",
     "mongoose-paginate": "^5.0.3",
     "only": "^0.0.2",
+    "shelljs": "^0.8.1",
     "tracer": "^0.8.11",
     "uuid": "^3.1.0"
   },
@@ -41,6 +43,8 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon app.js",
-    "start": "cross-env NODE_ENV=production node app.js"
+    "start": "cross-env NODE_ENV=production node app.js",
+    "deploy:init": "cross-env NODE_ENV=production node manage.js",
+    "deploy:start": "npx pm2 start -- pm2.config.json"
   }
 }
