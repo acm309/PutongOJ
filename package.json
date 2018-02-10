@@ -2,8 +2,18 @@
   "name": "putong-oj",
   "version": "2.0.0-beta",
   "main": "app.js",
-  "repository": "https://github.com/lazzzis/PutongOJ.git",
-  "author": "lazzzis <shenlijin@outlook.com>",
+  "repository": "https://github.com/acm309/PutongOJ.git",
+  "author": "lazzzis",
+  "contributors": [
+    {
+      "name": "lazzzis",
+      "url": "https://github.com/lazzzis"
+    },
+    {
+      "name": "Kerminate",
+      "url": "https://github.com/Kerminate"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
     "cross-env": "^5.1.3",
