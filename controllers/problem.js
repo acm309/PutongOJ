@@ -4,7 +4,6 @@ const path = require('path')
 const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
-const config = require('../config')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
