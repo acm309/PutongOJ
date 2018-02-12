@@ -7,7 +7,7 @@ const config = require('./config')
 // download and initialize the judgers
 // start !
 
-const logDir = resolve(__dirname, 'log')
+const logDir = resolve(__dirname, 'logs')
 
 const baseConfig = {
   apps: [

@@ -5,6 +5,8 @@ docker-compose.debug.yml
 requests/
 data/*
 !data/1000
+migrations/db
+!migrations/db/.gitkeep
 public/uploads/*
 !public/uploads/.gitkeep
 
