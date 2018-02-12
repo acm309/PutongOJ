@@ -7,13 +7,15 @@ const config = require('./config')
 // download and initialize the judgers
 // start !
 
+const logDir = resolve(__dirname, 'log')
+
 const baseConfig = {
   apps: [
     {
       name: 'app',
       script: resolve(__dirname, `app.js`),
-      'out_file': resolve(__dirname, `app.out.log`),
-      'error_file': resolve(__dirname, `app.err.log`),
+      'out_file': resolve(logDir, `app.out.log`),
+      'error_file': resolve(logDir, `app.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true,
       env: {
@@ -23,8 +25,8 @@ const baseConfig = {
     {
       name: 'updater',
       script: resolve(__dirname, 'judgers', `updater.js`),
-      'out_file': resolve(__dirname, 'judgers', `updater.out.log`),
-      'error_file': resolve(__dirname, 'judgers', `updater.err.log`),
+      'out_file': resolve(logDir, `updater.out.log`),
+      'error_file': resolve(logDir, `updater.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true
     }
@@ -60,8 +62,8 @@ async function main () {
     pm2config.apps.push({
       name: `node-${i}`,
       script: resolve(judgersDir, `node-${i}/judger.js`),
-      'out_file': resolve(judgersDir, `node-${i}/judger.out.log`),
-      'error_file': resolve(judgersDir, `node-${i}/judger.err.log`),
+      'out_file': resolve(logDir, `node-${i}-out.log`),
+      'error_file': resolve(logDir, `node-${i}-err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true
     })
