@@ -47,7 +47,7 @@ config.deploy = {
 
 const dev = {
   port: 8888,
-  dbURL: process.env.DBURL
+  dbURL: process.env.DBURL || process.env.dbURL // 之所以两个只为了兼容旧版命名；请优先采用后者
 }
 
 const prod = {
