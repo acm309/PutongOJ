@@ -5,6 +5,9 @@ services:
     image: mongo:3.4.12
     container_name: ptoj-db
     restart: always
+    volumes:
+      - $PWD/migrations/db:/data/db
+      - $PWD/migrations/backup:/data/backup
 
   ptoj-redis:
     image: redis:3.2.10
@@ -20,7 +23,7 @@ services:
       dbURL: 'http://ptoj-db:27017'
       redisURL: 'http://ptoj-redis:6379'
     ports:
-      - "0.0.0.0:80:3000"
+      - '0.0.0.0:80:3000'
     volumes:
       - $PWD/log:/app/log
     depends_on:
