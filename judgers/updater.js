@@ -1,4 +1,4 @@
-require('../../config/db')
+require('../config/db')
 const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')
 const logger = require('../utils/logger')
