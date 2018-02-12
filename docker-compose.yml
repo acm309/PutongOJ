@@ -20,8 +20,8 @@ services:
     build: .
     environment:
       NODE_ENV: production
-      dbURL: 'http://ptoj-db:27017'
-      redisURL: 'http://ptoj-redis:6379'
+      dbURL: 'mongodb://ptoj-db:27017'
+      redisURL: 'redis://ptoj-redis:6379'
     ports:
       - '0.0.0.0:80:3000'
     volumes:

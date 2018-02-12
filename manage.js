@@ -44,8 +44,8 @@ async function main () {
   shell.exec(`make -C ${resolve(judgersDir, 'Judger')}`)
 
   await Promise.all([
-    fse.copy(resolve(judgersDir, 'Judger', 'Judge'), resolve(__dirname, 'judgers', 'node-0', 'Judge')),
-    fse.copy(resolve(judgersDir, 'Judger', 'config.ini'), resolve(__dirname, 'judgers', 'node-0', 'config.ini'))
+    fse.copy(resolve(judgersDir, 'Judger', 'Judge'), resolve(judgersDir, 'node-0', 'Judge')),
+    fse.copy(resolve(judgersDir, 'Judger', 'config.ini'), resolve(judgersDir, 'node-0', 'config.ini'))
   ])
 
   await Promise.all(

@@ -51,8 +51,8 @@ const dev = {
 }
 
 const prod = {
-  port: 80,
-  dbURL: 'mongodb://127.0.0.1:27017/devoj'
+  port: 3000,
+  dbURL: process.env.DBURL || process.env.dbURL
 }
 
 module.exports = Object.assign(

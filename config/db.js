@@ -17,6 +17,7 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.on('error', () => {
   logger.error('MongoDB connected fail.')
+  process.exit(-1)
 })
 
 mongoose.connection.on('disconnected', () => {
