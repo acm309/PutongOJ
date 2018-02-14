@@ -54,11 +54,10 @@ const create = async (ctx) => {
   if (opt.mid) {
     solution.mid = parseInt(opt.mid)
   }
-
   try {
     await solution.save()
     pushToJudge(solution.sid)
-    logger.info(`One solution is created" ${solution.pid} -- ${solution.uid}`)
+    logger.info(`One solution is created ${solution.pid} -- ${solution.uid}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
