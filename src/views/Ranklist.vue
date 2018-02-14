@@ -31,7 +31,7 @@
         <td>{{ item.nick }}</td>
         <td>{{ item.motto }}</td>
         <td>
-          <router-link :to="{ name: 'status', params: { uid: item.uid, judge: 3 } }">
+          <router-link :to="{ name: 'status', params: { uid: item.uid, judge: judge.Accepted } }">
             <Button type="text">{{ item.solve }}</Button>
           </router-link>
         </td>
@@ -71,7 +71,8 @@ export default {
     ...mapGetters({
       list: 'ranklist/list',
       sum: 'ranklist/sum',
-      groups: 'group/list'
+      groups: 'group/list',
+      judge: 'judge'
     }),
     query () {
       const opt = Object.assign(
@@ -129,33 +130,16 @@ export default {
 </script>
 
 <style lang="stylus">
+@import '../styles/common'
+
 .rank-wrap
   margin-bottom: 20px
   label
     line-height: 30px
   table
-    width: 100%
     margin-bottom: 20px
-    border-collapse: collapse
-    border-spacing: 0
     td
       word-break: break-all
       line-height: 20px
-    th:nth-child(1)
-      padding-left: 10px
-    tr
-      border-bottom: 1px solid #ebeef5
-      height: 40px
-      line-height: 40px
-      font-size: 14px
-      td:nth-child(1)
-        padding-left: 10px
-    th
-      text-align:left
-      padding-right: 1em
-    .ivu-btn
-      vertical-align: baseline
-      color: #e040fb
-      padding: 0 1px
       font-size: 14px
 </style>

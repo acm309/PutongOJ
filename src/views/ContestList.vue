@@ -27,7 +27,7 @@
             <span>{{ item.start | timePretty }}</span>
           </td>
           <td>
-            <span :class="{'password': +item.encrypt === 3, 'private': +item.encrypt === 2, 'public': +item.encrypt === 1}">
+            <span :class="{'password': +item.encrypt === encrypt.Password, 'private': +item.encrypt === encrypt.Private, 'public': +item.encrypt === encrypt.Public}">
               {{ type[item.encrypt] }}
             </span>
           </td>
@@ -73,6 +73,7 @@ export default {
       list: 'contest/list',
       sum: 'contest/sum',
       status: 'status',
+      encrypt: 'encrypt',
       profile: 'session/profile',
       isLogined: 'session/isLogined',
       isAdmin: 'session/isAdmin'
@@ -125,9 +126,9 @@ export default {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > Date.now()) {
         this.$Message.error("This contest hasn't started yet!")
-      } else if (+item.encrypt === 1) {
+      } else if (+item.encrypt === this.encrypt.Public) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-      } else if (+item.encrypt === 2) {
+      } else if (+item.encrypt === this.encrypt.Private) {
         const opt = Object.assign(
           item,
           { uid: this.profile.uid }
@@ -139,7 +140,7 @@ export default {
             this.$Message.error("You're not invited to attend this contest!")
           }
         })
-      } else if (+item.encrypt === 3) {
+      } else if (+item.encrypt === this.encrypt.Password) {
         this.$Modal.confirm({
           render: (h) => {
             return h('Input', {
@@ -205,13 +206,12 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 .con-wrap
   margin-bottom: 20px
   table
-    width: 100%
     margin-bottom: 20px
-    border-collapse: collapse
-    border-spacing: 0
     th:nth-child(1)
       padding-left: 30px
       width: 5%
@@ -227,20 +227,8 @@ export default {
       width: 10%
     th:nth-child(7)
       width: 10%
-    tr
-      border-bottom: 1px solid #ebeef5
-      height: 40px
-      line-height: 40px
-      font-size: 14px
-      td:nth-child(1)
-        padding-left: 30px
-    th
-      text-align:left
-    .ivu-btn
-      vertical-align: baseline
-      color: #e040fb
-      padding: 0 1px
-      font-size: 14px
+    td:nth-child(1)
+      padding-left: 30px
   .ready
     font-weight: bold
     color: blue

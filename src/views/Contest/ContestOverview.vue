@@ -77,45 +77,16 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-  .conover-wrap
-    h2
-      text-align: center
-      margin-top: 10px
-      margin-bottom: 8px
-    h4
-      text-align: center
-      margin-bottom: 8px
-    table
-      width: 100%
-      margin-bottom: 20px
-      border-collapse: collapse
-      border-spacing: 0
-      th:nth-child(1)
-        padding-left: 10px
-      //   width: 5%
-      // th:nth-child(2)
-      //   width: 10%
-      // th:nth-child(3)
-      //   width: 20%
-      // th:nth-child(4)
-      //   width: 20%
-      // th:nth-child(5)
-      //   width: 10%
-      // th:nth-child(6)
-      //   width: 10%
-      tr
-        border-bottom: 1px solid #ebeef5
-        height: 40px
-        line-height: 40px
-        font-size: 14px
-        td:nth-child(1)
-          padding-left: 10px
-      th
-        text-align:left
-      .ivu-btn
-        vertical-align: baseline
-        color: #e040fb
-        padding: 0 1px
-        font-size: 14px
+<style lang="stylus" scoped>
+@import '../../styles/common'
+
+h2
+  text-align: center
+  margin-top: 10px
+  margin-bottom: 8px
+h4
+  text-align: center
+  margin-bottom: 8px
+table
+  margin-bottom: 20px
 </style>

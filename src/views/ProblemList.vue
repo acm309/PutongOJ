@@ -41,7 +41,7 @@
             </Tooltip>
           <td>
             <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
-            (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: 3 } }">
+            (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
               <Button type="text">{{ item.solve }}</Button>
             </router-link> /
             <router-link :to="{ name: 'status', query: { pid: item.pid } }">
@@ -109,6 +109,7 @@ export default {
       solved: 'problem/solved',
       profile: 'session/profile',
       status: 'status',
+      judge: 'judge',
       isAdmin: 'session/isAdmin'
     }),
     query () {
@@ -182,12 +183,10 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 table
-  width: 100%
-  border-collapse: collapse
-  border-spacing: 0
   th:nth-child(1)
-    padding-left: 10px
     width: 5%
   th:nth-child(2)
     width: 10%
@@ -201,18 +200,4 @@ table
     width: 10%
   th:nth-child(7)
     width: 10%
-  tr
-    border-bottom: 1px solid #ebeef5
-    height: 40px
-    line-height: 40px
-    font-size: 14px
-    td:nth-child(1)
-      padding-left: 10px
-  th
-    text-align:left
-  .ivu-btn
-    vertical-align: baseline
-    color: #e040fb
-    padding: 0 1px
-    font-size: 14px
 </style>

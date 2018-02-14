@@ -81,7 +81,7 @@ export default [
     meta: { title: 'Problem List' }
   },
   {
-    path: '/problems/create', // 这个路由是不是要这样设计? 可能要讨论一下
+    path: '/problems/create',
     name: 'problemCreate',
     component: ProblemCreate,
     meta: { title: 'Admin', requiresAdmin: true }
