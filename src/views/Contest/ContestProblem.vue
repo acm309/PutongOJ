@@ -44,12 +44,6 @@ export default {
         this.$store.dispatch('problem/findOne', { pid: data.res[this.proIndex - 1].pid })
       })
     },
-    reload (val) {
-      this.$router.push({
-        name: 'contestProblem',
-        params: { id: val }
-      })
-    },
     pageChange (val) {
       this.$router.push({
         name: 'contestProblem',

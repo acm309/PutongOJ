@@ -53,9 +53,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import constant from '../util/constant'
 import only from 'only'
-import pickBy from 'lodash.pickby'
+import { purify } from '../util/helper'
+import constant from '../util/constant'
 
 export default {
   data () {
@@ -80,10 +80,7 @@ export default {
     }),
     query () {
       const opt = only(this.$route.query, 'page pageSize type content')
-      return pickBy(
-        opt,
-        x => x != null && x !== ''
-      )
+      return purify(opt)
     }
   },
   created () {
