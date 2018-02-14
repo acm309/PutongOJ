@@ -14,7 +14,7 @@ services:
     container_name: ptoj-redis
     restart: always
 
-  ptoj-app:
+  ptoj-web-app:
     image: ptoj-web-app
     container_name: ptoj-web-app
     build: .
@@ -25,6 +25,7 @@ services:
     ports:
       - '0.0.0.0:80:3000'
     volumes:
+      - $PWD/data:/app/data
       - $PWD/logs:/app/logs
     depends_on:
       - ptoj-redis
