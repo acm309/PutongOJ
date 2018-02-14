@@ -9,7 +9,7 @@
  * 7. 结束，再次从第一步开始
  */
 const fse = require('fs-extra')
-const path = require('path')
+const { resolve } = require('path')
 const shell = require('shelljs')
 
 require('../../config/db')
@@ -52,62 +52,54 @@ function judgeCode (code) {
   }
 }
 
-// 用 sim 检测，返回相似度 (sim) 以及 最相似的那个提交 (sim_s_id)
-async function simTest (solution) {
-  const dir = path.resolve(__dirname, `../../data/${solution.pid}/ac/`)
-  // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
-  await fse.removeSync('./simfile')
-  shell.exec(`./sim.sh ./test/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
-  if (fse.existsSync('./simfile')) {
-    const simfile = await fse.readFile('./simfile')
-    const result = simfile.toString().match(/(\d+)\s+(\d+)/)
-    ;[solution.sim, solution.sim_s_id] = [+result[1], +result[2]]
-  }
-  return {
-    sim: solution.sim || 0,
-    sim_s_id: solution.sim_s_id || 0
-  }
-}
+async function beforeJudge (sid) {
+  const solution = await Solution.findOne({ sid }).exec()
+  const problem = await Problem.findOne({ pid: solution.pid }).exec()
+  solution.judge = config.judge.Running
+  await solution.save() // 将判题状态改为正在判题
 
-async function judge (problem, solution) {
+  // 复制测试数据和清空上一次的文件夹
   const { pid } = problem
-  const dir = path.resolve(__dirname, `../../data/${pid}`)
+  const dir = resolve(__dirname, `../../data/${pid}`)
+
   // meta 记录了有哪些数据
-  const meta = fse.readJsonSync(path.resolve(dir, 'meta.json'))
-  await fse.copy(path.resolve(dir, 'meta.json'), path.resolve(__dirname, 'meta.json'))
+  const meta = fse.readJsonSync(resolve(dir, 'meta.json'))
 
   await Promise.all([
-    fse.emptyDir(path.resolve(__dirname, 'temp')),
-    fse.emptyDir(path.resolve(__dirname, 'testdata'))
+    fse.copy(resolve(dir, 'meta.json'), resolve(__dirname, 'meta.json')),
+    fse.emptyDir(resolve(__dirname, 'temp')),
+    fse.emptyDir(resolve(__dirname, 'testdata'))
   ])
 
   // 把所有 testcases 复制过来
   // 输入
   await Promise.all(meta.testcases.map((test) => {
-    return fse.copy(path.resolve(dir, `${test.uuid}.in`), path.resolve(__dirname, `testdata/${test.uuid}.in`))
+    return fse.copy(resolve(dir, `${test.uuid}.in`), resolve(__dirname, `testdata/${test.uuid}.in`))
   }))
 
   // 输出
   await Promise.all(meta.testcases.map((test) => {
-    return fse.copy(path.resolve(dir, `${test.uuid}.out`), path.resolve(__dirname, `testdata/${test.uuid}.out`))
+    return fse.copy(resolve(dir, `${test.uuid}.out`), resolve(__dirname, `testdata/${test.uuid}.out`))
   }))
 
-  fse.writeFileSync(path.resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
+  fse.writeFileSync(resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
+  return { solution, problem }
+}
 
+async function judge (problem, solution) {
   shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`) //
 
   // 查看编译信息，是否错误之类的
-  const ce = fse.readFileSync(path.resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
+  const ce = fse.readFileSync(resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
   if (ce) { // 非空，有错
     solution.judge = config.judge.CompileError
     solution.error = ce
     return
   }
-  const result = fse.readJsonSync(path.resolve(__dirname, 'temp/result.json'))
+  const result = fse.readJsonSync(resolve(__dirname, 'temp/result.json'))
 
   solution.judge = -1
-  solution.time = 0
-  solution.memory = 0
+  solution.time = solution.memory = 0
   for (const item of result) {
     item.result = judgeCode(item.result)
     solution.time = Math.max(solution.time, item.time)
@@ -121,6 +113,51 @@ async function judge (problem, solution) {
   }
   solution.testcases = result
   return solution
+}
+
+async function afterJudge (problem, solution) {
+  if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能
+    const sim = await simTest(solution)
+    if (sim.sim !== 0) { // 有 "抄袭可能"
+      solution.sim = sim.sim
+      solution.sim_s_id = sim.sim_s_id
+    }
+  }
+  return Promise.all([
+    solution.save(),
+    solutionArchive(solution),
+    userUpdate(solution)
+  ])
+}
+
+// 如果作对了，就要把这个提交的代码保存到另一个文件夹中
+async function solutionArchive (solution) {
+  if (solution.judge !== config.judge.Accepted) {
+    return
+  }
+  const target = resolve(
+    __dirname,
+    `../../data/${solution.pid}/ac/`,
+    `${solution.sid}.${extensions[solution.language]}`
+  )
+  return fse.outputFile(target, solution.code)
+}
+
+// 用 sim 检测，返回相似度 (sim) 以及 最相似的那个提交 (sim_s_id)
+async function simTest (solution) {
+  const dir = resolve(__dirname, `../../data/${solution.pid}/ac/`)
+  // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
+  await fse.removeSync('./simfile')
+  shell.exec(`./sim.sh ./test/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
+  if (fse.existsSync('./simfile')) {
+    const simfile = await fse.readFile('./simfile')
+    const result = simfile.toString().match(/(\d+)\s+(\d+)/)
+    ;[solution.sim, solution.sim_s_id] = [+result[1], +result[2]]
+  }
+  return {
+    sim: solution.sim || 0,
+    sim_s_id: solution.sim_s_id || 0
+  }
 }
 
 /**
@@ -162,21 +199,10 @@ async function main () {
     // 移出并获取oj:solutions列表中的最后一个元素
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
     const sid = +res[1]
-    const solution = await Solution.findOne({ sid }).exec()
-    const problem = await Problem.findOne({ pid: solution.pid }).exec()
-    solution.judge = config.judge.Running
-    await solution.save() // 将判题状态改为正在判题
-    logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: solution.uid>`)
+    const { problem, solution } = await beforeJudge(sid)
+    logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}>`)
     await judge(problem, solution)
-    if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能
-      const sim = await simTest(solution)
-      if (sim.sim !== 0) { // 有 "抄袭可能"
-        solution.sim = sim.sim
-        solution.sim_s_id = sim.sim_s_id
-      }
-    }
-    await solution.save()
-    await userUpdate(solution)
+    await afterJudge(problem, solution)
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
   }
 }
