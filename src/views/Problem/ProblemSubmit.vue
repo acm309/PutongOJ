@@ -2,14 +2,16 @@
   <div>
     <h1>{{ this.$route.params.pid }}:  {{ title }}</h1>
     <submit></submit>
-    <Button type="primary" @click="submit">Submit</Button>
+    <Button type="primary" @click="submit" :disabled="!isLogined">Submit</Button>
     <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
+    <p v-if="!isLogined">Please Log in First</p>
   </div>
 </template>
 
 <script>
 import Submit from '@/components/Submit'
 import { mapGetters, mapActions } from 'vuex'
+import * as types from '../../store/types'
 
 export default {
   data: () => ({
@@ -18,7 +20,8 @@ export default {
   computed: {
     ...mapGetters({
       solution: 'solution/solution',
-      problem: 'problem/problem'
+      problem: 'problem/problem',
+      isLogined: 'session/isLogined'
     })
   },
   created () {
@@ -36,7 +39,7 @@ export default {
   methods: {
     ...mapActions(['changeDomTitle']),
     reset () {
-      this.$store.commit('solution/GET_SOLUTION', Object.assign(
+      this.$store.commit('solution/' + types.GET_SOLUTION, Object.assign(
         this.solution,
         { code: '' }
       ))
