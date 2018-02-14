@@ -112,15 +112,7 @@ export default {
       isAdmin: 'session/isAdmin'
     }),
     query () {
-      let uid
-      if (this.profile) {
-        uid = this.profile.uid
-      }
-      const opt = Object.assign(
-        only(this.$route.query, 'page pageSize type content'),
-        { uid }
-      )
-      return opt
+      return only(this.$route.query, 'page pageSize type content')
     }
   },
   methods: {

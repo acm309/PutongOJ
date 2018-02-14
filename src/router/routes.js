@@ -78,7 +78,7 @@ export default [
     path: '/problems',
     name: 'problemList',
     component: ProblemList,
-    meta: { title: 'problem List' }
+    meta: { title: 'Problem List' }
   },
   {
     path: '/problems/create', // 这个路由是不是要这样设计? 可能要讨论一下
@@ -210,31 +210,31 @@ export default [
         path: '',
         name: 'contestOverview',
         component: ContestOverview,
-        meta: { title: 'contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true }
       },
       {
         path: 'problem/:id',
         name: 'contestProblem',
         component: ContestProblem,
-        meta: { title: 'contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true }
       },
       {
         path: 'problem/:id/submit',
         name: 'contestSubmit',
         component: ContestSubmit,
-        meta: { title: 'contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true }
       },
       {
         path: 'status',
         name: 'contestStatus',
         component: ContestStatus,
-        meta: { title: 'contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true }
       },
       {
         path: 'ranklist',
         name: 'contestRanklist',
         component: ContestRanklist,
-        meta: { title: 'contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true }
       },
       {
         path: 'edit',
