@@ -1,7 +1,9 @@
+require('./config/db')
 const { resolve } = require('path')
 const fse = require('fs-extra')
 const range = require('lodash.range')
 const shell = require('shelljs')
+const ID = require('./models/ID')
 const config = require('./config')
 
 // download and initialize the judgers
@@ -33,7 +35,7 @@ const baseConfig = {
   ]
 }
 
-async function main () {
+async function judgeSetup () {
   let judgers = +config.judgers
   if (!(judgers >= 1 && judgers <= 10)) judgers = 1
 
@@ -69,7 +71,25 @@ async function main () {
     })
   )
 
-  await fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
+  return fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
+}
+
+async function databaseSetup () {
+  const models = [
+    'Problem', 'Solution', 'Contest', 'News', 'Group'
+  ]
+  return Promise.all(models.map(async (model) => {
+    const item = await ID.findOne({ name: model }).exec()
+    if (item != null && item.id >= 0) return
+    return new ID({ name: model, id: 0 }).save()
+  }))
+}
+
+async function main () {
+  return Promise.all([
+    judgeSetup(),
+    databaseSetup()
+  ])
 }
 
 main()

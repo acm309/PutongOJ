@@ -27,6 +27,8 @@ const IdSchema = mongoose.Schema({
         { "id" : 2, "name" : "News" }
 */
 IdSchema.statics.generateId = function (field = '') {
+  // field 只能是以下中的一个
+  // 'Problem', 'Solution', 'Contest', 'News', 'Group'
   field = field.toLocaleLowerCase()
   field = field[0].toLocaleUpperCase() + field.slice(1)
   return this

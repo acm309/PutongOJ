@@ -4,6 +4,7 @@ require('../../config/db')
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 const Contest = require('../../models/Contest')
+const ID = require('../../models/ID')
 const config = require('../config')
 
 const uuid = require('uuid/v4')
@@ -87,10 +88,23 @@ async function ranklistBuild () {
   return Promise.all(contests.map(update))
 }
 
+// 新版本里多了几个字段: 主要是 Group；其它，比如 Problem，就是顺便检查一下而已
+async function databaseSetup () {
+  const models = [
+    'Problem', 'Solution', 'Contest', 'News', 'Group'
+  ]
+  return Promise.all(models.map(async (model) => {
+    const item = await ID.findOne({ name: model }).exec()
+    if (item != null && item.id >= 0) return
+    return new ID({ name: model, id: 0 }).save()
+  }))
+}
+
 async function main () {
   return Promise.all([
     testcaseBuild(),
-    ranklistBuild()
+    ranklistBuild(),
+    databaseSetup()
   ])
 }
 
