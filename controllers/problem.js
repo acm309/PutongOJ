@@ -5,6 +5,7 @@ const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
+const { isLogined } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const pid = parseInt(ctx.params.pid)
@@ -49,12 +50,21 @@ const find = async (ctx) => {
     }
   }
 
-  const uid = opt.uid
   let solved = []
-  solved = await Solution
-    .find({ uid, judge: config.judge.Accepted })
-    .distinct('pid')
-    .exec()
+  if (isLogined(ctx)) {
+    const query = Solution.find({
+      uid: ctx.session.profile.uid,
+      judge: config.judge.Accepted
+    })
+    // 缩小查询范围
+    if (list.length > 0) {
+      query
+        .where('pid')
+        .gte(list.docs[0].pid)
+        .lte(list.docs[list.total - 1].pid)
+    }
+    solved = await query.distinct('pid').exec()
+  }
 
   ctx.body = {
     list,

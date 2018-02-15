@@ -37,11 +37,16 @@ const pushToJudge = (sid) => {
   redis.lpush('oj:solutions', sid) // 将sid往列表的头部插入
 }
 
+function isLogined (ctx) {
+  return ctx.session != null && ctx.session.profile != null && ctx.session.profile.uid != null
+}
+
 module.exports = {
   generatePwd,
   purify,
   isAdmin,
   isRoot,
   isUndefined,
-  pushToJudge
+  pushToJudge,
+  isLogined
 }
