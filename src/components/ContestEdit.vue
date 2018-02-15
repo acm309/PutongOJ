@@ -127,15 +127,11 @@ export default {
       encrypt: 'encrypt'
     }),
     transData () {
-      let data = []
-      this.list.forEach((item, index) => {
-        data.push({
-          key: index + '',
-          label: item.uid,
-          disabled: false
-        })
-      })
-      return data
+      return this.list.map((item, index) => ({
+        key: index + '',
+        label: item.uid,
+        disabled: false
+      }))
     }
   },
   created () {
@@ -154,14 +150,10 @@ export default {
       })
     }
     this.$store.dispatch('user/find').then(() => {
-      this.list.forEach((item) => {
-        this.userList.push(item.uid)
-      })
+      this.userList = this.list.map((item) => item.uid)
       if (+this.contest.encrypt === this.encrypt.Private) {
         const arg = this.contest.argument.split('\r\n')
-        arg.forEach((item) => {
-          this.targetKeys.push(this.userList.indexOf(item) + '')
-        })
+        this.targetKeys = arg.map((item) => this.userList.indexOf(item) + '')
       }
     })
   },
@@ -187,10 +179,7 @@ export default {
       this.targetKeys = newTargetKeys
     },
     saveUser () {
-      let user = []
-      this.targetKeys.forEach((item) => {
-        user.push(this.userList[+item])
-      })
+      const user = this.targetKeys.map((item) => this.userList[+item])
       const res = user.join('\r\n')
       this.contest.argument = res
       this.$Message.success('保存当前用户组成功！')
