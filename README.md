@@ -1,53 +1,45 @@
-# project
+# PutongOJ-FE
 
-> A Vue.js project
+[Putong OJ](https://github.com/acm309/PutongOJ) 的前端部分
 
-# Bug
-- ~~当先进入其他用户的信息界面时，再点击右上角用户名的profile，无法跳转到登录用户的信息界面~~
-- ~~查看用户代码页面浏览器报错~~
-- ~~更换页面LoadingBar~~
-- ~~前后端api命名统一~~
-- ~~后端judger将刚推入的比赛改为正在判题~~
-- ~~在竞赛页面(已登录)刷新后会跳转竞赛列表页面，并弹出登录框,router文件里如何异步进行判断~~
-- ~~图片上传后显示不了~~
-- ~~修改题目或比赛，新建题目或比赛，不在当前页面提交，直接点击Menu的其他栏，会报错~~
-- ~~管理员页面的路由懒加载~~
-- ~~比赛创建后跳转到新建比赛页面报错，获取不了数据~~
-- ~~将iview改为按需引用~~
-- ~~优化引入echarts~~
-- ~~比赛列表里某些题目不是在比赛中完成而是在平常做的也在列表中打上了完成记号~~
-- ~~比赛封榜~~
-- ~~confirm组件报错，在usermanage页面，移除管理员时报错，应该是按需引用的问题~~
-- ~~修改teacher权限，禁止修改admin用户的信息~~
-- ~~查询用户资料时报错，后端取不到group的title?~~
-- ~~查询管理员组时，没有数据返回~~
-- 使用webpack-bundle-analyzer检测打包文件
-- admin查看用户代码，显示测试数据通过情况
-- 网站窗口的小图片
+~~[Preview](http://acm.cjlu.edu.cn)~~
 
-## Build Setup
+一个采用 vue, vue-router, vuex 而成的单页应用
 
-``` bash
-# install dependencies
-npm install
+# 主要组件的版本
+- Vue 2.5.2
+- vue-router 3.0.1
+- vuex 3.0.1
+- axios 0.17.1
+- iview 2.8.0
 
-# serve with hot reload at localhost:8080
-npm run dev
+# 项目结构
 
-# build for production with minification
-npm run build
+```
+├── dist // 生成打包好的文件
+│   ├── static
+|   |   ├── css
+|   |   ├── fonts
+|   |   ├── img
+|   |   └── js
+│   └── index.html
+└── src
+    ├── main.js // 项目入口
+    ├── router // 路由文件，说明了各个路由将会使用的组件
+    |   ├── index.js // router的配置以及引用组件
+    |   └── routes.js // 定义各个路由
+    ├── assets // 网站logo图资源
+    ├── components // 一些小组件
+    ├── store // vuex 文件
+    │   └── modules // 子模块
+    └── views // 路由对应的组件 (这些组件在 router.js 中都被引入)
+        ├── Admin
+        ├── Contest
+        ├── News
+        └── Problem
 
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+# TODO
+
+- [ ] 开发文档
