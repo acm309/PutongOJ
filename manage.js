@@ -3,8 +3,12 @@ const { resolve } = require('path')
 const fse = require('fs-extra')
 const range = require('lodash.range')
 const shell = require('shelljs')
+const fetch = require('node-fetch')
 const ID = require('./models/ID')
+const User = require('./models/User')
+const Problem = require('./models/Problem')
 const config = require('./config')
+const { generatePwd } = require('./utils/helper')
 
 // download and initialize the judgers
 // start !
@@ -76,19 +80,46 @@ async function judgeSetup () {
 
 async function databaseSetup () {
   const models = [
-    'Problem', 'Solution', 'Contest', 'News', 'Group'
+    'Solution', 'Contest', 'News', 'Group'
   ]
-  return Promise.all(models.map(async (model) => {
+  const ps = models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
     if (item != null && item.id >= 0) return
     return new ID({ name: model, id: 0 }).save()
-  }))
+  })
+
+  const admin = await User.findOne({uid: 'admin'}).exec()
+  if (admin == null) {
+    ps.push(new User({
+      uid: 'admin',
+      nick: 'admin',
+      pwd: generatePwd(config.deploy.adminInitPwd)
+    }).save())
+  }
+
+  const count = await Problem.count().exec()
+  if (count === 0) {
+    ps.push(new Problem({
+      description: 'This is a test problem without any test data. Go to Edit tab to complete the description and other fields. Go to Test Data to upload new test data'
+    }).save())
+  }
+  return Promise.all(ps)
+}
+
+async function staticFilesSetUp () {
+  const res = await fetch('https://api.github.com/repos/acm309/PutongOJ-FE/releases')
+  const json = res.json()
+  const url = json[0].assets[0].browser_download_url
+  shell.exec(`wget ${url} -O dist.zip`)
+  shell.exec(`unzip dist.zip -d dist`)
+  shell.exec(`cp -r dist/* public/`)
 }
 
 async function main () {
   return Promise.all([
     judgeSetup(),
-    databaseSetup()
+    databaseSetup(),
+    staticFilesSetUp()
   ])
 }
 

@@ -42,7 +42,8 @@ config.encrypt = {
 }
 
 config.deploy = {
-  judgers: 1
+  judgers: 1,
+  adminInitPwd: 'kplkplkpl'
 }
 
 config.secretKey = process.env.secretKey || 'Putong Putong Putong'

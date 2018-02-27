@@ -33,6 +33,7 @@
     "lodash.remove": "^4.7.0",
     "mongoose": "^4.13.7",
     "mongoose-paginate": "^5.0.3",
+    "node-fetch": "^2.0.0",
     "only": "^0.0.2",
     "shelljs": "^0.8.1",
     "tracer": "^0.8.11",
