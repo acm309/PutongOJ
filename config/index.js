@@ -45,14 +45,16 @@ config.deploy = {
   judgers: 1
 }
 
+config.secretKey = process.env.secretKey || 'Putong Putong Putong'
+
 const dev = {
   port: 8888,
-  dbURL: process.env.DBURL || process.env.dbURL // 之所以两个只为了兼容旧版命名；请优先采用后者
+  dbURL: process.env.DBURL || process.env.dbURL || '127.0.0.1:27017' // 之所以两个只为了兼容旧版命名；请优先采用后者
 }
 
 const prod = {
   port: 3000,
-  dbURL: process.env.DBURL || process.env.dbURL
+  dbURL: process.env.DBURL || process.env.dbURL || '127.0.0.1:27017'
 }
 
 module.exports = Object.assign(

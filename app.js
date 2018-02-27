@@ -4,6 +4,7 @@ const bodyparser = require('koa-body')
 const staticServe = require('koa-static')
 const path = require('path')
 const session = require('koa-session')
+const send = require('koa-send')
 const config = require('./config')
 const router = require('./routes')
 const logger = require('./utils/logger')
@@ -14,7 +15,7 @@ const app = new Koa()
 // 日志，会在控制台显示请求的方法和路由
 app.use(koaLogger())
 
-app.keys = ['some secret hurr'] // TODO: config this at config.js
+app.keys = [config.secretKey]
 
 app.use(session({
   key: 'koa:oj:sess',
@@ -44,6 +45,13 @@ app.use(async (ctx, next) => {
       error: err.message
     }
     logger.error(`${err.status} -- ${err.message}\n${err.stack}`)
+  }
+})
+
+app.use(async (ctx, next) => {
+  await next()
+  if (ctx.status === 404) {
+    return send(ctx, 'public/index.html')
   }
 })
 
