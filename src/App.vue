@@ -14,7 +14,12 @@ export default {
     'oj-layout': Layout
   },
   methods: {
-    ...mapActions(['changeDomTitle'])
+    ...mapActions(['changeDomTitle', 'fetchTime', 'updateTime'])
+  },
+  created () {
+    this.fetchTime().then(() => {
+      this.updateTime()
+    })
   },
   watch: {
     '$route' () {

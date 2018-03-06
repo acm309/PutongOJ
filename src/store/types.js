@@ -65,3 +65,7 @@ export const DELETE_TESTCASE = 'DELETE_TESTCASE'
 // tag
 export const UPDATE_TAG = 'UPDATE_TAG'
 export const UPDATE_TAG_LIST = 'UPDATE_TAG_LIST'
+
+// index
+export const SET_SERVERTIME = 'SET_SERVERTIME'
+export const UPDATE_SERVERTIME = 'UPDATE_SERVERTIME'

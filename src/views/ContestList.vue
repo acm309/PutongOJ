@@ -156,17 +156,7 @@ export default {
             })
           },
           onOk: () => {
-            const opt = Object.assign(
-              item,
-              { pwd: this.enterPsd }
-            )
-            this.$store.dispatch('contest/verify', opt).then((data) => {
-              if (data) {
-                this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-              } else {
-                this.$Message.error('Wrong password!')
-              }
-            })
+            this.enter(item)
           }
         })
       }

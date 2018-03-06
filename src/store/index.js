@@ -11,10 +11,13 @@ import contest from './modules/contest'
 import group from './modules/group'
 import testcase from './modules/testcase'
 import tag from './modules/tag'
+import * as types from './types'
+import api from '@/api'
 
 Vue.use(Vuex)
 
 const state = {
+  currentTime: Date.now()
 }
 
 const getters = {
@@ -45,7 +48,17 @@ const getters = {
     PresentationError: 9,
     SystemError: 10,
     RejudgePending: 11
-  })
+  }),
+  currentTime: state => state.currentTime
+}
+
+const mutations = {
+  [types.SET_SERVERTIME]: (state, payload) => {
+    state.currentTime = payload.serverTime
+  },
+  [types.UPDATE_SERVERTIME]: (state, payload) => {
+    state.currentTime += payload.step
+  }
 }
 
 const actions = {
@@ -55,12 +68,25 @@ const actions = {
     } else {
       window.document.title = state.route.meta.title
     }
+  },
+  fetchTime ({ commit }) {
+    return api.getTime().then(({ data }) => {
+      commit(types.SET_SERVERTIME, data)
+    })
+  },
+  updateTime ({ commit }, payload) {
+    setInterval(() => {
+      commit(types.UPDATE_SERVERTIME, {
+        step: 1000
+      })
+    }, 1000)
   }
 }
 
 export default new Vuex.Store({
   state,
   getters,
+  mutations,
   actions,
   modules: {
     session,

@@ -68,6 +68,8 @@ const api = {
   getRanklist: (data) => instance.get('/ranklist/list', { params: data }),
   // 图片上传
   getImage: (data) => instance.post('/submit', data),
+  // 获取服务器时间
+  getTime: (data) => instance.get('/serverTime'),
   testcase: {
     findOne: (data) => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
     find: (data) => instance.get(`/testcase/${data.pid}`, { params: data }),
