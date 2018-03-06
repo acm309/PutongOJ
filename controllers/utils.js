@@ -7,6 +7,12 @@ const submit = (ctx) => {
   }
 }
 
+const serverTime = (ctx) => {
+  ctx.body = {
+    serverTime: Date.now()
+  }
+}
 module.exports = {
-  submit
+  submit,
+  serverTime
 }

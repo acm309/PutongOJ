@@ -34,15 +34,8 @@ const logout = async (ctx) => {
 // 检查登录状态
 const profile = async (ctx) => {
   const profile = ctx.session.profile ? ctx.session.profile : null
-  let status
-  if (profile != null) {
-    status = 'success'
-  } else {
-    status = 'fail'
-  }
   ctx.body = {
-    profile,
-    status
+    profile
   }
 }
 
