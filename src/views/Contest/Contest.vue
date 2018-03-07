@@ -3,9 +3,9 @@
     <Card class="card">
       <Row type="flex" justify="center">
         <Col :span="6">Begin: {{ contest.start | timePretty }}</Col>
-        <Col :span="12" v-if="Date.now() < contest.start">Ready</Col>
-        <Col :span="12" v-if="Date.now() > contest.start && Date.now() < contest.end">Running</Col>
-        <Col :span="12" v-if="Date.now() > contest.end">Ended</Col>
+        <Col :span="12" v-if="currentTime < contest.start">Ready</Col>
+        <Col :span="12" v-if="currentTime > contest.start && currentTime < contest.end">Running</Col>
+        <Col :span="12" v-if="currentTime > contest.end">Ended</Col>
         <Col :span="6">End: {{ contest.end | timePretty }}</Col>
       </Row>
         <Progress :stroke-width="18" :percent="timePercentage"></Progress>
@@ -35,15 +35,16 @@ export default {
   computed: {
     ...mapGetters({
       contest: 'contest/contest',
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      currentTime: 'currentTime'
     }),
     timePercentage () {
-      if (Date.now() < this.contest.start) {
+      if (this.currentTime < this.contest.start) {
         return 0
-      } else if (Date.now() > this.contest.end) {
+      } else if (this.currentTime > this.contest.end) {
         return 100
       } else {
-        return +((Date.now() - this.contest.start) * 100 /
+        return +((this.currentTime - this.contest.start) * 100 /
         (this.contest.end - this.contest.start)).toFixed(1)
       }
     }

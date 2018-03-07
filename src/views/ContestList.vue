@@ -19,9 +19,9 @@
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
           <td>
-            <span class="ready" v-if="item.start > Date.now()">Ready</span>
-            <span class="run" v-if="item.start < Date.now() && item.end > Date.now()">Running</span>
-            <span class="end" v-if="item.end < Date.now()" >Ended</span>
+            <span class="ready" v-if="item.start > currentTime">Ready</span>
+            <span class="run" v-if="item.start < currentTime && item.end > currentTime">Running</span>
+            <span class="end" v-if="item.end < currentTime" >Ended</span>
           </td>
           <td>
             <span>{{ item.start | timePretty }}</span>
@@ -76,7 +76,8 @@ export default {
       encrypt: 'encrypt',
       profile: 'session/profile',
       isLogined: 'session/isLogined',
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      currentTime: 'currentTime'
     }),
     query () {
       const opt = only(this.$route.query, 'page pageSize type content')
@@ -121,7 +122,7 @@ export default {
         this.$store.commit('session/TRIGGER_LOGIN')
       } else if (this.isAdmin || this.profile.verifyContest.indexOf(+item.cid) !== -1) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-      } else if (item.start > Date.now()) {
+      } else if (item.start > this.currentTime) {
         this.$Message.error("This contest hasn't started yet!")
       } else if (+item.encrypt === this.encrypt.Public) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
