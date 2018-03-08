@@ -9,6 +9,7 @@ const ID = require('./models/ID')
 const User = require('./models/User')
 const Problem = require('./models/Problem')
 const Contest = require('./models/Contest')
+const Solution = require('./models/Solution')
 const config = require('./config')
 const { generatePwd } = require('./utils/helper')
 
@@ -110,7 +111,7 @@ async function databaseSetup () {
 
 async function staticFilesSetUp () {
   const res = await fetch('https://api.github.com/repos/acm309/PutongOJ-FE/releases')
-  const json = res.json()
+  const json = await res.json()
   const url = json[0].assets[0].browser_download_url
   shell.exec(`wget ${url} -O dist.zip`)
   shell.exec(`unzip dist.zip -d dist`)
@@ -159,7 +160,7 @@ async function testcaseBuild (problem) {
     const pid = problem.pid
 
     // testdata
-    if (!fse.existsSync(path.resolve(__dirname, `./data/${pid}/test.in`))) {
+    if (!fse.existsSync(resolve(__dirname, `./data/${pid}/test.in`))) {
       return
     }
     const solutions = await Solution.find({ pid }).exec()
@@ -171,11 +172,14 @@ async function testcaseBuild (problem) {
       uuid: newid
     })
     await Promise.all([
-      fse.copy(path.resolve(__dirname, `./data/${pid}/test.in`), path.resolve(__dirname, `./data/${pid}/${newid}.in`)),
-      fse.copy(path.resolve(__dirname, `./data/${pid}/test.out`), path.resolve(__dirname, `./data/${pid}/${newid}.out`)),
-      fse.writeJson(path.resolve(__dirname, `./data/${pid}/meta.json`), meta, { spaces: 2 })
+      fse.copy(resolve(__dirname, `./data/${pid}/test.in`), resolve(__dirname, `./data/${pid}/${newid}.in`)),
+      fse.copy(resolve(__dirname, `./data/${pid}/test.out`), resolve(__dirname, `./data/${pid}/${newid}.out`)),
+      fse.writeJson(resolve(__dirname, `./data/${pid}/meta.json`), meta, { spaces: 2 })
     ])
     solutions.forEach((solution) => {
+      if (solution.code.length < 6) {
+        solution.code += ' Deprecated (Appended by System)'
+      }
       solution.testcases = [{
         uuid: newid,
         judge: solution.judge,
@@ -202,6 +206,10 @@ function main () {
 }
 
 main()
+  .then(() => {
+    console.log('ok')
+    process.exit(0)
+  })
   .catch(err => {
     console.error(err)
     process.exit(-1)
