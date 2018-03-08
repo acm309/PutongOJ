@@ -20,7 +20,7 @@
           <td>{{ item.uuid.slice(0, 8) }}</td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
-          <td :class="color[item.result]">{{ result[item.result] }}</td>
+          <td :class="color[item.judge]">{{ result[item.judge] }}</td>
         </tr>
       </template>
     </table>
