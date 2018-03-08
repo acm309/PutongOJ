@@ -8,6 +8,7 @@ const uuid = require('uuid/v4')
 const ID = require('./models/ID')
 const User = require('./models/User')
 const Problem = require('./models/Problem')
+const Contest = require('./models/Contest')
 const config = require('./config')
 const { generatePwd } = require('./utils/helper')
 
@@ -190,7 +191,7 @@ async function testcaseBuild (problem) {
   }
 }
 
-async function main () {
+function main () {
   return Promise.all([
     judgeSetup(),
     databaseSetup(),

@@ -15,8 +15,9 @@ mongoose.connection.on('connected', () => {
   logger.info('MongoDB connected success.')
 })
 
-mongoose.connection.on('error', () => {
+mongoose.connection.on('error', (err) => {
   logger.error('MongoDB connected fail.')
+  logger.error(err)
   process.exit(-1)
 })
 
