@@ -22,6 +22,7 @@ services:
       NODE_ENV: production
       dbURL: 'mongodb://ptoj-db:27017'
       redisURL: 'redis://ptoj-redis:6379'
+      UPGRADE: yes
     ports:
       - '0.0.0.0:80:3000'
     volumes:

@@ -4,6 +4,7 @@ const fse = require('fs-extra')
 const range = require('lodash.range')
 const shell = require('shelljs')
 const fetch = require('node-fetch')
+const uuid = require('uuid/v4')
 const ID = require('./models/ID')
 const User = require('./models/User')
 const Problem = require('./models/Problem')
@@ -115,11 +116,87 @@ async function staticFilesSetUp () {
   shell.exec(`cp -r dist/* public/`)
 }
 
+async function ranklistBuild () {
+  async function update (contest) {
+    const ranklist = {}
+    const { cid } = contest
+    const solutions = await Solution.find({
+      mid: cid
+    })
+    for (const solution of solutions) {
+      const { uid } = solution
+      const row = (uid in ranklist) ? ranklist[uid] : { uid }
+      const { pid } = solution
+      const item = (pid in row) ? row[pid] : {}
+      if ('wa' in item) {
+        if (item.wa >= 0) continue
+        if (solution.judge === config.judge.Accepted) {
+          item.wa = -item.wa
+          item.create = solution.create
+        } else item.wa --
+      } else {
+        if (solution.judge === config.judge.Accepted) {
+          item.wa = 0
+          item.create = solution.create
+        } else item.wa = -1
+      }
+      row[pid] = item
+      ranklist[uid] = row
+    }
+    contest.ranklist = ranklist
+    return contest.save()
+  }
+  const contests = await Contest.find({}).exec()
+  return Promise.all(contests.map(update))
+}
+
+/*
+对原有的 testcase 增加 id 标记
+*/
+async function testcaseBuild (problem) {
+  async function update (problem) {
+    const pid = problem.pid
+
+    // testdata
+    if (!fse.existsSync(path.resolve(__dirname, `./data/${pid}/test.in`))) {
+      return
+    }
+    const solutions = await Solution.find({ pid }).exec()
+    const meta = {
+      testcases: []
+    }
+    const newid = uuid()
+    meta.testcases.push({
+      uuid: newid
+    })
+    await Promise.all([
+      fse.copy(path.resolve(__dirname, `./data/${pid}/test.in`), path.resolve(__dirname, `./data/${pid}/${newid}.in`)),
+      fse.copy(path.resolve(__dirname, `./data/${pid}/test.out`), path.resolve(__dirname, `./data/${pid}/${newid}.out`)),
+      fse.writeJson(path.resolve(__dirname, `./data/${pid}/meta.json`), meta, { spaces: 2 })
+    ])
+    solutions.forEach((solution) => {
+      solution.testcases = [{
+        uuid: newid,
+        judge: solution.judge,
+        time: solution.time,
+        memory: solution.memory
+      }]
+    })
+    return Promise.all(solutions.map(s => s.save()))
+  }
+  if (process.env.UPGRADE === 'yes') {
+    const problems = await Problem.find().exec()
+    return Promise.all(problems.map(update))
+  }
+}
+
 async function main () {
   return Promise.all([
     judgeSetup(),
     databaseSetup(),
-    staticFilesSetUp()
+    staticFilesSetUp(),
+    ranklistBuild(),
+    testcaseBuild()
   ])
 }
 
