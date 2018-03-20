@@ -1,15 +1,13 @@
-import { Promise } from 'mongoose'
-
 require('../../config/db')
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 const Contest = require('../../models/Contest')
 const ID = require('../../models/ID')
-const config = require('../config')
+const config = require('../../config')
 
 const uuid = require('uuid/v4')
 const fse = require('fs-extra')
-const path = require('path')
+const { resolve } = require('path')
 
 /*
 对原有的 testcase 增加 id 标记
@@ -19,7 +17,7 @@ async function testcaseBuild (problem) {
     const pid = problem.pid
 
     // testdata
-    if (!fse.existsSync(path.resolve(__dirname, `../../data/${pid}/test.in`))) {
+    if (!fse.existsSync(resolve(__dirname, `../../data/${pid}/test.in`))) {
       return
     }
     const solutions = await Solution.find({ pid }).exec()
@@ -31,11 +29,14 @@ async function testcaseBuild (problem) {
       uuid: newid
     })
     await Promise.all([
-      fse.copy(path.resolve(__dirname, `../../data/${pid}/test.in`), path.resolve(__dirname, `../../data/${pid}/${newid}.in`)),
-      fse.copy(path.resolve(__dirname, `../../data/${pid}/test.out`), path.resolve(__dirname, `../../data/${pid}/${newid}.out`)),
-      fse.writeJson(path.resolve(__dirname, `../../data/${pid}/meta.json`), meta, { spaces: 2 })
+      fse.copy(resolve(__dirname, `../../data/${pid}/test.in`), resolve(__dirname, `../../data/${pid}/${newid}.in`)),
+      fse.copy(resolve(__dirname, `../../data/${pid}/test.out`), resolve(__dirname, `../../data/${pid}/${newid}.out`)),
+      fse.writeJson(resolve(__dirname, `../../data/${pid}/meta.json`), meta, { spaces: 2 })
     ])
     solutions.forEach((solution) => {
+      if (solution.code.length < 6) {
+        solution.code += ' Deprecated (Appended by System)'
+      }
       solution.testcases = [{
         uuid: newid,
         judge: solution.judge,
@@ -51,9 +52,7 @@ async function testcaseBuild (problem) {
 
 /**
  * 之前的数据里的 Contest model 没有 ranklist 属性，这个函数在现有数据库基础上生成 ranklist
- * TODO: 这个函数暂时没用上
  */
-// eslint-disable-next-line
 async function ranklistBuild () {
   async function update (contest) {
     const ranklist = {}

@@ -48,14 +48,14 @@ config.deploy = {
 
 config.secretKey = process.env.secretKey || 'Putong Putong Putong'
 
+config.dbURL = process.env.DBURL || process.env.dbURL || 'mongodb://127.0.0.1:27017' // 之所以两个只为了兼容旧版命名；请优先采用后者
+
 const dev = {
-  port: 8888,
-  dbURL: process.env.DBURL || process.env.dbURL || '127.0.0.1:27017' // 之所以两个只为了兼容旧版命名；请优先采用后者
+  port: 8888
 }
 
 const prod = {
-  port: 3000,
-  dbURL: process.env.DBURL || process.env.dbURL || '127.0.0.1:27017'
+  port: 3000
 }
 
 module.exports = Object.assign(
