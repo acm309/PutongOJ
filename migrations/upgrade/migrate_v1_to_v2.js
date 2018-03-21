@@ -108,5 +108,11 @@ async function main () {
 }
 
 main()
-  .then(() => console.log('ok'))
-  .catch((err) => console.error(err))
+  .then(() => {
+    console.log('ok')
+    process.exit(0)
+  })
+  .catch((err) => {
+    console.error(err)
+    process.exit(-1)
+  })

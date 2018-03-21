@@ -52,7 +52,7 @@ contestSchema.pre('validate', function (next) {
 
   if (this.title.length >= 80) {
     next(new Error('The length of the title should not be greater than 80'))
-  } else if (new Date(this.start).getTime() >= new Date(this.end).getTime()) {
+  } else if (new Date(this.start).getTime() > new Date(this.end).getTime()) {
     next(new Error('The race end time can not be earlier than the start time!'))
   } else {
     next()
