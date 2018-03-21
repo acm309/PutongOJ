@@ -26,7 +26,7 @@
       </tr>
       <template v-for="(item, index) in solution.testcases">
         <tr>
-          <td><a :href="`/testcase/${solution.pid}/${item.uuid}`" target="_blank"> {{ item.uuid.slice(0, 8) }} </a></td>
+          <td><a :href="`/api/testcase/${solution.pid}/${item.uuid}`" target="_blank"> {{ item.uuid.slice(0, 8) }} </a></td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
           <td :class="color[item.judge]">{{ result[item.judge] }}</td>
