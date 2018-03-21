@@ -67,7 +67,10 @@
             <Button type="text">{{ item.uid }}</Button>
           </router-link>
         </td>
-        <td :class="color[item.judge]">{{ result[item.judge] }}</td>
+        <td :class="color[item.judge]">
+          {{ result[item.judge] }}
+          <Tag color="yellow" v-if="item.sim">[{{ item.sim }}%]{{ item.sim_s_id }}</Tag>
+        </td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
         <td v-if="isAdmin || (profile && profile.uid === item.uid)">

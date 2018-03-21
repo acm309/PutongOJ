@@ -2,9 +2,18 @@
   <div v-if="solution">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
+      <span>Problem:
+        <router-link :to="{name: 'problemInfo', params: {pid: solution.pid}}">
+          {{ solution.pid }}
+        </router-link>
+      </span>
       <span>Memory: {{ solution.memory }} KB</span>
       <span>Runtime: {{ solution.time }} MS</span>
-      <span>Author: {{ solution.uid }}</span>
+      <span>Author:
+        <router-link :to="{name: 'userInfo', params: {uid: solution.uid}}">
+          {{ solution.uid }}
+        </router-link>
+      </span>
     </p>
     <hr>
     <h2>Testcases</h2>
@@ -17,7 +26,7 @@
       </tr>
       <template v-for="(item, index) in solution.testcases">
         <tr>
-          <td>{{ item.uuid.slice(0, 8) }}</td>
+          <td><a :href="`/testcase/${solution.pid}/${item.uuid}`" target="_blank"> {{ item.uuid.slice(0, 8) }} </a></td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
           <td :class="color[item.judge]">{{ result[item.judge] }}</td>
@@ -33,8 +42,11 @@
     <pre><code v-html="prettyCode(solution.code)"></code></pre>
     <div v-if="isAdmin && solution.sim">
       <hr>
-      Similarity: {{ solution.sim }}</br>
-      From: {{ solution.simSolution.sid }}% by {{ solution.simSolution.uid }}
+      Similarity: {{ solution.sim }}%</br>
+      From: {{ solution.simSolution.sid }} by
+      <router-link :to="{name: 'userInfo', params: {uid: solution.simSolution.uid}}">
+        {{ solution.simSolution.uid }}
+      </router-link>
       <pre><code v-html="prettyCode(solution.simSolution.code)"></code></pre>
     </div>
   </div>
