@@ -87,7 +87,7 @@ async function beforeJudge (sid) {
 }
 
 async function judge (problem, solution) {
-  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d temp -t ${problem.time} -m ${problem.memory} -o 81920`) //
+  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d ./temp -t ${problem.time} -m ${problem.memory} -o 81920`)
 
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()

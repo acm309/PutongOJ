@@ -74,7 +74,8 @@ async function judgeSetup () {
       'out_file': resolve(logDir, `node-${i}-out.log`),
       'error_file': resolve(logDir, `node-${i}-err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true
+      'merge_logs': true,
+      cwd: resolve(judgersDir, `node-${i}`)
     })
   )
 

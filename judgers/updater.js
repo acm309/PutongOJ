@@ -44,4 +44,4 @@ async function main () {
 
 main()
   .then(() => logger.info('Started!'))
-  .error((e) => logger.error(`${e.message}\n${e.stack}`))
+  .catch((e) => logger.error(`${e.message}\n${e.stack}`))
