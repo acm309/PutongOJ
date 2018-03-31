@@ -101,11 +101,11 @@ async function judge (problem, solution) {
   solution.judge = -1
   solution.time = solution.memory = 0
   for (const item of result) {
-    item.result = judgeCode(item.result)
+    item.judge = judgeCode(item.judge)
     solution.time = Math.max(solution.time, item.time)
     solution.memory = Math.max(solution.memory, item.memory)
-    if (item.result !== config.judge.Accepted && solution.judge === -1) {
-      solution.judge = item.result
+    if (item.judge !== config.judge.Accepted && solution.judge === -1) {
+      solution.judge = item.judge
     }
   }
   if (solution.judge === -1) {

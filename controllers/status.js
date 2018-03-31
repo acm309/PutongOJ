@@ -1,7 +1,8 @@
 const only = require('only')
 const Solution = require('../models/Solution')
-const { purify, isAdmin, pushToJudge } = require('../utils/helper')
+const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
+const redis = require('../config/redis')
 
 // 返回提交列表
 const find = async (ctx) => {
@@ -56,7 +57,7 @@ const create = async (ctx) => {
   }
   try {
     await solution.save()
-    pushToJudge(solution.sid)
+    redis.lpush('oj:solutions', solution.sid)
     logger.info(`One solution is created ${solution.pid} -- ${solution.uid}`)
   } catch (e) {
     ctx.throw(400, e.message)

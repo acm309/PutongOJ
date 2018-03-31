@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 const pickBy = require('lodash.pickby')
 const config = require('../config')
-const redis = require('../config/redis')
 
 function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
@@ -33,10 +32,6 @@ function isUndefined (item) {
   return typeof item === 'undefined'
 }
 
-const pushToJudge = (sid) => {
-  redis.lpush('oj:solutions', sid) // 将sid往列表的头部插入
-}
-
 function isLogined (ctx) {
   return ctx.session != null && ctx.session.profile != null && ctx.session.profile.uid != null
 }
@@ -47,6 +42,5 @@ module.exports = {
   isAdmin,
   isRoot,
   isUndefined,
-  pushToJudge,
   isLogined
 }

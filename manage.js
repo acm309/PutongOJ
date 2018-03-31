@@ -1,15 +1,9 @@
-require('./config/db')
 const { resolve } = require('path')
 const fse = require('fs-extra')
 const range = require('lodash.range')
 const shell = require('shelljs')
 const fetch = require('node-fetch')
 const uuid = require('uuid/v4')
-const ID = require('./models/ID')
-const User = require('./models/User')
-const Problem = require('./models/Problem')
-const Contest = require('./models/Contest')
-const Solution = require('./models/Solution')
 const config = require('./config')
 const { generatePwd } = require('./utils/helper')
 
@@ -27,6 +21,7 @@ const baseConfig = {
       'error_file': resolve(logDir, `app.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true,
+      'restart_delay': 500,
       env: {
         'NODE_ENV': 'production'
       }
@@ -47,6 +42,8 @@ async function judgeSetup () {
   if (!(judgers >= 1 && judgers <= 10)) judgers = 1
 
   const judgersDir = resolve(__dirname, 'judgers')
+
+  await fse.emptyDir(resolve(judgersDir, 'Judger'))
 
   // 下载最新版的 judger
   shell.exec(`git clone 'https://github.com/acm309/Judger' ${resolve(judgersDir, 'Judger')}`)
@@ -82,47 +79,18 @@ async function judgeSetup () {
   return fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
 }
 
-async function databaseSetup () {
-  const models = [
-    'Solution', 'Contest', 'News', 'Group'
-  ]
-  const ps = models.map(async (model) => {
-    const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= 0) return
-    return new ID({ name: model, id: 0 }).save()
-  })
-
-  const admin = await User.findOne({uid: 'admin'}).exec()
-  if (admin == null) {
-    ps.push(new User({
-      uid: 'admin',
-      nick: 'admin',
-      pwd: generatePwd(config.deploy.adminInitPwd)
-    }).save())
-  }
-
-  const count = await Problem.count().exec()
-  if (count === 0) {
-    ps.push(new Problem({
-      description: 'This is a test problem without any test data. Go to Edit tab to complete the description and other fields. Go to Test Data to upload new test data'
-    }).save())
-  }
-  return Promise.all(ps)
-}
-
 async function staticFilesSetUp () {
   const res = await fetch('https://api.github.com/repos/acm309/PutongOJ-FE/releases')
   const json = await res.json()
   const url = json[0].assets[0].browser_download_url
   shell.exec(`wget ${url} -O dist.zip`)
-  shell.exec(`unzip dist.zip -d dist`)
+  shell.exec(`unzip -o dist.zip -d dist`)
   shell.exec(`cp -r dist/* public/`)
 }
 
 function main () {
   return Promise.all([
     judgeSetup(),
-    databaseSetup(),
     staticFilesSetUp()
   ])
 }

@@ -8,6 +8,7 @@ const send = require('koa-send')
 const config = require('./config')
 const router = require('./routes')
 const logger = require('./utils/logger')
+const setup = require('./config/setup')
 require('./config/db')
 
 const app = new Koa()
@@ -57,6 +58,7 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes()).use(router.allowedMethods())
 
-app.listen(config.port, () => {
+app.listen(config.port, async () => {
+  await setup()
   logger.info('The server is running at http://localhost:' + config.port)
 })

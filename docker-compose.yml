@@ -19,10 +19,9 @@ services:
     container_name: ptoj-web-app
     build: .
     environment:
-      - NODE_ENV='production'
-      - dbURL='mongodb://ptoj-db:27017/oj'
-      - redisURL='redis://ptoj-redis:6379'
-      - UPGRADE='yes'
+      - NODE_ENV=production
+      - dbURL=mongodb://ptoj-db:27017/oj
+      - redisURL=redis://ptoj-redis:6379
     ports:
       - '0.0.0.0:80:3000'
     volumes:
@@ -31,3 +30,6 @@ services:
     depends_on:
       - ptoj-redis
       - ptoj-db
+    restart: always
+    cap_add:
+      - SYS_PTRACE

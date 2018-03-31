@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y curl apt-transport-https && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update && apt-get install -y yarn
 
-RUN apt-get install -y gcc g++
+RUN apt-get install -y gcc g++ unzip apt-utils libcairo2-dev libpango1.0-dev build-essential
 
 RUN npm install -g pm2
 
