@@ -20,7 +20,7 @@ app.keys = [config.secretKey]
 
 app.use(session({
   key: 'koa:oj:sess',
-  maxAge: 60 * 60 * 1000, // ms
+  maxAge: 7 * 24 * 60 * 60 * 60 * 1000, // ms
   httpOnly: true, /** (boolean) httpOnly or not (default true) */
   signed: true /** (boolean) signed or not (default true) */
 }, app))
