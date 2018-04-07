@@ -26,7 +26,10 @@
       </tr>
       <template v-for="(item, index) in solution.testcases">
         <tr>
-          <td><a :href="`/api/testcase/${solution.pid}/${item.uuid}`" target="_blank"> {{ item.uuid.slice(0, 8) }} </a></td>
+          <td>{{ item.uuid.slice(0, 8) }}
+            <a :href="testcaseUrl(item, 'in')" target="_blank">TestIn</a>
+            <a :href="testcaseUrl(item, 'out')" target="_blank">TestOut</a>
+          </td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
           <td :class="color[item.judge]">{{ result[item.judge] }}</td>
@@ -63,6 +66,7 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import python from 'highlight.js/lib/languages/python'
 import java from 'highlight.js/lib/languages/java'
 import 'highlight.js/styles/atom-one-light.css'
+import { testcaseUrl } from '@/util/helper'
 
 highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('java', java)
@@ -90,6 +94,9 @@ export default {
     },
     onCopy () {
       this.$Message.success('Copied!')
+    },
+    testcaseUrl ({ uuid }, type) {
+      return testcaseUrl(this.solution.pid, uuid, type)
     }
   }
 }
