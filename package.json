@@ -40,12 +40,15 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "nodemon": "^1.14.3"
+    "ava": "^1.0.0-beta.3",
+    "nodemon": "^1.14.3",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "start": "cross-env NODE_ENV=production node app.js",
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
-    "deploy:start": "npx pm2 start pm2.config.json"
+    "deploy:start": "npx pm2 start pm2.config.json",
+    "test": "ava"
   }
 }

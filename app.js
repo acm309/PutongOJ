@@ -58,7 +58,12 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes()).use(router.allowedMethods())
 
-app.listen(config.port, async () => {
-  await setup()
-  logger.info('The server is running at http://localhost:' + config.port)
-})
+// do not start on 'test'
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, async () => {
+    await setup()
+    logger.info('The server is running at http://localhost:' + config.port)
+  })
+}
+
+module.exports = app
