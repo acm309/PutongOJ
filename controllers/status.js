@@ -24,9 +24,11 @@ const find = async (ctx) => {
 
 // 返回一个提交
 const findOne = async (ctx) => {
-  const opt = parseInt(ctx.query.sid)
+  const opt = parseInt(ctx.params.sid)
   // 使用lean solution 就是一个 js 对象，没有 save 等方法
   const solution = await Solution.findOne({ sid: opt }).lean().exec()
+
+  if (solution == null) ctx.throw(400, 'No such a solution')
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
   if (isAdmin(ctx.session.profile) && solution.sim) {
