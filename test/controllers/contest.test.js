@@ -13,7 +13,7 @@ test('Contest list', async t => {
   t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list.docs))
 
-  if (res.body.list.docs.listen > 0) {
+  if (res.body.list.docs.length > 0) {
     t.truthy(res.body.list.docs[0].title)
     t.truthy(res.body.list.docs[0].start)
     t.truthy(res.body.list.docs[0].end)

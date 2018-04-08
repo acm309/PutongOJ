@@ -11,6 +11,12 @@ test('User list', async t => {
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
+  t.truthy(Array.isArray(res.body.list))
+
+  if (res.body.list.length > 0) {
+    t.truthy(res.body.list[0].uid)
+    t.truthy(res.body.list[0].nick)
+  }
 })
 
 test('User Find One', async t => {
