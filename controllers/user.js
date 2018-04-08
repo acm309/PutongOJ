@@ -33,7 +33,7 @@ const find = async (ctx) => {
 
 // 查询用户具体信息
 const findOne = async (ctx) => {
-  const uid = ctx.query.uid
+  const uid = ctx.params.uid
   const [user, solved, unsolved] = await Promise.all([
     User
       .findOne({ uid })
