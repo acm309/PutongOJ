@@ -110,3 +110,27 @@ then start with pm2
 ```bash
 pm2 start pm2.config.json
 ```
+
+# Migration
+
+Know the `Container Id` of the mongodb container by running:
+
+```bash
+docker ps
+```
+
+## dump
+
+Replace `<Container id>` with the real id of your running mongodb container
+
+```bash
+docker exec -it <Container id> mongodump --out /data/backup --db oj
+```
+
+The output data will be stored at `migrations/backup/`
+
+## restore
+
+```bash
+docker exec -it <Container Id> mongorestore --db oj --drop /data/backup/oj
+```
