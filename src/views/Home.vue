@@ -1,6 +1,7 @@
 <template lang="html">
   <div class="home-wrap">
     <div class="news">NewsList</div>
+    <div class="content">访问OJ出现问题，请加群687732865，向管理员反应</div>
     <Card v-for="(item, index) in list" :key="item.nid">
       <Row type="flex" align="middle">
         <Col :span="2">
@@ -97,6 +98,11 @@ export default {
   .news
     font-size: 40px
     padding-bottom: 10px
+    // margin-bottom: 20px
+    // border-bottom: 1px solid #dfd8d8
+  .content
+    padding-left: 20px
+    padding-bottom: 20px
     margin-bottom: 20px
     border-bottom: 1px solid #dfd8d8
   .ivu-card

@@ -27,7 +27,7 @@
         <th v-if="isAdmin">Delete</th>
       </tr>
       <template v-for="(item, index) in list">
-        <tr v-if="isAdmin || item.status === status.Available + ''">
+        <tr v-if="isAdmin || item.status === status.Available">
           <td>
             <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
           </td>
@@ -37,7 +37,7 @@
               <Button type="text">{{ item.title }}</Button>
             </router-link>
             <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
-              <strong v-show="item.status === status.Reserve + ''">Reserved</strong>
+              <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
           <td>
             <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
@@ -149,7 +149,7 @@ export default {
       this.content = ''
     },
     change (problem) {
-      problem.status = +problem.status === this.status.Reserve
+      problem.status = problem.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
       this.$store.dispatch('problem/update', problem).then(() => {
