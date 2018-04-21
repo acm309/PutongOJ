@@ -65,7 +65,7 @@ const problemSchema = mongoose.Schema({
     default: 0
   },
   status: {
-    type: String,
+    type: Number,
     default: config.status.Available // 默认新建的题目显示
   },
   tags: {
