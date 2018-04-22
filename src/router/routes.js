@@ -7,6 +7,7 @@ import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
 import MySubmission from '@/views/Problem/Mysubmission'
+import Discuss from '@/views/Problem/Discuss'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -112,6 +113,12 @@ export default [
         path: 'statistics',
         name: 'problemStatistics',
         component: ProblemStatistics,
+        meta: { title: 'Problem Info' }
+      },
+      {
+        path: 'discuss',
+        name: 'Discuss',
+        component: Discuss,
         meta: { title: 'Problem Info' }
       },
       {
