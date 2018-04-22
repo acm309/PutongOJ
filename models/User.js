@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: config.status.Available // 默认新建的题目显示
+    default: config.status.Available
   },
   solve: {
     type: Number,
