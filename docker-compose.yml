@@ -8,6 +8,7 @@ services:
     volumes:
       - $PWD/migrations/db:/data/db
       - $PWD/migrations/backup:/data/backup
+      - $PWD/config:/app/config
 
   ptoj-redis:
     image: redis:3.2.10

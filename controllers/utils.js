@@ -1,4 +1,5 @@
 const path = require('path')
+const websiteConf = require('../config/website')
 
 const submit = (ctx) => {
   const filename = path.basename(ctx.request.body.files.image.path) // 文件名
@@ -12,7 +13,15 @@ const serverTime = (ctx) => {
     serverTime: Date.now()
   }
 }
+
+const websiteConfig = (ctx) => {
+  ctx.body = {
+    website: websiteConf
+  }
+}
+
 module.exports = {
   submit,
-  serverTime
+  serverTime,
+  websiteConfig
 }
