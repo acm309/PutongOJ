@@ -17,7 +17,8 @@ import api from '@/api'
 Vue.use(Vuex)
 
 const state = {
-  currentTime: Date.now()
+  currentTime: Date.now(),
+  website: {}
 }
 
 const getters = {
@@ -49,7 +50,8 @@ const getters = {
     SystemError: 10,
     RejudgePending: 11
   }),
-  currentTime: state => state.currentTime
+  currentTime: state => state.currentTime,
+  website: state => state.website
 }
 
 const mutations = {
@@ -58,6 +60,9 @@ const mutations = {
   },
   [types.UPDATE_SERVERTIME]: (state, payload) => {
     state.currentTime += payload.step
+  },
+  [types.SET_WEBSITE_CONFIG]: (state, payload) => {
+    state.website = payload.website
   }
 }
 
@@ -66,8 +71,9 @@ const actions = {
     if (payload && payload.title) {
       window.document.title = payload.title
     } else {
-      window.document.title = state.route.meta.title
+      window.document.title = rootState.route.meta.title
     }
+    window.document.title += ` | ${rootState.website.title}`
   },
   fetchTime ({ commit }) {
     return api.getTime().then(({ data }) => {
@@ -80,6 +86,11 @@ const actions = {
         step: 1000
       })
     }, 1000)
+  },
+  fetchWebsiteConfig ({ commit }) {
+    return api.getWebsiteConfig().then(({ data }) => {
+      commit(types.SET_WEBSITE_CONFIG, data)
+    })
   }
 }
 

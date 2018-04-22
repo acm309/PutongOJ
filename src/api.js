@@ -70,6 +70,7 @@ const api = {
   getImage: (data) => instance.post('/submit', data),
   // 获取服务器时间
   getTime: (data) => instance.get('/servertime'),
+  getWebsiteConfig: () => instance.get('/website'),
   testcase: {
     findOne: (data) => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
     find: (data) => instance.get(`/testcase/${data.pid}`, { params: data }),

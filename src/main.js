@@ -109,7 +109,10 @@ Vue.prototype.$Message.config({
 
 Vue.config.productionTip = false
 
-store.dispatch('session/fetch').then(() =>
+Promise.all([
+  store.dispatch('fetchWebsiteConfig'),
+  store.dispatch('session/fetch')
+]).then(() =>
   /* eslint-disable no-new */
   new Vue({
     el: '#app',
