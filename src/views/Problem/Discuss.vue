@@ -1,7 +1,5 @@
 <template lang="html">
   <div class="discuss-wrap">
-    讨论区
-    <remote-js src="http://v2.uyan.cc/code/uyan.js"></remote-js>
     <div id="uyan_frame"></div>
   </div>
 </template>
@@ -9,15 +7,19 @@
 <script>
 
 export default {
-  components: {
-    'remote-js': {
-      render (createElement) {
-        return createElement('script', { attrs: { type: 'text/javascript', src: this.src } })
-      },
-      props: {
-        src: { type: String, required: true }
-      }
-    }
+  mounted () {
+    const node = document.createElement('script')
+    node.setAttribute('src', '//v2.uyan.cc/code/uyan.js')
+    const frame = document.querySelector('.discuss-wrap')
+    frame.appendChild(node)
+  },
+  destroyed () {
+    // 友言根据这些变量得知是否已经加载评论
+    // 删除这些变量会使友言重新加载
+    delete window.UYAN
+    delete window.UYAN_L
+    delete window.uyan_loadover
+    delete window.uyan_loaded
   }
 }
 </script>
