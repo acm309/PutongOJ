@@ -136,6 +136,12 @@ export default [
     ]
   },
   {
+    path: '/discuss',
+    name: 'discuss',
+    component: Discuss,
+    meta: { title: 'Discuss' }
+  },
+  {
     path: '/status',
     name: 'status',
     component: Status,

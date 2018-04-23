@@ -10,6 +10,9 @@
             <MenuItem name="problemList">
                 <Icon type="ios-keypad"></Icon>Problem
             </MenuItem>
+            <MenuItem name="discuss">
+              <Icon type="chatbubble-working"></Icon>Discuss
+            </MenuItem>
             <MenuItem name="status">
               <Icon type="refresh"></Icon>Status
             </MenuItem>
@@ -117,7 +120,7 @@ export default {
     height: 62px
     line-height: 60px
   .left
-    width: 800px
+    width: 900px
     margin: 0 auto
     margin-left: 5%
   .right
