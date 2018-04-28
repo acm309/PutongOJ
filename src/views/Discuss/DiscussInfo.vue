@@ -25,6 +25,7 @@
           <span v-if="!isLogined">Login to reply</span>
         </FormItem>
     </Form>
+    <span>You will receive notifications through your email, if anyone replies</span>
   </div>
 </template>
 
@@ -64,6 +65,7 @@
           content: this.form.content
         }).then(() => {
           this.loading = false
+          this.form.content = ''
           this.fetch()
         }).catch(() => {
           this.loading = false
