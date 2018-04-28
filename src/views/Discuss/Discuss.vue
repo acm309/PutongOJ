@@ -20,7 +20,7 @@
               <Button type="text"> {{ item.uid }} </Button>
             </router-link>
           <td>
-            {{ item.updated | timeagoPretty }}
+            {{ item.update | timeagoPretty }}
           </td>
         </tr>
       </template>

@@ -29,7 +29,7 @@ const store = {
     find ({ commit }, payload) {
       return api.discuss.find(payload).then(({ data }) => {
         if (data.list != null && Array.isArray(data.list)) {
-          data.list = data.list.sort((x, y) => -x.updated + y.updated)
+          data.list = data.list.sort((x, y) => -x.update + y.update)
         }
         commit(types.GET_DISCUSS_LIST, data.list)
       })
