@@ -17,7 +17,7 @@ const discussSchema = mongoose.Schema({
     type: Number,
     default: Date.now
   },
-  updated: {
+  update: {
     type: Number,
     required: true
   },

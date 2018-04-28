@@ -3,7 +3,9 @@ const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 const Contest = require('../../models/Contest')
 const ID = require('../../models/ID')
+const Discuss = require('../../models/Discuss')
 const config = require('../../config')
+const mongoose = require('mongoose')
 
 const uuid = require('uuid/v4')
 const fse = require('fs-extra')
@@ -90,7 +92,7 @@ async function ranklistBuild () {
 // 新版本里多了几个字段: 主要是 Group；其它，比如 Problem，就是顺便检查一下而已
 async function databaseSetup () {
   const models = [
-    'Problem', 'Solution', 'Contest', 'News', 'Group'
+    'Problem', 'Solution', 'Contest', 'News', 'Group', 'Discuss'
   ]
   return Promise.all(models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
@@ -99,11 +101,51 @@ async function databaseSetup () {
   }))
 }
 
+async function discussRefactor () {
+  // old schema of Comment
+  const CommentSchema = mongoose.Schema({
+    cmid: {
+      type: Number,
+      index: {
+        unique: true
+      }
+    },
+    did: Number,
+    create: {
+      type: Number,
+      default: Date.now
+    },
+    uid: {
+      type: String,
+      required: true
+    },
+    content: String
+  }, {
+    collection: 'Comment'
+  })
+
+  const Comment = mongoose.model('Comment', CommentSchema)
+
+  async function commentMerge (discuss) {
+    const comments = await Comment.find({did: discuss.did}).sort({create: -1}).exec()
+    discuss.comments = comments.map((x) => ({
+      uid: x.uid,
+      content: x.content,
+      create: x.create
+    }))
+    return discuss.save()
+  }
+
+  const discusses = await Discuss.find().exec()
+  return Promise.all(discusses.map((x) => commentMerge(x)))
+}
+
 async function main () {
   return Promise.all([
     testcaseBuild(),
     ranklistBuild(),
-    databaseSetup()
+    databaseSetup(),
+    discussRefactor()
   ])
 }
 

@@ -35,7 +35,7 @@ const create = async (ctx) => {
       uid: ctx.session.profile.uid,
       content: opt.content
     }],
-    updated: Date.now()
+    update: Date.now()
   })
 
   try {
@@ -59,7 +59,7 @@ const update = async (ctx) => {
       uid: ctx.session.profile.uid,
       content: opt.content
     })
-    discuss.updated = Date.now()
+    discuss.update = Date.now()
     await discuss.save()
     redis.lpush('oj:comment', discuss.did)
     logger.info(`One discuss is updated" ${discuss.did} -- ${discuss.title}`)
