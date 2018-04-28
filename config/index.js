@@ -50,6 +50,18 @@ config.secretKey = process.env.secretKey || 'Putong Putong Putong'
 
 config.dbURL = process.env.DBURL || process.env.dbURL || 'mongodb://127.0.0.1:27017' // 之所以两个只为了兼容旧版命名；请优先采用后者
 
+config.mail = {
+  enable: true, // set false to disable email notifications
+  // https://nodemailer.com/about/
+  host: 'smtp-mail.outlook.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.MAIL_ADDRESS,
+    pass: process.env.MAIL_PASSWORD
+  }
+}
+
 const dev = {
   port: 8888
 }

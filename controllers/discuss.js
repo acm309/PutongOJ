@@ -1,5 +1,6 @@
 const Discuss = require('../models/Discuss')
 const logger = require('../utils/logger')
+const redis = require('../config/redis')
 
 const preload = async (ctx, next) => {
   const did = parseInt(ctx.params.did)
@@ -60,6 +61,7 @@ const update = async (ctx) => {
     })
     discuss.updated = Date.now()
     await discuss.save()
+    redis.lpush('oj:comment', discuss.did)
     logger.info(`One discuss is updated" ${discuss.nid} -- ${discuss.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
