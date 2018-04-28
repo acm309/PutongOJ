@@ -28,9 +28,17 @@ const baseConfig = {
     },
     {
       name: 'updater',
-      script: resolve(__dirname, 'judgers', `updater.js`),
+      script: resolve(__dirname, 'services', `updater.js`),
       'out_file': resolve(logDir, `updater.out.log`),
       'error_file': resolve(logDir, `updater.err.log`),
+      'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
+      'merge_logs': true
+    },
+    {
+      name: 'mailer',
+      script: resolve(__dirname, 'services', `mailer.js`),
+      'out_file': resolve(logDir, `mailer.out.log`),
+      'error_file': resolve(logDir, `mailer.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true
     }
@@ -41,7 +49,7 @@ async function judgeSetup () {
   let judgers = +config.judgers
   if (!(judgers >= 1 && judgers <= 10)) judgers = 1
 
-  const judgersDir = resolve(__dirname, 'judgers')
+  const judgersDir = resolve(__dirname, 'services')
 
   await fse.emptyDir(resolve(judgersDir, 'Judger'))
 
