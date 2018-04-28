@@ -40,7 +40,7 @@ const create = async (ctx) => {
 
   try {
     await discuss.save()
-    logger.info(`New Discuss is created" ${discuss.pid} -- ${discuss.title}`)
+    logger.info(`New Discuss is created" ${discuss.did} -- ${discuss.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -62,7 +62,7 @@ const update = async (ctx) => {
     discuss.updated = Date.now()
     await discuss.save()
     redis.lpush('oj:comment', discuss.did)
-    logger.info(`One discuss is updated" ${discuss.nid} -- ${discuss.title}`)
+    logger.info(`One discuss is updated" ${discuss.did} -- ${discuss.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

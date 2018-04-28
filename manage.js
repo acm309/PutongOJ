@@ -33,16 +33,19 @@ const baseConfig = {
       'error_file': resolve(logDir, `updater.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true
-    },
-    {
-      name: 'mailer',
-      script: resolve(__dirname, 'services', `mailer.js`),
-      'out_file': resolve(logDir, `mailer.out.log`),
-      'error_file': resolve(logDir, `mailer.err.log`),
-      'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true
     }
   ]
+}
+
+if (config.mail && config.mail.enable) {
+  baseConfig.apps.push({
+    name: 'mailer',
+    script: resolve(__dirname, 'services', `mailer.js`),
+    'out_file': resolve(logDir, `mailer.out.log`),
+    'error_file': resolve(logDir, `mailer.err.log`),
+    'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
+    'merge_logs': true
+  })
 }
 
 async function judgeSetup () {
