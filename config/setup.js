@@ -1,5 +1,5 @@
 const fse = require('fs-extra')
-const path =require('path')
+const path = require('path')
 const ID = require('../models/ID')
 const User = require('../models/User')
 const Problem = require('../models/Problem')
@@ -8,7 +8,7 @@ const { generatePwd } = require('../utils/helper')
 
 async function databaseSetup () {
   const models = [
-    'Solution', 'Contest', 'News', 'Group'
+    'Solution', 'Contest', 'News', 'Group', 'Discuss'
   ]
   const ps = models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
@@ -36,7 +36,6 @@ async function databaseSetup () {
     ps.push(fse.outputJsonSync(path.resolve(__dirname, `../data/1000/`, 'meta.json'), {
       testcases: []
     }, { spaces: 2 })) // 缩进2个空格
-
   }
   return Promise.all(ps)
 }

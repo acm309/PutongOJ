@@ -16,6 +16,7 @@ const group = require('./group')
 const utils = require('./utils')
 const testcase = require('./testcase')
 const tag = require('./tag')
+const discuss = require('./discuss')
 
 router.use(session.routes(), session.allowedMethods()) // allowedMethods:当前接口运行的method
 router.use(problem.routes(), problem.allowedMethods())
@@ -29,5 +30,6 @@ router.use(group.routes(), group.allowedMethods())
 router.use(utils.routes(), utils.allowedMethods())
 router.use(testcase.routes(), testcase.allowedMethods())
 router.use(tag.routes(), tag.allowedMethods())
+router.use(discuss.routes(), discuss.allowedMethods())
 
 module.exports = router
