@@ -11,6 +11,7 @@ import contest from './modules/contest'
 import group from './modules/group'
 import testcase from './modules/testcase'
 import tag from './modules/tag'
+import discuss from './modules/discuss'
 import * as types from './types'
 import api from '@/api'
 
@@ -110,6 +111,7 @@ export default new Vuex.Store({
     contest,
     group,
     testcase,
+    discuss,
     tag
   }
 })

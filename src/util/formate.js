@@ -9,6 +9,10 @@ function timePretty (time) {
   return moment(parseInt(time)).format('YYYY-MM-DD HH:mm:ss')
 }
 
+function timeagoPretty (time) {
+  return moment(parseInt(time)).fromNow()
+}
+
 function timeContest (time) {
   let h = Math.floor(time / (1000 * 60 * 60))
   let m = Math.floor((time - h * 1000 * 60 * 60) / (1000 * 60))
@@ -21,5 +25,6 @@ function timeContest (time) {
 export {
   formate,
   timePretty,
-  timeContest
+  timeContest,
+  timeagoPretty
 }

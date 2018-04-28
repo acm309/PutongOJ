@@ -66,6 +66,10 @@ export const DELETE_TESTCASE = 'DELETE_TESTCASE'
 export const UPDATE_TAG = 'UPDATE_TAG'
 export const UPDATE_TAG_LIST = 'UPDATE_TAG_LIST'
 
+// discuss
+export const GET_DISCUSS = 'GET_DISCUSS'
+export const GET_DISCUSS_LIST = 'GET_DISCUSS_LIST'
+
 // index
 export const SET_SERVERTIME = 'SET_SERVERTIME'
 export const UPDATE_SERVERTIME = 'UPDATE_SERVERTIME'

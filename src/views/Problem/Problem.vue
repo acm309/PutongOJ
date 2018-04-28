@@ -5,7 +5,7 @@
       <TabPane label="Submit" name="problemSubmit"></TabPane>
       <TabPane label="My Submissions" name="mySubmission" v-if="isLogined"></TabPane>
       <TabPane label="Statistics" name="problemStatistics"></TabPane>
-      <TabPane label="Discuss" name="Discuss"></TabPane>
+      <!-- <TabPane label="Discuss" name="Discuss"></TabPane> -->
       <TabPane label="Edit" name="problemEdit" v-if="isAdmin"></TabPane>
       <TabPane label="Test Data" name="testcase" v-if="isAdmin"></TabPane>
     </Tabs>

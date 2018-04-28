@@ -7,7 +7,6 @@ import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
 import MySubmission from '@/views/Problem/Mysubmission'
-import Discuss from '@/views/Problem/Discuss'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -21,6 +20,10 @@ import ContestRanklist from '@/views/Contest/ContestRanklist'
 // news
 import News from '@/views/News/News'
 import NewsInfo from '@/views/News/NewsInfo'
+
+// discuss
+import Discuss from '@/views/Discuss/Discuss'
+import DiscussInfo from '@/views/Discuss/DiscussInfo'
 
 // status & solution & ranklist & user & news & faq
 import Status from '@/views/Status'
@@ -140,6 +143,13 @@ export default [
     name: 'discuss',
     component: Discuss,
     meta: { title: 'Discuss' }
+  },
+  {
+    path: '/discuss/:did',
+    name: 'discussInfo',
+    component: DiscussInfo,
+    props: (route) => route.params,
+    meta: { title: 'Discuss Info' }
   },
   {
     path: '/status',
