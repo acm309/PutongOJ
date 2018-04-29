@@ -22,6 +22,7 @@ const store = {
   actions: {
     findOne ({ commit }, payload) {
       return api.discuss.findOne(payload).then(({ data }) => {
+        data.discuss.comments = data.discuss.comments.sort((x, y) => x.create - y.create)
         commit(types.GET_DISCUSS, data.discuss)
         return data
       })
