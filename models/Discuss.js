@@ -19,7 +19,7 @@ const discussSchema = mongoose.Schema({
   },
   update: {
     type: Number,
-    required: true
+    default: Date.now
   },
   uid: {
     type: String,

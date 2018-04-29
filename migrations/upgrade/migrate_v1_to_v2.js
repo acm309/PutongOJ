@@ -132,7 +132,11 @@ async function discussRefactor () {
       uid: x.uid,
       content: x.content,
       create: x.create
-    }))
+    })).sort((x, y) => x.create - y.create)
+    // 旧数据库有的数据只有 updated，没有 update
+    if (discuss.update == null) {
+      discuss.update = discuss.updated
+    }
     return discuss.save()
   }
 
