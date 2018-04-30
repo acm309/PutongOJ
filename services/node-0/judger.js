@@ -148,7 +148,7 @@ async function simTest (solution) {
   const dir = resolve(__dirname, `../../data/${solution.pid}/ac/`)
   // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
   await fse.removeSync('./simfile')
-  shell.exec(`./sim.sh ./test/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
+  shell.exec(`./sim.sh ./temp/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
   if (fse.existsSync('./simfile')) {
     const simfile = await fse.readFile('./simfile')
     const result = simfile.toString().match(/(\d+)\s+(\d+)/)
