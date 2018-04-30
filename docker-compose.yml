@@ -8,7 +8,6 @@ services:
     volumes:
       - $PWD/migrations/db:/data/db
       - $PWD/migrations/backup:/data/backup
-      - $PWD/config:/app/config
 
   ptoj-redis:
     image: redis:3.2.10
@@ -28,6 +27,8 @@ services:
     volumes:
       - $PWD/data:/app/data
       - $PWD/logs:/app/logs
+      - $PWD/config:/app/config
+      - $PWD/public:/app/public
     depends_on:
       - ptoj-redis
       - ptoj-db
