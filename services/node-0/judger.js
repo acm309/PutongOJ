@@ -195,6 +195,8 @@ async function userUpdate (solution) {
 }
 
 async function main () {
+  shell.exec(`chmod 755 ${resolve(__dirname, 'sim_text')}`)
+  shell.exec(`chmod 755 ${resolve(__dirname, 'sim.sh')}`)
   while (1) {
     // 移出并获取oj:solutions列表中的最后一个元素
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
