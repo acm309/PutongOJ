@@ -38,6 +38,7 @@
     "only": "^0.0.2",
     "shelljs": "^0.8.1",
     "tracer": "^0.8.11",
+    "url-join": "^4.0.0",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
