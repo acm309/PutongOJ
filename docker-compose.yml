@@ -27,8 +27,7 @@ services:
     volumes:
       - $PWD/data:/app/data
       - $PWD/logs:/app/logs
-      - $PWD/config:/app/config
-      - $PWD/public:/app/public
+      # warning: volumn is not available on building period
     depends_on:
       - ptoj-redis
       - ptoj-db

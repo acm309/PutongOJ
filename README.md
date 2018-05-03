@@ -134,3 +134,13 @@ The output data will be stored at `migrations/backup/`
 ```bash
 docker exec -it <Container Id> mongorestore --db oj --drop /data/backup/oj
 ```
+
+## static files
+
+copy files to `public` folder
+
+Replace `<Container id>` with the real id of your running oj container
+
+```bash
+docker cp <SRC_PATH> <Container Id>:/app/public
+```
