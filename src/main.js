@@ -43,6 +43,7 @@ import {
   Tag,
   Spin
 } from 'iview'
+import { semiRestful } from './api'
 
 Vue.component('Row', Row)
 Vue.component('Col', Col)
@@ -113,7 +114,10 @@ Vue.config.productionTip = false
 Promise.all([
   store.dispatch('fetchWebsiteConfig'),
   store.dispatch('session/fetch')
-]).then(() =>
+]).then(() => {
+  if (store.getters.website.semi_restful) {
+    semiRestful()
+  }
   /* eslint-disable no-new */
   new Vue({
     el: '#app',
@@ -121,4 +125,5 @@ Promise.all([
     store,
     template: '<App/>',
     components: { App }
-  }))
+  })
+})

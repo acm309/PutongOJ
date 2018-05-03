@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Vue from 'vue'
 import store from '@/store'
+import urlJoin from 'url-join'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -142,3 +143,12 @@ api.logout = api.session.delete
 api.register = api.user.create
 
 export default api
+
+export function semiRestful () {
+  instance.put = function (url, ...args) {
+    return instance.post(urlJoin(url, '/update'), ...args)
+  }
+  instance.delete = function (url, ...args) {
+    return instance.post(urlJoin(url, '/delete'), ...args)
+  }
+}
