@@ -79,7 +79,6 @@
 .discuss-wrap
   .ivu-card-body
     padding: 0 16px
-
   .ivu-card
     margin-top: 1em
     &:first-child

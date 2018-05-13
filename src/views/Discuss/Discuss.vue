@@ -89,7 +89,8 @@ export default {
 
 <style lang="stylus" scoped>
 @import '../../styles/common'
-
+h3
+  margin-top: 20px
 .form
   margin-top: 2em
 </style>
