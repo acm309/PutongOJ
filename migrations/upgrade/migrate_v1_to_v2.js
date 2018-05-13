@@ -22,6 +22,9 @@ async function testcaseBuild (problem) {
     if (!fse.existsSync(resolve(__dirname, `../../data/${pid}/test.in`))) {
       return
     }
+    if (!fse.existsSync(resolve(__dirname, `../../data/${pid}/test.out`))) {
+      return
+    }
     const solutions = await Solution.find({ pid }).exec()
     const meta = {
       testcases: []
