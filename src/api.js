@@ -90,7 +90,7 @@ const api = {
     create: (data) => instance.post('/status', data)
   },
   problem: {
-    findOne: (data) => instance.get(`/problem/${data.pid}`, data),
+    findOne: (data) => instance.get(`/problem/${data.pid}`, { params: data }),
     find: (data) => instance.get('/problem/list', { params: data }),
     create: (data) => instance.post('/problem/', data),
     update: (data) => instance.put(`/problem/${data.pid}`, data),
