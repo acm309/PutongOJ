@@ -153,8 +153,7 @@ const ranklist = async (ctx) => {
       })
     })
     const str = JSON.stringify(res)
-    await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的ranklist更新到该表中
-
+    await redis.set('oj:ranklist', str) // 将更新后的ranklist更新到该表中
   } else {
     // 比赛结束
     res = ranklist
