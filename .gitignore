@@ -6,6 +6,7 @@ requests/
 data/*
 !data/1000
 migrations/db
+migrations/backup
 !migrations/db/.gitkeep
 public/uploads/*
 !public/uploads/.gitkeep
