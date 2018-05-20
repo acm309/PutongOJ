@@ -1,9 +1,3 @@
 {
-  "testcases": [
-    {
-      "uuid": "657a2950-e753-11e7-b5d5-acbc32d0fe0d"
-    }, {
-      "uuid": "aaa8a3d0-e753-11e7-83cc-9f6f17c0d58c"
-    }
-  ]
+  "testcases": []
 }
