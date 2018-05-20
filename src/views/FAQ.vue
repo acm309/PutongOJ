@@ -102,6 +102,7 @@ table
     font-size: 16px
   tr
     border-bottom: 1px solid #dbdbdb
+    line-height 25px
     td:nth-child(1)
       width: 180px
     td:nth-child(2)
