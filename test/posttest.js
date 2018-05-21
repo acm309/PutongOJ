@@ -1,8 +1,12 @@
 require('../config/db')
 const User = require('../models/User')
+const Problem = require('../models/Problem')
 
 async function main () {
-  await User.remove({}).exec()
+  await Promise.all([
+    User.remove({}).exec(),
+    Problem.remove({}).exec()
+  ])
 }
 
 main()

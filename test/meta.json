@@ -1,0 +1,14 @@
+{
+  "problems": {
+    "1000": {
+      "title": "A + B",
+      "time": 200,
+      "memory": 65530,
+      "description": "Calculate A + B",
+      "input": "two integers",
+      "output": "the sum",
+      "in": "1 2",
+      "out": "3"
+    }
+  }
+}
