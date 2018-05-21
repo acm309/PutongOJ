@@ -6,7 +6,7 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)
 
-~~Demo~~ (Not available currently, but coming soon)
+[Demo](http://acm.cjlu.edu.cn)
 
 ## Documentation
 
