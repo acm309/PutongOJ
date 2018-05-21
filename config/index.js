@@ -48,7 +48,7 @@ config.deploy = {
 
 config.secretKey = process.env.secretKey || 'Putong Putong Putong'
 
-config.dbURL = process.env.DBURL || process.env.dbURL || 'mongodb://127.0.0.1:27017' // 之所以两个只为了兼容旧版命名；请优先采用后者
+config.dbURL = process.env.DBURL || process.env.dbURL || 'mongodb://127.0.0.1:27017/oj' // 之所以两个只为了兼容旧版命名；请优先采用后者
 
 config.mail = {
   enable: true, // set false to disable email notifications
