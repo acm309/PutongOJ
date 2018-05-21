@@ -1,6 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../app')
+const meta = require('../meta')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -25,7 +26,11 @@ test('User Find One', async t => {
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
-  t.is(res.body.user.uid, 'admin')
+  t.is(res.body.user.uid, meta.users.admin.uid)
+  t.is(res.body.user.nick, meta.users.admin.nick)
+
+  // no secret info
+  t.falsy(res.body.user.pwd)
 })
 
 test('User should fail to find one', async t => {
