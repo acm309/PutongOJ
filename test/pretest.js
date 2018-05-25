@@ -8,10 +8,16 @@ const { removeall } = require('./helper')
 async function main () {
   await removeall()
 
-  await new ID({
-    id: 999,
-    name: 'Problem'
-  }).save()
+  await Promise.all([
+    new ID({
+      id: 999,
+      name: 'Problem'
+    }).save(),
+    new ID({
+      id: 0,
+      name: 'Solution'
+    }).save()
+  ])
 
   const admin = new User(meta.users.admin)
   const pu = new User(meta.users.pu)

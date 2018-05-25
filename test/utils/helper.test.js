@@ -46,3 +46,19 @@ test('helper.isAdmin', t => {
   t.false(helper.isAdmin({}))
   t.false(helper.isAdmin())
 })
+
+test('helper.isLogined', t => {
+  t.true(helper.isLogined({
+    session: {
+      profile: {
+        uid: '123'
+      }
+    }
+  }))
+  t.false(helper.isLogined({
+    session: {
+      profile: {}
+    }
+  }))
+  t.false(helper.isLogined({ session: {} }))
+})
