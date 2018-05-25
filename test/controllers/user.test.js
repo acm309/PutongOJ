@@ -1,7 +1,6 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../app')
-const meta = require('../meta')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -20,14 +19,55 @@ test('User list', async t => {
   }
 })
 
-test('User Find One', async t => {
-  const res = await request
-    .get('/api/user/admin')
+test.serial('create a new user', async t => {
+  let res = await request
+    .post('/api/user')
+    .send({
+      uid: 'test',
+      pwd: '123456',
+      nick: '1234'
+    })
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
-  t.is(res.body.user.uid, meta.users.admin.uid)
-  t.is(res.body.user.nick, meta.users.admin.nick)
+
+  res = await request
+    .post('/api/session')
+    .send({
+      uid: 'test',
+      pwd: '123456'
+    })
+  t.is(res.status, 200)
+})
+
+test.serial("can not update other user's info", async t => {
+  const res = await request
+    .put('/api/user/admin')
+    .send({
+      nick: 'asdfgh'
+    })
+
+  t.is(res.status, 400)
+})
+
+test.serial('can update user info', async t => {
+  const res = await request
+    .put('/api/user/test')
+    .send({
+      nick: 'new nick name'
+    })
+
+  t.is(res.status, 200)
+})
+
+test('User Find One', async t => {
+  const res = await request
+    .get('/api/user/test')
+
+  t.is(res.status, 200)
+  t.is(res.type, 'application/json')
+  t.is(res.body.user.uid, 'test')
+  t.is(res.body.user.nick, 'new nick name')
 
   // no secret info
   t.falsy(res.body.user.pwd)

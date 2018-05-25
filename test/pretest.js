@@ -1,5 +1,4 @@
 require('../config/db')
-const config = require('../config')
 const User = require('../models/User')
 const Problem = require('../models/Problem')
 const ID = require('../models/ID')
@@ -15,11 +14,13 @@ async function main () {
   }).save()
 
   const admin = new User(meta.users.admin)
+  const pu = new User(meta.users.pu)
   const problem = new Problem(meta.problems[1000])
 
-  await Promise.all([
+  return Promise.all([
     admin.save(),
-    problem.save()
+    problem.save(),
+    pu.save()
   ])
 }
 

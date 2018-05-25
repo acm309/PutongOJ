@@ -24,8 +24,8 @@ test('Problem list', async t => {
 test('Problem 1000', async t => {
   const res = await request
     .get('/api/problem/1000')
-  
-  t.is(res.status, 200)    
+
+  t.is(res.status, 200)
   for (const [key, value] of Object.entries(meta.problems[1000])) {
     t.deepEqual(res.body.problem[key], value)
   }

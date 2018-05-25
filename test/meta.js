@@ -20,6 +20,11 @@ module.exports = {
       pwd: generatePwd(config.deploy.adminInitPwd),
       nick: 'Test',
       privilege: config.privilege.Root
+    },
+    pu: {
+      uid: 'primaryuser',
+      pwd: generatePwd('123'),
+      nick: 'pu'
     }
   }
 }
