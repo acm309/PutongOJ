@@ -50,6 +50,7 @@
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.1.0",
     "nodemon": "^1.14.3",
+    "nyc": "^11.8.0",
     "supertest": "^3.0.0"
   },
   "scripts": {
@@ -58,7 +59,7 @@
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
     "pretest": "node test/pretest.js",
-    "test": "ava --verbose test/**/*.test.js",
+    "test": "cross-env NODE_ENV=test nyc ava --verbose test/**/*.test.js",
     "posttest": "node test/posttest.js"
   },
   "engines": {
