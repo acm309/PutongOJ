@@ -60,5 +60,8 @@
     "pretest": "node test/pretest.js",
     "test": "ava --verbose test/**/*.test.js",
     "posttest": "node test/posttest.js"
+  },
+  "engines": {
+    "node": ">= 9.0.0"
   }
 }
