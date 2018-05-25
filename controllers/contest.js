@@ -59,7 +59,7 @@ const findOne = async (ctx) => {
   }
   const list = contest.list
   const totalProblems = list.length
-  let overview = []
+  const overview = []
   const procedure = list.map((pid, index) => {
     return Problem.findOne({pid}).exec()
       .then((problem) => {
@@ -128,9 +128,9 @@ const ranklist = async (ctx) => {
   // await ctx.state.contest.save()
   await Promise.all(Object.keys(ranklist).map((uid) =>
     User
-    .findOne({ uid })
-    .exec()
-    .then(user => { ranklist[user.uid].nick = user.nick })))
+      .findOne({ uid })
+      .exec()
+      .then(user => { ranklist[user.uid].nick = user.nick })))
 
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
@@ -154,8 +154,6 @@ const ranklist = async (ctx) => {
     })
     const str = JSON.stringify(res)
     await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的ranklist更新到该表中
-
-  } else {
     // 比赛结束
     res = ranklist
   }
