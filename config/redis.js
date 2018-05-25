@@ -4,6 +4,10 @@ const config = require('./')
 
 const redis = new Redis(config.redisURL)
 
+redis.on('connect', function () {
+  logger.info('Redis server is connected')
+})
+
 redis.on('error', function (err) {
   logger.error('Redis connected fail.')
   logger.error(err)
