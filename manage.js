@@ -3,9 +3,7 @@ const fse = require('fs-extra')
 const range = require('lodash.range')
 const shell = require('shelljs')
 const fetch = require('node-fetch')
-const uuid = require('uuid/v4')
 const config = require('./config')
-const { generatePwd } = require('./utils/helper')
 
 // download and initialize the judgers
 // start !

@@ -75,7 +75,7 @@ async function ranklistBuild () {
         if (solution.judge === config.judge.Accepted) {
           item.wa = -item.wa
           item.create = solution.create
-        } else item.wa --
+        } else item.wa--
       } else {
         if (solution.judge === config.judge.Accepted) {
           item.wa = 0
