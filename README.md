@@ -1,12 +1,14 @@
 # Putong Online Judge v2
 
-(For version 1, please visit [here](https://github.com/acm309/PutongOJ/tree/v1))
+> (For version 1, please visit [here](https://github.com/acm309/PutongOJ/tree/v1))
 
 [![Build Status](https://img.shields.io/travis/acm309/PutongOJ.svg?branch=master&style=flat-square)](https://travis-ci.org/acm309/PutongOJ)
 [![David](https://img.shields.io/david/acm309/PutongOJ.svg?style=flat-square)](https://david-dm.org/acm309/PutongOJ)
 [![Node](https://img.shields.io/badge/node-%3E=9.0.0-ff69b4.svg?style=flat-square)](https://nodejs.org/en/download/releases/)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)
+
+### Preview
 
 [Demo](http://acm.cjlu.edu.cn)
 
@@ -20,11 +22,11 @@ Currently Not available
 - Single Page Application -- Better User Experience
 - Support multiple cases of test data
 
-# Delpoyment
+## Delpoyment
 
 Note: This project is still during `BETA` stage
 
-## Docker
+### Docker
 
 1. clone this project
 
@@ -49,7 +51,7 @@ It will listen on 80 ports after it is successfully deployed. Then you can direc
 
 Enjoy it!
 
-## Manual Installation
+### Manual Installation
 
 Ubuntu is recommended. You can deploy this platform on other linux, but I can't ensure it must work.
 
@@ -113,7 +115,7 @@ then start with pm2
 pm2 start pm2.config.json
 ```
 
-# Migration
+## Migration
 
 Know the `Container Id` of the mongodb container by running:
 
@@ -121,7 +123,7 @@ Know the `Container Id` of the mongodb container by running:
 docker ps
 ```
 
-## dump
+### dump
 
 Replace `<Container id>` with the real id of your running mongodb container
 
@@ -131,13 +133,13 @@ docker exec -it <Container id> mongodump --out /data/backup --db oj
 
 The output data will be stored at `migrations/backup/`
 
-## restore
+### restore
 
 ```bash
 docker exec -it <Container Id> mongorestore --db oj --drop /data/backup/oj
 ```
 
-## static files
+### static files
 
 copy files to `public` folder
 
@@ -146,3 +148,14 @@ Replace `<Container id>` with the real id of your running oj container
 ```bash
 docker cp <SRC_PATH> <Container Id>:/app/public
 ```
+
+## Browser Support
+
+- IE: **NOT** recommended
+- Chrome: 50 or above is recommended
+- Firefox: 50 or above is recommended
+- Edge: recommended
+
+## LICENSE
+
+[MIT](https://github.com/acm309/PutongOJ/blob/master/LICENSE)
