@@ -135,13 +135,13 @@ const ranklist = async (ctx) => {
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
     const str = JSON.stringify(ranklist)
-    await redis.set(`oj:ranklist:${contest.cid}`, str) // 将该列表里索引为0的值设置为最新的ranklist
+    await redis.set(`oj:ranklist:${contest.cid}`, str) // 更新该比赛的最新排名信息
     res = ranklist
   } else if (!isAdmin(ctx.session.profile) &&
     Date.now() + deadline > contest.end &&
     Date.now() < contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
-    const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获得该列表中索引为0的值
+    const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
     res = JSON.parse(mid)
     Object.entries(ranklist).map(([uid, problems]) => {
       Object.entries(problems).map(([pid, sub]) => {
@@ -153,7 +153,7 @@ const ranklist = async (ctx) => {
       })
     })
     const str = JSON.stringify(res)
-    await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的ranklist更新到该表中
+    await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的 ranklist 更新到 redis
     // 比赛结束
     res = ranklist
   }
