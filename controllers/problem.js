@@ -125,7 +125,7 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
   const fields = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status']
-  fields.forEach((field) => {
+  fields.filter((field) => opt[field] != null).forEach((field) => {
     problem[field] = opt[field]
   })
   try {

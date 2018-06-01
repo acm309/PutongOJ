@@ -194,12 +194,12 @@ const update = async (ctx) => {
   const fields = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
-  fields.forEach((field) => {
+  fields.filter((field) => opt[field] != null).forEach((field) => {
     contest[field] = opt[field]
   })
   try {
     await contest.save()
-    logger.info(`One problem is updated" ${contest.cid} -- ${contest.title}`)
+    logger.info(`One contest is updated" ${contest.cid} -- ${contest.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

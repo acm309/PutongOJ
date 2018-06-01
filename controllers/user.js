@@ -96,8 +96,8 @@ const update = async (ctx) => {
   }
   const opt = ctx.request.body
   const user = ctx.state.user
-  const fileds = ['nick', 'motto', 'school', 'mail']
-  fileds.forEach((filed) => {
+  const fields = ['nick', 'motto', 'school', 'mail']
+  fields.forEach((filed) => {
     if (!isUndefined(opt[filed])) {
       user[filed] = opt[filed]
     }
