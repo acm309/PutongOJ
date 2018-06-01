@@ -1,6 +1,6 @@
 <template>
   <div class="discuss-wrap">
-    <h1>3364数据有问题还有坑的数据？</h1>
+    <h1>{{ discuss.title }}</h1>
     <Card dis-hover v-for="comment in discuss.comments" :key="comment.content">
       <p slot="title">
         {{ comment.uid }}
