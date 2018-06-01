@@ -21,6 +21,7 @@ Currently Not available
 - Built on Docker -- One click Deployment
 - Single Page Application -- Better User Experience
 - Support multiple cases of test data
+- Powered by Vue.js, Koa.js, MongoDB, Redis
 
 ## Delpoyment
 
