@@ -21,6 +21,11 @@
           </DropdownMenu>
         </Dropdown>
       </Col>
+      <Col span="2">
+        <Tag>
+          {{ operation }}
+        </Tag>
+      </Col>
     </Row>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Title</Col>
@@ -55,7 +60,8 @@ export default {
       width: '350px',
       height: '400px'
     },
-    userList: []
+    userList: [],
+    operation: 'search'
   }),
   computed: {
     ...mapGetters({
@@ -98,8 +104,11 @@ export default {
       this.targetKeys = newTargetKeys
     },
     manageGroup (name) {
-      this.group.gid = this.groupList[this.ind].gid
-      this.group.title = this.groupList[this.ind].title
+      if (this.groupList.length > 0) {
+        this.group.gid = this.groupList[this.ind].gid
+        this.group.title = this.groupList[this.ind].title
+      }
+      this.operation = name
       if (name === 'search') {
         this.$Spin.showLoading()
         this.targetKeys = []
@@ -107,6 +116,8 @@ export default {
           this.group.list.forEach((item) => {
             this.targetKeys.push(this.userList.indexOf(item) + '')
           })
+          this.$Spin.hide()
+        }).catch(() => {
           this.$Spin.hide()
         })
       } else if (name === 'create') {
@@ -122,10 +133,12 @@ export default {
             title: '提示',
             content: `<p>此操作将永久删除Group--${this.group.title}, 是否继续?</p>`,
             onOk: () => {
-              this.showLoading()
+              this.$Spin.showLoading()
               this.$store.dispatch('group/delete', { gid: this.group.gid }).then(() => {
                 this.$Spin.hide()
                 this.$Message.success(`成功删除 ${this.group.title}！`)
+              }).catch(() => {
+                this.$Spin.hide()
               })
             },
             onCancel: () => {
@@ -146,6 +159,8 @@ export default {
         this.$store.dispatch('group/update', group).then(() => {
           this.$Spin.hide()
           this.$Message.success('更新当前用户组成功！')
+        }).catch(() => {
+          this.$Spin.hide()
         })
       } else {
         this.$Spin.showLoading()
@@ -153,6 +168,8 @@ export default {
           this.$store.dispatch('group/find')
           this.$Spin.hide()
           this.$Message.success('新建当前用户组成功！')
+        }).catch(() => {
+          this.$Spin.hide()
         })
       }
     }
@@ -166,4 +183,7 @@ export default {
 .tranfer
   margin-top: 20px
   margin-bottom: 20px
+.ivu-tag
+  height: 28px
+  line-height: 26px
 </style>

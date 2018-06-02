@@ -65,6 +65,7 @@ export const DELETE_TESTCASE = 'DELETE_TESTCASE'
 // tag
 export const UPDATE_TAG = 'UPDATE_TAG'
 export const UPDATE_TAG_LIST = 'UPDATE_TAG_LIST'
+export const DELETE_TAG = 'DELETE_TAG'
 
 // discuss
 export const GET_DISCUSS = 'GET_DISCUSS'

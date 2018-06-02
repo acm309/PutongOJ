@@ -9,7 +9,28 @@
         </Select>
       </Col>
       <Col :offset="1" :span="2">
-        <Button type="primary" @click="search">Search</Button>
+        <Dropdown @on-click="manageTag">
+          <Button type="primary">
+            Manage
+            <Icon type="arrow-down-b"></Icon>
+          </Button>
+          <DropdownMenu slot="list">
+            <DropdownItem name="search">Search</DropdownItem>
+            <DropdownItem name="create">Create</DropdownItem>
+            <DropdownItem name="delete">Delete</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </Col>
+      <Col span="2">
+        <Tag>
+          {{ operation }}
+        </Tag>
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">Title</Col>
+      <Col :span="4">
+        <Input v-model="tag.tid"></Input>
       </Col>
     </Row>
     <Transfer
@@ -23,7 +44,7 @@
       @on-change="handleChange"
       class="tranfer">
     </Transfer>
-    <Button type="primary" @click="save" class="submit">Submit</Button>
+    <Button type="primary" @click="saveTag" class="submit">Submit</Button>
   </div>
 </template>
 
@@ -39,7 +60,9 @@ export default {
       width: '350px',
       height: '400px'
     },
-    problemList: []
+    problemList: [],
+    operation: 'search',
+    isNew: false
   }),
   computed: {
     ...mapGetters({
@@ -81,28 +104,75 @@ export default {
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
-    search () {
-      this.tag.tid = this.tagList[this.ind].tid
-      this.$Spin.showLoading()
-      this.targetKeys = []
-      this.$store.dispatch('tag/findOne', { tid: this.tag.tid }).then(() => {
-        this.tag.list.forEach((item) => {
-          this.targetKeys.push(this.problemList.indexOf(item) + '')
+    manageTag (name) {
+      if (this.tagList.length > 0) {
+        this.tag.tid = this.tagList[this.ind].tid
+      }
+      this.operation = name
+      if (name === 'search') {
+        this.$Spin.showLoading()
+        this.targetKeys = []
+        this.isNew = false
+        this.$store.dispatch('tag/findOne', { tid: this.tag.tid }).then(() => {
+          this.tag.list.forEach((item) => {
+            this.targetKeys.push(this.problemList.indexOf(item) + '')
+          })
+          this.$Spin.hide()
+        }).catch(() => {
+          this.$Spin.hide()
         })
-        this.$Spin.hide()
-      })
+      } else if (name === 'create') {
+        this.tag.tid = ''
+        this.tag.list = []
+        this.targetKeys = []
+        this.isNew = true
+      } else if (name === 'delete') {
+        if (!this.tag || !this.tag.tid) {
+          this.$Message.info('未选择要删除的Tag!')
+        } else {
+          this.$Modal.confirm({
+            title: '提示',
+            content: `<p>此操作将永久删除Tag--${this.tag.tid}, 是否继续?</p>`,
+            onOk: () => {
+              this.$Spin.showLoading()
+              this.$store.dispatch('tag/delete', { tid: this.tag.tid }).then(() => {
+                this.$Spin.hide()
+                this.$Message.success(`成功删除 ${this.tag.tid}！`)
+              }).catch(() => {
+                this.$Spin.hide()
+              })
+            },
+            onCancel: () => {
+              this.$Message.info('已取消删除！')
+            }
+          })
+        }
+      }
     },
-    save () {
+    saveTag () {
       const problems = this.targetKeys.map((item) => this.problemList[+item])
       const tag = Object.assign(
         only(this.tag, 'tid'),
         { list: problems }
       )
-      this.$Spin.showLoading()
-      this.$store.dispatch('tag/update', tag).then(() => {
-        this.$Spin.hide()
-        this.$Message.success('更新当前标签组成功！')
-      })
+      if (!this.isNew) {
+        this.$Spin.showLoading()
+        this.$store.dispatch('tag/update', tag).then(() => {
+          this.$Spin.hide()
+          this.$Message.success('更新当前标签组成功！')
+        }).catch(() => {
+          this.$Spin.hide()
+        })
+      } else {
+        this.$Spin.showLoading()
+        this.$store.dispatch('tag/create', tag).then(() => {
+          this.$store.dispatch('tag/find')
+          this.$Spin.hide()
+          this.$Message.success('新建当前标签组成功！')
+        }).catch(() => {
+          this.$Spin.hide()
+        })
+      }
     }
   }
 }
@@ -114,4 +184,7 @@ export default {
 .tranfer
   margin-top: 20px
   margin-bottom: 20px
+.ivu-tag
+  height: 28px
+  line-height: 26px
 </style>

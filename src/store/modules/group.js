@@ -5,7 +5,11 @@ const store = {
   namespaced: true,
   state: {
     list: [],
-    group: {}
+    group: {
+      gid: '',
+      title: '',
+      list: []
+    }
   },
   getters: {
     list: state => state.list,
@@ -34,13 +38,13 @@ const store = {
         return data.list
       })
     },
-    update ({commit}, payload) {
+    update ({ commit }, payload) {
       return api.group.update(payload).then(({ data }) => data.gid)
     },
-    create ({commit}, payload) {
+    create ({ commit }, payload) {
       return api.group.create(payload).then(({ data }) => data.gid)
     },
-    delete ({commit}, payload) {
+    delete ({ commit }, payload) {
       return api.group.delete(payload).then(() => {
         commit(types.DELETE_GROUP, payload)
       })

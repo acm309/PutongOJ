@@ -49,7 +49,7 @@
             </router-link>)
           </td>
           <td>
-            <template v-for="(item2, index2) in item.tages">
+            <template v-for="(item2, index2) in item.tags">
               <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
                 <Tag>{{ item2 }}</Tag>
               </router-link>
@@ -195,7 +195,7 @@ table
   th:nth-child(4)
     width: 20%
   th:nth-child(5)
-    width: 10%
+    width: 20%
   th:nth-child(6)
     width: 10%
   th:nth-child(7)

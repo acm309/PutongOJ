@@ -122,7 +122,9 @@ const api = {
   tag: {
     findOne: (data) => instance.get(`/tag/${data.tid}`, { params: data }),
     find: (data) => instance.get('/tag/list', { params: data }),
-    update: (data) => instance.put(`/tag/${data.tid}`, data)
+    create: (data) => instance.post('/tag/', data),
+    update: (data) => instance.put(`/tag/${data.tid}`, data),
+    delete: (data) => instance.delete(`/tag/${data.tid}`, data)
   },
   session: {
     create: (data) => instance.post('/session', data),
