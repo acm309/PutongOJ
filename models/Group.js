@@ -33,8 +33,6 @@ groupSchema.pre('validate', function (next) {
     next(new Error('The length of the title should be greater than 3'))
   } if (this.title.length >= 80) {
     next(new Error('The length of the title should not be greater than 80'))
-  } else if (this.list.length === 0) {
-    next(new Error('The list should not be empty'))
   } else {
     next()
   }

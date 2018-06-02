@@ -1,5 +1,5 @@
 const only = require('only')
-const pull = require('lodash.pull')
+const without = require('lodash.without')
 const difference = require('lodash.difference')
 const Group = require('../models/Group')
 const User = require('../models/User')
@@ -87,7 +87,7 @@ const update = async (ctx) => {
   const delProcedure = removedUids.map((uid, index) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
-        pull(user.gid, gid)
+        user.gid = without(user.gid, gid)
         return user.save()
       })
       .then((user) => {
@@ -141,7 +141,7 @@ const del = async (ctx) => {
   const procedure = list.map((uid, index) => {
     return User.findOne({uid}).exec()
       .then((user) => {
-        pull(user.gid, gid)
+        user.gid = without(user.gid, gid)
         return user.save()
       })
       .then((user) => {
