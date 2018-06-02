@@ -47,7 +47,8 @@ const userSchema = mongoose.Schema({
   },
   gid: {
     type: [Number],
-    default: []
+    default: [],
+    usePushEach: true
   },
   motto: String,
   mail: String,
