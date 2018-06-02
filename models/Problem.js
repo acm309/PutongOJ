@@ -70,8 +70,7 @@ const problemSchema = mongoose.Schema({
   },
   tags: {
     type: [String],
-    default: [],
-    usePushEach: true
+    default: []
   }
 }, {
   collection: 'Problem'

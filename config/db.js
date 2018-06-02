@@ -5,9 +5,7 @@ const config = require('./')
 mongoose.Promise = global.Promise
 
 // 连接MongoDB数据库
-mongoose.connect(config.dbURL, {
-  useMongoClient: true
-})
+mongoose.connect(config.dbURL)
 
 mongoose.Promise = global.Promise
 

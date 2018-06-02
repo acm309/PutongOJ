@@ -11,6 +11,10 @@ const tagSchema = mongoose.Schema({
   list: {
     type: [Number],
     default: []
+  },
+  create: {
+    type: Number,
+    default: Date.now
   }
 }, {
   collection: 'Tag'
@@ -19,7 +23,12 @@ const tagSchema = mongoose.Schema({
 tagSchema.plugin(mongoosePaginate)
 
 tagSchema.pre('validate', function (next) {
-  if (this.list.length === 0) {
+  if (this.tid == null || this.tid.length <= 3) {
+    next(new Error('The length of the tid should be greater than 3'))
+  }
+  if (this.tid.length >= 80) {
+    next(new Error('The length of the tid should not be greater than 80'))
+  } else if (this.list.length === 0) {
     next(new Error('The list should not be empty'))
   } else {
     next()

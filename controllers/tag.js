@@ -1,3 +1,4 @@
+const only = require('only')
 const pull = require('lodash.pull')
 const difference = require('lodash.difference')
 const Tag = require('../models/Tag')
@@ -30,6 +31,49 @@ const findOne = async (ctx) => {
   }
 }
 
+// 新建一个tag
+const create = async (ctx) => {
+  const opt = ctx.request.body
+
+  const doc = await Tag.findOne({ tid: opt.tid }).exec()
+  if (doc) {
+    ctx.throw(400, '标签名已被占用!')
+  }
+
+  const tag = new Tag(Object.assign(
+    only(opt, 'tid list'), {
+      create: Date.now()
+    }
+  ))
+
+  try {
+    await tag.save()
+
+    logger.info(`New tag is created" ${tag.tid}`)
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+
+  const procedure = opt.list.map((pid, index) => {
+    return Problem.findOne({ pid }).exec()
+      .then((problem) => {
+        problem.tags.push(tag.tid)
+        return problem.save()
+      })
+      .then((problem) => {
+        logger.info(`Problem is updated" ${problem.uid} -- ${problem.tags}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(procedure)
+
+  ctx.body = {
+    tid: tag.tid
+  }
+}
+
 // 更新一个 tag
 const update = async (ctx) => {
   const opt = ctx.request.body
@@ -48,7 +92,9 @@ const update = async (ctx) => {
   const delProcedure = pidsOfRemovedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
+        console.log(problem)
         pull(problem.tags, tid)
+        console.log(problem)
         return problem.save()
       })
       .then((problem) => {
@@ -80,7 +126,7 @@ const update = async (ctx) => {
 
   try {
     await tag.save()
-    logger.info(`One tag is updated" ${tag.tid} -- ${tag.title}`)
+    logger.info(`One tag is updated" ${tag.tid}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -90,9 +136,44 @@ const update = async (ctx) => {
   }
 }
 
+// 删除一个group
+const del = async (ctx) => {
+  const tid = ctx.params.tid
+  const tag = ctx.state.tag
+  const list = tag.list
+
+  // 删除problem表里的gid
+  const procedure = list.map((pid, index) => {
+    return Problem.findOne({pid}).exec()
+      .then((problem) => {
+        pull(problem.tags, tid)
+        return problem.save()
+      })
+      .then((problem) => {
+        logger.info(`Problem's tag is deleted" ${problem.pid} -- ${tid}`)
+      })
+      .catch((e) => {
+        ctx.throw(400, e.message)
+      })
+  })
+  await Promise.all(procedure)
+
+  // 删除tag表里的tid
+  try {
+    await Tag.deleteOne({ tid }).exec()
+    logger.info(`One Tag is delete ${tid}`)
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+
+  ctx.body = {}
+}
+
 module.exports = {
   preload,
+  create,
   find,
   findOne,
-  update
+  update,
+  del
 }

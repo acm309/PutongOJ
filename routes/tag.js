@@ -7,7 +7,9 @@ const router = new Router({
 })
 
 router.get('/list', tag.find)
+router.post('/', auth.login, auth.admin, tag.create)
 router.get('/:tid', tag.preload, tag.findOne)
 router.put('/:tid', auth.login, auth.admin, tag.preload, tag.update)
+router.del('/:tid', auth.login, auth.admin, tag.preload, tag.del)
 
 module.exports = router
