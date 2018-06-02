@@ -28,8 +28,6 @@ tagSchema.pre('validate', function (next) {
   }
   if (this.tid.length >= 80) {
     next(new Error('The length of the tid should not be greater than 80'))
-  } else if (this.list.length === 0) {
-    next(new Error('The list should not be empty'))
   } else {
     next()
   }

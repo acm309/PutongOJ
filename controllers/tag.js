@@ -1,5 +1,5 @@
 const only = require('only')
-const pull = require('lodash.pull')
+const without = require('lodash.without')
 const difference = require('lodash.difference')
 const Tag = require('../models/Tag')
 const Problem = require('../models/Problem')
@@ -92,9 +92,7 @@ const update = async (ctx) => {
   const delProcedure = pidsOfRemovedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        console.log(problem)
-        pull(problem.tags, tid)
-        console.log(problem)
+        problem.tags = without(problem.tags, tid)
         return problem.save()
       })
       .then((problem) => {
@@ -136,17 +134,17 @@ const update = async (ctx) => {
   }
 }
 
-// 删除一个group
+// 删除一个 tag
 const del = async (ctx) => {
   const tid = ctx.params.tid
   const tag = ctx.state.tag
   const list = tag.list
 
-  // 删除problem表里的gid
+  // 删除 problem 表里的 tid
   const procedure = list.map((pid, index) => {
     return Problem.findOne({pid}).exec()
       .then((problem) => {
-        pull(problem.tags, tid)
+        problem.tag = without(problem.tags, tid)
         return problem.save()
       })
       .then((problem) => {
@@ -158,7 +156,7 @@ const del = async (ctx) => {
   })
   await Promise.all(procedure)
 
-  // 删除tag表里的tid
+  // 删除 tag 表里的 tid
   try {
     await Tag.deleteOne({ tid }).exec()
     logger.info(`One Tag is delete ${tid}`)
