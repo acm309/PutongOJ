@@ -23,8 +23,8 @@ const tagSchema = mongoose.Schema({
 tagSchema.plugin(mongoosePaginate)
 
 tagSchema.pre('validate', function (next) {
-  if (this.tid == null || this.tid.length <= 3) {
-    next(new Error('The length of the tid should be greater than 3'))
+  if (this.tid == null || this.tid.length <= 1) {
+    next(new Error('The length of the tid should be greater than 1'))
   }
   if (this.tid.length >= 80) {
     next(new Error('The length of the tid should not be greater than 80'))
