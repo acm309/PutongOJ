@@ -154,7 +154,9 @@ const ranklist = async (ctx) => {
     })
     const str = JSON.stringify(res)
     await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的 ranklist 更新到 redis
-    // 比赛结束
+    res = ranklist
+  } else {
+    // 比赛结束或管理员，这边有个问题 管理员是否有权限在封榜时间看所有排名
     res = ranklist
   }
   ctx.body = {
