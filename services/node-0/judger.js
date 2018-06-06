@@ -206,6 +206,9 @@ async function main () {
     await judge(problem, solution)
     await afterJudge(problem, solution)
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
+    if (solution.mid) {
+      redis.lpush('oj:contest:solution', solution.sid)
+    }
   }
 }
 
