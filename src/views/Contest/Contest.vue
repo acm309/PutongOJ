@@ -18,7 +18,7 @@
       <TabPane label="Ranklist" name="contestRanklist"></TabPane>
       <TabPane label="Edit" name="contestEdit" v-if="isAdmin"></TabPane>
     </Tabs>
-    <router-view v-if="contest"></router-view>
+    <router-view v-if="contest && contest.cid"></router-view>
     <!-- 为了确保之后的 children 能拿到 contest -->
   </div>
 </template>
