@@ -38,6 +38,7 @@ async function main () {
     }
     ranklist[uid][pid] = grid
     contest.ranklist = ranklist
+    contest.markModified('ranklist')
     await contest.save()
   }
 }
