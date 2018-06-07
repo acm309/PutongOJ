@@ -161,14 +161,18 @@ async function simTest (solution) {
 }
 
 /**
- * 如果用户之前没有提交过这题，那么 user.submit += 1
- * 如果用户之前没有 ac 过这题，那么 user.solved += 1
+ * 如果用户之前没有提交过这题，那么 user.submit += 1, problem.submit += 1
+ * 如果用户之前没有 ac 过这题，那么 user.solved += 1, problem.solved += 1
  */
 async function userUpdate (solution) {
   const user = await User.findOne({ uid: solution.uid }).exec()
   if (user == null) {
     logger.error(`Excuse me? No such a user with uid "${solution.uid}"`)
     return
+  }
+  const problem = await Problem.findOne({ pid: solution.pid }).exec()
+  if (problem == null) {
+    logger.error(`Excuse me? No such a problem with pid "${solution.pid}"`)
   }
   // 这道题之前提交过了么?
   const isSubmittedBefore = await Solution.count({
@@ -178,6 +182,7 @@ async function userUpdate (solution) {
   }).exec()
   if (isSubmittedBefore === 0) {
     user.submit += 1
+    problem.submit += 1
   }
   if (solution.judge === config.judge.Accepted) {
     // 之前 ac 过了么
@@ -189,9 +194,11 @@ async function userUpdate (solution) {
     }).exec()
     if (isAcBefore === 0) {
       user.solve += 1
+      problem.solve += 1
     }
   }
-  return user.save()
+  await problem.save()
+  await user.save()
 }
 
 async function main () {

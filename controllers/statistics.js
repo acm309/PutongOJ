@@ -65,7 +65,7 @@ const find = async (ctx) => {
 
   let countList = []
   for (let i = 2; i <= 10; i++) {
-    countList.push(Solution.count({pid, judge: i}).exec())
+    countList.push(Solution.count({pid, judge: i}).distinct('uid').exec())
   }
   countList = await Promise.all(countList)
 
