@@ -189,7 +189,7 @@ async function userUpdate (solution) {
     const isAcBefore = await Solution.count({
       uid: user.uid,
       pid: solution.pid,
-      sid: { $ne: solution.pid },
+      sid: { $ne: solution.sid },
       judge: config.judge.Accepted
     }).exec()
     if (isAcBefore === 0) {
@@ -198,7 +198,7 @@ async function userUpdate (solution) {
     }
   }
   await problem.save()
-  await user.save()
+  return user.save()
 }
 
 async function main () {
