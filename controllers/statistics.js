@@ -63,14 +63,13 @@ const find = async (ctx) => {
 
   const sumCharts = sumDoc.length
 
-  let countList = []
+  const countList = []
   for (let i = 2; i <= 10; i++) {
-    // TODO 这个地方没有对 uid 做 distinct操作
-    countList.push(Solution.count({pid, judge: i}).exec())
+    const count = await Solution.find({pid, judge: i}).distinct('uid').exec()
+    countList.push(count.length)
   }
-  countList = await Promise.all(countList)
 
-  const sumStatis = await countList.reduce((sum, item) => sum + item)
+  const sumStatis = countList.reduce((sum, item) => sum + item)
 
   ctx.body = {
     list,
