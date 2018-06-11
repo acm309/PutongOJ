@@ -51,7 +51,6 @@ export default {
   created () {
     this.getRank()
     this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-    console.log(1)
   },
   beforeDestroy () {
     clearInterval(this.timer)

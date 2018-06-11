@@ -47,9 +47,9 @@ export default {
   data () {
     // 自定义验证规则
     const validatePass1 = (rule, value, callback) => {
-      // 5-20位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
-      const error = !/[0-9a-zA-Z]{5,20}$/.test(value)
-        ? new Error('密码长度需5-20位，只能包含字母或字符') : null
+      // 5-50位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
+      const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
+        ? new Error('密码长度需5-50位，只能包含字母或字符') : null
       error ? callback(error) : callback()
     }
     // 验证密码是否重复
@@ -60,7 +60,7 @@ export default {
     const basicRules = {
       uid: [
         { required: true, message: '用户名不能少', trigger: 'change' },
-        { min: 5, max: 20, message: '用户名在5到20位之间', trigger: 'change' }
+        { min: 5, max: 50, message: '用户名在5到50位之间', trigger: 'change' }
       ],
       pwd: [
         { required: true, message: '请输入密码', trigger: 'change' }

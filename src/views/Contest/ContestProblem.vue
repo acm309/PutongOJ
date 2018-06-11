@@ -41,7 +41,7 @@ export default {
     fetch () {
       this.proIndex = parseInt(this.$route.params.id)
       this.$store.dispatch('contest/findOne', this.$route.params).then((data) => {
-        this.$store.dispatch('problem/findOne', { pid: data.overview[this.proIndex - 1].pid })
+        this.$store.dispatch('problem/findOne', { pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
       })
     },
     pageChange (val) {
