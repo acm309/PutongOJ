@@ -5,13 +5,16 @@ const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const logger = require('../utils/logger')
-const { isLogined } = require('../utils/helper')
+const { isLogined, isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const pid = parseInt(ctx.params.pid)
   if (isNaN(pid)) ctx.throw(400, 'Pid has to be a number')
   const problem = await Problem.findOne({ pid }).exec()
   if (problem == null) ctx.throw(400, 'No such a problem')
+  if (!isAdmin(ctx.session.profile) && problem.status === config.status.Reserve) {
+    ctx.throw(400, 'You do not have permission to enter this problem!')
+  }
   ctx.state.problem = problem
   return next()
 }

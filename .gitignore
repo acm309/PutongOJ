@@ -11,6 +11,7 @@ migrations/backup
 public/uploads/*
 !public/uploads/.gitkeep
 package-lock.json
+complete.js
 
 # macOS
 
