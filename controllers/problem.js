@@ -16,6 +16,7 @@ const preload = async (ctx, next) => {
   const problem = await Problem.findOne({ pid }).exec()
   if (problem == null) ctx.throw(400, 'No such a problem')
   if (isAdmin(ctx.session.profile)) {
+    ctx.state.problem = problem
     return next()
   }
   if (cid > 0) {
