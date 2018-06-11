@@ -4,15 +4,32 @@ const path = require('path')
 const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
+const Contest = require('../models/Contest')
 const logger = require('../utils/logger')
 const { isLogined, isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
-  const pid = parseInt(ctx.params.pid)
+  const opt = ctx.request.query
+  const pid = parseInt(opt.pid)
+  const cid = parseInt(opt.cid) || 0
   if (isNaN(pid)) ctx.throw(400, 'Pid has to be a number')
   const problem = await Problem.findOne({ pid }).exec()
   if (problem == null) ctx.throw(400, 'No such a problem')
-  if (!isAdmin(ctx.session.profile) && problem.status === config.status.Reserve) {
+  if (isAdmin(ctx.session.profile)) {
+    return next()
+  }
+  if (cid > 0) {
+    const contest = await Contest.findOne({ cid }).exec()
+    if (contest.start > Date.now() || (contest.encrypt !== config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1)) {
+      ctx.throw(400, 'You do not have permission to enter this problem!')
+    }
+    if (contest.encrypt === config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+      ctx.session.profile.verifyContest.push(contest.cid)
+    }
+    ctx.state.problem = problem
+    return next()
+  }
+  if (problem.status === config.status.Reserve) {
     ctx.throw(400, 'You do not have permission to enter this problem!')
   }
   ctx.state.problem = problem
