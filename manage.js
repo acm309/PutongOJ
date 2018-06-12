@@ -30,7 +30,10 @@ const baseConfig = {
       'out_file': resolve(logDir, `updater.out.log`),
       'error_file': resolve(logDir, `updater.err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true
+      'merge_logs': true,
+      env: {
+        'NODE_ENV': 'production'
+      }
     }
   ]
 }
@@ -42,7 +45,10 @@ if (config.mail && config.mail.enable) {
     'out_file': resolve(logDir, `mailer.out.log`),
     'error_file': resolve(logDir, `mailer.err.log`),
     'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-    'merge_logs': true
+    'merge_logs': true,
+    env: {
+      'NODE_ENV': 'production'
+    }
   })
 }
 
@@ -81,7 +87,10 @@ async function judgeSetup () {
       'error_file': resolve(logDir, `node-${i}-err.log`),
       'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
       'merge_logs': true,
-      cwd: resolve(judgersDir, `node-${i}`)
+      cwd: resolve(judgersDir, `node-${i}`),
+      env: {
+        'NODE_ENV': 'production'
+      }
     })
   )
 
