@@ -9,9 +9,8 @@ const logger = require('../utils/logger')
 const { isLogined, isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
-  const opt = ctx.request.query
-  const pid = parseInt(opt.pid)
-  const cid = parseInt(opt.cid) || 0
+  const pid = parseInt(ctx.params.pid)
+  const cid = parseInt(ctx.request.query.cid) || 0
   if (isNaN(pid)) ctx.throw(400, 'Pid has to be a number')
   const problem = await Problem.findOne({ pid }).exec()
   if (problem == null) ctx.throw(400, 'No such a problem')
