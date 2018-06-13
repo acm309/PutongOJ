@@ -10,9 +10,9 @@
       <Col :span="2" class="label">Start Time</Col>
       <Col :span="8">
         <DatePicker
-          v-model="contest.start"
           type="datetime"
-          placeholder="选择日期时间">
+          placeholder="选择日期时间"
+          @on-change="(time) => changeTime('start', time)">
         </DatePicker>
       </Col>
     </Row>
@@ -20,9 +20,9 @@
       <Col :span="2" class="label">End Time</Col>
       <Col :span="8">
         <DatePicker
-          v-model="contest.end"
           type="datetime"
-          placeholder="选择日期时间">
+          placeholder="选择日期时间"
+          @on-change="(time) => changeTime('end', time)">
         </DatePicker>
       </Col>
     </Row>
@@ -183,6 +183,13 @@ export default {
       const res = user.join('\r\n')
       this.contest.argument = res
       this.$Message.success('保存当前用户组成功！')
+    },
+    changeTime (name, time) {
+      if (name === 'start') {
+        this.contest.start = new Date(time).getTime()
+      } else {
+        this.contest.end = new Date(time).getTime()
+      }
     }
   },
   components: {
