@@ -1,5 +1,6 @@
 const only = require('only')
 const Solution = require('../models/Solution')
+const Contest = require('../models/Contest')
 const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 const redis = require('../config/redis')
@@ -44,6 +45,14 @@ const findOne = async (ctx) => {
 // 创建一个提交
 const create = async (ctx) => {
   const opt = ctx.request.body
+  if (opt.mid) {
+    const cid = parseInt(opt.mid)
+    const contest = await Contest.findOne({ cid }).exec()
+    if (contest.end < Date.now()) {
+      ctx.throw(400, 'Contest is ended!')
+    }
+  }
+
   const { pid, code, language } = opt
   const { uid } = ctx.session.profile
   const solution = new Solution({
@@ -57,6 +66,7 @@ const create = async (ctx) => {
   if (opt.mid) {
     solution.mid = parseInt(opt.mid)
   }
+
   try {
     await solution.save()
     redis.lpush('oj:solutions', solution.sid)
