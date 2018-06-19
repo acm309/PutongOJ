@@ -26,5 +26,14 @@ module.exports = {
       pwd: generatePwd('123'),
       nick: 'pu'
     }
+  },
+  groups: {
+    1: {
+      title: '测试组1',
+      list: [
+        'admin',
+        'pu'
+      ]
+    }
   }
 }
