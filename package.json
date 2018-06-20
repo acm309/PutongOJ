@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "ava": "^1.0.0-beta.3",
+    "codecov": "^3.0.2",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.12.0",
@@ -64,7 +65,8 @@
     "test": "cross-env NODE_ENV=test nyc ava",
     "report": "nyc report --reporter=html",
     "posttest": "cross-env NODE_ENV=test node test/posttest.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "engines": {
     "node": ">= 9.0.0"
