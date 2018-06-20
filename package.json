@@ -61,7 +61,8 @@
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
     "pretest": "node test/pretest.js",
-    "test": "cross-env NODE_ENV=test nyc ava --verbose test/**/*.test.js",
+    "test": "cross-env NODE_ENV=test nyc ava",
+    "report": "nyc report --reporter=html",
     "posttest": "node test/posttest.js",
     "lint": "eslint ."
   },
@@ -72,5 +73,10 @@
     "hooks": {
       "pre-push": "yarn run lint"
     }
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.js"
+    ]
   }
 }

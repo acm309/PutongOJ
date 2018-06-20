@@ -5,6 +5,9 @@ const ID = require('../models/ID')
 const Group = require('../models/Group')
 const meta = require('./meta')
 const { removeall } = require('./helper')
+const { generatePwd } = require('../utils/helper')
+
+const userSeeds = require('./seed/users')
 
 async function main () {
   await removeall()
@@ -24,15 +27,19 @@ async function main () {
     }).save()
   ])
 
-  const admin = new User(meta.users.admin)
-  const pu = new User(meta.users.pu)
   const problem = new Problem(meta.problems[1000])
   const group = new Group(meta.groups[1])
 
+  const users = Promise.all(
+    Object.values(userSeeds.data).map((user) => {
+      return new User(Object.assign(user, {
+        pwd: generatePwd(user.pwd)
+      })).save()
+    }))
+
   return Promise.all([
-    admin.save(),
+    users,
     problem.save(),
-    pu.save(),
     group.save()
   ])
 }

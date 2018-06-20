@@ -153,14 +153,6 @@ const del = async (ctx) => {
   })
   await Promise.all(procedure)
 
-  // 清空所有用户的gid
-  // const users = await User.find({})
-  // users.forEach((user) => {
-  //   user.gid.splice(0, user.gid.length)
-  //   console.log(user.gid)
-  // })
-  // await Promise.all(users.map(s => s.save()))
-
   // 删除group表里的gid
   try {
     await Group.deleteOne({ gid }).exec()
