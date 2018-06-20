@@ -51,9 +51,9 @@ test.serial('Update Group 2', async t => {
 })
 
 test.serial('Delete Group 2', async t => {
-  const update = await request
+  const del = await request
     .delete('/api/group/2')
-  t.is(update.status, 200)
+  t.is(del.status, 200)
 
   const find = await request
     .get('/api/group/2')

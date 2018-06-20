@@ -10,13 +10,14 @@ require('../config/db')
 
 const userSeeds = require('./seed/users')
 const newsSeeds = require('./seed/news')
+const problemSeeds = require('./seed/problems')
 
 async function main () {
   await removeall()
 
   await Promise.all([
     new ID({
-      id: 999,
+      id: 1000,
       name: 'Problem'
     }).save(),
     new ID({
@@ -33,7 +34,6 @@ async function main () {
     }).save()
   ])
 
-  const problem = new Problem(meta.problems[1000])
   const group = new Group(meta.groups[1])
 
   const news = Promise.all(
@@ -47,10 +47,14 @@ async function main () {
       })).save()
     }))
 
+  const problems = Promise.all(
+    problemSeeds.data.map((item) => new Problem(item).save())
+  )
+
   return Promise.all([
     users,
     news,
-    problem.save(),
+    problems,
     group.save()
   ])
 }
