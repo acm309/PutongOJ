@@ -27,6 +27,13 @@ const newSchema = mongoose.Schema({
 
 newSchema.plugin(mongoosePaginate)
 
+newSchema.pre('validate', function (next) {
+  if (this.title == null || this.title.length < 3) {
+    next(new Error('The length of the title should not be less than 3'))
+  }
+  next()
+})
+
 newSchema.pre('save', function (next) {
   // 保存
   if (this.nid === -1) {

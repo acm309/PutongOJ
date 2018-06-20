@@ -65,3 +65,7 @@ test.serial('Delete Group 2', async t => {
 
   t.false(user.body.user.gid.includes(2))
 })
+
+test.after.always('close server', t => {
+  server.close()
+})

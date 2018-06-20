@@ -1,3 +1,6 @@
+const dotenv = require('dotenv')
+dotenv.load()
+
 const Koa = require('koa')
 const koaLogger = require('koa-logger')
 const bodyparser = require('koa-body')
@@ -5,14 +8,11 @@ const staticServe = require('koa-static')
 const path = require('path')
 const session = require('koa-session')
 const send = require('koa-send')
-const dotenv = require('dotenv')
 const config = require('./config')
 const router = require('./routes')
 const logger = require('./utils/logger')
 const setup = require('./config/setup')
 require('./config/db')
-
-dotenv.load()
 
 const app = new Koa()
 

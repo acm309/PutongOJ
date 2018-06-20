@@ -34,3 +34,7 @@ test('Group should fail to find one', async (t) => {
 
   t.truthy(res.body.error)
 })
+
+test.after.always('close server', t => {
+  server.close()
+})
