@@ -60,10 +60,10 @@
     "start": "cross-env NODE_ENV=production node app.js",
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
-    "pretest": "node test/pretest.js",
+    "pretest": "cross-env NODE_ENV=test node test/pretest.js",
     "test": "cross-env NODE_ENV=test nyc ava",
     "report": "nyc report --reporter=html",
-    "posttest": "node test/posttest.js",
+    "posttest": "cross-env NODE_ENV=test node test/posttest.js",
     "lint": "eslint ."
   },
   "engines": {
