@@ -32,6 +32,30 @@ test('Tag list', async t => {
   t.truthy(Array.isArray(list.body.list))
 })
 
+test('Fails to create a tag -- tid is too short', async t => {
+  const create = await request
+    .post('/api/tag')
+    .send({
+      tid: '1',
+      list: []
+    })
+
+  t.is(create.status, 400)
+  t.truthy(create.body.error)
+})
+
+test('Fails to create a tag -- tid is too long', async t => {
+  const create = await request
+    .post('/api/tag')
+    .send({
+      tid: Array.from({length: 100}, (_, i) => i + '').join(''),
+      list: []
+    })
+
+  t.is(create.status, 400)
+  t.truthy(create.body.error)
+})
+
 test.serial('create a new tag', async t => {
   const create = await request
     .post('/api/tag')
@@ -39,10 +63,10 @@ test.serial('create a new tag', async t => {
 
   t.is(create.status, 200)
 
-  Promise.all(
+  return Promise.all(
     newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.true(res.body.problem.tags.includes(item))
+      t.true(res.body.problem.tags.includes(newTag.tid))
     })
   )
 })
@@ -60,14 +84,14 @@ test.serial('Update a tag', async t => {
   t.is(find.status, 200)
   t.deepEqual(find.body.tag.list, newList)
 
-  Promise.all(
+  return Promise.all(
     newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.false(res.body.problem.tags.includes(item))
+      t.false(res.body.problem.tags.includes(newTag.tid))
     }),
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.true(res.body.problem.tags.includes(item))
+      t.true(res.body.problem.tags.includes(newTag.tid))
     })
   )
 })
@@ -83,10 +107,10 @@ test.serial('Delete a tag', async t => {
 
   t.is(find.status, 400)
 
-  Promise.all(
+  return Promise.all(
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.false(res.body.problem.tags.includes(item))
+      t.false(res.body.problem.tags.includes(newTag.tid))
     })
   )
 })
