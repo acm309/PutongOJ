@@ -47,9 +47,12 @@ async function main () {
       })).save()
     }))
 
-  const problems = Promise.all(
-    problemSeeds.data.map((item) => new Problem(item).save())
-  )
+  // NOTE: run this in sequence
+  const problems = Promise.resolve().then(async () => {
+    for (const problem of problemSeeds.data) {
+      await new Problem(problem).save()
+    }
+  })
 
   return Promise.all([
     users,

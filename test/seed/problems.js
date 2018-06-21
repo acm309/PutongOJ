@@ -1,3 +1,6 @@
+const config = require('../../config')
+
+// 1004: reversed
 const problems = {
   size: 5,
   data: [
@@ -39,7 +42,8 @@ const problems = {
       input: '输入在一行中给出正方形边长N（3&lt;=N&lt;=21）和组成正方形边的某种字符C，间隔一个空格。',
       output: '输出由给定字符C画出的正方形。但是注意到行间距比列间距大，所以为了让结果看上去更像正方形，我们输出的行数实际上是列数的50%（四舍五入取整）。',
       in: '10 a',
-      out: 'aaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\n\r\n'
+      out: 'aaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\naaaaaaaaaa\r\n\r\n',
+      status: config.status.Reserve
     }
   ]
 }
