@@ -144,7 +144,7 @@ const del = async (ctx) => {
   const procedure = list.map((pid, index) => {
     return Problem.findOne({pid}).exec()
       .then((problem) => {
-        problem.tag = without(problem.tags, tid)
+        problem.tags = without(problem.tags, tid)
         return problem.save()
       })
       .then((problem) => {
