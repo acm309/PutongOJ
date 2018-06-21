@@ -3,12 +3,14 @@ const Problem = require('../models/Problem')
 const ID = require('../models/ID')
 const Group = require('../models/Group')
 const News = require('../models/News')
+const Tag = require('../models/Tag')
 const meta = require('./meta')
 const { removeall } = require('./helper')
 const { generatePwd } = require('../utils/helper')
 require('../config/db')
 
 const userSeeds = require('./seed/users')
+const tagSeeds = require('./seed/tags')
 const newsSeeds = require('./seed/news')
 const problemSeeds = require('./seed/problems')
 
@@ -47,6 +49,12 @@ async function main () {
       })).save()
     }))
 
+  const tags = Promise.all(
+    Object.values(tagSeeds.data).map((tag) => {
+      return new Tag(tag).save()
+    })
+  )
+
   // NOTE: run this in sequence
   const problems = Promise.resolve().then(async () => {
     for (const problem of problemSeeds.data) {
@@ -56,6 +64,7 @@ async function main () {
 
   return Promise.all([
     users,
+    tags,
     news,
     problems,
     group.save()

@@ -4,6 +4,7 @@ const ID = require('../models/ID')
 const Solution = require('../models/Solution')
 const Group = require('../models/Group')
 const News = require('../models/News')
+const Tag = require('../models/Tag')
 
 function removeall () {
   return Promise.all([
@@ -12,7 +13,8 @@ function removeall () {
     ID.remove({}).exec(),
     Solution.remove({}).exec(),
     Group.remove({}).exec(),
-    News.remove({}).exec()
+    News.remove({}).exec(),
+    Tag.remove({}).exec()
   ])
 }
 

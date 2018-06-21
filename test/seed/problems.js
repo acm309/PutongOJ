@@ -1,6 +1,6 @@
 const config = require('../../config')
 
-// 1004: reversed
+// 1005: reversed
 const problems = {
   size: 5,
   data: [
@@ -10,7 +10,8 @@ const problems = {
       input: "There are multiple test cases. The first line of input is an integer T indicating the number of test cases. For each test case:<br />The only line contains four integers Y, M, D and N (1 =‹ N =‹ 10^9) indicating the date (Y: year, M: month, D: day) of the Monday of the first Depressed Week and the HXW's query N.<br />The Monday of the first Depressed Week is between 1st Jan, 1753 and 31st Dec, 9999 (inclusive).<br />",
       output: 'For each case, print the date of the Monday of the N-th Depressed Week.',
       in: '2\r\n2016 4 11 9\r\n2016 4 11 8',
-      out: '2018 1 1\r\n2017 12 11'
+      out: '2018 1 1\r\n2017 12 11',
+      tags: ['level1']
     },
     {
       title: 'Ruby And Array',
@@ -18,7 +19,8 @@ const problems = {
       input: "<p>\tThere're multiple groups of&nbsp;test data. Each group contains two lines.</p><p>\tThe first line contains a single integer n (2 ≤ n ≤ 10,000) — the size of array a. The next line contains n positive integers, separated by single spaces and not exceeding 1,000,000,000, — array a.</p>Note: that the elements of the array are not necessarily distinct numbers.<br />Note:<br />In the first sample the array has already been sorted, so to sort it, we need 0 swap operations, that is not more than 1. Thus, the answer is \"YES\".<br /><br />In the second sample we can sort the array if we swap elements 1 and 3, so we need 1 swap operation to sort the array. Thus, the answer is \"YES\".<br /><br />In the third sample we can't sort the array in more than one swap operation, so the answer is \"NO\".<br />",
       output: 'In a single line print "YES" (without the quotes) if the Little Elephant could have accidentally changed the array himself, and "NO" (without the quotes) otherwise.',
       in: '2\r\n1 2\r\n3\r\n3 2 1\r\n4\r\n4 3 2 1',
-      out: 'YES\r\nYES\r\nNO'
+      out: 'YES\r\nYES\r\nNO',
+      tags: ['level1']
     },
     {
       title: 'Sapphire and Robot',
@@ -26,7 +28,8 @@ const problems = {
       input: "<p>\tThere're multiple groups of test data. Each group contains 2 lines.&nbsp;The first line contains two integers a and b, ( - 109 ≤ a, b ≤ 109). The second line contains a string s (1 ≤ |s| ≤ 100, s only contains characters 'U', 'D', 'L', 'R') — the command.</p><p>\tNote:</p><p>\tIn the first and second test case, command string is \"RU\", so the robot will go right, then go up, then right, and then up and so on.<br />The locations of its moves are (0, 0)  →  (1, 0)  →  (1, 1)  →  (2, 1)  →  (2, 2)  →  ...<br />So it can reach (2, 2) but not (1, 2).<br />\t<div>\t\t<br />\t</div></p>",
       output: 'Print "Yes" if the robot will be located at (a, b), and "No" otherwise.<br /><div>\t<br /></div>',
       in: '2 2\r\nRU\r\n1 2\r\nRU\r\n-1 1000000000\r\nLRRLU\r\n0 0\r\nD',
-      out: 'Yes\r\nNo\r\nYes\r\nYes\r\n'
+      out: 'Yes\r\nNo\r\nYes\r\nYes\r\n',
+      tags: ['level2']
     },
     {
       title: '简单题',
@@ -34,7 +37,8 @@ const problems = {
       input: '',
       output: '',
       in: '',
-      out: ''
+      out: '',
+      tags: ['level2']
     },
     {
       title: '跟奥巴马一起画方块',
