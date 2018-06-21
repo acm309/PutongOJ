@@ -11,19 +11,19 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api': {
-        target: 'http://127.0.0.1:8888',
-        changeOrigin: true
-      },
-      '/uploads': {
-        target: 'http://127.0.0.1:8888',
-        changeOrigin: false
-      }
-      // 使用 cjlu-oj 后端调试
       // '/api': {
-      //   target: 'http://acm.cjlu.edu.cn',
+      //   target: 'http://127.0.0.1:8888',
       //   changeOrigin: true
       // },
+      // '/uploads': {
+      //   target: 'http://127.0.0.1:8888',
+      //   changeOrigin: false
+      // }
+      // 使用 cjlu-oj 后端调试
+      '/api': {
+        target: 'http://acm.cjlu.edu.cn',
+        changeOrigin: true
+      },
     },
 
     // Various Dev Server settings

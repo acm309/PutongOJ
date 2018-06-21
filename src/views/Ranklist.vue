@@ -142,4 +142,7 @@ export default {
       word-break: break-all
       line-height: 20px
       font-size: 14px
+    td:nth-child(4)
+      width: 50%
+      padding-right: 10px
 </style>
