@@ -45,6 +45,16 @@ test('Problem should fail to find one', async (t) => {
   t.truthy(res.body.error)
 })
 
+test('Pid is not a number', async (t) => {
+  const res = await request
+    .get('/api/problem/xx')
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
 test.after.always('close server', t => {
   server.close()
 })

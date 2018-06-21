@@ -2,6 +2,7 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../app')
 const config = require('../../../config')
+const users = require('../../seed/users')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -48,6 +49,34 @@ test.serial('Update Group 2', async t => {
     .get('/api/user/admin')
 
   t.true(user.body.user.gid.includes(2))
+})
+
+test.serial('Update Group 2 -- update members', async t => {
+  const user = users.data['primaryuser']
+  const update = await request
+    .put('/api/group/2')
+    .send({
+      title: '测试组更新2',
+      list: [ user.uid ]
+    })
+  t.is(update.status, 200)
+
+  const find = await request
+    .get('/api/group/2')
+
+  t.is(find.status, 200)
+  t.is(find.body.group.title, '测试组更新2')
+  t.deepEqual(find.body.group.list, [ user.uid ])
+
+  let r = await request
+    .get('/api/user/admin')
+
+  t.false(r.body.user.gid.includes(2))
+
+  r = await request
+    .get(`/api/user/${user.uid}`)
+
+  t.true(r.body.user.gid.includes(2))
 })
 
 test.serial('Delete Group 2', async t => {
