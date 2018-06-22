@@ -1,5 +1,3 @@
-const config = require('../../config')
-
 module.exports = {
   size: 2,
   data: [
