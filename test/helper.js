@@ -6,6 +6,7 @@ const Group = require('../models/Group')
 const News = require('../models/News')
 const Tag = require('../models/Tag')
 const Discuss = require('../models/Discuss')
+const Contest = require('../models/Contest')
 
 function removeall () {
   return Promise.all([
@@ -16,7 +17,8 @@ function removeall () {
     Group.remove({}).exec(),
     News.remove({}).exec(),
     Tag.remove({}).exec(),
-    Discuss.remove({}).exec()
+    Discuss.remove({}).exec(),
+    Contest.remove({}).exec()
   ])
 }
 

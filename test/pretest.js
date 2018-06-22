@@ -41,6 +41,10 @@ async function main () {
     new ID({
       id: 0,
       name: 'Discuss'
+    }).save(),
+    new ID({
+      id: 0,
+      name: 'Contest'
     }).save()
   ])
 
