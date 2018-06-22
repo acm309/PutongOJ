@@ -49,7 +49,7 @@ const find = async (ctx) => {
 
 // 返回一个竞赛
 const findOne = async (ctx) => {
-  const opt = ctx.request.query
+  const opt = ctx.params
   const cid = parseInt(opt.cid)
   let contest = ctx.state.contest
 
@@ -192,7 +192,8 @@ const create = async (ctx) => {
 // 更新一个比赛
 const update = async (ctx) => {
   const opt = ctx.request.body
-  const contest = await Contest.findOne({cid: opt.cid}).exec()
+  const { cid } = ctx.params
+  const contest = await Contest.findOne({ cid }).exec()
   const fields = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
