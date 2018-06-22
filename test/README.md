@@ -12,5 +12,3 @@
 
 
 等 coverage 达到 80% 就在项目 README 里放上吧
-
-[![Codecov](https://img.shields.io/codecov/c/github/acm309/PutongOJ.svg?style=flat-square)](https://codecov.io/gh/acm309/PutongOJ)
