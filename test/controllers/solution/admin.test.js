@@ -1,0 +1,32 @@
+const test = require('ava')
+const supertest = require('supertest')
+const app = require('../../../app')
+const config = require('../../../config')
+
+const server = app.listen()
+const request = supertest.agent(server)
+
+test.before('Login', async t => {
+  const login = await request
+    .post('/api/session')
+    .send({
+      uid: 'admin',
+      pwd: config.deploy.adminInitPwd
+    })
+
+  t.is(login.status, 200)
+})
+
+test('Can see solution and sim of other users', async t => {
+  const res = await request
+    .get('/api/status/2')
+
+  t.is(res.status, 200)
+  t.truthy(res.body.solution.sim)
+  t.truthy(res.body.solution.sim_s_id)
+  t.truthy(res.body.solution.code)
+})
+
+test.after.always('close server', t => {
+  server.close()
+})
