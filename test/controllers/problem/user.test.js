@@ -2,7 +2,6 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../app')
 const users = require('../../seed/users')
-// const problems = require('../../seed/problems')
 
 const server = app.listen()
 const request = supertest.agent(server)

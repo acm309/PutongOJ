@@ -23,15 +23,6 @@ test.before('Login', async t => {
   t.is(login.status, 200)
 })
 
-test('Tag list', async t => {
-  const list = await request
-    .get('/api/tag/list')
-
-  t.is(list.status, 200)
-  t.is(list.type, 'application/json')
-  t.truthy(Array.isArray(list.body.list))
-})
-
 test('Fails to create a tag -- tid is too short', async t => {
   const create = await request
     .post('/api/tag')

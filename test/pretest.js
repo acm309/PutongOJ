@@ -4,6 +4,7 @@ const ID = require('../models/ID')
 const Group = require('../models/Group')
 const News = require('../models/News')
 const Tag = require('../models/Tag')
+const Discuss = require('../models/Discuss')
 const meta = require('./meta')
 const { removeall } = require('./helper')
 const { generatePwd } = require('../utils/helper')
@@ -13,6 +14,7 @@ const userSeeds = require('./seed/users')
 const tagSeeds = require('./seed/tags')
 const newsSeeds = require('./seed/news')
 const problemSeeds = require('./seed/problems')
+const discueeSeeds = require('./seed/discuss')
 
 async function main () {
   await removeall()
@@ -33,6 +35,10 @@ async function main () {
     new ID({
       id: 0,
       name: 'News'
+    }).save(),
+    new ID({
+      id: 0,
+      name: 'Discuss'
     }).save()
   ])
 
@@ -62,11 +68,18 @@ async function main () {
     }
   })
 
+  const discuss = Promise.resolve().then(async () => {
+    for (const dis of discueeSeeds.data) {
+      await new Discuss(dis).save()
+    }
+  })
+
   return Promise.all([
     users,
     tags,
     news,
     problems,
+    discuss,
     group.save()
   ])
 }
