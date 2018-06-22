@@ -95,6 +95,30 @@ test.serial('Delete Group 2', async t => {
   t.false(user.body.user.gid.includes(2))
 })
 
+test('The length of group title should be greater than 3', async t => {
+  const res = await request
+    .post('/api/group')
+    .send({
+      title: '1',
+      list: [ 'admin' ]
+    })
+
+  t.is(res.status, 400)
+  t.truthy(res.body.error)
+})
+
+test('The length of group title should be less than 80', async t => {
+  const res = await request
+    .post('/api/group')
+    .send({
+      title: Array.from({ length: 50 }, (_, i) => '' + i).join(''),
+      list: [ 'admin' ]
+    })
+
+  t.is(res.status, 400)
+  t.truthy(res.body.error)
+})
+
 test.after.always('close server', t => {
   server.close()
 })
