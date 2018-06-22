@@ -7,7 +7,7 @@ const router = new Router({
 })
 
 router.get('/list', status.find)
-router.get('/:sid', status.findOne)
+router.get('/:sid', auth.login, status.findOne)
 router.post('/', auth.login, status.create)
 
 module.exports = router

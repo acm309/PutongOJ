@@ -30,6 +30,7 @@ const findOne = async (ctx) => {
   const solution = await Solution.findOne({ sid: opt }).lean().exec()
 
   if (solution == null) ctx.throw(400, 'No such a solution')
+  if (!isAdmin(ctx.session.profile) && solution.uid !== ctx.session.profile.uid) ctx.throw(403, 'Permission denied')
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
   if (isAdmin(ctx.session.profile) && solution.sim) {
@@ -75,7 +76,9 @@ const create = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  ctx.body = {}
+  ctx.body = {
+    sid: solution.sid
+  }
 }
 
 module.exports = {
