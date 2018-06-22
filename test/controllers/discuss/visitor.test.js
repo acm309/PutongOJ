@@ -14,9 +14,14 @@ test('Discuss list', async t => {
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list))
+  res.body.list.forEach((item) => {
+    t.truthy(item.title)
+    t.truthy(item.uid)
+    t.truthy(item.update)
+  })
 })
 
-test('List find one', async (t) => {
+test('Find Discuss 1', async t => {
   const res = await request
     .get('/api/discuss/1')
 
@@ -32,12 +37,39 @@ test('List find one', async (t) => {
   })
 })
 
-test('List fails to find one', async (t) => {
+test('Discuss should fail to find one', async (t) => {
   const res = await request
-    .get('/api/discuss/-1')
+    .get('/api/discuss/10000')
 
   t.is(res.status, 400)
   t.is(res.type, 'application/json')
 
   t.truthy(res.body.error)
+})
+
+test('Did is not a number', async (t) => {
+  const res = await request
+    .get('/api/discuss/xx')
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
+test('Login required to create one', async (t) => {
+  const res = await request
+    .post('/api/discuss')
+    .send({
+      title: 'test'
+    })
+
+  t.is(res.status, 401)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
+test.after.always('close server', t => {
+  server.close()
 })
