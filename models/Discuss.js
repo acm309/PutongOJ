@@ -43,6 +43,21 @@ const discussSchema = mongoose.Schema({
   collection: 'Discuss'
 })
 
+discussSchema.pre('validate', function (next) {
+  if (this.title == null || this.title === '') {
+    next(new Error('The title should not be empty'))
+  } else if (this.title.length >= 80) {
+    next(new Error('The length of the title should not be greater than 80'))
+  } else if (
+    this.comments == null || this.comments.length === 0 ||
+    this.comments.some((item) => !item.content)
+  ) {
+    next(new Error('comment not be empty'))
+  } else {
+    next()
+  }
+})
+
 discussSchema.pre('save', function (next) {
   // 保存
   if (this.did === -1) {
