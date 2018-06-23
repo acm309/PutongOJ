@@ -5,12 +5,12 @@ const problems = {
   size: 5,
   data: [
     {
-      title: 'The Depressed Week',
-      description: "<p><img src=\"/uploads/upload_d91192da37591bf9a1697a5901a07f38\">HXW, vice leader of learning department of LiangXin college's Student Union, is very busy every day and always forgets the date.</p><p><br></p><p>The day which HXW can find that if Monday was the 1st, 11th or 21st day of that month, he always plays LOL failed in that week. Therefore, he called such week \"The Depressed Week\".</p><p><br></p><p>But now HXW only remembers the date of his first Depressed Week because of the age-related memory loss, and he wants to know the date of the N-th Depressed Week. Can you help him?</p><p><br></p>",
-      input: "There are multiple test cases. The first line of input is an integer T indicating the number of test cases. For each test case:<br />The only line contains four integers Y, M, D and N (1 =‹ N =‹ 10^9) indicating the date (Y: year, M: month, D: day) of the Monday of the first Depressed Week and the HXW's query N.<br />The Monday of the first Depressed Week is between 1st Jan, 1753 and 31st Dec, 9999 (inclusive).<br />",
-      output: 'For each case, print the date of the Monday of the N-th Depressed Week.',
-      in: '2\r\n2016 4 11 9\r\n2016 4 11 8',
-      out: '2018 1 1\r\n2017 12 11',
+      title: 'A + B',
+      description: '<p>输入两个数字，输出这两个数字的和</p>',
+      input: '<p>输入有多组样例，每行有2个数字</p>',
+      output: '<p>对于每个样例，输出2个数字的和</p>',
+      in: '1 2\r\n3 4',
+      out: '3\r\n7',
       tags: ['level1']
     },
     {

@@ -19,7 +19,7 @@ test.before('Login', async t => {
 
 test('Can see solution and sim of other users', async t => {
   const res = await request
-    .get('/api/status/2')
+    .get('/api/status/4')
 
   t.is(res.status, 200)
   t.truthy(res.body.solution.sim)

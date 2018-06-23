@@ -6,7 +6,7 @@ const find = async (ctx) => {
   const opt = ctx.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 20
-  const pid = parseInt(opt.pid)
+  const pid = parseInt(opt.pid) || parseInt(ctx.params.pid)
 
   // distinct 不能和 sort 同时使用，故使用聚合
   const list = await Solution.aggregate([
