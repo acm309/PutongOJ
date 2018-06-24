@@ -237,7 +237,7 @@ const verify = async (ctx) => {
   const arg = contest.argument
   let isVerify
   if (enc === config.encrypt.Private) {
-    const uid = opt.uid
+    const uid = ctx.session.profile.uid
     const arr = arg.split('\r\n')
     if (arr.indexOf(uid) !== -1) {
       isVerify = true
