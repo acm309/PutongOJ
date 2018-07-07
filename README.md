@@ -11,7 +11,7 @@
 
 ### Preview
 
-[Demo](http://acm.cjlu.edu.cn)
+[Demo](http://acm.cjlu.edu.cn) (Test Account: 123456 / 123456)
 
 ## Documentation
 
