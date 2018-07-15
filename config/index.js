@@ -21,9 +21,9 @@ module.exports = {
       // }
       // 使用 cjlu-oj 后端调试
       '/api': {
-        target: 'http://acm.cjlu.edu.cn',
+        target: 'http://localhost:8888',
         changeOrigin: true
-      },
+      }
     },
 
     // Various Dev Server settings
@@ -54,7 +54,7 @@ module.exports = {
     // https://vue-loader.vuejs.org/en/options.html#cachebusting
     cacheBusting: true,
 
-    cssSourceMap: true,
+    cssSourceMap: true
   },
 
   build: {
