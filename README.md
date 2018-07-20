@@ -2,7 +2,7 @@
 
 [Putong OJ](https://github.com/acm309/PutongOJ) 的前端部分
 
-~~[Preview](http://acm.cjlu.edu.cn)~~
+[Preview](http://acm.cjlu.edu.cn)
 
 一个采用 vue, vue-router, vuex 而成的单页应用
 
