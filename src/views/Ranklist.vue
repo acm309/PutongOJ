@@ -31,12 +31,12 @@
         <td>{{ item.nick }}</td>
         <td>{{ item.motto }}</td>
         <td>
-          <router-link :to="{ name: 'status', params: { uid: item.uid, judge: judge.Accepted } }">
+          <router-link :to="{ name: 'status', query: { uid: item.uid, judge: judge.Accepted } }">
             <Button type="text">{{ item.solve }}</Button>
           </router-link>
         </td>
         <td>
-          <router-link :to="{ name: 'status', params: { uid: item.uid } }">
+          <router-link :to="{ name: 'status', query: { uid: item.uid } }">
             <Button type="text">{{ item.submit }}</Button>
           </router-link>
         <td>
