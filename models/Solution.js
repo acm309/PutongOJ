@@ -99,7 +99,7 @@ solutionSchema.pre('validate', function (next) {
   } else if (this.code.length <= 5) {
     next(new Error('The length of code should be greater than 5'))
   } else if (this.code.length >= 10000) {
-    next(new Error('The length of code should be less than 5000'))
+    next(new Error('The length of code should be less than 10000'))
   } else {
     next()
   }
