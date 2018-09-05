@@ -39,6 +39,48 @@ test('create a new user', async t => {
   t.is(res2.body.user.nick, '1234')
 })
 
+test('Username is too long', async t => {
+  const res = await request
+    .post('/api/user')
+    .send({
+      uid: 'testxxx'.repeat(10),
+      pwd: '123456',
+      nick: '1234'
+    })
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+  t.truthy(res.body.error)
+})
+
+test('Username is too short', async t => {
+  const res = await request
+    .post('/api/user')
+    .send({
+      uid: 'xx',
+      pwd: '123456',
+      nick: '1234'
+    })
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+  t.truthy(res.body.error)
+})
+
+test('Nick is too long', async t => {
+  const res = await request
+    .post('/api/user')
+    .send({
+      uid: 'testyyy',
+      pwd: '123456',
+      nick: '123456'.repeat(10)
+    })
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+  t.truthy(res.body.error)
+})
+
 test("can update user's own info", async t => {
   const user = Object.values(users.data)[5]
   const res = await request

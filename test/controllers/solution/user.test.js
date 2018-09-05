@@ -104,6 +104,23 @@ test('Code is too long', async t => {
   t.truthy(res.body.error)
 })
 
+test('Code is too short', async t => {
+  const code = `1;`
+  const res = await request
+    .post('/api/status/')
+    .send({
+      pid: 1000,
+      uid: 'primaryuser',
+      code,
+      language: 2 // cpp; TODO: as a constant
+    })
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
 test.after.always('close server', t => {
   server.close()
 })
