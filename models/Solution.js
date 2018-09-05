@@ -98,7 +98,7 @@ solutionSchema.pre('validate', function (next) {
     next(new Error('Pid should be a number'))
   } else if (this.code.length <= 5) {
     next(new Error('The length of code should be greater than 5'))
-  } else if (this.code.length >= 5000) {
+  } else if (this.code.length >= 10000) {
     next(new Error('The length of code should be less than 5000'))
   } else {
     next()
