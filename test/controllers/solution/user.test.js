@@ -78,6 +78,32 @@ test('Can not see solution of another user', async t => {
   t.is(res.status, 403)
 })
 
+test('Code is too long', async t => {
+  const code = `
+    #include <iostream>
+
+    using namespace std;
+
+    int main () {
+      "${'a'.repeat(10000)}";
+      return 0;
+    }
+  `
+  const res = await request
+    .post('/api/status/')
+    .send({
+      pid: 1000,
+      uid: 'primaryuser',
+      code,
+      language: 2 // cpp; TODO: as a constant
+    })
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
 test.after.always('close server', t => {
   server.close()
 })
