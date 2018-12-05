@@ -34,7 +34,7 @@ const contestSchema = mongoose.Schema({
   },
   ranklist: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: function () { return {} }
   }
 }, {
   collection: 'Contest'

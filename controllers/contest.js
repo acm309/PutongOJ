@@ -97,10 +97,11 @@ const findOne = async (ctx) => {
 
 // 返回比赛排行榜
 const ranklist = async (ctx) => {
-  const contest = ctx.state.contest
-  const ranklist = ctx.state.contest.ranklist
+  const contest = ctx.state.contest.toObject()
+  const { ranklist } = contest
   let res
-  const deadline = 60 * 60 * 1000
+  // 最小 10 分钟 或者 20% 的时长
+  const deadline = Math.max(0.2 * (contest.end - contest.start), 10 * 60 * 1000)
   // const cid = parseInt(ctx.query.cid)
   // const solutions = await Solution.find({ mid: cid }).exec()
   // 临时注释，但请暂时不要删除
@@ -129,6 +130,7 @@ const ranklist = async (ctx) => {
   await Promise.all(Object.keys(ranklist).map((uid) =>
     User
       .findOne({ uid })
+      .lean()
       .exec()
       .then(user => { ranklist[user.uid].nick = user.nick })))
 
@@ -173,7 +175,8 @@ const create = async (ctx) => {
     { // cid 会自动生成
       start: new Date(opt.start).getTime(),
       end: new Date(opt.end).getTime(),
-      create: Date.now()
+      create: Date.now(),
+      ranklist: {}
     }
   ))
 
@@ -231,7 +234,7 @@ const verify = async (ctx) => {
   const opt = ctx.request.body
   const cid = opt.cid
   // 普通用户的前端页面里没有argument的值，需要重新在数据库中找一遍
-  const contest = await Contest.findOne({ cid }).exec()
+  const contest = await Contest.findOne({ cid }).lean().exec()
 
   const enc = parseInt(contest.encrypt)
   const arg = contest.argument
