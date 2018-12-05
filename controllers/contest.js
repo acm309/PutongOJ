@@ -98,7 +98,7 @@ const findOne = async (ctx) => {
 // 返回比赛排行榜
 const ranklist = async (ctx) => {
   const contest = ctx.state.contest.toObject()
-  const { ranklist } = contest
+  const { ranklist = {} } = contest
   let res
   // 最小 10 分钟 或者 20% 的时长
   const deadline = Math.max(0.2 * (contest.end - contest.start), 10 * 60 * 1000)
@@ -182,7 +182,7 @@ const create = async (ctx) => {
 
   try {
     await contest.save()
-    logger.info(`New problem is created" ${contest.cid} -- ${contest.title}`)
+    logger.info(`New Contest is created ${contest.cid} -- ${contest.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
