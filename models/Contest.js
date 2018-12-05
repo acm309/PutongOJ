@@ -37,7 +37,8 @@ const contestSchema = mongoose.Schema({
     default: function () { return {} }
   }
 }, {
-  collection: 'Contest'
+  collection: 'Contest',
+  minimize: false
 })
 
 contestSchema.plugin(mongoosePaginate)
