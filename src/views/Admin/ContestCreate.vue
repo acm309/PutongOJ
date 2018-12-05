@@ -16,6 +16,7 @@
 
 <script>
 import ContestEdit from '@/components/ContestEdit'
+import { mapGetters } from 'vuex'
 
 export default {
   data () {
@@ -29,6 +30,14 @@ export default {
         argument: ''
       }
     }
+  },
+  computed: {
+    ...mapGetters({
+      encrypt: 'encrypt'
+    })
+  },
+  created () {
+    this.contest.encrypt = this.encrypt.Public
   },
   methods: {
     submit () {

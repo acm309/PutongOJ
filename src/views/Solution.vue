@@ -43,7 +43,7 @@
       Click to copy code
     </Button>
     <pre><code v-html="prettyCode(solution.code)"></code></pre>
-    <div v-if="isAdmin && solution.sim">
+    <div v-if="isAdmin && solution.sim && solution.simSolution">
       <hr>
       Similarity: {{ solution.sim }}%</br>
       From: {{ solution.simSolution.sid }} by
@@ -83,6 +83,7 @@ export default {
     ...mapGetters('session', [ 'isAdmin' ])
   },
   created () {
+    console.log('solution', this.solution)
     this.$store.dispatch('solution/findOne', this.$route.params).then(() => {
       this.changeDomTitle({ title: `Solution ${this.solution.pid}` })
     })
