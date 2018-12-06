@@ -136,7 +136,7 @@ const status = {
   2: 'Available'
 }
 
-module.exports = {
+export default {
   result,
   language,
   judgeList,
