@@ -96,10 +96,19 @@ async function judge (problem, solution) {
     solution.error = ce
     return
   }
+
+  solution.time = solution.memory = 0
+
+  if (!fse.existsSync(resolve(__dirname, 'temp/result.json'))) {
+    solution.judge = config.judge.SystemError
+    logger.error(`${resolve(__dirname, 'temp/result.json')} does not exist`)
+    logger.error(`${solution}`)
+    return solution
+  }
+
   const result = fse.readJsonSync(resolve(__dirname, 'temp/result.json'))
 
   solution.judge = -1
-  solution.time = solution.memory = 0
   for (const item of result) {
     item.judge = judgeCode(item.judge)
     solution.time = Math.max(solution.time, item.time)
