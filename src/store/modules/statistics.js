@@ -1,6 +1,6 @@
 import * as types from '../types.js'
 import api from '@/api'
-import { statisTableObj } from '@/util/constant'
+import constant from '@/util/constant'
 
 const store = {
   namespaced: true,
@@ -37,9 +37,9 @@ const store = {
         num: payload.sumStatis
       }
       state.table.push(obj)
-      for (let i = 0; i < statisTableObj.length; i++) {
+      for (let i = 0; i < constant.statisTableObj.length; i++) {
         let obk = {}
-        obk.name = statisTableObj[i]
+        obk.name = constant.statisTableObj[i]
         obk.num = payload.countList[i]
         state.table.push(obk)
       }
