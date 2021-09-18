@@ -6,6 +6,7 @@
         <th>Title</th>
         <th>Author</th>
         <th>Updated</th>
+        <th v-if="isAdmin">Action</th>
       </tr>
       <template v-for="item in list">
         <tr>
@@ -21,6 +22,9 @@
             </router-link>
           <td>
             {{ item.update | timeagoPretty }}
+          </td>
+          <td v-if="isAdmin">
+            <Button type="text" @click="del(item.did)"> Delete </Button>
           </td>
         </tr>
       </template>
@@ -59,7 +63,10 @@ export default {
   },
   computed: {
     ...mapGetters('discuss', [ 'list' ]),
-    ...mapGetters('session', [ 'isLogined' ])
+    ...mapGetters('session', [ 'isLogined' ]),
+    ...mapGetters({
+      isAdmin: 'session/isAdmin'
+    })
   },
   methods: {
     ...mapActions('discuss', [ 'find', 'create' ]),
@@ -81,6 +88,20 @@ export default {
         })
       }).catch(() => {
         this.loading = false
+      })
+    },
+    del (did) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+        onOk: () => {
+          this.$store.dispatch('discuss/delete', { did }).then(() => {
+            this.$Message.success(`成功删除 ${did}！`)
+          })
+        },
+        onCancel: () => {
+          this.$Message.info('已取消删除！')
+        }
       })
     }
   }

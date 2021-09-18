@@ -49,7 +49,7 @@ export default {
     const validatePass1 = (rule, value, callback) => {
       // 5-50位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
       const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
-        ? new Error('密码长度需5-50位，只能包含字母或字符') : null
+        ? new Error('密码长度需5-50位，只能包含字母和数字') : null
       error ? callback(error) : callback()
     }
     // 验证密码是否重复
@@ -60,7 +60,7 @@ export default {
     const basicRules = {
       uid: [
         { required: true, message: '用户名不能少', trigger: 'change' },
-        { min: 5, max: 50, message: '用户名在5到50位之间', trigger: 'change' }
+        { min: 5, max: 50, message: '用户名在 5 到 50 位之间', trigger: 'change' }
       ],
       pwd: [
         { required: true, message: '请输入密码', trigger: 'change' }
@@ -75,7 +75,14 @@ export default {
         checkPwd: ''
       },
       loginRules: basicRules,
-      registerRules: Object.assign(basicRules, {
+      registerRules: {
+        uid: basicRules.uid.concat({
+          required: true,
+          type: 'string',
+          pattern: /^\w+$/ig,
+          message: '用户名只能包含字母和数字',
+          trigger: 'change'
+        }),
         pwd: [
           { required: true, message: '请输入密码', trigger: 'change' },
           { validator: validatePass1, trigger: 'change' }
@@ -84,7 +91,7 @@ export default {
           { required: true, message: '请再次输入密码', trigger: 'change' },
           { validator: validatePass2, trigger: 'change' }
         ]
-      })
+      }
     }
   },
   computed: {

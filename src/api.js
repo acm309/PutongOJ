@@ -135,7 +135,8 @@ const api = {
     create: (data) => instance.post('/discuss', data),
     find: (data) => instance.get('/discuss/list', { params: data }),
     findOne: (data) => instance.get(`/discuss/${data.did}`, { params: data }),
-    update: (data) => instance.put(`/discuss/${data.did}`, data)
+    update: (data) => instance.put(`/discuss/${data.did}`, data),
+    delete: (data) => instance.delete(`/discuss/${data.did}`, data)
   }
 }
 

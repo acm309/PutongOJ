@@ -70,6 +70,7 @@ export const DELETE_TAG = 'DELETE_TAG'
 // discuss
 export const GET_DISCUSS = 'GET_DISCUSS'
 export const GET_DISCUSS_LIST = 'GET_DISCUSS_LIST'
+export const DELETE_DISCUSS = 'DELETE_DISCUSS'
 
 // index
 export const SET_SERVERTIME = 'SET_SERVERTIME'

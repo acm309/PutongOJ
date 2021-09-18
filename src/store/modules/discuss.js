@@ -17,6 +17,9 @@ const store = {
     },
     [types.GET_DISCUSS_LIST]: (state, payload) => {
       state.list = payload
+    },
+    [types.DELETE_DISCUSS]: (state, {did}) => {
+      state.list = state.list.filter((p) => p.did !== +did)
     }
   },
   actions: {
@@ -35,13 +38,18 @@ const store = {
         commit(types.GET_DISCUSS_LIST, data.list)
       })
     },
-    update ({commit}, payload) {
+    update ({ commit }, payload) {
       return api.discuss.update(payload).then(({ data }) => {
         return data
       })
     },
-    create ({commit}, payload) {
+    create ({ commit }, payload) {
       return api.discuss.create(payload).then(({ data }) => data.did)
+    },
+    delete ({ commit }, payload) {
+      return api.discuss.delete(payload).then(() => {
+        commit(types.DELETE_DISCUSS, payload)
+      })
     }
   }
 }
