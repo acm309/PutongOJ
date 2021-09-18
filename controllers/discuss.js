@@ -72,10 +72,24 @@ const update = async (ctx) => {
   }
 }
 
+const del = async (ctx) => {
+  const did = ctx.params.did
+
+  try {
+    await Discuss.deleteOne({ did }).exec()
+    logger.info(`One Discuss is delete ${did}`)
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+
+  ctx.body = {}
+}
+
 module.exports = {
   preload,
   find,
   findOne,
   create,
-  update
+  update,
+  del
 }

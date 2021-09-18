@@ -35,7 +35,9 @@ const find = async (ctx) => {
   const opt = ctx.request.query
   const page = parseInt(opt.page) || 1
   const pageSize = parseInt(opt.pageSize) || 20
-  const list = await Contest.paginate({}, {
+
+  const filter = ctx.session.profile && isAdmin(ctx.session.profile) ? {} : { status: config.status.Available }
+  const list = await Contest.paginate(filter, {
     sort: { cid: -1 },
     page,
     limit: pageSize,
@@ -61,12 +63,12 @@ const findOne = async (ctx) => {
   const totalProblems = list.length
   const overview = []
   const procedure = list.map((pid, index) => {
-    return Problem.findOne({pid}).exec()
+    return Problem.findOne({ pid }).exec()
       .then((problem) => {
         overview[index] = only(problem, 'title pid')
       })
       .then(() => {
-        return Solution.count({pid, mid: cid}).exec()
+        return Solution.count({ pid, mid: cid }).exec()
       })
       .then((count) => {
         overview[index].submit = count

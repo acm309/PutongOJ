@@ -10,5 +10,6 @@ router.get('/list', discuss.find)
 router.get('/:did', discuss.preload, discuss.findOne)
 router.post('/', auth.login, discuss.create)
 router.put('/:did', auth.login, discuss.preload, discuss.update)
+router.del('/:did', auth.login, auth.admin, discuss.del)
 
 module.exports = router
