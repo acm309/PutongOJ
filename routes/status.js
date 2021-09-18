@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const status = require('../controllers/status')
-const { auth } = require('../utils/middlewares')
+const { auth, solutionCreateRateLimit } = require('../utils/middlewares')
 
 const router = new Router({
   prefix: '/status'
@@ -8,6 +8,6 @@ const router = new Router({
 
 router.get('/list', status.find)
 router.get('/:sid', auth.login, status.findOne)
-router.post('/', auth.login, status.create)
+router.post('/', auth.login, solutionCreateRateLimit, status.create)
 
 module.exports = router
