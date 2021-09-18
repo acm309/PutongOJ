@@ -1,6 +1,6 @@
 # Putong Online Judge v2
 
-> (初代版本 [here](https://github.com/acm309/PutongOJ/tree/v1))
+> (For version 1, please visit [here](https://github.com/acm309/PutongOJ/tree/v1))
 
 [![Build Status](https://img.shields.io/travis/acm309/PutongOJ.svg?branch=master&style=flat-square)](https://travis-ci.org/acm309/PutongOJ)
 [![Codecov](https://img.shields.io/codecov/c/github/acm309/PutongOJ.svg?style=flat-square)](https://codecov.io/gh/acm309/PutongOJ)
@@ -9,29 +9,28 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)
 
-### 预览
+### Preview
 
-[Demo](http://acm.cjlu.edu.cn) (测试账号: 123456 / 123456)
+[Demo](http://acm.cjlu.edu.cn) (Test Account: 123456 / 123456)
 
-## 文档
+## Documentation
 
 Currently Not available
-如果问题，请直接在发起一个 issue。
 
 ## Features
 
-- Docker 构建，一件部署
-- 单页应用
-- 多组测试样例
+- Built on Docker -- One click Deployment
+- Single Page Application -- Better User Experience
+- Support multiple cases of test data
 - Powered by Vue.js, Koa.js, MongoDB, Redis
 
-## 部署
+## Delpoyment
 
-注意，此 OJ 处于 beta 状态。
+Note: This project is still during `BETA` stage
 
 ### Docker
 
-1. 复制此仓库
+1. clone this project
 
 ```bash
 git clone https://github.com/acm309/PutongOJ.git PutongOJ
@@ -50,45 +49,45 @@ daemon mode
 docker-compose up -d
 ```
 
-会在 80 端口启动。可以直接访问。默认管理员账户 `admin`, 密码 `kplkplkpl`
+It will listen on 80 ports after it is successfully deployed. Then you can directly visit this platform.
 
 Enjoy it!
 
-### 手动安装
+### Manual Installation
 
-推荐安装在 Ubuntu 上。可以尝试其他版本，但不保证稳定。
+Ubuntu is recommended. You can deploy this platform on other linux, but I can't ensure it must work.
 
-1. 安装 [Node.js](https://nodejs.org) [mongodb](https://www.mongodb.com/download-center?jmp=nav#community) && [redis](https://redis.io/)
+1. install [Node.js](https://nodejs.org) [mongodb](https://www.mongodb.com/download-center?jmp=nav#community) && [redis](https://redis.io/)
 
-2. 安装其它依赖 (for ubuntu)
+2. install some system dependencies (for ubuntu)
 
 ```bash
 apt-get install libcairo2-dev libpango1.0-dev build-essential
 ```
 
-3. 复制此仓库
+3. clone this repo
 
 ```bash
 git clone https://github.com/acm309/PutongOJ.git
 ```
 
-4. 安装项目依赖
+4. install project dependencies
 
 ```bash
 npm i -g yarn
 yarn
 ```
 
-5. 尝试连接数据库
+5. setup database connections
 
-设置环境变量
+export variables
 
 ```bash
 export redisURL='your redis url'
 export dbURL='your mongodb url'
 ```
 
-更新 `config/index.js`
+update `config/index.js`
 
 ```js
 const prod = {
@@ -96,31 +95,31 @@ const prod = {
 }
 ```
 
-6. 下载静态文件和启动判题端
+6. setup static files and judger
 
 ```bash
 node manager.js
 ```
 
-`pm2.config.json` 会自动生成.
+`pm2.config.json` would be generated.
 
-7. 启动
+7. start
 
-安装 pm2
+install pm2 first
 
 ```bash
 npm i -g pm2
 ```
 
-用 pm2 启动
+then start with pm2
 
 ```bash
 pm2 start pm2.config.json
 ```
 
-## 迁移
+## Migration
 
-找到并记住 mongodb 容器的 `Container Id`
+Know the `Container Id` of the mongodb container by running:
 
 ```bash
 docker ps
@@ -128,25 +127,25 @@ docker ps
 
 ### dump
 
-将 `<Container id>` 替换为上一步中 mongodb 实际运行的 id
+Replace `<Container id>` with the real id of your running mongodb container
 
 ```bash
 docker exec -it <Container id> mongodump --out /data/backup --db oj
 ```
 
-数据会在 `migrations/backup/`
+The output data will be stored at `migrations/backup/`
 
-### 恢复
+### restore
 
 ```bash
 docker exec -it <Container Id> mongorestore --db oj --drop /data/backup/oj
 ```
 
-### 静态文件
+### static files
 
-将文件复制到 `public`
+copy files to `public` folder
 
-将 `<Container id>` 替换为 oj 系统在运行的容器 id
+Replace `<Container id>` with the real id of your running oj container
 
 ```bash
 docker cp <SRC_PATH> <Container Id>:/app/public
