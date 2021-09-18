@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   ptoj-db:
-    image: mongo:3.4.12
+    image: mongo:latest
     container_name: ptoj-db
     restart: always
     volumes:
@@ -10,7 +10,7 @@ services:
       - $PWD/migrations/backup:/data/backup
 
   ptoj-redis:
-    image: redis:3.2.10
+    image: redis:latest
     container_name: ptoj-redis
     restart: always
 
