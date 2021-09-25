@@ -67,6 +67,9 @@ const store = {
     },
     update ({ commit }, payoad) {
       return api.user.update(payoad)
+    },
+    delete ({ commit }, payload) {
+      return api.user.delete(payload)
     }
   }
 }

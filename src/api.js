@@ -82,7 +82,8 @@ const api = {
     findOne: (data) => instance.get(`/user/${data.uid}`, { params: data }),
     find: (data) => instance.get('/user/list', { params: data }),
     create: (data) => instance.post('/user', data),
-    update: (data) => instance.put(`/user/${data.uid}`, data)
+    update: (data) => instance.put(`/user/${data.uid}`, data),
+    delete: (data) => instance.delete(`/user/${data.uid}`, data)
   },
   solution: {
     findOne: (data) => instance.get(`/status/${data.sid}`, { params: data }),
