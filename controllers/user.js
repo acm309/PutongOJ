@@ -37,7 +37,7 @@ const findOne = async (ctx) => {
   const [user, solved, unsolved] = await Promise.all([
     User
       .findOne({ uid })
-      .select('-_id -pwd')
+      .select('-timerecord -iprecord -create -_id -pwd')
       .exec(),
     Solution
       .find({ uid, judge: config.judge.Accepted })
@@ -97,9 +97,9 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const user = ctx.state.user
   const fields = ['nick', 'motto', 'school', 'mail']
-  fields.forEach((filed) => {
-    if (!isUndefined(opt[filed])) {
-      user[filed] = opt[filed]
+  fields.forEach((field) => {
+    if (!isUndefined(opt[field])) {
+      user[field] = opt[field]
     }
   })
   if (!isUndefined(opt.privilege)) {
