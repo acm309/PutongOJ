@@ -38,7 +38,7 @@ const instance = {}
             content: `(〃∀〃) 请先登录`,
             duration: 6.5
           })
-        } else if (err.response && err.response.status === 400) {
+        } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
           Vue.prototype.$Message.error({
             content: `${err.response.data.error}`,
             duration: 6.5
