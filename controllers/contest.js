@@ -134,7 +134,7 @@ const ranklist = async (ctx) => {
       .findOne({ uid })
       .lean()
       .exec()
-      .then(user => { ranklist[user.uid].nick = user.nick })))
+      .then(user => { if (user != null) ranklist[user.uid].nick = user.nick })))
 
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里

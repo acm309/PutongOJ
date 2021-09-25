@@ -23,7 +23,7 @@ const root = async (ctx, next) => {
 }
 
 const handler = async function (ctx) {
-  ctx.status = 400
+  ctx.status = 429
   ctx.body = {
     error: '请求次数过高，请过一会重试'
   }
