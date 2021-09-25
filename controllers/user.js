@@ -122,10 +122,31 @@ const update = async (ctx) => {
   }
 }
 
+const del = async (ctx) => {
+  if (!isAdmin(ctx.session.profile) && ctx.session.profile.uid !== ctx.state.user.uid) {
+    ctx.throw(400, 'You do not have permission to change this user information!')
+  }
+  if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
+    ctx.throw(400, "You do not have permission to change Root's information!")
+  }
+
+  const { uid } = ctx.state.user
+
+  try {
+    await User.deleteOne({ uid }).exec()
+    logger.info(`One User is removed ${uid}`)
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+
+  ctx.body = {}
+}
+
 module.exports = {
   preload,
   find,
   findOne,
   create,
-  update
+  update,
+  del
 }
