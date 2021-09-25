@@ -40,6 +40,11 @@
 
 ```
 
+# 修改颜色
+
+- src/my-theme/index.less
+- src/styles/common.styl
+
 # TODO
 
 - [ ] 开发文档

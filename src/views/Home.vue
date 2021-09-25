@@ -92,6 +92,8 @@ export default {
 </script>
 
 <style lang="stylus">
+@import '../styles/common'
+
 .home-wrap
   margin: 0 10%
   .news
@@ -109,7 +111,7 @@ export default {
     .ivu-icon-chatbox-working
       font-size: 24px
       margin-left: 30%
-      color: rgba(201, 31, 242, 0.5)
+      color: alpha($primary-color, 0.9)
     p
       margin-top: 10px
     .ivu-icon-close-circled
