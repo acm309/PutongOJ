@@ -8,7 +8,7 @@
         <th>Start Time</th>
         <th>Type</th>
         <th v-if="isAdmin">Visible</th>
-        <th v-if="isAdmin">Delete</th>
+        <th v-if="isAdmin && canRemove">Delete</th>
       </tr>
       <template v-for="(item, index) in list">
         <tr v-if="isAdmin || item.status === status.Available">
@@ -36,7 +36,7 @@
               <Button type="text" @click="change(item)">{{ contestVisible[item.status] }}</Button>
             </Tooltip>
           </td>
-          <td v-if="isAdmin">
+          <td v-if="isAdmin && canRemove">
             <Button type="text" @click="del(item.cid)">Delete</Button>
           </td>
         </tr>
@@ -77,6 +77,7 @@ export default {
       profile: 'session/profile',
       isLogined: 'session/isLogined',
       isAdmin: 'session/isAdmin',
+      canRemove: 'session/canRemove',
       currentTime: 'currentTime'
     }),
     query () {

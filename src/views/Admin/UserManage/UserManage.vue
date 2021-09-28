@@ -3,7 +3,7 @@
     <Tabs :value="active" @on-click="change">
       <TabPane label="UserEdit" name="userEdit"></TabPane>
       <TabPane label="GroupEdit" name="groupEdit"></TabPane>
-      <TabPane label="AdminEdit" name="adminEdit"></TabPane>
+      <TabPane label="AdminEdit" name="adminEdit" v-if="canRemove"></TabPane>
       <TabPane label="TagEdit" name="tagEdit"></TabPane>
     </Tabs>
     <router-view></router-view>
@@ -15,7 +15,7 @@ import { mapState, mapGetters } from 'vuex'
 
 export default {
   computed: {
-    ...mapGetters('session', [ 'isAdmin' ]),
+    ...mapGetters('session', [ 'isAdmin', 'canRemove' ]),
     ...mapState({
       active: state => state.route.name
     })

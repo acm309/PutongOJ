@@ -24,7 +24,7 @@
         <th>Ratio</th>
         <th>Tags</th>
         <th v-if="isAdmin">Visible</th>
-        <th v-if="isAdmin">Delete</th>
+        <th v-if="isAdmin && canRemove">Delete</th>
       </tr>
       <template v-for="(item, index) in list">
         <tr v-if="isAdmin || item.status === status.Available">
@@ -60,7 +60,7 @@
               <Button type="text" @click="change(item)">{{ problemVisible[item.status] }}</Button>
             </Tooltip>
           </td>
-          <td v-if="isAdmin">
+          <td v-if="isAdmin && canRemove">
             <Button type="text" @click="del(item.pid)">Delete</Button>
           </td>
         </tr>
@@ -110,7 +110,8 @@ export default {
       profile: 'session/profile',
       status: 'status',
       judge: 'judge',
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      canRemove: 'session/canRemove'
     }),
     query () {
       return only(this.$route.query, 'page pageSize type content')

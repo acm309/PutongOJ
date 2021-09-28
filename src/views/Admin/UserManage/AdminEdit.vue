@@ -15,17 +15,28 @@
         <th>Username</th>
         <th>Nick</th>
         <th>Remove</th>
+        <th>Type</th>
       </tr>
-      <template v-for="item in adminList">
-        <tr>
-          <td>{{ item.uid }}</td>
-          <td>{{ item.nick }}</td>
+      <template v-for="user in adminList">
+        <tr :key="user.uid">
+          <td>{{ user.uid }}</td>
+          <td>{{ user.nick }}</td>
           <td>
-            <Button v-if="item.uid !== 'admin'" type="text" @click="remove(item)">Remove</Button>
+            <Button v-if="user.uid !== 'admin'" type="text" @click="remove(user)">Remove</Button>
+          </td>
+          <td>
+            <Select v-model="user.privilege" @on-change="update(user)" v-if="user.uid !== 'admin'">
+              <Option v-for="item in getOptions()" :value="item.value" :key="item.value">{{ item.label }}</Option>
+            </Select>
           </td>
         </tr>
       </template>
     </table>
+    <Card dis-hover>
+        <p>Admin 为最高权限，具有所有权限。</p>
+        <p>Teacher 具有除删除外的所有权限。</p>
+        <p>一般，被添加的用户通过刷新网页或重新登录即可查看新权限。</p>
+    </Card>
   </div>
 </template>
 
@@ -47,6 +58,24 @@ export default {
     this.fetchAdmin()
   },
   methods: {
+    getOptions () {
+      return [{
+        value: this.privilege.Teacher,
+        label: 'Teacher'
+      },
+      {
+        value: this.privilege.Root,
+        label: 'Admin'
+      }]
+    },
+    update (user) {
+      const payload = only(user, 'uid privilege')
+      this.$store.dispatch('user/update', payload).then(() => {
+        this.$Message.success(`成功更新 ${payload.uid} 用户！`)
+        this.fetchAdmin()
+        this.admin = ''
+      })
+    },
     fetchAdmin () {
       this.$store.dispatch('user/find', { privilege: 'admin' })
     },
@@ -56,7 +85,7 @@ export default {
         privilege: this.privilege.Teacher
       }
       this.$store.dispatch('user/update', user).then(() => {
-        this.$Message.success(`成功设置${this.admin}用户为管理员！`)
+        this.$Message.success(`成功设置 ${this.admin} 用户为管理员！`)
         this.fetchAdmin()
         this.admin = ''
       })

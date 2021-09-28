@@ -13,7 +13,7 @@
           <p>{{ item.create | timePretty }}</p>
         </Col>
         <Col :span="2">
-          <Icon v-if="isAdmin" type="close-circled" @click.native="del(item.nid)"></Icon>
+          <Icon v-if="isAdmin && canRemove" type="close-circled" @click.native="del(item.nid)"></Icon>
         </Col>
       </Row>
     </Card>
@@ -37,7 +37,8 @@ export default {
     ...mapGetters({
       list: 'news/list',
       sum: 'news/sum',
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      canRemove: 'session/canRemove'
     }),
     query () {
       const opt = only(this.$route.query, 'page pageSize')

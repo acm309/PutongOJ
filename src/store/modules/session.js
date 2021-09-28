@@ -3,8 +3,7 @@ import api from '@/api'
 
 const state = {
   loginDialog: false,
-  profile: null,
-  isAdmin: false
+  profile: null
 }
 
 const getters = {
@@ -16,6 +15,12 @@ const getters = {
     (
       parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Root) ||
       parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Teacher)
+    )
+  ),
+  canRemove: (state, getters, rootState, rootGetters) => (
+    getters.isLogined &&
+    (
+      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Root)
     )
   )
 }

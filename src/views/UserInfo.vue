@@ -27,7 +27,7 @@
             <h4>Submit</h4>
           </Col>
         </Row>
-        <Button style="margin-top: 20px" type="warning" long v-if="isAdmin && user.uid != 'admin'"
+        <Button style="margin-top: 20px" type="warning" long v-if="isAdmin && user.uid != 'admin' && canRemove"
           @click="del(user.uid)"
         >
           REMOVE THIS USER
@@ -115,7 +115,8 @@ export default {
       unsolved: 'user/unsolved',
       group: 'user/group',
       profile: 'session/profile',
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      canRemove: 'session/canRemove'
     })
   },
   created () {

@@ -6,7 +6,7 @@
         <th>Title</th>
         <th>Author</th>
         <th>Updated</th>
-        <th v-if="isAdmin">Action</th>
+        <th v-if="isAdmin && canRemove">Action</th>
       </tr>
       <template v-for="item in list">
         <tr>
@@ -23,7 +23,7 @@
           <td>
             {{ item.update | timeagoPretty }}
           </td>
-          <td v-if="isAdmin">
+          <td v-if="isAdmin && canRemove">
             <Button type="text" @click="del(item.did)"> Delete </Button>
           </td>
         </tr>
@@ -65,7 +65,8 @@ export default {
     ...mapGetters('discuss', [ 'list' ]),
     ...mapGetters('session', [ 'isLogined' ]),
     ...mapGetters({
-      isAdmin: 'session/isAdmin'
+      isAdmin: 'session/isAdmin',
+      canRemove: 'session/canRemove'
     })
   },
   methods: {
