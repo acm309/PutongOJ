@@ -83,7 +83,6 @@ export default {
     ...mapGetters('session', [ 'isAdmin' ])
   },
   created () {
-    console.log('solution', this.solution)
     this.$store.dispatch('solution/findOne', this.$route.params).then(() => {
       this.changeDomTitle({ title: `Solution ${this.solution.pid}` })
     })
@@ -91,7 +90,7 @@ export default {
   methods: {
     ...mapActions(['changeDomTitle']),
     prettyCode (code) {
-      return highlight.highlight(this.language[this.solution.language], `${this.solution.code}`).value
+      return highlight.highlight(this.language[this.solution.language], `${code}`).value
     },
     onCopy () {
       this.$Message.success('Copied!')
