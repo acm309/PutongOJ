@@ -1,3 +1,5 @@
+// optimize
+// https://itnext.io/performance-tips-for-mongodb-mongoose-190732a5d382
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate')
 const config = require('../config')
