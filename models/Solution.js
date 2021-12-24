@@ -13,15 +13,18 @@ const solutionSchema = mongoose.Schema({
   },
   pid: {
     type: Number,
-    required: true
+    required: true,
+    index: true
   },
   uid: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   mid: {
     type: Number,
-    default: 1 // 历史遗留问题，这里的 mid 指代 cid, 默认为 1
+    default: 1, // 历史遗留问题，这里的 mid 指代 cid, 默认为 1,
+    index: true
   },
   time: {
     type: Number,

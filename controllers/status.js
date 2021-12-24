@@ -15,7 +15,9 @@ const find = async (ctx) => {
     sort: { sid: -1 },
     page,
     limit: pageSize,
-    select: '-_id -code -error'
+    select: '-_id -code -error',
+    lean: true,
+    leanWithId: false
   })
 
   ctx.body = {

@@ -70,7 +70,8 @@ const problemSchema = mongoose.Schema({
   },
   tags: {
     type: [String],
-    default: []
+    default: [],
+    index: true
   }
 }, {
   collection: 'Problem'

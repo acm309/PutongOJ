@@ -47,7 +47,8 @@ const userSchema = mongoose.Schema({
   },
   gid: {
     type: [Number],
-    default: []
+    default: [],
+    index: true
   },
   motto: String,
   mail: String,

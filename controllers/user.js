@@ -25,6 +25,7 @@ const find = async (ctx) => {
   const list = await User
     .find(filter)
     .select('uid nick privilege')
+    .lean()
     .exec()
   ctx.body = {
     list
@@ -38,17 +39,21 @@ const findOne = async (ctx) => {
     User
       .findOne({ uid })
       .select('-timerecord -iprecord -create -_id -pwd')
+      .lean()
       .exec(),
     Solution
       .find({ uid, judge: config.judge.Accepted })
       .distinct('pid')
+      .lean()
       .exec(),
     Solution
       .find({ uid, judge: { $ne: config.judge.Accepted } })
       .distinct('pid')
+      .lean()
       .exec()
   ])
   const procedure = user.gid.map((gid) => Group.findOne({gid})
+    .lean()
     .exec()
     .then(item => item.title))
   const group = await Promise.all(procedure)

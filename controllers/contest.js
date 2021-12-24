@@ -41,6 +41,8 @@ const find = async (ctx) => {
     sort: { cid: -1 },
     page,
     limit: pageSize,
+    lean: true,
+    leanWithId: false,
     select: '-_id -creator -argument' // -表示不要的字段
   })
 
@@ -63,18 +65,18 @@ const findOne = async (ctx) => {
   const totalProblems = list.length
   const overview = []
   const procedure = list.map((pid, index) => {
-    return Problem.findOne({ pid }).exec()
+    return Problem.findOne({ pid }).lean().exec()
       .then((problem) => {
         overview[index] = only(problem, 'title pid')
       })
       .then(() => {
-        return Solution.count({ pid, mid: cid }).exec()
+        return Solution.count({ pid, mid: cid }).lean().exec()
       })
       .then((count) => {
         overview[index].submit = count
       })
       .then(() => {
-        return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).exec()
+        return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec()
       })
       .then((count) => {
         overview[index].solve = count
@@ -87,6 +89,7 @@ const findOne = async (ctx) => {
   solved = await Solution
     .find({ uid, mid: cid, judge: config.judge.Accepted })
     .distinct('pid')
+    .lean()
     .exec()
 
   ctx.body = {

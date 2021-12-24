@@ -60,10 +60,12 @@ const find = async (ctx) => {
       sort: { pid: 1 },
       page,
       limit: pageSize,
+      lean: true,
+      leanWithId: false,
       select: '-_id -hint -description -in -out -input -output' // -表示不要的字段
     })
   } else {
-    const docs = await Problem.find({}).exec()
+    const docs = await Problem.find({}).lean().exec()
     list = {
       docs,
       total: docs.length
@@ -83,7 +85,7 @@ const find = async (ctx) => {
         .gte(list.docs[0].pid)
         .lte(list.docs[list.total - 1].pid)
     }
-    solved = await query.distinct('pid').exec()
+    solved = await query.distinct('pid').lean().exec()
   }
 
   ctx.body = {
