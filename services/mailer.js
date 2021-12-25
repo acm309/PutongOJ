@@ -1,3 +1,5 @@
+require('dotenv-flow').config()
+
 const nodemailer = require('nodemailer')
 const config = require('../config')
 const Discuss = require('../models/Discuss')

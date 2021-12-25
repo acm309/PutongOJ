@@ -100,9 +100,6 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

@@ -1,5 +1,4 @@
-const dotenv = require('dotenv')
-dotenv.load()
+require('dotenv-flow').config()
 
 const Koa = require('koa')
 const koaLogger = require('koa-logger')

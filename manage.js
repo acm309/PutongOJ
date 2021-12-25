@@ -1,3 +1,5 @@
+require('dotenv-flow').config()
+
 const { resolve } = require('path')
 const fse = require('fs-extra')
 const range = require('lodash.range')

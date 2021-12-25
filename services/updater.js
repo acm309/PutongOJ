@@ -1,3 +1,5 @@
+require('dotenv-flow').config()
+
 require('../config/db')
 const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')

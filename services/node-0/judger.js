@@ -8,6 +8,8 @@
  * 6. 更新用户的 Submit 和 Solve
  * 7. 结束，再次从第一步开始
  */
+require('dotenv-flow').config()
+
 const fse = require('fs-extra')
 const { resolve } = require('path')
 const shell = require('shelljs')
