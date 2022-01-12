@@ -3,6 +3,7 @@ const Solution = require('../models/Solution')
 const Group = require('../models/Group')
 const config = require('../config')
 const logger = require('../utils/logger')
+const difference = require('lodash.difference')
 const { generatePwd } = require('../utils/helper')
 const { isAdmin, isRoot, isUndefined } = require('../utils/helper')
 
@@ -61,7 +62,7 @@ const findOne = async (ctx) => {
   ctx.body = {
     user,
     solved,
-    unsolved,
+    unsolved: difference(unsolved, solved),
     group
   }
 }
