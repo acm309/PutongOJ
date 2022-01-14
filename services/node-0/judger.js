@@ -192,9 +192,22 @@ async function userUpdate (solution) {
     sid: { $ne: solution.sid } // 把自身排除
   }).exec()
   if (isSubmittedBefore === 0) {
-    user.submit += 1
-    problem.submit += 1
+    await User.findOneAndUpdate({
+      uid: user.uid
+    }, {
+      $inc: {
+        submit: 1
+      }
+    }).exec()
+    await Problem.findOneAndUpdate({
+      pid: problem.pid
+    }, {
+      $inc: {
+        submit: 1
+      }
+    }).exec()
   }
+  console.log('submit', isSubmittedBefore)
   if (solution.judge === config.judge.Accepted) {
     // 之前 ac 过了么
     const isAcBefore = await Solution.count({
@@ -203,13 +216,24 @@ async function userUpdate (solution) {
       sid: { $ne: solution.sid },
       judge: config.judge.Accepted
     }).exec()
+    console.log('isAc', isAcBefore)
     if (isAcBefore === 0) {
-      user.solve += 1
-      problem.solve += 1
+      await User.findOneAndUpdate({
+        uid: user.uid
+      }, {
+        $inc: {
+          solve: 1
+        }
+      }).exec()
+      await Problem.findOneAndUpdate({
+        pid: problem.pid
+      }, {
+        $inc: {
+          solve: 1
+        }
+      }).exec()
     }
   }
-  await problem.save()
-  return user.save()
 }
 
 async function main () {
