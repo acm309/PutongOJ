@@ -12,3 +12,6 @@
 - 点击 Create 会新建标签组，此时左边的 label 显示为 create，在 title 输入框中输入你要新建的 tag 名字，然后在下面的穿梭框内选择要加入标签组的题目，最后点击 Submit 按钮提交新建信息。
 
 - 点击 Delete 会删除该标签组。
+
+## vue2-editor
+锁死在 2.3.11。避免出现 vue2-editor.esm.js

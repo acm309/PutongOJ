@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="con-wrap">
     <table>
       <tr>
@@ -50,7 +50,6 @@
     </Page>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 import only from 'only'
@@ -193,7 +192,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../styles/common'
 

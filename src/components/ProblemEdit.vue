@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="proadd-wrap">
     <Row>
       <Col :span="23">
@@ -62,7 +62,6 @@
     </Row>
   </div>
 </template>
-
 <script>
 import api from '@/api'
 import { VueEditor } from 'vue2-editor'
@@ -86,7 +85,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .proadd-wrap
   margin-bottom: 20px

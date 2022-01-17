@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div v-if="solution">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
@@ -54,7 +54,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import constant from '@/util/constant'
@@ -63,14 +62,12 @@ import 'highlight.js/styles/github.css'
 // https://github.com/isagalaev/highlight.js/issues/1284
 import highlight from 'highlight.js/lib/highlight'
 import cpp from 'highlight.js/lib/languages/cpp'
-import python from 'highlight.js/lib/languages/python'
 import java from 'highlight.js/lib/languages/java'
 import 'highlight.js/styles/atom-one-light.css'
 import { testcaseUrl } from '@/util/helper'
 
 highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('java', java)
-highlight.registerLanguage('python', python)
 
 export default {
   data: () => ({
@@ -101,7 +98,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../styles/common'
 

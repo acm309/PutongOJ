@@ -1,11 +1,10 @@
-<template lang="html">
+<template>
   <div>
     <h1>修改消息</h1>
     <oj-news-edit></oj-news-edit>
     <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import NewsEdit from '@/components/NewsEdit'
 import { mapGetters } from 'vuex'
@@ -34,7 +33,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 h1
   margin-bottom: 20px

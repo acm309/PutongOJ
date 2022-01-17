@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Tabs :value="active" @on-click="change">
       <TabPane label="Description" name="problemInfo"></TabPane>
@@ -12,7 +12,6 @@
     <router-view></router-view>
   </div>
 </template>
-
 <script>
 import { mapState, mapGetters } from 'vuex'
 
@@ -35,6 +34,5 @@ export default {
   }
 }
 </script>
-
 <style>
 </style>

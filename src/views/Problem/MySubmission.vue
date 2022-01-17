@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="status-wrap">
     <Row class="pagination">
       <Col :span="16">
@@ -41,7 +41,6 @@
     </table>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import only from 'only'
@@ -113,7 +112,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../../styles/common'
 

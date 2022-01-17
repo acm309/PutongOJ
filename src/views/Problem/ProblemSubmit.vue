@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <h1>{{ this.$route.params.pid }}:  {{ title }}</h1>
     <submit></submit>
@@ -7,7 +7,6 @@
     <p v-if="!isLogined">Please Log in First</p>
   </div>
 </template>
-
 <script>
 import Submit from '@/components/Submit'
 import { mapGetters, mapActions } from 'vuex'
@@ -59,7 +58,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 h1
   color: #9799ca

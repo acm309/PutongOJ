@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="nav-wrap">
     <Layout>
       <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
@@ -62,7 +62,6 @@
     <Dialog></Dialog>
   </div>
 </template>
-
 <script>
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
@@ -100,7 +99,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .nav-wrap
   border: 1px solid #d7dde4

@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <table>
       <tr>
@@ -44,7 +44,6 @@
   </Form>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
@@ -108,7 +107,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../../styles/common'
 h3

@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Form v-model="solution">
       <FormItem label="Language" label-position="left">
@@ -14,7 +14,6 @@
     </Form>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 
@@ -30,7 +29,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 .ivu-form-item-label
   font-size: 16px

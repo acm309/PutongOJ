@@ -119,11 +119,17 @@ Promise.all([
     semiRestful()
   }
   /* eslint-disable no-new */
+  // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
+  // new Vue({
+  //   el: '#app',
+  //   router,
+  //   store,
+  //   template: '<App/>',
+  //   components: { App }
+  // })
   new Vue({
-    el: '#app',
     router,
     store,
-    template: '<App/>',
-    components: { App }
-  })
+    render: (h) => h(App)
+  }).$mount('#app')
 })

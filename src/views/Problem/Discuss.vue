@@ -1,9 +1,8 @@
-<template lang="html">
+<template>
   <div class="discuss-wrap">
     <div id="uyan_frame"></div>
   </div>
 </template>
-
 <script>
 
 export default {
@@ -23,6 +22,5 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 </style>

@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="conover-wrap">
     <h2>{{ contest.title }}</h2>
     <h4>Start Time:&nbsp;&nbsp;{{ contest.create | timePretty }}</h4>
@@ -27,7 +27,6 @@
     </table>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
@@ -76,7 +75,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../../styles/common'
 

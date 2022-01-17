@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <h1>出题的基本步骤</h1>
     <br>
@@ -16,7 +16,6 @@
     <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import ProblemEdit from '@/components/ProblemEdit'
 import { mapActions } from 'vuex'
@@ -57,6 +56,5 @@ export default {
   }
 }
 </script>
-
 <style>
 </style>

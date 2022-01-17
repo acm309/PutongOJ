@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="statis-wrap">
     <div class="left">
       <table>
@@ -67,7 +67,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import ECharts from 'vue-echarts/components/ECharts.vue'
 import 'echarts/lib/chart/pie'
@@ -197,7 +196,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 @import '../../styles/common'
 

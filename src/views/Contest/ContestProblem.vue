@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="conpro-wrap">
     <ul>
       <li v-for="i in totalProblems" :key="i" :class="{'active': i === proIndex}" @click="pageChange(i)">
@@ -11,7 +11,6 @@
     <Button type="ghost" shape="circle" icon="ios-paperplane" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import Problem from '@/components/Problem'
 import { mapGetters, mapActions } from 'vuex'
@@ -64,7 +63,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 ul
   margin-left: 10px

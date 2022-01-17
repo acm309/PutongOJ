@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="rank-wrap">
     <Row style="margin-bottom: 20px" type="flex" justify="end">
       <Col :span="1"><label>Group</label></Col>
@@ -52,7 +52,6 @@
     </Page>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 import only from 'only'
@@ -128,7 +127,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 @import '../styles/common'
 

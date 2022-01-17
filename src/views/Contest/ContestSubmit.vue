@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <h1>{{ this.$route.params.id }}:  {{ title }}</h1>
     <submit></submit>
@@ -6,7 +6,6 @@
     <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
   </div>
 </template>
-
 <script>
 import Submit from '@/components/Submit'
 import { mapGetters, mapActions } from 'vuex'
@@ -60,7 +59,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 h1
   color: #9799ca

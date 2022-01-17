@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <h1>Test Data</h1>
     <table>
@@ -27,7 +27,6 @@
     <Button type="primary" @click="create"> Submit </Button>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 import { testcaseUrl } from '@/util/helper'
@@ -91,7 +90,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../../styles/common'
 </style>

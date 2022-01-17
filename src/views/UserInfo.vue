@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="user-wrap">
     <Row>
       <Col :span="6">
@@ -97,7 +97,6 @@
     </Row>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import { purify } from '@/util/helper'
@@ -169,7 +168,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .user-wrap
   text-align: left

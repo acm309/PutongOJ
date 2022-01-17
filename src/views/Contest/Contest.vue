@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="conin-wrap">
     <Card class="card">
       <Row type="flex" justify="center">
@@ -22,7 +22,6 @@
     <!-- 为了确保之后的 children 能拿到 contest -->
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 
@@ -69,7 +68,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .conin-wrap
   margin-bottom: 20px

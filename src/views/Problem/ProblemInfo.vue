@@ -1,10 +1,9 @@
-<template lang="html">
+<template>
   <div class="proinfo-wrap">
     <problem :problem="problem" />
     <Button type="ghost" shape="circle" icon="ios-paperplane" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import Problem from '@/components/Problem.vue'
 import { mapGetters, mapActions } from 'vuex'
@@ -32,6 +31,5 @@ export default {
   }
 }
 </script>
-
 <style>
 </style>

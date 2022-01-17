@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="proinfo-wrap">
     <slot name="title"><h1>{{ problem.pid }}:  {{ problem.title }}</h1></slot>
     <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
@@ -26,7 +26,6 @@
     </div>
   </div>
 </template>
-
 <script>
 export default {
   props: ['problem'],
@@ -37,7 +36,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 h1
   color: #757575

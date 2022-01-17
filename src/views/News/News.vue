@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Tabs :value="current" @on-click="change">
       <TabPane label="Overview" name="newsInfo"></TabPane>
@@ -7,7 +7,6 @@
     <router-view></router-view>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 
@@ -32,6 +31,5 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 </style>

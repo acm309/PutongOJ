@@ -1,11 +1,10 @@
-<template lang="html">
+<template>
   <div class="news">
     <h1>{{ news.title }}</h1>
     <h4>{{ news.create | timePretty }}</h4>
     <div class="news-cont" v-html="news.content"></div>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
@@ -25,7 +24,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 h1, h4
   margin-bottom: 10px

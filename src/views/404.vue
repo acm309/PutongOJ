@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Card>
       <Row type="flex" justify="center">
@@ -18,7 +18,6 @@
     </Card>
   </div>
 </template>
-
 <script>
 export default {
   methods: {
@@ -33,7 +32,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 p
   font-size: 80px

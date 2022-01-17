@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Row class="filter">
       <Col :offset="1" :span="5">
@@ -82,7 +82,6 @@
     </table>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import only from 'only'
@@ -185,7 +184,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 @import '../../styles/common'
 

@@ -1,10 +1,9 @@
-<template lang="html">
+<template>
   <div>
     <oj-problem-edit :problem="problem" />
     <Button type="primary" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import ProblemEdit from '@/components/ProblemEdit'
 import { mapGetters } from 'vuex'
@@ -29,6 +28,5 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 </style>

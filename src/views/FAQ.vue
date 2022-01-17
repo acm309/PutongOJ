@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="faq-wrap">
     <h1>FAQ</h1>
     <hr>
@@ -78,13 +78,11 @@
       <p>A: <code>IE</code> is not recommended! But <code>Chrome</code> (50 or above), <code>Firefox</code> (50 or above), <code>Edge</code> are all recommended.</p>
   </div>
 </template>
-
 <script>
 
 export default {
 }
 </script>
-
 <style lang="stylus" scoped>
 h1, hr
   margin-bottom: 10px

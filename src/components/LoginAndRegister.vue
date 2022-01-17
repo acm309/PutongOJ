@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <Modal :value="visible" @on-cancel="triggerLogin" :closable="false">
     <Tabs v-model="mode">
       <TabPane label="Login" name="login">
@@ -37,7 +37,6 @@
     </div>
   </Modal>
 </template>
-
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
@@ -134,7 +133,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 .ivu-tabs-nav-container
   font-size: 16px

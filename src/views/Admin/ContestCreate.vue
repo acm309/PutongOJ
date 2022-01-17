@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <!-- <pre>{{ jobs }} </pre> -->
     <!-- 这个注释故意留着，有时候偶用于调试蛮方便的 -->
@@ -13,7 +13,6 @@
     <Button type="primary" size="large" @click="submit">Submit</Button>
   </div>
 </template>
-
 <script>
 import ContestEdit from '@/components/ContestEdit'
 import { mapGetters } from 'vuex'
@@ -59,6 +58,5 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 </style>

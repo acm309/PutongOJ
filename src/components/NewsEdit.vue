@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">Title</Col>
@@ -16,7 +16,6 @@
     </Row>
   </div>
 </template>
-
 <script>
 import api from '@/api'
 import { VueEditor } from 'vue2-editor'
@@ -45,7 +44,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus" scoped>
 .ivu-row-flex
   margin-bottom: 20px

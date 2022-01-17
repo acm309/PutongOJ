@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="usermanage">
     <Tabs :value="active" @on-click="change">
       <TabPane label="UserEdit" name="userEdit"></TabPane>
@@ -9,7 +9,6 @@
     <router-view></router-view>
   </div>
 </template>
-
 <script>
 import { mapState, mapGetters } from 'vuex'
 
@@ -32,7 +31,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .usermanage
   h1

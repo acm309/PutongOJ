@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div>
     <i-switch size="large" @on-change="change">
       <Icon type="android-done" slot="open"></Icon>
@@ -37,7 +37,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
@@ -76,7 +75,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 .conrank-wrap
   margin-top: 1em

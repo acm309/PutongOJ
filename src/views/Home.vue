@@ -1,4 +1,4 @@
-<template lang="html">
+<template>
   <div class="home-wrap">
     <div class="news">NewsList</div>
     <Card v-for="(item, index) in list" :key="item.nid">
@@ -20,7 +20,6 @@
     <Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
@@ -91,7 +90,6 @@ export default {
   }
 }
 </script>
-
 <style lang="stylus">
 @import '../styles/common'
 

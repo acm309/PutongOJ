@@ -1,6 +1,8 @@
 .DS_Store
 node_modules/
 /dist/
+/dist-webpack/
+stats.html
 dist.zip
 npm-debug.log*
 package-lock.json
