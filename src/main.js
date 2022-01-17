@@ -120,13 +120,6 @@ Promise.all([
   }
   /* eslint-disable no-new */
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
-  // new Vue({
-  //   el: '#app',
-  //   router,
-  //   store,
-  //   template: '<App/>',
-  //   components: { App }
-  // })
   new Vue({
     router,
     store,
