@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import testcase from './modules/testcase'
 import tag from './modules/tag'
 import discuss from './modules/discuss'
 import * as types from './types'
@@ -169,7 +168,7 @@ export default new Vuex.Store({
     // ranklist,
     // contest,
     // group,
-    testcase,
+    // testcase,
     discuss,
     tag
   }

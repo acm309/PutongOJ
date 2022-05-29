@@ -8,7 +8,7 @@
         <th>Test out</th>
         <th>Delete</th>
       </tr>
-      <tr v-for="item in list.testcases">
+      <tr v-for="item in list.testcases" :key="item.uuid">
         <td>{{ item.uuid.slice(0, 8) }}</td>
         <td><a :href="testcaseUrl(item, 'in')" target="_blank" @click="search(item)">test.in</a></td>
         <td><a :href="testcaseUrl(item, 'out')" target="_blank">test.out</a></td>
@@ -28,8 +28,9 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import { testcaseUrl } from '@/util/helper'
+import { useTestcaseStore } from '@/store/modules/testcase'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data: () => ({
@@ -40,15 +41,17 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters('testcase', ['list', 'testcase'])
+    ...mapState(useTestcaseStore, ['list', 'testcase'])
   },
   created () {
     this.fetch()
     this.test.pid = this.$route.params.pid
   },
   methods: {
+    ...mapActions(useTestcaseStore, ['find', 'findOne']),
+    ...mapActions(useTestcaseStore, {remove: 'delete', createTestcase: 'create'}),
     fetch () {
-      this.$store.dispatch('testcase/find', this.$route.params)
+      this.find(this.$route.params)
     },
     search (item) {
       const testcase = {
@@ -56,33 +59,31 @@ export default {
         uuid: item.uuid,
         type: 'in'
       }
-      this.$store.dispatch('testcase/findOne', testcase)
+      this.findOne(testcase)
     },
     del (item) {
       this.$Modal.confirm({
         title: '提示',
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: () => {
+        onOk: async () => {
           const testcase = {
             pid: this.$route.params.pid,
             uuid: item.uuid
           }
-          this.$store.dispatch('testcase/delete', testcase).then(() => {
-            this.$Message.success(`成功删除${item.uuid}！`)
-          })
+          await this.remove(testcase)
+          this.$Message.success(`成功删除${item.uuid}！`)
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
         }
       })
     },
-    create () {
-      this.$store.dispatch('testcase/create', this.test).then(() => {
-        this.$Message.success(`成功创建！`)
-        this.fetch()
-        this.test.in = ''
-        this.test.out = ''
-      })
+    async create () {
+      await this.createTestcase(this.test)
+      this.$Message.success(`成功创建！`)
+      this.fetch()
+      this.test.in = ''
+      this.test.out = ''
     },
     testcaseUrl ({ uuid }, type) {
       return testcaseUrl(this.$route.params.pid, uuid, type)
