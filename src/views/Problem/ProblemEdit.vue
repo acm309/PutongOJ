@@ -17,12 +17,11 @@ export default {
     this.findOne({ pid: this.$route.params.pid })
   },
   methods: {
-    ...mapActions(useProblemStore, ['findOne']),
-    submit () {
-      this.$store.dispatch('problem/update', this.problem).then((data) => {
-        this.$Message.success('提交成功！')
-        this.$router.push({name: 'problemInfo', params: { pid: data.pid }})
-      })
+    ...mapActions(useProblemStore, ['findOne', 'update']),
+    async submit () {
+      const data = await this.update(this.problem)
+      this.$Message.success('提交成功！')
+      this.$router.push({name: 'problemInfo', params: { pid: data.pid }})
     }
   },
   components: {

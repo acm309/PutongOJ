@@ -3,7 +3,6 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import store from './store'
 import VueClipboard from 'vue-clipboard2'
 import '@/my-theme/index.less'
 import { formate, timePretty, timeContest, timeagoPretty } from '@/util/formate'
@@ -124,7 +123,6 @@ const pinia = createPinia()
 const app = new Vue({
   pinia,
   router,
-  store,
   render: (h) => h(App)
 })
 console.log('main')

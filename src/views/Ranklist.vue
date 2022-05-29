@@ -53,12 +53,12 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
-import { mapState } from 'pinia'
+import { useGroupStore } from '@/store/modules/group'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data () {
@@ -70,8 +70,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      groups: 'group/list'
+    ...mapState(useGroupStore, {
+      groups: 'list'
     }),
     ...mapState(useRootStore, ['judge']),
     ...mapState(useRanklistStore, ['list', 'sum']),
@@ -87,9 +87,10 @@ export default {
     this.fetch()
   },
   methods: {
+    ...mapActions(useGroupStore, ['find']),
     fetch () {
       useRanklistStore().find(this.query)
-      this.$store.dispatch('group/find').then(() => {
+      this.find().then(() => {
         this.groupList = [{
           gid: '',
           title: 'ALL'

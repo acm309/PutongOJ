@@ -1,5 +1,4 @@
 import routes from './routes'
-import store from '../store'
 import { sync } from 'vuex-router-sync'
 import { LoadingBar } from 'iview'
 import { useSessionStore } from '@/store/modules/session'
@@ -46,7 +45,5 @@ router.beforeEach((to, from, next) => {
 router.afterEach(() => {
   LoadingBar.finish()
 })
-
-sync(store, router)
 
 export default router

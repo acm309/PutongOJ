@@ -88,7 +88,7 @@ export default {
     ...mapActions(useProblemStore, {
       findProblems: 'find'
     }),
-    ...mapActions(useTagStore, ['find', 'findOne', 'update']),
+    ...mapActions(useTagStore, ['find', 'findOne', 'update', 'create']),
     ...mapActions(useTagStore, {remove: 'delete'}),
     async fetchTag () {
       this.$Spin.showLoading()
@@ -140,7 +140,7 @@ export default {
             content: `<p>此操作将永久删除Tag--${this.tag.tid}, 是否继续?</p>`,
             onOk: () => {
               this.$Spin.showLoading()
-              this.$store.remove({ tid: this.tag.tid }).then(() => {
+              this.remove({ tid: this.tag.tid }).then(() => {
                 this.$Spin.hide()
                 this.$Message.success(`成功删除 ${this.tag.tid}！`)
               }).catch(() => {
@@ -170,8 +170,8 @@ export default {
         })
       } else {
         this.$Spin.showLoading()
-        this.$store.dispatch('tag/create', tag).then(() => {
-          this.$store.dispatch('tag/find')
+        this.create(tag).then(() => {
+          this.find()
           this.$Spin.hide()
           this.$Message.success('新建当前标签组成功！')
         }).catch(() => {
