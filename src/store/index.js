@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import tag from './modules/tag'
-import discuss from './modules/discuss'
 import * as types from './types'
 import api from '@/api'
 import { defineStore } from 'pinia'
@@ -169,7 +168,7 @@ export default new Vuex.Store({
     // contest,
     // group,
     // testcase,
-    discuss,
+    // discuss,
     tag
   }
 })

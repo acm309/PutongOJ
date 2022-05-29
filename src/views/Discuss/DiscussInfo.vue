@@ -30,51 +30,51 @@
 </template>
 
 <script>
-  import { mapGetters, mapActions } from 'vuex'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { useDiscussStore } from '@/store/modules/discuss'
+import { mapState, mapActions } from 'pinia'
 
-  export default {
-    props: {
-      did: {
-        required: true
-      }
-    },
-    data () {
-      return {
-        loading: false,
-        form: {
-          content: ''
-        }
-      }
-    },
-    computed: {
-      ...mapGetters('discuss', [ 'discuss' ]),
-      ...mapState(useSessionStore, ['isLogined'])
-    },
-    created () {
-      this.fetch()
-    },
-    methods: {
-      ...mapActions('discuss', [ 'findOne', 'update' ]),
-      fetch () {
-        this.findOne({ did: this.did })
-      },
-      createNew () {
-        this.loading = true
-        this.update({
-          did: this.did,
-          content: this.form.content
-        }).then(() => {
-          this.loading = false
-          this.form.content = ''
-          this.fetch()
-        }).catch(() => {
-          this.loading = false
-        })
+export default {
+  props: {
+    did: {
+      required: true
+    }
+  },
+  data () {
+    return {
+      loading: false,
+      form: {
+        content: ''
       }
     }
+  },
+  computed: {
+    ...mapState(useSessionStore, ['isLogined']),
+    ...mapState(useDiscussStore, ['discuss'])
+  },
+  created () {
+    this.fetch()
+  },
+  methods: {
+    ...mapActions(useDiscussStore, [ 'findOne', 'update' ]),
+    fetch () {
+      this.findOne({ did: this.did })
+    },
+    createNew () {
+      this.loading = true
+      this.update({
+        did: this.did,
+        content: this.form.content
+      }).then(() => {
+        this.loading = false
+        this.form.content = ''
+        this.fetch()
+      }).catch(() => {
+        this.loading = false
+      })
+    }
   }
+}
 </script>
 
 <style lang="stylus">

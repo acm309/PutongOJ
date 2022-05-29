@@ -45,9 +45,9 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { useDiscussStore } from '@/store/modules/discuss'
+import { mapState, mapActions } from 'pinia'
 
 export default {
   data () {
@@ -64,10 +64,11 @@ export default {
   },
   computed: {
     ...mapState(useSessionStore, ['isLogined', 'isAdmin', 'canRemove']),
-    ...mapGetters('discuss', [ 'list' ])
+    ...mapState(useDiscussStore, ['list'])
   },
   methods: {
-    ...mapActions('discuss', [ 'find', 'create' ]),
+    ...mapActions(useDiscussStore, [ 'find', 'create' ]),
+    ...mapActions(useDiscussStore, {remove: 'delete'}),
     fetch () {
       this.find()
     },
@@ -93,7 +94,7 @@ export default {
         title: '提示',
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
         onOk: () => {
-          this.$store.dispatch('discuss/delete', { did }).then(() => {
+          this.remove({ did }).then(() => {
             this.$Message.success(`成功删除 ${did}！`)
           })
         },
