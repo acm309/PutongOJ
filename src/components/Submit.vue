@@ -15,17 +15,16 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { useSolutionStore } from '@/store/modules/solution'
+import { mapState } from 'pinia'
 
 export default {
   computed: {
-    ...mapGetters('solution', [
-      'solution'
-    ])
+    ...mapState(useSolutionStore, ['solution'])
   },
   created () {
     // 清空solution对象（否则如果先在status里点击他人代码，再进入submit页面，会显示之前看到的代码而不是空）
-    this.$store.commit('solution/GET_SOLUTION', {})
+    useSolutionStore().clearSavedSolution()
   }
 }
 </script>

@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import problem from './modules/problem'
-import solution from './modules/solution'
 import statistics from './modules/statistics'
 import ranklist from './modules/ranklist'
 import contest from './modules/contest'
@@ -169,7 +167,7 @@ export default new Vuex.Store({
     // session,
     // problem,
     // news,
-    solution,
+    // solution,
     // user,
     statistics,
     ranklist,

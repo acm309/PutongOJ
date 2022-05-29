@@ -85,12 +85,12 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { useSolutionStore } from '@/store/modules/solution'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data () {
@@ -112,19 +112,17 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters({
-      list: 'solution/list',
-      sum: 'solution/sum'
-    }),
     ...mapState(useSessionStore, ['profile', 'isAdmin']),
+    ...mapState(useSolutionStore, ['list', 'sum']),
     query () {
       const opt = only(this.$route.query, 'page pageSize uid pid language judge')
       return purify(opt)
     }
   },
   methods: {
+    ...mapActions(useSolutionStore, ['find']),
     fetch () {
-      this.$store.dispatch('solution/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 30

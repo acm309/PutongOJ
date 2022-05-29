@@ -83,12 +83,14 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { mapState, mapActions} from 'pinia'
+import { useSolutionStore } from '@/store/modules/solution'
+import { useRootStore } from '@/store'
 
 export default {
   data () {
@@ -121,13 +123,13 @@ export default {
   },
   computed: {
     ...mapGetters({
-      list: 'solution/list',
-      sum: 'solution/sum',
       problems: 'contest/problems'
     }),
     ...mapState(useSessionStore, ['profile', 'isAdmin']),
+    ...mapState(useSolutionStore, ['list', 'sum']),
     query () {
       const opt = Object.assign(
+        {},
         only(this.$route.query, 'page pageSize uid pid language judge'),
         {
           mid: this.$route.params.cid
@@ -140,12 +142,13 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useSolutionStore, ['find']),
     getId (pid) {
       return this.problems.indexOf(pid) + 1
     },
     fetch () {
-      this.$store.dispatch('solution/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 30
@@ -157,7 +160,7 @@ export default {
     reload (payload = {}) {
       this.$router.push({
         name: 'contestStatus',
-        query: purify(Object.assign(this.query, payload))
+        query: purify(Object.assign({}, this.query, payload))
       })
     },
     search (val) {

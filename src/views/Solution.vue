@@ -45,7 +45,7 @@
     <pre><code v-html="prettyCode(solution.code)"></code></pre>
     <div v-if="isAdmin && solution.sim && solution.simSolution">
       <hr>
-      Similarity: {{ solution.sim }}%</br>
+      Similarity: {{ solution.sim }}{{"%"}} <br/>
       From: {{ solution.simSolution.sid }} by
       <router-link :to="{name: 'userInfo', params: {uid: solution.simSolution.uid}}">
         {{ solution.simSolution.uid }}
@@ -55,7 +55,6 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
 // import highlight from 'highlight.js'
@@ -68,6 +67,7 @@ import { testcaseUrl } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { mapState, mapActions } from 'pinia'
 import { useRootStore } from '@/store'
+import { useSolutionStore } from '@/store/modules/solution'
 
 highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('java', java)
@@ -79,16 +79,17 @@ export default {
     color: constant.color
   }),
   computed: {
-    ...mapState(useSessionStore, 'isAdmin'),
-    ...mapGetters('solution', [ 'solution' ])
+    ...mapState(useSessionStore, ['isAdmin']),
+    ...mapState(useSolutionStore, ['solution'])
   },
   created () {
-    this.$store.dispatch('solution/findOne', this.$route.params).then(() => {
+    this.findOne(this.$route.params).then(() => {
       this.changeDomTitle({ title: `Solution ${this.solution.pid}` })
     })
   },
   methods: {
     ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useSolutionStore, ['findOne']),
     prettyCode (code) {
       return highlight.highlight(this.language[this.solution.language], `${code}`).value
     },

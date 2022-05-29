@@ -42,13 +42,14 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import { mapState, mapActions } from 'pinia'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
+import { useSolutionStore } from '@/store/modules/solution'
+import { useProblemStore } from '@/store/modules/problem'
 
 export default {
   data () {
@@ -61,15 +62,11 @@ export default {
     }
   },
   created () {
-    console.log('profile', this.profile)
     this.fetch()
     this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
   },
   computed: {
-    ...mapGetters({
-      list: 'solution/list',
-      sum: 'solution/sum'
-    }),
+    ...mapState(useSolutionStore, ['list', 'sum']),
     ...mapState(useSessionStore, ['profile', 'isAdmin']),
     query () {
       const opt = Object.assign(
@@ -87,8 +84,9 @@ export default {
   },
   methods: {
     ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useProblemStore, ['find']),
     fetch () {
-      this.$store.dispatch('solution/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 30

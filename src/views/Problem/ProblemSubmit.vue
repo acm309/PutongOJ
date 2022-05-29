@@ -9,23 +9,20 @@
 </template>
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters } from 'vuex'
-import * as types from '../../store/types'
 import { useSessionStore } from '@/store/modules/session'
 import { mapState, mapActions } from 'pinia'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
+import { useSolutionStore } from '@/store/modules/solution'
 
 export default {
   data: () => ({
     title: ''
   }),
   computed: {
-    ...mapGetters({
-      solution: 'solution/solution'
-    }),
     ...mapState(useSessionStore, ['isLogined']),
-    ...mapState(useProblemStore, ['problem'])
+    ...mapState(useProblemStore, ['problem']),
+    ...mapState(useSolutionStore, ['solution'])
   },
   created () {
     // 这里必须保证此时 overview 是存在的
@@ -42,14 +39,13 @@ export default {
   methods: {
     ...mapActions(useRootStore, ['changeDomTitle']),
     ...mapActions(useProblemStore, ['findOne']),
+    ...mapActions(useSolutionStore, ['clearCode', 'create']),
     reset () {
-      this.$store.commit('solution/' + types.GET_SOLUTION, Object.assign(
-        this.solution,
-        { code: '' }
-      ))
+      this.clearCode()
     },
     submit () {
-      this.$store.dispatch('solution/create', Object.assign(
+      this.create(Object.assign(
+        {},
         this.solution,
         { pid: this.problem.pid }
       )).then(() => {

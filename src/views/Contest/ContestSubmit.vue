@@ -8,7 +8,10 @@
 </template>
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { useSolutionStore } from '@/store/modules/solution'
+import { useRootStore } from '@/store'
+import { mapState, mapActions } from 'pinia'
 
 export default {
   data: () => ({
@@ -16,10 +19,10 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      solution: 'solution/solution',
       problems: 'contest/problems',
       overview: 'contest/overview'
-    })
+    }),
+    ...mapState(useSolutionStore, ['solution'])
   },
   created () {
     // 这里必须保证此时 overview 是存在的
@@ -34,15 +37,14 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useSolutionStore, ['clearCode', 'create']),
     reset () {
-      this.$store.commit('solution/GET_SOLUTION', Object.assign(
-        this.solution,
-        { code: '' }
-      ))
+      this.clearCode()
     },
     submit () {
-      this.$store.dispatch('solution/create', Object.assign(
+      this.create(Object.assign(
+        {},
         this.solution,
         {
           pid: this.problems[+this.$route.params.id - 1],
