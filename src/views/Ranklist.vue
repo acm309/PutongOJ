@@ -57,6 +57,7 @@ import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 import { useRootStore } from '@/store'
+import { useRanklistStore } from '@/store/modules/ranklist'
 import { mapState } from 'pinia'
 
 export default {
@@ -70,11 +71,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      list: 'ranklist/list',
-      sum: 'ranklist/sum',
       groups: 'group/list'
     }),
     ...mapState(useRootStore, ['judge']),
+    ...mapState(useRanklistStore, ['list', 'sum']),
     query () {
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize'),
@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     fetch () {
-      this.$store.dispatch('ranklist/find', this.query)
+      useRanklistStore().find(this.query)
       this.$store.dispatch('group/find').then(() => {
         this.groupList = [{
           gid: '',

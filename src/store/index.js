@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import ranklist from './modules/ranklist'
 import contest from './modules/contest'
 import group from './modules/group'
 import testcase from './modules/testcase'
@@ -169,7 +168,7 @@ export default new Vuex.Store({
     // solution,
     // user,
     // statistics,
-    ranklist,
+    // ranklist,
     contest,
     group,
     testcase,

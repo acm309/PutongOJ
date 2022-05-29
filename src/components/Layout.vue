@@ -93,7 +93,7 @@ export default {
     },
     ...mapActions(useSessionStore, ['logout']),
     routerTo (name) {
-      this.$router.push({ name })
+      if (this.$route.name !== name) { this.$router.push({ name }) }
     },
     profileAction (name) {
       if (name === 'logout') {
