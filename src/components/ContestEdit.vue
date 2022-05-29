@@ -91,6 +91,8 @@
 import draggable from 'vuedraggable'
 import only from 'only'
 import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/store/modules/user'
 
 export default {
   data () {
@@ -122,9 +124,9 @@ export default {
   props: ['contest', 'overview'],
   computed: {
     ...mapGetters({
-      list: 'user/list',
       encrypt: 'encrypt'
     }),
+    ...mapState(useUserStore, ['list']),
     transData () {
       return this.list.map((item, index) => ({
         key: index + '',
@@ -148,7 +150,7 @@ export default {
         })
       })
     }
-    this.$store.dispatch('user/find').then(() => {
+    useUserStore().find().then(() => {
       this.userList = this.list.map((item) => item.uid)
       if (+this.contest.encrypt === this.encrypt.Private) {
         const arg = this.contest.argument.split('\r\n')

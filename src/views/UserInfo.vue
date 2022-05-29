@@ -38,7 +38,7 @@
           <TabPane label="Overview" name="overview">
             <div class="solved">
               <div class="solved-name">Solved</div>
-              <Button v-for="(item, index) in solved" :key="item" type="text">
+              <Button v-for="item in solved" :key="item" type="text">
                 <router-link :to="{ name: 'problemInfo', params: { pid: item } }">{{ item }}</router-link>
               </Button>
             </div>
@@ -98,8 +98,10 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions as MA } from 'vuex'
+import { mapState, mapActions } from 'pinia'
 import { purify } from '@/util/helper'
+import { useUserStore } from '@/store/modules/user'
 
 export default {
   data: () => ({
@@ -109,22 +111,20 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      user: 'user/user',
-      solved: 'user/solved',
-      unsolved: 'user/unsolved',
-      group: 'user/group',
       profile: 'session/profile',
       isAdmin: 'session/isAdmin',
       canRemove: 'session/canRemove'
-    })
+    }),
+    ...mapState(useUserStore, ['user', 'solved', 'unsolved', 'group'])
   },
   created () {
     this.fetch()
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useUserStore, ['findOne']),
+    ...MA(['changeDomTitle']),
     fetch () {
-      this.$store.dispatch('user/findOne', this.$route.params).then(() => {
+      this.findOne(this.$route.params).then(() => {
         this.changeDomTitle({ title: this.user.uid })
       })
     },

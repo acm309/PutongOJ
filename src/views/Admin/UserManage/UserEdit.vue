@@ -45,8 +45,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/store/modules/user'
 
 export default {
   data: () => ({
@@ -55,15 +56,13 @@ export default {
     checkPwd: ''
   }),
   computed: {
-    ...mapGetters({
-      user: 'user/user'
-    })
+    ...mapState(useUserStore, ['user'])
   },
   created () {
   },
   methods: {
     findUser () {
-      this.$store.dispatch('user/findOne', { uid: this.uid })
+      useUserStore().findOne({ uid: this.uid })
     },
     saveUser () {
       if (this.newPwd === this.checkPwd) {
@@ -71,7 +70,7 @@ export default {
           this.user,
           { newPwd: this.newPwd }
         ))
-        this.$store.dispatch('user/update', user).then(() => {
+        useUserStore().update(user).then(() => {
           this.$Message.success('修改成功！')
         })
       } else {

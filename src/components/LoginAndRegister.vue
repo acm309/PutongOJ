@@ -38,8 +38,10 @@
   </Modal>
 </template>
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex'
+import { mapState, mapActions as MA, mapMutations } from 'vuex'
+import { mapActions } from 'pinia'
 import { TRIGGER_LOGIN } from '@/store/types'
+import { useUserStore } from '@/store/modules/user'
 import only from 'only'
 
 export default {
@@ -102,10 +104,10 @@ export default {
     ...mapMutations('session', {
       triggerLogin: TRIGGER_LOGIN
     }),
-    ...mapActions({
-      login: 'session/login',
-      register: 'user/register'
+    ...MA({
+      login: 'session/login'
     }),
+    ...mapActions(useUserStore, ['register']),
     submit () {
       if (this.mode === 'login') {
         this.$refs['loginForm'].validate((valid) => {

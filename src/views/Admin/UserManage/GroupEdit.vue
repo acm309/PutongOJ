@@ -50,6 +50,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/store/modules/user'
 import only from 'only'
 
 export default {
@@ -65,10 +67,12 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      user: 'user/user',
-      userSum: 'user/list',
       groupList: 'group/list',
       group: 'group/group'
+    }),
+    ...mapState(useUserStore, ['user']),
+    ...mapState(useUserStore, {
+      userSum: 'list'
     }),
     transData () {
       return this.userSum.map((item, index) => ({
@@ -83,7 +87,7 @@ export default {
   methods: {
     fetchGroup () {
       this.$Spin.showLoading()
-      this.$store.dispatch('user/find')
+      useUserStore().find()
         .then(() => {
           this.$store.dispatch('group/find')
         })

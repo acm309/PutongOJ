@@ -44,6 +44,7 @@ import {
   Spin
 } from 'iview'
 import { semiRestful } from './api'
+import { createPinia, PiniaVuePlugin } from 'pinia'
 
 Vue.component('Row', Row)
 Vue.component('Col', Col)
@@ -100,6 +101,7 @@ Vue.prototype.$Spin.showLoading = function () {
 }
 
 Vue.use(VueClipboard)
+Vue.use(PiniaVuePlugin)
 Vue.filter('formate', formate)
 Vue.filter('timePretty', timePretty)
 Vue.filter('timeContest', timeContest)
@@ -110,6 +112,8 @@ Vue.prototype.$Message.config({
 })
 
 Vue.config.productionTip = false
+
+const pinia = createPinia()
 
 Promise.all([
   store.dispatch('fetchWebsiteConfig'),
@@ -123,6 +127,9 @@ Promise.all([
   new Vue({
     router,
     store,
+    pinia,
     render: (h) => h(App)
   }).$mount('#app')
 })
+
+// remove @vue/composition-api when migrated to Vue 3

@@ -42,6 +42,8 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/store/modules/user'
 import only from 'only'
 
 export default {
@@ -50,9 +52,9 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      adminList: 'user/adminList',
       privilege: 'privilege'
-    })
+    }),
+    ...mapState(useUserStore, ['adminList'])
   },
   created () {
     this.fetchAdmin()
@@ -70,21 +72,21 @@ export default {
     },
     update (user) {
       const payload = only(user, 'uid privilege')
-      this.$store.dispatch('user/update', payload).then(() => {
+      useUserStore().update(payload).then(() => {
         this.$Message.success(`成功更新 ${payload.uid} 用户！`)
         this.fetchAdmin()
         this.admin = ''
       })
     },
     fetchAdmin () {
-      this.$store.dispatch('user/find', { privilege: 'admin' })
+      useUserStore().find({ privilege: 'admin' })
     },
     add () {
       const user = {
         uid: this.admin,
         privilege: this.privilege.Teacher
       }
-      this.$store.dispatch('user/update', user).then(() => {
+      useUserStore().update(user).then(() => {
         this.$Message.success(`成功设置 ${this.admin} 用户为管理员！`)
         this.fetchAdmin()
         this.admin = ''
@@ -99,7 +101,7 @@ export default {
         title: '提示',
         content: `<p>此操作将删除${user.uid}用户的管理员权限, 是否继续?</p>`,
         onOk: () => {
-          this.$store.dispatch('user/update', user).then(() => {
+          useUserStore().update(user).then(() => {
             this.$Message.success(`成功设置${user.uid}用户为普通用户！`)
             this.fetchAdmin()
           })

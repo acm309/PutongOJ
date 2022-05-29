@@ -55,7 +55,7 @@
         <th>Language</th>
         <th>Submit Time</th>
       </tr>
-      <tr v-for="(item, index) in list">
+      <tr v-for="item in list" :key="item.sid">
         <td>{{ item.sid }}</td>
         <td>
           <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">

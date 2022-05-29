@@ -4,7 +4,6 @@ import session from './modules/session'
 import problem from './modules/problem'
 import news from './modules/news'
 import solution from './modules/solution'
-import user from './modules/user'
 import statistics from './modules/statistics'
 import ranklist from './modules/ranklist'
 import contest from './modules/contest'
@@ -105,7 +104,7 @@ export default new Vuex.Store({
     problem,
     news,
     solution,
-    user,
+    // user,
     statistics,
     ranklist,
     contest,
