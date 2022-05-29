@@ -1,4 +1,3 @@
-import * as types from '../types'
 import api from '@/api'
 import { defineStore } from 'pinia'
 import { useRootStore } from '..'
@@ -25,17 +24,11 @@ export const useSessionStore = defineStore('session', {
     }
   },
   actions: {
-    [types.LOGIN] (payload) {
-      this.profile = payload // TODO
-    },
-    [types.LOGOUT] () {
-      this.profile = null
-    },
-    [types.TRIGGER_LOGIN] () {
+    toggleLoginState () {
       this.loginDialog = !this.loginDialog
     },
-    [types.UPDATE_PROFILE] (payload) {
-      this.profile = payload
+    setLoginProfile (profile) {
+      this.profile = profile
     },
     login (opt) {
       return api.login(opt).then(({ data }) => {
@@ -51,7 +44,6 @@ export const useSessionStore = defineStore('session', {
     fetch () {
       return api.session.fetch().then(({ data }) => {
         this.profile = data.profile
-        console.log(this.profile, this.isAdmin)
       })
     }
   }

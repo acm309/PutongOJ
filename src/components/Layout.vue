@@ -63,7 +63,6 @@
   </div>
 </template>
 <script>
-import { TRIGGER_LOGIN } from '@/store/types'
 import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
@@ -89,7 +88,7 @@ export default {
   },
   methods: {
     login () {
-      useSessionStore()[TRIGGER_LOGIN]()
+      useSessionStore().toggleLoginState()
     },
     ...mapActions(useSessionStore, ['logout']),
     routerTo (name) {

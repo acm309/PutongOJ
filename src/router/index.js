@@ -1,8 +1,6 @@
 import routes from './routes'
-import { sync } from 'vuex-router-sync'
 import { LoadingBar } from 'iview'
 import { useSessionStore } from '@/store/modules/session'
-import { TRIGGER_LOGIN } from '../store/types'
 import Router from 'vue-router'
 
 const router = new Router({
@@ -21,7 +19,7 @@ router.beforeEach((to, from, next) => {
     if (isLogined) {
       next()
     } else {
-      session[TRIGGER_LOGIN]()
+      session.toggleLoginState()
       next({
         name: 'contestList'
       })

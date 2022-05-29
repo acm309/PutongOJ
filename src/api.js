@@ -2,7 +2,6 @@ import axios from 'axios'
 import Vue from 'vue'
 import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
-import {LOGIN} from './store/types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -18,7 +17,7 @@ const instance = {}
     return axios[key](...args)
       .then((data) => {
         if (data.data.profile) {
-          useSessionStore()[LOGIN](data.data.profile)
+          useSessionStore().setLoginProfile(data.data.profile)
         }
         return data
       })

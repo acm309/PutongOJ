@@ -1,7 +1,3 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-// import tag from './modules/tag'
-import * as types from './types'
 import api from '@/api'
 import { defineStore } from 'pinia'
 
@@ -39,12 +35,6 @@ export const useRootStore = defineStore('root', {
     }
   }),
   actions: {
-    [types.SET_SERVERTIME] (payload) {
-      this.currentTime = payload.serverTime
-    },
-    [types.UPDATE_SERVERTIME] (payload) {
-      this.currentTime += payload.step
-    },
     changeDomTitle (payload) {
       if (payload && payload.title) {
         window.document.title = payload.title
@@ -54,14 +44,12 @@ export const useRootStore = defineStore('root', {
     },
     fetchTime () {
       return api.getTime().then(({ data }) => {
-        this[types.SET_SERVERTIME](data)
+        this.currentTime = data.serverTime
       })
     },
     updateTime () {
       setInterval(() => {
-        this[types.UPDATE_SERVERTIME]({
-          step: 1000
-        })
+        this.currentTime += 1000
       }, 1000)
     },
     fetchWebsiteConfig () {

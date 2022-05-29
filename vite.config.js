@@ -69,7 +69,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'common': ['vue', 'vuex', 'vue-router', 'axios'],
+          'common': ['vue', 'pinia', 'vue-router', 'axios'],
           'ui': ['iview']
         }
         // 不知道为啥，这两个都变成了 modulepreload，一开始就加载了

@@ -39,7 +39,6 @@
 </template>
 <script>
 import { mapState, mapActions } from 'pinia'
-import { TRIGGER_LOGIN } from '@/store/types'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 import only from 'only'
@@ -106,7 +105,7 @@ export default {
     ...mapActions(useUserStore, ['register']),
     ...mapActions(useSessionStore, ['login']),
     triggerLogin () {
-      useSessionStore()[TRIGGER_LOGIN]()
+      useSessionStore().toggleLoginState()
     },
     submit () {
       if (this.mode === 'login') {

@@ -49,7 +49,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useGroupStore } from '@/store/modules/group'

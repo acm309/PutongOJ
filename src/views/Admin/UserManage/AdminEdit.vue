@@ -41,9 +41,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { mapState } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
+import { useRootStore } from '@/store'
 import only from 'only'
 
 export default {
@@ -51,10 +51,8 @@ export default {
     admin: ''
   }),
   computed: {
-    ...mapGetters({
-      privilege: 'privilege'
-    }),
-    ...mapState(useUserStore, ['adminList'])
+    ...mapState(useUserStore, ['adminList']),
+    ...mapState(useRootStore, ['privilege'])
   },
   created () {
     this.fetchAdmin()

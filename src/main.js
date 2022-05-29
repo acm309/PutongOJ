@@ -138,3 +138,5 @@ Promise.all([
 })
 
 // remove @vue/composition-api when migrated to Vue 3
+// Setup Volar for Vue3
+// https://github.com/johnsoncodehk/volar/discussions/583

@@ -58,7 +58,6 @@ import { useSessionStore } from '@/store/modules/session'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { mapActions, mapState } from 'pinia'
-import { TRIGGER_LOGIN } from '../store/types'
 
 export default {
   data () {
@@ -120,7 +119,7 @@ export default {
     },
     visit (item) {
       if (!this.isLogined) {
-        useSessionStore()[TRIGGER_LOGIN]()
+        useSessionStore().toggleLoginState()
       } else if (this.isAdmin || this.profile.verifyContest.indexOf(+item.cid) !== -1) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > this.currentTime) {

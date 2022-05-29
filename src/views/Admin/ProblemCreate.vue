@@ -18,7 +18,8 @@
 </template>
 <script>
 import ProblemEdit from '@/components/ProblemEdit'
-import { mapActions } from 'vuex'
+import { useProblemStore } from '@/store/modules/problem'
+import { mapActions } from 'pinia'
 
 export default {
   components: {
@@ -38,7 +39,7 @@ export default {
     }
   }),
   methods: {
-    ...mapActions('problem', [ 'create' ]),
+    ...mapActions(useProblemStore, ['create']),
     submit () {
       if (!this.problem.title.trim()) {
         this.$Message.error('Title can not be empty')
