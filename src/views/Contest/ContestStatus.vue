@@ -88,7 +88,7 @@ import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState, mapActions} from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useRootStore } from '@/store'
 

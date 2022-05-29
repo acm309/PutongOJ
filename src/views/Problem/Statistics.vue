@@ -17,7 +17,7 @@
       </table>
       <chart :options="pie" ref="pie" auto-resize></chart>
       <table>
-        <tr v-for="(item, index) in countList">
+        <tr v-for="(item, index) in countList" :key="index">
           <td class="t1">{{ name[index] }}</td>
           <td class="t2">
             <router-link :to="{ name: 'status', query: { pid, judge: index + 2 } }">
@@ -38,7 +38,7 @@
           <th>Lang</th>
           <th>Submit Time</th>
         </tr>
-        <tr v-for="(item, index) in list">
+        <tr v-for="(item, index) in list" :key="index">
           <td>{{ index + 1 }}</td>
           <td>
             <router-link :to="{ name: '', params: { uid: item.uid } }">
@@ -73,8 +73,10 @@ import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
-import { mapGetters, mapActions } from 'vuex'
+import { useStatisticsStore } from '@/store/modules/statistics'
 import constant from '@/util/constant.js'
+import { mapActions, mapState } from 'pinia'
+import { useRootStore } from '@/store'
 
 export default {
   components: {
@@ -90,7 +92,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('statistics', [
+    ...mapState(useStatisticsStore, [
       'list',
       'countList',
       'sumCharts',
@@ -151,7 +153,7 @@ export default {
       pageSize: this.pageSize,
       pid: this.$route.params.pid
     }
-    this.$store.dispatch('statistics/find', opt)
+    this.find(opt)
       .then(() => {
         pie.dispatchAction({
           type: 'downplay',
@@ -173,14 +175,15 @@ export default {
       })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useStatisticsStore, ['find']),
     getStatistics () {
       let opt = {
         page: this.currentPage,
         pageSize: this.pageSize,
         pid: this.$route.params.pid
       }
-      this.$store.dispatch('statistics/find', opt)
+      this.find(opt)
     },
     handleCurrentChange (val) {
       this.currentPage = val

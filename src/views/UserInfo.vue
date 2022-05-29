@@ -119,7 +119,7 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ['findOne']),
-    ...mapActions(useRootStore, 'changeDomTitle'),
+    ...mapActions(useRootStore, ['changeDomTitle']),
     fetch () {
       this.findOne(this.$route.params).then(() => {
         this.changeDomTitle({ title: this.user.uid })
