@@ -83,13 +83,13 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { mapState, mapActions } from 'pinia'
 import { useSolutionStore } from '@/store/modules/solution'
+import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 
 export default {
@@ -114,7 +114,7 @@ export default {
     // 如果用户没有点过 overview tab 时，就会出现 'contest/problems' 不存在的情况
     let p = Promise.resolve()
     if (typeof this.problems === 'undefined') {
-      p = this.$store.dispatch('contest/findOne', { cid: this.$route.params.cid })
+      p = this.findOne({ cid: this.$route.params.cid })
     }
     p.then(() => {
       this.fetch()
@@ -122,9 +122,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters({
-      problems: 'contest/problems'
-    }),
+    ...mapState(useContestStore, ['problems']),
     ...mapState(useSessionStore, ['profile', 'isAdmin']),
     ...mapState(useSolutionStore, ['list', 'sum']),
     query () {
@@ -142,13 +140,14 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useContestStore, ['findOne']),
     ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useSolutionStore, ['find']),
+    ...mapActions(useSolutionStore, {findSolutions: 'find'}),
     getId (pid) {
       return this.problems.indexOf(pid) + 1
     },
     fetch () {
-      this.find(this.query)
+      this.findSolutions(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 30

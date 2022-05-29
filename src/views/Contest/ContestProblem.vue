@@ -13,8 +13,8 @@
 </template>
 <script>
 import Problem from '@/components/Problem'
-import { mapGetters } from 'vuex'
 import { useProblemStore } from '@/store/modules/problem'
+import { useContestStore } from '@/store/modules/contest'
 import { mapState, mapActions } from 'pinia'
 import { useRootStore } from '@/store'
 
@@ -28,11 +28,8 @@ export default {
     Problem
   },
   computed: {
-    ...mapGetters({
-      overview: 'contest/overview',
-      totalProblems: 'contest/totalProblems'
-    }),
-    ...mapState(useProblemStore, ['problem'])
+    ...mapState(useProblemStore, ['problem']),
+    ...mapState(useContestStore, ['overview', 'totalProblems'])
   },
   created () {
     this.fetch()
@@ -43,11 +40,11 @@ export default {
     ...mapActions(useProblemStore, {
       findOneProblem: 'findOne'
     }),
-    fetch () {
+    ...mapActions(useContestStore, ['findOne']),
+    async fetch () {
       this.proIndex = parseInt(this.$route.params.id)
-      this.$store.dispatch('contest/findOne', this.$route.params).then((data) => {
-        this.findOneProblem({ pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
-      })
+      const data = await this.findOne(this.$route.params)
+      this.findOneProblem({ pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
     },
     pageChange (val) {
       this.$router.push({

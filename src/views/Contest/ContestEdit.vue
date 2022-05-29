@@ -8,26 +8,27 @@
 </template>
 <script>
 import ContestEdit from '@/components/ContestEdit'
+import { useContestStore } from '@/store/modules/contest'
 import only from 'only'
-import { mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   computed: {
-    ...mapGetters('contest', ['contest', 'overview'])
+    ...mapState(useContestStore, ['overview', 'contest'])
   },
   methods: {
-    submit () {
-      this.$store.dispatch('contest/update', this.contest).then(({ data }) => {
-        this.$Message.success('提交成功！')
-        this.$router.push({name: 'contestOverview', params: only(data, 'cid')})
-      })
+    ...mapActions(useContestStore, ['update', 'findOne']),
+    async submit () {
+      const {data} = await this.update(this.contest)
+      this.$Message.success('提交成功！')
+      this.$router.push({name: 'contestOverview', params: only(data, 'cid')})
     }
   },
   components: {
     'oj-contest-edit': ContestEdit
   },
   beforeDestroy () {
-    this.$store.dispatch('contest/findOne', only(this.contest, 'cid'))
+    this.findOne(only(this.contest, 'cid'))
   }
 }
 </script>

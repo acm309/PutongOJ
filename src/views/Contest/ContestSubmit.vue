@@ -8,20 +8,17 @@
 </template>
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters } from 'vuex'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useRootStore } from '@/store'
 import { mapState, mapActions } from 'pinia'
+import { useContestStore } from '@/store/modules/contest'
 
 export default {
   data: () => ({
     title: ''
   }),
   computed: {
-    ...mapGetters({
-      problems: 'contest/problems',
-      overview: 'contest/overview'
-    }),
+    ...mapState(useContestStore, ['problems', 'overview']),
     ...mapState(useSolutionStore, ['solution'])
   },
   created () {
@@ -29,7 +26,7 @@ export default {
     // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
     let p = Promise.resolve()
     if (this.overview.length === 0) {
-      p = this.$store.dispatch('contest/findOne', { cid: this.$route.params.cid })
+      p = this.findOne({ cid: this.$route.params.cid })
     }
     p.then(() => {
       this.title = this.overview[+this.$route.params.id - 1].title
@@ -37,6 +34,7 @@ export default {
     })
   },
   methods: {
+    ...mapActions(useContestStore, ['findOne']),
     ...mapActions(useRootStore, ['changeDomTitle']),
     ...mapActions(useSolutionStore, ['clearCode', 'create']),
     reset () {

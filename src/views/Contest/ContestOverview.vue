@@ -28,9 +28,10 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { useContestStore } from '@/store/modules/contest'
+import { useRootStore } from '@/store'
+import { mapState, mapActions } from 'pinia'
 
 export default {
   data () {
@@ -39,11 +40,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      contest: 'contest/contest',
-      overview: 'contest/overview',
-      solved: 'contest/solved'
-    }),
+    ...mapState(useContestStore, ['contest', 'overview', 'solved']),
     ...mapState(useSessionStore, ['profile']),
     query () {
       let uid
@@ -62,9 +59,10 @@ export default {
     this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useContestStore, ['findOne']),
     fetch () {
-      this.$store.dispatch('contest/findOne', this.query)
+      this.findOne(this.query)
     }
   },
   watch: { // 浏览器后退时回退页面
@@ -72,7 +70,7 @@ export default {
       if (to !== from) this.fetch()
     },
     'profile' (val) {
-      this.$store.dispatch('contest/findOne', this.query)
+      this.findOne(this.query)
     }
   }
 }

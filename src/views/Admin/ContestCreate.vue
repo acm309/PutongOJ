@@ -15,7 +15,9 @@
 </template>
 <script>
 import ContestEdit from '@/components/ContestEdit'
-import { mapGetters } from 'vuex'
+import { useContestStore } from '@/store/modules/contest'
+import { useRootStore } from '@/store'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data () {
@@ -31,25 +33,22 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      encrypt: 'encrypt'
-    })
+    ...mapState(useRootStore, ['encrypt'])
   },
   created () {
     this.contest.encrypt = this.encrypt.Public
   },
   methods: {
-    submit () {
+    ...mapActions(useContestStore, ['create']),
+    async submit () {
       if (!this.contest.title) {
         this.$Message.error('Title can not be empty')
       } else if (!this.contest.start || !this.contest.end) {
         this.$Message.error('Time can not be empty')
       } else {
-        this.$store.dispatch('contest/create', this.contest)
-          .then((cid) => {
-            this.$Message.success(`Contest "${this.contest.title}" has been created!`)
-            this.$router.push({ name: 'contestOverview', params: { cid } })
-          })
+        const {cid} = await this.create(this.contest)
+        this.$Message.success(`Contest "${this.contest.title}" has been created!`)
+        this.$router.push({ name: 'contestOverview', params: { cid } })
       }
     }
   },

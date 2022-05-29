@@ -90,10 +90,11 @@
 <script>
 import draggable from 'vuedraggable'
 import only from 'only'
-import { mapGetters } from 'vuex'
 import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useProblemStore } from '@/store/modules/problem'
+import { useRootStore } from '@/store'
+import { useContestStore } from '@/store/modules/contest'
 
 export default {
   data () {
@@ -124,9 +125,7 @@ export default {
   },
   props: ['contest', 'overview'],
   computed: {
-    ...mapGetters({
-      encrypt: 'encrypt'
-    }),
+    ...mapState(useRootStore, ['encrypt']),
     ...mapState(useUserStore, ['list']),
     transData () {
       return this.list.map((item, index) => ({
@@ -142,7 +141,7 @@ export default {
     if (this.$route.params.cid) {
       let p = Promise.resolve()
       if (this.overview.length === 0) {
-        p = this.$store.dispatch('contest/findOne', only(this.$route.params, 'cid'))
+        p = this.findOne(only(this.$route.params, 'cid'))
       }
       p.then(() => {
         this.overview.forEach((item) => {
@@ -163,13 +162,12 @@ export default {
     ...mapActions(useProblemStore, {
       findOneProblem: 'findOne'
     }),
-    add () {
-      this.findOneProblem(only(this, 'pid'))
-        .then(({ problem }) => {
-          this.contest.list.push(problem.pid)
-          this.$set(this.jobs, problem.pid, problem.title)
-          this.pid = ''
-        })
+    ...mapActions(useContestStore, ['findOne']),
+    async add () {
+      const {problem} = await this.findOneProblem(only(this, 'pid'))
+      this.contest.list.push(problem.pid)
+      this.$set(this.jobs, problem.pid, problem.title)
+      this.pid = ''
     },
     removeJob (index) {
       this.contest.list.splice(index, 1)

@@ -12,23 +12,23 @@
           <th>Nick</th>
           <th>Solve</th>
           <th>Penalty</th>
-          <th v-for="(item, index) in contest.list">
+          <th v-for="(item, index) in contest.list" :key="index">
             {{ index + 1 }}
           </th>
         </tr>
-        <tr v-for="(item, index) in ranklist">
+        <tr v-for="(item, index) in ranklist" :key="item.uid">
           <td>{{ index + 1 }}</td>
           <td>{{ item.uid }}</td>
           <td>{{ item.nick }}</td>
           <td>{{ item.solved }}</td>
           <td class="straight">{{ item.penalty | timeContest }}</td>
           <template v-for="pid in contest.list">
-            <td v-if="!item[pid]"></td>
+            <td v-if="!item[pid]" :key="pid"></td>
             <!-- !item[pid] 为 true 表示这道题没有提交过 -->
-            <td v-else-if="item[pid].wa >= 0" :class="[ item[pid].prime ? 'prime' : 'normal']">
+            <td v-else-if="item[pid].wa >= 0" :class="[ item[pid].prime ? 'prime' : 'normal']" :key="pid">
               {{ item[pid].create - contest.start | timeContest }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
             </td>
-            <td v-else :class="{'red': item[pid].wa}">
+            <td v-else :class="{'red': item[pid].wa}" :key="pid">
               <span v-if="item[pid].wa">{{ item[pid].wa }}</span>
             </td>
           </template>
@@ -38,14 +38,16 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { useRootStore } from '@/store'
+import { useContestStore } from '@/store/modules/contest'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data: () => ({
     timer: null
   }),
   computed: {
-    ...mapGetters('contest', [ 'ranklist', 'contest' ])
+    ...mapState(useContestStore, ['ranklist', 'contest'])
   },
   created () {
     this.getRank()
@@ -55,9 +57,10 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useContestStore, {getRanklist: 'getRank'}),
     getRank () {
-      this.$store.dispatch('contest/getRank', this.$route.params)
+      this.getRanklist(this.$route.params)
     },
     change (status) {
       if (status) {

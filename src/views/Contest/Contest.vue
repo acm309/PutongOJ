@@ -23,10 +23,10 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useRootStore } from '@/store'
+import { useContestStore } from '@/store/modules/contest'
 
 export default {
   data () {
@@ -35,9 +35,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      contest: 'contest/contest'
-    }),
+    ...mapState(useContestStore, ['contest']),
     ...mapState(useSessionStore, ['isAdmin']),
     ...mapState(useRootStore, ['currentTime']),
     timePercentage () {
@@ -53,9 +51,10 @@ export default {
   },
   created () {
     this.display = this.$route.name
-    this.$store.dispatch('contest/findOne', this.$route.params)
+    this.findOne(this.$route.params)
   },
   methods: {
+    ...mapActions(useContestStore, ['findOne']),
     handleClick (name) {
       if (name === 'contestProblem' || name === 'contestSubmit') {
         this.$router.push({ name: name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })

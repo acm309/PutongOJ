@@ -51,13 +51,13 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '../util/helper'
 import constant from '../util/constant'
 import { useSessionStore } from '@/store/modules/session'
+import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { TRIGGER_LOGIN } from '../store/types'
 
 export default {
@@ -72,10 +72,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      list: 'contest/list',
-      sum: 'contest/sum'
-    }),
+    ...mapState(useContestStore, ['list', 'sum']),
     ...mapState(useSessionStore, ['profile', 'isLogined', 'isAdmin', 'canRemove']),
     ...mapState(useRootStore, ['status', 'encrypt', 'currentTime']),
     query () {
@@ -87,14 +84,18 @@ export default {
     this.fetch()
   },
   methods: {
+    ...mapActions(useContestStore, ['find', 'verify', 'update']),
+    ...mapActions(useContestStore, {
+      'remove': 'delete'
+    }),
     fetch () {
-      this.$store.dispatch('contest/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       this.pageSize = parseInt(query.pageSize) || 20
     },
     reload (payload = {}) {
-      const query = Object.assign(this.query, payload)
+      const query = Object.assign({}, this.query, payload)
       this.$router.push({
         name: 'contestList',
         query
@@ -105,10 +106,11 @@ export default {
     },
     enter (item) {
       const opt = Object.assign(
+        {},
         item,
         { pwd: this.enterPsd }
       )
-      this.$store.dispatch('contest/verify', opt).then((data) => {
+      this.verify(opt).then((data) => {
         if (data) {
           this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
         } else {
@@ -127,10 +129,11 @@ export default {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (+item.encrypt === this.encrypt.Private) {
         const opt = Object.assign(
+          {},
           item,
           { uid: this.profile.uid }
         )
-        this.$store.dispatch('contest/verify', opt).then((data) => {
+        this.verify(opt).then((data) => {
           if (data) {
             this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
           } else {
@@ -161,22 +164,20 @@ export default {
         })
       }
     },
-    change (contest) {
+    async change (contest) {
       contest.status = contest.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
-      this.$store.dispatch('contest/update', contest).then(() => {
-        this.$store.dispatch('contest/find', this.query)
-      })
+      await this.update(contest)
+      this.find(this.query)
     },
     del (cid) {
       this.$Modal.confirm({
         title: '提示',
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: () => {
-          this.$store.dispatch('contest/delete', { cid }).then(() => {
-            this.$Message.success(`成功删除 ${cid}！`)
-          })
+        onOk: async () => {
+          await this.remove({ cid })
+          this.$Message.success(`成功删除 ${cid}！`)
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
