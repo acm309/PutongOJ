@@ -13,7 +13,10 @@
 </template>
 <script>
 import Problem from '@/components/Problem'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { useProblemStore } from '@/store/modules/problem'
+import { mapState, mapActions } from 'pinia'
+import { useRootStore } from '@/store'
 
 export default {
   data () {
@@ -26,21 +29,24 @@ export default {
   },
   computed: {
     ...mapGetters({
-      problem: 'problem/problem',
       overview: 'contest/overview',
       totalProblems: 'contest/totalProblems'
-    })
+    }),
+    ...mapState(useProblemStore, ['problem'])
   },
   created () {
     this.fetch()
     this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useProblemStore, {
+      findOneProblem: 'findOne'
+    }),
     fetch () {
       this.proIndex = parseInt(this.$route.params.id)
       this.$store.dispatch('contest/findOne', this.$route.params).then((data) => {
-        this.$store.dispatch('problem/findOne', { pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
+        this.findOneProblem({ pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
       })
     },
     pageChange (val) {

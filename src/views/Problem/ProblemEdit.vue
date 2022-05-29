@@ -6,16 +6,18 @@
 </template>
 <script>
 import ProblemEdit from '@/components/ProblemEdit'
-import { mapGetters } from 'vuex'
+import { useProblemStore } from '@/store/modules/problem'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   computed: {
-    ...mapGetters('problem', [ 'problem' ])
+    ...mapState(useProblemStore, ['problem'])
   },
   created () {
-    this.$store.dispatch('problem/findOne', { pid: this.$route.params.pid })
+    this.findOne({ pid: this.$route.params.pid })
   },
   methods: {
+    ...mapActions(useProblemStore, ['findOne']),
     submit () {
       this.$store.dispatch('problem/update', this.problem).then((data) => {
         this.$Message.success('提交成功！')

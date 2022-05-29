@@ -91,8 +91,9 @@
 import draggable from 'vuedraggable'
 import only from 'only'
 import { mapGetters } from 'vuex'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
+import { useProblemStore } from '@/store/modules/problem'
 
 export default {
   data () {
@@ -159,8 +160,11 @@ export default {
     })
   },
   methods: {
+    ...mapActions(useProblemStore, {
+      findOneProblem: 'findOne'
+    }),
     add () {
-      this.$store.dispatch('problem/findOne', only(this, 'pid'))
+      this.findOneProblem(only(this, 'pid'))
         .then(({ problem }) => {
           this.contest.list.push(problem.pid)
           this.$set(this.jobs, problem.pid, problem.title)

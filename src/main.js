@@ -127,7 +127,7 @@ const app = new Vue({
   store,
   render: (h) => h(App)
 })
-
+console.log('main')
 Promise.all([
   useSessionStore().fetch(),
   useRootStore().fetchWebsiteConfig()

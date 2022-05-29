@@ -39,7 +39,7 @@ export const useSessionStore = defineStore('session', {
     },
     login (opt) {
       return api.login(opt).then(({ data }) => {
-        this[types.LOGIN](data.profile)
+        this.profile = data.profile
         return data
       })
     },
@@ -50,7 +50,8 @@ export const useSessionStore = defineStore('session', {
     },
     fetch () {
       return api.session.fetch().then(({ data }) => {
-        this[types.UPDATE_PROFILE](data.profile)
+        this.profile = data.profile
+        console.log(this.profile, this.isAdmin)
       })
     }
   }

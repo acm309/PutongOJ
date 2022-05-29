@@ -9,10 +9,12 @@
 </template>
 <script>
 import Submit from '@/components/Submit'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import * as types from '../../store/types'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { mapState, mapActions } from 'pinia'
+import { useProblemStore } from '@/store/modules/problem'
+import { useRootStore } from '@/store'
 
 export default {
   data: () => ({
@@ -20,17 +22,17 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      solution: 'solution/solution',
-      problem: 'problem/problem'
+      solution: 'solution/solution'
     }),
-    ...mapState(useSessionStore, ['isLogined'])
+    ...mapState(useSessionStore, ['isLogined']),
+    ...mapState(useProblemStore, ['problem'])
   },
   created () {
     // 这里必须保证此时 overview 是存在的
     // 如果用户没有点过 overview tab 时，就会出现 overview 不存在的情况
     let p = Promise.resolve()
     if (this.problem.title == null) {
-      p = this.$store.dispatch('problem/findOne', { pid: this.$route.params.pid })
+      p = this.findOne({ pid: this.$route.params.pid })
     }
     p.then(() => {
       this.title = this.problem.title
@@ -38,7 +40,8 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useProblemStore, ['findOne']),
     reset () {
       this.$store.commit('solution/' + types.GET_SOLUTION, Object.assign(
         this.solution,

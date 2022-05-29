@@ -6,22 +6,25 @@
 </template>
 <script>
 import Problem from '@/components/Problem.vue'
-import { mapGetters, mapActions } from 'vuex'
+import { useProblemStore } from '@/store/modules/problem'
+import { mapActions, mapState } from 'pinia'
+import { useRootStore } from '@/store'
 
 export default {
   components: {
     Problem
   },
   computed: {
-    ...mapGetters('problem', [ 'problem' ])
+    ...mapState(useProblemStore, ['problem'])
   },
   created () {
-    this.$store.dispatch('problem/findOne', this.$route.params).then(() => {
+    this.findOne(this.$route.params).then(() => {
       this.changeDomTitle({ title: `Problem ${this.problem.pid}` })
     })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useProblemStore, ['findOne']),
     submit () {
       this.$router.push({
         name: 'problemSubmit',

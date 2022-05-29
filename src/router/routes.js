@@ -54,6 +54,13 @@ export default [
     component: Home,
     meta: { title: 'Home' }
   },
+  // News create must be placed before /news/:nid
+  {
+    path: '/news/create',
+    name: 'newsCreate',
+    component: NewsCreate,
+    meta: { title: 'Admin', requiresAdmin: true }
+  },
   {
     path: '/news/:nid',
     component: News,
@@ -71,12 +78,6 @@ export default [
         meta: { title: 'Admin', requiresAdmin: true }
       }
     ]
-  },
-  {
-    path: '/news/create',
-    name: 'newsCreate',
-    component: NewsCreate,
-    meta: { title: 'Admin', requiresAdmin: true }
   },
   {
     path: '/problems',

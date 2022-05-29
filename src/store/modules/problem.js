@@ -1,5 +1,63 @@
 import * as types from '../types'
 import api from '@/api'
+import { defineStore } from 'pinia'
+
+export const useProblemStore = defineStore('problem', {
+  state: () => ({
+    list: [],
+    problem: {},
+    sum: 0,
+    solved: []
+  }),
+  actions: {
+    [types.GET_PROBLEM]: (payload) => {
+      this.problem = payload
+    },
+    [types.GET_PROBLEM_LIST]: (payload) => {
+      this.list = payload
+    },
+    [types.GET_PROBLEM_SOLVED]: (payload) => {
+      this.solved = payload
+    },
+    [types.GET_SUM_PROBLEM]: (payload) => {
+      this.sum = payload
+    },
+    [types.UPDATE_PROBLEM]: (payload) => {
+      this.problem = payload
+    },
+    [types.DELETE_PROBLEM]: ({ pid }) => {
+      // 从列表里删除
+      // 如果没有这一步，那么会出现：数据库里已经删除，但前端页面（不刷新的情况下）还有
+      this.list = this.list.filter((p) => p.pid !== +pid)
+    },
+    findOne (payload) {
+      return api.problem.findOne(payload).then(({ data }) => {
+        this.problem = data.problem
+        return data
+      })
+    },
+    find (payload) {
+      return api.problem.find(payload).then(({ data }) => {
+        this.list = data.list.docs
+        this.sum = data.list.total
+        this.solved = data.solved
+      })
+    },
+    update (payload) {
+      return api.problem.update(payload).then(({ data }) => {
+        return data
+      })
+    },
+    create (payload) {
+      return api.problem.create(payload).then(({ data }) => data.pid)
+    },
+    delete (payload) {
+      return api.problem.delete(payload).then(() => {
+        this.list = this.list.filter((p) => p.pid !== +(payload.pid))
+      })
+    }
+  }
+})
 
 const store = {
   namespaced: true,

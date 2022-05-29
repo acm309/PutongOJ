@@ -69,13 +69,13 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 import constant from '@/util/constant'
 import { useSessionStore } from '@/store/modules/session'
+import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data () {
@@ -105,11 +105,7 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters({
-      list: 'problem/list',
-      sum: 'problem/sum',
-      solved: 'problem/solved'
-    }),
+    ...mapState(useProblemStore, ['list', 'sum', 'solved']),
     ...mapState(useRootStore, ['status', 'judge']),
     ...mapState(useSessionStore, ['isAdmin', 'canRemove', 'profile']),
     query () {
@@ -117,8 +113,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useProblemStore, ['find', 'update']),
+    ...mapActions(useProblemStore, {'remove': 'delete'}),
     fetch () {
-      this.$store.dispatch('problem/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       if (query.pageSize) this.pageSize = parseInt(query.pageSize)
@@ -152,8 +150,8 @@ export default {
       problem.status = problem.status === this.status.Reserve
         ? this.status.Available
         : this.status.Reserve
-      this.$store.dispatch('problem/update', problem).then(() => {
-        this.$store.dispatch('problem/find', this.query)
+      this.update(problem).then(() => {
+        this.find(this.query)
       })
     },
     del (pid) {
@@ -161,7 +159,7 @@ export default {
         title: '提示',
         content: '<p>此操作将永久删除该文件, 是否继续?</p>',
         onOk: () => {
-          this.$store.dispatch('problem/delete', { pid }).then(() => {
+          this.remove({ pid }).then(() => {
             this.$Message.success(`成功删除 ${pid}！`)
           })
         },
@@ -176,7 +174,7 @@ export default {
       if (to !== from) this.fetch()
     },
     'profile' (val) {
-      this.$store.dispatch('problem/find', this.query)
+      this.find(this.query)
     }
   }
 }

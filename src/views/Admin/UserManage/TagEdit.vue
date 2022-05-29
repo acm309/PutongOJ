@@ -51,6 +51,8 @@
 <script>
 import { mapGetters } from 'vuex'
 import only from 'only'
+import { useProblemStore } from '@/store/modules/problem'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data: () => ({
@@ -67,8 +69,10 @@ export default {
   computed: {
     ...mapGetters({
       tagList: 'tag/list',
-      tag: 'tag/tag',
-      problemSum: 'problem/list'
+      tag: 'tag/tag'
+    }),
+    ...mapState(useProblemStore, {
+      problemSum: 'list'
     }),
     transData () {
       return this.problemSum.map((item, index) => ({
@@ -81,10 +85,13 @@ export default {
     this.fetchTag()
   },
   methods: {
+    ...mapActions(useProblemStore, {
+      findProblems: 'find'
+    }),
     fetchTag () {
       this.$Spin.showLoading()
       const opt = { page: -1 }
-      this.$store.dispatch('problem/find', opt)
+      this.findProblems(opt)
         .then(() => {
           this.$store.dispatch('tag/find')
         })
@@ -175,6 +182,7 @@ export default {
       }
     }
   }
+  // TODO: clear saved tags when leaving
 }
 </script>
 

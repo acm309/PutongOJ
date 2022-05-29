@@ -167,7 +167,7 @@ export default new Vuex.Store({
   actions,
   modules: {
     // session,
-    problem,
+    // problem,
     // news,
     solution,
     // user,
