@@ -13,18 +13,19 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useSessionStore } from '@/store/modules/session'
 
 export default {
   computed: {
-    ...mapGetters('session', [ 'isAdmin', 'isLogined' ]),
-    ...mapState({
-      active: state => state.route.name
-    })
+    ...mapState(useSessionStore, [ 'isAdmin', 'isLogined' ]),
+    active () {
+      return this.$route.name
+    }
   },
   methods: {
     change (name) {
-      this.$router.push({ name, params: { pid: this.$route.params.pid } })
+      if (name != this.$route.name) { this.$router.push({ name, params: { pid: this.$route.params.pid } }) }
     }
   },
   watch: {

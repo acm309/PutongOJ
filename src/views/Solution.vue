@@ -55,7 +55,7 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import constant from '@/util/constant'
 import 'highlight.js/styles/github.css'
 // import highlight from 'highlight.js'
@@ -65,6 +65,9 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import 'highlight.js/styles/atom-one-light.css'
 import { testcaseUrl } from '@/util/helper'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState, mapActions } from 'pinia'
+import { useRootStore } from '@/store'
 
 highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('java', java)
@@ -76,8 +79,8 @@ export default {
     color: constant.color
   }),
   computed: {
-    ...mapGetters('solution', [ 'solution' ]),
-    ...mapGetters('session', [ 'isAdmin' ])
+    ...mapState(useSessionStore, 'isAdmin'),
+    ...mapGetters('solution', [ 'solution' ])
   },
   created () {
     this.$store.dispatch('solution/findOne', this.$route.params).then(() => {
@@ -85,7 +88,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
     prettyCode (code) {
       return highlight.highlight(this.language[this.solution.language], `${code}`).value
     },

@@ -1,7 +1,7 @@
 <template>
   <div class="home-wrap">
     <div class="news">NewsList</div>
-    <Card v-for="(item, index) in list" :key="item.nid">
+    <Card v-for="item in list" :key="item.nid">
       <Row type="flex" align="middle">
         <Col :span="2">
           <Icon type="chatbox-working"></Icon>
@@ -24,6 +24,8 @@
 import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 import only from 'only'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -35,10 +37,9 @@ export default {
   computed: {
     ...mapGetters({
       list: 'news/list',
-      sum: 'news/sum',
-      isAdmin: 'session/isAdmin',
-      canRemove: 'session/canRemove'
+      sum: 'news/sum'
     }),
+    ...mapState(useSessionStore, ['isAdmin', 'canRemove']),
     query () {
       const opt = only(this.$route.query, 'page pageSize')
       return purify(opt)

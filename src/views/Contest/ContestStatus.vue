@@ -55,7 +55,7 @@
         <th>Language</th>
         <th>Submit Time</th>
       </tr>
-      <tr v-for="(item, index) in list">
+      <tr v-for="item in list" :key="item.sid">
         <td>{{ item.sid }}</td>
         <td>
           <router-link :to="{ name: 'contestProblem', params: { cid: mid, id: getId(item.pid) } }">
@@ -87,6 +87,8 @@ import { mapGetters, mapActions } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -121,10 +123,9 @@ export default {
     ...mapGetters({
       list: 'solution/list',
       sum: 'solution/sum',
-      problems: 'contest/problems',
-      profile: 'session/profile',
-      isAdmin: 'session/isAdmin'
+      problems: 'contest/problems'
     }),
+    ...mapState(useSessionStore, ['profile', 'isAdmin']),
     query () {
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize uid pid language judge'),

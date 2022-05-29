@@ -63,35 +63,42 @@
   </div>
 </template>
 <script>
-import { mapMutations, mapGetters, mapState } from 'vuex'
 import { TRIGGER_LOGIN } from '@/store/types'
 import Dialog from './LoginAndRegister'
+import { useSessionStore } from '@/store/modules/session'
+import { useRootStore } from '@/store'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   components: {
     Dialog
   },
   computed: {
-    ...mapGetters({
-      isLogined: 'session/isLogined',
-      profile: 'session/profile',
-      isAdmin: 'session/isAdmin',
-      currentTime: 'currentTime'
-    }),
-    ...mapState({
-      active: state => state.route.name
-    })
+    ...mapState(useRootStore, ['currentTime']),
+    ...mapState(useSessionStore, ['profile', 'isAdmin', 'isLogined']),
+    active () {
+      console.log('route name active:', this.$route.name, this.profile)
+      return this.$route.name
+    }
+  },
+  // TODO
+  async beforeRouteUpdate (to, from) {
+    console.log('to', to)
+  },
+  async beforeRouteEnter (to, from) {
+    console.log('to', to)
   },
   methods: {
-    ...mapMutations('session', {
-      login: TRIGGER_LOGIN
-    }),
+    login () {
+      useSessionStore()[TRIGGER_LOGIN]()
+    },
+    ...mapActions(useSessionStore, ['logout']),
     routerTo (name) {
       this.$router.push({ name })
     },
     profileAction (name) {
       if (name === 'logout') {
-        this.$store.dispatch('session/logout').then(() => this.$Message.info('bye bye!'))
+        this.logout().then(() => this.$Message.info('bye bye!'))
       } else if (name === 'profile') {
         this.$router.push({ name: 'userInfo', params: { uid: this.profile.uid } })
       }

@@ -9,7 +9,7 @@
         <th v-if="isAdmin && canRemove">Action</th>
       </tr>
       <template v-for="item in list">
-        <tr>
+        <tr :key="item.did">
           <td>
             {{ item.did }}
           </td>
@@ -46,6 +46,8 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -61,12 +63,8 @@ export default {
     this.fetch()
   },
   computed: {
-    ...mapGetters('discuss', [ 'list' ]),
-    ...mapGetters('session', [ 'isLogined' ]),
-    ...mapGetters({
-      isAdmin: 'session/isAdmin',
-      canRemove: 'session/canRemove'
-    })
+    ...mapState(useSessionStore, ['isLogined', 'isAdmin', 'canRemove']),
+    ...mapGetters('discuss', [ 'list' ])
   },
   methods: {
     ...mapActions('discuss', [ 'find', 'create' ]),

@@ -56,6 +56,8 @@
 import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
+import { useRootStore } from '@/store'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -70,9 +72,9 @@ export default {
     ...mapGetters({
       list: 'ranklist/list',
       sum: 'ranklist/sum',
-      groups: 'group/list',
-      judge: 'judge'
+      groups: 'group/list'
     }),
+    ...mapState(useRootStore, ['judge']),
     query () {
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize'),

@@ -89,6 +89,8 @@ import { mapGetters } from 'vuex'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -112,10 +114,9 @@ export default {
   computed: {
     ...mapGetters({
       list: 'solution/list',
-      sum: 'solution/sum',
-      profile: 'session/profile',
-      isAdmin: 'session/isAdmin'
+      sum: 'solution/sum'
     }),
+    ...mapState(useSessionStore, ['profile', 'isAdmin']),
     query () {
       const opt = only(this.$route.query, 'page pageSize uid pid language judge')
       return purify(opt)

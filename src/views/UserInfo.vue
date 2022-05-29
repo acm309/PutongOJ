@@ -98,10 +98,11 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions as MA } from 'vuex'
 import { mapState, mapActions } from 'pinia'
 import { purify } from '@/util/helper'
 import { useUserStore } from '@/store/modules/user'
+import { useSessionStore } from '@/store/modules/session'
+import { useRootStore } from '@/store'
 
 export default {
   data: () => ({
@@ -110,19 +111,15 @@ export default {
     checkPwd: ''
   }),
   computed: {
-    ...mapGetters({
-      profile: 'session/profile',
-      isAdmin: 'session/isAdmin',
-      canRemove: 'session/canRemove'
-    }),
-    ...mapState(useUserStore, ['user', 'solved', 'unsolved', 'group'])
+    ...mapState(useUserStore, ['user', 'solved', 'unsolved', 'group']),
+    ...mapState(useSessionStore, ['profile', 'isAdmin', 'canRemove'])
   },
   created () {
     this.fetch()
   },
   methods: {
     ...mapActions(useUserStore, ['findOne']),
-    ...MA(['changeDomTitle']),
+    ...mapActions(useRootStore, 'changeDomTitle'),
     fetch () {
       this.findOne(this.$route.params).then(() => {
         this.changeDomTitle({ title: this.user.uid })
@@ -135,7 +132,7 @@ export default {
           { newPwd: this.newPwd }
         ))
         user.mail = this.user.mail || ''
-        this.$store.dispatch('user/update', user).then(() => {
+        useUserStore().update(user).then(() => {
           this.$Message.success('修改成功！')
           this.display = 'overview'
         })
@@ -148,7 +145,7 @@ export default {
         title: '提示',
         content: `<p>此操作将永久删除用户 ${uid}, 是否继续?</p>`,
         onOk: () => {
-          this.$store.dispatch('user/delete', { uid }).then(() => {
+          useUserStore().delete({uid}).then(() => {
             this.$router.push({ name: 'home' })
             this.$Message.success(`成功删除 ${uid}！`)
           })

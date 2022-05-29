@@ -10,14 +10,15 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   computed: {
-    ...mapGetters('session', [ 'isAdmin', 'canRemove' ]),
-    ...mapState({
-      active: state => state.route.name
-    })
+    ...mapState(useSessionStore, [ 'isAdmin', 'canRemove' ]),
+    active () {
+      return this.$route.name
+    }
   },
   methods: {
     change (name) {

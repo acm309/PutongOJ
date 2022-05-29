@@ -16,7 +16,7 @@
         <th>Language</th>
         <th>Submit Time</th>
       </tr>
-      <tr v-for="(item, index) in list">
+      <tr v-for="item in list" :key="item.sid">
         <td>{{ item.sid }}</td>
         <td>
           <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
@@ -42,10 +42,13 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { mapState, mapActions } from 'pinia'
 import only from 'only'
 import constant from '@/util/constant'
 import { purify } from '@/util/helper'
+import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
 
 export default {
   data () {
@@ -58,16 +61,16 @@ export default {
     }
   },
   created () {
+    console.log('profile', this.profile)
     this.fetch()
     this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
   },
   computed: {
     ...mapGetters({
       list: 'solution/list',
-      sum: 'solution/sum',
-      profile: 'session/profile',
-      isAdmin: 'session/isAdmin'
+      sum: 'solution/sum'
     }),
+    ...mapState(useSessionStore, ['profile', 'isAdmin']),
     query () {
       const opt = Object.assign(
         only(this.$route.query, 'page pageSize language judge'),
@@ -83,7 +86,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(useRootStore, ['changeDomTitle']),
     fetch () {
       this.$store.dispatch('solution/find', this.query)
       const query = this.$route.query

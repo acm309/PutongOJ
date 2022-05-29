@@ -24,6 +24,9 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
+import { useRootStore } from '@/store'
 
 export default {
   data () {
@@ -33,10 +36,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      contest: 'contest/contest',
-      isAdmin: 'session/isAdmin',
-      currentTime: 'currentTime'
+      contest: 'contest/contest'
     }),
+    ...mapState(useSessionStore, ['isAdmin']),
+    ...mapState(useRootStore, ['currentTime']),
     timePercentage () {
       if (this.currentTime < this.contest.start) {
         return 0

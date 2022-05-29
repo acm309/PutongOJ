@@ -6,7 +6,8 @@
 
 <script>
 import Layout from '@/components/Layout'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useRootStore } from '@/store'
 
 export default {
   name: 'app',
@@ -14,7 +15,7 @@ export default {
     'oj-layout': Layout
   },
   methods: {
-    ...mapActions(['changeDomTitle', 'fetchTime', 'updateTime'])
+    ...mapActions(useRootStore, ['changeDomTitle', 'fetchTime', 'updateTime'])
   },
   created () {
     this.fetchTime().then(() => {
@@ -23,7 +24,8 @@ export default {
   },
   watch: {
     '$route' () {
-      this.changeDomTitle()
+      console.log(`meta`, this.$route.meta)
+      this.changeDomTitle(this.$route.meta)
     }
   }
 }

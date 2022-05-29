@@ -11,6 +11,8 @@
 import Submit from '@/components/Submit'
 import { mapGetters, mapActions } from 'vuex'
 import * as types from '../../store/types'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data: () => ({
@@ -19,9 +21,9 @@ export default {
   computed: {
     ...mapGetters({
       solution: 'solution/solution',
-      problem: 'problem/problem',
-      isLogined: 'session/isLogined'
-    })
+      problem: 'problem/problem'
+    }),
+    ...mapState(useSessionStore, ['isLogined'])
   },
   created () {
     // 这里必须保证此时 overview 是存在的

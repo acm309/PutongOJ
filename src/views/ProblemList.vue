@@ -26,8 +26,8 @@
         <th v-if="isAdmin">Visible</th>
         <th v-if="isAdmin && canRemove">Delete</th>
       </tr>
-      <template v-for="(item, index) in list">
-        <tr v-if="isAdmin || item.status === status.Available">
+      <template v-for="item in list">
+        <tr v-if="isAdmin || item.status === status.Available" :key="item.pid">
           <td>
             <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round"></Icon>
           </td>
@@ -50,7 +50,7 @@
           </td>
           <td>
             <template v-for="(item2, index2) in item.tags">
-              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
+              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }" :key="index2">
                 <Tag>{{ item2 }}</Tag>
               </router-link>
             </template>
@@ -73,6 +73,9 @@ import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '@/util/helper'
 import constant from '@/util/constant'
+import { useSessionStore } from '@/store/modules/session'
+import { useRootStore } from '@/store'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -105,13 +108,10 @@ export default {
     ...mapGetters({
       list: 'problem/list',
       sum: 'problem/sum',
-      solved: 'problem/solved',
-      profile: 'session/profile',
-      status: 'status',
-      judge: 'judge',
-      isAdmin: 'session/isAdmin',
-      canRemove: 'session/canRemove'
+      solved: 'problem/solved'
     }),
+    ...mapState(useRootStore, ['status', 'judge']),
+    ...mapState(useSessionStore, ['isAdmin', 'canRemove', 'profile']),
     query () {
       return only(this.$route.query, 'page pageSize type content')
     }

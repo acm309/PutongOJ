@@ -11,7 +11,7 @@
         <th v-if="isAdmin && canRemove">Delete</th>
       </tr>
       <template v-for="(item, index) in list">
-        <tr v-if="isAdmin || item.status === status.Available">
+        <tr v-if="isAdmin || item.status === status.Available" :key="index">
           <td>{{ item.cid }}</td>
           <td>
             <Button type="text" @click="visit(item)">{{ item.title }}</Button>
@@ -55,6 +55,10 @@ import { mapGetters } from 'vuex'
 import only from 'only'
 import { purify } from '../util/helper'
 import constant from '../util/constant'
+import { useSessionStore } from '@/store/modules/session'
+import { useRootStore } from '@/store'
+import { mapState } from 'pinia'
+import { TRIGGER_LOGIN } from '../store/types'
 
 export default {
   data () {
@@ -70,15 +74,10 @@ export default {
   computed: {
     ...mapGetters({
       list: 'contest/list',
-      sum: 'contest/sum',
-      status: 'status',
-      encrypt: 'encrypt',
-      profile: 'session/profile',
-      isLogined: 'session/isLogined',
-      isAdmin: 'session/isAdmin',
-      canRemove: 'session/canRemove',
-      currentTime: 'currentTime'
+      sum: 'contest/sum'
     }),
+    ...mapState(useSessionStore, ['profile', 'isLogined', 'isAdmin', 'canRemove']),
+    ...mapState(useRootStore, ['status', 'encrypt', 'currentTime']),
     query () {
       const opt = only(this.$route.query, 'page pageSize type content')
       return purify(opt)
@@ -119,7 +118,7 @@ export default {
     },
     visit (item) {
       if (!this.isLogined) {
-        this.$store.commit('session/TRIGGER_LOGIN')
+        useSessionStore()[TRIGGER_LOGIN]()
       } else if (this.isAdmin || this.profile.verifyContest.indexOf(+item.cid) !== -1) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > this.currentTime) {

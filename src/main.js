@@ -45,6 +45,9 @@ import {
 } from 'iview'
 import { semiRestful } from './api'
 import { createPinia, PiniaVuePlugin } from 'pinia'
+import { useSessionStore } from '@/store/modules/session'
+import { useRootStore } from '@/store'
+import Router from 'vue-router'
 
 Vue.component('Row', Row)
 Vue.component('Col', Col)
@@ -101,7 +104,10 @@ Vue.prototype.$Spin.showLoading = function () {
 }
 
 Vue.use(VueClipboard)
+// https://github.com/vuejs/pinia/discussions/723
+// PiniaVuePlugin must be injected before Router
 Vue.use(PiniaVuePlugin)
+Vue.use(Router)
 Vue.filter('formate', formate)
 Vue.filter('timePretty', timePretty)
 Vue.filter('timeContest', timeContest)
@@ -115,21 +121,22 @@ Vue.config.productionTip = false
 
 const pinia = createPinia()
 
+const app = new Vue({
+  pinia,
+  router,
+  store,
+  render: (h) => h(App)
+})
+
 Promise.all([
-  store.dispatch('fetchWebsiteConfig'),
-  store.dispatch('session/fetch')
+  useSessionStore().fetch(),
+  useRootStore().fetchWebsiteConfig()
 ]).then(() => {
-  if (store.getters.website.semi_restful) {
+  if (useRootStore().semi_restful) {
     semiRestful()
   }
-  /* eslint-disable no-new */
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
-  new Vue({
-    router,
-    store,
-    pinia,
-    render: (h) => h(App)
-  }).$mount('#app')
+  app.$mount('#app')
 })
 
 // remove @vue/composition-api when migrated to Vue 3

@@ -29,6 +29,8 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
 export default {
   data () {
@@ -40,9 +42,9 @@ export default {
     ...mapGetters({
       contest: 'contest/contest',
       overview: 'contest/overview',
-      solved: 'contest/solved',
-      profile: 'session/profile'
+      solved: 'contest/solved'
     }),
+    ...mapState(useSessionStore, ['profile']),
     query () {
       let uid
       if (this.profile) {

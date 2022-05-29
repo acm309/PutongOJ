@@ -8,16 +8,15 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { useSessionStore } from '@/store/modules/session'
 
 export default {
   data: () => ({
     current: 'newsInfo'
   }),
   computed: {
-    ...mapGetters({
-      isAdmin: 'session/isAdmin'
-    })
+    ...mapState(useSessionStore, ['isAdmin'])
   },
   methods: {
     change (name) {

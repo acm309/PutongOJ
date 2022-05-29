@@ -1,68 +1,57 @@
 import * as types from '../types'
 import api from '@/api'
+import { defineStore } from 'pinia'
+import { useRootStore } from '..'
 
-const state = {
-  loginDialog: false,
-  profile: null
-}
-
-const getters = {
-  loginDialog: state => state.loginDialog,
-  profile: state => state.profile,
-  isLogined: state => state.profile != null,
-  isAdmin: (state, getters, rootState, rootGetters) => (
-    getters.isLogined &&
-    (
-      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Root) ||
-      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Teacher)
-    )
-  ),
-  canRemove: (state, getters, rootState, rootGetters) => (
-    getters.isLogined &&
-    (
-      parseInt(state.profile.privilege) === parseInt(rootGetters.privilege.Root)
-    )
-  )
-}
-
-const mutations = {
-  [types.LOGIN]: (state, payload) => {
-    state.profile = payload // TODO
+export const useSessionStore = defineStore('session', {
+  state: () => ({
+    loginDialog: false,
+    profile: null
+  }),
+  getters: {
+    isLogined () { return this.profile != null },
+    isAdmin () {
+      return this.isLogined &&
+      (
+        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Root) ||
+        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Teacher)
+      )
+    },
+    canRemove () {
+      return this.isLogined &&
+      (
+        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Root)
+      )
+    }
   },
-  [types.LOGOUT]: (state) => {
-    state.profile = null
-  },
-  [types.TRIGGER_LOGIN]: (state) => {
-    state.loginDialog = !state.loginDialog
-  },
-  [types.UPDATE_PROFILE]: (state, payload) => {
-    state.profile = payload
+  actions: {
+    [types.LOGIN] (payload) {
+      this.profile = payload // TODO
+    },
+    [types.LOGOUT] () {
+      this.profile = null
+    },
+    [types.TRIGGER_LOGIN] () {
+      this.loginDialog = !this.loginDialog
+    },
+    [types.UPDATE_PROFILE] (payload) {
+      this.profile = payload
+    },
+    login (opt) {
+      return api.login(opt).then(({ data }) => {
+        this[types.LOGIN](data.profile)
+        return data
+      })
+    },
+    logout () {
+      return api.logout().then(() => {
+        this.profile = null
+      })
+    },
+    fetch () {
+      return api.session.fetch().then(({ data }) => {
+        this[types.UPDATE_PROFILE](data.profile)
+      })
+    }
   }
-}
-
-const actions = {
-  login ({ commit, rootGetters }, opt) {
-    return api.login(opt).then(({ data }) => {
-      commit(types.LOGIN, data.profile)
-      return data
-    })
-  },
-  logout ({ commit }) {
-    return api.logout().then(() => {
-      commit(types.LOGOUT)
-    })
-  },
-  fetch ({ commit, rootGetters }) {
-    return api.session.fetch().then(({ data }) => {
-      commit(types.UPDATE_PROFILE, data.profile)
-    })
-  }
-}
-
-export default {
-  namespaced: true,
-  state,
-  getters,
-  actions,
-  mutations
-}
+})

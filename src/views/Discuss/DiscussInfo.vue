@@ -31,6 +31,8 @@
 
 <script>
   import { mapGetters, mapActions } from 'vuex'
+import { useSessionStore } from '@/store/modules/session'
+import { mapState } from 'pinia'
 
   export default {
     props: {
@@ -48,7 +50,7 @@
     },
     computed: {
       ...mapGetters('discuss', [ 'discuss' ]),
-      ...mapGetters('session', [ 'isLogined' ])
+      ...mapState(useSessionStore, ['isLogined'])
     },
     created () {
       this.fetch()

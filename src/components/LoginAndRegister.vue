@@ -38,9 +38,9 @@
   </Modal>
 </template>
 <script>
-import { mapState, mapActions as MA, mapMutations } from 'vuex'
-import { mapActions } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 import { TRIGGER_LOGIN } from '@/store/types'
+import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 import only from 'only'
 
@@ -96,18 +96,18 @@ export default {
     }
   },
   computed: {
-    ...mapState('session', {
-      visible: state => state.loginDialog
+    ...mapState(useSessionStore, {
+      visible: store => {
+        return store.loginDialog
+      }
     })
   },
   methods: {
-    ...mapMutations('session', {
-      triggerLogin: TRIGGER_LOGIN
-    }),
-    ...MA({
-      login: 'session/login'
-    }),
     ...mapActions(useUserStore, ['register']),
+    ...mapActions(useSessionStore, ['login']),
+    triggerLogin () {
+      useSessionStore()[TRIGGER_LOGIN]()
+    },
     submit () {
       if (this.mode === 'login') {
         this.$refs['loginForm'].validate((valid) => {
