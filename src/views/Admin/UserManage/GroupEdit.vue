@@ -50,8 +50,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { mapState } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
+import { useGroupStore } from '@/store/modules/group'
 import only from 'only'
 
 export default {
@@ -66,10 +67,8 @@ export default {
     operation: 'search'
   }),
   computed: {
-    ...mapGetters({
-      groupList: 'group/list',
-      group: 'group/group'
-    }),
+    ...mapState(useGroupStore, ['group']),
+    ...mapState(useGroupStore, {groupList: 'list'}),
     ...mapState(useUserStore, ['user']),
     ...mapState(useUserStore, {
       userSum: 'list'
@@ -85,18 +84,16 @@ export default {
     this.fetchGroup()
   },
   methods: {
-    fetchGroup () {
+    ...mapActions(useGroupStore, ['find', 'findOne', 'update', 'create']),
+    ...mapActions(useGroupStore, {remove: 'delete'}),
+    async fetchGroup () {
       this.$Spin.showLoading()
-      useUserStore().find()
-        .then(() => {
-          this.$store.dispatch('group/find')
-        })
-        .then(() => {
-          this.userSum.forEach((item) => {
-            this.userList.push(item.uid)
-          })
-          this.$Spin.hide()
-        })
+      await useUserStore().find()
+      await this.find()
+      this.userSum.forEach((item) => {
+        this.userList.push(item.uid)
+      })
+      this.$Spin.hide()
     },
     format (item) {
       return item.label
@@ -107,7 +104,7 @@ export default {
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
-    manageGroup (name) {
+    async manageGroup (name) {
       if (this.groupList.length > 0) {
         this.group.gid = this.groupList[this.ind].gid
         this.group.title = this.groupList[this.ind].title
@@ -116,14 +113,14 @@ export default {
       if (name === 'search') {
         this.$Spin.showLoading()
         this.targetKeys = []
-        this.$store.dispatch('group/findOne', { gid: this.group.gid }).then(() => {
+        try {
+          await this.findOne({ gid: this.group.gid })
           this.group.list.forEach((item) => {
             this.targetKeys.push(this.userList.indexOf(item) + '')
           })
+        } finally {
           this.$Spin.hide()
-        }).catch(() => {
-          this.$Spin.hide()
-        })
+        }
       } else if (name === 'create') {
         this.group.gid = ''
         this.group.title = ''
@@ -136,14 +133,14 @@ export default {
           this.$Modal.confirm({
             title: '提示',
             content: `<p>此操作将永久删除Group--${this.group.title}, 是否继续?</p>`,
-            onOk: () => {
+            onOk: async () => {
               this.$Spin.showLoading()
-              this.$store.dispatch('group/delete', { gid: this.group.gid }).then(() => {
-                this.$Spin.hide()
+              try {
+                await this.remove({ gid: this.group.gid })
                 this.$Message.success(`成功删除 ${this.group.title}！`)
-              }).catch(() => {
+              } finally {
                 this.$Spin.hide()
-              })
+              }
             },
             onCancel: () => {
               this.$Message.info('已取消删除！')
@@ -152,7 +149,7 @@ export default {
         }
       }
     },
-    saveGroup () {
+    async saveGroup () {
       const user = this.targetKeys.map((item) => this.userList[+item])
       const group = Object.assign(
         only(this.group, 'gid title'),
@@ -160,21 +157,20 @@ export default {
       )
       if (this.group.gid !== '') {
         this.$Spin.showLoading()
-        this.$store.dispatch('group/update', group).then(() => {
-          this.$Spin.hide()
+        try {
+          await this.update(group)
           this.$Message.success('更新当前用户组成功！')
-        }).catch(() => {
+        } finally {
           this.$Spin.hide()
-        })
+        }
       } else {
         this.$Spin.showLoading()
-        this.$store.dispatch('group/create', group).then(() => {
-          this.$store.dispatch('group/find')
-          this.$Spin.hide()
+        try {
+          await this.create(group)
           this.$Message.success('新建当前用户组成功！')
-        }).catch(() => {
+        } finally {
           this.$Spin.hide()
-        })
+        }
       }
     }
   }
