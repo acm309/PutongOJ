@@ -21,11 +21,11 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex'
 import { purify } from '@/util/helper'
 import only from 'only'
 import { useSessionStore } from '@/store/modules/session'
-import { mapState } from 'pinia'
+import { useNewsStore } from '@/store/modules/news'
+import { mapActions, mapState } from 'pinia'
 
 export default {
   data () {
@@ -35,10 +35,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      list: 'news/list',
-      sum: 'news/sum'
-    }),
+    ...mapState(useNewsStore, ['list', 'sum']),
     ...mapState(useSessionStore, ['isAdmin', 'canRemove']),
     query () {
       const opt = only(this.$route.query, 'page pageSize')
@@ -49,8 +46,12 @@ export default {
     this.fetch()
   },
   methods: {
+    ...mapActions(useNewsStore, ['find']),
+    ...mapActions(useNewsStore, {
+      removeNews: 'delete'
+    }),
     fetch () {
-      this.$store.dispatch('news/find', this.query)
+      this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
       if (query.pageSize) this.pageSize = parseInt(query.pageSize)
@@ -70,7 +71,7 @@ export default {
         title: '提示',
         content: '<p>此操作将永久删除该消息, 是否继续?</p>',
         onOk: () => {
-          this.$store.dispatch('news/delete', { nid }).then(() => {
+          this.removeNews({ nid }).then(() => {
             this.$Message.success(`成功删除 ${nid}！`)
             this.$router.push({
               name: 'home',

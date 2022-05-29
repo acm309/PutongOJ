@@ -19,13 +19,12 @@
 <script>
 import api from '@/api'
 import { VueEditor } from 'vue2-editor'
-import { mapGetters } from 'vuex'
+import { useNewsStore } from '@/store/modules/news'
+import { mapState } from 'pinia'
 
 export default {
   computed: {
-    ...mapGetters('news', [
-      'news'
-    ])
+    ...mapState(useNewsStore, ['news'])
   },
   methods: {
     handleImageAdded (file, Editor, cursorLocation) {

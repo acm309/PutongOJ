@@ -7,20 +7,20 @@
 </template>
 <script>
 import NewsEdit from '@/components/NewsEdit'
-import { mapGetters } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useNewsStore } from '@/store/modules/news'
 
 export default {
   computed: {
-    ...mapGetters('news', [
-      'news'
-    ])
+    ...mapState(useNewsStore, ['news'])
   },
   methods: {
+    ...mapActions(useNewsStore, ['update']),
     submit () {
       if (!this.news.title) {
         this.$Message.error('Title can not be empty')
       } else {
-        this.$store.dispatch('news/update', this.news)
+        this.update(this.news)
           .then((nid) => {
             this.$Message.success(`News "${this.news.title}" has been updated!`)
             this.$router.push({ name: 'newsInfo', params: { nid } })

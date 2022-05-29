@@ -6,21 +6,22 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapActions } from 'pinia'
+import { useNewsStore } from '@/store/modules/news'
+import { useRootStore } from '@/store'
 
 export default {
   computed: {
-    ...mapGetters('news', {
-      news: 'news'
-    })
+    ...mapState(useNewsStore, ['news'])
   },
   created () {
-    this.$store.dispatch('news/findOne', this.$route.params).then(() => {
+    this.findOne(this.$route.params).then(() => {
       this.changeDomTitle({ title: `News -- ${this.news.title}` })
     })
   },
   methods: {
-    ...mapActions(['changeDomTitle'])
+    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useNewsStore, ['findOne'])
   }
 }
 </script>

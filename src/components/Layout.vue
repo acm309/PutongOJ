@@ -77,7 +77,6 @@ export default {
     ...mapState(useRootStore, ['currentTime']),
     ...mapState(useSessionStore, ['profile', 'isAdmin', 'isLogined']),
     active () {
-      console.log('route name active:', this.$route.name, this.profile)
       return this.$route.name
     }
   },
