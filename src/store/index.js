@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import tag from './modules/tag'
+// import tag from './modules/tag'
 import * as types from './types'
 import api from '@/api'
 import { defineStore } from 'pinia'
@@ -169,6 +169,6 @@ export default new Vuex.Store({
     // group,
     // testcase,
     // discuss,
-    tag
+    // tag
   }
 })

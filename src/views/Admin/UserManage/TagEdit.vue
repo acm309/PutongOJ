@@ -49,9 +49,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import only from 'only'
 import { useProblemStore } from '@/store/modules/problem'
+import { useTagStore } from '@/store/modules/tag'
 import { mapActions, mapState } from 'pinia'
 
 export default {
@@ -67,12 +67,12 @@ export default {
     isNew: false
   }),
   computed: {
-    ...mapGetters({
-      tagList: 'tag/list',
-      tag: 'tag/tag'
-    }),
     ...mapState(useProblemStore, {
       problemSum: 'list'
+    }),
+    ...mapState(useTagStore, {
+      tagList: 'list',
+      tag: 'tag'
     }),
     transData () {
       return this.problemSum.map((item, index) => ({
@@ -88,19 +88,17 @@ export default {
     ...mapActions(useProblemStore, {
       findProblems: 'find'
     }),
-    fetchTag () {
+    ...mapActions(useTagStore, ['find', 'findOne', 'update']),
+    ...mapActions(useTagStore, {remove: 'delete'}),
+    async fetchTag () {
       this.$Spin.showLoading()
       const opt = { page: -1 }
-      this.findProblems(opt)
-        .then(() => {
-          this.$store.dispatch('tag/find')
-        })
-        .then(() => {
-          this.$Spin.hide()
-          this.problemSum.forEach((item) => {
-            this.problemList.push(item.pid)
-          })
-        })
+      await this.findProblems(opt)
+      await this.find()
+      this.$Spin.hide()
+      this.problemSum.forEach((item) => {
+        this.problemList.push(item.pid)
+      })
     },
     format (item) {
       return item.label
@@ -111,7 +109,7 @@ export default {
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
-    manageTag (name) {
+    async manageTag (name) {
       if (this.tagList.length > 0) {
         this.tag.tid = this.tagList[this.ind].tid
       }
@@ -120,14 +118,14 @@ export default {
         this.$Spin.showLoading()
         this.targetKeys = []
         this.isNew = false
-        this.$store.dispatch('tag/findOne', { tid: this.tag.tid }).then(() => {
+        try {
+          await this.findOne({ tid: this.tag.tid })
           this.tag.list.forEach((item) => {
             this.targetKeys.push(this.problemList.indexOf(item) + '')
           })
+        } finally {
           this.$Spin.hide()
-        }).catch(() => {
-          this.$Spin.hide()
-        })
+        }
       } else if (name === 'create') {
         this.tag.tid = ''
         this.tag.list = []
@@ -142,7 +140,7 @@ export default {
             content: `<p>此操作将永久删除Tag--${this.tag.tid}, 是否继续?</p>`,
             onOk: () => {
               this.$Spin.showLoading()
-              this.$store.dispatch('tag/delete', { tid: this.tag.tid }).then(() => {
+              this.$store.remove({ tid: this.tag.tid }).then(() => {
                 this.$Spin.hide()
                 this.$Message.success(`成功删除 ${this.tag.tid}！`)
               }).catch(() => {
@@ -164,7 +162,7 @@ export default {
       )
       if (!this.isNew) {
         this.$Spin.showLoading()
-        this.$store.dispatch('tag/update', tag).then(() => {
+        this.update(tag).then(() => {
           this.$Spin.hide()
           this.$Message.success('更新当前标签组成功！')
         }).catch(() => {
