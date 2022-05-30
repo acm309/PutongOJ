@@ -10,6 +10,11 @@ axios.defaults.timeout = 100000 // 100000ms的超时验证
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 const instance = {}
+let errHandler = null
+
+export function setErrorHandler (handler) {
+  errHandler = handler
+}
 
 // 对异常的基本处理
 ;['get', 'post', 'put', 'delete'].forEach((key) => {
@@ -22,38 +27,11 @@ const instance = {}
         return data
       })
       .catch((err) => {
-        // console.log(err)
-        // if (err.response && err.response.status >= 500) {
-        //   Vue.prototype.$Message.error({
-        //     content: `Σ(;ﾟдﾟ)  服务器崩坏，需要联系管理员维修`,
-        //     duration: 6.5
-        //   })
-        // } else if (err.response && err.response.status === 403) {
-        //   Vue.prototype.$Message.error({
-        //     content: `╮(╯_╰)╭ 你没有相关权限进行此操作`,
-        //     duration: 6.5
-        //   })
-        // } else if (err.response && err.response.status === 401) {
-        //   Vue.prototype.$Message.error({
-        //     content: `(〃∀〃) 请先登录`,
-        //     duration: 6.5
-        //   })
-        // } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
-        //   Vue.prototype.$Message.error({
-        //     content: `${err.response.data.error}`,
-        //     duration: 6.5
-        //   })
-        // } else if (!err.response) {
-        //   Vue.prototype.$Message.error({
-        //     content: `_(:з」∠)_  网络异常，检查你的网线`,
-        //     duration: 6.5
-        //   })
-        // } else {
-        //   Vue.prototype.$Message.error({
-        //     content: err.message,
-        //     duration: 6.5
-        //   })
-        // }
+        if (errHandler) {
+          errHandler(err)
+        } else {
+          window.alert('故障')
+        }
         return Promise.reject(new Error('I throw this on purpose'))
         // 继续抛出错误
         // 不让后面的继续执行，也就是说，后面的 then 必然是在请求没有错误的情况下才执行的

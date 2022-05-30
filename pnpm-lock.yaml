@@ -6,6 +6,7 @@ specifiers:
   '@vitejs/plugin-vue': ^2.3.3
   axios: ^0.27.2
   cross-spawn: ^5.0.1
+  echarts: ^5.3.2
   eslint: ^3.19.0
   eslint-config-standard: ^10.2.1
   eslint-friendly-formatter: ^3.0.0
@@ -58,6 +59,7 @@ dependencies:
 devDependencies:
   '@originjs/vite-plugin-commonjs': 1.0.3
   cross-spawn: 5.1.0
+  echarts: 5.3.2
   eslint: 3.19.0
   eslint-config-standard: 10.2.1_txlzbtb4qap2ud7oaouocyomie
   eslint-friendly-formatter: 3.0.0
@@ -1579,6 +1581,13 @@ packages:
     resolution: {integrity: sha512-+ugizgtJ+KmsJyyDPxaw2Br5FqzuBnyOWwcxPKO6y0gc5caYcfnEUIlNStx02necw8jmKmTafmpHhGo4XDtEIA==}
     dependencies:
       zrender: 4.3.2
+    dev: true
+
+  /echarts/5.3.2:
+    resolution: {integrity: sha512-LWCt7ohOKdJqyiBJ0OGBmE9szLdfA9sGcsMEi+GGoc6+Xo75C+BkcT/6NNGRHAWtnQl2fNow05AQjznpap28TQ==}
+    dependencies:
+      tslib: 2.3.0
+      zrender: 5.3.1
     dev: true
 
   /editorconfig/0.15.3:
@@ -5511,6 +5520,10 @@ packages:
       strip-bom: 3.0.0
     dev: true
 
+  /tslib/2.3.0:
+    resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
+    dev: true
+
   /tslib/2.4.0:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
     dev: true
@@ -5984,4 +5997,10 @@ packages:
 
   /zrender/4.3.2:
     resolution: {integrity: sha512-bIusJLS8c4DkIcdiK+s13HiQ/zjQQVgpNohtd8d94Y2DnJqgM1yjh/jpDb8DoL6hd7r8Awagw8e3qK/oLaWr3g==}
+    dev: true
+
+  /zrender/5.3.1:
+    resolution: {integrity: sha512-7olqIjy0gWfznKr6vgfnGBk7y4UtdMvdwFmK92vVQsQeDPyzkHW1OlrLEKg6GHz1W5ePf0FeN1q2vkl/HFqhXw==}
+    dependencies:
+      tslib: 2.3.0
     dev: true

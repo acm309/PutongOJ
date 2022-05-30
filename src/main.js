@@ -30,6 +30,8 @@ Promise.all([
   app.use(router)
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
   app.mount('#app')
+  console.log(app.component.$Message)
+  console.log(app._component)
 })
 
 // remove @vue/composition-api when migrated to Vue 3
