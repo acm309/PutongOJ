@@ -8,16 +8,14 @@ export const useSolutionStore = defineStore('solution', {
     sum: 0
   }),
   actions: {
-    find (payload) {
-      return api.solution.find(payload).then(({ data }) => {
-        this.list = data.list.docs
-        this.sum = data.list.total
-      })
+    async find (payload) {
+      const {data} = await api.solution.find(payload)
+      this.list = data.list.docs
+      this.sum = data.list.total
     },
-    findOne (payload) {
-      return api.solution.findOne(payload).then(({ data }) => {
-        this.solution = data.solution
-      })
+    async findOne (payload) {
+      const {data} = await api.solution.findOne(payload)
+      this.solution = data.solution
     },
     create (payload) {
       return api.solution.create(payload)

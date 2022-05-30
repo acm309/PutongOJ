@@ -8,7 +8,7 @@
     <problem :problem="problem">
       <h1 slot="title">{{ this.$route.params.id }}:  {{ problem.title }}</h1>
     </problem>
-    <Button type="ghost" shape="circle" icon="ios-paperplane" @click="submit">Submit</Button>
+    <Button shape="circle" icon="md-paper-plane" @click="submit">Submit</Button>
   </div>
 </template>
 <script>

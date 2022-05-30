@@ -17,8 +17,8 @@
         <th>Remove</th>
         <th>Type</th>
       </tr>
-      <template v-for="user in adminList">
-        <tr :key="user.uid">
+      <template v-for="user in adminList" :key="user.uid">
+        <tr>
           <td>{{ user.uid }}</td>
           <td>{{ user.nick }}</td>
           <td>

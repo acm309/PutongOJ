@@ -12,13 +12,15 @@
         <Dropdown @on-click="manageGroup">
           <Button type="primary">
             Manage
-            <Icon type="arrow-down-b"></Icon>
+            <Icon type="ios-arrow-down"></Icon>
           </Button>
-          <DropdownMenu slot="list">
-            <DropdownItem name="search">Search</DropdownItem>
-            <DropdownItem name="create">Create</DropdownItem>
-            <DropdownItem name="delete">Delete</DropdownItem>
-          </DropdownMenu>
+          <template #list>
+            <DropdownMenu>
+              <DropdownItem name="search">Search</DropdownItem>
+              <DropdownItem name="create">Create</DropdownItem>
+              <DropdownItem name="delete">Delete</DropdownItem>
+            </DropdownMenu>
+          </template>
         </Dropdown>
       </Col>
       <Col span="2">
@@ -82,11 +84,16 @@ export default {
   created () {
     this.fetchGroup()
   },
+  beforeUnmount () {
+    this.clearSavedGroups()
+    this.clearSavedUsers()
+  },
   methods: {
-    ...mapActions(useGroupStore, ['find', 'findOne', 'update', 'create']),
+    ...mapActions(useGroupStore, ['find', 'findOne', 'update', 'create', 'clearSavedGroups']),
     ...mapActions(useGroupStore, {remove: 'delete'}),
+    ...mapActions(useUserStore, ['clearSavedUsers']),
     async fetchGroup () {
-      this.$Spin.showLoading()
+      this.$Spin.show()
       await useUserStore().find()
       await this.find()
       this.userSum.forEach((item) => {

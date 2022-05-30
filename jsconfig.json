@@ -5,6 +5,7 @@
                 "src/*"
             ]
         },
-        "baseUrl": "."
+        "baseUrl": ".",
+        "jsx": "preserve"
     }
 }

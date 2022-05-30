@@ -1,7 +1,7 @@
 <template>
   <div class="news">
     <h1>{{ news.title }}</h1>
-    <h4>{{ news.create | timePretty }}</h4>
+    <h4>{{ timePretty(news.create) }}</h4>
     <div class="news-cont" v-html="news.content"></div>
   </div>
 </template>
@@ -9,6 +9,7 @@
 import { mapState, mapActions } from 'pinia'
 import { useNewsStore } from '@/store/modules/news'
 import { useRootStore } from '@/store'
+import { timePretty } from '@/util/formate'
 
 export default {
   computed: {
@@ -21,7 +22,8 @@ export default {
   },
   methods: {
     ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useNewsStore, ['findOne'])
+    ...mapActions(useNewsStore, ['findOne']),
+    timePretty
   }
 }
 </script>

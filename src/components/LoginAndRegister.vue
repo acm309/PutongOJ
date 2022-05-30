@@ -1,5 +1,5 @@
 <template>
-  <Modal :value="visible" @on-cancel="triggerLogin" :closable="false">
+  <Modal v-model="visible" @on-cancel="triggerLogin" :closable="false">
     <Tabs v-model="mode">
       <TabPane label="Login" name="login">
         <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">

@@ -35,6 +35,9 @@ export const useUserStore = defineStore('user', {
     },
     delete (payload) {
       return api.user.delete(payload)
+    },
+    clearSavedUsers () {
+      this.list = []
     }
   }
 })

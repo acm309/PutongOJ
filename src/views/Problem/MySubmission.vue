@@ -36,7 +36,7 @@
             {{ lang[item.language] }}
           </router-link>
         </td>
-        <td>{{ item.create | timePretty }}</td>
+        <td>{{ timePretty(item.create) }}</td>
       </tr>
     </table>
   </div>
@@ -49,7 +49,7 @@ import { purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import { useProblemStore } from '@/store/modules/problem'
+import { timePretty } from '@/util/formate'
 
 export default {
   data () {
@@ -83,8 +83,9 @@ export default {
     }
   },
   methods: {
+    timePretty,
     ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useProblemStore, ['find']),
+    ...mapActions(useSolutionStore, ['find']),
     fetch () {
       this.find(this.query)
       const query = this.$route.query

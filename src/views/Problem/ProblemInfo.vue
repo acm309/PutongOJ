@@ -1,7 +1,7 @@
 <template>
   <div class="proinfo-wrap">
     <problem :problem="problem" />
-    <Button type="ghost" shape="circle" icon="ios-paperplane" @click="submit">Submit</Button>
+    <Button shape="circle" icon="md-paper-plane" @click="submit">Submit</Button>
   </div>
 </template>
 <script>

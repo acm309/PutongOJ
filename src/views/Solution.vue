@@ -24,8 +24,8 @@
         <th>Memory/kb</th>
         <th>Result</th>
       </tr>
-      <template v-for="(item, index) in solution.testcases">
-        <tr :key="index">
+      <template v-for="(item, index) in solution.testcases"  :key="index">
+        <tr>
           <td>{{ item.uuid.slice(0, 8) }}
             <a :href="testcaseUrl(item, 'in')" target="_blank">TestIn</a>
             <a :href="testcaseUrl(item, 'out')" target="_blank">TestOut</a>

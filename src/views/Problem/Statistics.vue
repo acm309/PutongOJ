@@ -55,7 +55,7 @@
               <Button type="text">{{ lang[item.language] }}</Button>
             </router-link>
           </td>
-          <td>{{ item.create | timePretty }}</td>
+          <td>{{ timePretty(item.create) }}</td>
         </tr>
       </table>
       <Page :total="sumStatis"
@@ -74,9 +74,10 @@ import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
 import { useStatisticsStore } from '@/store/modules/statistics'
-import constant from '@/util/constant.js'
+import constant from '@/util/constant'
 import { mapActions, mapState } from 'pinia'
 import { useRootStore } from '@/store'
+import { timePretty } from '@/util/formate'
 
 export default {
   components: {
@@ -175,6 +176,7 @@ export default {
       })
   },
   methods: {
+    timePretty,
     ...mapActions(useRootStore, ['changeDomTitle']),
     ...mapActions(useStatisticsStore, ['find']),
     getStatistics () {

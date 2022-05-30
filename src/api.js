@@ -1,12 +1,12 @@
 import axios from 'axios'
-import Vue from 'vue'
+// import Vue from 'vue'
 import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
 axios.defaults.withCredentials = true
-axios.defaults.timeout = 100000 // 10000ms的超时验证
+axios.defaults.timeout = 100000 // 100000ms的超时验证
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 
 const instance = {}
@@ -22,38 +22,38 @@ const instance = {}
         return data
       })
       .catch((err) => {
-        console.log(err)
-        if (err.response && err.response.status >= 500) {
-          Vue.prototype.$Message.error({
-            content: `Σ(;ﾟдﾟ)  服务器崩坏，需要联系管理员维修`,
-            duration: 6.5
-          })
-        } else if (err.response && err.response.status === 403) {
-          Vue.prototype.$Message.error({
-            content: `╮(╯_╰)╭ 你没有相关权限进行此操作`,
-            duration: 6.5
-          })
-        } else if (err.response && err.response.status === 401) {
-          Vue.prototype.$Message.error({
-            content: `(〃∀〃) 请先登录`,
-            duration: 6.5
-          })
-        } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
-          Vue.prototype.$Message.error({
-            content: `${err.response.data.error}`,
-            duration: 6.5
-          })
-        } else if (!err.response) {
-          Vue.prototype.$Message.error({
-            content: `_(:з」∠)_  网络异常，检查你的网线`,
-            duration: 6.5
-          })
-        } else {
-          Vue.prototype.$Message.error({
-            content: err.message,
-            duration: 6.5
-          })
-        }
+        // console.log(err)
+        // if (err.response && err.response.status >= 500) {
+        //   Vue.prototype.$Message.error({
+        //     content: `Σ(;ﾟдﾟ)  服务器崩坏，需要联系管理员维修`,
+        //     duration: 6.5
+        //   })
+        // } else if (err.response && err.response.status === 403) {
+        //   Vue.prototype.$Message.error({
+        //     content: `╮(╯_╰)╭ 你没有相关权限进行此操作`,
+        //     duration: 6.5
+        //   })
+        // } else if (err.response && err.response.status === 401) {
+        //   Vue.prototype.$Message.error({
+        //     content: `(〃∀〃) 请先登录`,
+        //     duration: 6.5
+        //   })
+        // } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
+        //   Vue.prototype.$Message.error({
+        //     content: `${err.response.data.error}`,
+        //     duration: 6.5
+        //   })
+        // } else if (!err.response) {
+        //   Vue.prototype.$Message.error({
+        //     content: `_(:з」∠)_  网络异常，检查你的网线`,
+        //     duration: 6.5
+        //   })
+        // } else {
+        //   Vue.prototype.$Message.error({
+        //     content: err.message,
+        //     duration: 6.5
+        //   })
+        // }
         return Promise.reject(new Error('I throw this on purpose'))
         // 继续抛出错误
         // 不让后面的继续执行，也就是说，后面的 then 必然是在请求没有错误的情况下才执行的

@@ -18,13 +18,15 @@ export default {
     ...mapActions(useRootStore, ['changeDomTitle', 'fetchTime', 'updateTime'])
   },
   created () {
+    this.$Message.config({
+      duration: 3.5 // 默认的 1.5s 也太短了
+    })
     this.fetchTime().then(() => {
       this.updateTime()
     })
   },
   watch: {
     '$route' () {
-      console.log(`meta`, this.$route.meta)
       this.changeDomTitle(this.$route.meta)
     }
   }

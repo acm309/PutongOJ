@@ -10,13 +10,13 @@
     <div class="cont" v-html="problem.output"></div>
     <h2>Sample Input
       <Tooltip content="Click to copy" placement="top">
-        <Icon type="document" v-clipboard:copy="problem.in" v-clipboard:success="onCopy" style="cursor: pointer"></Icon>
+        <!-- <Icon type="document" v-clipboard:copy="problem.in" v-clipboard:success="onCopy" style="cursor: pointer"></Icon> -->
       </Tooltip>
     </h2>
     <pre><code>{{ problem.in }}</code></pre>
     <h2>Sample Output
       <Tooltip content="Click to copy" placement="top">
-        <Icon type="document" v-clipboard:copy="problem.out" v-clipboard:success="onCopy" style="cursor: pointer"></Icon>
+        <!-- <Icon type="document" v-clipboard:copy="problem.out" v-clipboard:success="onCopy" style="cursor: pointer"></Icon> -->
       </Tooltip>
     </h2>
     <pre><code>{{ problem.out }}</code></pre>

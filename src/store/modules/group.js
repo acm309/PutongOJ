@@ -29,6 +29,9 @@ export const useGroupStore = defineStore('group', {
     async delete (payload) {
       await api.group.delete(payload)
       this.list = this.list.filter((p) => p.gid !== +(payload.gid))
+    },
+    clearSavedGroups () {
+      this.list = []
     }
   }
 })

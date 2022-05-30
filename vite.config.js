@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import { createVuePlugin } from 'vite-plugin-vue2';
+// import { createVuePlugin } from 'vite-plugin-vue2';
 import envCompatible from 'vite-plugin-env-compatible';
 import { injectHtml } from 'vite-plugin-html';
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import { visualizer } from 'rollup-plugin-visualizer';
+import vue from '@vitejs/plugin-vue'
 // import createImportPlugin from 'vite-plugin-import'
 import viteCompression from 'vite-plugin-compression';
 import legacy from '@vitejs/plugin-legacy'
@@ -33,7 +34,7 @@ export default defineConfig({
     ]
   },
   plugins: [
-    createVuePlugin({ jsx: false }),
+    vue(),
     viteCommonjs(),
     // support browsers which don't support esm
     legacy(),
@@ -70,7 +71,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'common': ['vue', 'pinia', 'vue-router', 'axios'],
-          'ui': ['iview']
+          'ui': ['view-ui-plus']
         }
         // 不知道为啥，这两个都变成了 modulepreload，一开始就加载了
         // 预想是访问里特定网页才加载

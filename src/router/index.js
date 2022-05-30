@@ -1,16 +1,14 @@
 import routes from './routes'
-import { LoadingBar } from 'iview'
+import { LoadingBar } from 'view-ui-plus'
 import { useSessionStore } from '@/store/modules/session'
-import Router from 'vue-router'
+import {createWebHashHistory, createRouter} from 'vue-router'
 
-const router = new Router({
-  mode: 'history',
+const router = createRouter({
+  history: createWebHashHistory(),
   routes
 })
 
 // 全局身份确认
-// To In-component Guard?
-// https://stackoverflow.com/questions/63495876/vue-router-navigation-guard-dynamic-import
 router.beforeEach((to, from, next) => {
   LoadingBar.start()
   const session = useSessionStore()
@@ -26,8 +24,6 @@ router.beforeEach((to, from, next) => {
     }
   } else if (to.meta.requiresAdmin) {
     const isAdmin = session.isAdmin
-    console.log('isAdmin', isAdmin)
-  // TODO: session is used before being fetched
     if (isAdmin) {
       next()
     } else {

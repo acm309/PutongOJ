@@ -8,8 +8,8 @@
         <th>Updated</th>
         <th v-if="isAdmin && canRemove">Action</th>
       </tr>
-      <template v-for="item in list">
-        <tr :key="item.did">
+      <template v-for="item in list" :key="item.did">
+        <tr>
           <td>
             {{ item.did }}
           </td>
@@ -20,8 +20,9 @@
             <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
               <Button type="text"> {{ item.uid }} </Button>
             </router-link>
+          </td>
           <td>
-            {{ item.update | timeagoPretty }}
+            {{ timeagoPretty(item.update) }}
           </td>
           <td v-if="isAdmin && canRemove">
             <Button type="text" @click="del(item.did)"> Delete </Button>
@@ -48,6 +49,7 @@
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { mapState, mapActions } from 'pinia'
+import { timeagoPretty } from '@/util/formate'
 
 export default {
   data () {
@@ -67,6 +69,7 @@ export default {
     ...mapState(useDiscussStore, ['list'])
   },
   methods: {
+    timeagoPretty,
     ...mapActions(useDiscussStore, [ 'find', 'create' ]),
     ...mapActions(useDiscussStore, {remove: 'delete'}),
     fetch () {

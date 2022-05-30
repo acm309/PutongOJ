@@ -15,12 +15,11 @@ export const useProblemStore = defineStore('problem', {
         return data
       })
     },
-    find (payload) {
-      return api.problem.find(payload).then(({ data }) => {
-        this.list = data.list.docs
-        this.sum = data.list.total
-        this.solved = data.solved
-      })
+    async find (payload) {
+      const {data} = await api.problem.find(payload)
+      this.list = data.list.docs
+      this.sum = data.list.total
+      this.solved = data.solved
     },
     update (payload) {
       return api.problem.update(payload).then(({ data }) => {
@@ -34,6 +33,9 @@ export const useProblemStore = defineStore('problem', {
       return api.problem.delete(payload).then(() => {
         this.list = this.list.filter((p) => p.pid !== +(payload.pid))
       })
+    },
+    clearSavedProblems () {
+      this.list = []
     }
   }
 })

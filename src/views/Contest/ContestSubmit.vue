@@ -3,7 +3,7 @@
     <h1>{{ this.$route.params.id }}:  {{ title }}</h1>
     <submit></submit>
     <Button type="primary" @click="submit">Submit</Button>
-    <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
+    <Button style="margin-left: 8px" @click="reset">Reset</Button>
   </div>
 </template>
 <script>

@@ -10,24 +10,24 @@
             <MenuItem name="problemList">
                 <Icon type="ios-keypad"></Icon>Problem
             </MenuItem>
-            <MenuItem name="discuss">
-              <Icon type="chatbubble-working"></Icon>Discuss
-            </MenuItem>
             <MenuItem name="status">
-              <Icon type="refresh"></Icon>Status
+              <Icon type="md-refresh"></Icon>Status
             </MenuItem>
             <MenuItem name="ranklist">
-              <Icon type="stats-bars"></Icon>Ranklist
+              <Icon type="ios-stats"></Icon>Ranklist
             </MenuItem>
             <MenuItem name="contestList">
-              <Icon type="android-bar"></Icon>Contest
+              <Icon type="ios-trophy"></Icon>Contest
+            </MenuItem>
+            <MenuItem name="discuss">
+              <Icon type="ios-quote"></Icon>Discuss
             </MenuItem>
             <MenuItem name="faq">
-              <Icon type="help-circled"></Icon>FAQ
+              <Icon type="md-help-circle"></Icon>FAQ
             </MenuItem>
             <Submenu v-if="isAdmin" name="admin">
-              <template slot="title">
-                <Icon type="paper-airplane"></Icon>Admin
+              <template #title>
+                <Icon type="md-paper-plane"></Icon>Admin
               </template>
               <MenuItem name="problemCreate">Create Problems</MenuItem>
               <MenuItem name="contestCreate">Create Contests</MenuItem>
@@ -39,13 +39,16 @@
         <div class="right">
           <Dropdown v-if="isLogined" @on-click="profileAction">
             <a href="javascript:void(0)">
+              <Icon type="md-contact"></Icon>
               {{ profile.uid }}
-              <Icon type="arrow-down-b"></Icon>
+              <Icon type="ios-arrow-down"></Icon>
             </a>
-            <DropdownMenu slot="list">
-              <DropdownItem name="profile">Profile</DropdownItem>
-              <DropdownItem name="logout">Logout</DropdownItem>
-            </DropdownMenu>
+            <template #list>
+              <DropdownMenu>
+                <DropdownItem name="profile">Profile</DropdownItem>
+                <DropdownItem name="logout">Logout</DropdownItem>
+              </DropdownMenu>
+            </template>
           </Dropdown>
           <Button type="text" @click="login" v-else>Login / Register</Button>
         </div>
@@ -54,7 +57,7 @@
         <router-view></router-view>
       </Content>
      <Footer class="layout-footer-center">
-       <p>Server Time: {{ currentTime | timePretty }}</p>
+       <p>Server Time: {{ timePretty(currentTime) }}</p>
        <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309 <Icon type="social-github"></Icon>.</a>
        The source code is licensed <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
      </Footer>
@@ -67,6 +70,7 @@ import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { mapActions, mapState } from 'pinia'
+import { timePretty } from '@/util/formate'
 
 export default {
   components: {
@@ -79,14 +83,8 @@ export default {
       return this.$route.name
     }
   },
-  // TODO
-  async beforeRouteUpdate (to, from) {
-    console.log('to', to)
-  },
-  async beforeRouteEnter (to, from) {
-    console.log('to', to)
-  },
   methods: {
+    timePretty,
     login () {
       useSessionStore().toggleLoginState()
     },

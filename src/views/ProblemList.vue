@@ -36,11 +36,12 @@
             <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
               <Button type="text">{{ item.title }}</Button>
             </router-link>
+          </td>
             <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
           <td>
-            <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
+            <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
             (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
               <Button type="text">{{ item.solve }}</Button>
             </router-link> /
@@ -49,8 +50,8 @@
             </router-link>)
           </td>
           <td>
-            <template v-for="(item2, index2) in item.tags">
-              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }" :key="index2">
+            <template v-for="(item2, index2) in item.tags"  :key="index2">
+              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
                 <Tag>{{ item2 }}</Tag>
               </router-link>
             </template>
@@ -76,6 +77,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
 import { mapActions, mapState } from 'pinia'
+import { formate } from '@/util/formate'
 
 export default {
   data () {
@@ -113,6 +115,7 @@ export default {
     }
   },
   methods: {
+    formate,
     ...mapActions(useProblemStore, ['find', 'update']),
     ...mapActions(useProblemStore, {'remove': 'delete'}),
     fetch () {

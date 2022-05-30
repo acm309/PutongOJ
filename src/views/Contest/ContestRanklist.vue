@@ -25,10 +25,10 @@
           <template v-for="pid in contest.list">
             <td v-if="!item[pid]" :key="pid"></td>
             <!-- !item[pid] 为 true 表示这道题没有提交过 -->
-            <td v-else-if="item[pid].wa >= 0" :class="[ item[pid].prime ? 'prime' : 'normal']" :key="pid">
-              {{ item[pid].create - contest.start | timeContest }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
+            <td v-else-if="item[pid].wa >= 0" :class="[ item[pid].prime ? 'prime' : 'normal']">
+              {{ timeContest(item[pid].create - contest.start) }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
             </td>
-            <td v-else :class="{'red': item[pid].wa}" :key="pid">
+            <td v-else :class="{'red': item[pid].wa}">
               <span v-if="item[pid].wa">{{ item[pid].wa }}</span>
             </td>
           </template>
@@ -41,6 +41,7 @@
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { mapActions, mapState } from 'pinia'
+import { timeContest } from '@/util/formate'
 
 export default {
   data: () => ({
@@ -57,6 +58,7 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    timeContest,
     ...mapActions(useRootStore, ['changeDomTitle']),
     ...mapActions(useContestStore, {getRanklist: 'getRank'}),
     getRank () {

@@ -2,6 +2,16 @@
   "name": "putongoj-fe",
   "version": "2.0.0-beta.17",
   "author": "Kerminate <kepeilin@outlook.com>",
+  "contributors": [
+    {
+      "name": "lazzzis",
+      "url": "https://github.com/lazzzis"
+    },
+    {
+      "name": "Kerminate",
+      "url": "https://github.com/Kerminate"
+    }
+  ],
   "private": true,
   "scripts": {
     "start": "npm run dev",
@@ -16,19 +26,17 @@
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^1.6.4",
-    "@vue/composition-api": "^1.6.2",
-    "axios": "^0.17.1",
-    "iview": "^2.8.0",
+    "@vitejs/plugin-vue": "^2.3.3",
+    "axios": "^0.27.2",
     "pinia": "^2.0.14",
     "rollup": "^2.75.1",
     "url-join": "^4.0.0",
-    "vue": "^2.6.14",
-    "vue-router": "3.5.4",
-    "vue-template-compiler": "^2.6.14"
+    "view-ui-plus": "^1.1.0-beta.2",
+    "vue": "^3.2.36",
+    "vue-router": "^4.0.15"
   },
   "devDependencies": {
     "@originjs/vite-plugin-commonjs": "^1.0.1",
-    "chromedriver": "^2.27.2",
     "cross-spawn": "^5.0.1",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
@@ -46,8 +54,6 @@
     "lodash.isempty": "^4.4.0",
     "lodash.pickby": "^4.6.0",
     "moment": "^2.20.1",
-    "nightwatch": "^0.9.12",
-    "node-notifier": "^5.1.2",
     "only": "^0.0.2",
     "rollup-plugin-visualizer": "^5.5.4",
     "selenium-server": "^3.0.1",
@@ -58,10 +64,8 @@
     "vite-plugin-env-compatible": "^1.1.1",
     "vite-plugin-html": "2.1.1",
     "vite-plugin-import": "^0.4.0",
-    "vite-plugin-vue2": "^1.9.0",
     "vue-clipboard2": "^0.0.8",
     "vue-echarts": "^3.0.1",
-    "vue-jest": "^1.0.2",
     "vue2-editor": "2.3.11",
     "vuedraggable": "^2.16.0",
     "zip-folder": "^1.0.0"

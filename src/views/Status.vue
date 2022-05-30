@@ -69,7 +69,7 @@
         </td>
         <td :class="color[item.judge]">
           {{ result[item.judge] }}
-          <Tag color="yellow" v-if="item.sim">[{{ item.sim }}%]{{ item.sim_s_id }}</Tag>
+          <Tag color="warning" v-if="item.sim">[{{ item.sim }}%]{{ item.sim_s_id }}</Tag>
         </td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
@@ -79,7 +79,7 @@
           </router-link>
         </td>
         <td v-else>{{ lang[item.language] }}</td>
-        <td>{{ item.create | timePretty }}</td>
+        <td>{{ timePretty(item.create) }}</td>
       </tr>
     </table>
   </div>
@@ -91,6 +91,7 @@ import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { mapActions, mapState } from 'pinia'
+import { timePretty } from '@/util/formate'
 
 export default {
   data () {
@@ -120,6 +121,7 @@ export default {
     }
   },
   methods: {
+    timePretty,
     ...mapActions(useSolutionStore, ['find']),
     fetch () {
       this.find(this.query)

@@ -41,7 +41,7 @@
       </tbody>
     </table>
     <h3>Q:What is the compiler the judge is using and what are the compiler options?</h3>
-    <p>A:We are using <code>GNU GCC/G++</code> for C/C++ compile, and <code>oracle-java-jdk1.8</code> for Java. The compile options are:</code>
+    <p>A:We are using <code>GNU GCC/G++</code> for C/C++ compile, and <code>oracle-java-jdk1.8</code> for Java. The compile options are:</p>
       <table>
         <thead>
           <th>Language</th>

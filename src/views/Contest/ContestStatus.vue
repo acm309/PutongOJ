@@ -77,7 +77,7 @@
           </router-link>
         </td>
         <td v-else>{{ lang[item.language] }}</td>
-        <td>{{ item.create | timePretty }}</td>
+        <td>{{ timePretty(item.create) }}</td>
       </tr>
     </table>
   </div>
@@ -91,6 +91,7 @@ import { mapState, mapActions } from 'pinia'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
+import { timePretty } from '@/util/formate'
 
 export default {
   data () {
@@ -140,6 +141,7 @@ export default {
     }
   },
   methods: {
+    timePretty,
     ...mapActions(useContestStore, ['findOne']),
     ...mapActions(useRootStore, ['changeDomTitle']),
     ...mapActions(useSolutionStore, {findSolutions: 'find'}),

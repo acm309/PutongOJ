@@ -28,6 +28,9 @@ export const useTagStore = defineStore('tag', {
     async delete (payload) {
       await api.tag.delete(payload)
       this.list = this.list.filter((p) => p.tid !== +(payload.tid))
+    },
+    clearSavedTags () {
+      this.list = []
     }
   }
 })

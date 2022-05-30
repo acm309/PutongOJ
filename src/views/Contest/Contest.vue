@@ -6,7 +6,7 @@
         <Col :span="12" v-if="currentTime < contest.start">Ready</Col>
         <Col :span="12" v-if="currentTime > contest.start && currentTime < contest.end">Running</Col>
         <Col :span="12" v-if="currentTime > contest.end">Ended</Col>
-        <Col :span="6">End: {{ contest.end | timePretty }}</Col>
+        <Col :span="6">End: {{ timePretty(contest.end) }}</Col>
       </Row>
         <Progress :stroke-width="18" :percent="timePercentage"></Progress>
     </Card>
@@ -27,6 +27,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { mapActions, mapState } from 'pinia'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
+import { timePretty } from '@/util/formate'
 
 export default {
   data () {
@@ -54,6 +55,7 @@ export default {
     this.findOne(this.$route.params)
   },
   methods: {
+    timePretty,
     ...mapActions(useContestStore, ['findOne']),
     handleClick (name) {
       if (name === 'contestProblem' || name === 'contestSubmit') {

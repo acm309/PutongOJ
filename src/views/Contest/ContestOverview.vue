@@ -1,8 +1,8 @@
 <template>
   <div class="conover-wrap">
     <h2>{{ contest.title }}</h2>
-    <h4>Start Time:&nbsp;&nbsp;{{ contest.create | timePretty }}</h4>
-    <h4>End Time:&nbsp;&nbsp;{{ contest.end | timePretty }}</h4>
+    <h4>Start Time:&nbsp;&nbsp;{{ timePretty(contest.create) }}</h4>
+    <h4>End Time:&nbsp;&nbsp;{{ timePretty(contest.end) }}</h4>
     <table>
       <tr>
         <th>#</th>
@@ -19,8 +19,9 @@
           <router-link :to="{ name: 'contestProblem', params: { cid: cid, id: index + 1 } }">
             <Button type="text">{{ item.title }}</Button>
           </router-link>
+        </td>
         <td>
-          <span>{{ item.solve / (item.submit + 0.000001) | formate }}</span>&nbsp;
+          <span>{{ formate(item.solve / (item.submit + 0.000001))  }}</span>&nbsp;
           ({{ item.solve }} / {{ item.submit }})
         </td>
       </tr>
@@ -32,6 +33,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { mapState, mapActions } from 'pinia'
+import { timePretty, formate } from '@/util/formate'
 
 export default {
   data () {
@@ -63,7 +65,9 @@ export default {
     ...mapActions(useContestStore, ['findOne']),
     fetch () {
       this.findOne(this.query)
-    }
+    },
+    timePretty,
+    formate
   },
   watch: { // 浏览器后退时回退页面
     '$route' (to, from) {

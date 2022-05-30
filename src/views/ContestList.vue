@@ -18,13 +18,14 @@
             <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
               <strong v-show="item.status === status.Reserve">Reserved</strong>
             </Tooltip>
+          </td>
           <td>
             <span class="ready" v-if="item.start > currentTime">Ready</span>
             <span class="run" v-if="item.start < currentTime && item.end > currentTime">Running</span>
             <span class="end" v-if="item.end < currentTime" >Ended</span>
           </td>
           <td>
-            <span>{{ item.start | timePretty }}</span>
+            <span>{{ timePretty(item.start) }}</span>
           </td>
           <td>
             <span :class="{'password': +item.encrypt === encrypt.Password, 'private': +item.encrypt === encrypt.Private, 'public': +item.encrypt === encrypt.Public}">
@@ -58,6 +59,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { mapActions, mapState } from 'pinia'
+import { timePretty } from '@/util/formate'
 
 export default {
   data () {
@@ -83,6 +85,7 @@ export default {
     this.fetch()
   },
   methods: {
+    timePretty,
     ...mapActions(useContestStore, ['find', 'verify', 'update']),
     ...mapActions(useContestStore, {
       'remove': 'delete'

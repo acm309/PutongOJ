@@ -3,7 +3,7 @@
     <h1>{{ this.$route.params.pid }}:  {{ title }}</h1>
     <submit></submit>
     <Button type="primary" @click="submit" :disabled="!isLogined">Submit</Button>
-    <Button type="ghost" style="margin-left: 8px" @click="reset">Reset</Button>
+    <Button style="margin-left: 8px" @click="reset">Reset</Button>
     <p v-if="!isLogined">Please Log in First</p>
   </div>
 </template>

@@ -275,7 +275,7 @@ export default [
     meta: { title: 'FAQ' }
   },
   {
-    path: '*',
+    path: '/:pathMatch(.*)*',
     name: 'notFound',
     component: NotFound,
     meta: { title: '404' }

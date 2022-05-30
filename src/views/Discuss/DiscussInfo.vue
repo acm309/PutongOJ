@@ -6,7 +6,7 @@
         {{ comment.uid }}
       </p>
       <span slot="extra">
-        {{ comment.create | timeagoPretty }}
+        {{ timeagoPretty(comment.create) }}
       </span>
       <pre><code>{{ comment.content }}</code></pre>
     </Card>
@@ -33,6 +33,7 @@
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { mapState, mapActions } from 'pinia'
+import { timeagoPretty } from '@/util/formate'
 
 export default {
   props: {
@@ -56,6 +57,7 @@ export default {
     this.fetch()
   },
   methods: {
+    timeagoPretty,
     ...mapActions(useDiscussStore, [ 'findOne', 'update' ]),
     fetch () {
       this.findOne({ did: this.did })

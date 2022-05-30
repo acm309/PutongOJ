@@ -39,8 +39,9 @@
           <router-link :to="{ name: 'status', query: { uid: item.uid } }">
             <Button type="text">{{ item.submit }}</Button>
           </router-link>
+        </td>
         <td>
-          <span>{{ item.solve / (item.submit + 0.0000001) | formate }}</span>
+          <span>{{ formate(item.solve / (item.submit + 0.0000001)) }}</span>
         </td>
       </tr>
     </table>
@@ -59,6 +60,7 @@ import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { mapActions, mapState } from 'pinia'
+import { formate } from '@/util/formate'
 
 export default {
   data () {
@@ -87,6 +89,7 @@ export default {
     this.fetch()
   },
   methods: {
+    formate,
     ...mapActions(useGroupStore, ['find']),
     fetch () {
       useRanklistStore().find(this.query)

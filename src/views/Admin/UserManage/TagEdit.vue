@@ -12,13 +12,15 @@
         <Dropdown @on-click="manageTag">
           <Button type="primary">
             Manage
-            <Icon type="arrow-down-b"></Icon>
+            <Icon type="ios-arrow-down"></Icon>
           </Button>
-          <DropdownMenu slot="list">
-            <DropdownItem name="search">Search</DropdownItem>
-            <DropdownItem name="create">Create</DropdownItem>
-            <DropdownItem name="delete">Delete</DropdownItem>
-          </DropdownMenu>
+          <template #list>
+            <DropdownMenu>
+              <DropdownItem name="search">Search</DropdownItem>
+              <DropdownItem name="create">Create</DropdownItem>
+              <DropdownItem name="delete">Delete</DropdownItem>
+            </DropdownMenu>
+          </template>
         </Dropdown>
       </Col>
       <Col span="2">
@@ -84,14 +86,19 @@ export default {
   created () {
     this.fetchTag()
   },
+  beforeUnmount () {
+    this.clearSavedProblems()
+    this.clearSavedTags()
+  },
   methods: {
     ...mapActions(useProblemStore, {
       findProblems: 'find'
     }),
-    ...mapActions(useTagStore, ['find', 'findOne', 'update', 'create']),
+    ...mapActions(useProblemStore, ['clearSavedProblems']),
+    ...mapActions(useTagStore, ['find', 'findOne', 'update', 'create', 'clearSavedTags']),
     ...mapActions(useTagStore, {remove: 'delete'}),
     async fetchTag () {
-      this.$Spin.showLoading()
+      this.$Spin.show()
       const opt = { page: -1 }
       await this.findProblems(opt)
       await this.find()
@@ -180,7 +187,6 @@ export default {
       }
     }
   }
-  // TODO: clear saved tags when leaving
 }
 </script>
 

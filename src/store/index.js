@@ -39,7 +39,6 @@ export const useRootStore = defineStore('root', {
       if (payload && payload.title) {
         window.document.title = payload.title
       }
-      console.log(this.website.title)
       window.document.title += ` | ${this.website.title}`
     },
     fetchTime () {
