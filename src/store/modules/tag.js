@@ -1,21 +1,21 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useTagStore = defineStore('tag', {
   state: () => ({
     list: [],
     tag: {
       tid: '',
-      list: []
-    }
+      list: [],
+    },
   }),
   actions: {
     async findOne (payload) {
-      const {data} = await api.tag.findOne(payload)
+      const { data } = await api.tag.findOne(payload)
       this.tag = data.tag
     },
     async find () {
-      const {data} = await api.tag.find()
+      const { data } = await api.tag.find()
       this.list = data.list
       return data.list
     },
@@ -27,10 +27,10 @@ export const useTagStore = defineStore('tag', {
     },
     async delete (payload) {
       await api.tag.delete(payload)
-      this.list = this.list.filter((p) => p.tid !== +(payload.tid))
+      this.list = this.list.filter(p => p.tid !== +(payload.tid))
     },
     clearSavedTags () {
       this.list = []
-    }
-  }
+    },
+  },
 })

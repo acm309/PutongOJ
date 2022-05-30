@@ -1,5 +1,5 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useRootStore = defineStore('root', {
   state: () => ({
@@ -8,16 +8,16 @@ export const useRootStore = defineStore('root', {
     privilege: {
       PrimaryUser: 1,
       Teacher: 2,
-      Root: 3
+      Root: 3,
     },
     status: {
       Reserve: 0,
-      Available: 2
+      Available: 2,
     },
     encrypt: {
       Public: 1,
       Private: 2,
-      Password: 3
+      Password: 3,
     },
     judge: {
       Pending: 0,
@@ -31,8 +31,8 @@ export const useRootStore = defineStore('root', {
       OutputLimitExceed: 8,
       PresentationError: 9,
       SystemError: 10,
-      RejudgePending: 11
-    }
+      RejudgePending: 11,
+    },
   }),
   actions: {
     changeDomTitle (payload) {
@@ -55,6 +55,6 @@ export const useRootStore = defineStore('root', {
       return api.getWebsiteConfig().then(({ data }) => {
         this.website = data.website
       })
-    }
-  }
+    },
+  },
 })

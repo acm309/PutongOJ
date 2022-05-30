@@ -1,47 +1,8 @@
-<template>
-  <Modal v-model="visible" @on-cancel="triggerLogin" :closable="false">
-    <Tabs v-model="mode">
-      <TabPane label="Login" name="login">
-        <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">
-          <FormItem class="loginuid" label="Username" prop="uid">
-            <Input v-model="form.uid"></Input>
-          </FormItem>
-          <FormItem class="loginpwd" label="Password" prop="pwd">
-            <Input v-model="form.pwd" type="password" @keyup.enter.native="submit"></Input>
-          </FormItem>
-        </Form>
-      </TabPane>
-      <TabPane label="Register" name="register">
-        <Form ref="registerForm" :model="form" :rules="registerRules" :label-width="100">
-          <FormItem label="Username" prop="uid">
-            <Input v-model="form.uid"></Input>
-          </FormItem>
-          <FormItem label="Nickname" prop="nick">
-            <Input v-model="form.nick"></Input>
-          </FormItem>
-          <FormItem label="Password" prop="pwd">
-            <Input v-model="form.pwd" type="password"></Input>
-          </FormItem>
-          <FormItem label="CheckPwd" prop="checkPwd" class="checkpwd">
-            <Input v-model="form.checkPwd" type="password"></Input>
-          </FormItem>
-        </Form>
-      </TabPane>
-    </Tabs>
-    <div slot="footer">
-      <Row type="flex" justify="center">
-        <Col :span="20">
-          <Button type="primary" size="large" long @click="submit">Submit</Button>
-        </Col>
-      </Row>
-    </div>
-  </Modal>
-</template>
 <script>
-import { mapState, mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
+import only from 'only'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
-import only from 'only'
 
 export default {
   data () {
@@ -49,7 +10,8 @@ export default {
     const validatePass1 = (rule, value, callback) => {
       // 5-50位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
       const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
-        ? new Error('密码长度需5-50位，只能包含字母和数字') : null
+        ? new Error('密码长度需5-50位，只能包含字母和数字')
+        : null
       error ? callback(error) : callback()
     }
     // 验证密码是否重复
@@ -60,11 +22,11 @@ export default {
     const basicRules = {
       uid: [
         { required: true, message: '用户名不能少', trigger: 'change' },
-        { min: 5, max: 50, message: '用户名在 5 到 50 位之间', trigger: 'change' }
+        { min: 5, max: 50, message: '用户名在 5 到 50 位之间', trigger: 'change' },
       ],
       pwd: [
-        { required: true, message: '请输入密码', trigger: 'change' }
-      ]
+        { required: true, message: '请输入密码', trigger: 'change' },
+      ],
     }
     return {
       mode: 'login',
@@ -72,7 +34,7 @@ export default {
         uid: '',
         pwd: '',
         nick: '',
-        checkPwd: ''
+        checkPwd: '',
       },
       loginRules: basicRules,
       registerRules: {
@@ -81,35 +43,35 @@ export default {
           type: 'string',
           pattern: /^\w+$/ig,
           message: '用户名只能包含字母和数字',
-          trigger: 'change'
+          trigger: 'change',
         }),
         pwd: [
           { required: true, message: '请输入密码', trigger: 'change' },
-          { validator: validatePass1, trigger: 'change' }
+          { validator: validatePass1, trigger: 'change' },
         ],
         checkPwd: [
           { required: true, message: '请再次输入密码', trigger: 'change' },
-          { validator: validatePass2, trigger: 'change' }
-        ]
-      }
+          { validator: validatePass2, trigger: 'change' },
+        ],
+      },
     }
   },
   computed: {
     ...mapState(useSessionStore, {
-      visible: store => {
+      visible: (store) => {
         return store.loginDialog
-      }
-    })
+      },
+    }),
   },
   methods: {
-    ...mapActions(useUserStore, ['register']),
-    ...mapActions(useSessionStore, ['login']),
+    ...mapActions(useUserStore, [ 'register' ]),
+    ...mapActions(useSessionStore, [ 'login' ]),
     triggerLogin () {
       useSessionStore().toggleLoginState()
     },
     submit () {
       if (this.mode === 'login') {
-        this.$refs['loginForm'].validate((valid) => {
+        this.$refs.loginForm.validate((valid) => {
           if (valid) { // 验证通过
             this.login(only(this.form, 'uid pwd'))
               .then(() => {
@@ -119,7 +81,7 @@ export default {
           }
         })
       } else {
-        this.$refs['registerForm'].validate((valid) => {
+        this.$refs.registerForm.validate((valid) => {
           if (valid) { // 验证通过
             this.register(this.form)
               .then(() => {
@@ -130,10 +92,53 @@ export default {
           }
         })
       }
-    }
-  }
+    },
+  },
 }
 </script>
+
+<template>
+  <Modal v-model="visible" :closable="false" @on-cancel="triggerLogin">
+    <Tabs v-model="mode">
+      <TabPane label="Login" name="login">
+        <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">
+          <FormItem class="loginuid" label="Username" prop="uid">
+            <Input v-model="form.uid" />
+          </FormItem>
+          <FormItem class="loginpwd" label="Password" prop="pwd">
+            <Input v-model="form.pwd" type="password" @keyup.enter.native="submit" />
+          </FormItem>
+        </Form>
+      </TabPane>
+      <TabPane label="Register" name="register">
+        <Form ref="registerForm" :model="form" :rules="registerRules" :label-width="100">
+          <FormItem label="Username" prop="uid">
+            <Input v-model="form.uid" />
+          </FormItem>
+          <FormItem label="Nickname" prop="nick">
+            <Input v-model="form.nick" />
+          </FormItem>
+          <FormItem label="Password" prop="pwd">
+            <Input v-model="form.pwd" type="password" />
+          </FormItem>
+          <FormItem label="CheckPwd" prop="checkPwd" class="checkpwd">
+            <Input v-model="form.checkPwd" type="password" />
+          </FormItem>
+        </Form>
+      </TabPane>
+    </Tabs>
+    <div slot="footer">
+      <Row type="flex" justify="center">
+        <Col :span="20">
+          <Button type="primary" size="large" long @click="submit">
+            Submit
+          </Button>
+        </Col>
+      </Row>
+    </div>
+  </Modal>
+</template>
+
 <style lang="stylus" scoped>
 .ivu-tabs-nav-container
   font-size: 16px

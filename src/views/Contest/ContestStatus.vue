@@ -1,47 +1,169 @@
+<script>
+import only from 'only'
+import { mapActions, mapState } from 'pinia'
+import constant from '@/util/constant'
+import { purify } from '@/util/helper'
+import { useSessionStore } from '@/store/modules/session'
+import { useSolutionStore } from '@/store/modules/solution'
+import { useContestStore } from '@/store/modules/contest'
+import { useRootStore } from '@/store'
+import { timePretty } from '@/util/formate'
+
+export default {
+  data () {
+    return {
+      mid: this.$route.params.cid,
+      uid: this.$route.query.uid || '',
+      pid: this.$route.query.pid || '',
+      judge: this.$route.query.judge || '',
+      language: this.$route.query.language || '',
+      page: parseInt(this.$route.query.page) || 1,
+      pageSize: parseInt(this.$route.query.pageSize) || 30,
+      judgeList: constant.judgeList,
+      languageList: constant.languageList,
+      result: constant.result,
+      lang: constant.language,
+      color: constant.color,
+    }
+  },
+  created () {
+    // 这里必须保证此时'contest/problems'是存在的
+    // 如果用户没有点过 overview tab 时，就会出现 'contest/problems' 不存在的情况
+    let p = Promise.resolve()
+    if (typeof this.problems === 'undefined') {
+      p = this.findOne({ cid: this.$route.params.cid })
+    }
+    p.then(() => {
+      this.fetch()
+      this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
+    })
+  },
+  computed: {
+    ...mapState(useContestStore, [ 'problems' ]),
+    ...mapState(useSessionStore, [ 'profile', 'isAdmin' ]),
+    ...mapState(useSolutionStore, [ 'list', 'sum' ]),
+    query () {
+      const opt = Object.assign(
+        {},
+        only(this.$route.query, 'page pageSize uid pid language judge'),
+        {
+          mid: this.$route.params.cid,
+        },
+      )
+      if (this.$route.query.pid) {
+        opt.pid = this.problems[this.$route.query.pid - 1]
+      }
+      return purify(opt)
+    },
+  },
+  methods: {
+    timePretty,
+    ...mapActions(useContestStore, [ 'findOne' ]),
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
+    ...mapActions(useSolutionStore, { findSolutions: 'find' }),
+    getId (pid) {
+      return this.problems.indexOf(pid) + 1
+    },
+    fetch () {
+      this.findSolutions(this.query)
+      const query = this.$route.query
+      this.page = parseInt(query.page) || 1
+      this.pageSize = parseInt(query.pageSize) || 30
+      this.uid = query.uid
+      this.pid = query.pid || ''
+      this.judge = query.judge || ''
+      this.language = query.language || ''
+    },
+    reload (payload = {}) {
+      this.$router.push({
+        name: 'contestStatus',
+        query: purify(Object.assign({}, this.query, payload)),
+      })
+    },
+    search (val) {
+      this.reload({
+        page: 1,
+        uid: this.uid,
+        pid: this.pid,
+        language: this.language,
+        judge: this.judge,
+      })
+    },
+    sizeChange (val) {
+      this.reload({ pageSize: val })
+    },
+    pageChange (val) {
+      this.reload({ page: val })
+    },
+  },
+  watch: {
+    $route (to, from) {
+      if (to !== from) {
+        this.fetch()
+      }
+    },
+  },
+}
+</script>
+
 <template>
   <div>
     <Row class="filter">
       <Col :offset="1" :span="5">
-        <Col :span="6"><label>User</label></Col>
-        <Col :span="15"><Input v-model="uid" placeholder="username"></Input></Col>
+        <Col :span="6">
+          <label>User</label>
+        </Col>
+        <Col :span="15">
+          <Input v-model="uid" placeholder="username" />
+        </Col>
       </Col>
       <Col :span="4">
-        <Col :span="6"><label>Pid</label></Col>
-        <Col :span="15"><Input v-model="pid" placeholder="pid"></Input></Col>
+        <Col :span="6">
+          <label>Pid</label>
+        </Col>
+        <Col :span="15">
+          <Input v-model="pid" placeholder="pid" />
+        </Col>
       </Col>
       <Col :span="6">
-        <Col :span="6"><label>Judge</label></Col>
+        <Col :span="6">
+          <label>Judge</label>
+        </Col>
         <Col :span="16">
           <Select v-model="judge" placeholder="请选择">
             <Option
               v-for="item in judgeList"
               :key="item.value"
               :label="item.label"
-              :value="item.value">
-            </Option>
+              :value="item.value"
+            />
           </Select>
         </Col>
       </Col>
       <Col :span="4">
-        <Col :span="12"><label>Language</label></Col>
+        <Col :span="12">
+          <label>Language</label>
+        </Col>
         <Col :span="12">
           <Select v-model="language" placeholder="请选择">
             <Option
               v-for="item in languageList"
               :key="item.value"
               :label="item.label"
-              :value="item.value">
-            </Option>
+              :value="item.value"
+            />
           </Select>
         </Col>
       </Col>
       <Col :span="3">
-        <Button type="primary" @click="search" icon="search">Search</Button>
+        <Button type="primary" icon="search" @click="search">
+          Search
+        </Button>
       </Col>
     </Row>
     <Row class="pagination" type="flex" justify="start">
       <Col :span="16">
-        <Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page>
+        <Page v-model:current="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
       </Col>
     </Row>
     <table>
@@ -63,11 +185,15 @@
           </router-link>
         </td>
         <td>
-          <Button type="text">{{ item.uid }}</Button>
+          <Button type="text">
+            {{ item.uid }}
+          </Button>
         </td>
         <td :class="color[item.judge]">
           {{ result[item.judge] }}
-          <Tag color="yellow" v-if="item.sim">[{{ item.sim }}%]{{ item.sim_s_id }}</Tag>
+          <Tag v-if="item.sim" color="yellow">
+            [{{ item.sim }}%]{{ item.sim_s_id }}
+          </Tag>
         </td>
         <td>{{ item.time }}</td>
         <td>{{ item.memory }}</td>
@@ -76,119 +202,15 @@
             {{ lang[item.language] }}
           </router-link>
         </td>
-        <td v-else>{{ lang[item.language] }}</td>
+        <td v-else>
+          {{ lang[item.language] }}
+        </td>
         <td>{{ timePretty(item.create) }}</td>
       </tr>
     </table>
   </div>
 </template>
-<script>
-import only from 'only'
-import constant from '@/util/constant'
-import { purify } from '@/util/helper'
-import { useSessionStore } from '@/store/modules/session'
-import { mapState, mapActions } from 'pinia'
-import { useSolutionStore } from '@/store/modules/solution'
-import { useContestStore } from '@/store/modules/contest'
-import { useRootStore } from '@/store'
-import { timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      mid: this.$route.params.cid,
-      uid: this.$route.query.uid || '',
-      pid: this.$route.query.pid || '',
-      judge: this.$route.query.judge || '',
-      language: this.$route.query.language || '',
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      judgeList: constant.judgeList,
-      languageList: constant.languageList,
-      result: constant.result,
-      lang: constant.language,
-      color: constant.color
-    }
-  },
-  created () {
-    // 这里必须保证此时'contest/problems'是存在的
-    // 如果用户没有点过 overview tab 时，就会出现 'contest/problems' 不存在的情况
-    let p = Promise.resolve()
-    if (typeof this.problems === 'undefined') {
-      p = this.findOne({ cid: this.$route.params.cid })
-    }
-    p.then(() => {
-      this.fetch()
-      this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-    })
-  },
-  computed: {
-    ...mapState(useContestStore, ['problems']),
-    ...mapState(useSessionStore, ['profile', 'isAdmin']),
-    ...mapState(useSolutionStore, ['list', 'sum']),
-    query () {
-      const opt = Object.assign(
-        {},
-        only(this.$route.query, 'page pageSize uid pid language judge'),
-        {
-          mid: this.$route.params.cid
-        }
-      )
-      if (this.$route.query.pid) {
-        opt.pid = this.problems[this.$route.query.pid - 1]
-      }
-      return purify(opt)
-    }
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useContestStore, ['findOne']),
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useSolutionStore, {findSolutions: 'find'}),
-    getId (pid) {
-      return this.problems.indexOf(pid) + 1
-    },
-    fetch () {
-      this.findSolutions(this.query)
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-      this.uid = query.uid
-      this.pid = query.pid || ''
-      this.judge = query.judge || ''
-      this.language = query.language || ''
-    },
-    reload (payload = {}) {
-      this.$router.push({
-        name: 'contestStatus',
-        query: purify(Object.assign({}, this.query, payload))
-      })
-    },
-    search (val) {
-      this.reload({
-        page: 1,
-        uid: this.uid,
-        pid: this.pid,
-        language: this.language,
-        judge: this.judge
-      })
-    },
-    sizeChange (val) {
-      this.reload({ pageSize: val })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    }
-  },
-  watch: {
-    '$route' (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    }
-  }
-}
-</script>
 <style lang="stylus" scoped>
 @import '../../styles/common'
 

@@ -1,94 +1,27 @@
-<template>
-  <div class="nav-wrap">
-    <Layout>
-      <Header :style="{position: 'fixed', width: '100%', 'z-index': 100}">
-        <Menu mode="horizontal" theme="light" @on-select="routerTo" :active-name="active">
-          <div class="left">
-            <MenuItem name="home">
-              <Icon type="ios-home"></Icon>Home
-            </MenuItem>
-            <MenuItem name="problemList">
-                <Icon type="ios-keypad"></Icon>Problem
-            </MenuItem>
-            <MenuItem name="status">
-              <Icon type="md-refresh"></Icon>Status
-            </MenuItem>
-            <MenuItem name="ranklist">
-              <Icon type="ios-stats"></Icon>Ranklist
-            </MenuItem>
-            <MenuItem name="contestList">
-              <Icon type="ios-trophy"></Icon>Contest
-            </MenuItem>
-            <MenuItem name="discuss">
-              <Icon type="ios-quote"></Icon>Discuss
-            </MenuItem>
-            <MenuItem name="faq">
-              <Icon type="md-help-circle"></Icon>FAQ
-            </MenuItem>
-            <Submenu v-if="isAdmin" name="admin">
-              <template #title>
-                <Icon type="md-paper-plane"></Icon>Admin
-              </template>
-              <MenuItem name="problemCreate">Create Problems</MenuItem>
-              <MenuItem name="contestCreate">Create Contests</MenuItem>
-              <MenuItem name="newsCreate">Create News</MenuItem>
-              <MenuItem name="userEdit">User Management</MenuItem>
-            </Submenu>
-          </div>
-        </Menu>
-        <div class="right">
-          <Dropdown v-if="isLogined" @on-click="profileAction">
-            <a href="javascript:void(0)">
-              <Icon type="md-contact"></Icon>
-              {{ profile.uid }}
-              <Icon type="ios-arrow-down"></Icon>
-            </a>
-            <template #list>
-              <DropdownMenu>
-                <DropdownItem name="profile">Profile</DropdownItem>
-                <DropdownItem name="logout">Logout</DropdownItem>
-              </DropdownMenu>
-            </template>
-          </Dropdown>
-          <Button type="text" @click="login" v-else>Login / Register</Button>
-        </div>
-      </Header>
-      <Content :style="{margin: '88px 20px 0', background: '#fff', minHeight: '500px', padding: '20px 40px'}">
-        <router-view></router-view>
-      </Content>
-     <Footer class="layout-footer-center">
-       <p>Server Time: {{ timePretty(currentTime) }}</p>
-       <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309 <Icon type="social-github"></Icon>.</a>
-       The source code is licensed <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
-     </Footer>
-    </Layout>
-    <Dialog></Dialog>
-  </div>
-</template>
 <script>
+import { mapActions, mapState } from 'pinia'
 import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
-import { mapActions, mapState } from 'pinia'
 import { timePretty } from '@/util/formate'
 
 export default {
   components: {
-    Dialog
+    Dialog,
   },
   computed: {
-    ...mapState(useRootStore, ['currentTime']),
-    ...mapState(useSessionStore, ['profile', 'isAdmin', 'isLogined']),
+    ...mapState(useRootStore, [ 'currentTime' ]),
+    ...mapState(useSessionStore, [ 'profile', 'isAdmin', 'isLogined' ]),
     active () {
       return this.$route.name
-    }
+    },
   },
   methods: {
     timePretty,
     login () {
       useSessionStore().toggleLoginState()
     },
-    ...mapActions(useSessionStore, ['logout']),
+    ...mapActions(useSessionStore, [ 'logout' ]),
     routerTo (name) {
       if (this.$route.name !== name) { this.$router.push({ name }) }
     },
@@ -98,10 +31,93 @@ export default {
       } else if (name === 'profile') {
         this.$router.push({ name: 'userInfo', params: { uid: this.profile.uid } })
       }
-    }
-  }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="nav-wrap">
+    <Layout>
+      <Header :style="{ 'position': 'fixed', 'width': '100%', 'z-index': 100 }">
+        <Menu mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
+          <div class="left">
+            <MenuItem name="home">
+              <Icon type="ios-home" />Home
+            </MenuItem>
+            <MenuItem name="problemList">
+              <Icon type="ios-keypad" />Problem
+            </MenuItem>
+            <MenuItem name="status">
+              <Icon type="md-refresh" />Status
+            </MenuItem>
+            <MenuItem name="ranklist">
+              <Icon type="ios-stats" />Ranklist
+            </MenuItem>
+            <MenuItem name="contestList">
+              <Icon type="ios-trophy" />Contest
+            </MenuItem>
+            <MenuItem name="discuss">
+              <Icon type="ios-quote" />Discuss
+            </MenuItem>
+            <MenuItem name="faq">
+              <Icon type="md-help-circle" />FAQ
+            </MenuItem>
+            <Submenu v-if="isAdmin" name="admin">
+              <template #title>
+                <Icon type="md-paper-plane" />Admin
+              </template>
+              <MenuItem name="problemCreate">
+                Create Problems
+              </MenuItem>
+              <MenuItem name="contestCreate">
+                Create Contests
+              </MenuItem>
+              <MenuItem name="newsCreate">
+                Create News
+              </MenuItem>
+              <MenuItem name="userEdit">
+                User Management
+              </MenuItem>
+            </Submenu>
+          </div>
+        </Menu>
+        <div class="right">
+          <Dropdown v-if="isLogined" @on-click="profileAction">
+            <a href="javascript:void(0)">
+              <Icon type="md-contact" />
+              {{ profile.uid }}
+              <Icon type="ios-arrow-down" />
+            </a>
+            <template #list>
+              <DropdownMenu>
+                <DropdownItem name="profile">
+                  Profile
+                </DropdownItem>
+                <DropdownItem name="logout">
+                  Logout
+                </DropdownItem>
+              </DropdownMenu>
+            </template>
+          </Dropdown>
+          <Button v-else type="text" @click="login">
+            Login / Register
+          </Button>
+        </div>
+      </Header>
+      <Content :style="{ margin: '88px 20px 0', background: '#fff', minHeight: '500px', padding: '20px 40px' }">
+        <router-view />
+      </Content>
+      <Footer class="layout-footer-center">
+        <p>Server Time: {{ timePretty(currentTime) }}</p>
+        <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309 <Icon type="social-github" />.</a>
+        The source code is licensed <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
+      </Footer>
+    </Layout>
+    <Dialog />
+  </div>
+</template>
+
 <style lang="stylus">
 .nav-wrap
   border: 1px solid #d7dde4

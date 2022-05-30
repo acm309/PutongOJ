@@ -1,11 +1,11 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useNewsStore = defineStore('news', {
   state: () => ({
     list: [],
     news: {},
-    sum: 0
+    sum: 0,
   }),
   actions: {
     findOne (payload) {
@@ -27,11 +27,11 @@ export const useNewsStore = defineStore('news', {
     },
     delete (payload) {
       return api.news.delete(payload).then(() => {
-        this.list = this.list.filter((p) => p.nid !== +(payload.nid))
+        this.list = this.list.filter(p => p.nid !== +(payload.nid))
       })
     },
     setCurrentNews (news) {
       this.news = news
-    }
-  }
+    },
+  },
 })

@@ -11,5 +11,5 @@ function testcaseUrl (pid, uuid, type = 'in') {
 
 export {
   purify,
-  testcaseUrl
+  testcaseUrl,
 }

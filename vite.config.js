@@ -34,7 +34,9 @@ export default defineConfig({
     ]
   },
   plugins: [
-    vue(),
+    vue({
+      reactivityTransform: true
+    }),
     viteCommonjs(),
     // support browsers which don't support esm
     legacy(),

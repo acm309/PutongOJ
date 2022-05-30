@@ -1,68 +1,46 @@
-<template>
-  <div class="home-wrap">
-    <div class="news">NewsList</div>
-    <Card v-for="item in list" :key="item.nid">
-      <Row type="flex" align="middle">
-        <Col :span="2">
-          <Icon type="md-chatbubbles"></Icon>
-        </Col>
-        <Col :span="20">
-          <router-link :to="{ name: 'newsInfo', params: { nid: item.nid } }">
-            <span>{{ item.title }}</span>
-          </router-link>
-          <p>{{ timePretty(item.create) }}</p>
-        </Col>
-        <Col :span="2">
-          <Icon v-if="isAdmin && canRemove" type="close-circled" @click.native="del(item.nid)"></Icon>
-        </Col>
-      </Row>
-    </Card>
-    <Page :total="sum" @on-change="pageChange" :page-size="pageSize" :current.sync="page" show-elevator></Page>
-  </div>
-</template>
 <script>
-import { purify } from '@/util/helper'
 import only from 'only'
+import { mapActions, mapState } from 'pinia'
+import { purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useNewsStore } from '@/store/modules/news'
-import { mapActions, mapState } from 'pinia'
 import { timePretty } from '@/util/formate'
 
 export default {
   data () {
     return {
       currentPage: 1,
-      pageSize: 5
+      pageSize: 5,
     }
   },
   computed: {
-    ...mapState(useNewsStore, ['list', 'sum']),
-    ...mapState(useSessionStore, ['isAdmin', 'canRemove']),
+    ...mapState(useNewsStore, [ 'list', 'sum' ]),
+    ...mapState(useSessionStore, [ 'isAdmin', 'canRemove' ]),
     query () {
       const opt = only(this.$route.query, 'page pageSize')
       return purify(opt)
-    }
+    },
   },
   created () {
     this.fetch()
   },
   methods: {
     timePretty,
-    ...mapActions(useNewsStore, ['find']),
+    ...mapActions(useNewsStore, [ 'find' ]),
     ...mapActions(useNewsStore, {
-      removeNews: 'delete'
+      removeNews: 'delete',
     }),
     fetch () {
       this.find(this.query)
       const query = this.$route.query
       this.page = parseInt(query.page) || 1
-      if (query.pageSize) this.pageSize = parseInt(query.pageSize)
+      if (query.pageSize) { this.pageSize = parseInt(query.pageSize) }
     },
     reload (payload = {}) {
       const query = Object.assign(this.query, purify(payload))
       this.$router.push({
         name: 'home',
-        query
+        query,
       })
     },
     pageChange (val) {
@@ -77,23 +55,49 @@ export default {
             this.$Message.success(`成功删除 ${nid}！`)
             this.$router.push({
               name: 'home',
-              query: { page: this.page }
+              query: { page: this.page },
             })
           })
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
-        }
+        },
       })
-    }
+    },
   },
   watch: { // 浏览器后退时回退页面
-    '$route' (to, from) {
-      if (to !== from) this.fetch()
-    }
-  }
+    $route (to, from) {
+      if (to !== from) { this.fetch() }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="home-wrap">
+    <div class="news">
+      NewsList
+    </div>
+    <Card v-for="item in list" :key="item.nid">
+      <Row type="flex" align="middle">
+        <Col :span="2">
+          <Icon type="md-chatbubbles" />
+        </Col>
+        <Col :span="20">
+          <router-link :to="{ name: 'newsInfo', params: { nid: item.nid } }">
+            <span>{{ item.title }}</span>
+          </router-link>
+          <p>{{ timePretty(item.create) }}</p>
+        </Col>
+        <Col :span="2">
+          <Icon v-if="isAdmin && canRemove" type="close-circled" @click.native="del(item.nid)" />
+        </Col>
+      </Row>
+    </Card>
+    <Page v-model:current="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
+  </div>
+</template>
+
 <style lang="stylus">
 @import '../styles/common'
 

@@ -1,14 +1,101 @@
+<script>
+import only from 'only'
+import { mapActions, mapState } from 'pinia'
+import { purify } from '@/util/helper'
+import { useRootStore } from '@/store'
+import { useRanklistStore } from '@/store/modules/ranklist'
+import { useGroupStore } from '@/store/modules/group'
+import { formate } from '@/util/formate'
+
+export default {
+  data () {
+    return {
+      page: parseInt(this.$route.query.page) || 1,
+      pageSize: parseInt(this.$route.query.pageSize) || 30,
+      group: '',
+      groupList: [],
+    }
+  },
+  computed: {
+    ...mapState(useGroupStore, {
+      groups: 'list',
+    }),
+    ...mapState(useRootStore, [ 'judge' ]),
+    ...mapState(useRanklistStore, [ 'list', 'sum' ]),
+    query () {
+      const opt = Object.assign(
+        only(this.$route.query, 'page pageSize'),
+        { gid: this.group },
+      )
+      return purify(opt)
+    },
+  },
+  watch: {
+    $route (to, from) {
+      if (to !== from) { this.fetch() }
+    },
+  },
+  created () {
+    this.fetch()
+  },
+  methods: {
+    formate,
+    ...mapActions(useGroupStore, [ 'find' ]),
+    fetch () {
+      useRanklistStore().find(this.query)
+      this.find().then(() => {
+        this.groupList = [ {
+          gid: '',
+          title: 'ALL',
+        } ]
+        this.groups.forEach((item) => {
+          this.groupList.push(item)
+        })
+      })
+      const query = this.$route.query
+      this.page = parseInt(query.page) || 1
+      this.pageSize = parseInt(query.pageSize) || 30
+    },
+    reload (payload = {}) {
+      const query = Object.assign(this.query, payload)
+      this.$router.push({
+        name: 'ranklist',
+        query,
+      })
+    },
+    pageChange (val) {
+      this.reload({ page: val })
+    },
+    indexMethod (index) {
+      return index + 1 + (this.page - 1) * this.pageSize
+    },
+    search () {
+      this.reload({
+        gid: this.group,
+        page: 1,
+      })
+    },
+  },
+}
+</script>
+
 <template>
   <div class="rank-wrap">
     <Row style="margin-bottom: 20px" type="flex" justify="end">
-      <Col :span="1"><label>Group</label></Col>
+      <Col :span="1">
+        <label>Group</label>
+      </Col>
       <Col :span="3">
         <Select v-model="group">
-          <Option v-for="item in groupList" :value="item.gid" :key="item.gid">{{ item.title }}</Option>
+          <Option v-for="item in groupList" :key="item.gid" :value="item.gid">
+            {{ item.title }}
+          </Option>
         </Select>
       </Col>
       <Col :span="2">
-        <Button type="primary" @click="search">Search</Button>
+        <Button type="primary" @click="search">
+          Search
+        </Button>
       </Col>
     </Row>
     <table>
@@ -22,22 +109,28 @@
         <th>Ratio</th>
       </tr>
       <tr v-for="(item, index) in list" :key="item.uid">
-        <td>{{ index + 1 + (page -1) * pageSize }}</td>
+        <td>{{ index + 1 + (page - 1) * pageSize }}</td>
         <td>
           <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
-            <Button type="text">{{ item.uid }}</Button>
+            <Button type="text">
+              {{ item.uid }}
+            </Button>
           </router-link>
         </td>
         <td>{{ item.nick }}</td>
         <td>{{ item.motto }}</td>
         <td>
           <router-link :to="{ name: 'status', query: { uid: item.uid, judge: judge.Accepted } }">
-            <Button type="text">{{ item.solve }}</Button>
+            <Button type="text">
+              {{ item.solve }}
+            </Button>
           </router-link>
         </td>
         <td>
           <router-link :to="{ name: 'status', query: { uid: item.uid } }">
-            <Button type="text">{{ item.submit }}</Button>
+            <Button type="text">
+              {{ item.submit }}
+            </Button>
           </router-link>
         </td>
         <td>
@@ -45,94 +138,16 @@
         </td>
       </tr>
     </table>
-    <Page :total="sum"
-      @on-change="pageChange"
+    <Page
+      v-model:current="page"
+      :total="sum"
       :page-size="pageSize"
-      :current.sync="page"
-      show-elevator>
-    </Page>
+      show-elevator
+      @on-change="pageChange"
+    />
   </div>
 </template>
-<script>
-import only from 'only'
-import { purify } from '@/util/helper'
-import { useRootStore } from '@/store'
-import { useRanklistStore } from '@/store/modules/ranklist'
-import { useGroupStore } from '@/store/modules/group'
-import { mapActions, mapState } from 'pinia'
-import { formate } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      group: '',
-      groupList: []
-    }
-  },
-  computed: {
-    ...mapState(useGroupStore, {
-      groups: 'list'
-    }),
-    ...mapState(useRootStore, ['judge']),
-    ...mapState(useRanklistStore, ['list', 'sum']),
-    query () {
-      const opt = Object.assign(
-        only(this.$route.query, 'page pageSize'),
-        { gid: this.group }
-      )
-      return purify(opt)
-    }
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    formate,
-    ...mapActions(useGroupStore, ['find']),
-    fetch () {
-      useRanklistStore().find(this.query)
-      this.find().then(() => {
-        this.groupList = [{
-          gid: '',
-          title: 'ALL'
-        }]
-        this.groups.map((item) => {
-          this.groupList.push(item)
-        })
-      })
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-    },
-    reload (payload = {}) {
-      const query = Object.assign(this.query, payload)
-      this.$router.push({
-        name: 'ranklist',
-        query
-      })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-    indexMethod (index) {
-      return index + 1 + (this.page - 1) * this.pageSize
-    },
-    search () {
-      this.reload({
-        gid: this.group,
-        page: 1
-      })
-    }
-  },
-  watch: {
-    '$route' (to, from) {
-      if (to !== from) this.fetch()
-    }
-  }
-}
-</script>
 <style lang="stylus">
 @import '../styles/common'
 

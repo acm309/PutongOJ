@@ -1,37 +1,39 @@
-<template>
-  <div class="usermanage">
-    <Tabs :value="active" @on-click="change">
-      <TabPane label="UserEdit" name="userEdit"></TabPane>
-      <TabPane label="GroupEdit" name="groupEdit"></TabPane>
-      <TabPane label="AdminEdit" name="adminEdit" v-if="canRemove"></TabPane>
-      <TabPane label="TagEdit" name="tagEdit"></TabPane>
-    </Tabs>
-    <router-view></router-view>
-  </div>
-</template>
 <script>
-import { useSessionStore } from '@/store/modules/session'
 import { mapState } from 'pinia'
+import { useSessionStore } from '@/store/modules/session'
 
 export default {
   computed: {
     ...mapState(useSessionStore, [ 'isAdmin', 'canRemove' ]),
     active () {
       return this.$route.name
-    }
+    },
+  },
+  watch: {
+    $route (to, from) {
+      if (to !== from) { this.current = this.$route.name }
+    },
   },
   methods: {
     change (name) {
       this.$router.push({ name })
-    }
+    },
   },
-  watch: {
-    '$route' (to, from) {
-      if (to !== from) this.current = this.$route.name
-    }
-  }
 }
 </script>
+
+<template>
+  <div class="usermanage">
+    <Tabs :value="active" @on-click="change">
+      <TabPane label="UserEdit" name="userEdit" />
+      <TabPane label="GroupEdit" name="groupEdit" />
+      <TabPane v-if="canRemove" label="AdminEdit" name="adminEdit" />
+      <TabPane label="TagEdit" name="tagEdit" />
+    </Tabs>
+    <router-view />
+  </div>
+</template>
+
 <style lang="stylus">
 .usermanage
   h1

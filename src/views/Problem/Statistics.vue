@@ -1,13 +1,154 @@
+<script>
+import ECharts from 'vue-echarts/components/ECharts.vue'
+import 'echarts/lib/chart/pie'
+import 'echarts/lib/component/title'
+import 'echarts/lib/component/tooltip'
+import 'echarts/lib/component/legend'
+import { mapActions, mapState } from 'pinia'
+import { useStatisticsStore } from '@/store/modules/statistics'
+import constant from '@/util/constant'
+import { useRootStore } from '@/store'
+import { timePretty } from '@/util/formate'
+
+export default {
+  components: {
+    Chart: ECharts,
+  },
+  data () {
+    return {
+      name: constant.statisTableObj,
+      lang: constant.language,
+      currentPage: 1,
+      pageSize: 20,
+      pid: '',
+    }
+  },
+  computed: {
+    ...mapState(useStatisticsStore, [
+      'list',
+      'countList',
+      'sumCharts',
+      'sumStatis',
+    ]),
+    pie () {
+      const data = {
+        title: {
+          text: `Statistics for ${this.$route.params.pid}`,
+          x: 'center',
+          y: 'top',
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b} </br>{d}%',
+        },
+        legend: {
+          orient: 'horizontal',
+          x: 'center',
+          y: 'bottom',
+          data: [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ],
+        },
+        calculable: true,
+        series: [
+          {
+            name: 'Statistics',
+            type: 'pie',
+            radius: '55%',
+            center: [ '50%', '50%' ],
+            data: [
+              { value: this.countList[0] || 0, name: 'CE' },
+              { value: this.countList[1] || 0, name: 'AC' },
+              { value: this.countList[2] || 0, name: 'RE' },
+              { value: this.countList[3] || 0, name: 'WA' },
+              { value: this.countList[4] || 0, name: 'TLE' },
+              { value: this.countList[5] || 0, name: 'MLE' },
+              { value: this.countList[6] || 0, name: 'OLE' },
+              { value: this.countList[7] || 0, name: 'PE' },
+              { value: this.countList[8] || 0, name: 'SE' },
+            ],
+          },
+        ],
+      }
+      return data
+    },
+  },
+  created () {
+    this.pid = this.$route.params.pid
+    this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
+  },
+  mounted () {
+    // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
+    let dataIndex = -1
+    const pie = this.$refs.pie
+    const dataLen = this.countList.length
+    const opt = {
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      pid: this.$route.params.pid,
+    }
+    this.find(opt)
+      .then(() => {
+        pie.dispatchAction({
+          type: 'downplay',
+          seriesIndex: 0,
+          dataIndex,
+        })
+        dataIndex = (dataIndex + 1) % dataLen
+        pie.dispatchAction({
+          type: 'highlight',
+          seriesIndex: 0,
+          dataIndex,
+        })
+        // 显示 tooltip
+        pie.dispatchAction({
+          type: 'showTip',
+          seriesIndex: 0,
+          dataIndex,
+        })
+      })
+  },
+  methods: {
+    timePretty,
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
+    ...mapActions(useStatisticsStore, [ 'find' ]),
+    getStatistics () {
+      const opt = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        pid: this.$route.params.pid,
+      }
+      this.find(opt)
+    },
+    handleCurrentChange (val) {
+      this.currentPage = val
+      this.getStatistics()
+    },
+    handleSizeChange (val) {
+      this.pageSize = val
+      this.getStatistics()
+    },
+    indexMethod (index) {
+      return index + 1 + (this.currentPage - 1) * this.pageSize
+    },
+  },
+}
+</script>
+
 <template>
   <div class="statis-wrap">
     <div class="left">
       <table>
         <tr>
-          <th class="t1">Result</th>
-          <th class="t2">Amount</th>
+          <th class="t1">
+            Result
+          </th>
+          <th class="t2">
+            Amount
+          </th>
         </tr>
         <tr>
-          <td class="t1">Total Submissions</td>
+          <td class="t1">
+            Total Submissions
+          </td>
           <td class="t2">
             <router-link :to="{ name: 'status', query: { pid } }">
               {{ sumCharts }}
@@ -15,10 +156,12 @@
           </td>
         </tr>
       </table>
-      <chart :options="pie" ref="pie" auto-resize></chart>
+      <Chart ref="pie" :options="pie" auto-resize />
       <table>
         <tr v-for="(item, index) in countList" :key="index">
-          <td class="t1">{{ name[index] }}</td>
+          <td class="t1">
+            {{ name[index] }}
+          </td>
           <td class="t2">
             <router-link :to="{ name: 'status', query: { pid, judge: index + 2 } }">
               {{ item }}
@@ -42,7 +185,9 @@
           <td>{{ index + 1 }}</td>
           <td>
             <router-link :to="{ name: '', params: { uid: item.uid } }">
-              <Button type="text">{{ item.uid }}</Button>
+              <Button type="text">
+                {{ item.uid }}
+              </Button>
             </router-link>
           </td>
           <td>
@@ -52,155 +197,25 @@
           <td>{{ item.length }}</td>
           <td>
             <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-              <Button type="text">{{ lang[item.language] }}</Button>
+              <Button type="text">
+                {{ lang[item.language] }}
+              </Button>
             </router-link>
           </td>
           <td>{{ timePretty(item.create) }}</td>
         </tr>
       </table>
-      <Page :total="sumStatis"
-        @on-change="handleCurrentChange"
+      <Page
+        v-model:current="currentPage"
+        :total="sumStatis"
         :page-size="pageSize"
-        :current.sync="currentPage"
-        show-elevator>
-      </Page>
+        show-elevator
+        @on-change="handleCurrentChange"
+      />
     </div>
   </div>
 </template>
-<script>
-import ECharts from 'vue-echarts/components/ECharts.vue'
-import 'echarts/lib/chart/pie'
-import 'echarts/lib/component/title'
-import 'echarts/lib/component/tooltip'
-import 'echarts/lib/component/legend'
-import { useStatisticsStore } from '@/store/modules/statistics'
-import constant from '@/util/constant'
-import { mapActions, mapState } from 'pinia'
-import { useRootStore } from '@/store'
-import { timePretty } from '@/util/formate'
 
-export default {
-  components: {
-    'chart': ECharts
-  },
-  data () {
-    return {
-      name: constant.statisTableObj,
-      lang: constant.language,
-      currentPage: 1,
-      pageSize: 20,
-      pid: ''
-    }
-  },
-  computed: {
-    ...mapState(useStatisticsStore, [
-      'list',
-      'countList',
-      'sumCharts',
-      'sumStatis'
-    ]),
-    pie () {
-      const data = {
-        title: {
-          text: 'Statistics for ' + this.$route.params.pid,
-          x: 'center',
-          y: 'top'
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{b} </br>{d}%'
-        },
-        legend: {
-          orient: 'horizontal',
-          x: 'center',
-          y: 'bottom',
-          data: ['CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE']
-        },
-        calculable: true,
-        series: [
-          {
-            name: 'Statistics',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '50%'],
-            data: [
-              {value: this.countList[0] || 0, name: 'CE'},
-              {value: this.countList[1] || 0, name: 'AC'},
-              {value: this.countList[2] || 0, name: 'RE'},
-              {value: this.countList[3] || 0, name: 'WA'},
-              {value: this.countList[4] || 0, name: 'TLE'},
-              {value: this.countList[5] || 0, name: 'MLE'},
-              {value: this.countList[6] || 0, name: 'OLE'},
-              {value: this.countList[7] || 0, name: 'PE'},
-              {value: this.countList[8] || 0, name: 'SE'}
-            ]
-          }
-        ]
-      }
-      return data
-    }
-  },
-  created () {
-    this.pid = this.$route.params.pid
-    this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
-  },
-  mounted () {
-    // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
-    let dataIndex = -1
-    let pie = this.$refs.pie
-    let dataLen = this.countList.length
-    let opt = {
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      pid: this.$route.params.pid
-    }
-    this.find(opt)
-      .then(() => {
-        pie.dispatchAction({
-          type: 'downplay',
-          seriesIndex: 0,
-          dataIndex
-        })
-        dataIndex = (dataIndex + 1) % dataLen
-        pie.dispatchAction({
-          type: 'highlight',
-          seriesIndex: 0,
-          dataIndex
-        })
-        // 显示 tooltip
-        pie.dispatchAction({
-          type: 'showTip',
-          seriesIndex: 0,
-          dataIndex
-        })
-      })
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useStatisticsStore, ['find']),
-    getStatistics () {
-      let opt = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        pid: this.$route.params.pid
-      }
-      this.find(opt)
-    },
-    handleCurrentChange (val) {
-      this.currentPage = val
-      this.getStatistics()
-    },
-    handleSizeChange (val) {
-      this.pageSize = val
-      this.getStatistics()
-    },
-    indexMethod (index) {
-      return index + 1 + (this.currentPage - 1) * this.pageSize
-    }
-  }
-}
-</script>
 <style lang="stylus">
 @import '../../styles/common'
 

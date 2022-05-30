@@ -1,104 +1,5 @@
-<template>
-  <div class="user-wrap">
-    <Row>
-      <Col :span="6">
-        <img src="../assets/logo.png" alt="">
-        <h1 style="margin-bottom: 20px">{{ user.uid }}</h1>
-        <Icon type="person"></Icon>&nbsp;&nbsp;{{ `Nick: ${user.nick}` }}
-        <div class="group" v-if="group.length > 0">
-          <Icon type="person-stalker"></Icon>&nbsp;&nbsp;{{ `Group: ${group}` }}
-        </div>
-        <div class="motto" v-if="user.motto">
-          <Icon type="edit"></Icon>&nbsp;&nbsp;{{ `Motto: ${user.motto}` }}
-        </div>
-        <div v-if="user.mail">
-          <Icon type="email"></Icon>&nbsp;&nbsp;{{ `Mail: ${user.mail}` }}
-        </div>
-        <div v-if="user.school">
-          <Icon type="university"></Icon>&nbsp;&nbsp;{{ `School: ${user.school}` }}
-        </div>
-        <Row class="border" type="flex" justify="center">
-          <Col :span="12">
-            <h1>{{ user.solve }}</h1>
-            <h4>Solved</h4>
-          </Col>
-          <Col :span="12">
-            <h1>{{ user.submit }}</h1>
-            <h4>Submit</h4>
-          </Col>
-        </Row>
-        <Button style="margin-top: 20px" type="warning" long v-if="isAdmin && user.uid != 'admin' && canRemove"
-          @click="del(user.uid)"
-        >
-          REMOVE THIS USER
-        </Button>
-      </Col>
-      <Col :offset="1" :span="17">
-        <Tabs v-model="display">
-          <TabPane label="Overview" name="overview">
-            <div class="solved">
-              <div class="solved-name">Solved</div>
-              <Button v-for="item in solved" :key="item" type="text">
-                <router-link :to="{ name: 'problemInfo', params: { pid: item } }">{{ item }}</router-link>
-              </Button>
-            </div>
-            <div class="unsolved">
-              <div class="unsolved-name">Unolved</div>
-              <Button v-for="item in unsolved" :key="item" type="text">
-                <router-link :to="{ name: 'problemInfo', params: { pid: item } }">{{ item }}</router-link>
-              </Button>
-            </div>
-          </TabPane>
-          <TabPane label="Edit" name="edit" class="edit" v-if="profile && profile.uid === user.uid">
-            <Row class="nick">
-              <Col :span="2" class="label">Nick</Col>
-              <Col :span="12">
-                <Input v-model="user.nick"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">Motto</Col>
-              <Col :span="12">
-                <Input v-model="user.motto"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">School</Col>
-              <Col :span="12">
-                <Input v-model="user.school"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">Mail</Col>
-              <Col :span="12">
-                <Input v-model="user.mail"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">Password</Col>
-              <Col :span="12">
-                <Input v-model="newPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
-              </Col>
-            </Row>
-            <Row>
-              <Col :span="2" class="label">CheckPwd</Col>
-              <Col :span="12">
-                <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed"></Input>
-              </Col>
-            </Row>
-            <Row class="submit">
-              <Col :offset="6" :span="6">
-                <Button type="primary" size="large" @click="submit">Submit</Button>
-              </Col>
-            </Row>
-          </TabPane>
-        </Tabs>
-      </Col>
-    </Row>
-  </div>
-</template>
 <script>
-import { mapState, mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { purify } from '@/util/helper'
 import { useUserStore } from '@/store/modules/user'
 import { useSessionStore } from '@/store/modules/session'
@@ -108,19 +9,28 @@ export default {
   data: () => ({
     display: 'overview',
     newPwd: '',
-    checkPwd: ''
+    checkPwd: '',
   }),
   computed: {
-    ...mapState(useUserStore, ['user', 'solved', 'unsolved', 'group']),
-    ...mapState(useSessionStore, ['profile', 'isAdmin', 'canRemove'])
+    ...mapState(useUserStore, [ 'user', 'solved', 'unsolved', 'group' ]),
+    ...mapState(useSessionStore, [ 'profile', 'isAdmin', 'canRemove' ]),
+  },
+  watch: {
+    $route (to, from) {
+      if (to !== from) {
+        this.fetch()
+      }
+    },
   },
   created () {
     this.fetch()
   },
   methods: {
-    ...mapActions(useUserStore, ['findOne']),
-    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useUserStore, [ 'findOne' ]),
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
     fetch () {
+      if (this.$route.params.uid == null) return
+
       this.findOne(this.$route.params).then(() => {
         this.changeDomTitle({ title: this.user.uid })
       })
@@ -129,7 +39,7 @@ export default {
       if (this.newPwd === this.checkPwd) {
         const user = purify(Object.assign(
           this.user,
-          { newPwd: this.newPwd }
+          { newPwd: this.newPwd },
         ))
         user.mail = this.user.mail || ''
         useUserStore().update(user).then(() => {
@@ -145,26 +55,145 @@ export default {
         title: '提示',
         content: `<p>此操作将永久删除用户 ${uid}, 是否继续?</p>`,
         onOk: () => {
-          useUserStore().delete({uid}).then(() => {
+          useUserStore().delete({ uid }).then(() => {
             this.$router.push({ name: 'home' })
             this.$Message.success(`成功删除 ${uid}！`)
           })
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
-        }
+        },
       })
-    }
+    },
   },
-  watch: {
-    '$route' (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    }
-  }
 }
 </script>
+
+<template>
+  <div class="user-wrap">
+    <Row>
+      <Col :span="6">
+        <img src="../assets/logo.png" alt="">
+        <h1 style="margin-bottom: 20px">
+          {{ user.uid }}
+        </h1>
+        <Icon type="person" />&nbsp;&nbsp;{{ `Nick: ${user.nick}` }}
+        <div v-if="group.length > 0" class="group">
+          <Icon type="person-stalker" />&nbsp;&nbsp;{{ `Group: ${group}` }}
+        </div>
+        <div v-if="user.motto" class="motto">
+          <Icon type="edit" />&nbsp;&nbsp;{{ `Motto: ${user.motto}` }}
+        </div>
+        <div v-if="user.mail">
+          <Icon type="email" />&nbsp;&nbsp;{{ `Mail: ${user.mail}` }}
+        </div>
+        <div v-if="user.school">
+          <Icon type="university" />&nbsp;&nbsp;{{ `School: ${user.school}` }}
+        </div>
+        <Row class="border" type="flex" justify="center">
+          <Col :span="12">
+            <h1>{{ user.solve }}</h1>
+            <h4>Solved</h4>
+          </Col>
+          <Col :span="12">
+            <h1>{{ user.submit }}</h1>
+            <h4>Submit</h4>
+          </Col>
+        </Row>
+        <Button
+          v-if="isAdmin && user.uid !== 'admin' && canRemove" style="margin-top: 20px" type="warning" long
+          @click="del(user.uid)"
+        >
+          REMOVE THIS USER
+        </Button>
+      </Col>
+      <Col :offset="1" :span="17">
+        <Tabs v-model="display">
+          <TabPane label="Overview" name="overview">
+            <div class="solved">
+              <div class="solved-name">
+                Solved
+              </div>
+              <Button v-for="item in solved" :key="item" type="text">
+                <router-link :to="{ name: 'problemInfo', params: { pid: item } }">
+                  {{ item }}
+                </router-link>
+              </Button>
+            </div>
+            <div class="unsolved">
+              <div class="unsolved-name">
+                Unolved
+              </div>
+              <Button v-for="item in unsolved" :key="item" type="text">
+                <router-link :to="{ name: 'problemInfo', params: { pid: item } }">
+                  {{ item }}
+                </router-link>
+              </Button>
+            </div>
+          </TabPane>
+          <TabPane v-if="profile && profile.uid === user.uid" label="Edit" name="edit" class="edit">
+            <Row class="nick">
+              <Col :span="2" class="label">
+                Nick
+              </Col>
+              <Col :span="12">
+                <Input v-model="user.nick" />
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">
+                Motto
+              </Col>
+              <Col :span="12">
+                <Input v-model="user.motto" />
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">
+                School
+              </Col>
+              <Col :span="12">
+                <Input v-model="user.school" />
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">
+                Mail
+              </Col>
+              <Col :span="12">
+                <Input v-model="user.mail" />
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">
+                Password
+              </Col>
+              <Col :span="12">
+                <Input v-model="newPwd" type="password" placeholder="Leave it blank if it is not changed" />
+              </Col>
+            </Row>
+            <Row>
+              <Col :span="2" class="label">
+                CheckPwd
+              </Col>
+              <Col :span="12">
+                <Input v-model="checkPwd" type="password" placeholder="Leave it blank if it is not changed" />
+              </Col>
+            </Row>
+            <Row class="submit">
+              <Col :offset="6" :span="6">
+                <Button type="primary" size="large" @click="submit">
+                  Submit
+                </Button>
+              </Col>
+            </Row>
+          </TabPane>
+        </Tabs>
+      </Col>
+    </Row>
+  </div>
+</template>
+
 <style lang="stylus">
 .user-wrap
   text-align: left

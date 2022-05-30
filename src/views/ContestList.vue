@@ -1,64 +1,11 @@
-<template>
-  <div class="con-wrap">
-    <table>
-      <tr>
-        <th>CID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Start Time</th>
-        <th>Type</th>
-        <th v-if="isAdmin">Visible</th>
-        <th v-if="isAdmin && canRemove">Delete</th>
-      </tr>
-      <template v-for="(item, index) in list">
-        <tr v-if="isAdmin || item.status === status.Available" :key="index">
-          <td>{{ item.cid }}</td>
-          <td>
-            <Button type="text" @click="visit(item)">{{ item.title }}</Button>
-            <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
-              <strong v-show="item.status === status.Reserve">Reserved</strong>
-            </Tooltip>
-          </td>
-          <td>
-            <span class="ready" v-if="item.start > currentTime">Ready</span>
-            <span class="run" v-if="item.start < currentTime && item.end > currentTime">Running</span>
-            <span class="end" v-if="item.end < currentTime" >Ended</span>
-          </td>
-          <td>
-            <span>{{ timePretty(item.start) }}</span>
-          </td>
-          <td>
-            <span :class="{'password': +item.encrypt === encrypt.Password, 'private': +item.encrypt === encrypt.Private, 'public': +item.encrypt === encrypt.Public}">
-              {{ type[item.encrypt] }}
-            </span>
-          </td>
-          <td v-if="isAdmin">
-            <Tooltip content="Click to change status" placement="right">
-              <Button type="text" @click="change(item)">{{ contestVisible[item.status] }}</Button>
-            </Tooltip>
-          </td>
-          <td v-if="isAdmin && canRemove">
-            <Button type="text" @click="del(item.cid)">Delete</Button>
-          </td>
-        </tr>
-      </template>
-    </table>
-    <Page :total="sum"
-      @on-change="pageChange"
-      :page-size="pageSize"
-      :current.sync="page"
-      show-elevator>
-    </Page>
-  </div>
-</template>
 <script>
 import only from 'only'
+import { mapActions, mapState } from 'pinia'
 import { purify } from '../util/helper'
 import constant from '../util/constant'
 import { useSessionStore } from '@/store/modules/session'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
-import { mapActions, mapState } from 'pinia'
 import { timePretty } from '@/util/formate'
 
 export default {
@@ -69,26 +16,26 @@ export default {
       contestStatus: constant.contestStatus,
       type: constant.contestType,
       contestVisible: constant.status,
-      enterPsd: ''
+      enterPsd: '',
     }
   },
   computed: {
-    ...mapState(useContestStore, ['list', 'sum']),
-    ...mapState(useSessionStore, ['profile', 'isLogined', 'isAdmin', 'canRemove']),
-    ...mapState(useRootStore, ['status', 'encrypt', 'currentTime']),
+    ...mapState(useContestStore, [ 'list', 'sum' ]),
+    ...mapState(useSessionStore, [ 'profile', 'isLogined', 'isAdmin', 'canRemove' ]),
+    ...mapState(useRootStore, [ 'status', 'encrypt', 'currentTime' ]),
     query () {
       const opt = only(this.$route.query, 'page pageSize type content')
       return purify(opt)
-    }
+    },
   },
   created () {
     this.fetch()
   },
   methods: {
     timePretty,
-    ...mapActions(useContestStore, ['find', 'verify', 'update']),
+    ...mapActions(useContestStore, [ 'find', 'verify', 'update' ]),
     ...mapActions(useContestStore, {
-      'remove': 'delete'
+      remove: 'delete',
     }),
     fetch () {
       this.find(this.query)
@@ -100,7 +47,7 @@ export default {
       const query = Object.assign({}, this.query, payload)
       this.$router.push({
         name: 'contestList',
-        query
+        query,
       })
     },
     pageChange (val) {
@@ -110,7 +57,7 @@ export default {
       const opt = Object.assign(
         {},
         item,
-        { pwd: this.enterPsd }
+        { pwd: this.enterPsd },
       )
       this.verify(opt).then((data) => {
         if (data) {
@@ -123,23 +70,23 @@ export default {
     visit (item) {
       if (!this.isLogined) {
         useSessionStore().toggleLoginState()
-      } else if (this.isAdmin || this.profile.verifyContest.indexOf(+item.cid) !== -1) {
+      } else if (this.isAdmin || this.profile.verifyContest.includes(+item.cid)) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (item.start > this.currentTime) {
-        this.$Message.error("This contest hasn't started yet!")
+        this.$Message.error('This contest hasn\'t started yet!')
       } else if (+item.encrypt === this.encrypt.Public) {
         this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
       } else if (+item.encrypt === this.encrypt.Private) {
         const opt = Object.assign(
           {},
           item,
-          { uid: this.profile.uid }
+          { uid: this.profile.uid },
         )
         this.verify(opt).then((data) => {
           if (data) {
             this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
           } else {
-            this.$Message.error("You're not invited to attend this contest!")
+            this.$Message.error('You\'re not invited to attend this contest!')
           }
         })
       } else if (+item.encrypt === this.encrypt.Password) {
@@ -147,22 +94,22 @@ export default {
           render: (h) => {
             return h('Input', {
               props: {
-                placeholder: 'Please enter password.'
+                placeholder: 'Please enter password.',
               },
               on: {
-                input: (val) => {
+                'input': (val) => {
                   this.enterPsd = val
                 },
                 'on-enter': () => {
                   this.enter(item)
                   this.$Modal.remove()
-                }
-              }
+                },
+              },
             })
           },
           onOk: () => {
             this.enter(item)
-          }
+          },
         })
       }
     },
@@ -183,17 +130,83 @@ export default {
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
-        }
+        },
       })
-    }
+    },
   },
   watch: {
-    '$route' (to, from) {
-      if (to !== from) this.fetch()
-    }
-  }
+    $route (to, from) {
+      if (to !== from) { this.fetch() }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="con-wrap">
+    <table>
+      <tr>
+        <th>CID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Start Time</th>
+        <th>Type</th>
+        <th v-if="isAdmin">
+          Visible
+        </th>
+        <th v-if="isAdmin && canRemove">
+          Delete
+        </th>
+      </tr>
+      <template v-for="(item, index) in list">
+        <tr v-if="isAdmin || item.status === status.Available" :key="index">
+          <td>{{ item.cid }}</td>
+          <td>
+            <Button type="text" @click="visit(item)">
+              {{ item.title }}
+            </Button>
+            <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
+              <strong v-show="item.status === status.Reserve">Reserved</strong>
+            </Tooltip>
+          </td>
+          <td>
+            <span v-if="item.start > currentTime" class="ready">Ready</span>
+            <span v-if="item.start < currentTime && item.end > currentTime" class="run">Running</span>
+            <span v-if="item.end < currentTime" class="end">Ended</span>
+          </td>
+          <td>
+            <span>{{ timePretty(item.start) }}</span>
+          </td>
+          <td>
+            <span :class="{ password: +item.encrypt === encrypt.Password, private: +item.encrypt === encrypt.Private, public: +item.encrypt === encrypt.Public }">
+              {{ type[item.encrypt] }}
+            </span>
+          </td>
+          <td v-if="isAdmin">
+            <Tooltip content="Click to change status" placement="right">
+              <Button type="text" @click="change(item)">
+                {{ contestVisible[item.status] }}
+              </Button>
+            </Tooltip>
+          </td>
+          <td v-if="isAdmin && canRemove">
+            <Button type="text" @click="del(item.cid)">
+              Delete
+            </Button>
+          </td>
+        </tr>
+      </template>
+    </table>
+    <Page
+      v-model:current="page"
+      :total="sum"
+      :page-size="pageSize"
+      show-elevator
+      @on-change="pageChange"
+    />
+  </div>
+</template>
+
 <style lang="stylus" scoped>
 @import '../styles/common'
 

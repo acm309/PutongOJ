@@ -1,46 +1,33 @@
-<template>
-  <div class="conpro-wrap">
-    <ul>
-      <li v-for="i in totalProblems" :key="i" :class="{'active': i === proIndex}" @click="pageChange(i)">
-        {{ i }}
-      </li>
-    </ul>
-    <problem :problem="problem">
-      <h1 slot="title">{{ this.$route.params.id }}:  {{ problem.title }}</h1>
-    </problem>
-    <Button shape="circle" icon="md-paper-plane" @click="submit">Submit</Button>
-  </div>
-</template>
 <script>
+import { mapActions, mapState } from 'pinia'
 import Problem from '@/components/Problem'
 import { useProblemStore } from '@/store/modules/problem'
 import { useContestStore } from '@/store/modules/contest'
-import { mapState, mapActions } from 'pinia'
 import { useRootStore } from '@/store'
 
 export default {
+  components: {
+    Problem,
+  },
   data () {
     return {
-      proIndex: parseInt(this.$route.params.id)
+      proIndex: parseInt(this.$route.params.id),
     }
   },
-  components: {
-    Problem
-  },
   computed: {
-    ...mapState(useProblemStore, ['problem']),
-    ...mapState(useContestStore, ['overview', 'totalProblems'])
+    ...mapState(useProblemStore, [ 'problem' ]),
+    ...mapState(useContestStore, [ 'overview', 'totalProblems' ]),
   },
   created () {
     this.fetch()
     this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
   },
   methods: {
-    ...mapActions(useRootStore, ['changeDomTitle']),
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
     ...mapActions(useProblemStore, {
-      findOneProblem: 'findOne'
+      findOneProblem: 'findOne',
     }),
-    ...mapActions(useContestStore, ['findOne']),
+    ...mapActions(useContestStore, [ 'findOne' ]),
     async fetch () {
       this.proIndex = parseInt(this.$route.params.id)
       const data = await this.findOne(this.$route.params)
@@ -49,23 +36,42 @@ export default {
     pageChange (val) {
       this.$router.push({
         name: 'contestProblem',
-        params: { id: val }
+        params: { id: val },
       })
     },
     submit () {
       this.$router.push({
         name: 'contestSubmit',
-        params: this.$router.params
+        params: this.$router.params,
       })
-    }
+    },
   },
   watch: {
-    '$route' (to, from) {
-      if (to !== from && to.name === 'contestProblem') this.fetch()
-    }
-  }
+    $route (to, from) {
+      if (to !== from && to.name === 'contestProblem') { this.fetch() }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="conpro-wrap">
+    <ul>
+      <li v-for="i in totalProblems" :key="i" :class="{ active: i === proIndex }" @click="pageChange(i)">
+        {{ i }}
+      </li>
+    </ul>
+    <Problem :problem="problem">
+      <h1 slot="title">
+        {{ $route.params.id }}:  {{ problem.title }}
+      </h1>
+    </Problem>
+    <Button shape="circle" icon="md-paper-plane" @click="submit">
+      Submit
+    </Button>
+  </div>
+</template>
+
 <style lang="stylus" scoped>
 ul
   margin-left: 10px

@@ -1,11 +1,11 @@
-import routes from './routes'
 import { LoadingBar } from 'view-ui-plus'
+import { createRouter, createWebHistory } from 'vue-router'
+import routes from './routes'
 import { useSessionStore } from '@/store/modules/session'
-import {createWebHashHistory, createRouter} from 'vue-router'
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes
+  history: createWebHistory(),
+  routes,
 })
 
 // 全局身份确认
@@ -19,7 +19,7 @@ router.beforeEach((to, from, next) => {
     } else {
       session.toggleLoginState()
       next({
-        name: 'contestList'
+        name: 'contestList',
       })
     }
   } else if (to.meta.requiresAdmin) {
@@ -28,7 +28,7 @@ router.beforeEach((to, from, next) => {
       next()
     } else {
       next({
-        name: 'home'
+        name: 'home',
       })
     }
   } else {

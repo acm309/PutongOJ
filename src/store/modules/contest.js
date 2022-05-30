@@ -1,5 +1,5 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useContestStore = defineStore('contest', {
   state: () => ({
@@ -10,16 +10,16 @@ export const useContestStore = defineStore('contest', {
     totalProblems: 0,
     problems: [],
     ranklist: [],
-    solved: []
+    solved: [],
   }),
   actions: {
     async find (payload) {
-      const {data} = await api.contest.find(payload)
+      const { data } = await api.contest.find(payload)
       this.list = data.list.docs
       this.sum = data.list.total
     },
     async findOne (payload) {
-      const {data} = await api.contest.findOne(payload)
+      const { data } = await api.contest.findOne(payload)
       this.contest = data.contest
       this.overview = data.overview
       this.totalProblems = data.totalProblems
@@ -27,7 +27,7 @@ export const useContestStore = defineStore('contest', {
       return data
     },
     async getRank (payload) {
-      const {data} = await api.contest.rank(payload)
+      const { data } = await api.contest.rank(payload)
       this.ranklist = normalize(data.ranklist, this.contest)
     },
     create (payload) {
@@ -38,20 +38,20 @@ export const useContestStore = defineStore('contest', {
     },
     async delete (payload) {
       await api.contest.delete(payload)
-      this.list = this.list.filter((p) => p.cid !== +(payload.cid))
+      this.list = this.list.filter(p => p.cid !== +(payload.cid))
     },
     verify (payload) {
       return api.contest.verify(payload).then(({ data }) => data.isVerify)
-    }
-  }
+    },
+  },
 })
 
 function normalize (ranklist, contest) {
-  const list = Object.values(ranklist).map(row => { // 每一行，也就是每一个用户的成绩
+  const list = Object.values(ranklist).map((row) => { // 每一行，也就是每一个用户的成绩
     let solved = 0 // 记录 ac 几道题
     let penalty = 0 // 罚时，尽在 ac 时计算
     for (const pid of contest.list) {
-      if (row[pid] == null) continue // 这道题没有交过
+      if (row[pid] == null) { continue } // 这道题没有交过
       const submission = row[pid]
       if (submission.wa >= 0) { // ac 了
         solved++
@@ -76,16 +76,16 @@ function normalize (ranklist, contest) {
   for (const pid of contest.list) {
     quickest[pid] = Infinity // init
   }
-  list.forEach(row => {
+  list.forEach((row) => {
     for (const pid of contest.list) {
       if (row[pid] != null && row[pid].wa >= 0) {
         quickest[pid] = Math.min(quickest[pid], row[pid].create)
       }
     }
   })
-  list.forEach(row => {
+  list.forEach((row) => {
     for (const pid of contest.list) {
-      if (row[pid] == null || row[pid].wa < 0) continue
+      if (row[pid] == null || row[pid].wa < 0) { continue }
       if (quickest[pid] === row[pid].create) { // 这就是最早提交的那个
         row[pid].prime = true // 打上标记
       }

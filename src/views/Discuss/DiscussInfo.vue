@@ -1,57 +1,26 @@
-<template>
-  <div class="discuss-wrap">
-    <h1>{{ discuss.title }}</h1>
-    <Card dis-hover v-for="comment in discuss.comments" :key="comment.content">
-      <p slot="title">
-        {{ comment.uid }}
-      </p>
-      <span slot="extra">
-        {{ timeagoPretty(comment.create) }}
-      </span>
-      <pre><code>{{ comment.content }}</code></pre>
-    </Card>
-    <br>
-    <Form :model="form" label-position="top" class="form">
-        <FormItem>
-            <Input v-model="form.content" type="textarea" :autosize="{minRows: 2,maxRows: 20}"></Input>
-        </FormItem>
-        <FormItem>
-          <Button
-            type="primary"
-            @click="createNew"
-            :loading="loading"
-            :disabled="!isLogined"
-          >Add a reply</Button>
-          <span v-if="!isLogined">Login to reply</span>
-        </FormItem>
-    </Form>
-    <span>You will receive notifications through your email, if anyone replies</span>
-  </div>
-</template>
-
 <script>
+import { mapActions, mapState } from 'pinia'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
-import { mapState, mapActions } from 'pinia'
 import { timeagoPretty } from '@/util/formate'
 
 export default {
   props: {
     did: {
-      required: true
-    }
+      required: true,
+    },
   },
   data () {
     return {
       loading: false,
       form: {
-        content: ''
-      }
+        content: '',
+      },
     }
   },
   computed: {
-    ...mapState(useSessionStore, ['isLogined']),
-    ...mapState(useDiscussStore, ['discuss'])
+    ...mapState(useSessionStore, [ 'isLogined' ]),
+    ...mapState(useDiscussStore, [ 'discuss' ]),
   },
   created () {
     this.fetch()
@@ -66,7 +35,7 @@ export default {
       this.loading = true
       this.update({
         did: this.did,
-        content: this.form.content
+        content: this.form.content,
       }).then(() => {
         this.loading = false
         this.form.content = ''
@@ -74,10 +43,43 @@ export default {
       }).catch(() => {
         this.loading = false
       })
-    }
-  }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="discuss-wrap">
+    <h1>{{ discuss.title }}</h1>
+    <Card v-for="comment in discuss.comments" :key="comment.content" dis-hover>
+      <p slot="title">
+        {{ comment.uid }}
+      </p>
+      <span slot="extra">
+        {{ timeagoPretty(comment.create) }}
+      </span>
+      <pre><code>{{ comment.content }}</code></pre>
+    </Card>
+    <br>
+    <Form :model="form" label-position="top" class="form">
+      <FormItem>
+        <Input v-model="form.content" type="textarea" :autosize="{ minRows: 2, maxRows: 20 }" />
+      </FormItem>
+      <FormItem>
+        <Button
+          type="primary"
+          :loading="loading"
+          :disabled="!isLogined"
+          @click="createNew"
+        >
+          Add a reply
+        </Button>
+        <span v-if="!isLogined">Login to reply</span>
+      </FormItem>
+    </Form>
+    <span>You will receive notifications through your email, if anyone replies</span>
+  </div>
+</template>
 
 <style lang="stylus">
 .discuss-wrap

@@ -1,92 +1,3 @@
-<template>
-  <div>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">Title</Col>
-      <Col :span="21">
-        <Input v-model="contest.title"></Input>
-      </Col>
-    </Row>
-    <Row  type="flex" justify="start">
-      <Col :span="2" class="label">Start Time</Col>
-      <Col :span="8">
-        <DatePicker
-          type="datetime"
-          placeholder="选择日期时间"
-          @on-change="(time) => changeTime('start', time)">
-        </DatePicker>
-      </Col>
-    </Row>
-    <Row  type="flex" justify="start">
-      <Col :span="2" class="label">End Time</Col>
-      <Col :span="8">
-        <DatePicker
-          type="datetime"
-          placeholder="选择日期时间"
-          @on-change="(time) => changeTime('end', time)">
-        </DatePicker>
-      </Col>
-    </Row>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">Type</Col>
-      <Col :span="4">
-        <Select v-model="contest.encrypt" placeholder="请选择">
-          <Option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </Option>
-        </Select>
-      </Col>
-    </Row>
-    <Row class="transfer" v-if="contest.encrypt === encrypt.Private">
-      <Transfer
-        :data="transData"
-        :target-keys="targetKeys"
-        :render-format="format"
-        :list-style="listStyle"
-        :operations="['To left','To right']"
-        filterable
-        :filter-method="filterMethod"
-        @on-change="handleChange">
-        <div :style="{float: 'right', margin: '5px'}">
-          <Button type="ghost" size="small" @click="saveUser">Save</Button>
-        </div>
-      </Transfer>
-    </Row>
-    <Row v-if="contest.encrypt === encrypt.Password">
-      <Col :span="23">
-        <Input v-model="contest.argument"></Input>
-      </Col>
-    </Row>
-    <Row>
-      <Col :span="23"><hr></Col>
-    </Row>
-    <Row>
-      <Col :span="23">
-        <draggable v-model="contest.list">
-          <transition-group name="list">
-            <div v-for="(item, index) in contest.list" :key="index" class="list-item">
-              <div>{{ item }} -- {{ jobs[item] }}</div>
-              <Icon type="close-circled" @click.native="removeJob(index)"></Icon>
-            </div>
-          </transition-group>
-        </draggable>
-      </Col>
-    </Row>
-    <Row>
-      <Col :span="21" class="add">
-        <Input v-model="pid" placeholder="Add a pid" @keyup.enter.native="add"></Input>
-      </Col>
-      <Col :span="2">
-        <Button type="primary" @click="add">Add</Button>
-      </Col>
-    </Row>
-    <Row>
-      <Col :span="23"><hr></Col>
-    </Row>
-  </div>
-</template>
 <script>
 import draggable from 'vuedraggable'
 import only from 'only'
@@ -97,43 +8,46 @@ import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 
 export default {
+  components: {
+    Draggable: draggable,
+  },
+  props: [ 'contest', 'overview' ],
   data () {
     return {
       jobs: {},
       options: [
         {
           value: 1,
-          label: 'Public'
+          label: 'Public',
         },
         {
           value: 2,
-          label: 'Private'
+          label: 'Private',
         },
         {
           value: 3,
-          label: 'Password'
-        }
+          label: 'Password',
+        },
       ],
       pid: '',
       targetKeys: [],
       listStyle: {
         width: '400px',
-        height: '500px'
+        height: '500px',
       },
-      userList: []
+      userList: [],
     }
   },
-  props: ['contest', 'overview'],
   computed: {
-    ...mapState(useRootStore, ['encrypt']),
-    ...mapState(useUserStore, ['list']),
+    ...mapState(useRootStore, [ 'encrypt' ]),
+    ...mapState(useUserStore, [ 'list' ]),
     transData () {
       return this.list.map((item, index) => ({
-        key: index + '',
+        key: `${index}`,
         label: item.uid,
-        disabled: false
+        disabled: false,
       }))
-    }
+    },
   },
   created () {
     // 这里必须保证此时 overview 是存在的
@@ -151,55 +65,165 @@ export default {
       })
     }
     useUserStore().find().then(() => {
-      this.userList = this.list.map((item) => item.uid)
+      this.userList = this.list.map(item => item.uid)
       if (+this.contest.encrypt === this.encrypt.Private) {
         const arg = this.contest.argument.split('\r\n')
-        this.targetKeys = arg.map((item) => this.userList.indexOf(item) + '')
+        this.targetKeys = arg.map(item => `${this.userList.indexOf(item)}`)
       }
     })
   },
   methods: {
     ...mapActions(useProblemStore, {
-      findOneProblem: 'findOne'
+      findOneProblem: 'findOne',
     }),
-    ...mapActions(useContestStore, ['findOne']),
+    ...mapActions(useContestStore, [ 'findOne' ]),
     async add () {
-      const {problem} = await this.findOneProblem(only(this, 'pid'))
+      const { problem } = await this.findOneProblem(only(this, 'pid'))
+      // eslint-disable-next-line vue/no-mutating-props
       this.contest.list.push(problem.pid)
       this.$set(this.jobs, problem.pid, problem.title)
       this.pid = ''
     },
     removeJob (index) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.contest.list.splice(index, 1)
     },
     format (item) {
       return item.label
     },
     filterMethod (data, query) {
-      return data.label.indexOf(query) > -1
+      return data.label.includes(query)
     },
     handleChange (newTargetKeys) {
       this.targetKeys = newTargetKeys
     },
     saveUser () {
-      const user = this.targetKeys.map((item) => this.userList[+item])
+      const user = this.targetKeys.map(item => this.userList[+item])
       const res = user.join('\r\n')
+      // eslint-disable-next-line vue/no-mutating-props
       this.contest.argument = res
       this.$Message.success('保存当前用户组成功！')
     },
     changeTime (name, time) {
       if (name === 'start') {
+        // eslint-disable-next-line vue/no-mutating-props
         this.contest.start = new Date(time).getTime()
       } else {
+        // eslint-disable-next-line vue/no-mutating-props
         this.contest.end = new Date(time).getTime()
       }
-    }
+    },
   },
-  components: {
-    draggable
-  }
 }
 </script>
+
+<template>
+  <div>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
+        Title
+      </Col>
+      <Col :span="21">
+        <Input v-model="contest.title" />
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
+        Start Time
+      </Col>
+      <Col :span="8">
+        <DatePicker
+          type="datetime"
+          placeholder="选择日期时间"
+          @on-change="(time) => changeTime('start', time)"
+        />
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
+        End Time
+      </Col>
+      <Col :span="8">
+        <DatePicker
+          type="datetime"
+          placeholder="选择日期时间"
+          @on-change="(time) => changeTime('end', time)"
+        />
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
+        Type
+      </Col>
+      <Col :span="4">
+        <Select v-model="contest.encrypt" placeholder="请选择">
+          <Option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </Select>
+      </Col>
+    </Row>
+    <Row v-if="contest.encrypt === encrypt.Private" class="transfer">
+      <Transfer
+        :data="transData"
+        :target-keys="targetKeys"
+        :render-format="format"
+        :list-style="listStyle"
+        :operations="['To left', 'To right']"
+        filterable
+        :filter-method="filterMethod"
+        @on-change="handleChange"
+      >
+        <div :style="{ float: 'right', margin: '5px' }">
+          <Button type="ghost" size="small" @click="saveUser">
+            Save
+          </Button>
+        </div>
+      </Transfer>
+    </Row>
+    <Row v-if="contest.encrypt === encrypt.Password">
+      <Col :span="23">
+        <Input v-model="contest.argument" />
+      </Col>
+    </Row>
+    <Row>
+      <Col :span="23">
+        <hr>
+      </Col>
+    </Row>
+    <Row>
+      <Col :span="23">
+        <Draggable v-model="contest.list">
+          <transition-group name="list">
+            <div v-for="(item, index) in contest.list" :key="index" class="list-item">
+              <div>{{ item }} -- {{ jobs[item] }}</div>
+              <Icon type="close-circled" @click.native="removeJob(index)" />
+            </div>
+          </transition-group>
+        </Draggable>
+      </Col>
+    </Row>
+    <Row>
+      <Col :span="21" class="add">
+        <Input v-model="pid" placeholder="Add a pid" @keyup.enter.native="add" />
+      </Col>
+      <Col :span="2">
+        <Button type="primary" @click="add">
+          Add
+        </Button>
+      </Col>
+    </Row>
+    <Row>
+      <Col :span="23">
+        <hr>
+      </Col>
+    </Row>
+  </div>
+</template>
+
 <style lang="stylus" scoped>
 .ivu-row, .ivu-row-flex
   margin-bottom: 14px

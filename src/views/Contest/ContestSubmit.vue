@@ -1,25 +1,17 @@
-<template>
-  <div>
-    <h1>{{ this.$route.params.id }}:  {{ title }}</h1>
-    <submit></submit>
-    <Button type="primary" @click="submit">Submit</Button>
-    <Button style="margin-left: 8px" @click="reset">Reset</Button>
-  </div>
-</template>
 <script>
+import { mapActions, mapState } from 'pinia'
 import Submit from '@/components/Submit'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useRootStore } from '@/store'
-import { mapState, mapActions } from 'pinia'
 import { useContestStore } from '@/store/modules/contest'
 
 export default {
   data: () => ({
-    title: ''
+    title: '',
   }),
   computed: {
-    ...mapState(useContestStore, ['problems', 'overview']),
-    ...mapState(useSolutionStore, ['solution'])
+    ...mapState(useContestStore, [ 'problems', 'overview' ]),
+    ...mapState(useSolutionStore, [ 'solution' ]),
   },
   created () {
     // 这里必须保证此时 overview 是存在的
@@ -34,9 +26,9 @@ export default {
     })
   },
   methods: {
-    ...mapActions(useContestStore, ['findOne']),
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useSolutionStore, ['clearCode', 'create']),
+    ...mapActions(useContestStore, [ 'findOne' ]),
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
+    ...mapActions(useSolutionStore, [ 'clearCode', 'create' ]),
     reset () {
       this.clearCode()
     },
@@ -46,19 +38,33 @@ export default {
         this.solution,
         {
           pid: this.problems[+this.$route.params.id - 1],
-          mid: this.$route.params.cid
-        }
+          mid: this.$route.params.cid,
+        },
       )).then(() => {
         this.$router.push({ name: 'contestStatus', params: { cid: this.$route.params.cid, id: this.$route.params.id } })
         this.$Message.info(`submit id:${this.$route.params.id} success!`)
       })
-    }
+    },
   },
   components: {
-    Submit
-  }
+    Submit,
+  },
 }
 </script>
+
+<template>
+  <div>
+    <h1>{{ $route.params.id }}:  {{ title }}</h1>
+    <Submit />
+    <Button type="primary" @click="submit">
+      Submit
+    </Button>
+    <Button style="margin-left: 8px" @click="reset">
+      Reset
+    </Button>
+  </div>
+</template>
+
 <style lang="stylus" scoped>
 h1
   color: #9799ca

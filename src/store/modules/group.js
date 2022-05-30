@@ -1,5 +1,5 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useGroupStore = defineStore('group', {
   state: () => ({
@@ -7,16 +7,16 @@ export const useGroupStore = defineStore('group', {
     group: {
       gid: '',
       title: '',
-      list: []
-    }
+      list: [],
+    },
   }),
   actions: {
     async findOne (payload) {
-      const {data} = await api.group.findOne(payload)
+      const { data } = await api.group.findOne(payload)
       this.group = data.group
     },
     async find () {
-      const {data} = await api.group.find()
+      const { data } = await api.group.find()
       this.list = data.list
       return data.list
     },
@@ -28,10 +28,10 @@ export const useGroupStore = defineStore('group', {
     },
     async delete (payload) {
       await api.group.delete(payload)
-      this.list = this.list.filter((p) => p.gid !== +(payload.gid))
+      this.list = this.list.filter(p => p.gid !== +(payload.gid))
     },
     clearSavedGroups () {
       this.list = []
-    }
-  }
+    },
+  },
 })

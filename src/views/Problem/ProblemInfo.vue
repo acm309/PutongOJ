@@ -1,21 +1,15 @@
-<template>
-  <div class="proinfo-wrap">
-    <problem :problem="problem" />
-    <Button shape="circle" icon="md-paper-plane" @click="submit">Submit</Button>
-  </div>
-</template>
 <script>
+import { mapActions, mapState } from 'pinia'
 import Problem from '@/components/Problem.vue'
 import { useProblemStore } from '@/store/modules/problem'
-import { mapActions, mapState } from 'pinia'
 import { useRootStore } from '@/store'
 
 export default {
   components: {
-    Problem
+    Problem,
   },
   computed: {
-    ...mapState(useProblemStore, ['problem'])
+    ...mapState(useProblemStore, [ 'problem' ]),
   },
   created () {
     this.findOne(this.$route.params).then(() => {
@@ -23,16 +17,26 @@ export default {
     })
   },
   methods: {
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useProblemStore, ['findOne']),
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
+    ...mapActions(useProblemStore, [ 'findOne' ]),
     submit () {
       this.$router.push({
         name: 'problemSubmit',
-        params: this.$router.params
+        params: this.$router.params,
       })
-    }
-  }
+    },
+  },
 }
 </script>
+
+<template>
+  <div class="proinfo-wrap">
+    <Problem :problem="problem" />
+    <Button shape="circle" icon="md-paper-plane" @click="submit">
+      Submit
+    </Button>
+  </div>
+</template>
+
 <style>
 </style>

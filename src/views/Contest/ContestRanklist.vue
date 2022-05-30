@@ -1,8 +1,52 @@
+<script>
+import { mapActions, mapState } from 'pinia'
+import { useRootStore } from '@/store'
+import { useContestStore } from '@/store/modules/contest'
+import { timeContest } from '@/util/formate'
+
+export default {
+  data: () => ({
+    timer: null,
+  }),
+  computed: {
+    ...mapState(useContestStore, [ 'ranklist', 'contest' ]),
+  },
+  created () {
+    this.getRank()
+    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
+  },
+  beforeUnmount () {
+    clearInterval(this.timer)
+  },
+  methods: {
+    timeContest,
+    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
+    ...mapActions(useContestStore, { getRanklist: 'getRank' }),
+    getRank () {
+      this.getRanklist(this.$route.params)
+    },
+    change (status) {
+      if (status) {
+        this.timer = setInterval(() => {
+          this.getRank()
+          this.$Message.info({
+            content: '刷新成功',
+            duration: 1,
+          })
+        }, 10000)
+      } else {
+        clearInterval(this.timer)
+      }
+    },
+  },
+}
+</script>
+
 <template>
   <div>
     <i-switch size="large" @on-change="change">
-      <Icon type="android-done" slot="open"></Icon>
-      <Icon type="android-close" slot="close"></Icon>
+      <Icon slot="open" type="android-done" />
+      <Icon slot="close" type="android-close" />
     </i-switch> 自动刷新 (每 10 秒一次)
     <div class="conrank-wrap">
       <table>
@@ -21,14 +65,16 @@
           <td>{{ item.uid }}</td>
           <td>{{ item.nick }}</td>
           <td>{{ item.solved }}</td>
-          <td class="straight">{{ item.penalty | timeContest }}</td>
+          <td class="straight">
+            {{ timeContest(item.penalty) }}
+          </td>
           <template v-for="pid in contest.list">
-            <td v-if="!item[pid]" :key="pid"></td>
+            <td v-if="!item[pid]" :key="`${pid} ${1}`" />
             <!-- !item[pid] 为 true 表示这道题没有提交过 -->
-            <td v-else-if="item[pid].wa >= 0" :class="[ item[pid].prime ? 'prime' : 'normal']">
+            <td v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`" :class="[item[pid].prime ? 'prime' : 'normal']">
               {{ timeContest(item[pid].create - contest.start) }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
             </td>
-            <td v-else :class="{'red': item[pid].wa}">
+            <td v-else :key="`${pid} ${3}`" :class="{ red: item[pid].wa }">
               <span v-if="item[pid].wa">{{ item[pid].wa }}</span>
             </td>
           </template>
@@ -37,49 +83,7 @@
     </div>
   </div>
 </template>
-<script>
-import { useRootStore } from '@/store'
-import { useContestStore } from '@/store/modules/contest'
-import { mapActions, mapState } from 'pinia'
-import { timeContest } from '@/util/formate'
 
-export default {
-  data: () => ({
-    timer: null
-  }),
-  computed: {
-    ...mapState(useContestStore, ['ranklist', 'contest'])
-  },
-  created () {
-    this.getRank()
-    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-  },
-  beforeDestroy () {
-    clearInterval(this.timer)
-  },
-  methods: {
-    timeContest,
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useContestStore, {getRanklist: 'getRank'}),
-    getRank () {
-      this.getRanklist(this.$route.params)
-    },
-    change (status) {
-      if (status) {
-        this.timer = setInterval(() => {
-          this.getRank()
-          this.$Message.info({
-            content: '刷新成功',
-            duration: 1
-          })
-        }, 10000)
-      } else {
-        clearInterval(this.timer)
-      }
-    }
-  }
-}
-</script>
 <style lang="stylus">
 .conrank-wrap
   margin-top: 1em

@@ -1,54 +1,7 @@
-<template>
-  <div>
-    <table>
-      <tr>
-        <th>Did</th>
-        <th>Title</th>
-        <th>Author</th>
-        <th>Updated</th>
-        <th v-if="isAdmin && canRemove">Action</th>
-      </tr>
-      <template v-for="item in list" :key="item.did">
-        <tr>
-          <td>
-            {{ item.did }}
-          </td>
-          <td> <router-link :to="{ name: 'discussInfo', params: { did: item.did } }">
-            <Button type="text">{{ item.title }}</Button>
-          </router-link></td>
-          <td>
-            <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
-              <Button type="text"> {{ item.uid }} </Button>
-            </router-link>
-          </td>
-          <td>
-            {{ timeagoPretty(item.update) }}
-          </td>
-          <td v-if="isAdmin && canRemove">
-            <Button type="text" @click="del(item.did)"> Delete </Button>
-          </td>
-        </tr>
-      </template>
-    </table>
-    <h3>Create New Thread</h3>
-    <Form :model="form" label-position="right" :label-width="100" class="form">
-      <FormItem label="Title">
-          <Input v-model="form.title"></Input>
-      </FormItem>
-      <FormItem label="Content">
-          <Input v-model="form.content" type="textarea" :autosize="{minRows: 2,maxRows: 20}"></Input>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" @click="createNew" :loading="loading" :disabled="!isLogined">Submit</Button>
-        <span v-if="!isLogined">Login to reply</span>
-    </FormItem>
-  </Form>
-  </div>
-</template>
 <script>
+import { mapActions, mapState } from 'pinia'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
-import { mapState, mapActions } from 'pinia'
 import { timeagoPretty } from '@/util/formate'
 
 export default {
@@ -56,22 +9,22 @@ export default {
     return {
       form: {
         title: '',
-        content: ''
+        content: '',
       },
-      loading: false
+      loading: false,
     }
   },
   created () {
     this.fetch()
   },
   computed: {
-    ...mapState(useSessionStore, ['isLogined', 'isAdmin', 'canRemove']),
-    ...mapState(useDiscussStore, ['list'])
+    ...mapState(useSessionStore, [ 'isLogined', 'isAdmin', 'canRemove' ]),
+    ...mapState(useDiscussStore, [ 'list' ]),
   },
   methods: {
     timeagoPretty,
     ...mapActions(useDiscussStore, [ 'find', 'create' ]),
-    ...mapActions(useDiscussStore, {remove: 'delete'}),
+    ...mapActions(useDiscussStore, { remove: 'delete' }),
     fetch () {
       this.find()
     },
@@ -85,8 +38,8 @@ export default {
         this.$router.push({
           name: 'discussInfo',
           params: {
-            did
-          }
+            did,
+          },
         })
       }).catch(() => {
         this.loading = false
@@ -103,12 +56,73 @@ export default {
         },
         onCancel: () => {
           this.$Message.info('已取消删除！')
-        }
+        },
       })
-    }
-  }
+    },
+  },
 }
 </script>
+
+<template>
+  <div>
+    <table>
+      <tr>
+        <th>Did</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Updated</th>
+        <th v-if="isAdmin && canRemove">
+          Action
+        </th>
+      </tr>
+      <template v-for="item in list" :key="item.did">
+        <tr>
+          <td>
+            {{ item.did }}
+          </td>
+          <td>
+            <router-link :to="{ name: 'discussInfo', params: { did: item.did } }">
+              <Button type="text">
+                {{ item.title }}
+              </Button>
+            </router-link>
+          </td>
+          <td>
+            <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+              <Button type="text">
+                {{ item.uid }}
+              </Button>
+            </router-link>
+          </td>
+          <td>
+            {{ timeagoPretty(item.update) }}
+          </td>
+          <td v-if="isAdmin && canRemove">
+            <Button type="text" @click="del(item.did)">
+              Delete
+            </Button>
+          </td>
+        </tr>
+      </template>
+    </table>
+    <h3>Create New Thread</h3>
+    <Form :model="form" label-position="right" :label-width="100" class="form">
+      <FormItem label="Title">
+        <Input v-model="form.title" />
+      </FormItem>
+      <FormItem label="Content">
+        <Input v-model="form.content" type="textarea" :autosize="{ minRows: 2, maxRows: 20 }" />
+      </FormItem>
+      <FormItem>
+        <Button type="primary" :loading="loading" :disabled="!isLogined" @click="createNew">
+          Submit
+        </Button>
+        <span v-if="!isLogined">Login to reply</span>
+      </FormItem>
+    </Form>
+  </div>
+</template>
+
 <style lang="stylus" scoped>
 @import '../../styles/common'
 h3

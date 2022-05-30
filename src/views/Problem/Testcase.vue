@@ -1,3 +1,68 @@
+<script>
+import { mapActions, mapState } from 'pinia'
+import { testcaseUrl } from '@/util/helper'
+import { useTestcaseStore } from '@/store/modules/testcase'
+
+export default {
+  data: () => ({
+    test: {
+      pid: '',
+      in: '',
+      out: '',
+    },
+  }),
+  computed: {
+    ...mapState(useTestcaseStore, [ 'list', 'testcase' ]),
+  },
+  created () {
+    this.fetch()
+    this.test.pid = this.$route.params.pid
+  },
+  methods: {
+    ...mapActions(useTestcaseStore, [ 'find', 'findOne' ]),
+    ...mapActions(useTestcaseStore, { remove: 'delete', createTestcase: 'create' }),
+    fetch () {
+      this.find(this.$route.params)
+    },
+    search (item) {
+      const testcase = {
+        pid: this.$route.params.pid,
+        uuid: item.uuid,
+        type: 'in',
+      }
+      this.findOne(testcase)
+    },
+    del (item) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+        onOk: async () => {
+          const testcase = {
+            pid: this.$route.params.pid,
+            uuid: item.uuid,
+          }
+          await this.remove(testcase)
+          this.$Message.success(`成功删除${item.uuid}！`)
+        },
+        onCancel: () => {
+          this.$Message.info('已取消删除！')
+        },
+      })
+    },
+    async create () {
+      await this.createTestcase(this.test)
+      this.$Message.success('成功创建！')
+      this.fetch()
+      this.test.in = ''
+      this.test.out = ''
+    },
+    testcaseUrl ({ uuid }, type) {
+      return testcaseUrl(this.$route.params.pid, uuid, type)
+    },
+  },
+}
+</script>
+
 <template>
   <div>
     <h1>Test Data</h1>
@@ -13,84 +78,25 @@
         <td><a :href="testcaseUrl(item, 'in')" target="_blank" @click="search(item)">test.in</a></td>
         <td><a :href="testcaseUrl(item, 'out')" target="_blank">test.out</a></td>
         <td>
-          <Button type="text" @click="del(item)">Delete</Button>
+          <Button type="text" @click="del(item)">
+            Delete
+          </Button>
         </td>
       </tr>
     </table>
     <h1>Create New</h1>
     <p>In</p>
-    <Input v-model="test.in" type="textarea" :autosize="{minRows: 5,maxRows: 25}"></Input>
+    <Input v-model="test.in" type="textarea" :autosize="{ minRows: 5, maxRows: 25 }" />
     <p>Out</p>
-    <Input v-model="test.out" type="textarea" :autosize="{minRows: 5,maxRows: 25}"></Input>
+    <Input v-model="test.out" type="textarea" :autosize="{ minRows: 5, maxRows: 25 }" />
     <br>
     <br>
-    <Button type="primary" @click="create"> Submit </Button>
+    <Button type="primary" @click="create">
+      Submit
+    </Button>
   </div>
 </template>
-<script>
-import { testcaseUrl } from '@/util/helper'
-import { useTestcaseStore } from '@/store/modules/testcase'
-import { mapActions, mapState } from 'pinia'
 
-export default {
-  data: () => ({
-    test: {
-      pid: '',
-      in: '',
-      out: ''
-    }
-  }),
-  computed: {
-    ...mapState(useTestcaseStore, ['list', 'testcase'])
-  },
-  created () {
-    this.fetch()
-    this.test.pid = this.$route.params.pid
-  },
-  methods: {
-    ...mapActions(useTestcaseStore, ['find', 'findOne']),
-    ...mapActions(useTestcaseStore, {remove: 'delete', createTestcase: 'create'}),
-    fetch () {
-      this.find(this.$route.params)
-    },
-    search (item) {
-      const testcase = {
-        pid: this.$route.params.pid,
-        uuid: item.uuid,
-        type: 'in'
-      }
-      this.findOne(testcase)
-    },
-    del (item) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: async () => {
-          const testcase = {
-            pid: this.$route.params.pid,
-            uuid: item.uuid
-          }
-          await this.remove(testcase)
-          this.$Message.success(`成功删除${item.uuid}！`)
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        }
-      })
-    },
-    async create () {
-      await this.createTestcase(this.test)
-      this.$Message.success(`成功创建！`)
-      this.fetch()
-      this.test.in = ''
-      this.test.out = ''
-    },
-    testcaseUrl ({ uuid }, type) {
-      return testcaseUrl(this.$route.params.pid, uuid, type)
-    }
-  }
-}
-</script>
 <style lang="stylus" scoped>
 @import '../../styles/common'
 </style>

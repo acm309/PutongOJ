@@ -52,14 +52,14 @@ export default [
     path: '/',
     name: 'home',
     component: Home,
-    meta: { title: 'Home' }
+    meta: { title: 'Home' },
   },
   // News create must be placed before /news/:nid
   {
     path: '/news/create',
     name: 'newsCreate',
     component: NewsCreate,
-    meta: { title: 'Admin', requiresAdmin: true }
+    meta: { title: 'Admin', requiresAdmin: true },
   },
   {
     path: '/news/:nid',
@@ -69,27 +69,27 @@ export default [
         path: '',
         name: 'newsInfo',
         component: NewsInfo,
-        meta: { title: 'News' }
+        meta: { title: 'News' },
       },
       {
         path: 'edit',
         name: 'newsEdit',
         component: NewsEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
-      }
-    ]
+        meta: { title: 'Admin', requiresAdmin: true },
+      },
+    ],
   },
   {
     path: '/problems',
     name: 'problemList',
     component: ProblemList,
-    meta: { title: 'Problem List' }
+    meta: { title: 'Problem List' },
   },
   {
     path: '/problems/create',
     name: 'problemCreate',
     component: ProblemCreate,
-    meta: { title: 'Admin', requiresAdmin: true }
+    meta: { title: 'Admin', requiresAdmin: true },
   },
   {
     path: '/problem/:pid',
@@ -99,82 +99,82 @@ export default [
         path: '',
         name: 'problemInfo',
         component: ProblemInfo,
-        meta: { title: 'Problem Info' }
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'submit',
         name: 'problemSubmit',
         component: ProblemSubmit,
-        meta: { title: 'Problem Info' }
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'mySubmission',
         name: 'mySubmission',
         component: MySubmission,
-        meta: { title: 'Problem Info' }
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'statistics',
         name: 'problemStatistics',
         component: ProblemStatistics,
-        meta: { title: 'Problem Info' }
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'discuss',
         name: 'Discuss',
         component: Discuss,
-        meta: { title: 'Problem Info' }
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'edit',
         name: 'problemEdit',
         component: ProblemEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true },
       },
       {
         path: 'testcase',
         name: 'testcase',
         component: Testcase,
-        meta: { title: 'Admin', requiresAdmin: true }
-      }
-    ]
+        meta: { title: 'Admin', requiresAdmin: true },
+      },
+    ],
   },
   {
     path: '/discuss',
     name: 'discuss',
     component: Discuss,
-    meta: { title: 'Discuss' }
+    meta: { title: 'Discuss' },
   },
   {
     path: '/discuss/:did',
     name: 'discussInfo',
     component: DiscussInfo,
-    props: (route) => route.params,
-    meta: { title: 'Discuss Info' }
+    props: route => route.params,
+    meta: { title: 'Discuss Info' },
   },
   {
     path: '/status',
     name: 'status',
     component: Status,
-    meta: { title: 'Status' }
+    meta: { title: 'Status' },
   },
   {
     path: '/status/:sid',
     name: 'solution',
     component: Solution,
-    meta: { title: 'Solution Info' }
+    meta: { title: 'Solution Info' },
   },
   {
     path: '/ranklist',
     name: 'ranklist',
     component: Ranklist,
-    meta: { title: 'Ranklist' }
+    meta: { title: 'Ranklist' },
   },
   {
     path: '/user/:uid',
     name: 'userInfo',
     component: UserInfo,
-    meta: { title: 'User Info' }
+    meta: { title: 'User Info' },
   },
   {
     path: '/manage/user',
@@ -185,45 +185,45 @@ export default [
         path: '',
         name: 'usermanage',
         component: UserManage,
-        meta: { title: 'Admin', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true },
       },
       {
         path: '/userEdit',
         name: 'userEdit',
         component: UserEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true },
       },
       {
         path: '/groupEdit',
         name: 'groupEdit',
         component: GroupEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true },
       },
       {
         path: '/adminEdit',
         name: 'adminEdit',
         component: AdminEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
+        meta: { title: 'Admin', requiresAdmin: true },
       },
       {
         path: '/tagEdit',
         name: 'tagEdit',
         component: TagEdit,
-        meta: { title: 'Admin', requiresAdmin: true }
-      }
-    ]
+        meta: { title: 'Admin', requiresAdmin: true },
+      },
+    ],
   },
   {
     path: '/contest',
     name: 'contestList',
     component: ContestList,
-    meta: { title: 'Contest List' }
+    meta: { title: 'Contest List' },
   },
   {
     path: '/contest/create',
     name: 'contestCreate',
     component: ContestCreate,
-    meta: { title: 'Admin', requiresAdmin: true }
+    meta: { title: 'Admin', requiresAdmin: true },
   },
   {
     path: '/contests/:cid',
@@ -234,50 +234,50 @@ export default [
         path: '',
         name: 'contestOverview',
         component: ContestOverview,
-        meta: { title: 'Contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
         path: 'problem/:id',
         name: 'contestProblem',
         component: ContestProblem,
-        meta: { title: 'Contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
         path: 'problem/:id/submit',
         name: 'contestSubmit',
         component: ContestSubmit,
-        meta: { title: 'Contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
         path: 'status',
         name: 'contestStatus',
         component: ContestStatus,
-        meta: { title: 'Contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
         path: 'ranklist',
         name: 'contestRanklist',
         component: ContestRanklist,
-        meta: { title: 'Contest Info', requiresLogin: true }
+        meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
         path: 'edit',
         name: 'contestEdit',
         meta: { title: 'Admin', requiresAdmin: true },
-        component: ContestEdit
-      }
-    ]
+        component: ContestEdit,
+      },
+    ],
   },
   {
     path: '/faq',
     name: 'faq',
     component: FAQ,
-    meta: { title: 'FAQ' }
+    meta: { title: 'FAQ' },
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'notFound',
     component: NotFound,
-    meta: { title: '404' }
-  }
+    meta: { title: '404' },
+  },
 ]

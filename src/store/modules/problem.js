@@ -1,12 +1,12 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useProblemStore = defineStore('problem', {
   state: () => ({
     list: [],
     problem: {},
     sum: 0,
-    solved: []
+    solved: [],
   }),
   actions: {
     findOne (payload) {
@@ -16,7 +16,7 @@ export const useProblemStore = defineStore('problem', {
       })
     },
     async find (payload) {
-      const {data} = await api.problem.find(payload)
+      const { data } = await api.problem.find(payload)
       this.list = data.list.docs
       this.sum = data.list.total
       this.solved = data.solved
@@ -31,11 +31,11 @@ export const useProblemStore = defineStore('problem', {
     },
     delete (payload) {
       return api.problem.delete(payload).then(() => {
-        this.list = this.list.filter((p) => p.pid !== +(payload.pid))
+        this.list = this.list.filter(p => p.pid !== +(payload.pid))
       })
     },
     clearSavedProblems () {
       this.list = []
-    }
-  }
+    },
+  },
 })

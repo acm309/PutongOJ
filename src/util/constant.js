@@ -10,87 +10,87 @@ const result = {
   8: 'Output Limit Exceeded',
   9: 'Presentation Error',
   10: 'System Error',
-  11: 'Rejudge Pending'
+  11: 'Rejudge Pending',
 }
 
 const language = {
   1: 'C',
   2: 'C++',
-  3: 'Java'
+  3: 'Java',
 }
 
 const judgeList = [
   {
     value: '',
-    label: 'ALL'
+    label: 'ALL',
   },
   {
     value: 0,
-    label: 'Pending'
+    label: 'Pending',
   },
   {
     value: 1,
-    label: 'Running & Judge'
+    label: 'Running & Judge',
   },
   {
     value: 2,
-    label: 'Compile Error'
+    label: 'Compile Error',
   },
   {
     value: 3,
-    label: 'Accepted'
+    label: 'Accepted',
   },
   {
     value: 4,
-    label: 'Runtime Error'
+    label: 'Runtime Error',
   },
   {
     value: 5,
-    label: 'Wrong Answer'
+    label: 'Wrong Answer',
   },
   {
     value: 6,
-    label: 'Time Limit Exceeded'
+    label: 'Time Limit Exceeded',
   },
   {
     value: 7,
-    label: 'Memory Limit Exceeded'
+    label: 'Memory Limit Exceeded',
   },
   {
     value: 8,
-    label: 'Output Limit Exceeded'
+    label: 'Output Limit Exceeded',
   },
   {
     value: 9,
-    label: 'Presentation Error'
+    label: 'Presentation Error',
   },
   {
     value: 10,
-    label: 'System Error'
+    label: 'System Error',
   },
   {
     value: 11,
-    label: 'Rejudge Pending'
-  }
+    label: 'Rejudge Pending',
+  },
 ]
 
 const languageList = [
   {
     value: '',
-    label: 'ALL'
+    label: 'ALL',
   },
   {
     value: 1,
-    label: 'C'
+    label: 'C',
   },
   {
     value: 2,
-    label: 'C++'
+    label: 'C++',
   },
   {
     value: 3,
-    label: 'Java'
-  }
+    label: 'Java',
+  },
 ]
 
 const color = {
@@ -105,7 +105,7 @@ const color = {
   8: 'ole',
   9: 'pe',
   10: 'se',
-  11: 'rp'
+  11: 'rp',
 }
 
 const statisTableObj = [
@@ -117,23 +117,23 @@ const statisTableObj = [
   'Memory Limit Exceeded',
   'Output Limit Exceeded',
   'Presentation Error',
-  'System Error'
+  'System Error',
 ]
 
 const contestStatus = {
   0: 'Running',
-  2: 'Ended'
+  2: 'Ended',
 }
 
 const contestType = {
   1: 'Public',
   2: 'Private',
-  3: 'Password'
+  3: 'Password',
 }
 
 const status = {
   0: 'Reserve', // 是否开放给普通用户
-  2: 'Available'
+  2: 'Available',
 }
 
 export default {
@@ -145,5 +145,5 @@ export default {
   statisTableObj,
   contestStatus,
   contestType,
-  status
+  status,
 }

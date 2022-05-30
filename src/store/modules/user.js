@@ -1,5 +1,5 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -9,14 +9,14 @@ export const useUserStore = defineStore('user', {
     solved: [],
     unsolved: [],
     group: [],
-    adminList: []
+    adminList: [],
   }),
   actions: {
     register (payload) {
       return api.register(payload)
     },
     async find (payload) {
-      const {data} = await api.user.find(payload)
+      const { data } = await api.user.find(payload)
       if (payload) {
         this.adminList = data.list
       } else {
@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', {
       }
     },
     async findOne (payload) {
-      const {data} = await api.user.findOne(payload)
+      const { data } = await api.user.findOne(payload)
       this.user = data.user
       this.solved = data.solved
       this.unsolved = data.unsolved
@@ -38,6 +38,6 @@ export const useUserStore = defineStore('user', {
     },
     clearSavedUsers () {
       this.list = []
-    }
-  }
+    },
+  },
 })

@@ -1,27 +1,27 @@
-import api from '@/api'
 import { defineStore } from 'pinia'
 import { useRootStore } from '..'
+import api from '@/api'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
     loginDialog: false,
-    profile: null
+    profile: null,
   }),
   getters: {
     isLogined () { return this.profile != null },
     isAdmin () {
-      return this.isLogined &&
-      (
-        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Root) ||
-        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Teacher)
+      return this.isLogined
+      && (
+        parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Root)
+        || parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Teacher)
       )
     },
     canRemove () {
-      return this.isLogined &&
-      (
+      return this.isLogined
+      && (
         parseInt(this.profile.privilege) === parseInt(useRootStore().privilege.Root)
       )
-    }
+    },
   },
   actions: {
     toggleLoginState () {
@@ -45,6 +45,6 @@ export const useSessionStore = defineStore('session', {
       return api.session.fetch().then(({ data }) => {
         this.profile = data.profile
       })
-    }
-  }
+    },
+  },
 })

@@ -1,16 +1,68 @@
+<script setup>
+import 'highlight.js/styles/github.css'
+// import highlight from 'highlight.js'
+// https://github.com/isagalaev/highlight.js/issues/1284
+import highlight from 'highlight.js/lib/highlight'
+import cpp from 'highlight.js/lib/languages/cpp'
+import java from 'highlight.js/lib/languages/java'
+import 'highlight.js/styles/atom-one-light.css'
+import { storeToRefs } from 'pinia'
+import { onBeforeMount } from 'vue'
+import { useRoute } from 'vue-router'
+import constant from '@/util/constant'
+import { useSessionStore } from '@/store/modules/session'
+import { testcaseUrl } from '@/util/helper'
+import { useRootStore } from '@/store'
+import { useSolutionStore } from '@/store/modules/solution'
+
+highlight.registerLanguage('cpp', cpp)
+highlight.registerLanguage('java', java)
+
+const result = $ref(constant.result)
+const language = $ref(constant.language)
+const color = $ref(constant.color)
+
+const session = useSessionStore()
+const solutionStore = useSolutionStore()
+
+const { solution } = $(storeToRefs(solutionStore))
+const { findOne } = solutionStore
+
+const root = useRootStore()
+
+const { isAdmin } = storeToRefs(session)
+
+const route = useRoute()
+
+function prettyCode (code) {
+  return highlight.highlight(language[solution.language], `${code}`).value
+}
+function onCopy () {
+  this.$Message.success('Copied!')
+}
+function testcaseUrl2 ({ uuid }, type) {
+  return testcaseUrl(solution.pid, uuid, type)
+}
+
+onBeforeMount(async () => {
+  await findOne(route.params)
+  root.changeDomTitle({ title: `Solution ${solution.pid}` })
+})
+</script>
+
 <template>
   <div v-if="solution">
     <h1>{{ result[solution.judge] }}</h1>
     <p>
       <span>Problem:
-        <router-link :to="{name: 'problemInfo', params: {pid: solution.pid}}">
+        <router-link :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
           {{ solution.pid }}
         </router-link>
       </span>
       <span>Memory: {{ solution.memory }} KB</span>
       <span>Runtime: {{ solution.time }} MS</span>
       <span>Author:
-        <router-link :to="{name: 'userInfo', params: {uid: solution.uid}}">
+        <router-link :to="{ name: 'userInfo', params: { uid: solution.uid } }">
           {{ solution.uid }}
         </router-link>
       </span>
@@ -24,84 +76,40 @@
         <th>Memory/kb</th>
         <th>Result</th>
       </tr>
-      <template v-for="(item, index) in solution.testcases"  :key="index">
+      <template v-for="(item, index) in solution.testcases" :key="index">
         <tr>
-          <td>{{ item.uuid.slice(0, 8) }}
-            <a :href="testcaseUrl(item, 'in')" target="_blank">TestIn</a>
-            <a :href="testcaseUrl(item, 'out')" target="_blank">TestOut</a>
+          <td>
+            {{ item.uuid.slice(0, 8) }}
+            <a :href="testcaseUrl2(item, 'in')" target="_blank">TestIn</a>
+            <a :href="testcaseUrl2(item, 'out')" target="_blank">TestOut</a>
           </td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
-          <td :class="color[item.judge]">{{ result[item.judge] }}</td>
+          <td :class="color[item.judge]">
+            {{ result[item.judge] }}
+          </td>
         </tr>
       </template>
     </table>
     <!-- <hr> -->
-    <pre class="error" v-if="solution.error"><code>{{ solution.error }}</code></pre>
+    <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
     <br>
-    <Button type="ghost" shape="circle" icon="document" v-clipboard:copy="solution.code" v-clipboard:success="onCopy">
-      Click to copy code
-    </Button>
-    <pre><code v-html="prettyCode(solution.code)"></code></pre>
+    <!-- <Button v-clipboard:copy="solution.code" v-clipboard:success="onCopy" type="ghost" shape="circle" icon="document"> -->
+    <!-- Click to copy code -->
+    <!-- </Button> -->
+    <pre><code v-html="prettyCode(solution.code)" /></pre>
     <div v-if="isAdmin && solution.sim && solution.simSolution">
       <hr>
-      Similarity: {{ solution.sim }}{{"%"}} <br/>
+      Similarity: {{ solution.sim }}{{ "%" }} <br>
       From: {{ solution.simSolution.sid }} by
-      <router-link :to="{name: 'userInfo', params: {uid: solution.simSolution.uid}}">
+      <router-link :to="{ name: 'userInfo', params: { uid: solution.simSolution.uid } }">
         {{ solution.simSolution.uid }}
       </router-link>
-      <pre><code v-html="prettyCode(solution.simSolution.code)"></code></pre>
+      <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>
     </div>
   </div>
 </template>
-<script>
-import constant from '@/util/constant'
-import 'highlight.js/styles/github.css'
-// import highlight from 'highlight.js'
-// https://github.com/isagalaev/highlight.js/issues/1284
-import highlight from 'highlight.js/lib/highlight'
-import cpp from 'highlight.js/lib/languages/cpp'
-import java from 'highlight.js/lib/languages/java'
-import 'highlight.js/styles/atom-one-light.css'
-import { testcaseUrl } from '@/util/helper'
-import { useSessionStore } from '@/store/modules/session'
-import { mapState, mapActions } from 'pinia'
-import { useRootStore } from '@/store'
-import { useSolutionStore } from '@/store/modules/solution'
 
-highlight.registerLanguage('cpp', cpp)
-highlight.registerLanguage('java', java)
-
-export default {
-  data: () => ({
-    result: constant.result,
-    language: constant.language,
-    color: constant.color
-  }),
-  computed: {
-    ...mapState(useSessionStore, ['isAdmin']),
-    ...mapState(useSolutionStore, ['solution'])
-  },
-  created () {
-    this.findOne(this.$route.params).then(() => {
-      this.changeDomTitle({ title: `Solution ${this.solution.pid}` })
-    })
-  },
-  methods: {
-    ...mapActions(useRootStore, ['changeDomTitle']),
-    ...mapActions(useSolutionStore, ['findOne']),
-    prettyCode (code) {
-      return highlight.highlight(this.language[this.solution.language], `${code}`).value
-    },
-    onCopy () {
-      this.$Message.success('Copied!')
-    },
-    testcaseUrl ({ uuid }, type) {
-      return testcaseUrl(this.solution.pid, uuid, type)
-    }
-  }
-}
-</script>
 <style lang="stylus" scoped>
 @import '../styles/common'
 
