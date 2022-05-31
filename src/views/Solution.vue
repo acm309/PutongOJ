@@ -2,7 +2,7 @@
 import 'highlight.js/styles/github.css'
 // import highlight from 'highlight.js'
 // https://github.com/isagalaev/highlight.js/issues/1284
-import highlight from 'highlight.js/lib/highlight'
+import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import 'highlight.js/styles/atom-one-light.css'

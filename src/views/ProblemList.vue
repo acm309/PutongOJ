@@ -3,7 +3,7 @@ import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { purify } from '@/util/helper'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 import constant from '@/util/constant'
 import { useSessionStore } from '@/store/modules/session'
 import { useProblemStore } from '@/store/modules/problem'
@@ -42,7 +42,7 @@ const sessionStore = useSessionStore()
 
 const { list, sum, solved } = $(storeToRefs(problemStore))
 const { status, judge } = $(storeToRefs(rootStore))
-const { isAdmin, canRemove, profile } = $(storeToRefs(sessionStore))
+const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
 const { find, update, 'delete': remove } = problemStore
 
 function reload (payload = {}) {
@@ -79,9 +79,9 @@ function del (pid) {
   })
 }
 
-onBeforeMount(() => fetch())
-watch($$(query), () => fetch())
-watch(profile, () => fetch())
+onBeforeMount(fetch)
+onRouteQueryUpdate(fetch)
+onProfileUpdate(fetch)
 </script>
 
 <template>

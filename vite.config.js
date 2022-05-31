@@ -1,13 +1,12 @@
-import { defineConfig } from 'vite';
-import path from 'path';
-// import { createVuePlugin } from 'vite-plugin-vue2';
-import envCompatible from 'vite-plugin-env-compatible';
-import { injectHtml } from 'vite-plugin-html';
-import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
-import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite'
+import path from 'path'
+import envCompatible from 'vite-plugin-env-compatible'
+import { injectHtml } from 'vite-plugin-html'
+import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
+import { visualizer } from 'rollup-plugin-visualizer'
 import vue from '@vitejs/plugin-vue'
-// import createImportPlugin from 'vite-plugin-import'
-import viteCompression from 'vite-plugin-compression';
+import createImportPlugin from 'vite-plugin-import'
+import viteCompression from 'vite-plugin-compression'
 import legacy from '@vitejs/plugin-legacy'
 
 // https://vitejs.dev/config/
@@ -48,23 +47,14 @@ export default defineConfig({
       // brotliSize: true,
       gzipSize: true
     }),
-    viteCompression()
-    // TODO: split iview
-    // 会报错：require is not defined
-    // createImportPlugin([
-    //   {
-    //     libraryName: 'iview',
-    //     libraryDirectory: 'src/components'
-    //   }
-    // ]),
+    viteCompression(),
+    createImportPlugin([
+      {
+        libraryName: 'view-ui-plus',
+        libraryDirectory: 'src/components'
+      },
+    ]),
   ],
-  // optimizeDeps: {
-  //   esbuildOptions: {
-  //     plugins: [
-  //       esbuildCommonjs(['iview'])
-  //     ]
-  //   }
-  // },
   build: {
     target: 'es2017',
     reportCompressedSize: false,
@@ -74,7 +64,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'common': ['vue', 'pinia', 'vue-router', 'axios'],
-          'ui': ['view-ui-plus']
+          // 'ui': ['view-ui-plus']
         }
       }
     }
