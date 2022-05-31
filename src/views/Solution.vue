@@ -7,8 +7,9 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import 'highlight.js/styles/atom-one-light.css'
 import { storeToRefs } from 'pinia'
-import { onBeforeMount } from 'vue'
+import { inject, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
+import { useClipboard } from '@vueuse/core'
 import constant from '@/util/constant'
 import { useSessionStore } from '@/store/modules/session'
 import { testcaseUrl } from '@/util/helper'
@@ -24,22 +25,25 @@ const color = $ref(constant.color)
 
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
-
-const { solution } = $(storeToRefs(solutionStore))
-const { findOne } = solutionStore
-
 const root = useRootStore()
 
+const { findOne } = solutionStore
+const { solution } = $(storeToRefs(solutionStore))
 const { isAdmin } = storeToRefs(session)
 
 const route = useRoute()
 
+const $Message = inject('$Message')
+const { copy } = useClipboard()
+const onCopy = (content) => {
+  copy(content)
+  $Message.success('Copied!')
+}
+
 function prettyCode (code) {
   return highlight.highlight(language[solution.language], `${code}`).value
 }
-function onCopy () {
-  this.$Message.success('Copied!')
-}
+
 function testcaseUrl2 ({ uuid }, type) {
   return testcaseUrl(solution.pid, uuid, type)
 }
@@ -94,9 +98,9 @@ onBeforeMount(async () => {
     <!-- <hr> -->
     <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
     <br>
-    <!-- <Button v-clipboard:copy="solution.code" v-clipboard:success="onCopy" type="ghost" shape="circle" icon="document"> -->
-    <!-- Click to copy code -->
-    <!-- </Button> -->
+    <Button shape="circle" icon="ios-document-outline" @click="onCopy(solution.code)">
+      Click to copy code
+    </Button>
     <pre><code v-html="prettyCode(solution.code)" /></pre>
     <div v-if="isAdmin && solution.sim && solution.simSolution">
       <hr>

@@ -1,6 +1,7 @@
 <script>
 import only from 'only'
 import { mapActions, mapState } from 'pinia'
+import { useRoute } from 'vue-router'
 import { purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
@@ -77,6 +78,14 @@ export default {
     },
   },
 }
+</script>
+
+<script setup>
+// const route = useRoute()
+// const page = $ref(route.query.page || 1)
+// const pageSize = $ref(route.query.pageSize || 30)
+// const group = $ref('')
+// const groupList = $ref([])
 </script>
 
 <template>

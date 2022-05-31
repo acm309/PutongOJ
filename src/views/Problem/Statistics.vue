@@ -1,18 +1,29 @@
 <script>
-import ECharts from 'vue-echarts/components/ECharts.vue'
+import VChart from 'vue-echarts'
 import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
 import { mapActions, mapState } from 'pinia'
+import { CanvasRenderer } from 'echarts/renderers'
+import { use } from 'echarts/core'
+import {
+  LegendComponent, TitleComponent, TooltipComponent,
+} from 'echarts/components'
+import { PieChart } from 'echarts/charts'
 import { useStatisticsStore } from '@/store/modules/statistics'
 import constant from '@/util/constant'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
+use([
+  TooltipComponent, PieChart, CanvasRenderer,
+  TitleComponent, LegendComponent,
+])
+
 export default {
   components: {
-    Chart: ECharts,
+    Chart: VChart,
   },
   data () {
     return {
@@ -77,34 +88,12 @@ export default {
   },
   mounted () {
     // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
-    let dataIndex = -1
-    const pie = this.$refs.pie
-    const dataLen = this.countList.length
     const opt = {
       page: this.currentPage,
       pageSize: this.pageSize,
       pid: this.$route.params.pid,
     }
     this.find(opt)
-      .then(() => {
-        pie.dispatchAction({
-          type: 'downplay',
-          seriesIndex: 0,
-          dataIndex,
-        })
-        dataIndex = (dataIndex + 1) % dataLen
-        pie.dispatchAction({
-          type: 'highlight',
-          seriesIndex: 0,
-          dataIndex,
-        })
-        // 显示 tooltip
-        pie.dispatchAction({
-          type: 'showTip',
-          seriesIndex: 0,
-          dataIndex,
-        })
-      })
   },
   methods: {
     timePretty,
@@ -156,7 +145,7 @@ export default {
           </td>
         </tr>
       </table>
-      <Chart ref="pie" :options="pie" auto-resize />
+      <Chart ref="pie" :option="pie" auto-resize />
       <table>
         <tr v-for="(item, index) in countList" :key="index">
           <td class="t1">
@@ -184,7 +173,7 @@ export default {
         <tr v-for="(item, index) in list" :key="index">
           <td>{{ index + 1 }}</td>
           <td>
-            <router-link :to="{ name: '', params: { uid: item.uid } }">
+            <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
               <Button type="text">
                 {{ item.uid }}
               </Button>
@@ -206,7 +195,7 @@ export default {
         </tr>
       </table>
       <Page
-        v-model:current="currentPage"
+        v-model="currentPage"
         :total="sumStatis"
         :page-size="pageSize"
         show-elevator

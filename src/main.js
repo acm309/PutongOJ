@@ -1,17 +1,12 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import { createApp } from 'vue'
 import ViewUIPlus from 'view-ui-plus'
 import { createPinia } from 'pinia'
 import App from './App'
 import router from './router'
-// import VueClipboard from 'vue-clipboard2'
 import '@/my-theme/index.less'
 import { semiRestful } from './api'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
-
-// Vue.use(VueClipboard)
 
 const pinia = createPinia()
 const app = createApp(App)

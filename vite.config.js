@@ -49,6 +49,7 @@ export default defineConfig({
       gzipSize: true
     }),
     viteCompression()
+    // TODO: split iview
     // 会报错：require is not defined
     // createImportPlugin([
     //   {
@@ -75,27 +76,6 @@ export default defineConfig({
           'common': ['vue', 'pinia', 'vue-router', 'axios'],
           'ui': ['view-ui-plus']
         }
-        // 不知道为啥，这两个都变成了 modulepreload，一开始就加载了
-        // 预想是访问里特定网页才加载
-        // manualChunks: {
-        //   'statistics': [
-        //     './src/views/Problem/Statistics'
-        //   ],
-        //   'admin': [
-        //     './src/views/Problem/ProblemEdit',
-        //     './src/views/Problem/Testcase',
-        //     './src/views/Contest/ContestEdit',
-        //     './src/views/News/NewsEdit',
-        //     './src/views/Admin/ProblemCreate',
-        //     './src/views/Admin/ContestCreate',
-        //     './src/views/Admin/NewsCreate',
-        //     './src/views/Admin/UserManage/Usermanage',
-        //     './src/views/Admin/UserManage/UserEdit',
-        //     './src/views/Admin/UserManage/GroupEdit',
-        //     './src/views/Admin/UserManage/AdminEdit',
-        //     './src/views/Admin/UserManage/TagEdit',
-        //   ]
-        // },
       }
     }
   },

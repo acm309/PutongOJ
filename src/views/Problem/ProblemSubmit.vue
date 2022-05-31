@@ -41,7 +41,7 @@ onBeforeMount(async () => {
 
 <template>
   <div>
-    <h1>{{ $route.params.pid }}:  {{ title }}</h1>
+    <h1>{{ route.params.pid }}:  {{ title }}</h1>
     <Submit />
     <Button type="primary" :disabled="!isLogined" @click="submit">
       Submit

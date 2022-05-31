@@ -1,9 +1,14 @@
 <script setup>
 import { inject } from 'vue'
+import { useClipboard } from '@vueuse/core'
 
 defineProps([ 'problem' ])
 const $Message = inject('$Message')
-const onCopy = () => $Message.success('Copied!')
+const { copy } = useClipboard()
+const onCopy = (content) => {
+  copy(content)
+  $Message.success('Copied!')
+}
 </script>
 
 <template>
@@ -23,14 +28,14 @@ const onCopy = () => $Message.success('Copied!')
     <h2>
       Sample Input
       <Tooltip content="Click to copy" placement="top">
-        <!-- <Icon type="document" v-clipboard:copy="problem.in" v-clipboard:success="onCopy" style="cursor: pointer"></Icon> -->
+        <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.in)" />
       </Tooltip>
     </h2>
     <pre><code>{{ problem.in }}</code></pre>
     <h2>
       Sample Output
       <Tooltip content="Click to copy" placement="top">
-        <!-- <Icon type="document" v-clipboard:copy="problem.out" v-clipboard:success="onCopy" style="cursor: pointer"></Icon> -->
+        <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.out)" />
       </Tooltip>
     </h2>
     <pre><code>{{ problem.out }}</code></pre>
