@@ -12,7 +12,8 @@ const find = async (ctx) => {
     sort: { solve: -1, submit: 1 },
     page,
     limit: pageSize,
-    select: '-_id -pwd -privilege'
+    select: '-_id -pwd -privilege -timerecord -iprecord -create -__v',
+    lean: true
   })
 
   ctx.body = {

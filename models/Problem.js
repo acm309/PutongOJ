@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate') // 分页
+const mongoosePaginate = require('mongoose-paginate-v2') // 分页
 const config = require('../config')
 const ids = require('./ID')
 

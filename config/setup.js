@@ -5,8 +5,20 @@ const User = require('../models/User')
 const Problem = require('../models/Problem')
 const config = require('.')
 const { generatePwd } = require('../utils/helper')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 async function databaseSetup () {
+  mongoosePaginate.paginate.options = {
+    customLabels: {
+      totalDocs: 'total',
+      totalPages: 'pages',
+      hasNextPage: false,
+      hasPrevPage: false,
+      pagingCounter: false,
+      nextPage: false,
+      prevPage: false
+    }
+  }
   const models = [
     'Solution', 'Contest', 'News', 'Group', 'Discuss'
   ]

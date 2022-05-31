@@ -36,6 +36,7 @@ app.use(bodyparser({
 }))
 
 app.use(staticServe(path.join(__dirname, 'public'), {
+  gzip: true,
   maxage: 7 * 24 * 60 * 60 // 7 天不更新，也就是缓存期限
 }))
 

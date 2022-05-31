@@ -48,21 +48,25 @@ const find = async (ctx) => {
         $in: [new RegExp(opt.content, 'i')]
       }
     } else {
-      filter.$where =
-        `${new RegExp(opt.content, 'i')}.test(this["${opt.type}"])`
+      // https://stackoverflow.com/questions/2908100/mongodb-regex-search-on-integer-value
+      filter.$expr = {
+        '$regexMatch': {
+          'input': {'$toString': `$${opt.type}`},
+          'regex': new RegExp(opt.content, 'i')
+        }
+      }
     }
   }
 
   let list
   if (page !== -1) {
-    // 使用mongoose-paginate包简化
     list = await Problem.paginate(filter, {
       sort: { pid: 1 },
       page,
       limit: pageSize,
       lean: true,
       leanWithId: false,
-      select: '-_id -hint -description -in -out -input -output' // -表示不要的字段
+      select: '-_id -hint -description -in -out -input -output -__v' // -表示不要的字段
     })
   } else {
     const docs = await Problem.find({}).lean().exec()

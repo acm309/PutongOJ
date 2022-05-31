@@ -16,7 +16,10 @@ const preload = async (ctx, next) => {
 
 // 返回group列表
 const find = async (ctx) => {
-  const list = await Group.find({}).exec()
+  const lean = parseInt(ctx.query.lean)
+  let select = '-_id -__v'
+  if (lean === 1) select += ' -list'
+  const list = await Group.find({}).select(select).lean().exec()
 
   ctx.body = {
     list
