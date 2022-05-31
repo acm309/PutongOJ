@@ -15,8 +15,8 @@ export const useGroupStore = defineStore('group', {
       const { data } = await api.group.findOne(payload)
       this.group = data.group
     },
-    async find () {
-      const { data } = await api.group.find()
+    async find (payload = {}) {
+      const { data } = await api.group.find(payload)
       this.list = data.list
       return data.list
     },

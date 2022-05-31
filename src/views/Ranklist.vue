@@ -1,91 +1,55 @@
-<script>
-import only from 'only'
-import { mapActions, mapState } from 'pinia'
-import { useRoute } from 'vue-router'
-import { purify } from '@/util/helper'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+import { onBeforeMount, onBeforeUnmount } from 'vue'
+import pick from 'lodash.pick'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { formate } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      group: '',
-      groupList: [],
-    }
-  },
-  computed: {
-    ...mapState(useGroupStore, {
-      groups: 'list',
-    }),
-    ...mapState(useRootStore, [ 'judge' ]),
-    ...mapState(useRanklistStore, [ 'list', 'sum' ]),
-    query () {
-      const opt = Object.assign(
-        only(this.$route.query, 'page pageSize'),
-        { gid: this.group },
-      )
-      return purify(opt)
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) { this.fetch() }
-    },
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    formate,
-    ...mapActions(useGroupStore, [ 'find' ]),
-    fetch () {
-      useRanklistStore().find(this.query)
-      this.find().then(() => {
-        this.groupList = [ {
-          gid: '',
-          title: 'ALL',
-        } ]
-        this.groups.forEach((item) => {
-          this.groupList.push(item)
-        })
-      })
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-    },
-    reload (payload = {}) {
-      const query = Object.assign(this.query, payload)
-      this.$router.push({
-        name: 'ranklist',
-        query,
-      })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-    indexMethod (index) {
-      return index + 1 + (this.page - 1) * this.pageSize
-    },
-    search () {
-      this.reload({
-        gid: this.group,
-        page: 1,
-      })
-    },
-  },
-}
-</script>
+const route = useRoute()
+const router = useRouter()
 
-<script setup>
-// const route = useRoute()
-// const page = $ref(route.query.page || 1)
-// const pageSize = $ref(route.query.pageSize || 30)
-// const group = $ref('')
-// const groupList = $ref([])
+const group = $ref('')
+const query = $computed(() => {
+  const opt = Object.assign(
+    {},
+    pick(route.query, [ 'page', 'pageSize' ]),
+    { gid: group },
+  )
+  return purify(opt)
+})
+
+const page = $computed(() => parseInt(query.page) || 1)
+const pageSize = $computed(() => parseInt(query.pageSize) || 30)
+
+const rootStore = useRootStore()
+const ranklistStore = useRanklistStore()
+const groupStore = useGroupStore()
+
+const { list: groups } = $(storeToRefs(groupStore))
+const { judge } = $(storeToRefs(rootStore))
+const { list, sum } = $(storeToRefs(ranklistStore))
+const groupList = $computed(() => [ { gid: '', title: 'ALL' } ].concat(groups))
+
+function reload (payload = {}) {
+  const routeQuery = Object.assign({}, query, payload)
+  router.push({ name: 'ranklist', query: routeQuery })
+}
+
+async function fetch () {
+  ranklistStore.find(query)
+  await groupStore.find({ lean: 1 })
+}
+
+const pageChange = val => reload({ page: val })
+const search = () => reload({ gid: group, page: 1 })
+
+onBeforeUnmount(() => groupStore.clearSavedGroups())
+onBeforeMount(fetch)
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>
@@ -148,7 +112,7 @@ export default {
       </tr>
     </table>
     <Page
-      v-model:current="page"
+      :model-value="page"
       :total="sum"
       :page-size="pageSize"
       show-elevator

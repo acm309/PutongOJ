@@ -6,7 +6,7 @@ import ProblemList from '@/views/ProblemList'
 import Problem from '@/views/Problem/Problem'
 import ProblemInfo from '@/views/Problem/ProblemInfo'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit'
-import MySubmission from '@/views/Problem/Mysubmission'
+import MySubmission from '@/views/Problem/MySubmission'
 
 // contests
 import ContestList from '@/views/ContestList'
@@ -41,7 +41,7 @@ const NewsEdit = () => import('@/views/News/NewsEdit')
 const ProblemCreate = () => import('@/views/Admin/ProblemCreate')
 const ContestCreate = () => import('@/views/Admin/ContestCreate')
 const NewsCreate = () => import('@/views/Admin/NewsCreate')
-const UserManage = () => import('@/views/Admin/UserManage/Usermanage')
+const UserManage = () => import('@/views/Admin/UserManage/UserManage')
 const UserEdit = () => import('@/views/Admin/UserManage/UserEdit')
 const GroupEdit = () => import('@/views/Admin/UserManage/GroupEdit')
 const AdminEdit = () => import('@/views/Admin/UserManage/AdminEdit')

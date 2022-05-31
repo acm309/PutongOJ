@@ -51,10 +51,9 @@ export const useRootStore = defineStore('root', {
         this.currentTime += 1000
       }, 1000)
     },
-    fetchWebsiteConfig () {
-      return api.getWebsiteConfig().then(({ data }) => {
-        this.website = data.website
-      })
+    async fetchWebsiteConfig () {
+      const { data } = await api.getWebsiteConfig()
+      this.website = data.website
     },
   },
 })

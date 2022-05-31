@@ -48,6 +48,7 @@
     "jest-serializer-vue": "^0.3.0",
     "less": "^2.7.3",
     "lodash.isempty": "^4.4.0",
+    "lodash.pick": "^4.4.0",
     "lodash.pickby": "^4.6.0",
     "moment": "^2.20.1",
     "only": "^0.0.2",

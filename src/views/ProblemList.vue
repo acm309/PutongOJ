@@ -73,9 +73,7 @@ function del (pid) {
       await remove({ pid })
       $Message.success(`成功删除 ${pid}！`)
     },
-    onCancel: () => {
-      $Message.info('已取消删除！')
-    },
+    onCancel: () => $Message.info('已取消删除！'),
   })
 }
 
