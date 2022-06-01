@@ -24,7 +24,7 @@ export default {
 
 <template>
   <div>
-    <Tabs :value="active" @on-click="change">
+    <Tabs :model-value="active" @on-click="change">
       <TabPane label="Description" name="problemInfo" />
       <TabPane label="Submit" name="problemSubmit" />
       <TabPane v-if="isLogined" label="My Submissions" name="mySubmission" />

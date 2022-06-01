@@ -24,7 +24,7 @@ export default {
 
 <template>
   <div class="usermanage">
-    <Tabs :value="active" @on-click="change">
+    <Tabs :model-value="active" @on-click="change">
       <TabPane label="UserEdit" name="userEdit" />
       <TabPane label="GroupEdit" name="groupEdit" />
       <TabPane v-if="canRemove" label="AdminEdit" name="adminEdit" />

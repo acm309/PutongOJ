@@ -1,21 +1,13 @@
 <script>
-import { mapActions, mapState } from 'pinia'
+import { mapState } from 'pinia'
 import { useNewsStore } from '@/store/modules/news'
-import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
 export default {
   computed: {
     ...mapState(useNewsStore, [ 'news' ]),
   },
-  created () {
-    this.findOne(this.$route.params).then(() => {
-      this.changeDomTitle({ title: `News -- ${this.news.title}` })
-    })
-  },
   methods: {
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useNewsStore, [ 'findOne' ]),
     timePretty,
   },
 }

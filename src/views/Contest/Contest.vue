@@ -71,7 +71,7 @@ export default {
       </Row>
       <Progress :stroke-width="18" :percent="timePercentage" />
     </Card>
-    <Tabs :value="display" @on-click="handleClick">
+    <Tabs :model-value="display" @on-click="handleClick">
       <TabPane label="Overview" name="contestOverview" />
       <TabPane label="Problem" name="contestProblem" />
       <TabPane label="Submit" name="contestSubmit" />
