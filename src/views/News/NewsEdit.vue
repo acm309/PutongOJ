@@ -1,29 +1,28 @@
-<script>
-import { mapActions, mapState } from 'pinia'
-import NewsEdit from '@/components/NewsEdit'
+<script setup>
+import { useRouter } from 'vue-router'
+import { inject } from 'vue'
+import { storeToRefs } from 'pinia'
+import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
 
-export default {
-  computed: {
-    ...mapState(useNewsStore, [ 'news' ]),
-  },
-  methods: {
-    ...mapActions(useNewsStore, [ 'update' ]),
-    submit () {
-      if (!this.news.title) {
-        this.$Message.error('Title can not be empty')
-      } else {
-        this.update(this.news)
-          .then((nid) => {
-            this.$Message.success(`News "${this.news.title}" has been updated!`)
-            this.$router.push({ name: 'newsInfo', params: { nid } })
-          })
-      }
-    },
-  },
-  components: {
-    OjNewsEdit: NewsEdit,
-  },
+const newsStore = useNewsStore()
+const router = useRouter()
+const $Message = inject('$Message')
+const { news } = $(storeToRefs(newsStore))
+
+async function submit () {
+  if (news.title.length === 0) {
+    $Message.error('Title is required')
+    return
+  }
+
+  try {
+    const nid = await newsStore.update(news)
+    $Message.success(`News "${news.title}" has been updated!`)
+    router.push({ name: 'newsInfo', params: { nid } })
+  } catch (err) {
+    $Message.error(err.message)
+  }
 }
 </script>
 
