@@ -1,135 +1,132 @@
-<script>
-import only from 'only'
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import pick from 'lodash.pick'
+import { onBeforeMount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import constant from '@/util/constant'
-import { purify } from '@/util/helper'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      uid: this.$route.query.uid || '',
-      pid: this.$route.query.pid || '',
-      judge: this.$route.query.judge || '',
-      language: this.$route.query.language || '',
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      judgeList: constant.judgeList,
-      languageList: constant.languageList,
-      result: constant.result,
-      lang: constant.language,
-      color: constant.color,
-    }
-  },
-  computed: {
-    ...mapState(useSessionStore, [ 'profile', 'isAdmin' ]),
-    ...mapState(useSolutionStore, [ 'list', 'sum' ]),
-    query () {
-      const opt = only(this.$route.query, 'page pageSize uid pid language judge')
-      return purify(opt)
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    },
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useSolutionStore, [ 'find' ]),
-    fetch () {
-      this.find(this.query)
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-      this.uid = query.uid
-      this.pid = query.pid || ''
-      this.judge = query.judge || ''
-      this.language = query.language || ''
-    },
-    reload (payload = {}) {
-      this.$router.push({
-        name: 'status',
-        query: purify(Object.assign(this.query, payload)),
-      })
-    },
-    search (val) {
-      this.reload({
-        page: 1,
-        uid: this.uid,
-        pid: this.pid,
-        language: this.language,
-        judge: this.judge,
-      })
-    },
-    sizeChange (val) {
-      this.reload({ pageSize: val })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-  },
+const sessionStore = useSessionStore()
+const solutionStore = useSolutionStore()
+const { profile, isAdmin } = $(storeToRefs(sessionStore))
+const { list, sum } = $(storeToRefs(solutionStore))
+const find = solutionStore.find
+const route = useRoute()
+const router = useRouter()
+
+let uid = $ref(route.query.uid || '')
+let pid = $ref(route.query.pid || '')
+let judge = $ref(parseInt(route.query.judge) || '')
+let language = $ref(parseInt(route.query.language) || '')
+let page = $ref(parseInt(route.query.page) || 1)
+let pageSize = $ref(parseInt(route.query.pageSize) || 30)
+
+const judgeList = $ref(constant.judgeList)
+const languageList = $ref(constant.languageList)
+const result = $ref(constant.result)
+const lang = $ref(constant.language)
+const color = $ref(constant.color)
+
+const query = $computed(() => {
+  const opt = pick(route.query,
+    [ 'page', 'pageSize', 'uid', 'pid', 'language', 'judge' ])
+  return purify(opt)
+})
+
+function fetch () {
+  find(query)
+  const routeQuery = route.query
+  page = parseInt(routeQuery.page) || 1
+  pageSize = parseInt(routeQuery.pageSize) || 30
+  uid = routeQuery.uid
+  pid = routeQuery.pid || ''
+  judge = parseInt(routeQuery.judge) || ''
+  language = parseInt(routeQuery.language) || ''
 }
+
+const reload = (payload = {}) => {
+  router.push({
+    name: 'status',
+    query: purify(Object.assign({}, query, payload)),
+  })
+}
+
+const search = () => reload({
+  page: 1,
+  uid,
+  pid,
+  language,
+  judge,
+})
+
+const pageChange = val => reload({ page: val })
+
+onBeforeMount(fetch)
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>
   <div class="status-wrap">
     <Row class="filter">
       <Col :offset="1" :span="5">
-        <Col :span="6">
-          <label>User</label>
-        </Col>
-        <Col :span="15">
-          <Input v-model="uid" placeholder="username" />
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>User</label>
+          </Col>
+          <Col :span="15">
+            <Input v-model="uid" placeholder="username" />
+          </Col>
+        </Row>
       </Col>
       <Col :span="4">
-        <Col :span="6">
-          <label>Pid</label>
-        </Col>
-        <Col :span="15">
-          <Input v-model="pid" placeholder="pid" />
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>Pid</label>
+          </Col>
+          <Col :span="15">
+            <Input v-model="pid" placeholder="pid" />
+          </Col>
+        </Row>
       </Col>
       <Col :span="6">
-        <Col :span="6">
-          <label>Judge</label>
-        </Col>
-        <Col :span="16">
-          <Select v-model="judge" placeholder="请选择">
-            <Option
-              v-for="item in judgeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </Select>
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>Judge</label>
+          </Col>
+          <Col :span="16">
+            <Select v-model="judge" placeholder="请选择">
+              <Option
+                v-for="item in judgeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </Select>
+          </Col>
+        </Row>
       </Col>
       <Col :span="4">
-        <Col :span="12">
-          <label>Language</label>
-        </Col>
-        <Col :span="12">
-          <Select v-model="language" placeholder="请选择">
-            <Option
-              v-for="item in languageList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </Select>
-        </Col>
+        <Row>
+          <Col :span="10">
+            <label>Language</label>
+          </Col>
+          <Col :span="14">
+            <Select v-model="language" placeholder="请选择">
+              <Option
+                v-for="item in languageList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </Select>
+          </Col>
+        </Row>
       </Col>
-      <Col :span="3">
-        <Button type="primary" icon="search" @click="search">
+      <Col :span="4">
+        <Button type="primary" icon="ios-search" @click="search">
           Search
         </Button>
       </Col>

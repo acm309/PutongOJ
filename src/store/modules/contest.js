@@ -8,10 +8,13 @@ export const useContestStore = defineStore('contest', {
     contest: {},
     overview: [],
     totalProblems: 0,
-    problems: [],
+    // problems: [],
     ranklist: [],
     solved: [],
   }),
+  getters: {
+    problems: state => state.contest.list,
+  },
   actions: {
     async find (payload) {
       const { data } = await api.contest.find(payload)

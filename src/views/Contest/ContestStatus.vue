@@ -1,162 +1,157 @@
-<script>
+<script setup>
 import only from 'only'
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
+import { onBeforeMount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import constant from '@/util/constant'
-import { purify } from '@/util/helper'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      mid: this.$route.params.cid,
-      uid: this.$route.query.uid || '',
-      pid: this.$route.query.pid || '',
-      judge: this.$route.query.judge || '',
-      language: this.$route.query.language || '',
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      judgeList: constant.judgeList,
-      languageList: constant.languageList,
-      result: constant.result,
-      lang: constant.language,
-      color: constant.color,
-    }
-  },
-  created () {
-    // 这里必须保证此时'contest/problems'是存在的
-    // 如果用户没有点过 overview tab 时，就会出现 'contest/problems' 不存在的情况
-    let p = Promise.resolve()
-    if (typeof this.problems === 'undefined') {
-      p = this.findOne({ cid: this.$route.params.cid })
-    }
-    p.then(() => {
-      this.fetch()
-      this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-    })
-  },
-  computed: {
-    ...mapState(useContestStore, [ 'problems' ]),
-    ...mapState(useSessionStore, [ 'profile', 'isAdmin' ]),
-    ...mapState(useSolutionStore, [ 'list', 'sum' ]),
-    query () {
-      const opt = Object.assign(
-        {},
-        only(this.$route.query, 'page pageSize uid pid language judge'),
-        {
-          mid: this.$route.params.cid,
-        },
-      )
-      if (this.$route.query.pid) {
-        opt.pid = this.problems[this.$route.query.pid - 1]
-      }
-      return purify(opt)
+const sessionStore = useSessionStore()
+const solutionStore = useSolutionStore()
+const contestStore = useContestStore()
+const { problems } = $(storeToRefs(contestStore))
+const { profile, isAdmin } = $(storeToRefs(sessionStore))
+const { list, sum } = $(storeToRefs(solutionStore))
+const { find: findSolutions } = solutionStore
+const { changeDomTitle } = useRootStore()
+const { findOne } = contestStore
+const route = useRoute()
+const router = useRouter()
+
+let uid = $ref(route.query.uid || '')
+let pid = $ref(route.query.pid || '')
+let judge = $ref(parseInt(route.query.judge) || '')
+let language = $ref(parseInt(route.query.language) || '')
+let page = $ref(parseInt(route.query.page) || 1)
+let pageSize = $ref(parseInt(route.query.pageSize) || 30)
+const mid = $computed(() => route.params.cid || '')
+
+const judgeList = $ref(constant.judgeList)
+const languageList = $ref(constant.languageList)
+const result = $ref(constant.result)
+const lang = $ref(constant.language)
+const color = $ref(constant.color)
+
+const query = $computed(() => {
+  const opt = Object.assign(
+    {},
+    only(route.query, 'page pageSize uid pid language judge'),
+    {
+      mid: route.params.cid,
     },
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useContestStore, [ 'findOne' ]),
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useSolutionStore, { findSolutions: 'find' }),
-    getId (pid) {
-      return this.problems.indexOf(pid) + 1
-    },
-    fetch () {
-      this.findSolutions(this.query)
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-      this.uid = query.uid
-      this.pid = query.pid || ''
-      this.judge = query.judge || ''
-      this.language = query.language || ''
-    },
-    reload (payload = {}) {
-      this.$router.push({
-        name: 'contestStatus',
-        query: purify(Object.assign({}, this.query, payload)),
-      })
-    },
-    search (val) {
-      this.reload({
-        page: 1,
-        uid: this.uid,
-        pid: this.pid,
-        language: this.language,
-        judge: this.judge,
-      })
-    },
-    sizeChange (val) {
-      this.reload({ pageSize: val })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    },
-  },
+  )
+  if (route.query.pid) {
+    opt.pid = problems[parseInt(route.query.pid) - 1]
+  }
+  return purify(opt)
+})
+
+const getId = pid => problems.indexOf(pid) + 1
+
+function fetch () {
+  findSolutions(query)
+  const routeQuery = route.query
+  page = parseInt(routeQuery.page) || 1
+  pageSize = parseInt(routeQuery.pageSize) || 30
+  uid = routeQuery.uid
+  pid = routeQuery.pid || ''
+  judge = parseInt(routeQuery.judge) || ''
+  language = parseInt(routeQuery.language) || ''
 }
+
+function reload (payload = {}) {
+  router.push({
+    name: 'contestStatus',
+    query: purify(Object.assign({}, query, payload)),
+  })
+}
+
+const search = () => reload({
+  page: 1,
+  uid,
+  pid,
+  language,
+  judge,
+})
+
+const pageChange = val => reload({ page: val })
+
+onBeforeMount(async () => {
+  if (problems == null) {
+    await findOne({ cid: mid })
+  }
+  fetch()
+  changeDomTitle({ title: `Contest ${route.params.cid}` })
+})
+onRouteQueryUpdate(() => {
+  fetch()
+})
 </script>
 
 <template>
   <div>
     <Row class="filter">
       <Col :offset="1" :span="5">
-        <Col :span="6">
-          <label>User</label>
-        </Col>
-        <Col :span="15">
-          <Input v-model="uid" placeholder="username" />
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>User</label>
+          </Col>
+          <Col :span="15">
+            <Input v-model="uid" placeholder="username" />
+          </Col>
+        </Row>
       </Col>
       <Col :span="4">
-        <Col :span="6">
-          <label>Pid</label>
-        </Col>
-        <Col :span="15">
-          <Input v-model="pid" placeholder="pid" />
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>Pid</label>
+          </Col>
+          <Col :span="15">
+            <Input v-model="pid" placeholder="pid" />
+          </Col>
+        </Row>
       </Col>
       <Col :span="6">
-        <Col :span="6">
-          <label>Judge</label>
-        </Col>
-        <Col :span="16">
-          <Select v-model="judge" placeholder="请选择">
-            <Option
-              v-for="item in judgeList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </Select>
-        </Col>
+        <Row>
+          <Col :span="6">
+            <label>Judge</label>
+          </Col>
+          <Col :span="16">
+            <Select v-model="judge" placeholder="请选择">
+              <Option
+                v-for="item in judgeList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </Select>
+          </Col>
+        </Row>
       </Col>
       <Col :span="4">
-        <Col :span="12">
-          <label>Language</label>
-        </Col>
-        <Col :span="12">
-          <Select v-model="language" placeholder="请选择">
-            <Option
-              v-for="item in languageList"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </Select>
-        </Col>
+        <Row>
+          <Col :span="12">
+            <label>Language</label>
+          </Col>
+          <Col :span="12">
+            <Select v-model="language" placeholder="请选择">
+              <Option
+                v-for="item in languageList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </Select>
+          </Col>
+        </Row>
       </Col>
       <Col :span="3">
-        <Button type="primary" icon="search" @click="search">
+        <Button type="primary" icon="ios-search" @click="search">
           Search
         </Button>
       </Col>

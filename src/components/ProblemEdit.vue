@@ -10,7 +10,9 @@ defineProps([ 'problem' ])
       <Col :span="23">
         <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.title">
-          <span slot="prepend">Title</span>
+          <template #prepend>
+            Title
+          </template>
         </Input>
       </Col>
     </Row>

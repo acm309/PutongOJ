@@ -1,7 +1,4 @@
 <script setup>
-import 'highlight.js/styles/github.css'
-// import highlight from 'highlight.js'
-// https://github.com/isagalaev/highlight.js/issues/1284
 import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
@@ -17,6 +14,7 @@ import { useRootStore } from '@/store'
 import { useSolutionStore } from '@/store/modules/solution'
 
 highlight.registerLanguage('cpp', cpp)
+highlight.registerLanguage('c', cpp)
 highlight.registerLanguage('java', java)
 
 const result = $ref(constant.result)
@@ -26,11 +24,9 @@ const color = $ref(constant.color)
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
 const root = useRootStore()
-
 const { findOne } = solutionStore
 const { solution } = $(storeToRefs(solutionStore))
 const { isAdmin } = storeToRefs(session)
-
 const route = useRoute()
 
 const $Message = inject('$Message')
@@ -41,7 +37,9 @@ const onCopy = (content) => {
 }
 
 function prettyCode (code) {
-  return highlight.highlight(language[solution.language], `${code}`).value
+  return highlight.highlight(`${code}`, {
+    language: language[solution.language],
+  }).value
 }
 
 function testcaseUrl2 ({ uuid }, type) {
