@@ -1,29 +1,11 @@
-<script>
-import { VueEditor } from 'vue2-editor'
-import { mapState } from 'pinia'
-import api from '@/api'
+<script setup>
+import { storeToRefs } from 'pinia'
+import ContentEditor from '@/components/ContentEditor'
 import { useNewsStore } from '@/store/modules/news'
 
-export default {
-  computed: {
-    ...mapState(useNewsStore, [ 'news' ]),
-  },
-  methods: {
-    handleImageAdded (file, Editor, cursorLocation) {
-      const formData = new window.FormData()
-      formData.append('image', file)
-      api.getImage(formData)
-        .then(({ data }) => {
-          const url = data.url // Get url from response
-          Editor.insertEmbed(cursorLocation, 'image', url)
-        })
-        .catch(err => console.log(err))
-    },
-  },
-  components: {
-    VueEditor,
-  },
-}
+const newsStore = useNewsStore()
+
+const { news } = storeToRefs(newsStore)
 </script>
 
 <template>
@@ -38,10 +20,8 @@ export default {
     </Row>
     <Row>
       <Col :span="23">
-        <VueEditor
-          id="editor1"
+        <ContentEditor
           v-model="news.content"
-          use-custom-image-handler @imageAdded="handleImageAdded"
         />
       </Col>
     </Row>
@@ -49,6 +29,7 @@ export default {
 </template>
 
 <style lang="stylus" scoped>
+// Some space between title and editor
 .ivu-row-flex
   margin-bottom: 20px
 .label
