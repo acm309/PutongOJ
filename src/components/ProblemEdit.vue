@@ -1,31 +1,14 @@
-<script>
-import { VueEditor } from 'vue2-editor'
-import api from '@/api'
+<script setup>
+import ContentEditor from '@/components/ContentEditor'
 
-export default {
-  components: {
-    VueEditor,
-  },
-  props: [ 'problem' ],
-  methods: {
-    handleImageAdded (file, Editor, cursorLocation) {
-      const formData = new window.FormData()
-      formData.append('image', file)
-      api.getImage(formData)
-        .then(({ data }) => {
-          const url = data.url // Get url from response
-          Editor.insertEmbed(cursorLocation, 'image', url)
-        })
-        .catch(err => console.log(err))
-    },
-  },
-}
+defineProps([ 'problem' ])
 </script>
 
 <template>
   <div class="proadd-wrap">
     <Row>
       <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.title">
           <span slot="prepend">Title</span>
         </Input>
@@ -33,15 +16,25 @@ export default {
     </Row>
     <Row>
       <Col :span="11">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.time">
-          <span slot="prepend">Time</span>
-          <span slot="append">MS</span>
+          <template #prepend>
+            Time
+          </template>
+          <template #append>
+            MS
+          </template>
         </Input>
       </Col>
       <Col :offset="1" :span="11">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.memory">
-          <span slot="prepend">Memory</span>
-          <span slot="append">KB</span>
+          <template #prepend>
+            Memory
+          </template>
+          <template #append>
+            KB
+          </template>
         </Input>
       </Col>
     </Row>
@@ -50,11 +43,8 @@ export default {
     </div>
     <Row>
       <Col :span="23">
-        <VueEditor
-          id="editor1"
-          v-model="problem.description"
-          use-custom-image-handler @imageAdded="handleImageAdded"
-        />
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
+        <ContentEditor v-model="problem.description" />
       </Col>
     </Row>
     <div class="label">
@@ -62,7 +52,8 @@ export default {
     </div>
     <Row>
       <Col :span="23">
-        <VueEditor id="editor2" v-model="problem.input" />
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
+        <ContentEditor v-model="problem.input" />
       </Col>
     </Row>
     <div class="label">
@@ -70,7 +61,8 @@ export default {
     </div>
     <Row>
       <Col :span="23">
-        <VueEditor id="editor3" v-model="problem.output" />
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
+        <ContentEditor v-model="problem.output" />
       </Col>
     </Row>
     <div class="label">
@@ -78,7 +70,8 @@ export default {
     </div>
     <Row>
       <Col :span="23">
-        <VueEditor id="editor4" v-model="problem.hint" />
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
+        <ContentEditor v-model="problem.hint" />
       </Col>
     </Row>
     <div class="label">
@@ -86,6 +79,7 @@ export default {
     </div>
     <Row>
       <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.in" type="textarea" :rows="8" />
       </Col>
     </Row>
@@ -94,6 +88,7 @@ export default {
     </div>
     <Row>
       <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.out" type="textarea" :rows="8" />
       </Col>
     </Row>
@@ -108,10 +103,10 @@ export default {
   .label
     text-align:left
     margin-bottom: 10px
-  #editor1, #editor2, #editor3, #editor4
-    text-align: left
+  .ql-container
+    // text-align: left
     height: 220px
-    margin-bottom: 10px
+    margin-bottom: 2em
   .el-textarea
     margin-bottom: 20px
 </style>
