@@ -93,7 +93,6 @@ onBeforeMount(async () => {
         </tr>
       </template>
     </table>
-    <!-- <hr> -->
     <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
     <br>
     <Button shape="circle" icon="ios-document-outline" @click="onCopy(solution.code)">

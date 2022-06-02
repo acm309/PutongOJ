@@ -1,72 +1,66 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+import { inject } from 'vue'
 import { purify } from '@/util/helper'
 import { useUserStore } from '@/store/modules/user'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 
-export default {
-  data: () => ({
-    display: 'overview',
-    newPwd: '',
-    checkPwd: '',
-  }),
-  computed: {
-    ...mapState(useUserStore, [ 'user', 'solved', 'unsolved', 'group' ]),
-    ...mapState(useSessionStore, [ 'profile', 'isAdmin', 'canRemove' ]),
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    },
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    ...mapActions(useUserStore, [ 'findOne' ]),
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    fetch () {
-      if (this.$route.params.uid == null) return
+const userStore = useUserStore()
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
 
-      this.findOne(this.$route.params).then(() => {
-        this.changeDomTitle({ title: this.user.uid })
-      })
-    },
-    submit () {
-      if (this.newPwd === this.checkPwd) {
-        const user = purify(Object.assign(
-          this.user,
-          { newPwd: this.newPwd },
-        ))
-        user.mail = this.user.mail || ''
-        useUserStore().update(user).then(() => {
-          this.$Message.success('修改成功！')
-          this.display = 'overview'
-        })
-      } else {
-        this.$Message.info('两次密码不一致，请重新输入！')
-      }
-    },
-    del (uid) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: `<p>此操作将永久删除用户 ${uid}, 是否继续?</p>`,
-        onOk: () => {
-          useUserStore().delete({ uid }).then(() => {
-            this.$router.push({ name: 'home' })
-            this.$Message.success(`成功删除 ${uid}！`)
-          })
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        },
-      })
-    },
-  },
+const { findOne, update, 'delete': remove } = userStore
+const { user, solved, unsolved, group } = $(storeToRefs(userStore))
+const { isAdmin, profile, canRemove } = $(storeToRefs(sessionStore))
+
+let display = $ref('overview')
+const newPwd = $ref('')
+const checkPwd = $ref('')
+
+const route = useRoute()
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
+
+async function fetch () {
+  if (route.params.uid == null) return
+  await findOne(route.params)
+  rootStore.changeDomTitle({ title: user.uid })
 }
+
+async function submit () {
+  if (newPwd === checkPwd) {
+    const updatedUser = purify(Object.assign(
+      user,
+      { newPwd },
+    ))
+    updatedUser.mail = user.mail || ''
+    update(user).then(() => {
+      display = 'overview'
+      $Message.success('修改成功！')
+    })
+  } else {
+    $Message.info('两次密码不一致，请重新输入！')
+  }
+}
+
+function del (uid) {
+  $Modal.confirm({
+    title: '提示',
+    content: `<p>此操作将永久删除用户 ${uid}, 是否继续?</p>`,
+    onOk: async () => {
+      await remove({ uid })
+      $router.push({ name: 'home' })
+      $Message.success(`成功删除 ${uid}！`)
+    },
+    onCancel: () => {
+      $Message.info('已取消删除！')
+    },
+  })
+}
+
+fetch()
 </script>
 
 <template>
