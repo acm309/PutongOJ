@@ -45,8 +45,8 @@ export default {
 <template>
   <div>
     <i-switch size="large" @on-change="change">
-      <Icon slot="open" type="android-done" />
-      <Icon slot="close" type="android-close" />
+      <!-- <Icon slot="open" type="android-done" />
+      <Icon slot="close" type="android-close" /> -->
     </i-switch> 自动刷新 (每 10 秒一次)
     <div class="conrank-wrap">
       <table>
@@ -71,7 +71,7 @@ export default {
           <template v-for="pid in contest.list">
             <td v-if="!item[pid]" :key="`${pid} ${1}`" />
             <!-- !item[pid] 为 true 表示这道题没有提交过 -->
-            <td v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`" :class="[item[pid].prime ? 'prime' : 'normal']">
+            <td v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`" :class="[ item[pid].prime ? 'prime' : 'normal' ]">
               {{ timeContest(item[pid].create - contest.start) }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
             </td>
             <td v-else :key="`${pid} ${3}`" :class="{ red: item[pid].wa }">
@@ -84,33 +84,33 @@ export default {
   </div>
 </template>
 
-<style lang="stylus">
-.conrank-wrap
-  margin-top: 1em
-  overflow: scroll
-  table
-    width: 100%
-    border-collapse: collapse
-    border-spacing: 0
-    th, td
-      border: 1px solid #dbdbdb
-      padding: 8px 4px
-      &:nth-child(n + 5)
-        min-width: 4em
-  .straight
-    nowrap: nowrap
-  .prime
-    color: #fff
-    background-color: #3273dc
-    word-wrap: break-word
-    word-break:break-all
-    text-align: left
-  .normal
-    color: #fff
-    background-color: #23d160
-    word-wrap: break-word
-    word-break:break-all
-    text-align: left
-  .red
-    color: red
+<style lang="less">
+// .conrank-wrap
+  // margin-top: 1em
+  // overflow: scroll
+  // table
+  //   width: 100%
+  //   border-collapse: collapse
+  //   border-spacing: 0
+  //   th, td
+  //     border: 1px solid #dbdbdb
+  //     padding: 8px 4px
+  //     &:nth-child(n + 5)
+  //       min-width: 4em
+  // .straight
+  //   nowrap: nowrap
+  // .prime
+  //   color: #fff
+  //   background-color: #3273dc
+  //   word-wrap: break-word
+  //   word-break:break-all
+  //   text-align: left
+  // .normal
+  //   color: #fff
+  //   background-color: #23d160
+  //   word-wrap: break-word
+  //   word-break:break-all
+  //   text-align: left
+  // .red
+  //   color: red
 </style>

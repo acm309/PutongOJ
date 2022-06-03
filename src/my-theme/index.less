@@ -1,3 +1,27 @@
+// https://github.com/view-design/ViewUIPlus/blob/master/src/styles/custom.less
 @import '~view-ui-plus/src/styles/index.less';
-@import './variable.less';
-@import './common.less';
+
+@font-face {
+    font-family: ionicons;
+    src: url('~view-ui-plus/dist/styles/fonts/ionicons.ttf') format('truetype'),
+        url('~view-ui-plus/dist/styles/fonts/ionicons.woff') format('woff'),
+        url('~view-ui-plus/dist/styles/fonts/ionicons.eot') format('embedded-opentype'),
+        url('~view-ui-plus/dist/styles/fonts/ionicons.svg') format('svg');
+}
+
+
+// Here are the variables to cover, such as:
+// @primary-color: #e040fb;
+@primary-color: #D500F9;
+// @primary-color: var(--oj-primary-color);
+// @primary-color: #1976D2;
+@link-color: @primary-color;
+@light-warning-color: #fff9c4;
+@font-size-small: 14px;
+
+@font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Helvetica Neue", "Helvetica", "PingFang SC", "Hiragino Sans GB", "Source Han Sans CN", "Source Han Sans SC", "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", SimHei, "Arial", sans-serif;
+@code-family: "source code pro", "Consolas", "Lucida Console", "Monaco", monospace;
+
+:root {
+    --oj-primary-color: @primary-color;
+}

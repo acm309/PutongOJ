@@ -192,7 +192,7 @@ export default {
       :target-keys="targetKeys"
       :render-format="format"
       :list-style="listStyle"
-      :operations="['To left', 'To right']"
+      :operations="[ 'To left', 'To right' ]"
       filterable
       :filter-method="filterMethod"
       class="tranfer"

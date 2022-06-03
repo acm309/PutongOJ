@@ -1,6 +1,4 @@
-<script>
-export default {
-}
+<script setup>
 </script>
 
 <template>
@@ -13,7 +11,7 @@ export default {
       <tbody>
         <tr>
           <td>
-            <p class="info yellow">
+            <p class="info pd">
               Pending
             </p>
           </td>
@@ -21,7 +19,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info yellow">
+            <p class="info rj">
               Running &amp; Judge
             </p>
           </td>
@@ -29,7 +27,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info red">
+            <p class="info ac">
               Accepted
             </p>
           </td>
@@ -37,7 +35,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info blue">
+            <p class="info pe">
               Presentation Error
             </p>
           </td>
@@ -45,7 +43,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info blue">
+            <p class="info wa">
               Wrong Answer
             </p>
           </td>
@@ -53,7 +51,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info blue">
+            <p class="info tle">
               Time Limit Exceeded
             </p>
           </td>
@@ -61,7 +59,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info blue">
+            <p class="info mle">
               Memory Limit Exceeded
             </p>
           </td>
@@ -69,7 +67,7 @@ export default {
         </tr>
         <tr>
           <td>
-            <p class="info blue">
+            <p class="info ole">
               Output Limit Exceeded
             </p>
           </td>
@@ -137,28 +135,18 @@ table
     td:nth-child(1)
       width: 180px
     td:nth-child(2)
+      padding: 5px
       padding-left: 20px
-      line-height: 40px
 .info
-  color: #fff
   border-radius: 4px
   text-align: center
   padding: 2px
-.yellow
-  background-color: #ffdd57
-.red
-  background-color: #ff3860
-.blue
-  background-color: #3273dc
 code
-  display: inline-block
   background: #f7f7f7
-  font-family: Consolas,Monaco,Andale Mono,Ubuntu Mono,monospace
-  margin: 0 3px
   padding: 1px 5px
   border-radius: 3px
-  color: #666
   border: 1px solid #eee
+  margin: 0 3px
 ol
   margin-bottom: 10px
 </style>

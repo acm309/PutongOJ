@@ -36,7 +36,7 @@
     "vue-router": "^4.0.15"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.25.0",
+    "@antfu/eslint-config": "https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?my",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
     "@vueup/vue-quill": "1.0.0-beta.8",
     "@vueuse/core": "^8.5.0",
@@ -58,7 +58,7 @@
     "rollup-plugin-visualizer": "^5.5.4",
     "selenium-server": "^3.0.1",
     "shelljs": "^0.7.6",
-    "stylus": "^0.56.0",
+    "stylus": "^0.58.1",
     "typescript": "^4.7.2",
     "unocss": "^0.37.2",
     "vite": "^2.7.2",
