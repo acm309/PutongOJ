@@ -1,32 +1,27 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
 
-export default {
-  components: {
-    Problem,
-  },
-  computed: {
-    ...mapState(useProblemStore, [ 'problem' ]),
-  },
-  created () {
-    this.findOne(this.$route.params).then(() => {
-      this.changeDomTitle({ title: `Problem ${this.problem.pid}` })
-    })
-  },
-  methods: {
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useProblemStore, [ 'findOne' ]),
-    submit () {
-      this.$router.push({
-        name: 'problemSubmit',
-        params: this.$router.params,
-      })
-    },
-  },
-}
+const problemStore = useProblemStore()
+const rootStore = useRootStore()
+const route = useRoute()
+const router = useRouter()
+
+const { problem } = $(storeToRefs(problemStore))
+const { findOne } = problemStore
+const { changeDomTitle } = rootStore
+
+const submit = () => router.push({
+  name: 'problemSubmit',
+  params: router.params,
+})
+
+findOne(route.params).then(() => {
+  changeDomTitle(problem.title)
+})
 </script>
 
 <template>
@@ -37,6 +32,3 @@ export default {
     </Button>
   </div>
 </template>
-
-<style>
-</style>

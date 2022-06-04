@@ -1,125 +1,108 @@
-<script>
-import VChart from 'vue-echarts'
+<script setup>
+import Chart from 'vue-echarts'
 import 'echarts/lib/chart/pie'
 import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/legend'
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { CanvasRenderer } from 'echarts/renderers'
 import { use } from 'echarts/core'
 import {
   LegendComponent, TitleComponent, TooltipComponent,
 } from 'echarts/components'
 import { PieChart } from 'echarts/charts'
+import { useRoute, useRouter } from 'vue-router'
 import { useStatisticsStore } from '@/store/modules/statistics'
 import constant from '@/util/constant'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
+import { onRouteQueryUpdate } from '@/util/helper'
 
 use([
   TooltipComponent, PieChart, CanvasRenderer,
   TitleComponent, LegendComponent,
 ])
 
-export default {
-  components: {
-    Chart: VChart,
-  },
-  data () {
-    return {
-      name: constant.statisTableObj,
-      lang: constant.language,
-      currentPage: 1,
-      pageSize: 20,
-      pid: '',
-    }
-  },
-  computed: {
-    ...mapState(useStatisticsStore, [
-      'list',
-      'countList',
-      'sumCharts',
-      'sumStatis',
-    ]),
-    pie () {
-      const data = {
-        title: {
-          text: `Statistics for ${this.$route.params.pid}`,
-          x: 'center',
-          y: 'top',
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{b} </br>{d}%',
-        },
-        legend: {
-          orient: 'horizontal',
-          x: 'center',
-          y: 'bottom',
-          data: [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ],
-        },
-        calculable: true,
-        series: [
-          {
-            name: 'Statistics',
-            type: 'pie',
-            radius: '55%',
-            center: [ '50%', '50%' ],
-            data: [
-              { value: this.countList[0] || 0, name: 'CE' },
-              { value: this.countList[1] || 0, name: 'AC' },
-              { value: this.countList[2] || 0, name: 'RE' },
-              { value: this.countList[3] || 0, name: 'WA' },
-              { value: this.countList[4] || 0, name: 'TLE' },
-              { value: this.countList[5] || 0, name: 'MLE' },
-              { value: this.countList[6] || 0, name: 'OLE' },
-              { value: this.countList[7] || 0, name: 'PE' },
-              { value: this.countList[8] || 0, name: 'SE' },
-            ],
-          },
+const statisticsStore = useStatisticsStore()
+const rootStore = useRootStore()
+const route = useRoute()
+const router = useRouter()
+
+const name = constant.statisTableObj
+const lang = constant.language
+const { list, countList, sumCharts, sumStatis } = $(storeToRefs(statisticsStore))
+const { changeDomTitle } = rootStore
+const { find } = statisticsStore
+const pid = $computed(() => route.params.pid)
+const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
+const currentPage = $computed(() => parseInt(route.query.page) || 1)
+
+const pie = $computed(() => {
+  const data = {
+    title: {
+      text: `Statistics for ${route.params.pid}`,
+      x: 'center',
+      y: 'top',
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b} </br>{d}%',
+    },
+    legend: {
+      orient: 'horizontal',
+      x: 'center',
+      y: 'bottom',
+      data: [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ],
+    },
+    calculable: true,
+    series: [
+      {
+        name: 'Statistics',
+        type: 'pie',
+        radius: '55%',
+        center: [ '50%', '50%' ],
+        data: [
+          { value: countList[0] || 0, name: 'CE' },
+          { value: countList[1] || 0, name: 'AC' },
+          { value: countList[2] || 0, name: 'RE' },
+          { value: countList[3] || 0, name: 'WA' },
+          { value: countList[4] || 0, name: 'TLE' },
+          { value: countList[5] || 0, name: 'MLE' },
+          { value: countList[6] || 0, name: 'OLE' },
+          { value: countList[7] || 0, name: 'PE' },
+          { value: countList[8] || 0, name: 'SE' },
         ],
-      }
-      return data
-    },
-  },
-  created () {
-    this.pid = this.$route.params.pid
-    this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
-  },
-  mounted () {
-    // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
-    const opt = {
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      pid: this.$route.params.pid,
-    }
-    this.find(opt)
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useStatisticsStore, [ 'find' ]),
-    getStatistics () {
-      const opt = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        pid: this.$route.params.pid,
-      }
-      this.find(opt)
-    },
-    handleCurrentChange (val) {
-      this.currentPage = val
-      this.getStatistics()
-    },
-    handleSizeChange (val) {
-      this.pageSize = val
-      this.getStatistics()
-    },
-    indexMethod (index) {
-      return index + 1 + (this.currentPage - 1) * this.pageSize
-    },
-  },
+      },
+    ],
+  }
+  return data
+})
+
+function getStatistics () {
+// https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
+  const opt = {
+    page: route.query.page || 1,
+    pageSize: route.query.pageSize || 20,
+    pid: route.params.pid,
+  }
+  find(opt)
 }
+
+function handleCurrentChange (val) {
+  router.push({
+    name: 'problemStatistics',
+    params: { pid: route.params.pid },
+    query: {
+      page: val,
+      pageSize: route.query.pageSize || 20,
+    },
+  })
+  getStatistics()
+}
+
+getStatistics()
+changeDomTitle({ title: `Problem ${route.params.pid}` })
+onRouteQueryUpdate(getStatistics)
 </script>
 
 <template>
@@ -195,7 +178,7 @@ export default {
         </tr>
       </table>
       <Page
-        v-model="currentPage"
+        :model-value="currentPage"
         :total="sumStatis"
         :page-size="pageSize"
         show-elevator
@@ -206,8 +189,6 @@ export default {
 </template>
 
 <style lang="stylus">
-@import '../../styles/common'
-
 .statis-wrap
   display: flex
   justify-content: space-around

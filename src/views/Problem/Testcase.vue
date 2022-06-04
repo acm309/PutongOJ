@@ -1,66 +1,58 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+import { inject } from 'vue'
 import { testcaseUrl } from '@/util/helper'
 import { useTestcaseStore } from '@/store/modules/testcase'
 
-export default {
-  data: () => ({
-    test: {
-      pid: '',
-      in: '',
-      out: '',
-    },
-  }),
-  computed: {
-    ...mapState(useTestcaseStore, [ 'list', 'testcase' ]),
-  },
-  created () {
-    this.fetch()
-    this.test.pid = this.$route.params.pid
-  },
-  methods: {
-    ...mapActions(useTestcaseStore, [ 'find', 'findOne' ]),
-    ...mapActions(useTestcaseStore, { remove: 'delete', createTestcase: 'create' }),
-    fetch () {
-      this.find(this.$route.params)
-    },
-    search (item) {
+// TODO: test this url
+const testcaseStore = useTestcaseStore()
+const { list } = $(storeToRefs(testcaseStore))
+
+const route = useRoute()
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
+
+const test = $ref({
+  pid: route.params.pid,
+  input: '',
+  output: '',
+})
+
+const fetch = () => testcaseStore.find(route.params)
+
+const search = item => testcaseStore.findOne({
+  pid: route.params.pid,
+  uuid: item.uuid,
+  type: 'in',
+})
+
+function del (item) {
+  $Modal.confirm({
+    title: '提示',
+    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    onOk: async () => {
       const testcase = {
         pid: this.$route.params.pid,
         uuid: item.uuid,
-        type: 'in',
       }
-      this.findOne(testcase)
+      await testcaseStore.delete(testcase)
+      $Message.success(`成功删除${item.uuid}！`)
     },
-    del (item) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: async () => {
-          const testcase = {
-            pid: this.$route.params.pid,
-            uuid: item.uuid,
-          }
-          await this.remove(testcase)
-          this.$Message.success(`成功删除${item.uuid}！`)
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        },
-      })
+    onCancel: () => {
+      $Message.info('已取消删除！')
     },
-    async create () {
-      await this.createTestcase(this.test)
-      this.$Message.success('成功创建！')
-      this.fetch()
-      this.test.in = ''
-      this.test.out = ''
-    },
-    testcaseUrl ({ uuid }, type) {
-      return testcaseUrl(this.$route.params.pid, uuid, type)
-    },
-  },
+  })
 }
+
+async function create () {
+  await testcaseStore.create(test)
+  $Message.success('成功创建！')
+  fetch()
+  test.in = test.out = ''
+}
+
+fetch()
 </script>
 
 <template>
@@ -96,7 +88,3 @@ export default {
     </Button>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../../styles/common'
-</style>

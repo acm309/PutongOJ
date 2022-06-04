@@ -88,10 +88,8 @@ onBeforeMount(async () => {
   fetch()
   changeDomTitle({ title: `Contest ${route.params.cid}` })
 })
-onRouteQueryUpdate(() => {
-  console.log('onRouteQueryUpdate contest status')
-  fetch()
-})
+
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>

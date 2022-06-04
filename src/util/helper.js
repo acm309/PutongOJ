@@ -24,7 +24,8 @@ export function onRouteQueryUpdate (callback) {
 
 export function onRouteParamUpdate (callback) {
   const route = useRoute()
-  watch(() => route.params, callback)
+  const unwatch = watch(() => route.params, callback)
+  onBeforeRouteLeave(unwatch)
 }
 
 export function onProfileUpdate (callback) {

@@ -1,24 +1,17 @@
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 
-export default {
-  computed: {
-    ...mapState(useSessionStore, [ 'isAdmin', 'isLogined' ]),
-    active () {
-      return this.$route.name
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) { this.current = this.$route.name }
-    },
-  },
-  methods: {
-    change (name) {
-      if (name !== this.$route.name) { this.$router.push({ name, params: { pid: this.$route.params.pid } }) }
-    },
-  },
+const sessionStore = useSessionStore()
+const { isAdmin, isLogined } = $(storeToRefs(sessionStore))
+const route = useRoute()
+const router = useRouter()
+const active = $computed(() => route.name)
+const change = (name) => {
+  if (name !== active) {
+    router.push({ name, params: { pid: route.params.pid } })
+  }
 }
 </script>
 
@@ -36,6 +29,3 @@ export default {
     <router-view />
   </div>
 </template>
-
-<style>
-</style>
