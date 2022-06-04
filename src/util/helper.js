@@ -1,7 +1,7 @@
 import pickBy from 'lodash.pickby'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 export function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
@@ -14,7 +14,12 @@ export function testcaseUrl (pid, uuid, type = 'in') {
 
 export function onRouteQueryUpdate (callback) {
   const route = useRoute()
-  watch(() => route.query, callback)
+  const unwatch = watch(() => route.query, callback)
+  // Unwatch when route is leaving.
+  // E.g.: /status?page=4 -> /ranklist
+  // if not unwatch, a call to /api/status?page=4 will be triggered
+  // when navigating to /ranklist.
+  onBeforeRouteLeave(unwatch)
 }
 
 export function onRouteParamUpdate (callback) {

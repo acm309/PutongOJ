@@ -41,7 +41,11 @@ export default {
   },
   watch: { // 浏览器后退时回退页面
     $route (to, from) {
-      if (to !== from) { this.fetch() }
+      if (to !== from) {
+        console.log('to', to)
+        // this.fetch()
+        // crash: cid has to be a number
+      }
     },
     profile (val) {
       this.findOne(this.query)

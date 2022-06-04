@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?my
+  '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182
   '@originjs/vite-plugin-commonjs': ^1.0.1
   '@vitejs/plugin-legacy': ^1.6.4
   '@vitejs/plugin-vue': ^2.3.3

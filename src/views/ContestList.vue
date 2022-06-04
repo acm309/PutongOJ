@@ -1,145 +1,119 @@
-<script>
+<script setup>
 import only from 'only'
-import { mapActions, mapState } from 'pinia'
-import { purify } from '../util/helper'
+import { storeToRefs } from 'pinia'
+import { inject } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { Input } from 'view-ui-plus'
+import { onRouteQueryUpdate, purify } from '../util/helper'
 import constant from '../util/constant'
 import { useSessionStore } from '@/store/modules/session'
 import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      currentPage: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 20,
-      contestStatus: constant.contestStatus,
-      type: constant.contestType,
-      contestVisible: constant.status,
-      enterPsd: '',
-    }
-  },
-  computed: {
-    ...mapState(useContestStore, [ 'list', 'sum' ]),
-    ...mapState(useSessionStore, [ 'profile', 'isLogined', 'isAdmin', 'canRemove' ]),
-    ...mapState(useRootStore, [ 'status', 'encrypt', 'currentTime' ]),
-    query () {
-      const opt = only(this.$route.query, 'page pageSize type content')
-      return purify(opt)
-    },
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useContestStore, [ 'find', 'verify', 'update' ]),
-    ...mapActions(useContestStore, {
-      remove: 'delete',
-    }),
-    fetch () {
-      this.find(this.query)
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 20
-    },
-    reload (payload = {}) {
-      const query = Object.assign({}, this.query, payload)
-      this.$router.push({
-        name: 'contestList',
-        query,
-      })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-    enter (item) {
-      const opt = Object.assign(
-        {},
-        item,
-        { pwd: this.enterPsd },
-      )
-      this.verify(opt).then((data) => {
-        if (data) {
-          this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-        } else {
-          this.$Message.error('Wrong password!')
-        }
-      })
-    },
-    visit (item) {
-      if (!this.isLogined) {
-        useSessionStore().toggleLoginState()
-      } else if (this.isAdmin || this.profile.verifyContest.includes(+item.cid)) {
-        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-      } else if (item.start > this.currentTime) {
-        this.$Message.error('This contest hasn\'t started yet!')
-      } else if (+item.encrypt === this.encrypt.Public) {
-        this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-      } else if (+item.encrypt === this.encrypt.Private) {
-        const opt = Object.assign(
-          {},
-          item,
-          { uid: this.profile.uid },
-        )
-        this.verify(opt).then((data) => {
-          if (data) {
-            this.$router.push({ name: 'contestOverview', params: { cid: item.cid } })
-          } else {
-            this.$Message.error('You\'re not invited to attend this contest!')
-          }
-        })
-      } else if (+item.encrypt === this.encrypt.Password) {
-        this.$Modal.confirm({
-          render: (h) => {
-            return h('Input', {
-              props: {
-                placeholder: 'Please enter password.',
-              },
-              on: {
-                'input': (val) => {
-                  this.enterPsd = val
-                },
-                'on-enter': () => {
-                  this.enter(item)
-                  this.$Modal.remove()
-                },
-              },
-            })
-          },
-          onOk: () => {
-            this.enter(item)
-          },
-        })
-      }
-    },
-    async change (contest) {
-      contest.status = contest.status === this.status.Reserve
-        ? this.status.Available
-        : this.status.Reserve
-      await this.update(contest)
-      this.find(this.query)
-    },
-    del (cid) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: async () => {
-          await this.remove({ cid })
-          this.$Message.success(`成功删除 ${cid}！`)
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        },
-      })
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) { this.fetch() }
-    },
-  },
+const { 'contestType': type, 'status': contestVisible } = constant
+const contestStore = useContestStore()
+const sessionStore = useSessionStore()
+const rootStore = useRootStore()
+const route = useRoute()
+const router = useRouter()
+
+const { list, sum } = $(storeToRefs(contestStore))
+const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
+const { profile, isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
+let enterPwd = $ref('')
+const query = $computed(() => {
+  const opt = only(route.query, 'page pageSize type content')
+  return purify(opt)
+})
+
+const page = $computed(() => parseInt(query.page) || 1)
+const pageSize = $computed(() => parseInt(query.pageSize) || 20)
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
+
+const { find, verify, update, 'delete': remove } = contestStore
+const fetch = () => find(query)
+
+function reload (payload = {}) {
+  router.push({
+    name: 'contestList',
+    query: Object.assign({}, query, payload),
+  })
 }
+
+const pageChange = val => reload({ page: val })
+
+async function enter (item) {
+  const opt = Object.assign(
+    only(item, 'cid'),
+    { pwd: enterPwd },
+  )
+  const data = await verify(opt)
+  if (data) {
+    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+  } else {
+    $Message.error('Wrong password!')
+  }
+}
+
+async function visit (item) {
+  if (!isLogined) {
+    sessionStore.toggleLoginState()
+  } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
+    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+  } else if (item.start > currentTime) {
+    $Message.error('This contest hasn\'t started yet!')
+  } else if (+item.encrypt === encrypt.Public) {
+    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+  } else if (+item.encrypt === encrypt.Private) {
+    const data = await verify(only(item, 'cid'))
+    if (data) {
+      router.push({ name: 'contestOverview', params: { cid: item.cid } })
+    } else {
+      $Message.error('You\'re not invited to attend this contest!')
+    }
+  } else if (+item.encrypt === encrypt.Password) {
+    $Modal.confirm({
+      render: (h) => {
+        return h(Input, {
+          placeholder: 'Please enter password.',
+          onChange: event => enterPwd = event.target.value,
+          onEnter: () => {
+            enter(item)
+            $Modal.remove()
+          },
+        })
+      },
+      onOk: () => {
+        enter(item)
+      },
+    })
+  }
+}
+
+async function change (contest) {
+  contest.status = contest.status === this.status.Reserve
+    ? status.Available
+    : status.Reserve
+  await update(contest)
+  find(query)
+}
+
+function del (cid) {
+  $Modal.confirm({
+    title: '提示',
+    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    onOk: async () => {
+      await remove({ cid })
+      $Message.success(`成功删除 ${cid}！`)
+    },
+    onCancel: () => $Message.info('已取消删除！'),
+  })
+}
+
+fetch()
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>

@@ -1,16 +1,9 @@
-<script>
-export default {
-  methods: {
-    home () {
-      this.$router.push({
-        name: 'home',
-      })
-    },
-    back () {
-      this.$router.go(-1)
-    },
-  },
-}
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const home = () => router.push({ name: 'home' })
+const back = () => router.go(-1)
 </script>
 
 <template>

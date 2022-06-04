@@ -133,7 +133,7 @@ onRouteQueryUpdate(fetch)
     </Row>
     <Row class="pagination">
       <Col :span="16">
-        <Page v-model:current="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
+        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
       </Col>
     </Row>
     <table>
