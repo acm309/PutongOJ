@@ -26,10 +26,7 @@ const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
 const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 let enterPwd = $ref('')
-const query = $computed(() => {
-  const opt = only(route.query, 'page pageSize type content')
-  return purify(opt)
-})
+const query = $computed(() => purify({ page, pageSize }))
 
 const { find, verify, update, 'delete': remove } = contestStore
 const fetch = () => find(query)

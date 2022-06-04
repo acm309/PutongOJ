@@ -112,8 +112,6 @@ onBeforeMount(async () => {
 </template>
 
 <style lang="stylus" scoped>
-@import '../styles/common'
-
 h1
   margin-bottom: 6px
 p

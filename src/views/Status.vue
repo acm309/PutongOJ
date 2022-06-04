@@ -1,7 +1,5 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import pick from 'lodash.pick'
-import { onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import constant from '@/util/constant'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -17,12 +15,12 @@ const find = solutionStore.find
 const route = useRoute()
 const router = useRouter()
 
-let uid = $ref(route.query.uid || '')
-let pid = $ref(route.query.pid || '')
-let judge = $ref(parseInt(route.query.judge) || '')
-let language = $ref(parseInt(route.query.language) || '')
-let page = $ref(parseInt(route.query.page) || 1)
-let pageSize = $ref(parseInt(route.query.pageSize) || 30)
+const uid = $computed(() => route.query.uid || '')
+const pid = $computed(() => route.query.pid || '')
+const judge = $computed(() => parseInt(route.query.judge) || '')
+const language = $computed(() => parseInt(route.query.language) || '')
+const page = $computed(() => parseInt(route.query.page) || 1)
+const pageSize = $computed(() => parseInt(route.query.pageSize) || 30)
 
 const judgeList = $ref(constant.judgeList)
 const languageList = $ref(constant.languageList)
@@ -30,22 +28,9 @@ const result = $ref(constant.result)
 const lang = $ref(constant.language)
 const color = $ref(constant.color)
 
-const query = $computed(() => {
-  const opt = pick(route.query,
-    [ 'page', 'pageSize', 'uid', 'pid', 'language', 'judge' ])
-  return purify(opt)
-})
+const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-function fetch () {
-  find(query)
-  const routeQuery = route.query
-  page = parseInt(routeQuery.page) || 1
-  pageSize = parseInt(routeQuery.pageSize) || 30
-  uid = routeQuery.uid
-  pid = routeQuery.pid || ''
-  judge = parseInt(routeQuery.judge) || ''
-  language = parseInt(routeQuery.language) || ''
-}
+const fetch = () => find(query)
 
 const reload = (payload = {}) => {
   router.push({
@@ -64,7 +49,7 @@ const search = () => reload({
 
 const pageChange = val => reload({ page: val })
 
-onBeforeMount(fetch)
+fetch()
 onRouteQueryUpdate(fetch)
 </script>
 
@@ -184,8 +169,6 @@ onRouteQueryUpdate(fetch)
 </template>
 
 <style lang="stylus" scoped>
-@import '../styles/common'
-
 .filter
   margin-bottom: 20px
   label

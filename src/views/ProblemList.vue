@@ -28,13 +28,12 @@ const options = reactive([
 const route = useRoute()
 const router = useRouter()
 
-const query = $computed(() => only(route.query, 'page pageSize type content'))
-
-const type = $ref(query.type || 'pid')
-const content = $ref(query.content || '')
-const page = $computed(() => parseInt(query.page) || 1)
-const pageSize = $computed(() => parseInt(query.pageSize) || 30)
+const type = $ref(route.query.type || 'pid')
+const content = $ref(route.query.content || '')
+const page = $computed(() => parseInt(route.query.page) || 1)
+const pageSize = $computed(() => parseInt(route.query.pageSize) || 30)
 const problemVisible = $ref(constant.status)
+const query = $computed(() => purify({ type, content, page, pageSize }))
 
 const problemStore = useProblemStore()
 const rootStore = useRootStore()

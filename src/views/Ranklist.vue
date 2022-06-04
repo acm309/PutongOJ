@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { onBeforeMount, onBeforeUnmount } from 'vue'
 import pick from 'lodash.pick'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -47,8 +47,8 @@ async function fetch () {
 const pageChange = val => reload({ page: val })
 const search = () => reload({ gid: group, page: 1 })
 
-onBeforeUnmount(() => groupStore.clearSavedGroups())
-onBeforeMount(fetch)
+fetch()
+onBeforeRouteLeave(() => groupStore.clearSavedGroups())
 onRouteQueryUpdate(fetch)
 </script>
 

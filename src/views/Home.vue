@@ -80,30 +80,29 @@ onRouteQueryUpdate(fetch)
 </template>
 
 <style lang="stylus">
-  @import '../styles/common'
-  .home-wrap
-    margin: 0 10%
-    .news
-      font-size: 40px
-      padding-bottom: 10px
-    .content
-      padding-left: 20px
-      padding-bottom: 20px
-      margin-bottom: 20px
-      border-bottom: 1px solid #dfd8d8
-    .ivu-card
-      margin-bottom: 20px
-      .ivu-icon-md-chatbubbles
-        font-size: 24px
-        margin-left: 30%
-        // color: alpha($primary-color, 0.9)
-        color: $primary-color
-      p
-        margin-top: 10px
-      .ivu-icon-close-circled
-        line-height: 20px
-        color: #c3c2c2
-        cursor: pointer
-        &:hover
-          font-size: 20px
+.home-wrap
+  margin: 0 10%
+  .news
+    font-size: 40px
+    padding-bottom: 10px
+  .content
+    padding-left: 20px
+    padding-bottom: 20px
+    margin-bottom: 20px
+    border-bottom: 1px solid #dfd8d8
+  .ivu-card
+    margin-bottom: 20px
+    .ivu-icon-md-chatbubbles
+      font-size: 24px
+      margin-left: 30%
+      // color: alpha($primary-color, 0.9)
+      color: $primary-color
+    p
+      margin-top: 10px
+    .ivu-icon-close-circled
+      line-height: 20px
+      color: #c3c2c2
+      cursor: pointer
+      &:hover
+        font-size: 20px
 </style>
