@@ -1,82 +1,62 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 import only from 'only'
+import { useRoute, useRouter } from 'vue-router'
 import constant from '@/util/constant'
-import { purify } from '@/util/helper'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      page: parseInt(this.$route.query.page) || 1,
-      pageSize: parseInt(this.$route.query.pageSize) || 30,
-      result: constant.result,
-      lang: constant.language,
-      color: constant.color,
-    }
-  },
-  created () {
-    this.fetch()
-    this.changeDomTitle({ title: `Problem ${this.$route.params.pid}` })
-  },
-  computed: {
-    ...mapState(useSolutionStore, [ 'list', 'sum' ]),
-    ...mapState(useSessionStore, [ 'profile', 'isAdmin' ]),
-    query () {
-      const opt = Object.assign(
-        only(this.$route.query, 'page pageSize language judge'),
-        {
-          pid: this.$route.params.pid,
-          uid: 'err', // err表示没有用户登录时的uid，前端限制过用户名不能少于5位
-        },
-      )
-      if (this.profile && this.profile.uid) {
-        opt.uid = this.profile.uid
-      }
-      return purify(opt)
+const solutionStore = useSolutionStore()
+const sessionStore = useSessionStore()
+const rootStore = useRootStore()
+const route = useRoute()
+const router = useRouter()
+
+const page = $computed(() => parseInt(route.query.page) || 1)
+const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
+const { result, language: lang, color } = constant
+
+const { list, sum } = $(storeToRefs(solutionStore))
+const { profile } = $(storeToRefs(sessionStore))
+const { find } = solutionStore
+const { changeDomTitle } = rootStore
+const query = $computed(() => {
+  const opt = Object.assign(
+    {},
+    only(route.query, 'page pageSize language judge'),
+    {
+      pid: route.params.pid,
+      uid: 'err',
     },
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useSolutionStore, [ 'find' ]),
-    fetch () {
-      this.find(this.query)
-      const query = this.$route.query
-      this.page = parseInt(query.page) || 1
-      this.pageSize = parseInt(query.pageSize) || 30
-    },
-    reload (payload = {}) {
-      this.$router.push({
-        name: 'mySubmission',
-        query: purify(Object.assign(this.query, payload)),
-      })
-    },
-    pageChange (val) {
-      this.reload({ page: val })
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from) {
-        this.fetch()
-      }
-    },
-    profile (val) {
-      this.fetch()
-    },
-  },
-}
+  )
+  // Test optional chaining
+  if (profile?.uid) {
+    opt.uid = profile.uid
+  }
+  return purify(opt)
+})
+
+const fetch = () => find(query)
+const reload = (payload = {}) => router.push({
+  name: 'mySubmission',
+  query: purify(Object.assign({}, query, payload)),
+})
+const pageChange = val => reload({ page: val })
+
+fetch()
+changeDomTitle({ title: `Problem ${route.params.pid} - My Submission` })
+onProfileUpdate(fetch)
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>
   <div class="status-wrap">
     <Row class="pagination">
       <Col :span="16">
-        <Page v-model:current="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
+        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
       </Col>
     </Row>
     <table>
@@ -121,8 +101,6 @@ export default {
 </template>
 
 <style lang="stylus" scoped>
-@import '../../styles/common'
-
 .pagination
   margin-top: 10px
   margin-bottom: 10px

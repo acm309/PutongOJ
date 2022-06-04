@@ -11,7 +11,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
   const sumStatis = ref(0)
   async function find (payload) {
     const { data } = await api.getStatistics(payload)
-    // problemStatistics???
+    // Write operation failed: computed value is readonly ???
     list.value = data.list
     countList.value = data.countList
     sumCharts.value = data.sumCharts

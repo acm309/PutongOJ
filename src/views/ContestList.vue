@@ -21,16 +21,15 @@ const router = useRouter()
 const { list, sum } = $(storeToRefs(contestStore))
 const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
 const { profile, isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const page = $computed(() => parseInt(route.query.page) || 1)
+const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
 let enterPwd = $ref('')
 const query = $computed(() => {
   const opt = only(route.query, 'page pageSize type content')
   return purify(opt)
 })
-
-const page = $computed(() => parseInt(query.page) || 1)
-const pageSize = $computed(() => parseInt(query.pageSize) || 20)
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
 
 const { find, verify, update, 'delete': remove } = contestStore
 const fetch = () => find(query)

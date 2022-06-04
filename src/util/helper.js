@@ -31,5 +31,6 @@ export function onRouteParamUpdate (callback) {
 export function onProfileUpdate (callback) {
   const sessionStore = useSessionStore()
   const { profile } = storeToRefs(sessionStore)
-  watch(profile, callback)
+  const unwatch = watch(profile, callback)
+  onBeforeRouteLeave(unwatch)
 }
