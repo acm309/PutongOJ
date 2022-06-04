@@ -1,57 +1,31 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem'
 import { useProblemStore } from '@/store/modules/problem'
 import { useContestStore } from '@/store/modules/contest'
-import { useRootStore } from '@/store'
+import { onRouteParamUpdate } from '@/util/helper'
 
-export default {
-  components: {
-    Problem,
-  },
-  data () {
-    return {
-      proIndex: parseInt(this.$route.params.id),
-    }
-  },
-  computed: {
-    ...mapState(useProblemStore, [ 'problem' ]),
-    ...mapState(useContestStore, [ 'overview', 'totalProblems' ]),
-  },
-  created () {
-    this.fetch()
-    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-  },
-  methods: {
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useProblemStore, {
-      findOneProblem: 'findOne',
-    }),
-    ...mapActions(useContestStore, [ 'findOne' ]),
-    async fetch () {
-      this.proIndex = parseInt(this.$route.params.id)
-      const data = await this.findOne(this.$route.params)
-      this.findOneProblem({ pid: data.overview[this.proIndex - 1].pid, cid: data.contest.cid })
-    },
-    pageChange (val) {
-      this.$router.push({
-        name: 'contestProblem',
-        params: { id: val },
-      })
-    },
-    submit () {
-      this.$router.push({
-        name: 'contestSubmit',
-        params: this.$router.params,
-      })
-    },
-  },
-  watch: {
-    $route (to, from) {
-      if (to !== from && to.name === 'contestProblem') { this.fetch() }
-    },
-  },
+const problemStore = useProblemStore()
+const contestStore = useContestStore()
+const router = useRouter()
+const route = useRoute()
+
+const { findOne: findOneProblem } = problemStore
+const { problem } = $(storeToRefs(problemStore))
+const { overview, contest, totalProblems } = $(storeToRefs(contestStore))
+
+const proIndex = $computed(() => parseInt(route.params.id || 1))
+
+const fetch = () => {
+  findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
 }
+
+const pageChange = val => router.push({ name: 'contestProblem', params: { id: val } })
+const submit = () => router.push({ name: 'contestSubmit', params: router.params })
+
+fetch()
+onRouteParamUpdate(fetch)
 </script>
 
 <template>
@@ -62,9 +36,9 @@ export default {
       </li>
     </ul>
     <Problem :problem="problem">
-      <h1 slot="title">
+      <template #title>
         {{ $route.params.id }}:  {{ problem.title }}
-      </h1>
+      </template>
     </Problem>
     <Button shape="circle" icon="md-paper-plane" @click="submit">
       Submit

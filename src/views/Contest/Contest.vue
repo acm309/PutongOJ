@@ -1,52 +1,55 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { timePretty } from '@/util/formate'
+import { onProfileUpdate, onRouteParamUpdate, purify } from '@/util/helper'
 
-export default {
-  data () {
-    return {
-      display: '',
-    }
-  },
-  computed: {
-    ...mapState(useContestStore, [ 'contest' ]),
-    ...mapState(useSessionStore, [ 'isAdmin' ]),
-    ...mapState(useRootStore, [ 'currentTime' ]),
-    timePercentage () {
-      if (this.currentTime < this.contest.start) {
-        return 0
-      } else if (this.currentTime > this.contest.end) {
-        return 100
-      } else {
-        return +((this.currentTime - this.contest.start) * 100
-        / (this.contest.end - this.contest.start)).toFixed(1)
-      }
-    },
-  },
-  created () {
-    this.display = this.$route.name
-    this.findOne(this.$route.params)
-  },
-  methods: {
-    timePretty,
-    ...mapActions(useContestStore, [ 'findOne' ]),
-    handleClick (name) {
-      if (name === 'contestProblem' || name === 'contestSubmit') {
-        this.$router.push({ name, params: { cid: this.$route.params.cid, id: this.$route.params.id || 1 } })
-      } else {
-        this.$router.push({ name, params: { cid: this.$route.params.cid } })
-      }
-    },
-  },
-  watch: {
-    $route (to, from) {
-      this.display = to.name
-    },
-  },
+const contestStore = useContestStore()
+const sessionStore = useSessionStore()
+const rootStore = useRootStore()
+const route = useRoute()
+const router = useRouter()
+
+const { contest } = $(storeToRefs(contestStore))
+const { isAdmin } = $(storeToRefs(sessionStore))
+const { currentTime } = $(storeToRefs(rootStore))
+const { findOne } = contestStore
+const { changeDomTitle } = rootStore
+const { profile } = sessionStore
+
+const display = $computed(() => route.name || 'contest')
+
+const timePercentage = $computed(() => {
+  if (currentTime < contest.start) {
+    return 0
+  } else if (currentTime > contest.end) {
+    return 100
+  } else {
+    return +((currentTime - contest.start) * 100
+        / (contest.end - contest.start)).toFixed(1)
+  }
+})
+
+function handleClick (name) {
+  if (name === 'contestProblem' || name === 'contestSubmit') {
+    router.push({ name, params: { cid: route.params.cid, id: route.params.id || 1 } })
+  } else {
+    router.push({ name, params: { cid: route.params.cid } })
+  }
 }
+
+async function fetch () {
+  await findOne(purify({ cid: route.params.cid, uid: profile?.uid }))
+  changeDomTitle(contest.name)
+}
+
+fetch()
+changeDomTitle({ title: `Contest ${route.params.cid}` })
+onRouteParamUpdate(() => changeDomTitle({ title: `Contest ${route.params.cid}` }))
+onProfileUpdate(fetch)
 </script>
 
 <template>

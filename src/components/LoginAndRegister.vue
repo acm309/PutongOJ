@@ -22,7 +22,7 @@ export default {
     const basicRules = {
       uid: [
         { required: true, message: '用户名不能少', trigger: 'change' },
-        { min: 5, max: 50, message: '用户名在 5 到 50 位之间', trigger: 'change' },
+        { min: 4, max: 50, message: '用户名在 4 到 50 位之间', trigger: 'change' },
       ],
       pwd: [
         { required: true, message: '请输入密码', trigger: 'change' },

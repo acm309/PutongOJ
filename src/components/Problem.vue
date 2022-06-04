@@ -13,9 +13,11 @@ const onCopy = (content) => {
 
 <template>
   <div class="proinfo-wrap">
-    <slot name="title">
-      <h1>{{ problem.pid }}:  {{ problem.title }}</h1>
-    </slot>
+    <h1>
+      <slot name="title">
+        {{ problem.pid }}:  {{ problem.title }}
+      </slot>
+    </h1>
     <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
     <h2 class="text-primary">
       Description

@@ -35,9 +35,6 @@ export default {
     </Button>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-</style>
 <!--
   这里，所有的更改都到了 store 里的 contest 上，这个方法并不一定最佳实践。
   一个可能的影响是:

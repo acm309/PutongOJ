@@ -1,57 +1,15 @@
-<script>
-import { mapActions, mapState } from 'pinia'
-import { useSessionStore } from '@/store/modules/session'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
-import { useRootStore } from '@/store'
 import { formate, timePretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      cid: this.$route.params.cid,
-    }
-  },
-  computed: {
-    ...mapState(useContestStore, [ 'contest', 'overview', 'solved' ]),
-    ...mapState(useSessionStore, [ 'profile' ]),
-    query () {
-      let uid
-      if (this.profile) {
-        uid = this.profile.uid
-      }
-      const opt = {
-        cid: this.$route.params.cid,
-        uid,
-      }
-      return opt
-    },
-  },
-  created () {
-    this.fetch()
-    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-  },
-  methods: {
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useContestStore, [ 'findOne' ]),
-    fetch () {
-      this.findOne(this.query)
-    },
-    timePretty,
-    formate,
-  },
-  watch: { // 浏览器后退时回退页面
-    $route (to, from) {
-      if (to !== from) {
-        console.log('to', to)
-        // this.fetch()
-        // crash: cid has to be a number
-      }
-    },
-    profile (val) {
-      this.findOne(this.query)
-    },
-  },
-}
+const contestStore = useContestStore()
+
+const { contest, overview, solved } = $(storeToRefs(contestStore))
+
+const route = useRoute()
+const cid = $computed(() => parseInt(route.params.cid || 1))
 </script>
 
 <template>
@@ -68,7 +26,7 @@ export default {
       </tr>
       <tr v-for="(item, index) in overview" :key="item.pid">
         <td>
-          <Icon v-if="solved.indexOf(item.pid) !== -1" type="checkmark-round" />
+          <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
         </td>
         <td>{{ index + 1 }}</td>
         <td>

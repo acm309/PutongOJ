@@ -1,45 +1,36 @@
-<script>
-import { mapActions, mapState } from 'pinia'
-import { useRootStore } from '@/store'
+<script setup>
+import { inject, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useContestStore } from '@/store/modules/contest'
 import { timeContest } from '@/util/formate'
 
-export default {
-  data: () => ({
-    timer: null,
-  }),
-  computed: {
-    ...mapState(useContestStore, [ 'ranklist', 'contest' ]),
-  },
-  created () {
-    this.getRank()
-    this.changeDomTitle({ title: `Contest ${this.$route.params.cid}` })
-  },
-  beforeUnmount () {
-    clearInterval(this.timer)
-  },
-  methods: {
-    timeContest,
-    ...mapActions(useRootStore, [ 'changeDomTitle' ]),
-    ...mapActions(useContestStore, { getRanklist: 'getRank' }),
-    getRank () {
-      this.getRanklist(this.$route.params)
-    },
-    change (status) {
-      if (status) {
-        this.timer = setInterval(() => {
-          this.getRank()
-          this.$Message.info({
-            content: '刷新成功',
-            duration: 1,
-          })
-        }, 10000)
-      } else {
-        clearInterval(this.timer)
-      }
-    },
-  },
+const contestStore = useContestStore()
+const route = useRoute()
+const $Message = inject('$Message')
+
+const { contest, ranklist } = $(storeToRefs(contestStore))
+const { getRank: getRanklist } = contestStore
+let timer = $ref(null)
+
+const getRank = () => getRanklist(route.params)
+
+function change (enabled) {
+  if (enabled) {
+    timer = setInterval(() => {
+      getRank()
+      $Message.info({
+        content: '刷新成功',
+        duration: 1,
+      })
+    }, 10000)
+  } else {
+    clearInterval(timer)
+  }
 }
+
+getRank()
+onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>

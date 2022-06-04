@@ -28,6 +28,12 @@ export function onRouteParamUpdate (callback) {
   onBeforeRouteLeave(unwatch)
 }
 
+export function onRouteNameUpdate (callback) {
+  const route = useRoute()
+  const unwatch = watch(() => route.name, callback)
+  onBeforeRouteLeave(unwatch)
+}
+
 export function onProfileUpdate (callback) {
   const sessionStore = useSessionStore()
   const { profile } = storeToRefs(sessionStore)

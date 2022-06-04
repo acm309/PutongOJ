@@ -124,6 +124,7 @@ export default {
         Title
       </Col>
       <Col :span="21">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="contest.title" />
       </Col>
     </Row>
@@ -156,6 +157,7 @@ export default {
         Type
       </Col>
       <Col :span="4">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Select v-model="contest.encrypt" placeholder="请选择">
           <Option
             v-for="item in options"
@@ -186,6 +188,7 @@ export default {
     </Row>
     <Row v-if="contest.encrypt === encrypt.Password">
       <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="contest.argument" />
       </Col>
     </Row>
@@ -196,11 +199,12 @@ export default {
     </Row>
     <Row>
       <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Draggable v-model="contest.list">
           <transition-group name="list">
             <div v-for="(item, index) in contest.list" :key="index" class="list-item">
               <div>{{ item }} -- {{ jobs[item] }}</div>
-              <Icon type="close-circled" @click.native="removeJob(index)" />
+              <Icon type="close-circled" @click="removeJob(index)" />
             </div>
           </transition-group>
         </Draggable>
@@ -208,7 +212,7 @@ export default {
     </Row>
     <Row>
       <Col :span="21" class="add">
-        <Input v-model="pid" placeholder="Add a pid" @keyup.enter.native="add" />
+        <Input v-model="pid" placeholder="Add a pid" @keyup.enter="add" />
       </Col>
       <Col :span="2">
         <Button type="primary" @click="add">
