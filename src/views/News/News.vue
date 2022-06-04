@@ -18,10 +18,9 @@ const change = name => router.push({
   params: { nid: route.params.nid },
 })
 
-onBeforeMount(() => {
-  newsStore.findOne(route.params).then(() => {
-    rootStore.changeDomTitle({ title: `News -- ${newsStore.news.title}` })
-  })
+onBeforeMount(async () => {
+  await newsStore.findOne(route.params)
+  rootStore.changeDomTitle({ title: `News -- ${newsStore.news.title}` })
 })
 </script>
 

@@ -1,16 +1,9 @@
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
-export default {
-  computed: {
-    ...mapState(useNewsStore, [ 'news' ]),
-  },
-  methods: {
-    timePretty,
-  },
-}
+const { news } = $(storeToRefs(useNewsStore()))
 </script>
 
 <template>
