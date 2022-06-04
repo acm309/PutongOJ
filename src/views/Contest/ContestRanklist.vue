@@ -84,33 +84,33 @@ export default {
   </div>
 </template>
 
-<style lang="less">
-// .conrank-wrap
-  // margin-top: 1em
-  // overflow: scroll
-  // table
-  //   width: 100%
-  //   border-collapse: collapse
-  //   border-spacing: 0
-  //   th, td
-  //     border: 1px solid #dbdbdb
-  //     padding: 8px 4px
-  //     &:nth-child(n + 5)
-  //       min-width: 4em
-  // .straight
-  //   nowrap: nowrap
-  // .prime
-  //   color: #fff
-  //   background-color: #3273dc
-  //   word-wrap: break-word
-  //   word-break:break-all
-  //   text-align: left
-  // .normal
-  //   color: #fff
-  //   background-color: #23d160
-  //   word-wrap: break-word
-  //   word-break:break-all
-  //   text-align: left
-  // .red
-  //   color: red
+<style lang="stylus">
+.conrank-wrap
+  margin-top: 1em
+  overflow: scroll
+  table
+    width: 100%
+    border-collapse: collapse
+    border-spacing: 0
+    th, td
+      border: 1px solid #dbdbdb
+      padding: 8px 4px
+      &:nth-child(n + 5)
+        min-width: 4em
+  .straight
+    nowrap: nowrap
+  .prime
+    color: #fff
+    background-color: #3273dc
+    word-wrap: break-word
+    word-break:break-all
+    text-align: left
+  .normal
+    color: #fff
+    background-color: #23d160
+    word-wrap: break-word
+    word-break:break-all
+    text-align: left
+  .red
+    color: red
 </style>

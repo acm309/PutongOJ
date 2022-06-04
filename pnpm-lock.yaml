@@ -9,6 +9,7 @@ specifiers:
   '@vueuse/core': ^8.5.0
   axios: ^0.27.2
   cross-spawn: ^5.0.1
+  date-fns: ^2.28.0
   echarts: ^5.3.2
   eslint: ^8.16.0
   eslint-plugin-html: ^6.2.0
@@ -19,7 +20,6 @@ specifiers:
   lodash.isempty: ^4.4.0
   lodash.pick: ^4.4.0
   lodash.pickby: ^4.6.0
-  moment: ^2.20.1
   only: ^0.0.2
   pinia: ^2.0.14
   quill: ^1.3.7
@@ -56,11 +56,12 @@ dependencies:
   vue-router: 4.0.15_vue@3.2.36
 
 devDependencies:
-  '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my_xztl6dhthcahlo6akmb2bmjmle'
+  '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182_xztl6dhthcahlo6akmb2bmjmle'
   '@originjs/vite-plugin-commonjs': 1.0.3
   '@vueup/vue-quill': 1.0.0-beta.8_vue@3.2.36
   '@vueuse/core': 8.5.0_vue@3.2.36
   cross-spawn: 5.1.0
+  date-fns: 2.28.0
   echarts: 5.3.2
   eslint: 8.16.0
   eslint-plugin-html: 6.2.0
@@ -71,7 +72,6 @@ devDependencies:
   lodash.isempty: 4.4.0
   lodash.pick: 4.4.0
   lodash.pickby: 4.6.0
-  moment: 2.29.3
   only: 0.0.2
   quill: 1.3.7
   quill-image-uploader: 1.2.2_quill@1.3.7
@@ -1842,6 +1842,11 @@ packages:
     engines: {node: '>=0.10'}
     dependencies:
       assert-plus: 1.0.0
+
+  /date-fns/2.28.0:
+    resolution: {integrity: sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==}
+    engines: {node: '>=0.11'}
+    dev: true
 
   /dayjs/1.11.2:
     resolution: {integrity: sha512-F4LXf1OeU9hrSYRPTTj/6FbO4HTjPKXvEIC1P2kcnFurViINCVk3ZV0xAS3XVx9MkMsXbbqlK6hjseaYbgKEHw==}
@@ -4795,10 +4800,6 @@ packages:
     dependencies:
       minimist: 1.2.6
 
-  /moment/2.29.3:
-    resolution: {integrity: sha512-c6YRvhEo//6T2Jz/vVtYzqBzwvPT95JBQ+smCytzf7c50oMZRsR/a4w88aD34I+/QVSfnoAnSBFPJHItlOMJVw==}
-    dev: true
-
   /mrmime/1.0.0:
     resolution: {integrity: sha512-a70zx7zFfVO7XpnQ2IX1Myh9yY4UYvfld/dikWRnsXxbyvMcfz+u6UfgNAtH+k2QqtJuzVpv6eLTx1G2+WKZbQ==}
     engines: {node: '>=10'}
@@ -7043,9 +7044,9 @@ packages:
       tslib: 2.3.0
     dev: true
 
-  '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my_xztl6dhthcahlo6akmb2bmjmle':
-    resolution: {tarball: https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?my}
-    id: '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my'
+  '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182_xztl6dhthcahlo6akmb2bmjmle':
+    resolution: {tarball: https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182}
+    id: '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182'
     name: '@antfu/eslint-config'
     version: 0.25.0
     peerDependencies:

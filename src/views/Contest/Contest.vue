@@ -54,7 +54,7 @@ export default {
     <Card class="card">
       <Row type="flex" justify="center">
         <Col :span="6">
-          Begin: {{ contest.start | timePretty }}
+          Begin: {{ timePretty(contest.start) }}
         </Col>
         <Col v-if="currentTime < contest.start" :span="12">
           Ready
