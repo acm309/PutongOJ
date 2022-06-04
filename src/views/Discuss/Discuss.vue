@@ -1,66 +1,62 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+// TODO: add pagination
+import { storeToRefs } from 'pinia'
+import { inject } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { timeagoPretty } from '@/util/formate'
 
-export default {
-  data () {
-    return {
-      form: {
-        title: '',
-        content: '',
-      },
-      loading: false,
-    }
-  },
-  created () {
-    this.fetch()
-  },
-  computed: {
-    ...mapState(useSessionStore, [ 'isLogined', 'isAdmin', 'canRemove' ]),
-    ...mapState(useDiscussStore, [ 'list' ]),
-  },
-  methods: {
-    timeagoPretty,
-    ...mapActions(useDiscussStore, [ 'find', 'create' ]),
-    ...mapActions(useDiscussStore, { remove: 'delete' }),
-    fetch () {
-      this.find()
-    },
-    createNew () {
-      if (!this.form.title || !this.form.content) {
-        this.$Message.warning('Title or Content can not be empty')
-        return
-      }
-      this.loading = true
-      this.create(this.form).then((did) => {
-        this.$router.push({
-          name: 'discussInfo',
-          params: {
-            did,
-          },
-        })
-      }).catch(() => {
-        this.loading = false
-      })
-    },
-    del (did) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '<p>此操作将永久删除该文件, 是否继续?</p>',
-        onOk: () => {
-          this.remove({ did }).then(() => {
-            this.$Message.success(`成功删除 ${did}！`)
-          })
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        },
-      })
-    },
-  },
+const sessionStore = useSessionStore()
+const discussStore = useDiscussStore()
+const router = useRouter()
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
+
+const form = $ref({
+  content: '',
+  title: '',
+})
+let loading = $ref(false)
+
+const { isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { list } = $(storeToRefs(discussStore))
+const { find, create, 'delete': remove } = discussStore
+
+const fetch = () => find()
+
+async function createNew () {
+  if (!form.title || !form.content) {
+    $Message.warning('Title or Content can not be empty')
+    return
+  }
+  loading = true
+  try {
+    const { did } = await create(form)
+    router.push({
+      name: 'discussInfo',
+      params: { did },
+    })
+  } finally {
+    loading = false
+  }
 }
+
+function del (did) {
+  $Modal.confirm({
+    title: '提示',
+    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    onOk: async () => {
+      remove({ did })
+      $Message.success(`成功删除 ${did}！`)
+    },
+    onCancel: () => {
+      $Message.info('已取消删除！')
+    },
+  })
+}
+
+fetch()
 </script>
 
 <template>
@@ -124,7 +120,6 @@ export default {
 </template>
 
 <style lang="stylus" scoped>
-@import '../../styles/common'
 h3
   margin-top: 20px
 .form

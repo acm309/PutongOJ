@@ -1,5 +1,4 @@
 <script setup>
-import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

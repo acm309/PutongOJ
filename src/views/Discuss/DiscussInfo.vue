@@ -1,63 +1,57 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { toRefs } from 'vue'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { timeagoPretty } from '@/util/formate'
 
-export default {
-  props: {
-    did: {
-      required: true,
-    },
+const props = defineProps([ 'did' ])
+const { did } = $(toRefs(props))
+
+const sessionStore = useSessionStore()
+const discussStore = useDiscussStore()
+let loading = $ref(false)
+const form = $ref({
+  form: {
+    content: '',
   },
-  data () {
-    return {
-      loading: false,
-      form: {
-        content: '',
-      },
-    }
-  },
-  computed: {
-    ...mapState(useSessionStore, [ 'isLogined' ]),
-    ...mapState(useDiscussStore, [ 'discuss' ]),
-  },
-  created () {
-    this.fetch()
-  },
-  methods: {
-    timeagoPretty,
-    ...mapActions(useDiscussStore, [ 'findOne', 'update' ]),
-    fetch () {
-      this.findOne({ did: this.did })
-    },
-    createNew () {
-      this.loading = true
-      this.update({
-        did: this.did,
-        content: this.form.content,
-      }).then(() => {
-        this.loading = false
-        this.form.content = ''
-        this.fetch()
-      }).catch(() => {
-        this.loading = false
-      })
-    },
-  },
+})
+
+const { isLogined } = $(storeToRefs(sessionStore))
+const { discuss } = $(storeToRefs(discussStore))
+const { findOne, update } = discussStore
+
+const fetch = () => findOne({ did })
+
+async function createNew () {
+  loading = true
+  try {
+    await update({
+      did,
+      content: form.content,
+    })
+    form.content = ''
+    fetch()
+  } finally {
+    loading = false
+  }
 }
+
+fetch()
 </script>
 
 <template>
   <div class="discuss-wrap">
     <h1>{{ discuss.title }}</h1>
     <Card v-for="comment in discuss.comments" :key="comment.content" dis-hover>
-      <p slot="title">
-        {{ comment.uid }}
-      </p>
-      <span slot="extra">
-        {{ timeagoPretty(comment.create) }}
-      </span>
+      <template #title>
+        <p>{{ comment.uid }}</p>
+      </template>
+      <template #extra>
+        <span>
+          {{ timeagoPretty(comment.create) }}
+        </span>
+      </template>
       <pre><code>{{ comment.content }}</code></pre>
     </Card>
     <br>

@@ -60,7 +60,6 @@
     "shelljs": "^0.7.6",
     "stylus": "^0.58.1",
     "typescript": "^4.7.2",
-    "unocss": "^0.37.2",
     "vite": "^2.7.2",
     "vite-plugin-compression": "^0.4.0",
     "vite-plugin-env-compatible": "^1.1.1",
