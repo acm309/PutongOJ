@@ -1,16 +1,12 @@
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { mapState, storeToRefs } from 'pinia'
 import { useSolutionStore } from '@/store/modules/solution'
 
-export default {
-  computed: {
-    ...mapState(useSolutionStore, [ 'solution' ]),
-  },
-  created () {
-    // 清空solution对象（否则如果先在status里点击他人代码，再进入submit页面，会显示之前看到的代码而不是空）
-    useSolutionStore().clearSavedSolution()
-  },
-}
+const solutionStore = useSolutionStore()
+const { solution } = $(storeToRefs(solutionStore))
+// Clear the saved solution in case of the user visits this page after
+// they viewed other's solution.
+solutionStore.clearSavedSolution()
 </script>
 
 <template>
