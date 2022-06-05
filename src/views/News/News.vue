@@ -2,10 +2,12 @@
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { onBeforeMount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useNewsStore } from '@/store/modules/news'
 import { useRootStore } from '@/store'
 
+const { t } = useI18n()
 const newsStore = useNewsStore()
 const rootStore = useRootStore()
 const route = useRoute()
@@ -26,9 +28,9 @@ onBeforeMount(async () => {
 
 <template>
   <div>
-    <Tabs :model-value="current" @on-click="change">
-      <TabPane label="Overview" name="newsInfo" />
-      <TabPane v-if="isAdmin" label="Edit" name="newsEdit" />
+    <Tabs v-if="isAdmin" :model-value="current" @on-click="change">
+      <TabPane :label="t('oj.overview')" name="newsInfo" />
+      <TabPane :label="t('oj.edit')" name="newsEdit" />
     </Tabs>
     <router-view />
   </div>

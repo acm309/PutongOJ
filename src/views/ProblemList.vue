@@ -129,9 +129,6 @@ onProfileUpdate(fetch)
               </Button>
             </router-link>
           </td>
-          <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
-            <strong v-show="item.status === status.Reserve">Reserved</strong>
-          </Tooltip>
           <td>
             <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
             (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">

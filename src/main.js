@@ -37,13 +37,13 @@ import {
   Transfer,
 } from 'view-ui-plus'
 import { createPinia } from 'pinia'
-import zh from 'view-ui-plus/dist/locale/zh-CN'
 import { createI18n } from 'vue-i18n'
-import en from 'view-ui-plus/dist/locale/en-US'
 import App from './App'
 import router from './router'
 import '@/my-theme/index.less'
 import { semiRestful } from './api'
+import zh from '@/locales/zh'
+import en from '@/locales/en'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 
@@ -57,19 +57,8 @@ const i18n = createI18n({
   globalInjection: true,
   legacy: false,
   locale: 'zh-CN',
+  fallbackLocale: 'en-US',
   messages: {
-    // 'zh-CN': {
-    //   ...zh,
-    //   oj: {
-    //     test: '测试',
-    //   },
-    // },
-    // 'en-US': {
-    //   ...en,
-    //   oj: {
-    //     test: 'test',
-    //   },
-    // },
     'zh-CN': zh,
     'en-US': en,
   },

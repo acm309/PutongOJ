@@ -2,10 +2,12 @@
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
+import { useHumanLanguage } from '@/util/helper'
 
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
@@ -17,6 +19,9 @@ const { currentTime } = $(storeToRefs(rootStore))
 const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
 
 const active = $computed(() => route.name)
+const { t, locale } = useI18n({ useScope: 'global' })
+let selectedLang = $(useHumanLanguage())
+locale.value = selectedLang
 
 const login = toggleLoginState
 const routerTo = (name) => {
@@ -24,12 +29,17 @@ const routerTo = (name) => {
     router.push({ name })
   }
 }
+
 function profileAction (name) {
   if (name === 'logout') {
     logout().then(() => $Message.info('bye bye!'))
   } else if (name === 'profile') {
     router.push({ name: 'userInfo', params: { uid: profile.uid } })
   }
+}
+
+function langSelected (lang) {
+  locale.value = selectedLang = lang
 }
 </script>
 
@@ -47,25 +57,25 @@ export default {
         <Menu mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
           <div class="left">
             <MenuItem name="home">
-              <Icon type="ios-home" />Home
+              <Icon type="ios-home" />{{ t('oj.home') }}
             </MenuItem>
             <MenuItem name="problemList">
-              <Icon type="ios-keypad" />Problem
+              <Icon type="ios-keypad" />{{ t('oj.problem_list') }}
             </MenuItem>
             <MenuItem name="status">
-              <Icon type="md-refresh" />Status
+              <Icon type="md-refresh" />{{ t('oj.status_list') }}
             </MenuItem>
             <MenuItem name="ranklist">
-              <Icon type="ios-stats" />Ranklist
+              <Icon type="ios-stats" />{{ t('oj.ranklist') }}
             </MenuItem>
             <MenuItem name="contestList">
-              <Icon type="ios-trophy" />Contest
+              <Icon type="ios-trophy" />{{ t('oj.contest_list') }}
             </MenuItem>
             <MenuItem name="discuss">
-              <Icon type="ios-quote" />Discuss
+              <Icon type="ios-quote" />{{ t('oj.discussion_list') }}
             </MenuItem>
             <MenuItem name="faq">
-              <Icon type="md-help-circle" />FAQ
+              <Icon type="md-help-circle" />{{ t('oj.faq') }}
             </MenuItem>
             <Submenu v-if="isAdmin" name="admin">
               <template #title>
@@ -96,17 +106,33 @@ export default {
             <template #list>
               <DropdownMenu>
                 <DropdownItem name="profile">
-                  Profile
+                  {{ t('oj.profile') }}
                 </DropdownItem>
                 <DropdownItem name="logout">
-                  Logout
+                  {{ t('oj.logout') }}
                 </DropdownItem>
               </DropdownMenu>
             </template>
           </Dropdown>
           <Button v-else type="text" @click="login">
-            Login / Register
+            {{ t("oj.login") }} / {{ t("oj.register") }}
           </Button>
+          <Dropdown @on-click="langSelected">
+            <Button type="text">
+              <span>({{ t('oj.human_language') }})</span>
+              <img src="../assets/i18n.svg" alt="" style="height: 1.2em">
+            </Button>
+            <template #list>
+              <DropdownMenu>
+                <DropdownItem name="en-US">
+                  English
+                </DropdownItem>
+                <DropdownItem name="zh-CN">
+                  简中
+                </DropdownItem>
+              </DropdownMenu>
+            </template>
+          </Dropdown>
         </div>
       </Header>
       <Content :style="{ margin: '88px 20px 0', background: '#fff', minHeight: '500px', padding: '20px 40px' }">
@@ -153,4 +179,7 @@ export default {
     text-align: center
     p
       margin-bottom: 8px
+  .i18n::before
+    content: url('../assets/i18n.svg')
+    // margin-right: 5px
 </style>

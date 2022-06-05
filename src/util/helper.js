@@ -2,6 +2,7 @@ import pickBy from 'lodash.pickby'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import { useStorage } from '@vueuse/core'
 import { useSessionStore } from '@/store/modules/session'
 export function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
@@ -39,4 +40,8 @@ export function onProfileUpdate (callback) {
   const { profile } = storeToRefs(sessionStore)
   const unwatch = watch(profile, callback)
   onBeforeRouteLeave(unwatch)
+}
+
+export function useHumanLanguage () {
+  return useStorage('oj_human_language', 'zh-CN')
 }

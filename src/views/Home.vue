@@ -3,11 +3,13 @@ import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
+const { t } = useI18n()
 const newsStore = useNewsStore()
 const sessionStore = useSessionStore()
 const route = useRoute()
@@ -57,7 +59,7 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="home-wrap">
     <div class="news">
-      NewsList
+      {{ t('oj.news_list') }}
     </div>
     <Card v-for="item in list" :key="item.nid">
       <Row type="flex" align="middle">
