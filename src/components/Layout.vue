@@ -1,38 +1,42 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+import { inject } from 'vue'
 import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
+const route = useRoute()
+const router = useRouter()
+const $Message = inject('$Message')
+const { toggleLoginState, logout } = sessionStore
+const { currentTime } = $(storeToRefs(rootStore))
+const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
+
+const active = $computed(() => route.name)
+
+const login = toggleLoginState
+const routerTo = (name) => {
+  if (route.name !== name) {
+    router.push({ name })
+  }
+}
+function profileAction (name) {
+  if (name === 'logout') {
+    logout().then(() => $Message.info('bye bye!'))
+  } else if (name === 'profile') {
+    router.push({ name: 'userInfo', params: { uid: profile.uid } })
+  }
+}
+</script>
+
+<script>
+// Must be renamed; otherwise, it will be confused with Layout.vue in 'view'.
 export default {
-  components: {
-    Dialog,
-  },
-  computed: {
-    ...mapState(useRootStore, [ 'currentTime' ]),
-    ...mapState(useSessionStore, [ 'profile', 'isAdmin', 'isLogined' ]),
-    active () {
-      return this.$route.name
-    },
-  },
-  methods: {
-    timePretty,
-    login () {
-      useSessionStore().toggleLoginState()
-    },
-    ...mapActions(useSessionStore, [ 'logout' ]),
-    routerTo (name) {
-      if (this.$route.name !== name) { this.$router.push({ name }) }
-    },
-    profileAction (name) {
-      if (name === 'logout') {
-        this.logout().then(() => this.$Message.info('bye bye!'))
-      } else if (name === 'profile') {
-        this.$router.push({ name: 'userInfo', params: { uid: this.profile.uid } })
-      }
-    },
-  },
+  name: 'OjLayout',
 }
 </script>
 

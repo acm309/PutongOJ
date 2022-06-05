@@ -37,9 +37,11 @@ import {
   Transfer,
 } from 'view-ui-plus'
 import { createPinia } from 'pinia'
+import zh from 'view-ui-plus/dist/locale/zh-CN'
+import { createI18n } from 'vue-i18n'
+import en from 'view-ui-plus/dist/locale/en-US'
 import App from './App'
 import router from './router'
-// import '@/styles/common.styl'
 import '@/my-theme/index.less'
 import { semiRestful } from './api'
 import { useSessionStore } from '@/store/modules/session'
@@ -49,6 +51,31 @@ const pinia = createPinia()
 const app = createApp(App)
 
 app.use(pinia)
+
+const i18n = createI18n({
+  allowComposition: true,
+  globalInjection: true,
+  legacy: false,
+  locale: 'zh-CN',
+  messages: {
+    // 'zh-CN': {
+    //   ...zh,
+    //   oj: {
+    //     test: '测试',
+    //   },
+    // },
+    // 'en-US': {
+    //   ...en,
+    //   oj: {
+    //     test: 'test',
+    //   },
+    // },
+    'zh-CN': zh,
+    'en-US': en,
+  },
+})
+
+app.use(i18n)
 
 app.component('Row', Row)
 app.component('Col', Col)

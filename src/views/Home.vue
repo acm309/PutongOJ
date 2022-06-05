@@ -96,7 +96,7 @@ onRouteQueryUpdate(fetch)
       font-size: 24px
       margin-left: 30%
       // color: alpha($primary-color, 0.9)
-      color: $primary-color
+      color: var(--oj-primary-color)
     p
       margin-top: 10px
     .ivu-icon-close-circled
