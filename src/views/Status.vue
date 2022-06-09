@@ -1,12 +1,14 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import constant from '@/util/constant'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
 const { profile, isAdmin } = $(storeToRefs(sessionStore))
@@ -82,7 +84,7 @@ onRouteQueryUpdate(fetch)
             <label>Judge</label>
           </Col>
           <Col :span="16">
-            <Select v-model="judge" placeholder="请选择">
+            <Select v-model="judge">
               <Option
                 v-for="item in judgeList"
                 :key="item.value"
@@ -99,7 +101,7 @@ onRouteQueryUpdate(fetch)
             <label>Language</label>
           </Col>
           <Col :span="14">
-            <Select v-model="language" placeholder="请选择">
+            <Select v-model="language">
               <Option
                 v-for="item in languageList"
                 :key="item.value"
@@ -112,7 +114,7 @@ onRouteQueryUpdate(fetch)
       </Col>
       <Col :span="4">
         <Button type="primary" icon="ios-search" @click="search">
-          Search
+          {{ t('oj.search') }}
         </Button>
       </Col>
     </Row>

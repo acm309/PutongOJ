@@ -7,6 +7,7 @@ import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClipboard } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 import constant from '@/util/constant'
 import { useSessionStore } from '@/store/modules/session'
 import { testcaseUrl } from '@/util/helper'
@@ -17,6 +18,7 @@ highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('c', cpp)
 highlight.registerLanguage('java', java)
 
+const { t } = useI18n()
 const result = $ref(constant.result)
 const language = $ref(constant.language)
 const color = $ref(constant.color)
@@ -96,12 +98,12 @@ onBeforeMount(async () => {
     <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
     <br>
     <Button shape="circle" icon="ios-document-outline" @click="onCopy(solution.code)">
-      Click to copy code
+      {{ t('oj.click_to_copy_code') }}
     </Button>
     <pre><code v-html="prettyCode(solution.code)" /></pre>
     <div v-if="isAdmin && solution.sim && solution.simSolution">
       <hr>
-      Similarity: {{ solution.sim }}{{ "%" }} <br>
+      {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
       From: {{ solution.simSolution.sid }} by
       <router-link :to="{ name: 'userInfo', params: { uid: solution.simSolution.uid } }">
         {{ solution.simSolution.uid }}

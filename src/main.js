@@ -105,6 +105,7 @@ app.component('Spin', Spin)
 app.config.globalProperties.$Message = Message
 app.config.globalProperties.$Modal = Modal
 app.config.globalProperties.$Spin = Spin
+
 app.provide('$Message', app.config.globalProperties.$Message)
 app.provide('$Modal', app.config.globalProperties.$Modal)
 app.provide('$Spin', app.config.globalProperties.$Spin)

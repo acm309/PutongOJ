@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 import constant from '@/util/constant'
 import { useSessionStore } from '@/store/modules/session'
@@ -26,6 +27,7 @@ const options = reactive([
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const type = $ref(route.query.type || 'pid')
 const content = $ref(route.query.content || '')
@@ -65,13 +67,15 @@ const $Modal = inject('$Modal')
 
 function del (pid) {
   $Modal.confirm({
-    title: '提示',
-    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    okText: t('oj.ok'),
+    cancelText: t('oj.cancel'),
+    title: t('oj.warning'),
+    content: t('oj.will_remove_problem', { pid }),
     onOk: async () => {
-      await remove({ pid })
-      $Message.success(`成功删除 ${pid}！`)
+      // await remove({ pid })
+      $Message.success(t('oj.remove_problem_success', { pid }))
     },
-    onCancel: () => $Message.info('已取消删除！'),
+    onCancel: () => $Message.info(t('oj.cancel_remove')),
   })
 }
 
@@ -94,7 +98,7 @@ onProfileUpdate(fetch)
         </Select>
       </Col>
       <Col :span="4">
-        <Input v-model="content" icon="search" placeholder="Please input..." @keyup.enter="search" />
+        <Input v-model="content" icon="search" @keyup.enter="search" />
       </Col>
       <Col :span="2">
         <Button type="primary" @click="search">

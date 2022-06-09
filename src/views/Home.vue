@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
+import { getCurrentInstance, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -54,6 +54,9 @@ const del = nid => $Modal.confirm({
 
 fetch()
 onRouteQueryUpdate(fetch)
+// Another way to use $Modal
+// console.log(getCurrentInstance().$Message)
+// console.log(getCurrentInstance().appContext.config.globalProperties.$Modal.confirm())
 </script>
 
 <template>

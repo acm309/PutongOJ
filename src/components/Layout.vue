@@ -79,19 +79,19 @@ export default {
             </MenuItem>
             <Submenu v-if="isAdmin" name="admin">
               <template #title>
-                <Icon type="md-paper-plane" />Admin
+                <Icon type="md-paper-plane" />{{ t('oj.admin') }}
               </template>
               <MenuItem name="problemCreate">
-                Create Problems
+                {{ t('oj.create_problem') }}
               </MenuItem>
               <MenuItem name="contestCreate">
-                Create Contests
+                {{ t('oj.create_contest') }}
               </MenuItem>
               <MenuItem name="newsCreate">
-                Create News
+                {{ t('oj.create_news') }}
               </MenuItem>
               <MenuItem name="userEdit">
-                User Management
+                {{ t('oj.user_management') }}
               </MenuItem>
             </Submenu>
           </div>

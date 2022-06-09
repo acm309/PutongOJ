@@ -1,28 +1,32 @@
 <script setup>
 import only from 'only'
 import { inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 
+const { t } = useI18n({ global: true })
+
+const password_requiremnt = $computed(() => t('oj.password_requirement'))
+
 const validatePass1 = (rule, value, callback) => {
-  // 5-50位, 数字, 字母, 字符至少包含两种, 同时不能包含中文和空格
   const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
-    ? new Error('密码长度需5-50位，只能包含字母和数字')
+    ? new Error(password_requiremnt)
     : null
   error ? callback(error) : callback()
 }
 // 验证密码是否重复
 const validatePass2 = (rule, value, callback) => {
-  const error = value !== this.form.pwd ? new Error('两次密码输入不一致') : null
+  const error = value !== this.form.pwd ? new Error(t('oj.password_not_match')) : null
   error ? callback(error) : callback()
 }
 const basicRules = {
   uid: [
-    { required: true, message: '用户名不能少', trigger: 'change' },
-    { min: 4, max: 50, message: '用户名在 4 到 50 位之间', trigger: 'change' },
+    { required: true, message: t('oj.username_missing'), trigger: 'change' },
+    { min: 4, max: 50, message: t('oj.username_length_requirement'), trigger: 'change' },
   ],
   pwd: [
-    { required: true, message: '请输入密码', trigger: 'change' },
+    { required: true, message: t('oj.password_missing'), trigger: 'change' },
   ],
 }
 
@@ -46,15 +50,15 @@ const registerRules = {
     required: true,
     type: 'string',
     pattern: /^\w+$/ig,
-    message: '用户名只能包含字母和数字',
+    message: t('oj.username_char_requirement'),
     trigger: 'change',
   }),
   pwd: [
-    { required: true, message: '请输入密码', trigger: 'change' },
+    { required: true, message: t('oj.password_missing'), trigger: 'change' },
     { validator: validatePass1, trigger: 'change' },
   ],
   checkPwd: [
-    { required: true, message: '请再次输入密码', trigger: 'change' },
+    { required: true, message: t('oj.password_confirm_missing'), trigger: 'change' },
     { validator: validatePass2, trigger: 'change' },
   ],
 }
@@ -81,28 +85,28 @@ function submit () {
 <template>
   <Modal v-model="visible" :closable="false" @on-cancel="triggerLogin">
     <Tabs v-model="mode">
-      <TabPane label="Login" name="login">
+      <TabPane :label="t('oj.login')" name="login">
         <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">
-          <FormItem class="loginuid" label="Username" prop="uid">
+          <FormItem class="loginuid" :label="t('oj.username')" prop="uid">
             <Input v-model="form.uid" />
           </FormItem>
-          <FormItem class="loginpwd" label="Password" prop="pwd">
+          <FormItem class="loginpwd" :label="t('oj.password')" prop="pwd">
             <Input v-model="form.pwd" type="password" @keyup.enter="submit" />
           </FormItem>
         </Form>
       </TabPane>
-      <TabPane label="Register" name="register">
+      <TabPane :label="t('oj.register')" name="register">
         <Form ref="registerForm" :model="form" :rules="registerRules" :label-width="100">
-          <FormItem label="Username" prop="uid">
-            <Input v-model="form.uid" />
+          <FormItem :label="t('oj.username')" prop="uid">
+            <Input v-model="form.uid" :placeholder="t('oj.username_description')" />
           </FormItem>
-          <FormItem label="Nickname" prop="nick">
+          <FormItem :label="t('oj.nick')" prop="nick">
             <Input v-model="form.nick" />
           </FormItem>
-          <FormItem label="Password" prop="pwd">
+          <FormItem :label="t('oj.password')" prop="pwd">
             <Input v-model="form.pwd" type="password" />
           </FormItem>
-          <FormItem label="CheckPwd" prop="checkPwd" class="checkpwd">
+          <FormItem :label="t('oj.password_confirm')" prop="checkPwd" class="checkpwd">
             <Input v-model="form.checkPwd" type="password" />
           </FormItem>
         </Form>
@@ -112,7 +116,7 @@ function submit () {
       <Row type="flex" justify="center">
         <Col :span="20">
           <Button type="primary" size="large" long @click="submit">
-            Submit
+            {{ t('oj.submit') }}
           </Button>
         </Col>
       </Row>

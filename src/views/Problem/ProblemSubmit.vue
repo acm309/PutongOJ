@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Submit from '@/components/Submit'
 import { useSessionStore } from '@/store/modules/session'
 import { useProblemStore } from '@/store/modules/problem'
@@ -10,6 +11,7 @@ import { useSolutionStore } from '@/store/modules/solution'
 
 let title = $ref('')
 
+const { t } = useI18n()
 const problemStore = useProblemStore()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
@@ -26,7 +28,7 @@ const route = useRoute()
 const router = useRouter()
 const $Message = inject('$Message')
 
-const submit = async () => {
+const submitSolution = async () => {
   await create(Object.assign({}, solution, { pid: problem.pid }))
   $Message.info(`submit pid:${problem.pid} success!`)
   router.push({ name: 'mySubmission', params: { pid: route.params.pid } })
@@ -43,14 +45,14 @@ onBeforeMount(async () => {
   <div>
     <h1>{{ route.params.pid }}:  {{ title }}</h1>
     <Submit />
-    <Button type="primary" :disabled="!isLogined" @click="submit">
-      Submit
+    <Button type="primary" :disabled="!isLogined" @click="submitSolution">
+      {{ t('oj.submit') }}
     </Button>
     <Button style="margin-left: 8px" @click="clearCode">
-      Reset
+      {{ t('oj.reset') }}
     </Button>
     <p v-if="!isLogined">
-      Please Log in First
+      {{ t('oj.please_login') }}
     </p>
   </div>
 </template>

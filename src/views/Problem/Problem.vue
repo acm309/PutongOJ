@@ -1,8 +1,10 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const { isAdmin, isLogined } = $(storeToRefs(sessionStore))
 const route = useRoute()
@@ -18,13 +20,13 @@ const change = (name) => {
 <template>
   <div>
     <Tabs :model-value="active" @on-click="change">
-      <TabPane label="Description" name="problemInfo" />
-      <TabPane label="Submit" name="problemSubmit" />
-      <TabPane v-if="isLogined" label="My Submissions" name="mySubmission" />
-      <TabPane label="Statistics" name="problemStatistics" />
+      <TabPane :label="t('oj.description')" name="problemInfo" />
+      <TabPane :label="t('oj.submit')" name="problemSubmit" />
+      <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="mySubmission" />
+      <TabPane :label="t('oj.statistics')" name="problemStatistics" />
       <!-- <TabPane label="Discuss" name="Discuss"></TabPane> -->
-      <TabPane v-if="isAdmin" label="Edit" name="problemEdit" />
-      <TabPane v-if="isAdmin" label="Test Data" name="testcase" />
+      <TabPane v-if="isAdmin" :label="t('oj.edit')" name="problemEdit" />
+      <TabPane v-if="isAdmin" :label="t('oj.test_data')" name="testcase" />
     </Tabs>
     <router-view />
   </div>
