@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { timeagoPretty } from '@/util/formate'
@@ -8,6 +9,7 @@ import { timeagoPretty } from '@/util/formate'
 const props = defineProps([ 'did' ])
 const { did } = $(toRefs(props))
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const discussStore = useDiscussStore()
 let loading = $ref(false)
@@ -66,12 +68,11 @@ fetch()
           :disabled="!isLogined"
           @click="createNew"
         >
-          Add a reply
+          {{ t('oj.add_a_reply') }}
         </Button>
-        <span v-if="!isLogined">Login to reply</span>
+        <span v-if="!isLogined">{{ t('oj.login_to_reply') }}</span>
       </FormItem>
     </Form>
-    <span>You will receive notifications through your email, if anyone replies</span>
   </div>
 </template>
 

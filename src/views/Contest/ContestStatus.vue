@@ -3,6 +3,7 @@ import only from 'only'
 import { storeToRefs } from 'pinia'
 import { onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import constant from '@/util/constant'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
@@ -11,6 +12,7 @@ import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
 const contestStore = useContestStore()
@@ -121,7 +123,7 @@ onRouteQueryUpdate(fetch)
             <label>Judge</label>
           </Col>
           <Col :span="16">
-            <Select v-model="judge" placeholder="请选择">
+            <Select v-model="judge">
               <Option
                 v-for="item in judgeList"
                 :key="item.value"
@@ -138,7 +140,7 @@ onRouteQueryUpdate(fetch)
             <label>Language</label>
           </Col>
           <Col :span="12">
-            <Select v-model="language" placeholder="请选择">
+            <Select v-model="language">
               <Option
                 v-for="item in languageList"
                 :key="item.value"
@@ -151,7 +153,7 @@ onRouteQueryUpdate(fetch)
       </Col>
       <Col :span="3">
         <Button type="primary" icon="ios-search" @click="search">
-          Search
+          {{ t('oj.search') }}
         </Button>
       </Col>
     </Row>

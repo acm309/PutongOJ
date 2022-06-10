@@ -17,6 +17,9 @@ export default {
     // Home
     news_list: 'Announcement',
 
+    // News
+    news_has_been_updated: 'Announcement "{title}" has been updated!',
+
     // Login / Register
     login: 'Login',
     register: 'Register',
@@ -34,6 +37,12 @@ export default {
     description: 'Description',
     submit_success: 'Submitted successfully!',
     reset: 'Reset',
+    title: 'Title',
+    delete: 'Delete',
+    content: 'Content',
+    problem: 'Problem',
+    status: 'Status',
+    title_is_required: 'Title is required',
 
     // Problem
     solved: 'Solved',
@@ -41,6 +50,16 @@ export default {
     my_submissions: 'My submissions',
     statistics: 'Statistics',
     test_data: 'Test Data',
+    paste_your_code: 'Paste your code',
+
+    // Contest
+    auto_refresh: 'Auto refresh (every 10 seconds)',
+    refreshed: 'Refreshed!',
+
+    // Discuss
+    create_new_thread: 'Create new thread',
+    login_to_reply: 'Login to reply',
+    add_a_reply: 'Add a reply',
 
     // Admin
     admin: 'Admin',

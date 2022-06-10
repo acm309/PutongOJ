@@ -3,10 +3,12 @@
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { timeagoPretty } from '@/util/formate'
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const discussStore = useDiscussStore()
 const router = useRouter()
@@ -95,25 +97,25 @@ fetch()
           </td>
           <td v-if="isAdmin && canRemove">
             <Button type="text" @click="del(item.did)">
-              Delete
+              {{ t('oj.delete') }}
             </Button>
           </td>
         </tr>
       </template>
     </table>
-    <h3>Create New Thread</h3>
+    <h3>{{ t('oj.create_new_thread') }}</h3>
     <Form :model="form" label-position="right" :label-width="100" class="form">
-      <FormItem label="Title">
+      <FormItem :label="t('oj.title')">
         <Input v-model="form.title" />
       </FormItem>
-      <FormItem label="Content">
+      <FormItem :label="t('oj.content')">
         <Input v-model="form.content" type="textarea" :autosize="{ minRows: 2, maxRows: 20 }" />
       </FormItem>
       <FormItem>
         <Button type="primary" :loading="loading" :disabled="!isLogined" @click="createNew">
-          Submit
+          {{ t('oj.submit') }}
         </Button>
-        <span v-if="!isLogined">Login to reply</span>
+        <span v-if="!isLogined">{{ t('oj.login_to_reply') }}</span>
       </FormItem>
     </Form>
   </div>

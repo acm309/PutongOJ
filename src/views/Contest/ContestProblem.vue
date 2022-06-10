@@ -1,11 +1,13 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Problem from '@/components/Problem'
 import { useProblemStore } from '@/store/modules/problem'
 import { useContestStore } from '@/store/modules/contest'
 import { onRouteParamUpdate } from '@/util/helper'
 
+const { t } = useI18n()
 const problemStore = useProblemStore()
 const contestStore = useContestStore()
 const router = useRouter()
@@ -41,7 +43,7 @@ onRouteParamUpdate(fetch)
       </template>
     </Problem>
     <Button shape="circle" icon="md-paper-plane" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

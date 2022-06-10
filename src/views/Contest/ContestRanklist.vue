@@ -2,9 +2,11 @@
 import { inject, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { useContestStore } from '@/store/modules/contest'
 import { timeContest } from '@/util/formate'
 
+const { t } = useI18n()
 const contestStore = useContestStore()
 const route = useRoute()
 const $Message = inject('$Message')
@@ -20,7 +22,7 @@ function change (enabled) {
     timer = setInterval(() => {
       getRank()
       $Message.info({
-        content: '刷新成功',
+        content: t('oj.refreshed'),
         duration: 1,
       })
     }, 10000)
@@ -38,7 +40,7 @@ onBeforeUnmount(() => clearInterval(timer))
     <i-switch size="large" @on-change="change">
       <!-- <Icon slot="open" type="android-done" />
       <Icon slot="close" type="android-close" /> -->
-    </i-switch> 自动刷新 (每 10 秒一次)
+    </i-switch> {{ t('oj.auto_refresh') }}
     <div class="conrank-wrap">
       <table>
         <tr>

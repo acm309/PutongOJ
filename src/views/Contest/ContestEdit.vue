@@ -3,9 +3,11 @@ import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import OjContestEdit from '@/components/ContestEdit'
 import { useContestStore } from '@/store/modules/contest'
 
+const { t } = useI18n()
 const contestStore = useContestStore()
 const router = useRouter()
 const $Message = inject('$Message')
@@ -29,7 +31,7 @@ onBeforeUnmount(() => findOne({ cid: contest.cid }))
   <div v-if="contest" class="conadd-wrap">
     <OjContestEdit :contest="editingContest" :overview="overview" />
     <Button type="primary" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

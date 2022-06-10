@@ -13,6 +13,7 @@ export default {
     faq: 'FAQ',
 
     news_list: '通知',
+    news_has_been_updated: '通知 "{title}" 已更新！',
 
     login: '登陆',
     register: '注册',
@@ -29,12 +30,26 @@ export default {
     description: '描述',
     submit_success: '提交成功！',
     reset: '重置',
+    title: '标题',
+    delete: '删除',
+    content: '内容',
+    problem: '题目',
+    status: '状态',
+    title_is_required: '标题不能为空',
+
+    create_new_thread: '创建新帖',
+    login_to_reply: '登陆后可回复',
+    add_a_reply: '添加回复',
 
     solved: '已解决',
     unsolved: '未解决',
     my_submissions: '我的提交',
     statistics: '统计',
     test_data: '测试数据',
+    paste_your_code: '粘贴你的代码',
+
+    auto_refresh: '自动刷新（每10秒刷新一次）',
+    refreshed: '刷新成功！',
 
     admin: '管理员',
     create_problem: '创建题目',

@@ -2,10 +2,12 @@
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Submit from '@/components/Submit'
+import { useI18n } from 'vue-i18n'
+import OJSubmit from '@/components/Submit'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useContestStore } from '@/store/modules/contest'
 
+const { t } = useI18n()
 const contestStore = useContestStore()
 const solutionStore = useSolutionStore()
 const route = useRoute()
@@ -35,12 +37,12 @@ async function submit () {
 <template>
   <div>
     <h1>{{ $route.params.id }}:  {{ title }}</h1>
-    <Submit />
+    <OJSubmit />
     <Button type="primary" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
     <Button style="margin-left: 8px" @click="reset">
-      Reset
+      {{ t('oj.reset') }}
     </Button>
   </div>
 </template>

@@ -1,7 +1,9 @@
 <script setup>
-import { mapState, storeToRefs } from 'pinia'
+import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
 
+const { t } = useI18n()
 const solutionStore = useSolutionStore()
 const { solution } = $(storeToRefs(solutionStore))
 // Clear the saved solution in case of the user visits this page after
@@ -26,7 +28,7 @@ solutionStore.clearSavedSolution()
         </Select>
       </FormItem>
       <FormItem>
-        <Input v-model="solution.code" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }" placeholder="Paste your code here" />
+        <Input v-model="solution.code" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }" :placeholder="t('oj.paste_your_code')" />
       </FormItem>
     </Form>
   </div>

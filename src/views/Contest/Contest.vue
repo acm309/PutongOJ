@@ -1,12 +1,14 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { timePretty } from '@/util/formate'
 import { onProfileUpdate, onRouteParamUpdate, purify } from '@/util/helper'
 
+const { t } = useI18n()
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
 const rootStore = useRootStore()
@@ -75,12 +77,12 @@ onProfileUpdate(fetch)
       <Progress :stroke-width="18" :percent="timePercentage" />
     </Card>
     <Tabs :model-value="display" @on-click="handleClick">
-      <TabPane label="Overview" name="contestOverview" />
-      <TabPane label="Problem" name="contestProblem" />
-      <TabPane label="Submit" name="contestSubmit" />
-      <TabPane label="Status" name="contestStatus" />
-      <TabPane label="Ranklist" name="contestRanklist" />
-      <TabPane v-if="isAdmin" label="Edit" name="contestEdit" />
+      <TabPane :label="t('oj.overview')" name="contestOverview" />
+      <TabPane :label="t('oj.problem')" name="contestProblem" />
+      <TabPane :label="t('oj.submit')" name="contestSubmit" />
+      <TabPane :label="t('oj.status')" name="contestStatus" />
+      <TabPane :label="t('oj.ranklist')" name="contestRanklist" />
+      <TabPane v-if="isAdmin" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
     <router-view v-if="contest && contest.cid" />
     <!-- 为了确保之后的 children 能拿到 contest -->
