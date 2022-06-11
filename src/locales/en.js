@@ -43,6 +43,9 @@ export default {
     problem: 'Problem',
     status: 'Status',
     title_is_required: 'Title is required',
+    type: 'Type',
+    save: 'Save',
+    add: 'Add',
 
     // Problem
     solved: 'Solved',
@@ -51,6 +54,11 @@ export default {
     statistics: 'Statistics',
     test_data: 'Test Data',
     paste_your_code: 'Paste your code',
+    input: 'Input',
+    output: 'Output',
+    hint: 'Hint',
+    sample_input: 'Sample Input',
+    sample_output: 'Sample Output',
 
     // Contest
     auto_refresh: 'Auto refresh (every 10 seconds)',

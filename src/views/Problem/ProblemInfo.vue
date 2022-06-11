@@ -1,10 +1,12 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import Problem from '@/components/Problem.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
 
+const { t } = useI18n()
 const problemStore = useProblemStore()
 const rootStore = useRootStore()
 const route = useRoute()
@@ -28,7 +30,7 @@ findOne(route.params).then(() => {
   <div class="proinfo-wrap">
     <Problem :problem="problem" />
     <Button shape="circle" icon="md-paper-plane" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

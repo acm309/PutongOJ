@@ -47,8 +47,8 @@ export default {
     ...mapActions(useUserStore, [ 'clearSavedUsers' ]),
     async fetchGroup () {
       this.$Spin.show()
-      await useUserStore().find()
-      await this.find()
+      // await useUserStore().find()
+      // await this.find()
       this.userSum.forEach((item) => {
         this.userList.push(item.uid)
       })

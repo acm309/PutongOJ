@@ -2,20 +2,21 @@
 import Draggable from 'vuedraggable'
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { onBeforeMount, toRefs } from 'vue'
-import { useRoute } from 'vue-router'
+import { onBeforeMount, onBeforeUnmount, toRefs, watch } from 'vue'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/store/modules/user'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
 
 const props = defineProps([ 'contest', 'overview' ])
+const { t } = useI18n()
 const rootStore = useRootStore()
 const userStore = useUserStore()
 const problemStore = useProblemStore()
 const route = useRoute()
 
-const { encrypt } = $(storeToRefs(rootStore))
-const { list } = $(storeToRefs(userStore))
+const { encrypt, list } = $(storeToRefs(rootStore))
 const { findOne: findOneProblem } = problemStore
 
 const { contest, overview } = $(toRefs(props))
@@ -42,9 +43,14 @@ const listStyle = {
 }
 let userList = $ref([])
 
-const transData = $computed(() => list.map((item, index) => ({
-  key: `${index}`,
-  label: item.uid,
+// const transData = $computed(() => list.map((item, index) => ({
+//   key: `${index}`,
+//   label: item.uid,
+//   disabled: false,
+// })))
+let transData = $ref(Array.from({ length: 10 }, (_, i) => ({
+  key: `${i}`,
+  label: `${i}`,
   disabled: false,
 })))
 
@@ -68,10 +74,20 @@ function handleChange (newTargetKeys) {
   targetKeys = newTargetKeys
 }
 function saveUser () {
-  const user = targetKeys.map(item => userList[+item])
-  const res = user.join('\r\n')
+  // const user = targetKeys.map(item => userList[+item])
+  // const res = user.join('\r\n')
 
-  contest.argument = res
+  // contest.argument = res
+  userList = Array.from({ length: 10 }, (_, i) => ({
+    key: `${i}`,
+    label: `${i}`,
+    disabled: false,
+  }))
+  transData = Array.from({ length: 10 }, (_, i) => ({
+    key: `${i * 101}`,
+    label: `${i * 101}`,
+    disabled: false,
+  }))
   $Message.success('保存当前用户组成功！')
 }
 function changeTime (name, time) {
@@ -81,6 +97,19 @@ function changeTime (name, time) {
     contest.end = new Date(time).getTime()
   }
 }
+async function queryUserList () {
+  // await useUserStore().find()
+  // userList = Array.from({ length: 10 }).map(i => ({
+  //   key: `${i * 20}`,
+  //   label: `${i}`,
+  //   disabled: false,
+  // }))
+  // list.map(item => item.uid)
+  // if (+contest.encrypt === encrypt.Private) {
+  //   const arg = contest.argument.split('\r\n')
+  //   targetKeys = arg.map(item => `${userList.indexOf(item)}`)
+  // }
+}
 
 onBeforeMount(async () => {
   if (route.params.cid) {
@@ -89,12 +118,22 @@ onBeforeMount(async () => {
     }
     overview.forEach(item => jobs[item.pid] = item.title)
   }
-  await useUserStore().find()
-  userList = list.map(item => item.uid)
-  if (+contest.encrypt === encrypt.Private) {
-    const arg = contest.argument.split('\r\n')
-    targetKeys = arg.map(item => `${this.userList.indexOf(item)}`)
+  if (contest.encrypt !== encrypt.Private) {
+    userStore.clearSavedUsers()
+    return
   }
+  queryUserList()
+})
+
+watch(() => contest.encrypt, async (val) => {
+  if (val !== encrypt.Private) {
+    userStore.clearSavedUsers()
+    return
+  }
+  queryUserList()
+})
+onBeforeUnmount(() => {
+  userStore.clearSavedUsers()
 })
 </script>
 
@@ -102,7 +141,7 @@ onBeforeMount(async () => {
   <div>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
-        Title
+        {{ t('oj.title') }}
       </Col>
       <Col :span="21">
         <!-- eslint-disable-next-line vue/no-mutating-props -->
@@ -117,7 +156,6 @@ onBeforeMount(async () => {
         <DatePicker
           :model-value="new Date(contest?.start || 0)"
           type="datetime"
-          placeholder="选择日期时间"
           @on-change="(time) => changeTime('start', time)"
         />
       </Col>
@@ -130,18 +168,17 @@ onBeforeMount(async () => {
         <DatePicker
           type="datetime"
           :model-value="new Date(contest?.end || 0)"
-          placeholder="选择日期时间"
           @on-change="(time) => changeTime('end', time)"
         />
       </Col>
     </Row>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
-        Type
+        {{ t('oj.type') }}
       </Col>
       <Col :span="4">
         <!-- eslint-disable-next-line vue/no-mutating-props -->
-        <Select v-model="contest.encrypt" placeholder="请选择">
+        <Select v-model="contest.encrypt">
           <Option
             v-for="item in options"
             :key="item.value"
@@ -151,7 +188,10 @@ onBeforeMount(async () => {
         </Select>
       </Col>
     </Row>
-    <Row v-if="contest.encrypt === encrypt.Private" class="transfer">
+    <Row
+      v-if="+contest.encrypt === encrypt.Private" :key="encrypt.Private"
+      class="transfer"
+    >
       <Transfer
         :data="transData"
         :target-keys="targetKeys"
@@ -163,13 +203,13 @@ onBeforeMount(async () => {
         @on-change="handleChange"
       >
         <div :style="{ float: 'right', margin: '5px' }">
-          <Button type="ghost" size="small" @click="saveUser">
-            Save
+          <Button type="primary" size="small" @click="saveUser">
+            {{ t('oj.save') }}
           </Button>
         </div>
       </Transfer>
     </Row>
-    <Row v-if="contest.encrypt === encrypt.Password">
+    <Row v-if="contest.encrypt === encrypt.Password" :key="encrypt.Password">
       <Col :span="23">
         <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="contest.argument" />
@@ -199,7 +239,7 @@ onBeforeMount(async () => {
       </Col>
       <Col :span="2">
         <Button type="primary" @click="add">
-          Add
+          {{ t('oj.add') }}
         </Button>
       </Col>
     </Row>

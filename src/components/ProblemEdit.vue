@@ -1,7 +1,8 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import ContentEditor from '@/components/ContentEditor'
-
 defineProps([ 'problem' ])
+const { t } = useI18n()
 </script>
 
 <template>
@@ -11,7 +12,7 @@ defineProps([ 'problem' ])
         <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.title">
           <template #prepend>
-            Title
+            {{ t('oj.title') }}
           </template>
         </Input>
       </Col>
@@ -41,7 +42,7 @@ defineProps([ 'problem' ])
       </Col>
     </Row>
     <div class="label">
-      Description
+      {{ t('oj.description') }}
     </div>
     <Row>
       <Col :span="23">
@@ -50,7 +51,7 @@ defineProps([ 'problem' ])
       </Col>
     </Row>
     <div class="label">
-      Input
+      {{ t('oj.input') }}
     </div>
     <Row>
       <Col :span="23">
@@ -59,7 +60,7 @@ defineProps([ 'problem' ])
       </Col>
     </Row>
     <div class="label">
-      Output
+      {{ t('oj.output') }}
     </div>
     <Row>
       <Col :span="23">
@@ -68,16 +69,7 @@ defineProps([ 'problem' ])
       </Col>
     </Row>
     <div class="label">
-      Hint
-    </div>
-    <Row>
-      <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
-        <ContentEditor v-model="problem.hint" />
-      </Col>
-    </Row>
-    <div class="label">
-      Sample Input
+      {{ t('oj.sample_input') }}
     </div>
     <Row>
       <Col :span="23">
@@ -86,12 +78,21 @@ defineProps([ 'problem' ])
       </Col>
     </Row>
     <div class="label">
-      Sample Output
+      {{ t('oj.sample_output') }}
     </div>
     <Row>
       <Col :span="23">
         <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.out" type="textarea" :rows="8" />
+      </Col>
+    </Row>
+    <div class="label">
+      {{ t('oj.hint') }}
+    </div>
+    <Row>
+      <Col :span="23">
+        <!-- eslint-disable-next-line vue/no-mutating-props -->
+        <ContentEditor v-model="problem.hint" />
       </Col>
     </Row>
   </div>

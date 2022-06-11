@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeUnmount } from 'vue'
+import { inject, onBeforeUnmount, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import OjContestEdit from '@/components/ContestEdit'
@@ -14,7 +14,7 @@ const $Message = inject('$Message')
 
 const { overview, contest } = $(storeToRefs(contestStore))
 const { update, findOne } = contestStore
-const editingContest = Object.assign({}, contest)
+const editingContest = reactive(Object.assign({}, contest))
 
 async function submit () {
   const cid = await update(editingContest)

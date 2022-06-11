@@ -1,9 +1,11 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import ContentEditor from '@/components/ContentEditor'
 import { useNewsStore } from '@/store/modules/news'
 
 const newsStore = useNewsStore()
+const { t } = useI18n()
 
 const { news } = storeToRefs(newsStore)
 </script>
@@ -12,7 +14,7 @@ const { news } = storeToRefs(newsStore)
   <div>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
-        Title
+        {{ t('oj.title') }}
       </Col>
       <Col :span="21">
         <Input v-model="news.title" />
