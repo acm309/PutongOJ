@@ -1,47 +1,35 @@
-<script>
-import { mapActions, mapState } from 'pinia'
-import NewsEdit from '@/components/NewsEdit'
+<script setup>
+import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
 
-export default {
-  data: () => ({
-    addNews: {
-      title: '',
-      content: '',
-    },
-  }),
-  computed: {
-    ...mapState(useNewsStore, [ 'news' ]),
-  },
-  created () {
-    useNewsStore().setCurrentNews(this.addNews)
-  },
-  methods: {
-    ...mapActions(useNewsStore, [ 'create' ]),
-    submit () {
-      if (!this.news.title) {
-        this.$Message.error('Title can not be empty')
-      } else {
-        this.create(this.news)
-          .then((nid) => {
-            this.$Message.success(`News "${this.news.title}" has been created!`)
-            this.$router.push({ name: 'newsInfo', params: { nid } })
-          })
-      }
-    },
-  },
-  components: {
-    OjNewsEdit: NewsEdit,
-  },
+const newsStore = useNewsStore()
+const { create } = newsStore
+const Message = inject('$Message')
+const router = useRouter()
+const { t } = useI18n()
+
+const addNews = $ref({
+  title: '',
+  content: '',
+})
+
+async function submit () {
+  const nid = await create(addNews)
+  Message.success(t('oj.create_news_success', { nid }))
+  router.push({ name: 'newsInfo', params: { nid } })
 }
+newsStore.setCurrentNews($$(addNews))
 </script>
 
 <template>
   <div>
-    <h1>新增消息</h1>
+    <h1>{{ t('oj.add_news') }}</h1>
     <OjNewsEdit />
     <Button type="primary" size="large" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

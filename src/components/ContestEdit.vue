@@ -2,21 +2,22 @@
 import Draggable from 'vuedraggable'
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { onBeforeMount, onBeforeUnmount, toRefs, watch } from 'vue'
-import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import { inject, onBeforeMount, toRefs, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useUserStore } from '@/store/modules/user'
+import { escape } from 'html-escaper'
+import SearchableTransfer from './SearchableTransfer.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
+import api from '@/api'
 
 const props = defineProps([ 'contest', 'overview' ])
 const { t } = useI18n()
 const rootStore = useRootStore()
-const userStore = useUserStore()
 const problemStore = useProblemStore()
 const route = useRoute()
 
-const { encrypt, list } = $(storeToRefs(rootStore))
+const { encrypt } = $(storeToRefs(rootStore))
 const { findOne: findOneProblem } = problemStore
 
 const { contest, overview } = $(toRefs(props))
@@ -36,23 +37,7 @@ const options = [
   },
 ]
 let pid = $ref('')
-let targetKeys = $ref([])
-const listStyle = {
-  width: '400px',
-  height: '500px',
-}
-let userList = $ref([])
-
-// const transData = $computed(() => list.map((item, index) => ({
-//   key: `${index}`,
-//   label: item.uid,
-//   disabled: false,
-// })))
-let transData = $ref(Array.from({ length: 10 }, (_, i) => ({
-  key: `${i}`,
-  label: `${i}`,
-  disabled: false,
-})))
+const pwd = $ref('')
 
 async function add () {
   const { problem } = await findOneProblem({ pid })
@@ -64,52 +49,6 @@ async function add () {
 function removeJob (index) {
   contest.list.splice(index, 1)
 }
-function format (item) {
-  return item.label
-}
-function filterMethod (data, query) {
-  return data.label.includes(query)
-}
-function handleChange (newTargetKeys) {
-  targetKeys = newTargetKeys
-}
-function saveUser () {
-  // const user = targetKeys.map(item => userList[+item])
-  // const res = user.join('\r\n')
-
-  // contest.argument = res
-  userList = Array.from({ length: 10 }, (_, i) => ({
-    key: `${i}`,
-    label: `${i}`,
-    disabled: false,
-  }))
-  transData = Array.from({ length: 10 }, (_, i) => ({
-    key: `${i * 101}`,
-    label: `${i * 101}`,
-    disabled: false,
-  }))
-  $Message.success('保存当前用户组成功！')
-}
-function changeTime (name, time) {
-  if (name === 'start') {
-    contest.start = new Date(time).getTime()
-  } else {
-    contest.end = new Date(time).getTime()
-  }
-}
-async function queryUserList () {
-  // await useUserStore().find()
-  // userList = Array.from({ length: 10 }).map(i => ({
-  //   key: `${i * 20}`,
-  //   label: `${i}`,
-  //   disabled: false,
-  // }))
-  // list.map(item => item.uid)
-  // if (+contest.encrypt === encrypt.Private) {
-  //   const arg = contest.argument.split('\r\n')
-  //   targetKeys = arg.map(item => `${userList.indexOf(item)}`)
-  // }
-}
 
 onBeforeMount(async () => {
   if (route.params.cid) {
@@ -118,23 +57,39 @@ onBeforeMount(async () => {
     }
     overview.forEach(item => jobs[item.pid] = item.title)
   }
-  if (contest.encrypt !== encrypt.Private) {
-    userStore.clearSavedUsers()
-    return
-  }
-  queryUserList()
 })
 
-watch(() => contest.encrypt, async (val) => {
-  if (val !== encrypt.Private) {
-    userStore.clearSavedUsers()
-    return
+// User search
+const Spin = inject('$Spin')
+let source = $ref([])
+async function search (val) {
+  try {
+    Spin.show()
+    const { data } = await api.user.find({ type: 'uid', content: val })
+    source = data.list.map(item => ({
+      // Transfer component is using v-html, so we need to escape the html
+      key: escape(item.uid),
+      label: escape(`${item.uid} -- ${item.nick}`),
+    })).sort((x, y) => x.key.localeCompare(y.key))
+  } finally {
+    Spin.hide()
   }
-  queryUserList()
+}
+const result = $ref(
+  +contest.encrypt === encrypt.Private
+    ? contest.argument.split('\r\n')
+    : [],
+)
+
+watch(() => contest.encrypt, async (val) => {
+  if (val === encrypt.Password) {
+    contest.argument = pwd
+  } else if (val === encrypt.Private) {
+    contest.argument = result.join('\r\n')
+  }
 })
-onBeforeUnmount(() => {
-  userStore.clearSavedUsers()
-})
+watch($$(pwd), () => contest.argument = pwd)
+watch($$(result), () => contest.argument = result.join('\r\n'))
 </script>
 
 <template>
@@ -154,7 +109,7 @@ onBeforeUnmount(() => {
       </Col>
       <Col :span="8">
         <DatePicker
-          :model-value="new Date(contest?.start || 0)"
+          :model-value="new Date(contest?.start || new Date().getTime())"
           type="datetime"
           @on-change="(time) => changeTime('start', time)"
         />
@@ -167,7 +122,7 @@ onBeforeUnmount(() => {
       <Col :span="8">
         <DatePicker
           type="datetime"
-          :model-value="new Date(contest?.end || 0)"
+          :model-value="new Date(contest?.end || new Date().getTime() + 60 * 1000 * 60)"
           @on-change="(time) => changeTime('end', time)"
         />
       </Col>
@@ -188,31 +143,14 @@ onBeforeUnmount(() => {
         </Select>
       </Col>
     </Row>
-    <Row
+    <SearchableTransfer
       v-if="+contest.encrypt === encrypt.Private" :key="encrypt.Private"
-      class="transfer"
-    >
-      <Transfer
-        :data="transData"
-        :target-keys="targetKeys"
-        :render-format="format"
-        :list-style="listStyle"
-        :operations="[ 'To left', 'To right' ]"
-        filterable
-        :filter-method="filterMethod"
-        @on-change="handleChange"
-      >
-        <div :style="{ float: 'right', margin: '5px' }">
-          <Button type="primary" size="small" @click="saveUser">
-            {{ t('oj.save') }}
-          </Button>
-        </div>
-      </Transfer>
-    </Row>
+      v-model:result="result" :source="source"
+      @on-search="search"
+    />
     <Row v-if="contest.encrypt === encrypt.Password" :key="encrypt.Password">
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
-        <Input v-model="contest.argument" />
+        <Input v-model="pwd" />
       </Col>
     </Row>
     <Row>
@@ -237,8 +175,8 @@ onBeforeUnmount(() => {
       <Col :span="21" class="add">
         <Input v-model="pid" placeholder="Add a pid" @keyup.enter="add" />
       </Col>
-      <Col :span="2">
-        <Button type="primary" @click="add">
+      <Col :span="3" class="ivu-mp-8">
+        <Button type="primary" class="ivu-ml-8" @click="add">
           {{ t('oj.add') }}
         </Button>
       </Col>

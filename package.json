@@ -46,6 +46,7 @@
     "eslint": "^8.16.0",
     "eslint-plugin-html": "^6.2.0",
     "highlight.js": "^11.5.1",
+    "html-escaper": "^3.0.3",
     "jest": "^21.2.0",
     "jest-serializer-vue": "^0.3.0",
     "less": "2.7.3",

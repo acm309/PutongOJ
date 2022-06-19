@@ -1,62 +1,56 @@
-<script>
-import { mapActions } from 'pinia'
-import ProblemEdit from '@/components/ProblemEdit'
+<script setup>
+import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import OJProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
+const { t } = useI18n()
 
-export default {
-  components: {
-    OjProblemEdit: ProblemEdit,
-  },
-  data: () => ({
-    problem: {
-      title: '',
-      memory: 32268,
-      time: 1000,
-      description: '',
-      input: '',
-      output: '',
-      hint: '',
-      in: '',
-      out: '',
-    },
-  }),
-  methods: {
-    ...mapActions(useProblemStore, [ 'create' ]),
-    submit () {
-      if (!this.problem.title.trim()) {
-        this.$Message.error('Title can not be empty')
-      } else if (!this.problem.description.trim()) {
-        this.$Message.error('Description can not be empty')
-      } else {
-        this
-          .create(this.problem)
-          .then((pid) => {
-            this.$Message.success(`Problem "${this.problem.title}" has been created!`)
-            this.$router.push({ name: 'problemInfo', params: { pid } })
-          })
-      }
-    },
-  },
+const router = useRouter()
+const problemStore = useProblemStore()
+const { create } = problemStore
+const problem = $ref({
+  title: '',
+  memory: 32268,
+  time: 1000,
+  description: '',
+  input: '',
+  output: '',
+  hint: '',
+  in: '',
+  out: '',
+})
+
+const Message = inject('$Message')
+
+async function submit () {
+  if (!problem.title.trim()) {
+    Message.error(t('oj.title_is_required'))
+  } else if (!problem.description.trim()) {
+    Message.error(t('oj.description_is_required'))
+  } else {
+    const pid = await create(problem)
+    Message.success(t('oj.create_problem_success', { pid }))
+    router.push({ name: 'problemInfo', params: { pid } })
+  }
 }
 </script>
 
 <template>
   <div>
-    <h1>出题的基本步骤</h1>
+    <h1>{{ t('oj.steps_of_create_a_problem') }}</h1>
     <br>
     <Steps :current="5" :style="{ color: 'black' }">
-      <Step title="算法设计" content="思考该题希望解答者使用的算法类型" status="process" />
-      <Step title="题面设计" content="在算法基础上增加适当背景描述" status="process" />
-      <Step title="输入输出格式" content="一般情况下应该使输入输出保持简单" status="process" />
-      <Step title="测试数据编写" content="尽可能多出一点数据，这些数据建议自己写代码生成" status="process" />
-      <Step title="测试题目" content="务必自己写代码测试题目能不能通过！！！必要时也要让其它人测试题目" icon="ios-star" status="process" />
+      <Step :title="t('oj.algorithm_design')" :content="t('oj.algorithm_design_explanation')" status="process" />
+      <Step :title="t('oj.add_context')" :content="t('oj.add_context_explanation')" status="process" />
+      <Step :title="t('oj.input_format')" :content="t('oj.input_format_explanation')" status="process" />
+      <Step :title="t('oj.create_test_data')" :content="t('oj.create_test_data_explanation')" status="process" />
+      <Step :title="t('oj.test_problem')" :content="t('oj.test_problem_explanation')" icon="ios-star" status="process" />
     </Steps>
     <br>
-    <OjProblemEdit
-      :problem="problem"
-    />
+    <OJProblemEdit :problem="problem" />
     <Button type="primary" size="large" @click="submit">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

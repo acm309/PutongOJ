@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { getCurrentInstance, inject } from 'vue'
+import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
