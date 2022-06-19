@@ -79,7 +79,7 @@ export default {
     user_remove: 'REMOVE THIS USER',
     will_remove_user_continue_or_not: 'This will remove {uid} permanently, continue?',
     remove_user_success: 'User {uid} has been removed!',
-    cancel_user_remove: 'Cancelled!',
+    cancel_remove: 'Cancelled!',
     will_remove_problem: 'This will remove {pid} permanently, continue?',
     remove_problem_success: 'Problem {pid} has been removed!',
     create_problem_success: 'Problem {pid} has been created!',
@@ -103,6 +103,9 @@ export default {
     correctness_of_the_problem_explanation: 'Make sure every problem has been varified',
     create_news_success: 'Announcement {nid} has been created!',
     add_news: 'Add Announcement',
+    add_remove_admin: 'Add/Remove Admin',
+    will_remove_admin: 'This will remove admin {uid} from admin list, continue?',
+    priviledge_explanation: 'Admin is the top level user, and can do everything.\nTeacher is the user who can do anything except deletion.\nUsually, new priviledge becomes effective after the user is logined.',
 
     // User
     nick: 'Nick',
@@ -115,6 +118,7 @@ export default {
     password: 'Password',
     password_confirm: 'Confirm Password',
     leave_it_blank_if_no_change: 'Leave it blank if it is not change',
+    edit_user: 'Edit User',
 
     password_requirement: 'At least 5 characters long and only numbers and letters',
     password_not_match: 'Password not match',

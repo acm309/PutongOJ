@@ -93,6 +93,9 @@ export default {
     correctness_of_the_problem_explanation: '确保每道题都能通过测试',
     create_news_success: '成功创建通知 {nid}！',
     add_news: '添加通知',
+    add_remove_admin: '添加 / 删除管理员',
+    will_remove_admin: '此操作将永久删除管理员 {uid}, 是否继续?',
+    priviledge_explanation: 'Admin 为最高权限，具有所有权限。\nTeacher 具有除删除外的所有权限。\n一般，被添加的用户通过刷新网页或重新登录即可查看新权限。',
 
     nick: '昵称',
     username: '用户名',
@@ -104,6 +107,7 @@ export default {
     password: '密码',
     password_confirm: '确认密码',
     leave_it_blank_if_no_change: '不修改请留空',
+    edit_user: '编辑用户',
 
     password_requirement: '密码长度至少为5位，只能包含数字和字母',
     password_not_match: '密码不匹配',

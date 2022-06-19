@@ -1,96 +1,100 @@
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { mapState, storeToRefs } from 'pinia'
 import only from 'only'
+import { useI18n } from 'vue-i18n'
+import { inject } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 import { useRootStore } from '@/store'
 
-export default {
-  data: () => ({
-    admin: '',
-  }),
-  computed: {
-    ...mapState(useUserStore, [ 'adminList' ]),
-    ...mapState(useRootStore, [ 'privilege' ]),
-  },
-  created () {
-    this.fetchAdmin()
-  },
-  methods: {
-    getOptions () {
-      return [ {
-        value: this.privilege.Teacher,
-        label: 'Teacher',
-      },
-      {
-        value: this.privilege.Root,
-        label: 'Admin',
-      } ]
-    },
-    update (user) {
-      const payload = only(user, 'uid privilege')
-      useUserStore().update(payload).then(() => {
-        this.$Message.success(`成功更新 ${payload.uid} 用户！`)
-        this.fetchAdmin()
-        this.admin = ''
-      })
-    },
-    fetchAdmin () {
-      useUserStore().find({ privilege: 'admin' })
-    },
-    add () {
-      const user = {
-        uid: this.admin,
-        privilege: this.privilege.Teacher,
-      }
-      useUserStore().update(user).then(() => {
-        this.$Message.success(`成功设置 ${this.admin} 用户为管理员！`)
-        this.fetchAdmin()
-        this.admin = ''
-      })
-    },
-    remove (item) {
-      const user = Object.assign(
-        only(item, 'uid nick'),
-        { privilege: this.privilege.PrimaryUser },
-      )
-      this.$Modal.confirm({
-        title: '提示',
-        content: `<p>此操作将删除${user.uid}用户的管理员权限, 是否继续?</p>`,
-        onOk: () => {
-          useUserStore().update(user).then(() => {
-            this.$Message.success(`成功设置${user.uid}用户为普通用户！`)
-            this.fetchAdmin()
-          })
-        },
-        onCancel: () => {
-          this.$Message.info('已取消删除！')
-        },
-      })
-    },
-  },
+const { t } = useI18n()
+const userStore = useUserStore()
+const rootStore = useRootStore()
+const Message = inject('$Message')
+const Modal = inject('$Modal')
+
+const { adminList } = $(storeToRefs(userStore))
+const { privilege } = $(storeToRefs(rootStore))
+
+let admin = $ref('')
+const fetchAdmin = () => userStore.find({ privilege: 'admin' })
+
+function getOptions () {
+  return [ {
+    value: privilege.Teacher,
+    label: 'Teacher',
+  }, {
+    value: privilege.Root,
+    label: 'Admin',
+  } ]
 }
+
+async function update (user) {
+  const payload = only(user, 'uid privilege')
+  await userStore.update(payload)
+  Message.success(t('oj.update_success'))
+  fetchAdmin()
+  admin = ''
+}
+
+async function add () {
+  const user = {
+    uid: admin,
+    privilege: privilege.Teacher,
+  }
+  await useUserStore().update(user)
+  Message.success(t('oj.update_success'))
+  fetchAdmin()
+  admin = ''
+}
+
+async function remove (item) {
+  const user = Object.assign(
+    only(item, 'uid nick'),
+    { privilege: privilege.PrimaryUser },
+  )
+  Modal.confirm({
+    title: t('oj.warning'),
+    content: t('oj.will_remove_admin', user),
+    okText: t('oj.ok'),
+    cancelText: t('oj.cancel'),
+    onOk: async () => {
+      await useUserStore().update(user)
+      Message.success(t('oj.update_success'))
+      fetchAdmin()
+    },
+    onCancel: () => {
+      Message.info(t('oj.cancel_remove'))
+    },
+  })
+}
+
+fetchAdmin()
 </script>
 
 <template>
   <div>
-    <h1>增删管理员</h1>
+    <h1>{{ t('oj.add_remove_admin') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
-        Username
+        {{ t('oj.username') }}
       </Col>
       <Col :span="4">
-        <Input v-model="admin" @keyup.enter.native="add" />
+        <Input v-model="admin" @keyup.enter="add" />
       </Col>
       <Col :offset="1" :span="2">
         <Button type="primary" @click="add">
-          Add
+          {{ t('oj.add') }}
         </Button>
       </Col>
     </Row>
     <table>
       <tr>
-        <th>Username</th>
-        <th>Nick</th>
+        <th>
+          {{ t('oj.username') }}
+        </th>
+        <th>
+          {{ t('oj.nick') }}
+        </th>
         <th>Remove</th>
         <th>Type</th>
       </tr>
@@ -114,9 +118,7 @@ export default {
       </template>
     </table>
     <Card dis-hover>
-      <p>Admin 为最高权限，具有所有权限。</p>
-      <p>Teacher 具有除删除外的所有权限。</p>
-      <p>一般，被添加的用户通过刷新网页或重新登录即可查看新权限。</p>
+      <pre>{{ t('oj.priviledge_explanation') }}</pre>
     </Card>
   </div>
 </template>
