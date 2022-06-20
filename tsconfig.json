@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        },
+        "baseUrl": ".",
+        "jsx": "preserve",
+        "target": "esnext",
+        "useDefineForClassFields": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "lib": [
+            "esnext",
+            "dom"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "src/store/modules/session.js"
+    ]
+}

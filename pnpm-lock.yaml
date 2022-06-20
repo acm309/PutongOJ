@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182
   '@originjs/vite-plugin-commonjs': ^1.0.1
+  '@types/lodash.pickby': ^4.6.7
   '@vitejs/plugin-legacy': ^1.6.4
   '@vitejs/plugin-vue': ^2.3.3
   '@vueup/vue-quill': 1.0.0-beta.8
@@ -59,6 +60,7 @@ dependencies:
 devDependencies:
   '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182_jy2jd5t2lznmjxpvwxnj7idzze'
   '@originjs/vite-plugin-commonjs': 1.0.3
+  '@types/lodash.pickby': 4.6.7
   '@vueup/vue-quill': 1.0.0-beta.8_vue@3.2.36
   '@vueuse/core': 8.5.0_vue@3.2.36
   cross-spawn: 5.1.0
@@ -465,6 +467,16 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/lodash.pickby/4.6.7:
+    resolution: {integrity: sha512-4ebXRusuLflfscbD0PUX4eVknDHD9Yf+uMtBIvA/hrnTqeAzbuHuDjvnYriLjUrI9YrhCPVKUf4wkRSXJQ6gig==}
+    dependencies:
+      '@types/lodash': 4.14.182
+    dev: true
+
+  /@types/lodash/4.14.182:
+    resolution: {integrity: sha512-/THyiqyQAP9AfARo4pF+aCGcyiQ94tX/Is2I7HofNRqoYLgN1PBoOWu2/zTA5zMxzP5EFutMtWtGAFRKUe961Q==}
     dev: true
 
   /@types/mdast/3.0.10:

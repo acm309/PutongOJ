@@ -11,13 +11,13 @@ const result = {
   9: 'Presentation Error',
   10: 'System Error',
   11: 'Rejudge Pending',
-}
+} as const
 
 const language = {
   1: 'C',
   2: 'C++',
   3: 'Java',
-}
+} as const
 
 const judgeList = [
   {
@@ -72,7 +72,7 @@ const judgeList = [
     value: 11,
     label: 'Rejudge Pending',
   },
-]
+] as const
 
 const languageList = [
   {
@@ -91,7 +91,7 @@ const languageList = [
     value: 3,
     label: 'Java',
   },
-]
+] as const
 
 const color = {
   0: 'pd',
@@ -106,7 +106,7 @@ const color = {
   9: 'pe',
   10: 'se',
   11: 'rp',
-}
+} as const
 
 const statisTableObj = [
   'Compile Error',
@@ -118,23 +118,23 @@ const statisTableObj = [
   'Output Limit Exceeded',
   'Presentation Error',
   'System Error',
-]
+] as const
 
 const contestStatus = {
   0: 'Running',
   2: 'Ended',
-}
+} as const
 
 const contestType = {
   1: 'Public',
   2: 'Private',
   3: 'Password',
-}
+} as const
 
 const status = {
   0: 'Reserve', // 是否开放给普通用户
   2: 'Available',
-}
+} as const
 
 export default {
   result,
