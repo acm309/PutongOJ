@@ -145,5 +145,11 @@ export default {
     ok: 'OK',
     cancel: 'Cancel',
     warning: 'Warning',
+
+    // Errors
+    error_500: 'Σ(;ﾟдﾟ) Server Error',
+    error_403: '╮(╯_╰)╭ Unauthorized',
+    error_401: '(〃∀〃) Please log in first',
+    lose_connection: '_(:з」∠)_ Connection lost',
   },
 }

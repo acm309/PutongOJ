@@ -2,20 +2,20 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow'
 import toDate from 'date-fns/toDate'
 import format from 'date-fns/format'
 
-export function formate (value) {
+export function formate (value: number) {
   const num = value * 100
   return `${num.toFixed(2)}%`
 }
 
-export function timePretty (time) {
-  return format(toDate(parseInt(time || 0)), 'yyyy-MM-dd HH:mm:ss')
+export function timePretty (time: number | string) {
+  return format(toDate(parseInt(`${time}`)), 'yyyy-MM-dd HH:mm:ss')
 }
 
-export function timeagoPretty (time) {
-  return formatDistanceToNow(toDate(parseInt(time || 0)))
+export function timeagoPretty (time: number | string) {
+  return formatDistanceToNow(toDate(parseInt(`${time}`)))
 }
 
-export function timeContest (time) {
+export function timeContest (time: number) {
   const h = Math.floor(time / (1000 * 60 * 60))
   const m = Math.floor((time - h * 1000 * 60 * 60) / (1000 * 60))
   const s = Math.floor((time - h * 1000 * 60 * 60 - m * 1000 * 60) / 1000)

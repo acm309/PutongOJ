@@ -76,7 +76,7 @@ onRouteQueryUpdate(fetch)
           <p>{{ timePretty(item.create) }}</p>
         </Col>
         <Col :span="2">
-          <Icon v-if="isAdmin && canRemove" type="close-circled" @click="del(item.nid)" />
+          <Icon v-if="isAdmin && canRemove" type="md-close-circle" @click="del(item.nid)" />
         </Col>
       </Row>
     </Card>
@@ -102,12 +102,12 @@ onRouteQueryUpdate(fetch)
       margin-left: 30%
       // color: alpha($primary-color, 0.9)
       color: var(--oj-primary-color)
+      opacity: 0.85
     p
       margin-top: 10px
-    .ivu-icon-close-circled
-      line-height: 20px
-      color: #c3c2c2
+    .ivu-icon-md-close-circle
+      opacity: 0.85
+      font-size: 1.5rem
+      // color: #c3c2c2
       cursor: pointer
-      &:hover
-        font-size: 20px
 </style>

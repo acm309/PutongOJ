@@ -1,8 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
-import { onBeforeMount, onBeforeUnmount } from 'vue'
 import pick from 'lodash.pick'
+import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
@@ -11,6 +11,7 @@ import { formate } from '@/util/formate'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const group = $ref('')
 const query = $computed(() => {
@@ -56,7 +57,7 @@ onRouteQueryUpdate(fetch)
   <div class="rank-wrap">
     <Row style="margin-bottom: 20px" type="flex" justify="end">
       <Col :span="1">
-        <label>Group</label>
+        <label>{{ t('oj.group') }}</label>
       </Col>
       <Col :span="3">
         <Select v-model="group">
@@ -66,19 +67,19 @@ onRouteQueryUpdate(fetch)
         </Select>
       </Col>
       <Col :span="2">
-        <Button type="primary" @click="search">
-          Search
+        <Button type="primary" class="ivu-ml-8" @click="search">
+          {{ t('oj.search') }}
         </Button>
       </Col>
     </Row>
     <table>
       <tr>
         <th>Rank</th>
-        <th>Username</th>
-        <th>Nick</th>
-        <th>Motto</th>
-        <th>Solve</th>
-        <th>Submit</th>
+        <th>{{ t('oj.username') }}</th>
+        <th>{{ t('oj.nick') }}</th>
+        <th>{{ t('oj.motto') }}</th>
+        <th>{{ t('oj.solved') }}</th>
+        <th>{{ t('oj.submit') }}</th>
         <th>Ratio</th>
       </tr>
       <tr v-for="(item, index) in list" :key="item.uid">

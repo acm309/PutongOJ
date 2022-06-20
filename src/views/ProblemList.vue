@@ -98,11 +98,14 @@ onProfileUpdate(fetch)
         </Select>
       </Col>
       <Col :span="4">
-        <Input v-model="content" icon="search" @keyup.enter="search" />
+        <Input
+          v-model="content" icon="search" class="ivu-ml-8 ivu-pr-16"
+          @keyup.enter="search"
+        />
       </Col>
       <Col :span="2">
         <Button type="primary" @click="search">
-          Search
+          {{ t('oj.search') }}
         </Button>
       </Col>
     </Row>

@@ -1,6 +1,7 @@
 <script>
 import { useRoute } from 'vue-router'
 import { inject, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { setErrorHandler } from './api'
 import OjLayout from '@/components/Layout'
 import { useRootStore } from '@/store'
@@ -14,22 +15,23 @@ export default {
 <script setup>
 const route = useRoute()
 const $Message = inject('$Message')
+const { t } = useI18n()
 
 $Message.config({ duration: 3.5 }) // default: 1.5s
 setErrorHandler((err) => {
   if (err.response && err.response.status >= 500) {
     $Message.error({
-      content: 'Σ(;ﾟдﾟ)  服务器崩坏，需要联系管理员维修',
+      content: t('oj.error_500'),
       duration: 6.5,
     })
   } else if (err.response && err.response.status === 403) {
     $Message.error({
-      content: '╮(╯_╰)╭ 你没有相关权限进行此操作',
+      content: t('oj.error_403'),
       duration: 6.5,
     })
   } else if (err.response && err.response.status === 401) {
     $Message.error({
-      content: '(〃∀〃) 请先登录',
+      content: t('oj.error_401'),
       duration: 6.5,
     })
   } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
@@ -39,7 +41,7 @@ setErrorHandler((err) => {
     })
   } else if (!err.response) {
     $Message.error({
-      content: '_(:з」∠)_  网络异常，检查你的网线',
+      content: t('oj.lose_connection'),
       duration: 6.5,
     })
   } else {
