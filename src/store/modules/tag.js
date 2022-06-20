@@ -31,6 +31,10 @@ export const useTagStore = defineStore('tag', {
     },
     clearSavedTags () {
       this.list = []
+      this.tag = {
+        tid: '',
+        list: [],
+      }
     },
   },
 })

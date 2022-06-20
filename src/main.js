@@ -68,8 +68,6 @@ app.use(i18n)
 
 app.component('Row', Row)
 app.component('Col', Col)
-// app.component('Checkbox', Checkbox)
-// app.component('CheckboxGroup', CheckboxGroup)
 app.component('Input', Input)
 app.component('Icon', Icon)
 app.component('Tabs', Tabs)

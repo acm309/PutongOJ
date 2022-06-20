@@ -1,146 +1,129 @@
-<script>
+<script setup>
 import only from 'only'
-import { mapActions, mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
+import { inject } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProblemStore } from '@/store/modules/problem'
 import { useTagStore } from '@/store/modules/tag'
 
-export default {
-  data: () => ({
-    ind: 0,
-    targetKeys: [],
-    listStyle: {
-      width: '350px',
-      height: '400px',
-    },
-    problemList: [],
-    operation: 'search',
-    isNew: false,
-  }),
-  computed: {
-    ...mapState(useProblemStore, {
-      problemSum: 'list',
-    }),
-    ...mapState(useTagStore, {
-      tagList: 'list',
-      tag: 'tag',
-    }),
-    transData () {
-      return this.problemSum.map((item, index) => ({
-        key: `${index}`,
-        label: `${item.pid} | ${item.title}`,
-      }))
-    },
-  },
-  created () {
-    this.fetchTag()
-  },
-  beforeUnmount () {
-    this.clearSavedProblems()
-    this.clearSavedTags()
-  },
-  methods: {
-    ...mapActions(useProblemStore, {
-      findProblems: 'find',
-    }),
-    ...mapActions(useProblemStore, [ 'clearSavedProblems' ]),
-    ...mapActions(useTagStore, [ 'find', 'findOne', 'update', 'create', 'clearSavedTags' ]),
-    ...mapActions(useTagStore, { remove: 'delete' }),
-    async fetchTag () {
-      this.$Spin.show()
-      const opt = { page: -1 }
-      await this.findProblems(opt)
-      await this.find()
-      this.$Spin.hide()
-      this.problemSum.forEach((item) => {
-        this.problemList.push(item.pid)
-      })
-    },
-    format (item) {
-      return item.label
-    },
-    filterMethod (data, query) {
-      return data.label.includes(query)
-    },
-    handleChange (newTargetKeys) {
-      this.targetKeys = newTargetKeys
-    },
-    async manageTag (name) {
-      if (this.tagList.length > 0) {
-        this.tag.tid = this.tagList[this.ind].tid
-      }
-      this.operation = name
-      if (name === 'search') {
-        this.$Spin.showLoading()
-        this.targetKeys = []
-        this.isNew = false
-        try {
-          await this.findOne({ tid: this.tag.tid })
-          this.tag.list.forEach((item) => {
-            this.targetKeys.push(`${this.problemList.indexOf(item)}`)
-          })
-        } finally {
-          this.$Spin.hide()
-        }
-      } else if (name === 'create') {
-        this.tag.tid = ''
-        this.tag.list = []
-        this.targetKeys = []
-        this.isNew = true
-      } else if (name === 'delete') {
-        if (!this.tag || !this.tag.tid) {
-          this.$Message.info('未选择要删除的Tag!')
-        } else {
-          this.$Modal.confirm({
-            title: '提示',
-            content: `<p>此操作将永久删除Tag--${this.tag.tid}, 是否继续?</p>`,
-            onOk: () => {
-              this.$Spin.showLoading()
-              this.remove({ tid: this.tag.tid }).then(() => {
-                this.$Spin.hide()
-                this.$Message.success(`成功删除 ${this.tag.tid}！`)
-              }).catch(() => {
-                this.$Spin.hide()
-              })
-            },
-            onCancel: () => {
-              this.$Message.info('已取消删除！')
-            },
-          })
-        }
-      }
-    },
-    saveTag () {
-      const problems = this.targetKeys.map(item => this.problemList[+item])
-      const tag = Object.assign(
-        only(this.tag, 'tid'),
-        { list: problems },
-      )
-      if (!this.isNew) {
-        this.$Spin.showLoading()
-        this.update(tag).then(() => {
-          this.$Spin.hide()
-          this.$Message.success('更新当前标签组成功！')
-        }).catch(() => {
-          this.$Spin.hide()
-        })
-      } else {
-        this.$Spin.showLoading()
-        this.create(tag).then(() => {
-          this.find()
-          this.$Spin.hide()
-          this.$Message.success('新建当前标签组成功！')
-        }).catch(() => {
-          this.$Spin.hide()
-        })
-      }
-    },
-  },
+const { t } = useI18n()
+const problemStore = useProblemStore()
+const tagStore = useTagStore()
+const ind = $ref(0)
+let targetKeys = $ref([])
+const listStyle = $ref({
+  width: '350px',
+  height: '400px',
+})
+let problemList = $ref([])
+let operation = $ref('search')
+let isNew = $ref(false)
+const Spin = inject('$Spin')
+const Message = inject('$Message')
+const Modal = inject('$Modal')
+
+const { list: problemSum } = $(storeToRefs(problemStore))
+const { list: tagList, tag } = $(storeToRefs(tagStore))
+const { clearSavedProblems } = problemStore
+const {
+  find, findOne, update, create, clearSavedTags,
+  'delete': remove,
+} = tagStore
+const transData = $computed(() => problemSum.map(item => ({
+  key: `${item.pid}`,
+  label: `${item.pid} | ${item.title}`,
+})))
+
+fetchTag()
+
+async function fetchTag () {
+  Spin.show()
+  await Promise.all([ problemStore.find({ page: -1 }), tagStore.find() ])
+  problemList = problemSum.map(item => item.pid)
+  Spin.hide()
 }
+
+function handleChange (newTargetKeys) {
+  targetKeys = newTargetKeys
+}
+
+async function manageTag (name) {
+  if (tagList.length > 0) {
+    tag.tid = tagList[ind].tid
+  }
+  operation = name
+  if (name === 'search') {
+    Spin.show()
+    targetKeys = []
+    isNew = false
+    try {
+      await findOne({ tid: tag.tid })
+      targetKeys = tag.list.map(item => `${item}`)
+    } finally {
+      Spin.hide()
+    }
+  } else if (name === 'create') {
+    tag.tid = ''
+    tag.list = []
+    targetKeys = []
+    isNew = true
+  } else if (name === 'delete') {
+    if (!tag || !tag.tid) {
+      Message.info(t('oj.no_tag'))
+    } else {
+      Modal.confirm({
+        title: t('oj.warning'),
+        okText: t('oj.ok'),
+        cancelText: t('oj.cancel'),
+        content: `<p>${t('oj.will_remove_tag', tag)}</p>`,
+        onOk: async () => {
+          Spin.show()
+          try {
+            await remove({ tid: tag.tid })
+            Message.success(t('oj.remove_tag_success', tag))
+          } finally {
+            Spin.hide()
+          }
+        },
+        onCancel: () => Message.info(t('oj.cancel_remove')),
+      })
+    }
+  }
+}
+
+async function saveTag () {
+  const problems = targetKeys.slice()
+  const newTag = Object.assign(
+    only(tag, 'tid'),
+    { list: problems },
+  )
+  Spin.show()
+  try {
+    if (!isNew) {
+      await update(newTag)
+      Message.success(t('oj.update_tag_success', tag))
+    } else {
+      await create(tag)
+      find()
+      Message.success(t('oj.create_tag_success', tag))
+    }
+  } finally {
+    Spin.hide()
+  }
+}
+
+onBeforeRouteLeave(() => {
+  clearSavedProblems()
+  clearSavedTags()
+  problemList = []
+  targetKeys = []
+})
 </script>
 
 <template>
   <div>
-    <h1>管理标签组</h1>
+    <h1>{{ t('oj.manage_tag') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
         Tag
@@ -155,28 +138,23 @@ export default {
       <Col :offset="1" :span="2">
         <Dropdown @on-click="manageTag">
           <Button type="primary">
-            Manage
+            {{ t('oj.manage_tag') }}
             <Icon type="ios-arrow-down" />
           </Button>
           <template #list>
             <DropdownMenu>
               <DropdownItem name="search">
-                Search
+                {{ t('oj.search') }}
               </DropdownItem>
               <DropdownItem name="create">
-                Create
+                {{ t('oj.create') }}
               </DropdownItem>
               <DropdownItem name="delete">
-                Delete
+                {{ t('oj.delete') }}
               </DropdownItem>
             </DropdownMenu>
           </template>
         </Dropdown>
-      </Col>
-      <Col span="2">
-        <Tag>
-          {{ operation }}
-        </Tag>
       </Col>
     </Row>
     <Row type="flex" justify="start">
@@ -190,16 +168,13 @@ export default {
     <Transfer
       :data="transData"
       :target-keys="targetKeys"
-      :render-format="format"
       :list-style="listStyle"
-      :operations="[ 'To left', 'To right' ]"
       filterable
-      :filter-method="filterMethod"
       class="tranfer"
       @on-change="handleChange"
     />
     <Button type="primary" class="submit" @click="saveTag">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

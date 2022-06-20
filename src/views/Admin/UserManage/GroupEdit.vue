@@ -1,144 +1,118 @@
-<script>
-import { mapActions, mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 import only from 'only'
+import { inject } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/store/modules/user'
 import { useGroupStore } from '@/store/modules/group'
 
-export default {
-  data: () => ({
-    ind: 0,
-    targetKeys: [],
-    listStyle: {
-      width: '350px',
-      height: '400px',
-    },
-    userList: [],
-    operation: 'search',
-  }),
-  computed: {
-    ...mapState(useGroupStore, [ 'group' ]),
-    ...mapState(useGroupStore, { groupList: 'list' }),
-    ...mapState(useUserStore, [ 'user' ]),
-    ...mapState(useUserStore, {
-      userSum: 'list',
-    }),
-    transData () {
-      return this.userSum.map((item, index) => ({
-        key: `${index}`,
-        label: `${item.uid} | ${item.nick}`,
-      }))
-    },
-  },
-  created () {
-    this.fetchGroup()
-  },
-  /**
-   * onBeforeUnmount is called when there is no active component instance to be
-   * associated with. Lifecycle injection APIs can only be used during execution of setup().
-   * If you are using async setup(), make sure to register lifecycle hooks before the first await statement.
-   */
-  beforeUnmount () {
-    this.clearSavedGroups()
-    this.clearSavedUsers()
-  },
-  methods: {
-    ...mapActions(useGroupStore, [ 'find', 'findOne', 'update', 'create', 'clearSavedGroups' ]),
-    ...mapActions(useGroupStore, { remove: 'delete' }),
-    ...mapActions(useUserStore, [ 'clearSavedUsers' ]),
-    async fetchGroup () {
-      this.$Spin.show()
-      // await useUserStore().find()
-      // await this.find()
-      this.userSum.forEach((item) => {
-        this.userList.push(item.uid)
-      })
-      this.$Spin.hide()
-    },
-    format (item) {
-      return item.label
-    },
-    filterMethod (data, query) {
-      return data.label.includes(query)
-    },
-    handleChange (newTargetKeys) {
-      this.targetKeys = newTargetKeys
-    },
-    async manageGroup (name) {
-      if (this.groupList.length > 0) {
-        this.group.gid = this.groupList[this.ind].gid
-        this.group.title = this.groupList[this.ind].title
-      }
-      this.operation = name
-      if (name === 'search') {
-        this.$Spin.showLoading()
-        this.targetKeys = []
-        try {
-          await this.findOne({ gid: this.group.gid })
-          this.group.list.forEach((item) => {
-            this.targetKeys.push(`${this.userList.indexOf(item)}`)
-          })
-        } finally {
-          this.$Spin.hide()
-        }
-      } else if (name === 'create') {
-        this.group.gid = ''
-        this.group.title = ''
-        this.group.list = []
-        this.targetKeys = []
-      } else if (name === 'delete') {
-        if (!this.group || !this.group.gid) {
-          this.$Message.info('未选择要删除的Group!')
-        } else {
-          this.$Modal.confirm({
-            title: '提示',
-            content: `<p>此操作将永久删除Group--${this.group.title}, 是否继续?</p>`,
-            onOk: async () => {
-              this.$Spin.showLoading()
-              try {
-                await this.remove({ gid: this.group.gid })
-                this.$Message.success(`成功删除 ${this.group.title}！`)
-              } finally {
-                this.$Spin.hide()
-              }
-            },
-            onCancel: () => {
-              this.$Message.info('已取消删除！')
-            },
-          })
-        }
-      }
-    },
-    async saveGroup () {
-      const user = this.targetKeys.map(item => this.userList[+item])
-      const group = Object.assign(
-        only(this.group, 'gid title'),
-        { list: user },
-      )
-      if (this.group.gid !== '') {
-        this.$Spin.showLoading()
-        try {
-          await this.update(group)
-          this.$Message.success('更新当前用户组成功！')
-        } finally {
-          this.$Spin.hide()
-        }
-      } else {
-        this.$Spin.showLoading()
-        try {
-          await this.create(group)
-          this.$Message.success('新建当前用户组成功！')
-        } finally {
-          this.$Spin.hide()
-        }
-      }
-    },
-  },
+const { t } = useI18n()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const { group, list: groupList } = $(storeToRefs(groupStore))
+const { list: userSum } = $(storeToRefs(userStore))
+const { find, findOne, update, create, clearSavedGroups } = groupStore
+const Spin = inject('$Spin')
+const Message = inject('$Message')
+const Modal = inject('$Modal')
+
+const ind = $ref('')
+let targetKeys = $ref([])
+const listStyle = $ref({
+  width: '350px',
+  height: '400px',
+})
+let userList = $ref([])
+let operation = $ref('search')
+const transData = $computed(() => userSum.map(item => ({
+  key: item.uid,
+  label: `${item.uid} | ${item.nick}`,
+})))
+
+fetchGroup()
+
+async function fetchGroup () {
+  Spin.show()
+  await Promise.all([ userStore.find(), find() ])
+  userList = userSum.map(item => item.uid)
+  Spin.hide()
 }
+
+function handleChange (newTargetKeys) {
+  targetKeys = newTargetKeys
+}
+
+async function manageGroup (name) {
+  if (groupList.length > 0) {
+    group.gid = groupList[ind].gid
+    group.title = groupList[ind].title
+  }
+  operation = name
+  if (name === 'search') {
+    Spin.show()
+    targetKeys = []
+    try {
+      await findOne({ gid: group.gid })
+      targetKeys = group.list.slice()
+    } finally {
+      Spin.hide()
+    }
+  } else if (name === 'create') {
+    group.gid = ''
+    group.title = ''
+    group.list = []
+    targetKeys = []
+  } else if (name === 'delete') {
+    if (!group || !group.gid) {
+      Message.info(t('oj.no_group'))
+    } else {
+      Modal.confirm({
+        title: t('oj.warning'),
+        content: `<p>${t('oj.will_remove_group', group)}</p>`,
+        okText: t('oj.ok'),
+        cancelText: t('oj.cancel'),
+        onOk: async () => {
+          await remove({ gid: group.gid })
+          Message.success(t('oj.remove_group_success', group))
+        },
+        onCancel: () => {
+          Message.info(t('oj.cancel_remove'))
+        },
+      })
+    }
+  }
+}
+
+async function saveGroup () {
+  const user = targetKeys
+  const newGroup = Object.assign(
+    only(group, 'gid title'),
+    { list: user },
+  )
+  Spin.show()
+  try {
+    if (group.gid !== '') {
+      await update(newGroup)
+      Message.success(t('oj.update_group_success', group))
+    } else {
+      await create(newGroup)
+      Message.success(t('oj.create_group_success', group))
+    }
+  } finally {
+    Spin.hide()
+  }
+}
+
+onBeforeRouteLeave(() => {
+  clearSavedGroups()
+  clearSavedUsers()
+})
 </script>
 
 <template>
   <div>
-    <h1>管理用户组</h1>
+    <h1>{{ t('oj.manage_group') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
         Group
@@ -153,28 +127,23 @@ export default {
       <Col :offset="1" :span="2">
         <Dropdown @on-click="manageGroup">
           <Button type="primary">
-            Manage
+            {{ t('oj.manage_group') }}
             <Icon type="ios-arrow-down" />
           </Button>
           <template #list>
             <DropdownMenu>
               <DropdownItem name="search">
-                Search
+                {{ t('oj.search') }}
               </DropdownItem>
               <DropdownItem name="create">
-                Create
+                {{ t('oj.create') }}
               </DropdownItem>
               <DropdownItem name="delete">
-                Delete
+                {{ t('oj.delete') }}
               </DropdownItem>
             </DropdownMenu>
           </template>
         </Dropdown>
-      </Col>
-      <Col span="2">
-        <Tag>
-          {{ operation }}
-        </Tag>
       </Col>
     </Row>
     <Row type="flex" justify="start">
@@ -188,16 +157,13 @@ export default {
     <Transfer
       :data="transData"
       :target-keys="targetKeys"
-      :render-format="format"
       :list-style="listStyle"
-      :operations="[ 'To left', 'To right' ]"
       filterable
-      :filter-method="filterMethod"
       class="tranfer"
       @on-change="handleChange"
     />
     <Button type="primary" class="submit" @click="saveGroup">
-      Submit
+      {{ t('oj.submit') }}
     </Button>
   </div>
 </template>

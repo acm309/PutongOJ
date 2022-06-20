@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable'
 import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount, toRefs, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { escape } from 'html-escaper'
 import SearchableTransfer from './SearchableTransfer.vue'
@@ -90,6 +90,8 @@ watch(() => contest.encrypt, async (val) => {
 })
 watch($$(pwd), () => contest.argument = pwd)
 watch($$(result), () => contest.argument = result.join('\r\n'))
+// Do not return any value for onBeforeRouteLeave
+onBeforeRouteLeave(() => { source = [] })
 </script>
 
 <template>

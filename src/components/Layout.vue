@@ -24,6 +24,7 @@ let selectedLang = $(useHumanLanguage())
 locale.value = selectedLang
 
 const login = toggleLoginState
+// possible bug that e is not catched in #catch
 const routerTo = (name) => {
   if (route.name !== name) {
     router.push({ name })
