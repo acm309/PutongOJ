@@ -242,6 +242,7 @@ async function main () {
   while (1) {
     // 移出并获取oj:solutions列表中的最后一个元素
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
+    if (res == null) continue
     const sid = +res[1]
     const { problem, solution } = await beforeJudge(sid)
     logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}>`)
