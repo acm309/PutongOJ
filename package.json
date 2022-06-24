@@ -39,6 +39,7 @@
     "@antfu/eslint-config": "https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182",
     "@originjs/vite-plugin-commonjs": "^1.0.1",
     "@types/lodash.pickby": "^4.6.7",
+    "@types/url-join": "^4.0.1",
     "@vueup/vue-quill": "1.0.0-beta.8",
     "@vueuse/core": "^8.5.0",
     "cross-spawn": "^5.0.1",

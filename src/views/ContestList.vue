@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Input } from 'view-ui-plus'
+import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '../util/helper'
 import constant from '../util/constant'
 import { useSessionStore } from '@/store/modules/session'
@@ -11,6 +12,7 @@ import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
+const { t } = useI18n()
 const { 'contestType': type, 'status': contestVisible } = constant
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
@@ -27,6 +29,7 @@ const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 let enterPwd = $ref('')
 const query = $computed(() => purify({ page, pageSize }))
+const contestTitle = $ref('')
 
 const { find, verify, update, 'delete': remove } = contestStore
 const fetch = () => find(query)
@@ -108,12 +111,30 @@ function del (cid) {
   })
 }
 
+function search () {
+  find(Object.assign({}, query, {
+    type: 'title',
+    content: contestTitle,
+  }))
+}
+
 fetch()
 onRouteQueryUpdate(fetch)
 </script>
 
 <template>
   <div class="con-wrap">
+    <Row>
+      <Col span="16" order="1" />
+      <Col span="6" order="2" class="ivu-pr-8">
+        <Input v-model="contestTitle" :placeholder="t('oj.title')" />
+      </Col>
+      <Col span="2" order="3">
+        <Button type="primary" @click="search">
+          {{ t('oj.search') }}
+        </Button>
+      </Col>
+    </Row>
     <table>
       <tr>
         <th>CID</th>

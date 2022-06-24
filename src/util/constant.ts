@@ -1,4 +1,4 @@
-const result = {
+export const result = {
   0: 'Pending',
   1: 'Running & Judge',
   2: 'Compile Error',
@@ -13,13 +13,13 @@ const result = {
   11: 'Rejudge Pending',
 } as const
 
-const language = {
+export const language = {
   1: 'C',
   2: 'C++',
   3: 'Java',
 } as const
 
-const judgeList = [
+export const judgeList = [
   {
     value: '',
     label: 'ALL',
@@ -74,7 +74,7 @@ const judgeList = [
   },
 ] as const
 
-const languageList = [
+export const languageList = [
   {
     value: '',
     label: 'ALL',
@@ -93,7 +93,7 @@ const languageList = [
   },
 ] as const
 
-const color = {
+export const color = {
   0: 'pd',
   1: 'rj',
   2: 'ce',
@@ -108,7 +108,7 @@ const color = {
   11: 'rp',
 } as const
 
-const statisTableObj = [
+export const statisTableObj = [
   'Compile Error',
   'Accepted',
   'Runtime Error',
@@ -120,20 +120,26 @@ const statisTableObj = [
   'System Error',
 ] as const
 
-const contestStatus = {
+export const contestStatus = {
   0: 'Running',
   2: 'Ended',
 } as const
 
-const contestType = {
+export const contestType = {
   1: 'Public',
   2: 'Private',
   3: 'Password',
 } as const
 
-const status = {
+export const status = {
   0: 'Reserve', // 是否开放给普通用户
   2: 'Available',
+} as const
+
+export const privilege = {
+  PrimaryUser: 1,
+  Teacher: 2,
+  Root: 3,
 } as const
 
 export default {
@@ -146,4 +152,5 @@ export default {
   contestStatus,
   contestType,
   status,
-}
+  privilege,
+} as const

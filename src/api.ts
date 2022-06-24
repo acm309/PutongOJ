@@ -1,44 +1,51 @@
+import type { Axios } from 'axios'
 import axios from 'axios'
-// import Vue from 'vue'
 import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
+import { Profile } from './types'
+import type { LoginParam, TimeResp, WebsiteConfigResp } from './types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
 axios.defaults.withCredentials = true
 axios.defaults.timeout = 100000 // 100000ms的超时验证
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
+const methods = [ 'get', 'post', 'put', 'delete' ] as const
+const instance = {} as {
+  [K in (typeof methods)[number]]: Axios[K]
+}
 
-const instance = {}
-let errHandler = null
+let errHandler: null | ((err: any) => void) = null
 
-export function setErrorHandler (handler) {
+export function setErrorHandler (handler: typeof errHandler) {
   errHandler = handler
 }
 
 // 对异常的基本处理
-[ 'get', 'post', 'put', 'delete' ].forEach((key) => {
-  instance[key] = function (...args) { // 闭包给原函数捕获异常
-    return axios[key](...args)
-      .then((data) => {
-        if (data.data.profile) {
-          useSessionStore().setLoginProfile(data.data.profile)
-        }
-        return data
-      })
-      .catch((err) => {
-        if (errHandler) {
-          errHandler(err)
-        } else {
-          // eslint-disable-next-line no-alert
-          window.alert('故障')
-        }
-        return Promise.reject(new Error('I throw this on purpose'))
-        // 继续抛出错误
-        // 不让后面的继续执行，也就是说，后面的 then 必然是在请求没有错误的情况下才执行的
-        // 因此后面不需要用 if (data.success) 语句判断是否有无错误
-      })
-  }
+methods.forEach((key) => {
+  const axiosMethod = axios[key]
+  type T = Parameters<typeof axiosMethod>
+  // A decorator that wraps the passed function and handles errors
+  instance[key] = async function (...args: T) { // 闭包给原函数捕获异常
+    try {
+      // @ts-expect-error ts-merge-fail: Type 'T' is not assignable to type 'Parameters<typeof axiosMethod>'.
+      const data = await (axiosMethod<{
+        profile: Profile | null
+      }>).call(axios, ...(args as Parameters<typeof axiosMethod>))
+      if (data.data.profile) {
+        useSessionStore().setLoginProfile(data.data.profile)
+      }
+      return data
+    } catch (err) {
+      if (errHandler) {
+        errHandler(err)
+      } else {
+        // eslint-disable-next-line no-alert
+        window.alert('故障')
+      }
+      return Promise.reject(new Error('I throw this on purpose'))
+    }
+  } as Axios[typeof key]
 })
 
 const api = {
@@ -49,8 +56,8 @@ const api = {
   // 图片上传
   getImage: data => instance.post('/submit', data),
   // 获取服务器时间
-  getTime: () => instance.get('/servertime'),
-  getWebsiteConfig: () => instance.get('/website'),
+  getTime: () => instance.get<TimeResp>('/servertime'),
+  getWebsiteConfig: () => instance.get<WebsiteConfigResp>('/website'),
   testcase: {
     findOne: data => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
     find: data => instance.get(`/testcase/${data.pid}`, { params: data }),
@@ -107,9 +114,9 @@ const api = {
     delete: data => instance.delete(`/tag/${data.tid}`, data),
   },
   session: {
-    create: data => instance.post('/session', data),
-    delete: () => instance.delete('/session'),
-    fetch: () => instance.get('/session'),
+    create: (data: LoginParam) => instance.post<{ profile: Profile }>('/session', data),
+    delete: () => instance.delete<{}>('/session'),
+    fetch: () => instance.get<{ profile: Profile | null }>('/session'),
   },
   discuss: {
     create: data => instance.post('/discuss', data),
@@ -120,12 +127,12 @@ const api = {
   },
 }
 
-// alias
-api.login = api.session.create
-api.logout = api.session.delete
-api.register = api.user.create
-
-export default api
+export default {
+  ...api,
+  login: api.session.create,
+  logout: api.session.delete,
+  register: api.user.create,
+}
 
 export function semiRestful () {
   instance.put = function (url, ...args) {

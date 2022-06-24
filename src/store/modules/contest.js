@@ -8,7 +8,6 @@ export const useContestStore = defineStore('contest', {
     contest: {},
     overview: [],
     totalProblems: 0,
-    // problems: [],
     ranklist: [],
     solved: [],
   }),

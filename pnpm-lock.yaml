@@ -4,6 +4,7 @@ specifiers:
   '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182
   '@originjs/vite-plugin-commonjs': ^1.0.1
   '@types/lodash.pickby': ^4.6.7
+  '@types/url-join': ^4.0.1
   '@vitejs/plugin-legacy': ^1.6.4
   '@vitejs/plugin-vue': ^2.3.3
   '@vueup/vue-quill': 1.0.0-beta.8
@@ -61,6 +62,7 @@ devDependencies:
   '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?3e14182_jy2jd5t2lznmjxpvwxnj7idzze'
   '@originjs/vite-plugin-commonjs': 1.0.3
   '@types/lodash.pickby': 4.6.7
+  '@types/url-join': 4.0.1
   '@vueup/vue-quill': 1.0.0-beta.8_vue@3.2.36
   '@vueuse/core': 8.5.0_vue@3.2.36
   cross-spawn: 5.1.0
@@ -491,6 +493,10 @@ packages:
 
   /@types/unist/2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
+    dev: true
+
+  /@types/url-join/4.0.1:
+    resolution: {integrity: sha512-wDXw9LEEUHyV+7UWy7U315nrJGJ7p1BzaCxDpEoLr789Dk1WDVMMlf3iBfbG2F8NdWnYyFbtTxUn2ZNbm1Q4LQ==}
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.28.0_y366mf4ecd5xaliqespbwv4cay:

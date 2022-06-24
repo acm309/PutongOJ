@@ -18,13 +18,15 @@
         "lib": [
             "esnext",
             "dom"
-        ]
+        ],
+        // TODO: remove after migration
+        "allowJs": true
     },
     "include": [
         "src/**/*.ts",
         "src/**/*.d.ts",
         "src/**/*.tsx",
         "src/**/*.vue",
-        "src/store/modules/session.js"
+        "src/store/modules/session.ts"
     ]
 }

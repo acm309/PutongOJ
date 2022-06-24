@@ -1,15 +1,14 @@
 import { defineStore } from 'pinia'
 import api from '@/api'
+import type { WebsiteConfigResp } from '@/types'
+import { privilege } from '@/util/constant'
 
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
-    website: {},
-    privilege: {
-      PrimaryUser: 1,
-      Teacher: 2,
-      Root: 3,
-    },
+    website: {} as WebsiteConfigResp['website'],
+    // Todo: remove
+    privilege,
     status: {
       Reserve: 0,
       Available: 2,
@@ -35,16 +34,15 @@ export const useRootStore = defineStore('root', {
     },
   }),
   actions: {
-    changeDomTitle (payload) {
+    changeDomTitle (payload: { title: string }) {
       if (payload && payload.title) {
         window.document.title = payload.title
       }
       window.document.title += ` | ${this.website.title}`
     },
-    fetchTime () {
-      return api.getTime().then(({ data }) => {
-        this.currentTime = data.serverTime
-      })
+    async fetchTime () {
+      const { data } = await api.getTime()
+      this.currentTime = data.serverTime
     },
     updateTime () {
       setInterval(() => {

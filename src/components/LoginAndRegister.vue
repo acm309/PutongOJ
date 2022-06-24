@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 
-const { t } = useI18n({ global: true })
+const { t } = useI18n()
 
 const password_requiremnt = $computed(() => t('oj.password_requirement'))
 

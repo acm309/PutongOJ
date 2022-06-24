@@ -19,7 +19,7 @@ const { currentTime } = $(storeToRefs(rootStore))
 const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
 
 const active = $computed(() => route.name)
-const { t, locale } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n()
 let selectedLang = $(useHumanLanguage())
 locale.value = selectedLang
 
