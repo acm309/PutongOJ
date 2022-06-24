@@ -37,6 +37,14 @@ const find = async (ctx) => {
   const pageSize = parseInt(opt.pageSize) || 20
 
   const filter = ctx.session.profile && isAdmin(ctx.session.profile) ? {} : { status: config.status.Available }
+  if (ctx.query.type === 'title') {
+    filter.$expr = {
+      '$regexMatch': {
+        'input': {'$toString': `$title`},
+        'regex': new RegExp(ctx.query.content, 'i')
+      }
+    }
+  }
   const list = await Contest.paginate(filter, {
     sort: { cid: -1 },
     page,
