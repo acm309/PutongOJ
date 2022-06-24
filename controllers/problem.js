@@ -60,6 +60,9 @@ const find = async (ctx) => {
 
   let list
   if (page !== -1) {
+    if (!isAdmin(ctx.session.profile)) {
+      filter.status = config.status.Available
+    }
     list = await Problem.paginate(filter, {
       sort: { pid: 1 },
       page,
@@ -69,7 +72,7 @@ const find = async (ctx) => {
       select: '-_id -hint -description -in -out -input -output -__v' // -表示不要的字段
     })
   } else {
-    const docs = await Problem.find({}).lean().exec()
+    const docs = await Problem.find({}, {title: 1, pid: 1, _id: 0}).lean().exec()
     list = {
       docs,
       total: docs.length

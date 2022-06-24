@@ -7,11 +7,13 @@ const staticServe = require('koa-static')
 const path = require('path')
 const session = require('koa-session')
 const send = require('koa-send')
+// In order to apply the moongoose plugin,
+// DB must be inited before others.
+require('./config/db')
 const config = require('./config')
 const router = require('./routes')
 const logger = require('./utils/logger')
 const setup = require('./config/setup')
-require('./config/db')
 
 const app = new Koa()
 

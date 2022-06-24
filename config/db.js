@@ -22,3 +22,16 @@ mongoose.connection.on('error', (err) => {
 mongoose.connection.on('disconnected', () => {
   logger.error('MongoDB connected disconnected.')
 })
+
+mongoose.plugin((schema) => {
+  schema.options.toJSON = {
+    transform (doc, ret) {
+      delete ret._id
+    }
+  }
+  schema.options.toObject = {
+    transform (doc, ret) {
+      delete ret._id
+    }
+  }
+})

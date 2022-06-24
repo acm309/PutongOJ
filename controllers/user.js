@@ -23,9 +23,16 @@ const find = async (ctx) => {
       $in: [config.privilege.Root, config.privilege.Teacher]
     }
   }
+  if (isAdmin(ctx.session.profile) && ctx.query.type === 'uid') {
+    filter.$expr = {
+      '$regexMatch': {
+        'input': {'$toString': `$uid`},
+        'regex': new RegExp(ctx.query.content, 'i')
+      }
+    }
+  }
   const list = await User
-    .find(filter)
-    .select('uid nick privilege')
+    .find(filter, { _id: 0, uid: 1, nick: 1, privilege: 1 })
     .lean()
     .exec()
   ctx.body = {

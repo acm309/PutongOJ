@@ -84,10 +84,12 @@ const findOne = async (ctx) => {
   })
   await Promise.all(procedure)
 
-  const uid = opt.uid
-  let solved = []
-  solved = await Solution
-    .find({ uid, mid: cid, judge: config.judge.Accepted })
+  const solved = await Solution
+    .find({
+      uid: ctx.query.uid || ctx.session.profile.uid,
+      mid: cid,
+      judge: config.judge.Accepted
+    })
     .distinct('pid')
     .lean()
     .exec()
