@@ -2,9 +2,10 @@
 
 > (初代版本 [here](https://github.com/acm309/PutongOJ/tree/v1))
 
-[![Build Status](https://img.shields.io/travis/acm309/PutongOJ.svg?branch=master&style=flat-square)](https://travis-ci.org/acm309/PutongOJ)
+> (English [here](./README_en.md))
+
+[![Build Status](https://img.shields.io/github/workflow/status/acm309/PutongOJ/Node.js%20CI?style=flat-square)](https://github.com/acm309/PutongOJ/actions/workflows/test.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/acm309/PutongOJ.svg?style=flat-square)](https://codecov.io/gh/acm309/PutongOJ)
-[![David](https://img.shields.io/david/acm309/PutongOJ.svg?style=flat-square)](https://david-dm.org/acm309/PutongOJ)
 [![Node](https://img.shields.io/badge/node-%3E=9.0.0-ff69b4.svg?style=flat-square)](https://nodejs.org/en/download/releases/)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)

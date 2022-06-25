@@ -18,7 +18,9 @@ const setup = require('./config/setup')
 const app = new Koa()
 
 // 日志，会在控制台显示请求的方法和路由
-app.use(koaLogger())
+if (process.env.NODE_ENV !== 'test') {
+  app.use(koaLogger())
+}
 
 app.keys = [config.secretKey]
 
