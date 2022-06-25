@@ -27,7 +27,7 @@ test('create a new user', async t => {
       nick: '1234'
     })
 
-  t.is(res.status, 200)
+  t.is(res.status, 200, res.body.error)
   t.is(res.type, 'application/json')
 
   const res2 = await request

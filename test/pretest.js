@@ -1,3 +1,5 @@
+require('dotenv-flow').config()
+
 const User = require('../models/User')
 const Problem = require('../models/Problem')
 const ID = require('../models/ID')
@@ -22,7 +24,6 @@ const ContestSeed = require('./seed/contest')
 
 async function main () {
   await removeall()
-
   await Promise.all([
     new ID({
       id: 1000,

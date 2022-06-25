@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const logger = require('../utils/logger')
 const config = require('./')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 mongoose.Promise = global.Promise
 
@@ -35,3 +36,15 @@ mongoose.plugin((schema) => {
     }
   }
 })
+
+mongoosePaginate.paginate.options = {
+  customLabels: {
+    totalDocs: 'total',
+    totalPages: 'pages',
+    hasNextPage: false,
+    hasPrevPage: false,
+    pagingCounter: false,
+    nextPage: false,
+    prevPage: false
+  }
+}
