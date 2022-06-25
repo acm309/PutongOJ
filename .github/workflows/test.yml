@@ -33,7 +33,7 @@ jobs:
         env:
           CI: true
       - name: Upload coverage to Codecov
-          uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v2
           # with:
             # directory: ./coverage/reports/
             # files: ./coverage1.xml,./coverage2.xml
