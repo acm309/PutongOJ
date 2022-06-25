@@ -62,3 +62,19 @@ test('helper.isLogined', t => {
   }))
   t.false(helper.isLogined({ session: {} }))
 })
+
+test('helper.isRoot', t => {
+  t.false(helper.isRoot(null))
+  t.false(helper.isRoot({
+    privilege: null
+  }))
+  t.false(helper.isRoot({
+    privilege: config.privilege.Teacher
+  }))
+  t.false(helper.isRoot({
+    privilege: config.privilege.PrimaryUser
+  }))
+  t.true(helper.isRoot({
+    privilege: config.privilege.Root
+  }))
+})
