@@ -5,31 +5,30 @@ on:
     branches: [ master ]
 
 jobs:
-  container-job:
-    # Containers must run in Linux based operating systems
+  build:
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-    container: node:latest
-
-    # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redis
-
-      mongo:
-        # Docker Hub image
-        image: mongo
+    strategy:
+      matrix:
+        node-version: [18.x]
+        redis-version: [6]
+        mongodb-version: ['5.0']
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.4.0
+        with:
+          redis-version: ${{ matrix.redis-version }}
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
       - name: Install dependencies
         run: yarn
       - run: yarn test
         env:
-          # The hostname used to communicate with the PostgreSQL service container
-          MONGO_HOST: mongo
-          REDIS_HOST: redis
+          CI: true
