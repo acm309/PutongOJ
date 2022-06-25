@@ -10,15 +10,15 @@ const Contest = require('../models/Contest')
 
 function removeall () {
   return Promise.all([
-    User.remove({}).exec(),
-    Problem.remove({}).exec(),
-    ID.remove({}).exec(),
-    Solution.remove({}).exec(),
-    Group.remove({}).exec(),
-    News.remove({}).exec(),
-    Tag.remove({}).exec(),
-    Discuss.remove({}).exec(),
-    Contest.remove({}).exec()
+    User.deleteMany({}).exec(),
+    Problem.deleteMany({}).exec(),
+    ID.deleteMany({}).exec(),
+    Solution.deleteMany({}).exec(),
+    Group.deleteMany({}).exec(),
+    News.deleteMany({}).exec(),
+    Tag.deleteMany({}).exec(),
+    Discuss.deleteMany({}).exec(),
+    Contest.deleteMany({}).exec()
   ])
 }
 
