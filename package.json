@@ -54,7 +54,7 @@
     "eslint-plugin-standard": "^3.1.0",
     "husky": "^1.0.0-rc.7",
     "nodemon": "^1.14.3",
-    "nyc": "^11.8.0",
+    "nyc": "^15.1.0",
     "supertest": "^3.0.0"
   },
   "scripts": {
