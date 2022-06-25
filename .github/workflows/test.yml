@@ -5,13 +5,22 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  container-job:
+    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: node:latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      redis:
+        # Docker Hub image
+        image: redis
+
+      mongo:
+        # Docker Hub image
+        image: mongo
 
     steps:
       - uses: actions/checkout@v3
