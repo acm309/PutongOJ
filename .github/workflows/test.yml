@@ -29,7 +29,7 @@ jobs:
           mongodb-version: ${{ matrix.mongodb-version }}
       - name: Install dependencies
         run: yarn
-      - run: yarn test & yarn coverage
+      - run: yarn test && yarn coverage
         env:
           CI: true
       - name: Upload coverage to Codecov
