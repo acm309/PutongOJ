@@ -3,7 +3,8 @@ require('dotenv-flow').config()
 const { resolve } = require('path')
 const fse = require('fs-extra')
 const range = require('lodash.range')
-const shell = require('shelljs')
+// DO not upgrade execa to v6.0.0 as it is esm module
+const { command: execaCommand } = require('execa')
 const fetch = require('node-fetch')
 const config = require('./config')
 
@@ -63,8 +64,8 @@ async function judgeSetup () {
   await fse.emptyDir(resolve(judgersDir, 'Judger'))
 
   // 下载最新版的 judger
-  shell.exec(`git clone 'https://github.com/acm309/Judger' ${resolve(judgersDir, 'Judger')}`)
-  shell.exec(`make -C ${resolve(judgersDir, 'Judger')}`)
+  await execaCommand(`git clone https://github.com/acm309/Judger ${resolve(judgersDir, 'Judger')}`)
+  await execaCommand(`make -C ${resolve(judgersDir, 'Judger')}`)
 
   await Promise.all([
     fse.copy(resolve(judgersDir, 'Judger', 'Judge'), resolve(judgersDir, 'node-0', 'Judge')),
@@ -103,9 +104,9 @@ async function staticFilesSetUp () {
   const res = await fetch('https://api.github.com/repos/acm309/PutongOJ-FE/releases')
   const json = await res.json()
   const url = json[0].assets[0].browser_download_url
-  shell.exec(`wget ${url} -O dist.zip`)
-  shell.exec(`unzip -o dist.zip -d dist`)
-  shell.exec(`cp -r dist/* public/`)
+  await execaCommand(`wget ${url} -O dist.zip`)
+  await execaCommand(`unzip -o dist.zip -d dist`)
+  await execaCommand(`cp -r dist/ public/`)
 }
 
 function main () {

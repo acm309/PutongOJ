@@ -12,7 +12,7 @@ require('dotenv-flow').config()
 
 const fse = require('fs-extra')
 const { resolve } = require('path')
-const shell = require('shelljs')
+const { command: execaCommand } = require('execa')
 
 require('../../config/db')
 const Solution = require('../../models/Solution')
@@ -89,7 +89,7 @@ async function beforeJudge (sid) {
 }
 
 async function judge (problem, solution) {
-  shell.exec(`./Judge -l ${solution.language} -D ./testdata -d ./temp -t ${problem.time} -m ${problem.memory} -o 81920`)
+  await execaCommand(`./Judge -l ${solution.language} -D ./testdata -d ./temp -t ${problem.time} -m ${problem.memory} -o 81920`)
 
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
@@ -159,7 +159,7 @@ async function simTest (solution) {
   const dir = resolve(__dirname, `../../data/${solution.pid}/ac/`)
   // 必须删除上一次的 simfile，否则如果这次没有查出重样，那么程序可能将上一次的 simfile 当作这一次的结果
   await fse.removeSync('./simfile')
-  shell.exec(`./sim.sh ./temp/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
+  await execaCommand(`./sim.sh ./temp/Main.${extensions[solution.language]} ${dir} ${extensions[solution.language]}`)
   if (fse.existsSync('./simfile')) {
     const simfile = await fse.readFile('./simfile')
     const result = simfile.toString().match(/(\d+)\s+(\d+)/)
@@ -237,8 +237,8 @@ async function userUpdate (solution) {
 }
 
 async function main () {
-  shell.exec(`chmod 755 ${resolve(__dirname, 'sim_text')}`)
-  shell.exec(`chmod 755 ${resolve(__dirname, 'sim.sh')}`)
+  await execaCommand(`chmod 755 ${resolve(__dirname, 'sim_text')}`)
+  await execaCommand(`chmod 755 ${resolve(__dirname, 'sim.sh')}`)
   while (1) {
     // 移出并获取oj:solutions列表中的最后一个元素
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
