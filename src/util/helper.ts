@@ -43,5 +43,5 @@ export function onProfileUpdate (callback: (...args: any[]) => void) {
 }
 
 export function useHumanLanguage () {
-  return useStorage('oj_human_language', 'zh-CN')
+  return useStorage('oj_human_language', 'en-US')
 }
