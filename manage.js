@@ -106,7 +106,9 @@ async function staticFilesSetUp () {
   const url = json[0].assets[0].browser_download_url
   await execaCommand(`wget ${url} -O dist.zip`)
   await execaCommand(`unzip -o dist.zip -d dist`)
-  await execaCommand(`cp -r dist/ public/`)
+  await execaCommand(`cp -r dist/* public/`, {
+    shell: true
+  })
 }
 
 function main () {
