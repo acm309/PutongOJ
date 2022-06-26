@@ -4,14 +4,13 @@
 
 [Preview](http://acm.cjlu.edu.cn)
 
-一个采用 vue, vue-router, vuex 而成的单页应用
+一个采用 vue, vue-router, pinia 而成的单页应用
 
 # 主要组件的版本
-- Vue 2.5.2
-- vue-router 3.0.1
-- vuex 3.0.1
-- axios 0.17.1
-- iview 2.8.0
+- Vue 3
+- vue-router 4 
+- pinia 2
+- view-ui-plus 1.1.0
 
 # 项目结构
 
