@@ -114,7 +114,7 @@ Promise.all([
   useSessionStore().fetch(),
   useRootStore().fetchWebsiteConfig(),
 ]).then(() => {
-  if (useRootStore().semi_restful) {
+  if (useRootStore().website.semi_restful) {
     semiRestful()
   }
   // Router must be loaded after session/website config is loaded

@@ -2,8 +2,7 @@ import type { Axios } from 'axios'
 import axios from 'axios'
 import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
-import { Profile } from './types'
-import type { LoginParam, TimeResp, WebsiteConfigResp } from './types'
+import type { LoginParam, Profile, TimeResp, WebsiteConfigResp } from './types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -28,10 +27,9 @@ methods.forEach((key) => {
   // A decorator that wraps the passed function and handles errors
   instance[key] = async function (...args: T) { // 闭包给原函数捕获异常
     try {
-      // @ts-expect-error ts-merge-fail: Type 'T' is not assignable to type 'Parameters<typeof axiosMethod>'.
-      const data = await (axiosMethod<{
-        profile: Profile | null
-      }>).call(axios, ...(args as Parameters<typeof axiosMethod>))
+      const data: {
+        data: { profile: Profile | null }
+      } = await Reflect.apply(axiosMethod, axios, args)
       if (data.data.profile) {
         useSessionStore().setLoginProfile(data.data.profile)
       }
