@@ -9,16 +9,19 @@ import { escape } from 'html-escaper'
 import SearchableTransfer from './SearchableTransfer.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
+import { useGroupStore } from '@/store/modules/group'
 import api from '@/api'
 
 const props = defineProps([ 'contest', 'overview' ])
 const { t } = useI18n()
 const rootStore = useRootStore()
 const problemStore = useProblemStore()
+const groupStore = useGroupStore()
 const route = useRoute()
 
 const { encrypt } = $(storeToRefs(rootStore))
 const { findOne: findOneProblem } = problemStore
+const { list: groups } = $(storeToRefs(groupStore))
 
 const { contest, overview } = $(toRefs(props))
 const jobs = $ref({})
@@ -59,7 +62,7 @@ onBeforeMount(async () => {
   }
 })
 
-// User search
+// User search -- Contest of Private Type
 const Spin = inject('$Spin')
 let source = $ref([])
 async function search (val) {
@@ -81,15 +84,30 @@ const result = $ref(
     : [],
 )
 
+let selectedGroups = $ref([])
+
+const groupOptions = $computed(() => groups.map(item => ({
+  key: item.gid,
+  label: item.title,
+})))
+const argument = $computed(() => {
+  return result.concat(selectedGroups.map(item => `gid:${item}`)).join('\r\n')
+})
+const handleGroupChanges = (data) => {
+  selectedGroups = data
+}
+
+groupStore.find({ lean: 1 })
+
 watch(() => contest.encrypt, async (val) => {
   if (val === encrypt.Password) {
     contest.argument = pwd
   } else if (val === encrypt.Private) {
-    contest.argument = result.join('\r\n')
+    contest.argument = argument
   }
 })
 watch($$(pwd), () => contest.argument = pwd)
-watch($$(result), () => contest.argument = result.join('\r\n'))
+watch($$(result), () => contest.argument = argument)
 // Do not return any value for onBeforeRouteLeave
 onBeforeRouteLeave(() => { source = [] })
 </script>
@@ -150,6 +168,13 @@ onBeforeRouteLeave(() => { source = [] })
       v-model:result="result" :source="source"
       @on-search="search"
     />
+    <Transfer
+      v-if="+contest.encrypt === encrypt.Private"
+      class="group-transfer"
+      :data="groupOptions"
+      :target-keys="selectedGroups"
+      @on-change="handleGroupChanges"
+    />
     <Row v-if="contest.encrypt === encrypt.Password" :key="encrypt.Password">
       <Col :span="23">
         <Input v-model="pwd" />
@@ -207,6 +232,12 @@ onBeforeRouteLeave(() => { source = [] })
     margin-left: 20px
 .transfer
   margin-bottom: 30px
+
+.group-transfer
+  margin-bottom: 30px
+  padding-left: 2rem
+  :deep(.ivu-transfer-list)
+    width: 500px
 .list-item
   display: flex
   justify-content: space-between
