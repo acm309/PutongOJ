@@ -37,6 +37,6 @@ test('Query problem list', async (t) => {
   t.truthy(Array.isArray(res.body.solved))
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

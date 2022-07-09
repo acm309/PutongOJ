@@ -8,7 +8,7 @@ const send = require('koa-send')
  * 拿到输入输出的测试文件，然后将它移动到专门放测试数据的地方
  * 记得中间要修改对应的 meta.json
  */
-const create = async (ctx, next) => {
+const create = async (ctx) => {
   const pid = +ctx.params.pid
   // 输入
   const testin = ctx.request.body.in
@@ -34,7 +34,7 @@ const create = async (ctx, next) => {
  * 只移除 meta.json 中的对应元素，但并不删除测试数据的文件！
  * 保留测试数据的文件，原因是为了能够继续查看测试样例, 比如 一个提交的测试数据用的是 id 为 1 的测试数据，即时管理员不再用这个数据了，我们仍然能够看到当时这个提交用的测试数据
  */
-const del = async (ctx, next) => {
+const del = async (ctx) => {
   const { pid, uuid } = ctx.params
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
@@ -46,7 +46,7 @@ const del = async (ctx, next) => {
 /**
  * 这里是将文件返回
  */
-const fetch = async (ctx, next) => {
+const fetch = async (ctx) => {
   const { pid, uuid } = ctx.params
   const type = ctx.query.type // 必须指明要输入文件还是输出文件
   // 原则上需要判断一下请求的文件在不在
@@ -60,7 +60,7 @@ const fetch = async (ctx, next) => {
 }
 
 // 返回该题拥有的测试数据
-const find = async (ctx, next) => {
+const find = async (ctx) => {
   const pid = ctx.params.pid
   const meta = await fse.readJson(
     path.resolve(__dirname, `../data/${pid}/meta.json`),

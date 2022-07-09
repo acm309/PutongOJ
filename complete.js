@@ -7,7 +7,7 @@ require('./config/db')
 async function main () {
   console.log('start')
   const problems = await Problem.find({}).exec()
-  const arr = problems.map(async (problem, index) => {
+  const arr = problems.map(async (problem) => {
     const submit = await Solution
       .find({ pid: problem.pid })
       .distinct('uid')

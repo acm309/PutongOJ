@@ -158,6 +158,6 @@ test('Some field is required to create a contest', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

@@ -1,6 +1,7 @@
 {
   "extends": "@antfu",
   "rules": {
-    "prefer-const": "error"
+    "prefer-const": "error",
+    "no-console": "warn"
   }
 }

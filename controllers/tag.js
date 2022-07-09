@@ -54,7 +54,7 @@ const create = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  const procedure = opt.list.map((pid, index) => {
+  const procedure = opt.list.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         problem.tags.push(tag.tid)
@@ -89,7 +89,7 @@ const update = async (ctx) => {
   const pidsOfImportedTids = difference(newList, oldList)
 
   // 删除 tag 表里的原 problem 表的 tid
-  const delProcedure = pidsOfRemovedTids.map((pid, index) => {
+  const delProcedure = pidsOfRemovedTids.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         if (problem == null) return { pid: `${pid} not found` }
@@ -106,7 +106,7 @@ const update = async (ctx) => {
   await Promise.all(delProcedure)
 
   // 新增 tag 表里 user 的 tid
-  const addProcedure = pidsOfImportedTids.map((pid, index) => {
+  const addProcedure = pidsOfImportedTids.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         if (problem == null) return { pid: `${pid} not found` }
@@ -143,7 +143,7 @@ const del = async (ctx) => {
   const list = tag.list
 
   // 删除 problem 表里的 tid
-  const procedure = list.map((pid, index) => {
+  const procedure = list.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
         problem.tags = without(problem.tags, tid)

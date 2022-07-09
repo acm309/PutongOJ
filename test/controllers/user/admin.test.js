@@ -29,6 +29,6 @@ test.serial('can update other user info', async (t) => {
   t.is(res.status, 200)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

@@ -38,6 +38,6 @@ test('Can not see solution without login', async (t) => {
   t.is(res.status, 401)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

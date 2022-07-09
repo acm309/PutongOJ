@@ -74,7 +74,7 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const group = ctx.state.group
-  const fields = ['title', 'list']
+  const fields = [ 'title', 'list' ]
   const gid = group.gid
 
   // 这些 uid 不再属于这个用户组
@@ -84,7 +84,7 @@ const update = async (ctx) => {
   const importedUids = difference(opt.list, group.list)
 
   // 删除 user 表里的原 user 的 gid
-  const delProcedure = removedUids.map((uid, index) => {
+  const delProcedure = removedUids.map((uid) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
         user.gid = without(user.gid, gid)
@@ -104,7 +104,7 @@ const update = async (ctx) => {
   })
 
   // 新增 user 表里 user 的 gid
-  const addProcedure = importedUids.map((uid, index) => {
+  const addProcedure = importedUids.map((uid) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
         user.gid.push(gid)
@@ -138,7 +138,7 @@ const del = async (ctx) => {
   const list = group.list
 
   // 删除user表里的gid
-  const procedure = list.map((uid, index) => {
+  const procedure = list.map((uid) => {
     return User.findOne({ uid }).exec()
       .then((user) => {
         user.gid = without(user.gid, gid)

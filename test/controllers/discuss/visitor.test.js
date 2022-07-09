@@ -32,7 +32,7 @@ test('Find Discuss 1', async (t) => {
   const com = res.body.discuss.comments
 
   t.deepEqual(only(res.body.discuss, 'create title uid create update'), only(select, 'create title uid create update'))
-  com.map((item, index) => {
+  com.forEach((item, index) => {
     t.deepEqual(only(item, 'content create uid'), select.comments[index])
   })
 })
@@ -70,6 +70,6 @@ test('Login required to create one', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

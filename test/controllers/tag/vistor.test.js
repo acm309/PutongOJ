@@ -34,6 +34,6 @@ test('Fails to create a tag -- no permission', async (t) => {
   t.truthy(create.body.error)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

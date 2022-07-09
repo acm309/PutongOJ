@@ -13,7 +13,7 @@ const config = require('../../config')
 /*
 对原有的 testcase 增加 id 标记
 */
-async function testcaseBuild (problem) {
+async function testcaseBuild () {
   async function update (problem) {
     const pid = problem.pid
 

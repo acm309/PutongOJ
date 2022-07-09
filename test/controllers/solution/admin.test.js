@@ -27,6 +27,6 @@ test('Can see solution and sim of other users', async (t) => {
   t.truthy(res.body.solution.code)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

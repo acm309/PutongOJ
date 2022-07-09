@@ -45,6 +45,6 @@ test('Gid is not a number', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?311c042
+  '@antfu/eslint-config': https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?my
   '@antfu/eslint-config-basic': https://gitpkg.now.sh/lazzzis/eslint-config/packages/basic?my
   ava: ^4.3.0
   codecov: ^3.0.2
@@ -72,7 +72,7 @@ dependencies:
   uuid: 3.4.0
 
 devDependencies:
-  '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?311c042_4x5o4skxv6sl53vpwefgt23khm'
+  '@antfu/eslint-config': '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my_4x5o4skxv6sl53vpwefgt23khm'
   '@antfu/eslint-config-basic': '@gitpkg.now.sh/lazzzis/eslint-config/packages/basic?my_4x5o4skxv6sl53vpwefgt23khm'
   ava: 4.3.0
   codecov: 3.8.3
@@ -6506,9 +6506,9 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?311c042_4x5o4skxv6sl53vpwefgt23khm':
-    resolution: {tarball: https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?311c042}
-    id: '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?311c042'
+  '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my_4x5o4skxv6sl53vpwefgt23khm':
+    resolution: {tarball: https://gitpkg.now.sh/lazzzis/eslint-config/packages/all?my}
+    id: '@gitpkg.now.sh/lazzzis/eslint-config/packages/all?my'
     name: '@antfu/eslint-config'
     version: 0.25.0
     peerDependencies:

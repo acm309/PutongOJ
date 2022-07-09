@@ -78,6 +78,6 @@ test('News finds one', async (t) => {
   t.is(res.body.news.content, n.content)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

@@ -134,6 +134,6 @@ test('Find ranklist for contest 1', async (t) => {
   t.truthy(rank.body.ranklist)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

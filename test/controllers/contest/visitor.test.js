@@ -20,6 +20,6 @@ test('Contest list', async (t) => {
   }
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

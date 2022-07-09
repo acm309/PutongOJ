@@ -18,6 +18,6 @@ test('Statistics for pid 1001', async (t) => {
   t.truthy(res.body.sumStatis)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })

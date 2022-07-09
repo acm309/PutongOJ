@@ -64,6 +64,6 @@ test.serial('Delete a Problem', async (t) => {
   t.is(find.status, 400)
 })
 
-test.after.always('close server', (t) => {
+test.after.always('close server', () => {
   server.close()
 })
