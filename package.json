@@ -24,7 +24,7 @@
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
     "pretest": "cross-env NODE_ENV=test node test/pretest.js",
-    "test": "cross-env NODE_ENV=test nyc ava",
+    "test": "pnpm run pretest && cross-env NODE_ENV=test nyc ava && pnpm run posttest",
     "report": "nyc report --reporter=html",
     "posttest": "cross-env NODE_ENV=test node test/posttest.js",
     "lint": "eslint .",
