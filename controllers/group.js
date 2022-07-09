@@ -22,7 +22,7 @@ const find = async (ctx) => {
   const list = await Group.find({}).select(select).lean().exec()
 
   ctx.body = {
-    list
+    list,
   }
 }
 
@@ -31,7 +31,7 @@ const findOne = async (ctx) => {
   const group = ctx.state.group
 
   ctx.body = {
-    group
+    group,
   }
 }
 
@@ -42,8 +42,8 @@ const create = async (ctx) => {
   const group = new Group(Object.assign(
     only(opt, 'title list'),
     { // gid 会自动生成
-      create: Date.now()
-    }
+      create: Date.now(),
+    },
   ))
 
   try {
@@ -53,23 +53,20 @@ const create = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  const procedure = opt.list.map((uid, index) => {
-    return User.findOne({uid}).exec()
-      .then((user) => {
-        user.gid.push(group.gid)
-        return user.save()
-      })
-      .then((user) => {
-        logger.info(`User is updated" ${user.uid} -- ${user.gid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+  const procedure = opt.list.map(async (uid) => {
+    try {
+      const user = await User.findOne({ uid }).exec()
+      user.gid.push(group.gid)
+      const savedUser = await user.save()
+      logger.info(`User is updated" ${savedUser.uid} -- ${savedUser.gid}`)
+    } catch (e) {
+      ctx.throw(400, e.message)
+    }
   })
   await Promise.all(procedure)
 
   ctx.body = {
-    gid: group.gid
+    gid: group.gid,
   }
 }
 
@@ -130,7 +127,7 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    gid: group.gid
+    gid: group.gid,
   }
 }
 
@@ -142,7 +139,7 @@ const del = async (ctx) => {
 
   // 删除user表里的gid
   const procedure = list.map((uid, index) => {
-    return User.findOne({uid}).exec()
+    return User.findOne({ uid }).exec()
       .then((user) => {
         user.gid = without(user.gid, gid)
         return user.save()
@@ -173,5 +170,5 @@ module.exports = {
   findOne,
   create,
   update,
-  del
+  del,
 }

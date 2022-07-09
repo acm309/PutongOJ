@@ -10,18 +10,18 @@ const request = supertest.agent(server)
 // delete: 7
 // update: 8
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
 })
 
-test('Delete a news', async t => {
+test('Delete a news', async (t) => {
   const res = await request
     .delete('/api/news/7')
 
@@ -33,22 +33,22 @@ test('Delete a news', async t => {
   t.is(find.status, 400)
 })
 
-test('fails to create a news', async t => {
+test('fails to create a news', async (t) => {
   const res = await request
     .post('/api/news')
     .send({
-      content: 'xx'
+      content: 'xx',
     })
 
   t.is(res.status, 400)
 })
 
-test('Create a news', async t => {
+test('Create a news', async (t) => {
   const res = await request
     .post('/api/news')
     .send({
       title: 'abcdefg',
-      content: 'xx'
+      content: 'xx',
     })
 
   t.is(res.status, 200)
@@ -63,12 +63,12 @@ test('Create a news', async t => {
   t.is(find.body.news.content, 'xx')
 })
 
-test('Update a news', async t => {
+test('Update a news', async (t) => {
   const res = await request
     .put('/api/news/8')
     .send({
       title: '09876',
-      content: '12345'
+      content: '12345',
     })
 
   t.is(res.status, 200)

@@ -1,5 +1,5 @@
-const { isAdmin, isRoot } = require('./helper')
 const { RateLimit } = require('koa2-ratelimit')
+const { isAdmin, isRoot } = require('./helper')
 
 const login = async (ctx, next) => {
   if (!ctx.session || ctx.session.profile == null) ctx.throw(401, 'Login required')
@@ -25,7 +25,7 @@ const root = async (ctx, next) => {
 const handler = async function (ctx) {
   ctx.status = 429
   ctx.body = {
-    error: '请求次数过高，请过一会重试'
+    error: '请求次数过高，请过一会重试',
   }
   if (this.options && this.options.headers) {
     ctx.set('Retry-After', Math.ceil(this.options.interval / 1000))
@@ -35,18 +35,18 @@ const handler = async function (ctx) {
 const solutionCreateRateLimit = RateLimit.middleware({
   interval: { min: 1 },
   max: 60,
-  keyGenerator: async function (ctx) {
+  async keyGenerator (ctx) {
     const opt = ctx.request.body
     return `solutions/${opt.pid}| ${ctx.request.ip} `
   },
-  handler
+  handler,
 })
 
 const userCreateRateLimit = RateLimit.middleware({
   interval: { min: 1 },
   max: 30,
   prefixKey: 'user',
-  handler
+  handler,
 })
 
 module.exports = {
@@ -55,6 +55,6 @@ module.exports = {
   auth: {
     login,
     admin,
-    root
-  }
+    root,
+  },
 }

@@ -21,7 +21,7 @@ const login = async (ctx) => {
   ctx.session.profile = only(user, 'uid nick privilege')
   ctx.session.profile.verifyContest = []
   ctx.body = {
-    profile: ctx.session.profile
+    profile: ctx.session.profile,
   }
 }
 
@@ -35,12 +35,12 @@ const logout = async (ctx) => {
 const profile = async (ctx) => {
   const profile = ctx.session.profile ? ctx.session.profile : null
   ctx.body = {
-    profile
+    profile,
   }
 }
 
 module.exports = {
   login,
   logout,
-  profile
+  profile,
 }

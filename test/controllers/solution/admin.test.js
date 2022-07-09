@@ -6,18 +6,18 @@ const config = require('../../../config')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
 })
 
-test('Can see solution and sim of other users', async t => {
+test('Can see solution and sim of other users', async (t) => {
   const res = await request
     .get('/api/status/4')
 
@@ -27,6 +27,6 @@ test('Can see solution and sim of other users', async t => {
   t.truthy(res.body.solution.code)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

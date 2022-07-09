@@ -76,8 +76,8 @@ git clone https://github.com/acm309/PutongOJ.git
 4. 安装项目依赖
 
 ```bash
-npm i -g yarn
-yarn
+npm i -g pnpm
+pnpm i
 ```
 
 5. 尝试连接数据库

@@ -15,14 +15,14 @@ const find = async (ctx) => {
   const list = await Discuss.find().exec()
 
   ctx.body = {
-    list
+    list,
   }
 }
 
 const findOne = async (ctx) => {
   const discuss = ctx.state.discuss
   ctx.body = {
-    discuss
+    discuss,
   }
 }
 
@@ -31,11 +31,11 @@ const create = async (ctx) => {
   const discuss = new Discuss({
     title: opt.title,
     uid: ctx.session.profile.uid,
-    comments: [{
+    comments: [ {
       uid: ctx.session.profile.uid,
-      content: opt.content
-    }],
-    update: Date.now()
+      content: opt.content,
+    } ],
+    update: Date.now(),
   })
 
   try {
@@ -46,7 +46,7 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    did: discuss.did
+    did: discuss.did,
   }
 }
 
@@ -57,7 +57,7 @@ const update = async (ctx) => {
   try {
     discuss.comments.push({
       uid: ctx.session.profile.uid,
-      content: opt.content
+      content: opt.content,
     })
     discuss.update = Date.now()
     await discuss.save()
@@ -68,7 +68,7 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    did: discuss.did
+    did: discuss.did,
   }
 }
 
@@ -91,5 +91,5 @@ module.exports = {
   findOne,
   create,
   update,
-  del
+  del,
 }

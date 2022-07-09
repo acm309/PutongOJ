@@ -6,17 +6,17 @@ const config = require('../../config')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before(async t => {
+test.before(async (t) => {
   const res = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
   t.is(res.status, 200)
 })
 
-test.serial('get session profile', async t => {
+test.serial('get session profile', async (t) => {
   const res = await request
     .get('/api/session')
 
@@ -25,7 +25,7 @@ test.serial('get session profile', async t => {
   t.is(res.body.profile.privilege, config.privilege.Root)
 })
 
-test('User logout', async t => {
+test('User logout', async (t) => {
   let res = await request.del('/api/session')
 
   t.is(res.status, 200)
@@ -38,6 +38,6 @@ test('User logout', async t => {
   t.is(res.status, 401)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

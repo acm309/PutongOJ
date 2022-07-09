@@ -6,7 +6,7 @@ const meta = require('../../meta')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Group list', async t => {
+test('Group list', async (t) => {
   const res = await request
     .get('/api/group/list')
 
@@ -15,12 +15,12 @@ test('Group list', async t => {
   t.truthy(Array.isArray(res.body.list))
 })
 
-test('Find Group 1', async t => {
+test('Find Group 1', async (t) => {
   const res = await request
     .get('/api/group/1')
 
   t.is(res.status, 200)
-  for (const [key, value] of Object.entries(meta.groups[0])) {
+  for (const [ key, value ] of Object.entries(meta.groups[0])) {
     t.deepEqual(res.body.group[key], value)
   }
 })
@@ -45,6 +45,6 @@ test('Gid is not a number', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

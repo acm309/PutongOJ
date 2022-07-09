@@ -10,8 +10,8 @@
  */
 require('dotenv-flow').config()
 
-const fse = require('fs-extra')
 const { resolve } = require('path')
+const fse = require('fs-extra')
 const { command: execaCommand } = require('execa')
 
 require('../../config/db')
@@ -21,7 +21,7 @@ const User = require('../../models/User')
 const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
-const extensions = ['', 'c', 'cpp', 'java']
+const extensions = [ '', 'c', 'cpp', 'java' ]
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
@@ -30,7 +30,7 @@ const extensions = ['', 'c', 'cpp', 'java']
 // OJ 默认的见 config/index.js
 function judgeCode (code) {
   if (isNaN(+code)) {
-    throw new Error(`${code}, which has type ${typeof code}, should be able to be converted into a number`)
+    throw new TypeError(`${code}, which has type ${typeof code}, should be able to be converted into a number`)
   }
   code = parseInt(code)
   if (code === 2) {
@@ -70,7 +70,7 @@ async function beforeJudge (sid) {
   await Promise.all([
     fse.copy(resolve(dir, 'meta.json'), resolve(__dirname, 'meta.json')),
     fse.emptyDir(resolve(__dirname, 'temp')),
-    fse.emptyDir(resolve(__dirname, 'testdata'))
+    fse.emptyDir(resolve(__dirname, 'testdata')),
   ])
 
   // 把所有 testcases 复制过来
@@ -137,7 +137,7 @@ async function afterJudge (problem, solution) {
   return Promise.all([
     solution.save(),
     solutionArchive(solution),
-    userUpdate(solution)
+    userUpdate(solution),
   ])
 }
 
@@ -149,7 +149,7 @@ async function solutionArchive (solution) {
   const target = resolve(
     __dirname,
     `../../data/${solution.pid}/ac/`,
-    `${solution.sid}.${extensions[solution.language]}`
+    `${solution.sid}.${extensions[solution.language]}`,
   )
   return fse.outputFile(target, solution.code)
 }
@@ -163,11 +163,11 @@ async function simTest (solution) {
   if (fse.existsSync('./simfile')) {
     const simfile = await fse.readFile('./simfile')
     const result = simfile.toString().match(/(\d+)\s+(\d+)/)
-    ;[solution.sim, solution.sim_s_id] = [+result[1], +result[2]]
+    ;[ solution.sim, solution.sim_s_id ] = [ +result[1], +result[2] ]
   }
   return {
     sim: solution.sim || 0,
-    sim_s_id: solution.sim_s_id || 0
+    sim_s_id: solution.sim_s_id || 0,
   }
 }
 
@@ -189,22 +189,22 @@ async function userUpdate (solution) {
   const isSubmittedBefore = await Solution.count({
     uid: user.uid,
     pid: solution.pid,
-    sid: { $ne: solution.sid } // 把自身排除
+    sid: { $ne: solution.sid }, // 把自身排除
   }).exec()
   if (isSubmittedBefore === 0) {
     await User.findOneAndUpdate({
-      uid: user.uid
+      uid: user.uid,
     }, {
       $inc: {
-        submit: 1
-      }
+        submit: 1,
+      },
     }).exec()
     await Problem.findOneAndUpdate({
-      pid: problem.pid
+      pid: problem.pid,
     }, {
       $inc: {
-        submit: 1
-      }
+        submit: 1,
+      },
     }).exec()
   }
   console.log('submit', isSubmittedBefore)
@@ -214,23 +214,23 @@ async function userUpdate (solution) {
       uid: user.uid,
       pid: solution.pid,
       sid: { $ne: solution.sid },
-      judge: config.judge.Accepted
+      judge: config.judge.Accepted,
     }).exec()
     console.log('isAc', isAcBefore)
     if (isAcBefore === 0) {
       await User.findOneAndUpdate({
-        uid: user.uid
+        uid: user.uid,
       }, {
         $inc: {
-          solve: 1
-        }
+          solve: 1,
+        },
       }).exec()
       await Problem.findOneAndUpdate({
-        pid: problem.pid
+        pid: problem.pid,
       }, {
         $inc: {
-          solve: 1
-        }
+          solve: 1,
+        },
       }).exec()
     }
   }

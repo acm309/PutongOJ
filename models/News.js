@@ -7,22 +7,22 @@ const newSchema = mongoose.Schema({
   nid: {
     type: Number,
     index: {
-      unique: true
+      unique: true,
     },
-    default: -1
+    default: -1,
   },
   title: String,
   content: String,
   status: {
     type: Number,
-    default: config.status.Available // 默认新建的消息显示
+    default: config.status.Available, // 默认新建的消息显示
   },
   create: {
     type: Number,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 }, {
-  collection: 'News'
+  collection: 'News',
 })
 
 newSchema.plugin(mongoosePaginate)
@@ -40,7 +40,7 @@ newSchema.pre('save', function (next) {
     // 表示新的新闻被创建了，因此赋予一个新的 id
     ids
       .generateId('News')
-      .then(id => {
+      .then((id) => {
         this.nid = id
       })
       .then(next)

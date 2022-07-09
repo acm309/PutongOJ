@@ -12,10 +12,10 @@ module.exports = {
       status: config.status.Available,
       create: 1458924613000,
       list: [
-        1001
+        1001,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Private Contest',
@@ -26,10 +26,10 @@ module.exports = {
       status: config.status.Available,
       create: 1468924613000,
       list: [
-        1001
+        1001,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Password Contest',
@@ -40,10 +40,10 @@ module.exports = {
       status: config.status.Available,
       create: 1468924613000,
       list: [
-        1001
+        1001,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Private Contest',
@@ -54,10 +54,10 @@ module.exports = {
       status: config.status.Available,
       create: 1468924613000,
       list: [
-        1001
+        1001,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Future Contest',
@@ -68,10 +68,10 @@ module.exports = {
       status: config.status.Available,
       create: 2458924613000,
       list: [
-        1003
+        1003,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Private Group Contest',
@@ -82,10 +82,10 @@ module.exports = {
       status: config.status.Available,
       create: 2458924613000,
       list: [
-        1003
+        1003,
       ],
       ranklist: {
-      }
+      },
     },
     {
       title: 'Private Group Contest 2',
@@ -96,10 +96,10 @@ module.exports = {
       status: config.status.Available,
       create: 2458924613000,
       list: [
-        1003
+        1003,
       ],
       ranklist: {
-      }
-    }
-  ]
+      },
+    },
+  ],
 }

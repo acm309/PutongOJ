@@ -1,6 +1,6 @@
+const path = require('path')
 const fse = require('fs-extra')
 const uuid = require('uuid/v4')
-const path = require('path')
 const remove = require('lodash.remove')
 const send = require('koa-send')
 
@@ -17,15 +17,15 @@ const create = async (ctx, next) => {
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   const id = uuid() // 快速生成RFC4122 UUID
   // 将文件读取到meta对象
-  const meta = await fse.readJson(path.resolve(testDir, `meta.json`))
+  const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
   meta.testcases.push({
-    uuid: id
+    uuid: id,
   })
   await Promise.all([
     // 将test.in等文件写入本地文件，如果父级目录不存在(即testDir)，创建它
     fse.outputFile(path.resolve(testDir, `${id}.in`), testin),
     fse.outputFile(path.resolve(testDir, `${id}.out`), testout),
-    fse.outputJson(path.resolve(testDir, `meta.json`), meta, { spaces: 2 })
+    fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 }),
   ])
   ctx.body = meta // 结构就是: {testcases: [{ uuid: 'axxx' }, { uuid: 'yyyy' }]}
 }
@@ -37,9 +37,9 @@ const create = async (ctx, next) => {
 const del = async (ctx, next) => {
   const { pid, uuid } = ctx.params
   const testDir = path.resolve(__dirname, `../data/${pid}`)
-  const meta = await fse.readJson(path.resolve(testDir, `meta.json`))
-  remove(meta.testcases, (item) => item.uuid === uuid)
-  await fse.outputJson(path.resolve(testDir, `meta.json`), meta, { spaces: 2 })
+  const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
+  remove(meta.testcases, item => item.uuid === uuid)
+  await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
   ctx.body = meta
 }
 
@@ -63,7 +63,7 @@ const fetch = async (ctx, next) => {
 const find = async (ctx, next) => {
   const pid = ctx.params.pid
   const meta = await fse.readJson(
-    path.resolve(__dirname, `../data/${pid}/meta.json`)
+    path.resolve(__dirname, `../data/${pid}/meta.json`),
   )
   ctx.body = meta
 }
@@ -72,5 +72,5 @@ module.exports = {
   create,
   del,
   fetch,
-  find
+  find,
 }

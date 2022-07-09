@@ -5,42 +5,42 @@ const discussSchema = mongoose.Schema({
   did: {
     type: Number,
     index: {
-      unique: true
+      unique: true,
     },
-    default: -1 // 表示新组
+    default: -1, // 表示新组
   },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   create: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   update: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   uid: {
     type: String,
-    required: true
+    required: true,
   },
-  comments: [{
+  comments: [ {
     uid: {
       type: String,
-      required: true
+      required: true,
     },
     content: {
       type: String,
-      default: ''
+      default: '',
     },
     create: {
       type: Number,
-      default: Date.now
-    }
-  }]
+      default: Date.now,
+    },
+  } ],
 }, {
-  collection: 'Discuss'
+  collection: 'Discuss',
 })
 
 discussSchema.pre('validate', function (next) {
@@ -49,8 +49,8 @@ discussSchema.pre('validate', function (next) {
   } else if (this.title.length >= 80) {
     next(new Error('The length of the title should not be greater than 80'))
   } else if (
-    this.comments == null || this.comments.length === 0 ||
-    this.comments.some((item) => !item.content)
+    this.comments == null || this.comments.length === 0
+    || this.comments.some(item => !item.content)
   ) {
     next(new Error('comment not be empty'))
   } else {
@@ -64,7 +64,7 @@ discussSchema.pre('save', function (next) {
     // 表示新的题目被创建了，因此赋予一个新的 id
     ids
       .generateId('Discuss')
-      .then(id => {
+      .then((id) => {
         this.did = id
       })
       .then(next)

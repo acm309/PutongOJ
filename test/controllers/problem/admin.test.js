@@ -6,12 +6,12 @@ const config = require('../../../config')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
@@ -19,7 +19,7 @@ test.before('Login', async t => {
 
 let createPid
 
-test.serial('create a new problem', async t => {
+test.serial('create a new problem', async (t) => {
   const create = await request
     .post('/api/problem')
     .send({
@@ -28,7 +28,7 @@ test.serial('create a new problem', async t => {
       input: '输入在一行中给出3个整数，其间以空格分隔。',
       output: '在一行中将3个整数从小到大输出，其间以“-&gt;”相连。',
       in: '4 2 8',
-      out: '2->4->8'
+      out: '2->4->8',
     })
 
   t.is(create.status, 200)
@@ -36,12 +36,12 @@ test.serial('create a new problem', async t => {
   createPid = create.body.pid
 })
 
-test.serial('Update a problem', async t => {
+test.serial('Update a problem', async (t) => {
   const update = await request
     .put(`/api/problem/${createPid}`)
     .send({
       title: '更新新建题目',
-      description: '应该可以更新成功吧'
+      description: '应该可以更新成功吧',
     })
   t.is(update.status, 200)
 
@@ -53,7 +53,7 @@ test.serial('Update a problem', async t => {
   t.is(find.body.problem.description, '应该可以更新成功吧')
 })
 
-test.serial('Delete a Problem', async t => {
+test.serial('Delete a Problem', async (t) => {
   const del = await request
     .delete(`/api/problem/${createPid}`)
   t.is(del.status, 200)
@@ -64,6 +64,6 @@ test.serial('Delete a Problem', async t => {
   t.is(find.status, 400)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

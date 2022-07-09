@@ -5,7 +5,7 @@ const app = require('../../app')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('ranklist', async t => {
+test('ranklist', async (t) => {
   const res = await request.get('/api/ranklist/list')
 
   t.is(res.status, 200)

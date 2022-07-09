@@ -8,73 +8,73 @@ const problemSchema = mongoose.Schema({
   pid: {
     type: Number,
     index: {
-      unique: true
+      unique: true,
     },
-    default: -1 // 表示新题目
+    default: -1, // 表示新题目
   },
   time: {
     type: Number,
     default: 1000,
     min: 100,
-    max: 10000
+    max: 10000,
   },
   memory: {
     type: Number,
     default: 32768,
     min: 100,
-    max: 32768 * 4
+    max: 32768 * 4,
   },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   create: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   input: {
     type: String,
-    default: ''
+    default: '',
   },
   output: {
     type: String,
-    default: ''
+    default: '',
   },
   in: {
     type: String,
-    default: ''
+    default: '',
   },
   out: {
     type: String,
-    default: ''
+    default: '',
   },
   hint: {
     type: String,
-    default: ''
+    default: '',
   },
   solve: {
     type: Number,
-    default: 0
+    default: 0,
   },
   submit: {
     type: Number,
-    default: 0
+    default: 0,
   },
   status: {
     type: Number,
-    default: config.status.Available // 默认新建的题目显示
+    default: config.status.Available, // 默认新建的题目显示
   },
   tags: {
-    type: [String],
+    type: [ String ],
     default: [],
-    index: true
-  }
+    index: true,
+  },
 }, {
-  collection: 'Problem'
+  collection: 'Problem',
 })
 
 problemSchema.plugin(mongoosePaginate)
@@ -96,7 +96,7 @@ problemSchema.pre('save', function (next) {
     // 表示新的题目被创建了，因此赋予一个新的 id
     ids
       .generateId('Problem')
-      .then(id => {
+      .then((id) => {
         this.pid = id
       })
       .then(next)

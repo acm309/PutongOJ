@@ -8,46 +8,46 @@ const request = supertest.agent(server)
 
 const newTag = {
   tid: 'newTag',
-  list: [1001, 1004]
+  list: [ 1001, 1004 ],
 }
-const newList = [1002, 1003]
+const newList = [ 1002, 1003 ]
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
 })
 
-test('Fails to create a tag -- tid is too short', async t => {
+test('Fails to create a tag -- tid is too short', async (t) => {
   const create = await request
     .post('/api/tag')
     .send({
       tid: '1',
-      list: []
+      list: [],
     })
 
   t.is(create.status, 400)
   t.truthy(create.body.error)
 })
 
-test('Fails to create a tag -- tid is too long', async t => {
+test('Fails to create a tag -- tid is too long', async (t) => {
   const create = await request
     .post('/api/tag')
     .send({
-      tid: Array.from({length: 100}, (_, i) => i + '').join(''),
-      list: []
+      tid: Array.from({ length: 100 }, (_, i) => `${i}`).join(''),
+      list: [],
     })
 
   t.is(create.status, 400)
   t.truthy(create.body.error)
 })
 
-test.serial('create a new tag', async t => {
+test.serial('create a new tag', async (t) => {
   const create = await request
     .post('/api/tag')
     .send(newTag)
@@ -58,11 +58,11 @@ test.serial('create a new tag', async t => {
     newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
       t.true(res.body.problem.tags.includes(newTag.tid))
-    })
+    }),
   )
 })
 
-test.serial('Update a tag', async t => {
+test.serial('Update a tag', async (t) => {
   const update = await request
     .put(`/api/tag/${newTag.tid}`)
     .send({ list: newList })
@@ -83,11 +83,11 @@ test.serial('Update a tag', async t => {
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
       t.true(res.body.problem.tags.includes(newTag.tid))
-    })
+    }),
   )
 })
 
-test.serial('Delete a tag', async t => {
+test.serial('Delete a tag', async (t) => {
   const del = await request
     .delete(`/api/tag/${newTag.tid}`)
 
@@ -102,10 +102,10 @@ test.serial('Delete a tag', async t => {
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
       t.false(res.body.problem.tags.includes(newTag.tid))
-    })
+    }),
   )
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

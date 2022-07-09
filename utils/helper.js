@@ -42,5 +42,5 @@ module.exports = {
   isAdmin,
   isRoot,
   isUndefined,
-  isLogined
+  isLogined,
 }

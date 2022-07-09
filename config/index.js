@@ -1,11 +1,11 @@
 const config = {
-  redisURL: process.env.redisURL
+  redisURL: process.env.redisURL,
 }
 
 config.privilege = {
   PrimaryUser: 1,
   Teacher: 2,
-  Root: 3
+  Root: 3,
 }
 
 config.judge = {
@@ -20,30 +20,30 @@ config.judge = {
   OutputLimitExceed: 8,
   PresentationError: 9,
   SystemError: 10,
-  RejudgePending: 11
+  RejudgePending: 11,
 }
 
 config.module = {
   Problem: 1,
-  Contest: 2
+  Contest: 2,
 }
 
 // 是否开放给普通用户
 config.status = {
   Reserve: 0,
-  Available: 2
+  Available: 2,
 }
 
 // 比赛类型
 config.encrypt = {
   Public: 1,
   Private: 2,
-  Password: 3
+  Password: 3,
 }
 
 config.deploy = {
   judgers: 2,
-  adminInitPwd: 'kplkplkpl'
+  adminInitPwd: 'kplkplkpl',
 }
 
 config.secretKey = process.env.secretKey
@@ -58,12 +58,12 @@ config.mail = {
   secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.MAIL_ADDRESS,
-    pass: process.env.MAIL_PASSWORD
-  }
+    pass: process.env.MAIL_PASSWORD,
+  },
 }
 
 config.port = Number.parseInt(
-  process.env.PORT
+  process.env.PORT,
 )
 
 module.exports = config

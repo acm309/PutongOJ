@@ -10,22 +10,22 @@ module.exports = {
       description: 'Calculate A + B',
       input: 'two integers',
       output: 'the sum',
-      'in': '1 2',
-      out: '3'
-    }
+      in: '1 2',
+      out: '3',
+    },
   },
   users: {
     admin: {
       uid: 'admin',
       pwd: generatePwd(config.deploy.adminInitPwd),
       nick: 'Test',
-      privilege: config.privilege.Root
+      privilege: config.privilege.Root,
     },
     pu: {
       uid: 'primaryuser',
       pwd: generatePwd('123'),
-      nick: 'pu'
-    }
+      nick: 'pu',
+    },
   },
   groups: [
     {
@@ -33,8 +33,8 @@ module.exports = {
       list: [
         'admin',
         'pu',
-        'primaryuser'
-      ]
-    }
-  ]
+        'primaryuser',
+      ],
+    },
+  ],
 }

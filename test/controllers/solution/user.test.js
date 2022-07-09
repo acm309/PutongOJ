@@ -8,17 +8,17 @@ const request = supertest.agent(server)
 
 let sid = null
 
-test.before(async t => {
+test.before(async (t) => {
   const res = await request
     .post('/api/session')
     .send({
       uid: 'primaryuser',
-      pwd: users.data['primaryuser'].pwd
+      pwd: users.data.primaryuser.pwd,
     })
   t.is(res.status, 200)
 })
 
-test.serial('Submit a solution', async t => {
+test.serial('Submit a solution', async (t) => {
   const code = `
     #include <iostream>
 
@@ -34,7 +34,7 @@ test.serial('Submit a solution', async t => {
       pid: 1000,
       uid: 'primaryuser',
       code,
-      language: 2 // cpp; TODO: as a constant
+      language: 2, // cpp; TODO: as a constant
     })
 
   sid = res.body.sid
@@ -57,28 +57,28 @@ test('Status fails to find one', async (t) => {
   t.truthy(res.body.error)
 })
 
-test('Status fails to delete', async t => {
+test('Status fails to delete', async (t) => {
   const res = await request
     .del('/api/status/1000')
 
   t.is(res.status, 405)
 })
 
-test('Status fails to update', async t => {
+test('Status fails to update', async (t) => {
   const res = await request
     .put('/api/status/1000')
 
   t.is(res.status, 405)
 })
 
-test('Can not see solution of another user', async t => {
+test('Can not see solution of another user', async (t) => {
   const res = await request
     .get('/api/status/1')
 
   t.is(res.status, 403)
 })
 
-test('Code is too long', async t => {
+test('Code is too long', async (t) => {
   const code = `
     #include <iostream>
 
@@ -95,7 +95,7 @@ test('Code is too long', async t => {
       pid: 1000,
       uid: 'primaryuser',
       code,
-      language: 2 // cpp; TODO: as a constant
+      language: 2, // cpp; TODO: as a constant
     })
 
   t.is(res.status, 400)
@@ -104,15 +104,15 @@ test('Code is too long', async t => {
   t.truthy(res.body.error)
 })
 
-test('Code is too short', async t => {
-  const code = `1;`
+test('Code is too short', async (t) => {
+  const code = '1;'
   const res = await request
     .post('/api/status/')
     .send({
       pid: 1000,
       uid: 'primaryuser',
       code,
-      language: 2 // cpp; TODO: as a constant
+      language: 2, // cpp; TODO: as a constant
     })
 
   t.is(res.status, 400)
@@ -121,6 +121,6 @@ test('Code is too short', async t => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

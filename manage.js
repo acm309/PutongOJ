@@ -17,41 +17,41 @@ const baseConfig = {
   apps: [
     {
       name: 'app',
-      script: resolve(__dirname, `app.js`),
-      'out_file': resolve(logDir, `app.out.log`),
-      'error_file': resolve(logDir, `app.err.log`),
-      'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true,
-      'restart_delay': 500,
+      script: resolve(__dirname, 'app.js'),
+      out_file: resolve(logDir, 'app.out.log'),
+      error_file: resolve(logDir, 'app.err.log'),
+      log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+      merge_logs: true,
+      restart_delay: 500,
       env: {
-        'NODE_ENV': 'production'
-      }
+        NODE_ENV: 'production',
+      },
     },
     {
       name: 'updater',
-      script: resolve(__dirname, 'services', `updater.js`),
-      'out_file': resolve(logDir, `updater.out.log`),
-      'error_file': resolve(logDir, `updater.err.log`),
-      'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true,
+      script: resolve(__dirname, 'services', 'updater.js'),
+      out_file: resolve(logDir, 'updater.out.log'),
+      error_file: resolve(logDir, 'updater.err.log'),
+      log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+      merge_logs: true,
       env: {
-        'NODE_ENV': 'production'
-      }
-    }
-  ]
+        NODE_ENV: 'production',
+      },
+    },
+  ],
 }
 
 if (config.mail && config.mail.enable) {
   baseConfig.apps.push({
     name: 'mailer',
-    script: resolve(__dirname, 'services', `mailer.js`),
-    'out_file': resolve(logDir, `mailer.out.log`),
-    'error_file': resolve(logDir, `mailer.err.log`),
-    'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-    'merge_logs': true,
+    script: resolve(__dirname, 'services', 'mailer.js'),
+    out_file: resolve(logDir, 'mailer.out.log'),
+    error_file: resolve(logDir, 'mailer.err.log'),
+    log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+    merge_logs: true,
     env: {
-      'NODE_ENV': 'production'
-    }
+      NODE_ENV: 'production',
+    },
   })
 }
 
@@ -69,15 +69,15 @@ async function judgeSetup () {
 
   await Promise.all([
     fse.copy(resolve(judgersDir, 'Judger', 'Judge'), resolve(judgersDir, 'node-0', 'Judge')),
-    fse.copy(resolve(judgersDir, 'Judger', 'config.ini'), resolve(judgersDir, 'node-0', 'config.ini'))
+    fse.copy(resolve(judgersDir, 'Judger', 'config.ini'), resolve(judgersDir, 'node-0', 'config.ini')),
   ])
 
   await Promise.all(
     range(1, judgers)
       .map(i => fse.copy(
         resolve(judgersDir, 'node-0'),
-        resolve(judgersDir, `node-${i}`)
-      ))
+        resolve(judgersDir, `node-${i}`),
+      )),
   )
 
   const pm2config = baseConfig
@@ -86,15 +86,15 @@ async function judgeSetup () {
     pm2config.apps.push({
       name: `node-${i}`,
       script: resolve(judgersDir, `node-${i}/judger.js`),
-      'out_file': resolve(logDir, `node-${i}-out.log`),
-      'error_file': resolve(logDir, `node-${i}-err.log`),
-      'log_date_format': 'YYYY-MM-DD HH:mm:ss X',
-      'merge_logs': true,
+      out_file: resolve(logDir, `node-${i}-out.log`),
+      error_file: resolve(logDir, `node-${i}-err.log`),
+      log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+      merge_logs: true,
       cwd: resolve(judgersDir, `node-${i}`),
       env: {
-        'NODE_ENV': 'production'
-      }
-    })
+        NODE_ENV: 'production',
+      },
+    }),
   )
 
   return fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
@@ -105,16 +105,16 @@ async function staticFilesSetUp () {
   const json = await res.json()
   const url = json[0].assets[0].browser_download_url
   await execaCommand(`wget ${url} -O dist.zip`)
-  await execaCommand(`unzip -o dist.zip -d dist`)
-  await execaCommand(`cp -r dist/* public/`, {
-    shell: true
+  await execaCommand('unzip -o dist.zip -d dist')
+  await execaCommand('cp -r dist/* public/', {
+    shell: true,
   })
 }
 
 function main () {
   return Promise.all([
     judgeSetup(),
-    staticFilesSetUp()
+    staticFilesSetUp(),
   ])
 }
 
@@ -123,7 +123,7 @@ main()
     console.log('ok')
     process.exit(0)
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err)
     process.exit(-1)
   })

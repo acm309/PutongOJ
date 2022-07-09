@@ -5,19 +5,19 @@ const tagSchema = mongoose.Schema({
   tid: {
     type: String,
     index: {
-      unique: true
-    }
+      unique: true,
+    },
   },
   list: {
-    type: [Number],
-    default: []
+    type: [ Number ],
+    default: [],
   },
   create: {
     type: Number,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 }, {
-  collection: 'Tag'
+  collection: 'Tag',
 })
 
 tagSchema.plugin(mongoosePaginate)

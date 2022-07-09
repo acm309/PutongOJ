@@ -22,8 +22,8 @@ module.exports = {
           judge: config.judge.WrongAnswer,
           memory: 1720,
           time: 1,
-          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2'
-        }
+          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
+        },
       ],
       code: `import java.util.Scanner;
         public class Main {
@@ -36,7 +36,7 @@ module.exports = {
                 }
             }
         }
-      `
+      `,
     },
     {
       judge: config.judge.Accepted,
@@ -57,8 +57,8 @@ module.exports = {
           judge: config.judge.Accepted,
           memory: 1720,
           time: 1,
-          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2'
-        }
+          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
+        },
       ],
       code: `#include <iostream>
           using namespace std;
@@ -71,7 +71,7 @@ module.exports = {
 
               return 0;
           }
-      `
+      `,
     },
     {
       judge: config.judge.RuntimeError,
@@ -92,8 +92,8 @@ module.exports = {
           judge: config.judge.RuntimeError,
           memory: 24836,
           time: 170,
-          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2'
-        }
+          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
+        },
       ],
       code: `import java.util.Scanner;
         public class Main {
@@ -106,7 +106,7 @@ module.exports = {
                 }
             }
         }
-      `
+      `,
     },
     {
       judge: config.judge.Accepted,
@@ -127,8 +127,8 @@ module.exports = {
           judge: config.judge.Accepted,
           memory: 1720,
           time: 1,
-          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2'
-        }
+          uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
+        },
       ],
       code: `#include <iostream>
           using namespace std;
@@ -141,7 +141,7 @@ module.exports = {
 
               return 0;
           }
-      `
-    }
-  ]
+      `,
+    },
+  ],
 }

@@ -6,55 +6,55 @@ const userSchema = mongoose.Schema({
   uid: {
     type: String,
     index: {
-      unique: true
-    }
+      unique: true,
+    },
   },
   nick: {
     type: String,
-    required: true
+    required: true,
   },
   pwd: {
     type: String,
-    required: true
+    required: true,
   },
   create: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   privilege: {
     type: Number,
-    default: 1
+    default: 1,
   },
   timerecord: {
-    type: [Number],
-    default: [0, 0, 0, 0, 0]
+    type: [ Number ],
+    default: [ 0, 0, 0, 0, 0 ],
   },
   iprecord: {
-    type: [String],
-    default: ['', '', '', '', '']
+    type: [ String ],
+    default: [ '', '', '', '', '' ],
   },
   status: {
     type: Number,
-    default: config.status.Available
+    default: config.status.Available,
   },
   solve: {
     type: Number,
-    default: 0
+    default: 0,
   },
   submit: {
     type: Number,
-    default: 0
+    default: 0,
   },
   gid: {
-    type: [Number],
+    type: [ Number ],
     default: [],
-    index: true
+    index: true,
   },
   motto: String,
   mail: String,
-  school: String
+  school: String,
 }, {
-  collection: 'User'
+  collection: 'User',
 })
 
 userSchema.plugin(mongoosePaginate)

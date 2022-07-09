@@ -3,7 +3,7 @@ const contest = require('../controllers/contest')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/contest'
+  prefix: '/contest',
 })
 
 router.get('/list', contest.find)

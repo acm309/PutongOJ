@@ -9,12 +9,12 @@ async function main () {
   const problems = await Problem.find({}).exec()
   const arr = problems.map(async (problem, index) => {
     const submit = await Solution
-      .find({pid: problem.pid})
+      .find({ pid: problem.pid })
       .distinct('uid')
       .exec()
 
     const ac = await Solution
-      .find({pid: problem.pid, judge: 3})
+      .find({ pid: problem.pid, judge: 3 })
       .distinct('uid')
       .exec()
 

@@ -6,7 +6,7 @@ const app = require('../../../app')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Statistics for pid 1001', async t => {
+test('Statistics for pid 1001', async (t) => {
   const res = await request
     .get('/api/statistics/1001')
 
@@ -18,6 +18,6 @@ test('Statistics for pid 1001', async t => {
   t.truthy(res.body.sumStatis)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

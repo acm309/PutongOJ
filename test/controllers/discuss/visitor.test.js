@@ -7,7 +7,7 @@ const discuss = require('../../seed/discuss')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Discuss list', async t => {
+test('Discuss list', async (t) => {
   const res = await request
     .get('/api/discuss/list')
 
@@ -21,14 +21,14 @@ test('Discuss list', async t => {
   })
 })
 
-test('Find Discuss 1', async t => {
+test('Find Discuss 1', async (t) => {
   const res = await request
     .get('/api/discuss/1')
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
 
-  const select = discuss.data.find((item) => item.title === res.body.discuss.title)
+  const select = discuss.data.find(item => item.title === res.body.discuss.title)
   const com = res.body.discuss.comments
 
   t.deepEqual(only(res.body.discuss, 'create title uid create update'), only(select, 'create title uid create update'))
@@ -61,7 +61,7 @@ test('Login required to create one', async (t) => {
   const res = await request
     .post('/api/discuss')
     .send({
-      title: 'test'
+      title: 'test',
     })
 
   t.is(res.status, 401)
@@ -70,6 +70,6 @@ test('Login required to create one', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

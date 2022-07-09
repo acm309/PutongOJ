@@ -21,11 +21,11 @@ const find = async (ctx) => {
     sort: { nid: -1 },
     page,
     limit: pageSize,
-    select: '-_id'
+    select: '-_id',
   })
 
   ctx.body = {
-    list
+    list,
   }
 }
 
@@ -33,7 +33,7 @@ const find = async (ctx) => {
 const findOne = async (ctx) => {
   const news = ctx.state.news
   ctx.body = {
-    news
+    news,
   }
 }
 
@@ -43,8 +43,8 @@ const create = async (ctx) => {
   const news = new News(Object.assign(
     only(opt, 'title content'),
     { // nid 会自动生成
-      create: Date.now()
-    }
+      create: Date.now(),
+    },
   ))
 
   try {
@@ -55,7 +55,7 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    nid: news.nid
+    nid: news.nid,
   }
 }
 
@@ -63,7 +63,7 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const news = ctx.state.news
-  const fields = ['title', 'content']
+  const fields = [ 'title', 'content' ]
   fields.forEach((field) => {
     news[field] = opt[field]
   })
@@ -75,7 +75,7 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    nid: news.nid
+    nid: news.nid,
   }
 }
 
@@ -84,7 +84,7 @@ const del = async (ctx) => {
   const nid = ctx.params.nid
 
   try {
-    await News.deleteOne({nid}).exec()
+    await News.deleteOne({ nid }).exec()
     logger.info(`One news is delete ${nid}`)
   } catch (e) {
     ctx.throw(400, e.message)
@@ -99,5 +99,5 @@ module.exports = {
   findOne,
   create,
   update,
-  del
+  del,
 }

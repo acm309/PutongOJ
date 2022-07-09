@@ -1,6 +1,6 @@
+const path = require('path')
 const only = require('only')
 const fse = require('fs-extra')
-const path = require('path')
 const config = require('../config')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
@@ -20,10 +20,10 @@ const preload = async (ctx, next) => {
   }
   if (cid > 0) {
     const contest = await Contest.findOne({ cid }).exec()
-    if (contest.start > Date.now() || (contest.encrypt !== config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1)) {
+    if (contest.start > Date.now() || (contest.encrypt !== config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid))) {
       ctx.throw(400, 'You do not have permission to enter this problem!')
     }
-    if (contest.encrypt === config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+    if (contest.encrypt === config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid)) {
       ctx.session.profile.verifyContest.push(contest.cid)
     }
     ctx.state.problem = problem
@@ -45,15 +45,15 @@ const find = async (ctx) => {
   if (opt.content) {
     if (opt.type === 'tag') {
       filter.tags = {
-        $in: [new RegExp(opt.content, 'i')]
+        $in: [ new RegExp(opt.content, 'i') ],
       }
     } else {
       // https://stackoverflow.com/questions/2908100/mongodb-regex-search-on-integer-value
       filter.$expr = {
-        '$regexMatch': {
-          'input': {'$toString': `$${opt.type}`},
-          'regex': new RegExp(opt.content, 'i')
-        }
+        $regexMatch: {
+          input: { $toString: `$${opt.type}` },
+          regex: new RegExp(opt.content, 'i'),
+        },
       }
     }
   }
@@ -69,13 +69,13 @@ const find = async (ctx) => {
       limit: pageSize,
       lean: true,
       leanWithId: false,
-      select: '-_id -hint -description -in -out -input -output -__v' // -表示不要的字段
+      select: '-_id -hint -description -in -out -input -output -__v', // -表示不要的字段
     })
   } else {
-    const docs = await Problem.find({}, {title: 1, pid: 1, _id: 0}).lean().exec()
+    const docs = await Problem.find({}, { title: 1, pid: 1, _id: 0 }).lean().exec()
     list = {
       docs,
-      total: docs.length
+      total: docs.length,
     }
   }
 
@@ -83,7 +83,7 @@ const find = async (ctx) => {
   if (isLogined(ctx)) {
     const query = Solution.find({
       uid: ctx.session.profile.uid,
-      judge: config.judge.Accepted
+      judge: config.judge.Accepted,
     })
     // 缩小查询范围
     if (list.length > 0) {
@@ -97,7 +97,7 @@ const find = async (ctx) => {
 
   ctx.body = {
     list,
-    solved
+    solved,
   }
 }
 
@@ -106,7 +106,7 @@ const findOne = async (ctx) => {
   const problem = ctx.state.problem
 
   ctx.body = {
-    problem
+    problem,
   }
 }
 
@@ -118,8 +118,8 @@ const create = async (ctx) => {
     only(opt, 'title description input output in out hint'),
     { // pid 会自动生成
       time: parseInt(opt.time) || 1000,
-      memory: parseInt(opt.memory) || 32768
-    }
+      memory: parseInt(opt.memory) || 32768,
+    },
   ))
 
   try {
@@ -140,12 +140,12 @@ const create = async (ctx) => {
    */
   // 把 object 写入到 file 中，如果 file 不存在，就创建它
   fse.outputJsonSync(path.resolve(dir, 'meta.json'), {
-    testcases: []
+    testcases: [],
   }, { spaces: 2 }) // 缩进2个空格
   logger.info(`Testcase info for problem ${problem.pid} is created`)
 
   ctx.body = {
-    pid: problem.pid
+    pid: problem.pid,
   }
 }
 
@@ -153,8 +153,8 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
-  const fields = ['title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status']
-  fields.filter((field) => opt[field] != null).forEach((field) => {
+  const fields = [ 'title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status' ]
+  fields.filter(field => opt[field] != null).forEach((field) => {
     problem[field] = opt[field]
   })
   try {
@@ -166,7 +166,7 @@ const update = async (ctx) => {
 
   ctx.body = {
     success: true,
-    pid: problem.pid
+    pid: problem.pid,
   }
 }
 
@@ -175,7 +175,7 @@ const del = async (ctx) => {
   const pid = ctx.params.pid
 
   try {
-    await Problem.deleteOne({pid}).exec()
+    await Problem.deleteOne({ pid }).exec()
     logger.info(`One Problem is delete ${pid}`)
   } catch (e) {
     ctx.throw(400, e.message)
@@ -190,5 +190,5 @@ module.exports = {
   findOne,
   create,
   update,
-  del
+  del,
 }

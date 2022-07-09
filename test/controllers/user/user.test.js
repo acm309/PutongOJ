@@ -7,24 +7,24 @@ const config = require('../../../config')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
 })
 
-test('create a new user', async t => {
+test('create a new user', async (t) => {
   const res = await request
     .post('/api/user')
     .send({
       uid: 'testxxx',
       pwd: '123456',
-      nick: '1234'
+      nick: '1234',
     })
 
   t.is(res.status, 200, res.body.error)
@@ -39,13 +39,13 @@ test('create a new user', async t => {
   t.is(res2.body.user.nick, '1234')
 })
 
-test('Username is too long', async t => {
+test('Username is too long', async (t) => {
   const res = await request
     .post('/api/user')
     .send({
       uid: 'testxxx'.repeat(10),
       pwd: '123456',
-      nick: '1234'
+      nick: '1234',
     })
 
   t.is(res.status, 400)
@@ -53,13 +53,13 @@ test('Username is too long', async t => {
   t.truthy(res.body.error)
 })
 
-test('Username is too short', async t => {
+test('Username is too short', async (t) => {
   const res = await request
     .post('/api/user')
     .send({
       uid: 'xx',
       pwd: '123456',
-      nick: '1234'
+      nick: '1234',
     })
 
   t.is(res.status, 400)
@@ -67,13 +67,13 @@ test('Username is too short', async t => {
   t.truthy(res.body.error)
 })
 
-test('Nick is too long', async t => {
+test('Nick is too long', async (t) => {
   const res = await request
     .post('/api/user')
     .send({
       uid: 'testyyy',
       pwd: '123456',
-      nick: '123456'.repeat(10)
+      nick: '123456'.repeat(10),
     })
 
   t.is(res.status, 400)
@@ -81,12 +81,12 @@ test('Nick is too long', async t => {
   t.truthy(res.body.error)
 })
 
-test("can update user's own info", async t => {
+test('can update user\'s own info', async (t) => {
   const user = Object.values(users.data)[5]
   const res = await request
     .put(`/api/user/${user.uid}`)
     .send({
-      nick: 'new nick name'
+      nick: 'new nick name',
     })
 
   t.is(res.status, 200)
@@ -94,37 +94,37 @@ test("can update user's own info", async t => {
   const find = await request
     .get(`/api/user/${user.uid}`)
     .send({
-      nick: 'new nick name'
+      nick: 'new nick name',
     })
   t.is(find.body.user.nick, 'new nick name')
 })
 
-test('user uid is been used', async t => {
+test('user uid is been used', async (t) => {
   const user = Object.values(users.data)[10]
   const res = await request
-    .post(`/api/user/`)
+    .post('/api/user/')
     .send({
       uid: user.uid,
       pwd: '123456',
-      nick: user.nick
+      nick: user.nick,
     })
 
   t.is(res.status, 400)
 })
 
-test('password is too short', async t => {
+test('password is too short', async (t) => {
   const user = Object.values(users.data)[10]
   const res = await request
-    .post(`/api/user/`)
+    .post('/api/user/')
     .send({
       uid: user.uid,
       pwd: '12345',
-      nick: user.nick
+      nick: user.nick,
     })
 
   t.is(res.status, 400)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

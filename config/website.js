@@ -1,7 +1,7 @@
 module.exports = {
   title: 'Putong OJ',
   discussOnProblem: true,
-  semi_restful: false
+  semi_restful: false,
 }
 
 /**

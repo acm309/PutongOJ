@@ -3,7 +3,7 @@ const tag = require('../controllers/tag')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/tag'
+  prefix: '/tag',
 })
 
 router.get('/list', tag.find)

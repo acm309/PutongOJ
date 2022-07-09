@@ -5,11 +5,11 @@ const IdSchema = mongoose.Schema({
   name: {
     type: String,
     index: {
-      unique: true
-    }
-  }
+      unique: true,
+    },
+  },
 }, {
-  collection: 'ids'
+  collection: 'ids',
 })
 
 /**
@@ -32,9 +32,9 @@ IdSchema.statics.generateId = function (field = '') {
   field = field.toLocaleLowerCase()
   field = field[0].toLocaleUpperCase() + field.slice(1)
   return this
-    .findOneAndUpdate({name: field}, {$inc: {id: 1}}) // $inc表示该字段自增
+    .findOneAndUpdate({ name: field }, { $inc: { id: 1 } }) // $inc表示该字段自增
     .exec()
-    .then((obj) => obj.id + 1) // 记得取 id 字段加 1 才是新的可用的 id
+    .then(obj => obj.id + 1) // 记得取 id 字段加 1 才是新的可用的 id
 }
 
 module.exports = mongoose.model('Ids', IdSchema)

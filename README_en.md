@@ -73,8 +73,8 @@ git clone https://github.com/acm309/PutongOJ.git
 4. install project dependencies
 
 ```bash
-npm i -g yarn
-yarn
+npm i -g pnpm
+pnpm i
 ```
 
 5. setup database connections

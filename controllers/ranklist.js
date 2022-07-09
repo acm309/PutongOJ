@@ -13,14 +13,14 @@ const find = async (ctx) => {
     page,
     limit: pageSize,
     select: '-_id -pwd -privilege -timerecord -iprecord -create -__v',
-    lean: true
+    lean: true,
   })
 
   ctx.body = {
-    list
+    list,
   }
 }
 
 module.exports = {
-  find
+  find,
 }

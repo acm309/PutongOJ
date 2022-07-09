@@ -3,7 +3,7 @@ const group = require('../controllers/group')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/group'
+  prefix: '/group',
 })
 
 router.get('/list', group.find)

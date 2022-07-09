@@ -18,10 +18,10 @@ function removeall () {
     News.deleteMany({}).exec(),
     Tag.deleteMany({}).exec(),
     Discuss.deleteMany({}).exec(),
-    Contest.deleteMany({}).exec()
+    Contest.deleteMany({}).exec(),
   ])
 }
 
 module.exports = {
-  removeall
+  removeall,
 }

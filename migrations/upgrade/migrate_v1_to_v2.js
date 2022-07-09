@@ -1,15 +1,14 @@
 require('../../config/db')
+const { resolve } = require('path')
+const mongoose = require('mongoose')
+const uuid = require('uuid/v4')
+const fse = require('fs-extra')
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
 const Contest = require('../../models/Contest')
 const ID = require('../../models/ID')
 const Discuss = require('../../models/Discuss')
 const config = require('../../config')
-const mongoose = require('mongoose')
-
-const uuid = require('uuid/v4')
-const fse = require('fs-extra')
-const { resolve } = require('path')
 
 /*
 对原有的 testcase 增加 id 标记
@@ -27,27 +26,27 @@ async function testcaseBuild (problem) {
     }
     const solutions = await Solution.find({ pid }).exec()
     const meta = {
-      testcases: []
+      testcases: [],
     }
     const newid = uuid()
     meta.testcases.push({
-      uuid: newid
+      uuid: newid,
     })
     await Promise.all([
       fse.copy(resolve(__dirname, `../../data/${pid}/test.in`), resolve(__dirname, `../../data/${pid}/${newid}.in`)),
       fse.copy(resolve(__dirname, `../../data/${pid}/test.out`), resolve(__dirname, `../../data/${pid}/${newid}.out`)),
-      fse.writeJson(resolve(__dirname, `../../data/${pid}/meta.json`), meta, { spaces: 2 })
+      fse.writeJson(resolve(__dirname, `../../data/${pid}/meta.json`), meta, { spaces: 2 }),
     ])
     solutions.forEach((solution) => {
       if (solution.code.length < 6) {
         solution.code += ' Deprecated (Appended by System)'
       }
-      solution.testcases = [{
+      solution.testcases = [ {
         uuid: newid,
         judge: solution.judge,
         time: solution.time,
-        memory: solution.memory
-      }]
+        memory: solution.memory,
+      } ]
     })
     return Promise.all(solutions.map(s => s.save()))
   }
@@ -63,7 +62,7 @@ async function ranklistBuild () {
     const ranklist = {}
     const { cid } = contest
     const solutions = await Solution.find({
-      mid: cid
+      mid: cid,
     })
     for (const solution of solutions) {
       const { uid } = solution
@@ -95,7 +94,7 @@ async function ranklistBuild () {
 // 新版本里多了几个字段: 主要是 Group；其它，比如 Problem，就是顺便检查一下而已
 async function databaseSetup () {
   const models = [
-    'Problem', 'Solution', 'Contest', 'News', 'Group', 'Discuss'
+    'Problem', 'Solution', 'Contest', 'News', 'Group', 'Discuss',
   ]
   return Promise.all(models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
@@ -110,31 +109,31 @@ async function discussRefactor () {
     cmid: {
       type: Number,
       index: {
-        unique: true
-      }
+        unique: true,
+      },
     },
     did: Number,
     create: {
       type: Number,
-      default: Date.now
+      default: Date.now,
     },
     uid: {
       type: String,
-      required: true
+      required: true,
     },
-    content: String
+    content: String,
   }, {
-    collection: 'Comment'
+    collection: 'Comment',
   })
 
   const Comment = mongoose.model('Comment', CommentSchema)
 
   async function commentMerge (discuss) {
-    const comments = await Comment.find({did: discuss.did}).sort({create: -1}).exec()
-    discuss.comments = comments.map((x) => ({
+    const comments = await Comment.find({ did: discuss.did }).sort({ create: -1 }).exec()
+    discuss.comments = comments.map(x => ({
       uid: x.uid,
       content: x.content,
-      create: x.create
+      create: x.create,
     })).sort((x, y) => x.create - y.create)
     // 旧数据库有的数据只有 updated，没有 update
     if (discuss.update == null) {
@@ -144,7 +143,7 @@ async function discussRefactor () {
   }
 
   const discusses = await Discuss.find().exec()
-  return Promise.all(discusses.map((x) => commentMerge(x)))
+  return Promise.all(discusses.map(x => commentMerge(x)))
 }
 
 async function main () {
@@ -152,7 +151,7 @@ async function main () {
     testcaseBuild(),
     ranklistBuild(),
     databaseSetup(),
-    discussRefactor()
+    discussRefactor(),
   ])
 }
 

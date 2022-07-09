@@ -17,11 +17,11 @@ const find = async (ctx) => {
     limit: pageSize,
     select: '-_id -code -error',
     lean: true,
-    leanWithId: false
+    leanWithId: false,
   })
 
   ctx.body = {
-    list
+    list,
   }
 }
 
@@ -41,7 +41,7 @@ const findOne = async (ctx) => {
   }
 
   ctx.body = {
-    solution
+    solution,
   }
 }
 
@@ -63,7 +63,7 @@ const create = async (ctx) => {
     uid,
     code,
     language,
-    length: Buffer.from(code).length // 这个属性是不是没啥用?
+    length: Buffer.from(code).length, // 这个属性是不是没啥用?
   })
 
   if (opt.mid) {
@@ -79,12 +79,12 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    sid: solution.sid
+    sid: solution.sid,
   }
 }
 
 module.exports = {
   find,
   findOne,
-  create
+  create,
 }

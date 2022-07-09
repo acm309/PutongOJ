@@ -3,7 +3,7 @@ const news = require('../controllers/news')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/news'
+  prefix: '/news',
 })
 
 router.get('/list', news.find)

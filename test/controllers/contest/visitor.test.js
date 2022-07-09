@@ -5,7 +5,7 @@ const app = require('../../../app')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Contest list', async t => {
+test('Contest list', async (t) => {
   const res = await request
     .get('/api/contest/list')
 
@@ -20,6 +20,6 @@ test('Contest list', async t => {
   }
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

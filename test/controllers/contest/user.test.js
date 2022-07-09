@@ -6,20 +6,20 @@ const users = require('../../seed/users')
 
 const server = app.listen()
 const request = supertest.agent(server)
-const user = users.data['primaryuser']
+const user = users.data.primaryuser
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: user.uid,
-      pwd: user.pwd
+      pwd: user.pwd,
     })
 
   t.is(login.status, 200)
 })
 
-test('Find contest 1', async t => {
+test('Find contest 1', async (t) => {
   const find = await request
     .get('/api/contest/1')
 
@@ -31,7 +31,7 @@ test('Find contest 1', async t => {
   t.truthy(find.body.totalProblems)
 })
 
-test('Can not find non-existent contest', async t => {
+test('Can not find non-existent contest', async (t) => {
   const find = await request
     .get('/api/contest/-1')
 
@@ -41,7 +41,7 @@ test('Can not find non-existent contest', async t => {
   t.truthy(find.body.error)
 })
 
-test('Can not enter contest that have not started', async t => {
+test('Can not enter contest that have not started', async (t) => {
   const find = await request
     .get('/api/contest/5')
 
@@ -51,11 +51,11 @@ test('Can not enter contest that have not started', async t => {
   t.truthy(find.body.error)
 })
 
-test('Can enter private contest of groups', async t => {
+test('Can enter private contest of groups', async (t) => {
   const verify = await request
     .post('/api/contest/6/verify')
     .send({
-      cid: 6
+      cid: 6,
     })
 
   t.is(verify.status, 200, verify.body.error)
@@ -63,11 +63,11 @@ test('Can enter private contest of groups', async t => {
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter private contest of groups', async t => {
+test('Can not enter private contest of groups', async (t) => {
   const verify = await request
     .post('/api/contest/7/verify')
     .send({
-      cid: 7
+      cid: 7,
     })
 
   t.is(verify.status, 200, verify.body.error)
@@ -75,11 +75,11 @@ test('Can not enter private contest of groups', async t => {
   t.truthy(verify.body.profile)
 })
 
-test('Can enter the private contest because of authorization', async t => {
+test('Can enter the private contest because of authorization', async (t) => {
   const verify = await request
     .post('/api/contest/2/verify')
     .send({
-      cid: 2
+      cid: 2,
     })
 
   t.is(verify.status, 200)
@@ -87,11 +87,11 @@ test('Can enter the private contest because of authorization', async t => {
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter the private contest because of no authorization', async t => {
+test('Can not enter the private contest because of no authorization', async (t) => {
   const verify = await request
     .post('/api/contest/2/verify')
     .send({
-      cid: 4
+      cid: 4,
     })
 
   t.is(verify.status, 200)
@@ -99,12 +99,12 @@ test('Can not enter the private contest because of no authorization', async t =>
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter the contest because of wrong password', async t => {
+test('Can not enter the contest because of wrong password', async (t) => {
   const res1 = await request
     .post('/api/contest/3/verify')
     .send({
       cid: 3,
-      pwd: '000000'
+      pwd: '000000',
     })
 
   t.is(res1.status, 200)
@@ -112,12 +112,12 @@ test('Can not enter the contest because of wrong password', async t => {
   t.truthy(res1.body.profile)
 })
 
-test('Can enter the contest because of right password', async t => {
+test('Can enter the contest because of right password', async (t) => {
   const res1 = await request
     .post('/api/contest/3/verify')
     .send({
       cid: 3,
-      pwd: '123456'
+      pwd: '123456',
     })
 
   t.is(res1.status, 200)
@@ -125,7 +125,7 @@ test('Can enter the contest because of right password', async t => {
   t.truthy(res1.body.profile)
 })
 
-test('Find ranklist for contest 1', async t => {
+test('Find ranklist for contest 1', async (t) => {
   const rank = await request
     .get('/api/contest/1/rank')
 
@@ -134,6 +134,6 @@ test('Find ranklist for contest 1', async t => {
   t.truthy(rank.body.ranklist)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

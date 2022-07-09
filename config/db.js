@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2')
 const logger = require('../utils/logger')
 const config = require('./')
-const mongoosePaginate = require('mongoose-paginate-v2')
 
 mongoose.Promise = global.Promise
 
@@ -28,12 +28,12 @@ mongoose.plugin((schema) => {
   schema.options.toJSON = {
     transform (doc, ret) {
       delete ret._id
-    }
+    },
   }
   schema.options.toObject = {
     transform (doc, ret) {
       delete ret._id
-    }
+    },
   }
 })
 
@@ -45,6 +45,6 @@ mongoosePaginate.paginate.options = {
     hasPrevPage: false,
     pagingCounter: false,
     nextPage: false,
-    prevPage: false
-  }
+    prevPage: false,
+  },
 }

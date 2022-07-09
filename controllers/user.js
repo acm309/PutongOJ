@@ -1,9 +1,9 @@
+const difference = require('lodash.difference')
 const User = require('../models/User')
 const Solution = require('../models/Solution')
 const Group = require('../models/Group')
 const config = require('../config')
 const logger = require('../utils/logger')
-const difference = require('lodash.difference')
 const { generatePwd } = require('../utils/helper')
 const { isAdmin, isRoot, isUndefined } = require('../utils/helper')
 
@@ -20,15 +20,15 @@ const find = async (ctx) => {
   const filter = {}
   if (!isUndefined(ctx.query.privilege) && ctx.query.privilege === 'admin') {
     filter.privilege = {
-      $in: [config.privilege.Root, config.privilege.Teacher]
+      $in: [ config.privilege.Root, config.privilege.Teacher ],
     }
   }
   if (isAdmin(ctx.session.profile) && ctx.query.type === 'uid') {
     filter.$expr = {
-      '$regexMatch': {
-        'input': {'$toString': `$uid`},
-        'regex': new RegExp(ctx.query.content, 'i')
-      }
+      $regexMatch: {
+        input: { $toString: '$uid' },
+        regex: new RegExp(ctx.query.content, 'i'),
+      },
     }
   }
   const list = await User
@@ -36,14 +36,14 @@ const find = async (ctx) => {
     .lean()
     .exec()
   ctx.body = {
-    list
+    list,
   }
 }
 
 // 查询用户具体信息
 const findOne = async (ctx) => {
   const uid = ctx.params.uid
-  const [user, solved, unsolved] = await Promise.all([
+  const [ user, solved, unsolved ] = await Promise.all([
     User
       .findOne({ uid })
       .select('-timerecord -iprecord -create -_id -pwd')
@@ -58,9 +58,9 @@ const findOne = async (ctx) => {
       .find({ uid, judge: { $ne: config.judge.Accepted } })
       .distinct('pid')
       .lean()
-      .exec()
+      .exec(),
   ])
-  const procedure = user.gid.map((gid) => Group.findOne({gid})
+  const procedure = user.gid.map(gid => Group.findOne({ gid })
     .lean()
     .exec()
     .then(item => item.title))
@@ -70,7 +70,7 @@ const findOne = async (ctx) => {
     user,
     solved,
     unsolved: difference(unsolved, solved),
-    group
+    group,
   }
 }
 
@@ -82,7 +82,7 @@ const create = async (ctx) => {
   const user = new User({
     uid: ctx.request.body.uid,
     nick: ctx.request.body.nick,
-    pwd: generatePwd(ctx.request.body.pwd)
+    pwd: generatePwd(ctx.request.body.pwd),
   })
   // 将objectid转换为用户创建时间(可以不用)
   // user.create = moment(objectIdToTimestamp(user._id)).format('YYYY-MM-DD HH:mm:ss')
@@ -105,11 +105,11 @@ const update = async (ctx) => {
     ctx.throw(400, 'You do not have permission to change this user information!')
   }
   if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
-    ctx.throw(400, "You do not have permission to change Root's information!")
+    ctx.throw(400, 'You do not have permission to change Root\'s information!')
   }
   const opt = ctx.request.body
   const user = ctx.state.user
-  const fields = ['nick', 'motto', 'school', 'mail']
+  const fields = [ 'nick', 'motto', 'school', 'mail' ]
   fields.forEach((field) => {
     if (!isUndefined(opt[field])) {
       user[field] = opt[field]
@@ -131,7 +131,7 @@ const update = async (ctx) => {
 
   ctx.body = {
     success: true,
-    uid: user.uid
+    uid: user.uid,
   }
 }
 
@@ -140,7 +140,7 @@ const del = async (ctx) => {
     ctx.throw(400, 'You do not have permission to change this user information!')
   }
   if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
-    ctx.throw(400, "You do not have permission to change Root's information!")
+    ctx.throw(400, 'You do not have permission to change Root\'s information!')
   }
 
   const { uid } = ctx.state.user
@@ -161,5 +161,5 @@ module.exports = {
   findOne,
   create,
   update,
-  del
+  del,
 }

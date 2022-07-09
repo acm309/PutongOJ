@@ -15,10 +15,10 @@ const preload = async (ctx, next) => {
 
 // 返回tag列表
 const find = async (ctx) => {
-  const list = await Tag.find({}, {tid: 1}).exec()
+  const list = await Tag.find({}, { tid: 1 }).exec()
 
   ctx.body = {
-    list
+    list,
   }
 }
 
@@ -27,7 +27,7 @@ const findOne = async (ctx) => {
   const tag = ctx.state.tag
 
   ctx.body = {
-    tag
+    tag,
   }
 }
 
@@ -42,8 +42,8 @@ const create = async (ctx) => {
 
   const tag = new Tag(Object.assign(
     only(opt, 'tid list'), {
-      create: Date.now()
-    }
+      create: Date.now(),
+    },
   ))
 
   try {
@@ -70,7 +70,7 @@ const create = async (ctx) => {
   await Promise.all(procedure)
 
   ctx.body = {
-    tid: tag.tid
+    tid: tag.tid,
   }
 }
 
@@ -92,7 +92,7 @@ const update = async (ctx) => {
   const delProcedure = pidsOfRemovedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        if (problem == null) return {pid: pid + ' not found'}
+        if (problem == null) return { pid: `${pid} not found` }
         problem.tags = without(problem.tags, tid)
         return problem.save()
       })
@@ -109,7 +109,7 @@ const update = async (ctx) => {
   const addProcedure = pidsOfImportedTids.map((pid, index) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        if (problem == null) return {pid: pid + ' not found'}
+        if (problem == null) return { pid: `${pid} not found` }
         problem.tags.push(tid)
         return problem.save()
       })
@@ -132,7 +132,7 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    tid: tag.tid
+    tid: tag.tid,
   }
 }
 
@@ -144,7 +144,7 @@ const del = async (ctx) => {
 
   // 删除 problem 表里的 tid
   const procedure = list.map((pid, index) => {
-    return Problem.findOne({pid}).exec()
+    return Problem.findOne({ pid }).exec()
       .then((problem) => {
         problem.tags = without(problem.tags, tid)
         return problem.save()
@@ -175,5 +175,5 @@ module.exports = {
   find,
   findOne,
   update,
-  del
+  del,
 }

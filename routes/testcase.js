@@ -3,7 +3,7 @@ const testcase = require('../controllers/testcase')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/testcase'
+  prefix: '/testcase',
 })
 
 router.get('/:pid', auth.login, auth.admin, testcase.find)

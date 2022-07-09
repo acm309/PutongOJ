@@ -9,9 +9,9 @@ const Tag = require('../models/Tag')
 const Discuss = require('../models/Discuss')
 const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')
+const { generatePwd } = require('../utils/helper')
 const meta = require('./meta')
 const { removeall } = require('./helper')
-const { generatePwd } = require('../utils/helper')
 require('../config/db')
 
 const userSeeds = require('./seed/users')
@@ -27,48 +27,48 @@ async function main () {
   await Promise.all([
     new ID({
       id: 1000,
-      name: 'Problem'
+      name: 'Problem',
     }).save(),
     new ID({
       id: 0,
-      name: 'Solution'
+      name: 'Solution',
     }).save(),
     new ID({
       id: 0,
-      name: 'Group'
+      name: 'Group',
     }).save(),
     new ID({
       id: 0,
-      name: 'News'
+      name: 'News',
     }).save(),
     new ID({
       id: 0,
-      name: 'Discuss'
+      name: 'Discuss',
     }).save(),
     new ID({
       id: 0,
-      name: 'Contest'
-    }).save()
+      name: 'Contest',
+    }).save(),
   ])
 
   const groups = Promise.all(
-    meta.groups.map((item) => new Group(item).save()))
+    meta.groups.map(item => new Group(item).save()))
 
   const news = Promise.all(
-    newsSeeds.data.map((item) => new News(item).save())
+    newsSeeds.data.map(item => new News(item).save()),
   )
 
   const users = Promise.all(
     Object.values(userSeeds.data).map((user) => {
       return new User(Object.assign(user, {
-        pwd: generatePwd(user.pwd)
+        pwd: generatePwd(user.pwd),
       })).save()
     }))
 
   const tags = Promise.all(
     Object.values(tagSeeds.data).map((tag) => {
       return new Tag(tag).save()
-    })
+    }),
   )
 
   // NOTE: run this in sequence
@@ -104,7 +104,7 @@ async function main () {
     discuss,
     solutions,
     contests,
-    groups
+    groups,
   ])
 }
 

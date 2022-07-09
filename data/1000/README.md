@@ -13,10 +13,10 @@
 ```json
 {
   "testcases": [
-    {"uuid": "1"},
-    {"uuid": "2"},
-    {"uuid": "3"},
-    {"uuid": "4"}
+    { "uuid": "1" },
+    { "uuid": "2" },
+    { "uuid": "3" },
+    { "uuid": "4" }
   ]
 }
 ```
@@ -32,10 +32,10 @@ admin 随时可以调换顺序，也就是说，meta.json 可能是这样的:
 ```json
 {
   "testcases": [
-    {"uuid": "1"},
-    {"uuid": "4"},
-    {"uuid": "3"},
-    {"uuid": "2"}
+    { "uuid": "1" },
+    { "uuid": "4" },
+    { "uuid": "3" },
+    { "uuid": "2" }
   ]
 }
 ```

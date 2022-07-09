@@ -10,62 +10,74 @@ const find = async (ctx) => {
 
   // distinct 不能和 sort 同时使用，故使用聚合
   const list = await Solution.aggregate([
-    { $match: {
-      pid,
-      judge: config.judge.Accepted
-    }},
-    { $sort: {
-      time: 1,
-      memory: 1,
-      length: 1,
-      create: 1
-    }},
-    { $group: {
-      _id: '$uid',
-      sid: { $first: '$sid' },
-      time: { $first: '$time' },
-      memory: { $first: '$memory' },
-      length: { $first: '$length' },
-      language: { $first: '$language' },
-      create: { $first: '$create' },
-      pid: { $first: '$pid' },
-      uid: { $first: '$uid' }
-    }},
     {
-      $skip: (page - 1) * pageSize
+      $match: {
+        pid,
+        judge: config.judge.Accepted,
+      },
     },
     {
-      $limit: pageSize
-    }
+      $sort: {
+        time: 1,
+        memory: 1,
+        length: 1,
+        create: 1,
+      },
+    },
+    {
+      $group: {
+        _id: '$uid',
+        sid: { $first: '$sid' },
+        time: { $first: '$time' },
+        memory: { $first: '$memory' },
+        length: { $first: '$length' },
+        language: { $first: '$language' },
+        create: { $first: '$create' },
+        pid: { $first: '$pid' },
+        uid: { $first: '$uid' },
+      },
+    },
+    {
+      $skip: (page - 1) * pageSize,
+    },
+    {
+      $limit: pageSize,
+    },
   ]).exec()
 
   const sumDoc = await Solution.aggregate([
-    { $match: {
-      pid,
-      judge: config.judge.Accepted
-    }},
-    { $sort: {
-      time: 1,
-      memory: 1,
-      length: 1,
-      create: 1
-    }},
-    { $group: {
-      _id: '$uid',
-      sid: { $first: '$sid' },
-      time: { $first: '$time' },
-      memory: { $first: '$memory' },
-      length: { $first: '$length' },
-      language: { $first: '$language' },
-      create: { $first: '$create' }
-    }}
+    {
+      $match: {
+        pid,
+        judge: config.judge.Accepted,
+      },
+    },
+    {
+      $sort: {
+        time: 1,
+        memory: 1,
+        length: 1,
+        create: 1,
+      },
+    },
+    {
+      $group: {
+        _id: '$uid',
+        sid: { $first: '$sid' },
+        time: { $first: '$time' },
+        memory: { $first: '$memory' },
+        length: { $first: '$length' },
+        language: { $first: '$language' },
+        create: { $first: '$create' },
+      },
+    },
   ]).exec()
 
   const sumCharts = sumDoc.length
 
   const countList = []
   for (let i = 2; i <= 10; i++) {
-    const count = await Solution.find({pid, judge: i}).distinct('uid').exec()
+    const count = await Solution.find({ pid, judge: i }).distinct('uid').exec()
     countList.push(count.length)
   }
 
@@ -75,10 +87,10 @@ const find = async (ctx) => {
     list,
     sumCharts,
     countList,
-    sumStatis
+    sumStatis,
   }
 }
 
 module.exports = {
-  find
+  find,
 }

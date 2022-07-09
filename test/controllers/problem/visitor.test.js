@@ -6,7 +6,7 @@ const problems = require('../../seed/problems')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Problem list', async t => {
+test('Problem list', async (t) => {
   const res = await request
     .get('/api/problem/list')
 
@@ -22,15 +22,15 @@ test('Problem list', async t => {
   }
 })
 
-test('Problem find one', async t => {
+test('Problem find one', async (t) => {
   const res = await request
     .get('/api/problem/1001')
 
   t.is(res.status, 200)
 
-  const n = problems.data.find((item) => item.title === res.body.problem.title)
+  const n = problems.data.find(item => item.title === res.body.problem.title)
 
-  for (const [key, value] of Object.entries(n)) {
+  for (const [ key, value ] of Object.entries(n)) {
     t.deepEqual(res.body.problem[key], value)
   }
 })
@@ -55,6 +55,6 @@ test('Pid is not a number', async (t) => {
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

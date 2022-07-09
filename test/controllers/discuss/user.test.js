@@ -5,25 +5,25 @@ const users = require('../../seed/users')
 
 const server = app.listen()
 const request = supertest.agent(server)
-const user = users.data['primaryuser']
+const user = users.data.primaryuser
 const newDiscuss = {
   title: '一楼',
-  content: '我是一楼，欧耶'
+  content: '我是一楼，欧耶',
 }
 let newDid
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: user.uid,
-      pwd: user.pwd
+      pwd: user.pwd,
     })
 
   t.is(login.status, 200)
 })
 
-test.serial('create a new discuss', async t => {
+test.serial('create a new discuss', async (t) => {
   const create = await request
     .post('/api/discuss')
     .send(newDiscuss)
@@ -43,7 +43,7 @@ test.serial('create a new discuss', async t => {
   t.is(find.body.discuss.comments[0].uid, user.uid)
 })
 
-test.serial('Add a comment', async t => {
+test.serial('Add a comment', async (t) => {
   const update = await request
     .put(`/api/discuss/${newDid}`)
     .send({ content: 'nothing' })
@@ -61,53 +61,53 @@ test.serial('Add a comment', async t => {
   t.is(comments[comments.length - 1].content, 'nothing')
 })
 
-test('Title can not be empty', async t => {
+test('Title can not be empty', async (t) => {
   const res = await request
     .post('/api/discuss')
     .send({
       title: '',
-      content: 'nothing'
+      content: 'nothing',
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test('Title is too long', async t => {
+test('Title is too long', async (t) => {
   const res = await request
     .post('/api/discuss')
     .send({
-      title: Array.from({ length: 50 }, (_, i) => '' + i).join(''),
-      content: 'nothing'
+      title: Array.from({ length: 50 }, (_, i) => `${i}`).join(''),
+      content: 'nothing',
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test('Content can not be empty on creation', async t => {
+test('Content can not be empty on creation', async (t) => {
   const res = await request
     .post('/api/discuss')
     .send({
       title: 'test',
-      content: ''
+      content: '',
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test('Content can not be empty on update', async t => {
+test('Content can not be empty on update', async (t) => {
   const res = await request
     .put(`/api/discuss/${newDid}`)
     .send({
-      content: ''
+      content: '',
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

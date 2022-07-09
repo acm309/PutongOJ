@@ -27,7 +27,7 @@ if (website.semi_restful) {
 }
 
 const router = new Router({
-  prefix: '/api'
+  prefix: '/api',
 })
 
 const session = require('./session')

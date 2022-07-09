@@ -1,10 +1,10 @@
 require('dotenv-flow').config()
 
+const path = require('path')
 const Koa = require('koa')
 const koaLogger = require('koa-logger')
 const bodyparser = require('koa-body')
 const staticServe = require('koa-static')
-const path = require('path')
 const session = require('koa-session')
 const send = require('koa-send')
 // In order to apply the moongoose plugin,
@@ -22,26 +22,26 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(koaLogger())
 }
 
-app.keys = [config.secretKey]
+app.keys = [ config.secretKey ]
 
 app.use(session({
   key: 'koa:oj:sess',
   maxAge: 7 * 24 * 60 * 60 * 60 * 1000, // ms
   httpOnly: true, /** (boolean) httpOnly or not (default true) */
-  signed: true /** (boolean) signed or not (default true) */
+  signed: true, /** (boolean) signed or not (default true) */
 }, app))
 
 app.use(bodyparser({
   formidable: {
-    uploadDir: path.resolve(__dirname, 'public/uploads')
+    uploadDir: path.resolve(__dirname, 'public/uploads'),
   },
   multipart: true,
-  urlencoded: true
+  urlencoded: true,
 }))
 
 app.use(staticServe(path.join(__dirname, 'public'), {
   gzip: true,
-  maxage: 7 * 24 * 60 * 60 // 7 天不更新，也就是缓存期限
+  maxage: 7 * 24 * 60 * 60, // 7 天不更新，也就是缓存期限
 }))
 
 app.use(async (ctx, next) => {
@@ -50,7 +50,7 @@ app.use(async (ctx, next) => {
   } catch (err) {
     ctx.status = err.status || 500
     ctx.body = {
-      error: err.message
+      error: err.message,
     }
     logger.error(`${err.status} -- ${err.message}\n${err.stack}`)
   }
@@ -69,7 +69,7 @@ app.use(router.routes()).use(router.allowedMethods())
 if (process.env.NODE_ENV !== 'test') {
   app.listen(config.port, async () => {
     await setup()
-    logger.info('The server is running at http://localhost:' + config.port)
+    logger.info(`The server is running at http://localhost:${config.port}`)
   })
 }
 

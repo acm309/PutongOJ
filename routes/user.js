@@ -3,7 +3,7 @@ const user = require('../controllers/user')
 const { auth, userCreateRateLimit } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/user'
+  prefix: '/user',
 })
 
 router.get('/list', user.find)

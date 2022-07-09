@@ -19,12 +19,12 @@ const preload = async (ctx, next) => {
     return next()
   }
   if (contest.start > Date.now()) {
-    ctx.throw(400, "This contest hasn't started yet")
+    ctx.throw(400, 'This contest hasn\'t started yet')
   }
-  if (contest.encrypt !== config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+  if (contest.encrypt !== config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid)) {
     ctx.throw(400, 'You do not have permission to enter this competition!')
   }
-  if (contest.encrypt === config.encrypt.Public && ctx.session.profile.verifyContest.indexOf(contest.cid) === -1) {
+  if (contest.encrypt === config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid)) {
     ctx.session.profile.verifyContest.push(contest.cid)
   }
   ctx.state.contest = contest
@@ -40,10 +40,10 @@ const find = async (ctx) => {
   const filter = ctx.session.profile && isAdmin(ctx.session.profile) ? {} : { status: config.status.Available }
   if (ctx.query.type === 'title') {
     filter.$expr = {
-      '$regexMatch': {
-        'input': {'$toString': `$title`},
-        'regex': new RegExp(ctx.query.content, 'i')
-      }
+      $regexMatch: {
+        input: { $toString: '$title' },
+        regex: new RegExp(ctx.query.content, 'i'),
+      },
     }
   }
   const list = await Contest.paginate(filter, {
@@ -52,11 +52,11 @@ const find = async (ctx) => {
     limit: pageSize,
     lean: true,
     leanWithId: false,
-    select: '-_id -creator -argument' // -表示不要的字段
+    select: '-_id -creator -argument', // -表示不要的字段
   })
 
   ctx.body = {
-    list
+    list,
   }
 }
 
@@ -97,7 +97,7 @@ const findOne = async (ctx) => {
     .find({
       uid: ctx.query.uid || ctx.session.profile.uid,
       mid: cid,
-      judge: config.judge.Accepted
+      judge: config.judge.Accepted,
     })
     .distinct('pid')
     .lean()
@@ -107,7 +107,7 @@ const findOne = async (ctx) => {
     contest,
     overview,
     totalProblems,
-    solved
+    solved,
   }
 }
 
@@ -143,29 +143,29 @@ const ranklist = async (ctx) => {
   // }
   // ctx.state.contest.ranklist = ranklist
   // await ctx.state.contest.save()
-  await Promise.all(Object.keys(ranklist).map((uid) =>
+  await Promise.all(Object.keys(ranklist).map(uid =>
     User
       .findOne({ uid })
       .lean()
       .exec()
-      .then(user => { if (user != null) ranklist[user.uid].nick = user.nick })))
+      .then((user) => { if (user != null) ranklist[user.uid].nick = user.nick })))
 
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
     const str = JSON.stringify(ranklist)
     await redis.set(`oj:ranklist:${contest.cid}`, str) // 更新该比赛的最新排名信息
     res = ranklist
-  } else if (!isAdmin(ctx.session.profile) &&
-    Date.now() + deadline > contest.end &&
-    Date.now() < contest.end) {
+  } else if (!isAdmin(ctx.session.profile)
+    && Date.now() + deadline > contest.end
+    && Date.now() < contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
     const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
     res = JSON.parse(mid)
-    Object.entries(ranklist).map(([uid, problems]) => {
-      Object.entries(problems).map(([pid, sub]) => {
+    Object.entries(ranklist).forEach(([ uid, problems ]) => {
+      Object.entries(problems).forEach(([ pid, sub ]) => {
         if (sub.wa < 0) {
           res[uid][pid] = {
-            wa: sub.wa
+            wa: sub.wa,
           }
         }
       })
@@ -178,7 +178,7 @@ const ranklist = async (ctx) => {
     res = ranklist
   }
   ctx.body = {
-    ranklist: res
+    ranklist: res,
   }
 }
 
@@ -192,8 +192,8 @@ const create = async (ctx) => {
       start: new Date(opt.start).getTime(),
       end: new Date(opt.end).getTime(),
       create: Date.now(),
-      ranklist: {}
-    }
+      ranklist: {},
+    },
   ))
 
   try {
@@ -204,7 +204,7 @@ const create = async (ctx) => {
   }
 
   ctx.body = {
-    cid: contest.cid
+    cid: contest.cid,
   }
 }
 
@@ -213,10 +213,10 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const { cid } = ctx.params
   const contest = await Contest.findOne({ cid }).exec()
-  const fields = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
+  const fields = [ 'title', 'encrypt', 'list', 'argument', 'start', 'end', 'status' ]
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
-  fields.filter((field) => opt[field] != null).forEach((field) => {
+  fields.filter(field => opt[field] != null).forEach((field) => {
     contest[field] = opt[field]
   })
   try {
@@ -227,7 +227,7 @@ const update = async (ctx) => {
   }
 
   ctx.body = {
-    cid: contest.cid
+    cid: contest.cid,
   }
 }
 
@@ -284,7 +284,7 @@ const verify = async (ctx) => {
   }
   ctx.body = {
     isVerify,
-    profile: ctx.session.profile
+    profile: ctx.session.profile,
   }
 }
 
@@ -296,5 +296,5 @@ module.exports = {
   create,
   update,
   del,
-  verify
+  verify,
 }

@@ -7,45 +7,45 @@ const contestSchema = mongoose.Schema({
   cid: {
     type: Number,
     index: {
-      unique: true
+      unique: true,
     },
-    default: -1
+    default: -1,
   },
   title: String,
   status: {
     type: Number,
-    default: config.status.Available // 默认新建的比赛显示
+    default: config.status.Available, // 默认新建的比赛显示
   },
   create: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   start: Number,
   end: Number,
   creator: String,
-  list: [Number],
+  list: [ Number ],
   encrypt: {
     type: Number,
-    default: config.encrypt.Public
+    default: config.encrypt.Public,
   },
   argument: {
     type: mongoose.Schema.Types.Mixed,
-    default: null
+    default: null,
   },
   ranklist: {
     type: mongoose.Schema.Types.Mixed,
-    default: function () { return {} }
-  }
+    default () { return {} },
+  },
 }, {
   collection: 'Contest',
-  minimize: false
+  minimize: false,
 })
 
 contestSchema.plugin(mongoosePaginate)
 
 contestSchema.pre('validate', function (next) {
   // 验证字段
-  ;['title', 'start', 'end', 'list', 'encrypt'].forEach((item) => {
+  [ 'title', 'start', 'end', 'list', 'encrypt' ].forEach((item) => {
     if (typeof this[item] === 'undefined' || this[item] === '') {
       next(new Error(`Field "${item}" is required to create a contest`))
     }
@@ -66,7 +66,7 @@ contestSchema.pre('save', function (next) {
     // 表示新的比赛被创建了，因此赋予一个新的 id
     ids
       .generateId('Contest')
-      .then(id => {
+      .then((id) => {
         this.cid = id
       })
       .then(next)

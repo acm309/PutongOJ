@@ -3,7 +3,7 @@ const discuss = require('../controllers/discuss')
 const { auth } = require('../utils/middlewares')
 
 const router = new Router({
-  prefix: '/discuss'
+  prefix: '/discuss',
 })
 
 router.get('/list', discuss.find)

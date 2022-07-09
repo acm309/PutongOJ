@@ -6,7 +6,7 @@ const news = require('../../seed/news')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('News list', async t => {
+test('News list', async (t) => {
   const res = await request
     .get('/api/news/list')
 
@@ -43,12 +43,12 @@ test('News fails to find one because nid is not number', async (t) => {
   t.truthy(res.body.error)
 })
 
-test('Visitor can not update news', async t => {
+test('Visitor can not update news', async (t) => {
   const res = await request
-    .put(`/api/news/5`)
+    .put('/api/news/5')
     .send({
       title: 'xx',
-      content: 'xxx'
+      content: 'xxx',
     })
 
   t.is(res.status, 401)
@@ -56,7 +56,7 @@ test('Visitor can not update news', async t => {
   t.truthy(res.body.error)
 
   const find = await request
-    .get(`/api/news/5`)
+    .get('/api/news/5')
 
   t.is(find.status, 200)
   t.is(find.type, 'application/json')
@@ -64,20 +64,20 @@ test('Visitor can not update news', async t => {
   t.not(find.body.news.content, 'xxx')
 })
 
-test('News finds one', async t => {
+test('News finds one', async (t) => {
   const res = await request
-    .get(`/api/news/5`)
+    .get('/api/news/5')
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
   t.truthy(res.body.news.nid)
   t.truthy(res.body.news.title)
 
-  const n = news.data.find((item) => item.title === res.body.news.title)
+  const n = news.data.find(item => item.title === res.body.news.title)
 
   t.is(res.body.news.content, n.content)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })

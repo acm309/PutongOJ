@@ -1,7 +1,7 @@
-const test = require('ava')
-const supertest = require('supertest')
 const fs = require('fs')
 const { resolve } = require('path')
+const test = require('ava')
+const supertest = require('supertest')
 const app = require('../../app')
 const websiteConfig = require('../../config/website')
 const config = require('../../config')
@@ -12,7 +12,7 @@ const request = supertest.agent(server)
 const filepath = resolve(__dirname, 'utils.test.js')
 const content = fs.readFileSync(filepath, 'utf8')
 
-test('Server time', async t => {
+test('Server time', async (t) => {
   const res = await request
     .get('/api/servertime')
 
@@ -22,7 +22,7 @@ test('Server time', async t => {
   t.truthy(Number.isInteger(res.body.serverTime))
 })
 
-test('Website config', async t => {
+test('Website config', async (t) => {
   const res = await request
     .get('/api/website')
 
@@ -31,19 +31,19 @@ test('Website config', async t => {
   t.deepEqual(res.body.website, websiteConfig)
 })
 
-test('Visitor can not submit file', async t => {
+test('Visitor can not submit file', async (t) => {
   const res = await request
     .post('/api/submit')
     .attach('image', filepath)
   t.is(res.status, 403)
 })
 
-test('Admin could submit file', async t => {
+test('Admin could submit file', async (t) => {
   const res = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
   t.is(res.status, 200)
 
@@ -58,7 +58,7 @@ test('Admin could submit file', async t => {
 
   const uploadedContent = fs.readFileSync(
     resolve(__dirname, '../../public/uploads', uploaded),
-    'utf8'
+    'utf8',
   )
   t.is(uploadedContent, content)
 })

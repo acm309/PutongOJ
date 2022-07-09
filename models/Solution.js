@@ -9,76 +9,76 @@ const solutionSchema = mongoose.Schema({
   sid: {
     type: Number,
     index: {
-      unique: true
+      unique: true,
     },
-    default: -1
+    default: -1,
   },
   pid: {
     type: Number,
     required: true,
-    index: true
+    index: true,
   },
   uid: {
     type: String,
     required: true,
-    index: true
+    index: true,
   },
   mid: {
     type: Number,
     default: 1, // 历史遗留问题，这里的 mid 指代 cid, 默认为 1,
-    index: true
+    index: true,
   },
   time: {
     type: Number,
-    default: 0
+    default: 0,
   },
   memory: {
     type: Number,
-    default: 0
+    default: 0,
   },
   create: {
     type: Number,
-    default: Date.now
+    default: Date.now,
   },
   length: Number,
   judge: {
     type: Number,
-    default: config.judge.Pending
+    default: config.judge.Pending,
   },
   status: {
     type: Number,
-    default: config.judge.Pending
+    default: config.judge.Pending,
   },
   language: {
     type: Number,
-    required: true
+    required: true,
   },
   error: {
     type: String,
-    default: ''
+    default: '',
   },
   sim: {
     type: Number,
-    default: 0
+    default: 0,
   },
   sim_s_id: {
     type: Number,
-    default: 0
+    default: 0,
   },
   code: {
     type: String,
-    required: true
+    required: true,
   },
   module: {
     type: Number,
-    default: config.module.Problem
+    default: config.module.Problem,
   },
   testcases: {
     type: mongoose.Schema.Types.Mixed,
-    default: []
-  }
+    default: [],
+  },
 }, {
-  collection: 'Solution'
+  collection: 'Solution',
 })
 
 solutionSchema.plugin(mongoosePaginate)
@@ -116,7 +116,7 @@ solutionSchema.pre('save', function (next) {
     // 表示新的提交被创建了，因此赋予一个新的 id
     ids
       .generateId('Solution')
-      .then(id => {
+      .then((id) => {
         this.sid = id
       })
       .then(next)

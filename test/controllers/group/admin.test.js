@@ -7,34 +7,34 @@ const users = require('../../seed/users')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before('Login', async t => {
+test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd
+      pwd: config.deploy.adminInitPwd,
     })
 
   t.is(login.status, 200)
 })
 
-test.serial('create new group', async t => {
+test.serial('create new group', async (t) => {
   const create = await request
     .post('/api/group')
     .send({
       title: '测试组2',
-      list: [ 'admin' ]
+      list: [ 'admin' ],
     })
 
   t.is(create.status, 200)
 })
 
-test.serial('Update Group 2', async t => {
+test.serial('Update Group 2', async (t) => {
   const update = await request
     .put('/api/group/2')
     .send({
       title: '测试组更新2',
-      list: [ 'admin' ]
+      list: [ 'admin' ],
     })
   t.is(update.status, 200)
 
@@ -51,13 +51,13 @@ test.serial('Update Group 2', async t => {
   t.true(user.body.user.gid.includes(2))
 })
 
-test.serial('Update Group 2 -- update members', async t => {
-  const user = users.data['primaryuser']
+test.serial('Update Group 2 -- update members', async (t) => {
+  const user = users.data.primaryuser
   const update = await request
     .put('/api/group/2')
     .send({
       title: '测试组更新2',
-      list: [ user.uid ]
+      list: [ user.uid ],
     })
   t.is(update.status, 200)
 
@@ -79,7 +79,7 @@ test.serial('Update Group 2 -- update members', async t => {
   t.true(r.body.user.gid.includes(2))
 })
 
-test.serial('Delete Group 2', async t => {
+test.serial('Delete Group 2', async (t) => {
   const del = await request
     .delete('/api/group/2')
   t.is(del.status, 200)
@@ -95,30 +95,30 @@ test.serial('Delete Group 2', async t => {
   t.false(user.body.user.gid.includes(2))
 })
 
-test('The length of group title should be greater than 3', async t => {
+test('The length of group title should be greater than 3', async (t) => {
   const res = await request
     .post('/api/group')
     .send({
       title: '1',
-      list: [ 'admin' ]
+      list: [ 'admin' ],
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test('The length of group title should be less than 80', async t => {
+test('The length of group title should be less than 80', async (t) => {
   const res = await request
     .post('/api/group')
     .send({
-      title: Array.from({ length: 50 }, (_, i) => '' + i).join(''),
-      list: [ 'admin' ]
+      title: Array.from({ length: 50 }, (_, i) => `${i}`).join(''),
+      list: [ 'admin' ],
     })
 
   t.is(res.status, 400)
   t.truthy(res.body.error)
 })
 
-test.after.always('close server', t => {
+test.after.always('close server', (t) => {
   server.close()
 })
