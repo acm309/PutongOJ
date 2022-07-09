@@ -72,6 +72,34 @@ module.exports = {
       ],
       ranklist: {
       }
+    },
+    {
+      title: 'Private Group Contest',
+      encrypt: config.encrypt.Private,
+      argument: 'gid:1',
+      start: 1468968400000,
+      end: 1468986400000,
+      status: config.status.Available,
+      create: 2458924613000,
+      list: [
+        1003
+      ],
+      ranklist: {
+      }
+    },
+    {
+      title: 'Private Group Contest 2',
+      encrypt: config.encrypt.Private,
+      argument: 'gid:100', // no such group
+      start: 1468968400000,
+      end: 1468986400000,
+      status: config.status.Available,
+      create: 2458924613000,
+      list: [
+        1003
+      ],
+      ranklist: {
+      }
     }
   ]
 }

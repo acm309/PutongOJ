@@ -51,7 +51,8 @@ async function main () {
     }).save()
   ])
 
-  const group = new Group(meta.groups[1])
+  const groups = Promise.all(
+    meta.groups.map((item) => new Group(item).save()))
 
   const news = Promise.all(
     newsSeeds.data.map((item) => new News(item).save())
@@ -103,7 +104,7 @@ async function main () {
     discuss,
     solutions,
     contests,
-    group.save()
+    groups
   ])
 }
 

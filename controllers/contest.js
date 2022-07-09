@@ -2,6 +2,7 @@ const only = require('only')
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
+const Group = require('../models/Group')
 const User = require('../models/User')
 const logger = require('../utils/logger')
 const config = require('../config')
@@ -253,14 +254,22 @@ const verify = async (ctx) => {
 
   const enc = parseInt(contest.encrypt)
   const arg = contest.argument
-  let isVerify
+  let isVerify = false
   if (enc === config.encrypt.Private) {
     const uid = ctx.session.profile.uid
     const arr = arg.split('\r\n')
-    if (arr.indexOf(uid) !== -1) {
-      isVerify = true
-    } else {
-      isVerify = false
+    for (const item of arr) {
+      if (item.startsWith('gid:')) {
+        const gid = item.substring(4)
+        const group = await Group.findOne({ gid: parseInt(gid) }).exec()
+        if (group != null && group.list.includes(uid)) {
+          isVerify = true
+          break
+        }
+      } else if (item === uid) {
+        isVerify = true
+        break
+      }
     }
   } else {
     const pwd = opt.pwd

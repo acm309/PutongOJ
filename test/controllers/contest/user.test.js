@@ -51,6 +51,30 @@ test('Can not enter contest that have not started', async t => {
   t.truthy(find.body.error)
 })
 
+test('Can enter private contest of groups', async t => {
+  const verify = await request
+    .post('/api/contest/6/verify')
+    .send({
+      cid: 6
+    })
+
+  t.is(verify.status, 200, verify.body.error)
+  t.true(verify.body.isVerify)
+  t.truthy(verify.body.profile)
+})
+
+test('Can not enter private contest of groups', async t => {
+  const verify = await request
+    .post('/api/contest/7/verify')
+    .send({
+      cid: 7
+    })
+
+  t.is(verify.status, 200, verify.body.error)
+  t.false(verify.body.isVerify)
+  t.truthy(verify.body.profile)
+})
+
 test('Can enter the private contest because of authorization', async t => {
   const verify = await request
     .post('/api/contest/2/verify')

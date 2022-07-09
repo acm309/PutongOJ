@@ -27,13 +27,14 @@ module.exports = {
       nick: 'pu'
     }
   },
-  groups: {
-    1: {
+  groups: [
+    {
       title: '测试组1',
       list: [
         'admin',
-        'pu'
+        'pu',
+        'primaryuser'
       ]
     }
-  }
+  ]
 }

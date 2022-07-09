@@ -20,7 +20,7 @@ test('Find Group 1', async t => {
     .get('/api/group/1')
 
   t.is(res.status, 200)
-  for (const [key, value] of Object.entries(meta.groups[1])) {
+  for (const [key, value] of Object.entries(meta.groups[0])) {
     t.deepEqual(res.body.group[key], value)
   }
 })
