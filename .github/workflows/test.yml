@@ -27,9 +27,15 @@ jobs:
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
       - name: Install dependencies
-        run: yarn
-      - run: yarn test && yarn coverage
+        run: pnpm install
+      - run: pnpm test && pnpm coverage
         env:
           CI: true
       - name: Upload coverage to Codecov
