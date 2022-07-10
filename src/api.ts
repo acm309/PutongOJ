@@ -1,4 +1,3 @@
-import type { Axios } from 'axios'
 import axios from 'axios'
 import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
@@ -9,41 +8,41 @@ axios.defaults.baseURL = '/api/'
 axios.defaults.withCredentials = true
 axios.defaults.timeout = 100000 // 100000ms的超时验证
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
-const methods = [ 'get', 'post', 'put', 'delete' ] as const
-const instance = {} as {
-  [K in (typeof methods)[number]]: Axios[K]
-}
+const instance = axios.create()
 
 let errHandler: null | ((err: any) => void) = null
+let isSemiRestful = false
 
 export function setErrorHandler (handler: typeof errHandler) {
   errHandler = handler
 }
 
-// 对异常的基本处理
-methods.forEach((key) => {
-  const axiosMethod = axios[key]
-  type T = Parameters<typeof axiosMethod>
-  // A decorator that wraps the passed function and handles errors
-  instance[key] = async function (...args: T) { // 闭包给原函数捕获异常
-    try {
-      const data: {
-        data: { profile: Profile | null }
-      } = await Reflect.apply(axiosMethod, axios, args)
-      if (data.data.profile) {
-        useSessionStore().setLoginProfile(data.data.profile)
-      }
-      return data
-    } catch (err) {
-      if (errHandler) {
-        errHandler(err)
-      } else {
-        // eslint-disable-next-line no-alert
-        window.alert('故障')
-      }
-      return Promise.reject(new Error('I throw this on purpose'))
-    }
-  } as Axios[typeof key]
+instance.interceptors.request.use((config) => {
+  if (!isSemiRestful) return config
+  if (config.method === 'put') {
+    config.method = 'post'
+    config.url = urlJoin(config.url!, '/update')
+  } else if (config.method === 'delete') {
+    config.method = 'post'
+    config.url = urlJoin(config.url!, '/delete')
+  }
+  return config
+})
+
+instance.interceptors.response.use((resp) => {
+  const data: { profile: Profile | null } = resp.data
+  if (data.profile) {
+    useSessionStore().setLoginProfile(data.profile)
+  }
+  return resp
+}, (err) => {
+  if (errHandler) {
+    errHandler(err)
+  } else {
+    // eslint-disable-next-line no-alert
+    window.alert('故障')
+  }
+  return err
 })
 
 const api = {
@@ -133,10 +132,5 @@ export default {
 }
 
 export function semiRestful () {
-  instance.put = function (url, ...args) {
-    return instance.post(urlJoin(url, '/update'), ...args)
-  }
-  instance.delete = function (url, ...args) {
-    return instance.post(urlJoin(url, '/delete'), ...args)
-  }
+  isSemiRestful = true
 }

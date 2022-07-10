@@ -17,12 +17,12 @@ const find = solutionStore.find
 const route = useRoute()
 const router = useRouter()
 
-const uid = $computed(() => route.query.uid || '')
-const pid = $computed(() => route.query.pid || '')
-const judge = $computed(() => parseInt(route.query.judge) || '')
-const language = $computed(() => parseInt(route.query.language) || '')
-const page = $computed(() => parseInt(route.query.page) || 1)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 30)
+const uid = $ref(route.query.uid || '')
+const pid = $ref(route.query.pid || '')
+const judge = $ref(parseInt(route.query.judge) || '')
+const language = $ref(parseInt(route.query.language) || '')
+const page = $ref(parseInt(route.query.page) || 1)
+const pageSize = $ref(parseInt(route.query.pageSize) || 30)
 
 const judgeList = $ref(constant.judgeList)
 const languageList = $ref(constant.languageList)

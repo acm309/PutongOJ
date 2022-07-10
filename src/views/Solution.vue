@@ -84,8 +84,11 @@ onBeforeMount(async () => {
         <tr>
           <td>
             {{ item.uuid.slice(0, 8) }}
-            <a :href="testcaseUrl2(item, 'in')" target="_blank">TestIn</a>
-            <a :href="testcaseUrl2(item, 'out')" target="_blank">TestOut</a>
+            <template v-if="isAdmin">
+              <a :href="testcaseUrl2(item, 'in')" target="_blank">TestIn</a>
+              {{ " " }}
+              <a :href="testcaseUrl2(item, 'out')" target="_blank">TestOut</a>
+            </template>
           </td>
           <td>{{ item.time }}</td>
           <td>{{ item.memory }}</td>
