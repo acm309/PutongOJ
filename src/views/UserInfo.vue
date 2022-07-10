@@ -88,7 +88,7 @@ onProfileUpdate(fetch)
           <Icon type="email" />&nbsp;&nbsp;{{ `${t('oj.mail')}: ${user.mail}` }}
         </div>
         <div v-if="user.school">
-          <Icon type="university" />&nbsp;&nbsp;{{ `${t(oj.school)}: ${user.school}` }}
+          <Icon type="university" />&nbsp;&nbsp;{{ `${t('oj.school')}: ${user.school}` }}
         </div>
         <Row class="border" type="flex" justify="center">
           <Col :span="12">
