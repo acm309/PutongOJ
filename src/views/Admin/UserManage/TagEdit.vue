@@ -35,7 +35,12 @@ const transData = $computed(() => problemSum.map(item => ({
   label: `${item.pid} | ${item.title}`,
 })))
 
-fetchTag()
+onBeforeRouteLeave(() => {
+  clearSavedProblems()
+  clearSavedTags()
+  problemList = []
+  targetKeys = []
+})
 
 async function fetchTag () {
   Spin.show()
@@ -112,13 +117,7 @@ async function saveTag () {
     Spin.hide()
   }
 }
-
-onBeforeRouteLeave(() => {
-  clearSavedProblems()
-  clearSavedTags()
-  problemList = []
-  targetKeys = []
-})
+fetchTag()
 </script>
 
 <template>
@@ -166,11 +165,7 @@ onBeforeRouteLeave(() => {
       </Col>
     </Row>
     <Transfer
-      :data="transData"
-      :target-keys="targetKeys"
-      :list-style="listStyle"
-      filterable
-      class="tranfer"
+      :data="transData" :target-keys="targetKeys" :list-style="listStyle" filterable class="tranfer"
       @on-change="handleChange"
     />
     <Button type="primary" class="submit" @click="saveTag">

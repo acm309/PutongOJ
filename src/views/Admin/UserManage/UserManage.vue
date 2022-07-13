@@ -1,5 +1,5 @@
 <script setup>
-import { mapState, storeToRefs } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 
@@ -7,7 +7,7 @@ const route = useRoute()
 const router = useRouter()
 
 const sessionStore = useSessionStore()
-const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { canRemove } = $(storeToRefs(sessionStore))
 
 const active = $computed(() => route.name)
 const change = name => router.push({ name })

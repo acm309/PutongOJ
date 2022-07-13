@@ -13,6 +13,7 @@ const groupStore = useGroupStore()
 const { group, list: groupList } = $(storeToRefs(groupStore))
 const { list: userSum } = $(storeToRefs(userStore))
 const { find, findOne, update, create, clearSavedGroups } = groupStore
+const { clearSavedUsers } = userStore
 const Spin = inject('$Spin')
 const Message = inject('$Message')
 const Modal = inject('$Modal')
@@ -23,14 +24,21 @@ const listStyle = $ref({
   width: '350px',
   height: '400px',
 })
+
 let userList = $ref([])
 let operation = $ref('search')
+
 const transData = $computed(() => userSum.map(item => ({
   key: item.uid,
   label: `${item.uid} | ${item.nick}`,
 })))
 
-fetchGroup()
+// per vue-router: onBeforeRouteLeave must be called at the top
+// of function
+onBeforeRouteLeave(() => {
+  clearSavedGroups()
+  clearSavedUsers()
+})
 
 async function fetchGroup () {
   Spin.show()
@@ -104,10 +112,7 @@ async function saveGroup () {
   }
 }
 
-onBeforeRouteLeave(() => {
-  clearSavedGroups()
-  clearSavedUsers()
-})
+fetchGroup()
 </script>
 
 <template>
