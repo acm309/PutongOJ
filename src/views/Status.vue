@@ -17,12 +17,12 @@ const find = solutionStore.find
 const route = useRoute()
 const router = useRouter()
 
-const uid = $ref(route.query.uid || '')
-const pid = $ref(route.query.pid || '')
-const judge = $ref(parseInt(route.query.judge) || '')
-const language = $ref(parseInt(route.query.language) || '')
-const page = $ref(parseInt(route.query.page) || 1)
-const pageSize = $ref(parseInt(route.query.pageSize) || 30)
+let uid = $ref(route.query.uid || '')
+let pid = $ref(route.query.pid || '')
+let judge = $ref(parseInt(route.query.judge) || '')
+let language = $ref(parseInt(route.query.language) || '')
+let page = $ref(parseInt(route.query.page) || 1)
+let pageSize = $ref(parseInt(route.query.pageSize) || 30)
 
 const judgeList = $ref(constant.judgeList)
 const languageList = $ref(constant.languageList)
@@ -32,7 +32,15 @@ const color = $ref(constant.color)
 
 const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-const fetch = () => find(query)
+const fetch = () => {
+  uid = route.query.uid || ''
+  pid = route.query.pid || ''
+  judge = parseInt(route.query.judge) || ''
+  language = parseInt(route.query.language) || ''
+  page = parseInt(route.query.page) || 1
+  pageSize = parseInt(route.query.pageSize) || 30
+  find(query)
+}
 
 const reload = (payload = {}) => {
   router.push({
