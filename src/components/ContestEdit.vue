@@ -42,11 +42,16 @@ const options = [
 let pid = $ref('')
 const pwd = $ref('')
 
+if (contest != null) {
+  contest.start = contest.start || new Date().getTime()
+  contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
+}
+
 async function add () {
   const { problem } = await findOneProblem({ pid })
 
   contest.list.push(problem.pid)
-  jobs[item.pid] = item.title
+  jobs[problem.pid] = problem.title
   pid = ''
 }
 function removeJob (index) {
@@ -95,6 +100,13 @@ const argument = $computed(() => {
 })
 const handleGroupChanges = (data) => {
   selectedGroups = data
+}
+const changeTime = (label, time) => {
+  if (label === 'start') {
+    contest.start = time
+  } else {
+    contest.end = time
+  }
 }
 
 groupStore.find({ lean: 1 })
