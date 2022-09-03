@@ -40,11 +40,14 @@ const options = [
   },
 ]
 let pid = $ref('')
-const pwd = $ref('')
+let pwd = $ref('')
 
 if (contest != null) {
   contest.start = contest.start || new Date().getTime()
   contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
+  if (contest.encrypt === encrypt.Password) {
+    pwd = contest.argument
+  }
 }
 
 async function add () {
