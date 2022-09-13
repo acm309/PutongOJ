@@ -18,7 +18,7 @@ const Spin = inject('$Spin')
 const Message = inject('$Message')
 const Modal = inject('$Modal')
 
-const ind = $ref('')
+const ind = $ref(0)
 let targetKeys = $ref([])
 const listStyle = $ref({
   width: '350px',
@@ -107,6 +107,7 @@ async function saveGroup () {
       await create(newGroup)
       Message.success(t('oj.create_group_success', group))
     }
+    await find()
   } finally {
     Spin.hide()
   }
@@ -149,6 +150,11 @@ fetchGroup()
             </DropdownMenu>
           </template>
         </Dropdown>
+      </Col>
+      <Col span="2">
+        <Tag>
+          {{ operation }}
+        </Tag>
       </Col>
     </Row>
     <Row type="flex" justify="start">

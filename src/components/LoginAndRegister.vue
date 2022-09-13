@@ -8,6 +8,10 @@ import { useUserStore } from '@/store/modules/user'
 const { t } = useI18n()
 
 const password_requiremnt = $computed(() => t('oj.password_requirement'))
+let mode = $ref('login')
+const form = $ref({
+  uid: '', pwd: '', nick: '', checkPwd: '',
+})
 
 const validatePass1 = (rule, value, callback) => {
   const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
@@ -17,7 +21,7 @@ const validatePass1 = (rule, value, callback) => {
 }
 // 验证密码是否重复
 const validatePass2 = (rule, value, callback) => {
-  const error = value !== this.form.pwd ? new Error(t('oj.password_not_match')) : null
+  const error = value !== form.pwd ? new Error(t('oj.password_not_match')) : null
   error ? callback(error) : callback()
 }
 const basicRules = {
@@ -30,10 +34,6 @@ const basicRules = {
   ],
 }
 
-let mode = $ref('login')
-const form = $ref({
-  uid: '', pwd: '', nick: '', checkPwd: '',
-})
 const sessionStore = useSessionStore()
 const userStore = useUserStore()
 const visible = $computed(() => sessionStore.loginDialog)
