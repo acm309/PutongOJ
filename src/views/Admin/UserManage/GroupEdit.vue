@@ -12,7 +12,7 @@ const userStore = useUserStore()
 const groupStore = useGroupStore()
 const { group, list: groupList } = $(storeToRefs(groupStore))
 const { list: userSum } = $(storeToRefs(userStore))
-const { find, findOne, update, create, clearSavedGroups } = groupStore
+const { find, findOne, update, create, clearSavedGroups, delete: remove } = groupStore
 const { clearSavedUsers } = userStore
 const Spin = inject('$Spin')
 const Message = inject('$Message')
@@ -83,6 +83,7 @@ async function manageGroup (name) {
         onOk: async () => {
           await remove({ gid: group.gid })
           Message.success(t('oj.remove_group_success', group))
+          await find()
         },
         onCancel: () => {
           Message.info(t('oj.cancel_remove'))
