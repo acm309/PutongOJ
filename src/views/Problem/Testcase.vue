@@ -67,8 +67,8 @@ fetch()
       </tr>
       <tr v-for="item in list.testcases" :key="item.uuid">
         <td>{{ item.uuid.slice(0, 8) }}</td>
-        <td><a :href="testcaseUrl(item, 'in')" target="_blank" @click="search(item)">test.in</a></td>
-        <td><a :href="testcaseUrl(item, 'out')" target="_blank">test.out</a></td>
+        <td><a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank" @click="search(item)">test.in</a></td>
+        <td><a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">test.out</a></td>
         <td>
           <Button type="text" @click="del(item)">
             Delete

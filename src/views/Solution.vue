@@ -44,10 +44,6 @@ function prettyCode (code) {
   }).value
 }
 
-function testcaseUrl2 ({ uuid }, type) {
-  return testcaseUrl(solution.pid, uuid, type)
-}
-
 onBeforeMount(async () => {
   await findOne(route.params)
   root.changeDomTitle({ title: `Solution ${solution.pid}` })
@@ -85,9 +81,9 @@ onBeforeMount(async () => {
           <td>
             {{ item.uuid.slice(0, 8) }}
             <template v-if="isAdmin">
-              <a :href="testcaseUrl2(item, 'in')" target="_blank">TestIn</a>
+              <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">TestIn</a>
               {{ " " }}
-              <a :href="testcaseUrl2(item, 'out')" target="_blank">TestOut</a>
+              <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">TestOut</a>
             </template>
           </td>
           <td>{{ item.time }}</td>
