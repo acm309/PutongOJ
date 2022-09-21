@@ -33,7 +33,7 @@ function del (item) {
     content: '<p>此操作将永久删除该文件, 是否继续?</p>',
     onOk: async () => {
       const testcase = {
-        pid: this.$route.params.pid,
+        pid: route.params.pid,
         uuid: item.uuid,
       }
       await testcaseStore.delete(testcase)
