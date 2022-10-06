@@ -92,7 +92,7 @@ async function visit (item) {
 }
 
 async function change (contest) {
-  contest.status = contest.status === this.status.Reserve
+  contest.status = contest.status === status.Reserve
     ? status.Available
     : status.Reserve
   await update(contest)

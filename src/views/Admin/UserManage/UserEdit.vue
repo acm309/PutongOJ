@@ -1,6 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { inject } from 'vue'
 import { purify } from '@/util/helper'
 import { useUserStore } from '@/store/modules/user'
 
@@ -10,6 +11,7 @@ const { user } = $(storeToRefs(userStore))
 const uid = $ref('')
 const newPwd = $ref('')
 const checkPwd = $ref('')
+const Message = inject('$Message')
 
 const findUser = () => userStore.findOne({ uid })
 
@@ -17,7 +19,7 @@ async function saveUser () {
   if (newPwd === checkPwd) {
     const newUser = purify(Object.assign(
       user,
-      { newPwd: this.newPwd },
+      { newPwd },
     ))
     await userStore.update(newUser)
     Message.success(t('oj.update_success'))
@@ -83,9 +85,15 @@ async function saveUser () {
         <Input v-model="checkPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
       </Col>
     </Row>
-    <Button type="primary" class="submit" @click="saveUser">
+    <Button
+      type="primary" class="submit" :disabled="user.uid == null"
+      @click="saveUser"
+    >
       {{ t('oj.submit') }}
     </Button>
+    <p v-if="user.uid == null">
+      Click search to find user first
+    </p>
   </div>
 </template>
 
