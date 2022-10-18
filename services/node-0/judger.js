@@ -8,7 +8,9 @@
  * 6. 更新用户的 Submit 和 Solve
  * 7. 结束，再次从第一步开始
  */
-require('dotenv-flow').config()
+require('dotenv-flow').config({
+  path: '../../',
+})
 
 const { resolve } = require('path')
 const fse = require('fs-extra')
@@ -54,9 +56,15 @@ function judgeCode (code) {
   }
 }
 
-async function beforeJudge (sid) {
+async function fetchProblemAndSolution (sid) {
   const solution = await Solution.findOne({ sid }).exec()
+  if (solution == null) return null
   const problem = await Problem.findOne({ pid: solution.pid }).exec()
+  if (problem == null) return null
+  return { solution, problem }
+}
+
+async function beforeJudge (problem, solution) {
   solution.judge = config.judge.Running
   await solution.save() // 将判题状态改为正在判题
 
@@ -90,13 +98,12 @@ async function beforeJudge (sid) {
 
 async function judge (problem, solution) {
   await execaCommand(`./Judge -l ${solution.language} -D ./testdata -d ./temp -t ${problem.time} -m ${problem.memory} -o 81920`)
-
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
   if (ce) { // 非空，有错
     solution.judge = config.judge.CompileError
     solution.error = ce
-    return
+    return solution
   }
 
   solution.time = solution.memory = 0
@@ -244,9 +251,21 @@ async function main () {
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
     if (res == null) continue
     const sid = +res[1]
-    const { problem, solution } = await beforeJudge(sid)
-    logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}>`)
-    await judge(problem, solution)
+    const baseInfo = await fetchProblemAndSolution(sid)
+    if (baseInfo == null) {
+      logger.info(`Start judge: <sid ${sid}> null`)
+      continue
+    }
+    const { problem, solution } = baseInfo
+    try {
+      await beforeJudge(problem, solution)
+      logger.info(`Start judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}>`)
+      await judge(problem, solution)
+    } catch (e) {
+      logger.error(`System Error: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}>`)
+      logger.error(`${e}`)
+      solution.judge = config.judge.SystemError
+    }
     await afterJudge(problem, solution)
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
     if (solution.mid) {
