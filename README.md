@@ -127,7 +127,7 @@ pm2 start pm2.config.json
 docker ps
 ```
 
-### dump
+### 导出
 
 将 `<Container id>` 替换为上一步中 mongodb 实际运行的 id
 
