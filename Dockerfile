@@ -3,24 +3,18 @@ ENV NODE_ENV production
 
 WORKDIR /app
 
-# https://github.com/kkarczmarczyk/docker-node-yarn/blob/master/latest/Dockerfile
-RUN apt-get update && apt-get install -y curl apt-transport-https && \
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && apt-get install -y yarn
+RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 
-RUN apt-get install -y gcc g++ unzip apt-utils libcairo2-dev libpango1.0-dev build-essential default-jdk
-
-RUN npm install -g pm2
+RUN apt update && apt install -y gcc g++ unzip libcairo2-dev libpango1.0-dev build-essential default-jdk
 
 COPY package*.json ./
-COPY yarn.lock ./
+COPY pnpm-lock.yaml ./
 
-RUN yarn install --production && mv node_modules ../
+RUN pnpm install -P && mv node_modules ../
 
 COPY . .
 
 EXPOSE 3000
 
 RUN node manage.js
-CMD ["npx", "pm2", "start", "pm2.config.json", "--no-daemon"]
+CMD ["pnpm", "exec", "pm2", "start", "pm2.config.json", "--no-daemon"]
