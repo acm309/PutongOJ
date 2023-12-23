@@ -5,8 +5,8 @@ const { purify } = require('../utils/helper')
 // 返回排名列表
 const find = async (ctx) => {
   const opt = ctx.request.query
-  const page = parseInt(opt.page) || 1
-  const pageSize = parseInt(opt.pageSize) || 30
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 30
   const filter = purify(only(opt, 'gid'))
   const list = await User.paginate(filter, {
     sort: { solve: -1, submit: 1 },

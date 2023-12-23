@@ -1,3 +1,4 @@
+const Buffer = require('node:buffer').Buffer
 const only = require('only')
 const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')
@@ -8,8 +9,8 @@ const redis = require('../config/redis')
 // 返回提交列表
 const find = async (ctx) => {
   const opt = ctx.request.query
-  const page = parseInt(opt.page) || 1
-  const pageSize = parseInt(opt.pageSize) || 30
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 30
   const filter = purify(only(opt, 'uid pid judge language mid'))
   const list = await Solution.paginate(filter, {
     sort: { sid: -1 },
@@ -27,12 +28,12 @@ const find = async (ctx) => {
 
 // 返回一个提交
 const findOne = async (ctx) => {
-  const opt = parseInt(ctx.params.sid)
+  const opt = Number.parseInt(ctx.params.sid)
   // 使用lean solution 就是一个 js 对象，没有 save 等方法
   const solution = await Solution.findOne({ sid: opt }).lean().exec()
 
-  if (solution == null) ctx.throw(400, 'No such a solution')
-  if (!isAdmin(ctx.session.profile) && solution.uid !== ctx.session.profile.uid) ctx.throw(403, 'Permission denied')
+  if (solution == null) { ctx.throw(400, 'No such a solution') }
+  if (!isAdmin(ctx.session.profile) && solution.uid !== ctx.session.profile.uid) { ctx.throw(403, 'Permission denied') }
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
   if (isAdmin(ctx.session.profile) && solution.sim) {
@@ -49,7 +50,7 @@ const findOne = async (ctx) => {
 const create = async (ctx) => {
   const opt = ctx.request.body
   if (opt.mid) {
-    const cid = parseInt(opt.mid)
+    const cid = Number.parseInt(opt.mid)
     const contest = await Contest.findOne({ cid }).exec()
     if (contest.end < Date.now()) {
       ctx.throw(400, 'Contest is ended!')
@@ -67,7 +68,7 @@ const create = async (ctx) => {
   })
 
   if (opt.mid) {
-    solution.mid = parseInt(opt.mid)
+    solution.mid = Number.parseInt(opt.mid)
   }
 
   try {

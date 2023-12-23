@@ -50,7 +50,7 @@ discussSchema.pre('validate', function (next) {
     next(new Error('The length of the title should not be greater than 80'))
   } else if (
     this.comments == null || this.comments.length === 0
-    || this.comments.some(item => !item.content)
+      || this.comments.some(item => !item.content)
   ) {
     next(new Error('comment not be empty'))
   } else {

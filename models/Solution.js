@@ -99,7 +99,7 @@ solutionSchema.virtual('isPending').get(function () {
 
 solutionSchema.pre('validate', function (next) {
   // 验证字段
-  if (isNaN(this.pid)) {
+  if (Number.isNaN(this.pid)) {
     next(new Error('Pid should be a number'))
   } else if (this.code.length <= 5) {
     next(new Error('The length of code should be greater than 5'))

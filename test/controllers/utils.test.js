@@ -1,5 +1,5 @@
-const fs = require('fs')
-const { resolve } = require('path')
+const fs = require('node:fs')
+const { resolve } = require('node:path')
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../app')

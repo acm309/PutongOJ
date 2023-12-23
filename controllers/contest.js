@@ -10,10 +10,10 @@ const redis = require('../config/redis')
 const { isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
-  const cid = parseInt(ctx.params.cid)
-  if (isNaN(cid)) ctx.throw(400, 'Cid has to be a number')
+  const cid = Number.parseInt(ctx.params.cid)
+  if (Number.isNaN(cid)) { ctx.throw(400, 'Cid has to be a number') }
   const contest = await Contest.findOne({ cid }).exec()
-  if (contest == null) ctx.throw(400, 'No such a contest')
+  if (contest == null) { ctx.throw(400, 'No such a contest') }
   if (isAdmin(ctx.session.profile)) {
     ctx.state.contest = contest
     return next()
@@ -34,8 +34,8 @@ const preload = async (ctx, next) => {
 // 返回竞赛列表
 const find = async (ctx) => {
   const opt = ctx.request.query
-  const page = parseInt(opt.page) || 1
-  const pageSize = parseInt(opt.pageSize) || 20
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 20
 
   const filter = ctx.session.profile && isAdmin(ctx.session.profile) ? {} : { status: config.status.Available }
   if (ctx.query.type === 'title') {
@@ -63,7 +63,7 @@ const find = async (ctx) => {
 // 返回一个竞赛
 const findOne = async (ctx) => {
   const opt = ctx.params
-  const cid = parseInt(opt.cid)
+  const cid = Number.parseInt(opt.cid)
   let contest = ctx.state.contest
 
   // 普通用户不能获取argument的值
@@ -148,7 +148,7 @@ const ranklist = async (ctx) => {
       .findOne({ uid })
       .lean()
       .exec()
-      .then((user) => { if (user != null) ranklist[user.uid].nick = user.nick })))
+      .then((user) => { if (user != null) { ranklist[user.uid].nick = user.nick } })))
 
   if (Date.now() + deadline < contest.end) {
     // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
@@ -156,8 +156,8 @@ const ranklist = async (ctx) => {
     await redis.set(`oj:ranklist:${contest.cid}`, str) // 更新该比赛的最新排名信息
     res = ranklist
   } else if (!isAdmin(ctx.session.profile)
-    && Date.now() + deadline > contest.end
-    && Date.now() < contest.end) {
+  && Date.now() + deadline > contest.end
+  && Date.now() < contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
     const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
     res = JSON.parse(mid)
@@ -252,7 +252,7 @@ const verify = async (ctx) => {
   // 普通用户的前端页面里没有argument的值，需要重新在数据库中找一遍
   const contest = await Contest.findOne({ cid }).lean().exec()
 
-  const enc = parseInt(contest.encrypt)
+  const enc = Number.parseInt(contest.encrypt)
   const arg = contest.argument
   let isVerify = false
   if (enc === config.encrypt.Private) {
@@ -261,7 +261,7 @@ const verify = async (ctx) => {
     for (const item of arr) {
       if (item.startsWith('gid:')) {
         const gid = item.substring(4)
-        const group = await Group.findOne({ gid: parseInt(gid) }).exec()
+        const group = await Group.findOne({ gid: Number.parseInt(gid) }).exec()
         if (group != null && group.list.includes(uid)) {
           isVerify = true
           break

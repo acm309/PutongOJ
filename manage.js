@@ -1,6 +1,7 @@
 require('dotenv-flow').config()
 
-const { resolve } = require('path')
+const { resolve } = require('node:path')
+const process = require('node:process')
 const fse = require('fs-extra')
 const range = require('lodash.range')
 // DO not upgrade execa to v6.0.0 as it is esm module
@@ -57,7 +58,7 @@ if (config.mail && config.mail.enable) {
 
 async function judgeSetup () {
   let judgers = +config.judgers
-  if (!(judgers >= 1 && judgers <= 10)) judgers = 1
+  if (!(judgers >= 1 && judgers <= 10)) { judgers = 1 }
 
   const judgersDir = resolve(__dirname, 'services')
 

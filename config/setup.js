@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('node:path')
 const fse = require('fs-extra')
 const ID = require('../models/ID')
 const User = require('../models/User')
@@ -12,7 +12,7 @@ async function databaseSetup () {
   ]
   const ps = models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= 0) return
+    if (item != null && item.id >= 0) { return }
     return new ID({ name: model, id: 0 }).save()
   })
 

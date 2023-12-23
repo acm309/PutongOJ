@@ -1,14 +1,15 @@
+const process = require('node:process')
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
 const logger = require('../utils/logger')
 const config = require('./')
 
-mongoose.Promise = global.Promise
+mongoose.Promise = globalThis.Promise
 
 // 连接MongoDB数据库
 mongoose.connect(config.dbURL)
 
-mongoose.Promise = global.Promise
+mongoose.Promise = globalThis.Promise
 
 mongoose.connection.on('connected', () => {
   logger.info('MongoDB connected success.')

@@ -1,5 +1,5 @@
 require('dotenv-flow').config()
-
+const process = require('node:process')
 const User = require('../models/User')
 const Problem = require('../models/Problem')
 const ID = require('../models/ID')

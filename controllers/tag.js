@@ -8,7 +8,7 @@ const logger = require('../utils/logger')
 const preload = async (ctx, next) => {
   const tid = ctx.params.tid
   const tag = await Tag.findOne({ tid }).exec()
-  if (tag == null) ctx.throw(400, 'No such a tag')
+  if (tag == null) { ctx.throw(400, 'No such a tag') }
   ctx.state.tag = tag
   return next()
 }
@@ -92,7 +92,7 @@ const update = async (ctx) => {
   const delProcedure = pidsOfRemovedTids.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        if (problem == null) return { pid: `${pid} not found` }
+        if (problem == null) { return { pid: `${pid} not found` } }
         problem.tags = without(problem.tags, tid)
         return problem.save()
       })
@@ -109,7 +109,7 @@ const update = async (ctx) => {
   const addProcedure = pidsOfImportedTids.map((pid) => {
     return Problem.findOne({ pid }).exec()
       .then((problem) => {
-        if (problem == null) return { pid: `${pid} not found` }
+        if (problem == null) { return { pid: `${pid} not found` } }
         problem.tags.push(tid)
         return problem.save()
       })

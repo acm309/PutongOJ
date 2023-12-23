@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('node:path')
 const only = require('only')
 const fse = require('fs-extra')
 const config = require('../config')
@@ -9,11 +9,11 @@ const logger = require('../utils/logger')
 const { isLogined, isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
-  const pid = parseInt(ctx.params.pid)
-  const cid = parseInt(ctx.request.query.cid) || 0
-  if (isNaN(pid)) ctx.throw(400, 'Pid has to be a number')
+  const pid = Number.parseInt(ctx.params.pid)
+  const cid = Number.parseInt(ctx.request.query.cid) || 0
+  if (Number.isNaN(pid)) { ctx.throw(400, 'Pid has to be a number') }
   const problem = await Problem.findOne({ pid }).exec()
-  if (problem == null) ctx.throw(400, 'No such a problem')
+  if (problem == null) { ctx.throw(400, 'No such a problem') }
   if (isAdmin(ctx.session.profile)) {
     ctx.state.problem = problem
     return next()
@@ -40,8 +40,8 @@ const preload = async (ctx, next) => {
 const find = async (ctx) => {
   const opt = ctx.request.query
   const filter = {}
-  const page = parseInt(opt.page) || 1
-  const pageSize = parseInt(opt.pageSize) || 30
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 30
   if (opt.content) {
     if (opt.type === 'tag') {
       filter.tags = {
@@ -117,8 +117,8 @@ const create = async (ctx) => {
   const problem = new Problem(Object.assign(
     only(opt, 'title description input output in out hint'),
     { // pid 会自动生成
-      time: parseInt(opt.time) || 1000,
-      memory: parseInt(opt.memory) || 32768,
+      time: Number.parseInt(opt.time) || 1000,
+      memory: Number.parseInt(opt.memory) || 32768,
     },
   ))
 
@@ -135,8 +135,8 @@ const create = async (ctx) => {
   /**
    * outputJsonSync (file, object, options)
    * @param {string} file
-   * @param {Object} object
-   * @param {Object} options
+   * @param {object} object
+   * @param {object} options
    */
   // 把 object 写入到 file 中，如果 file 不存在，就创建它
   fse.outputJsonSync(path.resolve(dir, 'meta.json'), {

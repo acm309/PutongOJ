@@ -1,5 +1,6 @@
 require('../../config/db')
-const { resolve } = require('path')
+const process = require('node:process')
+const { resolve } = require('node:path')
 const mongoose = require('mongoose')
 const uuid = require('uuid/v4')
 const fse = require('fs-extra')
@@ -70,16 +71,16 @@ async function ranklistBuild () {
       const { pid } = solution
       const item = (pid in row) ? row[pid] : {}
       if ('wa' in item) {
-        if (item.wa >= 0) continue
+        if (item.wa >= 0) { continue }
         if (solution.judge === config.judge.Accepted) {
           item.wa = -item.wa
           item.create = solution.create
-        } else item.wa--
+        } else { item.wa-- }
       } else {
         if (solution.judge === config.judge.Accepted) {
           item.wa = 0
           item.create = solution.create
-        } else item.wa = -1
+        } else { item.wa = -1 }
       }
       row[pid] = item
       ranklist[uid] = row
@@ -98,7 +99,7 @@ async function databaseSetup () {
   ]
   return Promise.all(models.map(async (model) => {
     const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= 0) return
+    if (item != null && item.id >= 0) { return }
     return new ID({ name: model, id: 0 }).save()
   }))
 }

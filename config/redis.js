@@ -1,3 +1,4 @@
+const process = require('node:process')
 const Redis = require('ioredis')
 const logger = require('../utils/logger')
 const config = require('./')

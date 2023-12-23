@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const pickBy = require('lodash.pickby')
 const config = require('../config')
 
@@ -11,8 +11,8 @@ function generatePwd (pwd) {
 }
 
 function isAdmin (profile) {
-  if (profile == null || profile.privilege == null) return false
-  if (parseInt(profile.privilege) === config.privilege.Root || parseInt(profile.privilege) === config.privilege.Teacher) {
+  if (profile == null || profile.privilege == null) { return false }
+  if (Number.parseInt(profile.privilege) === config.privilege.Root || Number.parseInt(profile.privilege) === config.privilege.Teacher) {
     return true
   } else {
     return false
@@ -20,8 +20,8 @@ function isAdmin (profile) {
 }
 
 function isRoot (profile) {
-  if (profile == null || profile.privilege == null) return false
-  if (parseInt(profile.privilege) === config.privilege.Root) {
+  if (profile == null || profile.privilege == null) { return false }
+  if (Number.parseInt(profile.privilege) === config.privilege.Root) {
     return true
   } else {
     return false

@@ -2,7 +2,7 @@ const { RateLimit } = require('koa2-ratelimit')
 const { isAdmin, isRoot } = require('./helper')
 
 const login = async (ctx, next) => {
-  if (!ctx.session || ctx.session.profile == null) ctx.throw(401, 'Login required')
+  if (!ctx.session || ctx.session.profile == null) { ctx.throw(401, 'Login required') }
   await next()
 }
 

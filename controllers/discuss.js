@@ -3,10 +3,10 @@ const logger = require('../utils/logger')
 const redis = require('../config/redis')
 
 const preload = async (ctx, next) => {
-  const did = parseInt(ctx.params.did)
-  if (isNaN(did)) ctx.throw(400, 'Did has to be a number')
+  const did = Number.parseInt(ctx.params.did)
+  if (Number.isNaN(did)) { ctx.throw(400, 'Did has to be a number') }
   const discuss = await Discuss.findOne({ did }).exec()
-  if (discuss == null) ctx.throw(400, 'No such a discuss')
+  if (discuss == null) { ctx.throw(400, 'No such a discuss') }
   ctx.state.discuss = discuss
   return next()
 }

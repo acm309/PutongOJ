@@ -1,6 +1,7 @@
 require('dotenv-flow').config()
 
-const path = require('path')
+const path = require('node:path')
+const process = require('node:process')
 const Koa = require('koa')
 const koaLogger = require('koa-logger')
 const bodyparser = require('koa-body')

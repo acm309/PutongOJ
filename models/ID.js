@@ -14,8 +14,8 @@ const IdSchema = mongoose.Schema({
 
 /**
   Return a new id for required field
-  @param {String} [field=''] - the required field
-  @returns {Number} - a new id
+  @param {string} [field] - the required field
+  @returns {number} - a new id
   @example
     Before:
       ids collection in db:
@@ -25,7 +25,7 @@ const IdSchema = mongoose.Schema({
       ids.generateId('News')
       ids collection in db:
         { "id" : 2, "name" : "News" }
-*/
+ */
 IdSchema.statics.generateId = function (field = '') {
   // field 只能是以下中的一个
   // 'Problem', 'Solution', 'Contest', 'News', 'Group', 'Discuss', 'Tag'

@@ -3,10 +3,10 @@ const News = require('../models/News')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
-  const nid = parseInt(ctx.params.nid)
-  if (isNaN(nid)) ctx.throw(400, 'Nid has to be a number')
+  const nid = Number.parseInt(ctx.params.nid)
+  if (Number.isNaN(nid)) { ctx.throw(400, 'Nid has to be a number') }
   const news = await News.findOne({ nid }).exec()
-  if (news == null) ctx.throw(400, 'No such a news')
+  if (news == null) { ctx.throw(400, 'No such a news') }
   ctx.state.news = news
   return next()
 }
@@ -15,8 +15,8 @@ const preload = async (ctx, next) => {
 const find = async (ctx) => {
   const filter = {}
   const opt = ctx.request.query
-  const page = parseInt(opt.page) || 1
-  const pageSize = parseInt(opt.pageSize) || 5
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 5
   const list = await News.paginate(filter, {
     sort: { nid: -1 },
     page,

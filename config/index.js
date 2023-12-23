@@ -1,3 +1,5 @@
+const process = require('node:process')
+
 const config = {
   redisURL: process.env.redisURL,
 }

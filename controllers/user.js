@@ -10,7 +10,7 @@ const { isAdmin, isRoot, isUndefined } = require('../utils/helper')
 const preload = async (ctx, next) => {
   const uid = ctx.params.uid
   const user = await User.findOne({ uid }).exec()
-  if (user == null) ctx.throw(400, 'No such a user')
+  if (user == null) { ctx.throw(400, 'No such a user') }
   ctx.state.user = user
   return next()
 }
@@ -116,7 +116,7 @@ const update = async (ctx) => {
     }
   })
   if (!isUndefined(opt.privilege)) {
-    user.privilege = parseInt(opt.privilege)
+    user.privilege = Number.parseInt(opt.privilege)
   }
   if (opt.newPwd) {
     user.pwd = generatePwd(opt.newPwd)

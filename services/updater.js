@@ -12,9 +12,9 @@ async function main () {
   while (1) {
     try {
       const res = await redis.brpop('oj:contest:solution', 365 * 24 * 60) // one year
-      const sid = parseInt(res[1])
+      const sid = Number.parseInt(res[1])
       const solution = await Solution.findOne({ sid }).lean().exec()
-      if (solution == null) continue
+      if (solution == null) { continue }
       const { uid, pid } = solution
       const contest = await Contest.findOne({ cid: solution.mid }).lean().exec()
       logger.info(`Contest: <${contest.cid}>, Solution: <${sid}>, User: <${uid}>, Problem: <${pid}>`)

@@ -12,7 +12,7 @@ require('dotenv-flow').config({
   path: '../../',
 })
 
-const { resolve } = require('path')
+const { resolve } = require('node:path')
 const fse = require('fs-extra')
 const { command: execaCommand } = require('execa')
 
@@ -23,6 +23,7 @@ const User = require('../../models/User')
 const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
+
 const extensions = [ '', 'c', 'cpp', 'java' ]
 
 // 转化代码
@@ -31,10 +32,10 @@ const extensions = [ '', 'c', 'cpp', 'java' ]
 // 判题端的 judge 代码见 README
 // OJ 默认的见 config/index.js
 function judgeCode (code) {
-  if (isNaN(+code)) {
+  if (Number.isNaN(+code)) {
     throw new TypeError(`${code}, which has type ${typeof code}, should be able to be converted into a number`)
   }
-  code = parseInt(code)
+  code = Number.parseInt(code)
   if (code === 2) {
     return config.judge.Accepted
   } else if (code === 3) {
@@ -58,9 +59,9 @@ function judgeCode (code) {
 
 async function fetchProblemAndSolution (sid) {
   const solution = await Solution.findOne({ sid }).exec()
-  if (solution == null) return null
+  if (solution == null) { return null }
   const problem = await Problem.findOne({ pid: solution.pid }).exec()
-  if (problem == null) return null
+  if (problem == null) { return null }
   return { solution, problem }
 }
 
@@ -170,7 +171,7 @@ async function simTest (solution) {
   if (fse.existsSync('./simfile')) {
     const simfile = await fse.readFile('./simfile')
     const result = simfile.toString().match(/(\d+)\s+(\d+)/)
-    ;[ solution.sim, solution.sim_s_id ] = [ +result[1], +result[2] ]
+      ;[ solution.sim, solution.sim_s_id ] = [ +result[1], +result[2] ]
   }
   return {
     sim: solution.sim || 0,
@@ -249,7 +250,7 @@ async function main () {
   while (1) {
     // 移出并获取oj:solutions列表中的最后一个元素
     const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
-    if (res == null) continue
+    if (res == null) { continue }
     const sid = +res[1]
     const baseInfo = await fetchProblemAndSolution(sid)
     if (baseInfo == null) {

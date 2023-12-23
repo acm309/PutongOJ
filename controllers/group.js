@@ -6,19 +6,19 @@ const User = require('../models/User')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
-  const gid = parseInt(ctx.params.gid)
-  if (isNaN(gid)) ctx.throw(400, 'Gid has to be a number')
+  const gid = Number.parseInt(ctx.params.gid)
+  if (Number.isNaN(gid)) { ctx.throw(400, 'Gid has to be a number') }
   const group = await Group.findOne({ gid }).exec()
-  if (group == null) ctx.throw(400, 'No such a group')
+  if (group == null) { ctx.throw(400, 'No such a group') }
   ctx.state.group = group
   return next()
 }
 
 // 返回group列表
 const find = async (ctx) => {
-  const lean = parseInt(ctx.query.lean)
+  const lean = Number.parseInt(ctx.query.lean)
   let select = '-_id -__v'
-  if (lean === 1) select += ' -list'
+  if (lean === 1) { select += ' -list' }
   const list = await Group.find({}).select(select).lean().exec()
 
   ctx.body = {
@@ -133,7 +133,7 @@ const update = async (ctx) => {
 
 // 删除一个group
 const del = async (ctx) => {
-  const gid = parseInt(ctx.params.gid)
+  const gid = Number.parseInt(ctx.params.gid)
   const group = ctx.state.group
   const list = group.list
 
