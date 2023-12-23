@@ -10,10 +10,9 @@ const { isAdmin, isLogined } = $(storeToRefs(sessionStore))
 const route = useRoute()
 const router = useRouter()
 const active = $computed(() => route.name)
-const change = (name) => {
-  if (name !== active) {
+function change (name) {
+  if (name !== active)
     router.push({ name, params: { pid: route.params.pid } })
-  }
 }
 </script>
 

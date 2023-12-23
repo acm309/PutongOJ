@@ -1,4 +1,3 @@
-/* eslint-disable vue/no-reserved-component-names */
 import { createApp } from 'vue'
 import {
   Button,
@@ -114,9 +113,9 @@ Promise.all([
   useSessionStore().fetch(),
   useRootStore().fetchWebsiteConfig(),
 ]).then(() => {
-  if (useRootStore().website.semi_restful) {
+  if (useRootStore().website.semi_restful)
     semiRestful()
-  }
+
   // Router must be loaded after session/website config is loaded
   app.use(router)
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/

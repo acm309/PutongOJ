@@ -21,11 +21,13 @@ const test = $ref({
 
 const fetch = () => testcaseStore.find(route.params)
 
-const search = item => testcaseStore.findOne({
-  pid: route.params.pid,
-  uuid: item.uuid,
-  type: 'in',
-})
+function search (item) {
+  return testcaseStore.findOne({
+    pid: route.params.pid,
+    uuid: item.uuid,
+    type: 'in',
+  })
+}
 
 function del (item) {
   $Modal.confirm({

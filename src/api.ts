@@ -31,9 +31,9 @@ instance.interceptors.request.use((config) => {
 
 instance.interceptors.response.use((resp) => {
   const data: { profile: Profile | null } = resp.data
-  if (data.profile) {
+  if (data.profile)
     useSessionStore().setLoginProfile(data.profile)
-  }
+
   return resp
 }, (err) => {
   if (errHandler) {
@@ -47,80 +47,80 @@ instance.interceptors.response.use((resp) => {
 
 const api = {
   // 获取题目提交图表信息
-  getStatistics: data => instance.get(`/statistics/${data.pid}`, { params: data }),
+  getStatistics: (data: object) => instance.get(`/statistics/${data.pid}`, { params: data }),
   // 获取排名列表
-  getRanklist: data => instance.get('/ranklist/list', { params: data }),
+  getRanklist: (data: object) => instance.get('/ranklist/list', { params: data }),
   // 图片上传
-  getImage: data => instance.post('/submit', data),
+  getImage: (data: object) => instance.post('/submit', data),
   // 获取服务器时间
   getTime: () => instance.get<TimeResp>('/servertime'),
   getWebsiteConfig: () => instance.get<WebsiteConfigResp>('/website'),
   testcase: {
-    findOne: data => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
-    find: data => instance.get(`/testcase/${data.pid}`, { params: data }),
-    create: data => instance.post(`/testcase/${data.pid}`, data),
-    delete: data => instance.delete(`/testcase/${data.pid}/${data.uuid}`, data),
+    findOne: (data: object) => instance.get(`/testcase/${data.pid}/${data.uuid}`, { params: data }),
+    find: (data: object) => instance.get(`/testcase/${data.pid}`, { params: data }),
+    create: (data: object) => instance.post(`/testcase/${data.pid}`, data),
+    delete: (data: object) => instance.delete(`/testcase/${data.pid}/${data.uuid}`, data),
   },
   user: {
-    findOne: data => instance.get(`/user/${data.uid}`, { params: data }),
-    find: data => instance.get('/user/list', { params: data }),
-    create: data => instance.post('/user', data),
-    update: data => instance.put(`/user/${data.uid}`, data),
-    delete: data => instance.delete(`/user/${data.uid}`, data),
+    findOne: (data: object) => instance.get(`/user/${data.uid}`, { params: data }),
+    find: (data: object) => instance.get('/user/list', { params: data }),
+    create: (data: object) => instance.post('/user', data),
+    update: (data: object) => instance.put(`/user/${data.uid}`, data),
+    delete: (data: object) => instance.delete(`/user/${data.uid}`, data),
   },
   solution: {
-    findOne: data => instance.get(`/status/${data.sid}`, { params: data }),
-    find: data => instance.get('/status/list', { params: data }),
-    create: data => instance.post('/status', data),
+    findOne: (data: object) => instance.get(`/status/${data.sid}`, { params: data }),
+    find: (data: object) => instance.get('/status/list', { params: data }),
+    create: (data: object) => instance.post('/status', data),
   },
   problem: {
-    findOne: data => instance.get(`/problem/${data.pid}`, { params: data }),
-    find: data => instance.get('/problem/list', { params: data }),
-    create: data => instance.post('/problem/', data),
-    update: data => instance.put(`/problem/${data.pid}`, data),
-    delete: data => instance.delete(`/problem/${data.pid}`, data),
+    findOne: (data: object) => instance.get(`/problem/${data.pid}`, { params: data }),
+    find: (data: object) => instance.get('/problem/list', { params: data }),
+    create: (data: object) => instance.post('/problem/', data),
+    update: (data: object) => instance.put(`/problem/${data.pid}`, data),
+    delete: (data: object) => instance.delete(`/problem/${data.pid}`, data),
   },
   contest: {
-    findOne: data => instance.get(`/contest/${data.cid}`, { params: data }),
-    find: data => instance.get('/contest/list', { params: data }),
-    create: data => instance.post('/contest/', data),
-    update: data => instance.put(`/contest/${data.cid}`, data),
-    rank: data => instance.get(`/contest/${data.cid}/rank`, { params: data }),
-    delete: data => instance.delete(`/contest/${data.cid}`, data),
-    verify: data => instance.post(`/contest/${data.cid}/verify`, data),
+    findOne: (data: object) => instance.get(`/contest/${data.cid}`, { params: data }),
+    find: (data: object) => instance.get('/contest/list', { params: data }),
+    create: (data: object) => instance.post('/contest/', data),
+    update: (data: object) => instance.put(`/contest/${data.cid}`, data),
+    rank: (data: object) => instance.get(`/contest/${data.cid}/rank`, { params: data }),
+    delete: (data: object) => instance.delete(`/contest/${data.cid}`, data),
+    verify: (data: object) => instance.post(`/contest/${data.cid}/verify`, data),
   },
   news: {
-    findOne: data => instance.get(`/news/${data.nid}`, { params: data }),
-    find: data => instance.get('/news/list', { params: data }),
-    create: data => instance.post('/news/', data),
-    update: data => instance.put(`/news/${data.nid}`, data),
-    delete: data => instance.delete(`/news/${data.nid}`, data),
+    findOne: (data: object) => instance.get(`/news/${data.nid}`, { params: data }),
+    find: (data: object) => instance.get('/news/list', { params: data }),
+    create: (data: object) => instance.post('/news/', data),
+    update: (data: object) => instance.put(`/news/${data.nid}`, data),
+    delete: (data: object) => instance.delete(`/news/${data.nid}`, data),
   },
   group: {
-    findOne: data => instance.get(`/group/${data.gid}`, { params: data }),
-    find: data => instance.get('/group/list', { params: data }),
-    create: data => instance.post('/group/', data),
-    update: data => instance.put(`/group/${data.gid}`, data),
-    delete: data => instance.delete(`/group/${data.gid}`, data),
+    findOne: (data: object) => instance.get(`/group/${data.gid}`, { params: data }),
+    find: (data: object) => instance.get('/group/list', { params: data }),
+    create: (data: object) => instance.post('/group/', data),
+    update: (data: object) => instance.put(`/group/${data.gid}`, data),
+    delete: (data: object) => instance.delete(`/group/${data.gid}`, data),
   },
   tag: {
-    findOne: data => instance.get(`/tag/${data.tid}`, { params: data }),
-    find: data => instance.get('/tag/list', { params: data }),
-    create: data => instance.post('/tag/', data),
-    update: data => instance.put(`/tag/${data.tid}`, data),
-    delete: data => instance.delete(`/tag/${data.tid}`, data),
+    findOne: (data: object) => instance.get(`/tag/${data.tid}`, { params: data }),
+    find: (data: object) => instance.get('/tag/list', { params: data }),
+    create: (data: object) => instance.post('/tag/', data),
+    update: (data: object) => instance.put(`/tag/${data.tid}`, data),
+    delete: (data: object) => instance.delete(`/tag/${data.tid}`, data),
   },
   session: {
     create: (data: LoginParam) => instance.post<{ profile: Profile }>('/session', data),
-    delete: () => instance.delete<{}>('/session'),
+    delete: () => instance.delete<object>('/session'),
     fetch: () => instance.get<{ profile: Profile | null }>('/session'),
   },
   discuss: {
-    create: data => instance.post('/discuss', data),
-    find: data => instance.get('/discuss/list', { params: data }),
-    findOne: data => instance.get(`/discuss/${data.did}`, { params: data }),
-    update: data => instance.put(`/discuss/${data.did}`, data),
-    delete: data => instance.delete(`/discuss/${data.did}`, data),
+    create: (data: object) => instance.post('/discuss', data),
+    find: (data: object) => instance.get('/discuss/list', { params: data }),
+    findOne: (data: object) => instance.get(`/discuss/${data.did}`, { params: data }),
+    update: (data: object) => instance.put(`/discuss/${data.did}`, data),
+    delete: (data: object) => instance.delete(`/discuss/${data.did}`, data),
   },
 }
 

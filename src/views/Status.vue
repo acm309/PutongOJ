@@ -19,10 +19,10 @@ const router = useRouter()
 
 let uid = $ref(route.query.uid || '')
 let pid = $ref(route.query.pid || '')
-let judge = $ref(parseInt(route.query.judge) || '')
-let language = $ref(parseInt(route.query.language) || '')
-let page = $ref(parseInt(route.query.page) || 1)
-let pageSize = $ref(parseInt(route.query.pageSize) || 30)
+let judge = $ref(Number.parseInt(route.query.judge) || '')
+let language = $ref(Number.parseInt(route.query.language) || '')
+let page = $ref(Number.parseInt(route.query.page) || 1)
+let pageSize = $ref(Number.parseInt(route.query.pageSize) || 30)
 
 const judgeList = $ref(constant.judgeList)
 const languageList = $ref(constant.languageList)
@@ -32,30 +32,32 @@ const color = $ref(constant.color)
 
 const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-const fetch = () => {
+function fetch () {
   uid = route.query.uid || ''
   pid = route.query.pid || ''
-  judge = parseInt(route.query.judge) || ''
-  language = parseInt(route.query.language) || ''
-  page = parseInt(route.query.page) || 1
-  pageSize = parseInt(route.query.pageSize) || 30
+  judge = Number.parseInt(route.query.judge) || ''
+  language = Number.parseInt(route.query.language) || ''
+  page = Number.parseInt(route.query.page) || 1
+  pageSize = Number.parseInt(route.query.pageSize) || 30
   find(query)
 }
 
-const reload = (payload = {}) => {
+function reload (payload = {}) {
   router.push({
     name: 'status',
     query: purify(Object.assign({}, query, payload)),
   })
 }
 
-const search = () => reload({
-  page: 1,
-  uid,
-  pid,
-  language,
-  judge,
-})
+function search () {
+  return reload({
+    page: 1,
+    uid,
+    pid,
+    language,
+    judge,
+  })
+}
 
 const pageChange = val => reload({ page: val })
 

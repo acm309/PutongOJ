@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OJProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
+
 const { t } = useI18n()
 
 const router = useRouter()

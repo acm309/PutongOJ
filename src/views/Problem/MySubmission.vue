@@ -15,8 +15,8 @@ const rootStore = useRootStore()
 const route = useRoute()
 const router = useRouter()
 
-const page = $computed(() => parseInt(route.query.page) || 1)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
+const page = $computed(() => Number.parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
 const { result, language: lang, color } = constant
 
 const { list, sum } = $(storeToRefs(solutionStore))
@@ -33,17 +33,19 @@ const query = $computed(() => {
     },
   )
   // Test optional chaining
-  if (profile?.uid) {
+  if (profile?.uid)
     opt.uid = profile.uid
-  }
+
   return purify(opt)
 })
 
 const fetch = () => find(query)
-const reload = (payload = {}) => router.push({
-  name: 'mySubmission',
-  query: purify(Object.assign({}, query, payload)),
-})
+function reload (payload = {}) {
+  return router.push({
+    name: 'mySubmission',
+    query: purify(Object.assign({}, query, payload)),
+  })
+}
 const pageChange = val => reload({ page: val })
 
 fetch()

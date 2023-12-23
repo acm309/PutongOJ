@@ -15,10 +15,12 @@ const router = useRouter()
 const current = $computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
-const change = name => router.push({
-  name,
-  params: { nid: route.params.nid },
-})
+function change (name) {
+  return router.push({
+    name,
+    params: { nid: route.params.nid },
+  })
+}
 
 onBeforeMount(async () => {
   await newsStore.findOne(route.params)

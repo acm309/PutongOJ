@@ -23,8 +23,8 @@ const query = $computed(() => {
   return purify(opt)
 })
 
-const page = $computed(() => parseInt(query.page) || 1)
-const pageSize = $computed(() => parseInt(query.pageSize) || 30)
+const page = $computed(() => Number.parseInt(query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(query.pageSize) || 30)
 
 const rootStore = useRootStore()
 const ranklistStore = useRanklistStore()

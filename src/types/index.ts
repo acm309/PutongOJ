@@ -1,4 +1,5 @@
 import type { privilege } from '@/util/constant'
+
 export interface TimeResp {
   serverTime: number
 }

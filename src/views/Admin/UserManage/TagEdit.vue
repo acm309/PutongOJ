@@ -27,7 +27,11 @@ const { list: problemSum } = $(storeToRefs(problemStore))
 const { list: tagList, tag } = $(storeToRefs(tagStore))
 const { clearSavedProblems } = problemStore
 const {
-  find, findOne, update, create, clearSavedTags,
+  find,
+  findOne,
+  update,
+  create,
+  clearSavedTags,
   'delete': remove,
 } = tagStore
 const transData = $computed(() => problemSum.map(item => ({
@@ -54,9 +58,9 @@ function handleChange (newTargetKeys) {
 }
 
 async function manageTag (name) {
-  if (tagList.length > 0) {
+  if (tagList.length > 0)
     tag.tid = tagList[ind].tid
-  }
+
   operation = name
   if (name === 'search') {
     Spin.show()

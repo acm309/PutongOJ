@@ -29,6 +29,11 @@ export const useStatisticsStore = defineStore('statistics', () => {
     }
   }
   return {
-    list, countList, sumCharts, table, sumStatis, find,
+    list,
+    countList,
+    sumCharts,
+    table,
+    sumStatis,
+    find,
   }
 })

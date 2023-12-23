@@ -45,9 +45,8 @@ let pwd = $ref('')
 if (contest != null) {
   contest.start = contest.start || new Date().getTime()
   contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
-  if (contest.encrypt === encrypt.Password) {
+  if (contest.encrypt === encrypt.Password)
     pwd = contest.argument
-  }
 }
 
 async function add () {
@@ -63,9 +62,9 @@ function removeJob (index) {
 
 onBeforeMount(async () => {
   if (route.params.cid) {
-    if (overview.length === 0) {
+    if (overview.length === 0)
       await findOne(only(route.params, 'cid'))
-    }
+
     overview.forEach(item => jobs[item.pid] = item.title)
   }
 })
@@ -101,25 +100,23 @@ const groupOptions = $computed(() => groups.map(item => ({
 const argument = $computed(() => {
   return result.concat(selectedGroups.map(item => `gid:${item}`)).join('\r\n')
 })
-const handleGroupChanges = (data) => {
+function handleGroupChanges (data) {
   selectedGroups = data
 }
-const changeTime = (label, time) => {
-  if (label === 'start') {
+function changeTime (label, time) {
+  if (label === 'start')
     contest.start = time
-  } else {
+  else
     contest.end = time
-  }
 }
 
 groupStore.find({ lean: 1 })
 
 watch(() => contest.encrypt, async (val) => {
-  if (val === encrypt.Password) {
+  if (val === encrypt.Password)
     contest.argument = pwd
-  } else if (val === encrypt.Private) {
+  else if (val === encrypt.Private)
     contest.argument = argument
-  }
 })
 watch($$(pwd), () => contest.argument = pwd)
 watch($$(result), () => contest.argument = argument)

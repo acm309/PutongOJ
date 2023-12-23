@@ -16,10 +16,12 @@ const { problem } = $(storeToRefs(problemStore))
 const { findOne } = problemStore
 const { changeDomTitle } = rootStore
 
-const submit = () => router.push({
-  name: 'problemSubmit',
-  params: router.params,
-})
+function submit () {
+  return router.push({
+    name: 'problemSubmit',
+    params: router.params,
+  })
+}
 
 findOne(route.params).then(() => {
   changeDomTitle(problem.title)

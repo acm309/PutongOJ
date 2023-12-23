@@ -20,8 +20,8 @@ const $Message = inject('$Message')
 const { find, 'delete': removeNews } = newsStore
 const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
 const { list, sum } = $(storeToRefs(newsStore))
-const page = $computed(() => parseInt(route.query.page) || 1)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 5)
+const page = $computed(() => Number.parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 5)
 const query = $computed(() => {
   const opt = only(route.query, 'page pageSize')
   return purify(opt)
@@ -31,7 +31,7 @@ function fetch () {
   find(query)
 }
 
-const reload = (payload = {}) => {
+function reload (payload = {}) {
   router.push({
     name: 'home',
     query: Object.assign(query, purify(payload)),
@@ -39,18 +39,20 @@ const reload = (payload = {}) => {
 }
 
 const pageChange = val => reload({ page: val })
-const del = nid => $Modal.confirm({
-  title: '提示',
-  content: '<p>此操作将永久删除该消息, 是否继续?</p>',
-  onOk: async () => {
-    await removeNews({ nid })
-    $Message.success(`成功删除 ${nid}！`)
-    reload({ page: currentPage })
-  },
-  onCancel: () => {
-    $Message.info('已取消删除！')
-  },
-})
+function del (nid) {
+  return $Modal.confirm({
+    title: '提示',
+    content: '<p>此操作将永久删除该消息, 是否继续?</p>',
+    onOk: async () => {
+      await removeNews({ nid })
+      $Message.success(`成功删除 ${nid}！`)
+      reload({ page: currentPage })
+    },
+    onCancel: () => {
+      $Message.info('已取消删除！')
+    },
+  })
+}
 
 fetch()
 onRouteQueryUpdate(fetch)

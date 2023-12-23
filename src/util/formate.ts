@@ -8,11 +8,11 @@ export function formate (value: number) {
 }
 
 export function timePretty (time: number | string = 0) {
-  return format(toDate(parseInt(`${time}`)), 'yyyy-MM-dd HH:mm:ss')
+  return format(toDate(Number.parseInt(`${time}`)), 'yyyy-MM-dd HH:mm:ss')
 }
 
 export function timeagoPretty (time: number | string) {
-  return formatDistanceToNow(toDate(parseInt(`${time}`)))
+  return formatDistanceToNow(toDate(Number.parseInt(`${time}`)))
 }
 
 export function timeContest (time: number) {

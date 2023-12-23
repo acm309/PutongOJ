@@ -4,6 +4,7 @@ import { watch } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useSessionStore } from '@/store/modules/session'
+
 export function purify (obj: object) {
   return pickBy(obj, x => x != null && x !== '')
 }

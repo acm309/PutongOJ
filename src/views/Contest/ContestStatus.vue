@@ -27,10 +27,10 @@ const router = useRouter()
 
 let uid = $ref(route.query.uid || '')
 let pid = $ref(route.query.pid || '')
-let judge = $ref(parseInt(route.query.judge) || '')
-let language = $ref(parseInt(route.query.language) || '')
-let page = $ref(parseInt(route.query.page) || 1)
-let pageSize = $ref(parseInt(route.query.pageSize) || 30)
+let judge = $ref(Number.parseInt(route.query.judge) || '')
+let language = $ref(Number.parseInt(route.query.language) || '')
+let page = $ref(Number.parseInt(route.query.page) || 1)
+let pageSize = $ref(Number.parseInt(route.query.pageSize) || 30)
 const mid = $computed(() => route.params.cid || '')
 
 const judgeList = $ref(constant.judgeList)
@@ -47,9 +47,9 @@ const query = $computed(() => {
       mid: route.params.cid,
     },
   )
-  if (route.query.pid) {
-    opt.pid = problems[parseInt(route.query.pid) - 1]
-  }
+  if (route.query.pid)
+    opt.pid = problems[Number.parseInt(route.query.pid) - 1]
+
   return purify(opt)
 })
 
@@ -58,12 +58,12 @@ const getId = pid => problems.indexOf(pid) + 1
 function fetch () {
   findSolutions(query)
   const routeQuery = route.query
-  page = parseInt(routeQuery.page) || 1
-  pageSize = parseInt(routeQuery.pageSize) || 30
+  page = Number.parseInt(routeQuery.page) || 1
+  pageSize = Number.parseInt(routeQuery.pageSize) || 30
   uid = routeQuery.uid
   pid = routeQuery.pid || ''
-  judge = parseInt(routeQuery.judge) || ''
-  language = parseInt(routeQuery.language) || ''
+  judge = Number.parseInt(routeQuery.judge) || ''
+  language = Number.parseInt(routeQuery.language) || ''
 }
 
 function reload (payload = {}) {
@@ -73,20 +73,22 @@ function reload (payload = {}) {
   })
 }
 
-const search = () => reload({
-  page: 1,
-  uid,
-  pid,
-  language,
-  judge,
-})
+function search () {
+  return reload({
+    page: 1,
+    uid,
+    pid,
+    language,
+    judge,
+  })
+}
 
 const pageChange = val => reload({ page: val })
 
 onBeforeMount(async () => {
-  if (problems == null) {
+  if (problems == null)
     await findOne({ cid: mid })
-  }
+
   fetch()
   changeDomTitle({ title: `Contest ${route.params.cid}` })
 })

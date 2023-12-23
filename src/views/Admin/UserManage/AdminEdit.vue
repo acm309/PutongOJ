@@ -1,5 +1,5 @@
 <script setup>
-import { mapState, storeToRefs } from 'pinia'
+import { storeToRefs } from 'pinia'
 import only from 'only'
 import { useI18n } from 'vue-i18n'
 import { inject } from 'vue'

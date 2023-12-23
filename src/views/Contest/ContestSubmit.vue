@@ -28,7 +28,8 @@ async function submit () {
     mid: route.params.cid,
   }))
   router.push({
-    name: 'contestStatus', params: route.params,
+    name: 'contestStatus',
+    params: route.params,
   })
   $Message.info(`submit id:${route.params.id} success!`)
 }

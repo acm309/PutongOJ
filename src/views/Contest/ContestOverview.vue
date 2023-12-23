@@ -9,7 +9,7 @@ const contestStore = useContestStore()
 const { contest, overview, solved } = $(storeToRefs(contestStore))
 
 const route = useRoute()
-const cid = $computed(() => parseInt(route.params.cid || 1))
+const cid = $computed(() => Number.parseInt(route.params.cid || 1))
 </script>
 
 <template>

@@ -8,7 +8,9 @@ import { storeToRefs } from 'pinia'
 import { CanvasRenderer } from 'echarts/renderers'
 import { use } from 'echarts/core'
 import {
-  LegendComponent, TitleComponent, TooltipComponent,
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent,
 } from 'echarts/components'
 import { PieChart } from 'echarts/charts'
 import { useRoute, useRouter } from 'vue-router'
@@ -19,8 +21,11 @@ import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
 
 use([
-  TooltipComponent, PieChart, CanvasRenderer,
-  TitleComponent, LegendComponent,
+  TooltipComponent,
+  PieChart,
+  CanvasRenderer,
+  TitleComponent,
+  LegendComponent,
 ])
 
 const statisticsStore = useStatisticsStore()
@@ -34,8 +39,8 @@ const { list, countList, sumCharts, sumStatis } = $(storeToRefs(statisticsStore)
 const { changeDomTitle } = rootStore
 const { find } = statisticsStore
 const pid = $computed(() => route.params.pid)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
-const currentPage = $computed(() => parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
+const currentPage = $computed(() => Number.parseInt(route.query.page) || 1)
 
 const pie = $computed(() => {
   const data = {

@@ -18,7 +18,7 @@
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
-    "lint": "eslint",
+    "lint": "eslint ./src --fix",
     "zip": "node build/zip.js",
     "dev": "vite",
     "build": "vite build",

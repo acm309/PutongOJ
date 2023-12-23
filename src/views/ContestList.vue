@@ -23,8 +23,8 @@ const router = useRouter()
 const { list, sum } = $(storeToRefs(contestStore))
 const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
 const { profile, isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
-const page = $computed(() => parseInt(route.query.page) || 1)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 20)
+const page = $computed(() => Number.parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
 const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 let enterPwd = $ref('')
@@ -49,11 +49,10 @@ async function enter (item) {
     { pwd: enterPwd },
   )
   const data = await verify(opt)
-  if (data) {
+  if (data)
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
-  } else {
+  else
     $Message.error('Wrong password!')
-  }
 }
 
 async function visit (item) {
@@ -67,11 +66,10 @@ async function visit (item) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (+item.encrypt === encrypt.Private) {
     const data = await verify(only(item, 'cid'))
-    if (data) {
+    if (data)
       router.push({ name: 'contestOverview', params: { cid: item.cid } })
-    } else {
+    else
       $Message.error('You\'re not invited to attend this contest!')
-    }
   } else if (+item.encrypt === encrypt.Password) {
     $Modal.confirm({
       render: (h) => {

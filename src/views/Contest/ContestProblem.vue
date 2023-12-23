@@ -17,9 +17,9 @@ const { findOne: findOneProblem } = problemStore
 const { problem } = $(storeToRefs(problemStore))
 const { overview, contest, totalProblems } = $(storeToRefs(contestStore))
 
-const proIndex = $computed(() => parseInt(route.params.id || 1))
+const proIndex = $computed(() => Number.parseInt(route.params.id || 1))
 
-const fetch = () => {
+function fetch () {
   findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
 }
 

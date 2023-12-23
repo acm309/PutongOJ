@@ -17,11 +17,10 @@ export const useUserStore = defineStore('user', {
     },
     async find (payload) {
       const { data } = await api.user.find(payload)
-      if (payload) {
+      if (payload)
         this.adminList = data.list
-      } else {
+      else
         this.list = data.list
-      }
     },
     async findOne (payload) {
       const { data } = await api.user.findOne(payload)

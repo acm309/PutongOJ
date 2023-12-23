@@ -15,8 +15,8 @@ export const useSessionStore = defineStore('session', {
     // https://pinia.vuejs.org/core-concepts/getters.html#getters
     isAdmin (): boolean {
       return this.isLogined
-      && (this.profile?.privilege === privilege.Root
-          || this.profile?.privilege === privilege.Teacher)
+        && (this.profile?.privilege === privilege.Root
+        || this.profile?.privilege === privilege.Teacher)
     },
     canRemove (): boolean {
       return this.isLogined && (this.profile?.privilege === useRootStore().privilege.Root)

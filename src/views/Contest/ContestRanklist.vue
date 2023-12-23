@@ -64,7 +64,7 @@ onBeforeUnmount(() => clearInterval(timer))
           <template v-for="pid in contest.list">
             <td v-if="!item[pid]" :key="`${pid} ${1}`" />
             <!-- !item[pid] 为 true 表示这道题没有提交过 -->
-            <td v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`" :class="[ item[pid].prime ? 'prime' : 'normal' ]">
+            <td v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`" :class="[item[pid].prime ? 'prime' : 'normal']">
               {{ timeContest(item[pid].create - contest.start) }}<span v-if="item[pid].wa">({{ item[pid].wa }})</span>
             </td>
             <td v-else :key="`${pid} ${3}`" :class="{ red: item[pid].wa }">

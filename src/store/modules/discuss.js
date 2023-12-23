@@ -15,9 +15,9 @@ export const useDiscussStore = defineStore('discuss', {
     },
     async find (payload) {
       const { data } = await api.discuss.find(payload)
-      if (data.list != null && Array.isArray(data.list)) {
+      if (data.list != null && Array.isArray(data.list))
         data.list = data.list.sort((x, y) => -x.update + y.update)
-      }
+
       this.list = data.list
     },
     update (payload) {

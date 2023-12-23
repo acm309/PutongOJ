@@ -31,16 +31,15 @@ const timePercentage = $computed(() => {
     return 100
   } else {
     return +((currentTime - contest.start) * 100
-        / (contest.end - contest.start)).toFixed(1)
+      / (contest.end - contest.start)).toFixed(1)
   }
 })
 
 function handleClick (name) {
-  if (name === 'contestProblem' || name === 'contestSubmit') {
+  if (name === 'contestProblem' || name === 'contestSubmit')
     router.push({ name, params: { cid: route.params.cid, id: route.params.id || 1 } })
-  } else {
+  else
     router.push({ name, params: { cid: route.params.cid } })
-  }
 }
 
 async function fetch () {

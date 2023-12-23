@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount, reactive, watch } from 'vue'
+import { inject, onBeforeMount, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
@@ -31,8 +31,8 @@ const { t } = useI18n()
 
 const type = $ref(route.query.type || 'pid')
 const content = $ref(route.query.content || '')
-const page = $computed(() => parseInt(route.query.page) || 1)
-const pageSize = $computed(() => parseInt(route.query.pageSize) || 30)
+const page = $computed(() => Number.parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
 const problemVisible = $ref(constant.status)
 const query = $computed(() => purify({ type, content, page, pageSize }))
 

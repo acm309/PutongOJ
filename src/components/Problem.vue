@@ -7,7 +7,7 @@ defineProps([ 'problem' ])
 const { t } = useI18n()
 const $Message = inject('$Message')
 const { copy } = useClipboard()
-const onCopy = (content) => {
+function onCopy (content) {
   copy(content)
   $Message.success('Copied!')
 }

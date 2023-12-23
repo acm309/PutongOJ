@@ -25,18 +25,16 @@ locale.value = selectedLang
 
 const login = toggleLoginState
 // possible bug that e is not catched in #catch
-const routerTo = (name) => {
-  if (route.name !== name) {
+function routerTo (name) {
+  if (route.name !== name)
     router.push({ name })
-  }
 }
 
 function profileAction (name) {
-  if (name === 'logout') {
+  if (name === 'logout')
     logout().then(() => $Message.info('bye bye!'))
-  } else if (name === 'profile') {
+  else if (name === 'profile')
     router.push({ name: 'userInfo', params: { uid: profile.uid } })
-  }
 }
 
 function langSelected (lang) {

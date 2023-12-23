@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import ContentEditor from '@/components/ContentEditor'
+
 defineProps([ 'problem' ])
 const { t } = useI18n()
 </script>

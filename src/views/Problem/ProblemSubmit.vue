@@ -28,7 +28,7 @@ const route = useRoute()
 const router = useRouter()
 const $Message = inject('$Message')
 
-const submitSolution = async () => {
+async function submitSolution () {
   await create(Object.assign({}, solution, { pid: problem.pid }))
   $Message.info(`submit pid:${problem.pid} success!`)
   router.push({ name: 'mySubmission', params: { pid: route.params.pid } })
