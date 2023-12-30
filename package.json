@@ -65,7 +65,6 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config-basic": "https://gitpkg.now.sh/lazzzis/eslint-config/packages/basic?my",
     "ava": "^4.3.0",
     "codecov": "^3.0.2",
     "eslint-config-standard": "^11.0.0",
