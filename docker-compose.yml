@@ -8,29 +8,33 @@ services:
     volumes:
       - $PWD/migrations/db:/data/db
       - $PWD/migrations/backup:/data/backup
+    ports:
+      - '0.0.0.0:27017:27017'
 
   ptoj-redis:
     image: redis:latest
     container_name: ptoj-redis
     restart: always
-
-  ptoj-web-app:
-    image: ptoj-web-app
-    container_name: ptoj-web-app
-    build: .
-    environment:
-      - NODE_ENV=production
-      - dbURL=mongodb://ptoj-db:27017/oj
-      - redisURL=redis://ptoj-redis:6379
     ports:
-      - '0.0.0.0:80:3000'
-    volumes:
-      - $PWD/data:/app/data
-      - $PWD/logs:/app/logs
-      # warning: volumn is not available on building period
-    depends_on:
-      - ptoj-redis
-      - ptoj-db
-    restart: always
-    cap_add:
-      - SYS_PTRACE
+      - '0.0.0.0:6379:6379'
+  # ptoj-web-app:
+  #   image: ptoj-web-app
+  #   container_name: ptoj-web-app
+  #   build: .
+  #   environment:
+  #     - NODE_ENV=production
+  #     - dbURL=mongodb://ptoj-db:27017/oj
+  #     - redisURL=redis://ptoj-redis:6379
+  #   ports:
+  #     - '0.0.0.0:80:3000'
+  #   volumes:
+  #     - $PWD/data:/app/data
+  #     - $PWD/logs:/app/logs
+  #     - $PWD/public:/app/public
+  #     # warning: volumn is not available on building period
+  #   depends_on:
+  #     - ptoj-redis
+  #     - ptoj-db
+  #   restart: always
+  #   cap_add:
+  #     - SYS_PTRACE

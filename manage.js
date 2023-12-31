@@ -114,7 +114,7 @@ async function staticFilesSetUp () {
 
 function main () {
   return Promise.all([
-    judgeSetup(),
+    // judgeSetup(),
     staticFilesSetUp(),
   ])
 }

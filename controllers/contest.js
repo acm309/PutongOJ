@@ -161,8 +161,8 @@ const ranklist = async (ctx) => {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
     const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
     res = JSON.parse(mid)
-    Object.entries(ranklist).forEach(([ uid, problems ]) => {
-      Object.entries(problems).forEach(([ pid, sub ]) => {
+    Object.entries(ranklist).forEach(([uid, problems]) => {
+      Object.entries(problems).forEach(([pid, sub]) => {
         if (sub.wa < 0) {
           res[uid][pid] = {
             wa: sub.wa,
@@ -213,7 +213,7 @@ const update = async (ctx) => {
   const opt = ctx.request.body
   const { cid } = ctx.params
   const contest = await Contest.findOne({ cid }).exec()
-  const fields = [ 'title', 'encrypt', 'list', 'argument', 'start', 'end', 'status' ]
+  const fields = ['title', 'encrypt', 'list', 'argument', 'start', 'end', 'status']
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
   fields.filter(field => opt[field] != null).forEach((field) => {
@@ -297,4 +297,5 @@ module.exports = {
   update,
   del,
   verify,
+  csv,
 }
