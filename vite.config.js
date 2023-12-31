@@ -1,5 +1,5 @@
+import path from 'node:path'
 import { defineConfig } from 'vite'
-import path from 'path'
 import envCompatible from 'vite-plugin-env-compatible'
 import { injectHtml } from 'vite-plugin-html'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
@@ -15,12 +15,12 @@ export default defineConfig({
     alias: [
       {
         find: /^~/,
-        replacement: ''
+        replacement: '',
       },
       {
         find: '@',
-        replacement: path.resolve(__dirname, 'src')
-      }
+        replacement: path.resolve(__dirname, 'src'),
+      },
     ],
     extensions: [
       '.mjs',
@@ -29,12 +29,12 @@ export default defineConfig({
       '.jsx',
       '.tsx',
       '.json',
-      '.vue'
-    ]
+      '.vue',
+    ],
   },
   plugins: [
     vue({
-      reactivityTransform: true
+      reactivityTransform: true,
     }),
     viteCommonjs(),
     // support browsers which don't support esm
@@ -45,13 +45,13 @@ export default defineConfig({
       // generate stats.html in project root
       // sourcemap: true,
       // brotliSize: true,
-      gzipSize: true
+      gzipSize: true,
     }),
     viteCompression(),
     createImportPlugin([
       {
         libraryName: 'view-ui-plus',
-        libraryDirectory: 'src/components'
+        libraryDirectory: 'src/components',
       },
     ]),
   ],
@@ -63,22 +63,22 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'common': ['vue', 'pinia', 'vue-router', 'axios'],
+          common: [ 'vue', 'pinia', 'vue-router', 'axios' ],
           // 'ui': ['view-ui-plus']
-        }
-      }
-    }
+        },
+      },
+    },
   },
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8888',
-        changeOrigin: true
+        target: 'http://localhost:8008',
+        changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:8888',
-        changeOrigin: true
-      }
-    }
-  }
+        target: 'http://localhost:8008',
+        changeOrigin: true,
+      },
+    },
+  },
 })
