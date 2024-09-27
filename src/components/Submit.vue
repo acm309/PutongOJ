@@ -25,6 +25,9 @@ solutionStore.clearSavedSolution()
           <Option :value="3">
             Java (openJDK)
           </Option>
+          <Option :value="4">
+            Python 3
+          </Option>
         </Select>
       </FormItem>
       <FormItem>

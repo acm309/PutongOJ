@@ -2,6 +2,7 @@
 import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
+import python from 'highlight.js/lib/languages/python'
 import 'highlight.js/styles/atom-one-light.css'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount } from 'vue'
@@ -17,6 +18,7 @@ import { useSolutionStore } from '@/store/modules/solution'
 highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('c', cpp)
 highlight.registerLanguage('java', java)
+highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
 const result = $ref(constant.result)

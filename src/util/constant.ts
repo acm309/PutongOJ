@@ -17,6 +17,7 @@ export const language = {
   1: 'C',
   2: 'C++',
   3: 'Java',
+  4: 'Python',
 } as const
 
 export const judgeList = [
@@ -90,6 +91,10 @@ export const languageList = [
   {
     value: 3,
     label: 'Java',
+  },
+  {
+    value: 4,
+    label: 'Python',
   },
 ] as const
 
