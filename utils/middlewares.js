@@ -7,6 +7,8 @@ const login = async (ctx, next) => {
   const user = await User.findOne({ uid: ctx.session.profile.uid }).exec()
   if (user == null) { ctx.throw(401, 'Login required') }
   if (user.pwd !== ctx.session.profile.pwd) { ctx.throw(401, 'Login required') }
+  if (user.privilege !== ctx.session.profile.privilege)
+    ctx.session.profile.privilege = user.privilege
   await next()
 }
 
