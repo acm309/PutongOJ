@@ -55,6 +55,8 @@ export default {
     input: '输入',
     output: '输出',
     hint: '提示',
+    spj: '特判',
+    spj_code: '特判代码',
     sample_input: '样例输入',
     sample_output: '样例输出',
 

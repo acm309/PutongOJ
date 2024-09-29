@@ -59,6 +59,8 @@ export default {
     input: 'Input',
     output: 'Output',
     hint: 'Hint',
+    spj: 'Special Judge',
+    spj_code: 'Special Judge Code',
     sample_input: 'Sample Input',
     sample_output: 'Sample Output',
 

@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import ContentEditor from '@/components/ContentEditor'
 
-defineProps([ 'problem' ])
+defineProps(['problem'])
 const { t } = useI18n()
 </script>
 
@@ -10,7 +10,6 @@ const { t } = useI18n()
   <div class="proadd-wrap">
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.title">
           <template #prepend>
             {{ t('oj.title') }}
@@ -20,7 +19,6 @@ const { t } = useI18n()
     </Row>
     <Row>
       <Col :span="11">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.time">
           <template #prepend>
             Time
@@ -31,7 +29,6 @@ const { t } = useI18n()
         </Input>
       </Col>
       <Col :offset="1" :span="11">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.memory">
           <template #prepend>
             Memory
@@ -47,7 +44,6 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <ContentEditor v-model="problem.description" />
       </Col>
     </Row>
@@ -56,7 +52,6 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <ContentEditor v-model="problem.input" />
       </Col>
     </Row>
@@ -65,7 +60,6 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <ContentEditor v-model="problem.output" />
       </Col>
     </Row>
@@ -74,7 +68,6 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.in" type="textarea" :rows="8" />
       </Col>
     </Row>
@@ -83,7 +76,6 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <Input v-model="problem.out" type="textarea" :rows="8" />
       </Col>
     </Row>
@@ -92,8 +84,15 @@ const { t } = useI18n()
     </div>
     <Row>
       <Col :span="23">
-        <!-- eslint-disable-next-line vue/no-mutating-props -->
         <ContentEditor v-model="problem.hint" />
+      </Col>
+    </Row>
+    <div class="label">
+      {{ t('oj.spj') }} <i-switch v-model="problem.spj" />
+    </div>
+    <Row>
+      <Col :span="23">
+        <Input v-model="problem.spjcode" type="textarea" :rows="8" :placeholder="t('oj.spj_code')" />
       </Col>
     </Row>
   </div>
