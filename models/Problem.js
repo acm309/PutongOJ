@@ -1,75 +1,84 @@
 const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2') // 分页
+const mongoosePaginate = require('mongoose-paginate-v2')
+
 const config = require('../config')
 const ids = require('./ID')
 
 const problemSchema = mongoose.Schema({
   isdone: Boolean,
-  pid: {
+  pid: { // 唯一标识符，-1 表示新题目
     type: Number,
     index: {
       unique: true,
     },
-    default: -1, // 表示新题目
+    default: -1,
   },
-  time: {
+  time: { // 时间限制，单位 ms
     type: Number,
     default: 1000,
     min: 100,
     max: 10000,
   },
-  memory: {
+  memory: { // 内存限制，单位 KB
     type: Number,
     default: 32768,
     min: 100,
     max: 32768 * 4,
   },
-  title: {
+  title: { // 标题
     type: String,
     required: true,
   },
-  create: {
+  create: { // 创建时间
     type: Number,
     default: Date.now,
   },
-  description: {
+  description: { // 描述
     type: String,
     default: '',
   },
-  input: {
+  input: { // 输入格式
     type: String,
     default: '',
   },
-  output: {
+  output: { // 输出格式
     type: String,
     default: '',
   },
-  in: {
+  in: { // 输入样例
     type: String,
     default: '',
   },
-  out: {
+  out: { // 输出样例
     type: String,
     default: '',
   },
-  hint: {
+  hint: { // 提示
     type: String,
     default: '',
   },
-  solve: {
+  spj: { // 是否是特判题目
+    type: Boolean,
+    default: false,
+  },
+  spjcode: { // 特判代码
+    type: String,
+    default: '',
+  },
+  solve: { // 解决人数
     type: Number,
     default: 0,
   },
-  submit: {
+  submit: { // 提交人数
     type: Number,
     default: 0,
   },
-  status: {
+  status: { // 状态，默认新建的题目不显示
     type: Number,
-    default: config.status.Available, // 默认新建的题目显示
+    default: config.status.Reserve,
   },
-  tags: {
-    type: [ String ],
+  tags: { // 标签
+    type: [String],
     default: [],
     index: true,
   },
