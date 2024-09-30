@@ -29,7 +29,7 @@
     "posttest": "cross-env NODE_ENV=test node test/posttest.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
+    "coverage": "nyc report --reporter=text-lcov > coverage.lcov",
     "prepare": "husky install"
   },
   "dependencies": {
