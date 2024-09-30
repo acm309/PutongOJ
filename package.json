@@ -2,9 +2,6 @@
   "name": "putong-oj",
   "version": "2.0.0-beta",
   "author": "lazzzis",
-  "license": "MIT",
-  "repository": "https://github.com/acm309/PutongOJ.git",
-  "main": "app.js",
   "contributors": [
     {
       "name": "lazzzis",
@@ -15,6 +12,9 @@
       "url": "https://github.com/Kerminate"
     }
   ],
+  "license": "MIT",
+  "repository": "https://github.com/acm309/PutongOJ.git",
+  "main": "app.js",
   "engines": {
     "node": ">= 16.0.0"
   },
@@ -73,7 +73,7 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
     "nodemon": "^1.19.4",
-    "nyc": "^15.1.0",
+    "nyc": "^17.1.0",
     "supertest": "^3.4.2",
     "typescript": "^4.9.5"
   },
