@@ -24,7 +24,7 @@ const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
 
-const extensions = [ '', 'c', 'cpp', 'java' ]
+const extensions = ['', 'c', 'cpp', 'java', 'py']
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
