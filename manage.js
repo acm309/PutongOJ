@@ -7,7 +7,10 @@ const range = require('lodash.range')
 // DO not upgrade execa to v6.0.0 as it is esm module
 const { command: execaCommand } = require('execa')
 const fetch = require('node-fetch')
+const { Command } = require('commander')
 const config = require('./config')
+
+const program = new Command()
 
 // download and initialize the judgers
 // start !
@@ -101,7 +104,7 @@ async function judgeSetup () {
   return fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
 }
 
-async function staticFilesSetUp () {
+async function staticFilesSetup () {
   const res = await fetch('https://api.github.com/repos/acm309/PutongOJ-FE/releases')
   const json = await res.json()
   const url = json[0].assets[0].browser_download_url
@@ -112,19 +115,40 @@ async function staticFilesSetUp () {
   })
 }
 
-function main () {
-  return Promise.all([
-    judgeSetup(),
-    staticFilesSetUp(),
-  ])
+async function exampleProblemSetUp () {
+  fse.move('data/example', 'data/1000')
 }
 
-main()
-  .then(() => {
-    console.log('ok')
-    process.exit(0)
+program.command('setup')
+  .action(() => {
+    console.log('setup...')
+    Promise.all([
+      exampleProblemSetUp(),
+      judgeSetup(),
+      staticFilesSetup(),
+    ])
+      .then(() => {
+        console.log('ok')
+        process.exit(0)
+      })
+      .catch((err) => {
+        console.error(err)
+        process.exit(-1)
+      })
   })
-  .catch((err) => {
-    console.error(err)
-    process.exit(-1)
+
+program.command('update-fe')
+  .action(() => {
+    console.log('updating fe...')
+    staticFilesSetup()
+      .then(() => {
+        console.log('ok')
+        process.exit(0)
+      })
+      .catch((err) => {
+        console.error(err)
+        process.exit(-1)
+      })
   })
+
+program.parse()
