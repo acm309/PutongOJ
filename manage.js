@@ -115,7 +115,7 @@ async function staticFilesSetup () {
   })
 }
 
-async function exampleProblemSetUp () {
+async function exampleProblemSetup () {
   fse.move('data/example', 'data/1000')
 }
 
@@ -123,7 +123,7 @@ program.command('setup')
   .action(() => {
     console.log('setup...')
     Promise.all([
-      exampleProblemSetUp(),
+      exampleProblemSetup(),
       judgeSetup(),
       staticFilesSetup(),
     ])
