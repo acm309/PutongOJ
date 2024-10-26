@@ -74,7 +74,7 @@ fetch()
         </th>
       </tr>
       <template v-for="item in list" :key="item.did">
-        <tr>
+        <tr v-if="isAdmin || item.uid === sessionStore.profile.uid">
           <td>
             {{ item.did }}
           </td>
