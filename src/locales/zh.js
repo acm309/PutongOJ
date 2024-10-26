@@ -33,6 +33,7 @@ export default {
     title: '标题',
     create: '创建',
     delete: '删除',
+    rename: '更名',
     content: '内容',
     problem: '题目',
     status: '状态',

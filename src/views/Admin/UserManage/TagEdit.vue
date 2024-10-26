@@ -1,5 +1,4 @@
 <script setup>
-import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
@@ -10,15 +9,13 @@ import { useTagStore } from '@/store/modules/tag'
 const { t } = useI18n()
 const problemStore = useProblemStore()
 const tagStore = useTagStore()
-const ind = $ref(0)
+const targetTagIdx = $ref(-1)
 let targetKeys = $ref([])
 const listStyle = $ref({
   width: '350px',
   height: '400px',
 })
-let problemList = $ref([])
-let operation = $ref('search')
-let isNew = $ref(false)
+const newTid = $ref('')
 const Spin = inject('$Spin')
 const Message = inject('$Message')
 const Modal = inject('$Modal')
@@ -42,14 +39,12 @@ const transData = $computed(() => problemSum.map(item => ({
 onBeforeRouteLeave(() => {
   clearSavedProblems()
   clearSavedTags()
-  problemList = []
   targetKeys = []
 })
 
 async function fetchTag () {
   Spin.show()
   await Promise.all([ problemStore.find({ page: -1 }), tagStore.find() ])
-  problemList = problemSum.map(item => item.pid)
   Spin.hide()
 }
 
@@ -58,25 +53,15 @@ function handleChange (newTargetKeys) {
 }
 
 async function manageTag (name) {
-  if (tagList.length > 0)
-    tag.tid = tagList[ind].tid
-
-  operation = name
   if (name === 'search') {
     Spin.show()
     targetKeys = []
-    isNew = false
     try {
-      await findOne({ tid: tag.tid })
+      await findOne({ tid: tagList[targetTagIdx].tid })
       targetKeys = tag.list.map(item => `${item}`)
     } finally {
       Spin.hide()
     }
-  } else if (name === 'create') {
-    tag.tid = ''
-    tag.list = []
-    targetKeys = []
-    isNew = true
   } else if (name === 'delete') {
     if (!tag || !tag.tid) {
       Message.info(t('oj.no_tag'))
@@ -103,24 +88,30 @@ async function manageTag (name) {
 
 async function saveTag () {
   const problems = targetKeys.slice()
-  const newTag = Object.assign(
-    only(tag, 'tid'),
-    { list: problems },
-  )
   Spin.show()
   try {
-    if (!isNew) {
-      await update(newTag)
-      Message.success(t('oj.update_tag_success', tag))
-    } else {
-      await create(tag)
-      find()
-      Message.success(t('oj.create_tag_success', tag))
-    }
+    const tid = await update({
+      tid: tagList[targetTagIdx].tid,
+      list: problems,
+    })
+    Message.success(t('oj.update_tag_success', { tid }))
   } finally {
     Spin.hide()
   }
 }
+
+async function createTag () {
+  const problems = targetKeys.slice()
+  Spin.show()
+  try {
+    await create({ tid: newTid, list: problems })
+    await find()
+    Message.success(t('oj.create_tag_success', { tid: newTid }))
+  } finally {
+    Spin.hide()
+  }
+}
+
 fetchTag()
 </script>
 
@@ -129,45 +120,40 @@ fetchTag()
     <h1>{{ t('oj.manage_tag') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
+        Title
+      </Col>
+      <Col :span="4">
+        <Input v-model="newTid" />
+      </Col>
+      <Col offset="1" :span="6">
+        <Button type="primary" :disabled="!newTid" @click="createTag">
+          {{ t('oj.create') }}
+        </Button>
+        <!-- TODO: implement rename -->
+        <!-- &nbsp;
+        <Button type="primary" :disabled="!tag.tid" @click="saveTag">
+          {{ t('oj.rename') }}
+        </Button> -->
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
         Tag
       </Col>
       <Col :span="4">
-        <Select v-model="ind" filterable>
+        <Select v-model="targetTagIdx" filterable @on-select="manageTag('search')">
           <Option v-for="(item, index) in tagList" :key="item.tid" :value="index">
             {{ item.tid }}
           </Option>
         </Select>
       </Col>
-      <Col :offset="1" :span="2">
-        <Dropdown @on-click="manageTag">
-          <Button type="primary">
-            {{ t('oj.manage_tag') }}
-            <Icon type="ios-arrow-down" />
-          </Button>
-          <template #list>
-            <DropdownMenu>
-              <DropdownItem name="search">
-                {{ t('oj.search') }}
-              </DropdownItem>
-              <DropdownItem name="create">
-                {{ t('oj.create') }}
-              </DropdownItem>
-              <DropdownItem name="delete">
-                {{ t('oj.delete') }}
-              </DropdownItem>
-            </DropdownMenu>
-          </template>
-        </Dropdown>
+      <Col offset="1" :span="6">
+        <Button type="primary" :disabled="targetTagIdx !== -1" @click="manageTag('delete')">
+          {{ t('oj.delete') }}
+        </Button>
       </Col>
     </Row>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">
-        Title
-      </Col>
-      <Col :span="4">
-        <Input v-model="tag.tid" />
-      </Col>
-    </Row>
+
     <Transfer
       :data="transData" :target-keys="targetKeys" :list-style="listStyle" filterable class="tranfer"
       @on-change="handleChange"
