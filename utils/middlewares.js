@@ -45,10 +45,10 @@ const handler = async function (ctx) {
 
 const solutionCreateRateLimit = RateLimit.middleware({
   interval: { min: 1 },
-  max: 60,
-  async keyGenerator (ctx) {
-    const opt = ctx.request.body
-    return `solutions/${opt.pid}| ${ctx.request.ip} `
+  max: 12,
+  async keyGenerator(ctx) {
+    const user = ctx.session.profile
+    return `solutions/${user.uid}`
   },
   handler,
 })
