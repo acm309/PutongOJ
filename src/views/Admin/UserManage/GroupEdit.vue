@@ -14,19 +14,17 @@ const { group, list: groupList } = $(storeToRefs(groupStore))
 const { list: userSum } = $(storeToRefs(userStore))
 const { find, findOne, update, create, clearSavedGroups, delete: remove } = groupStore
 const { clearSavedUsers } = userStore
+const newGid = $ref('')
 const Spin = inject('$Spin')
 const Message = inject('$Message')
 const Modal = inject('$Modal')
 
-const ind = $ref(0)
+const targetGid = $ref(0)
 let targetKeys = $ref([])
 const listStyle = $ref({
   width: '350px',
   height: '400px',
 })
-
-let userList = $ref([])
-let operation = $ref('search')
 
 const transData = $computed(() => userSum.map(item => ({
   key: item.uid,
@@ -43,7 +41,6 @@ onBeforeRouteLeave(() => {
 async function fetchGroup () {
   Spin.show()
   await Promise.all([ userStore.find(), find() ])
-  userList = userSum.map(item => item.uid)
   Spin.hide()
 }
 
@@ -52,25 +49,15 @@ function handleChange (newTargetKeys) {
 }
 
 async function manageGroup (name) {
-  if (groupList.length > 0) {
-    group.gid = groupList[ind].gid
-    group.title = groupList[ind].title
-  }
-  operation = name
   if (name === 'search') {
     Spin.show()
     targetKeys = []
     try {
-      await findOne({ gid: group.gid })
+      await findOne({ gid: groupList[targetGid].gid })
       targetKeys = group.list.slice()
     } finally {
       Spin.hide()
     }
-  } else if (name === 'create') {
-    group.gid = ''
-    group.title = ''
-    group.list = []
-    targetKeys = []
   } else if (name === 'delete') {
     if (!group || !group.gid) {
       Message.info(t('oj.no_group'))
@@ -114,6 +101,18 @@ async function saveGroup () {
   }
 }
 
+async function createTag () {
+  const user = targetKeys
+  Spin.show()
+  try {
+    await create({ list: user, title: newGid })
+    await find()
+    Message.success(t('oj.create_group_success', { title: newGid }))
+  } finally {
+    Spin.hide()
+  }
+}
+
 fetchGroup()
 </script>
 
@@ -122,22 +121,34 @@ fetchGroup()
     <h1>{{ t('oj.manage_group') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
+        Title
+      </Col>
+      <Col :span="4">
+        <Input v-model="newGid" />
+      </Col>
+      <Col offset="1" :span="6">
+        <Button type="primary" :disabled="!newGid" @click="createTag">
+          {{ t('oj.create') }}
+        </Button>
+        <!-- TODO: implement rename -->
+      </Col>
+    </Row>
+    <Row type="flex" justify="start">
+      <Col :span="2" class="label">
         Group
       </Col>
       <Col :span="4">
-        <Select v-model="ind" filterable>
+        <Select v-model="targetGid" filterable @on-select="manageGroup('search')">
           <Option v-for="(item, index) in groupList" :key="item.gid" :value="index">
             {{ item.title }}
           </Option>
         </Select>
       </Col>
       <Col :offset="1" :span="2">
-        <Dropdown @on-click="manageGroup">
-          <Button type="primary">
-            {{ t('oj.manage_group') }}
-            <Icon type="ios-arrow-down" />
-          </Button>
-          <template #list>
+        <Button type="primary" @click="manageGroup('delete')">
+          {{ t('oj.delete') }}
+        </Button>
+        <!-- <template #list>
             <DropdownMenu>
               <DropdownItem name="search">
                 {{ t('oj.search') }}
@@ -149,23 +160,10 @@ fetchGroup()
                 {{ t('oj.delete') }}
               </DropdownItem>
             </DropdownMenu>
-          </template>
-        </Dropdown>
-      </Col>
-      <Col span="2">
-        <Tag>
-          {{ operation }}
-        </Tag>
+          </template> -->
       </Col>
     </Row>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">
-        Title
-      </Col>
-      <Col :span="4">
-        <Input v-model="group.title" />
-      </Col>
-    </Row>
+
     <Transfer
       :data="transData"
       :target-keys="targetKeys"

@@ -16,7 +16,9 @@ export const useTagStore = defineStore('tag', {
     },
     async find () {
       const { data } = await api.tag.find()
-      this.list = data.list
+      this.list = data.list.toSorted(
+        (x, y) => x.tid.localeCompare(y.tid),
+      )
       return data.list
     },
     update (payload) {

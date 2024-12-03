@@ -17,7 +17,9 @@ export const useGroupStore = defineStore('group', {
     },
     async find (payload = {}) {
       const { data } = await api.group.find(payload)
-      this.list = data.list
+      this.list = data.list.toSorted(
+        (x, y) => x.title.localeCompare(y.title),
+      )
       return data.list
     },
     update (payload) {

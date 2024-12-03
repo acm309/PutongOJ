@@ -40,6 +40,7 @@ export default {
     title: 'Title',
     create: 'Create',
     delete: 'Delete',
+    rename: 'Rename',
     content: 'Content',
     problem: 'Problem',
     status: 'Status',
