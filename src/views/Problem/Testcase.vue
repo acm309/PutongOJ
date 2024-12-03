@@ -49,7 +49,7 @@ function del (item) {
 
 async function create () {
   if (!test.in && !test.out) {
-    $Message.error('输入输出不能为空！')
+    $Message.error('输入输出不能同时为空！')
     return
   }
   if (!test.in || !test.out) {
