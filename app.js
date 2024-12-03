@@ -38,6 +38,8 @@ app.use(bodyparser({
   },
   multipart: true,
   urlencoded: true,
+  jsonLimit: '8mb',
+  formLimit: '8mb',
 }))
 
 app.use(staticServe(path.join(__dirname, 'public'), {
