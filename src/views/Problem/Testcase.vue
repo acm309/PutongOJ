@@ -15,8 +15,8 @@ const $Modal = inject('$Modal')
 
 const test = $ref({
   pid: route.params.pid,
-  input: '',
-  output: '',
+  in: '',
+  out: '',
 })
 
 const fetch = () => testcaseStore.find(route.params)
