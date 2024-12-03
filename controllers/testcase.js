@@ -14,6 +14,11 @@ const create = async (ctx) => {
   const testin = ctx.request.body.in || ''
   // 输出
   const testout = ctx.request.body.out || ''
+
+  if (!testin && !testout) {
+    ctx.throw(400, 'Cannot create testcase without both input and output')
+  }
+
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   const id = uuid() // 快速生成RFC4122 UUID
   // 将文件读取到meta对象
