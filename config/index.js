@@ -25,6 +25,11 @@ config.judge = {
   RejudgePending: 11,
 }
 
+config.limitation = {
+  time: 10 * 1000,
+  memory: 256 * 1024,
+}
+
 config.module = {
   Problem: 1,
   Contest: 2,

@@ -17,13 +17,13 @@ const problemSchema = mongoose.Schema({
     type: Number,
     default: 1000,
     min: 100,
-    max: 10000,
+    max: config.limitation.time,
   },
   memory: { // 内存限制，单位 KB
     type: Number,
     default: 32768,
-    min: 100,
-    max: 32768 * 4,
+    min: 128,
+    max: config.limitation.memory,
   },
   title: { // 标题
     type: String,
@@ -90,10 +90,10 @@ problemSchema.plugin(mongoosePaginate)
 
 problemSchema.pre('validate', function (next) {
   // 验证字段
-  if (this.time > 10000) {
-    next(new Error('Time should not be longer than 10000 ms'))
-  } else if (this.memory > 32768 * 5) {
-    next(new Error(`Memory should not be greater than ${32768 * 5} kb`))
+  if (this.time > config.limitation.time) {
+    next(new Error(`Time should not be longer than ${config.limitation.time} ms`))
+  } else if (this.memory > config.limitation.memory) {
+    next(new Error(`Memory should not be greater than ${config.limitation.memory} KB`))
   } else {
     next()
   }
