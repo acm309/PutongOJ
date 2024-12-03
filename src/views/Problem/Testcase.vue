@@ -48,10 +48,25 @@ function del (item) {
 }
 
 async function create () {
-  await testcaseStore.create(test)
-  $Message.success('成功创建！')
-  fetch()
-  test.in = test.out = ''
+  if (!test.in && !test.out) {
+    $Message.error('输入输出不能为空！')
+    return
+  }
+  if (!test.in || !test.out) {
+    $Modal.confirm({
+      title: '提示',
+      content: '<p>输入输出不完整，是否继续？</p>',
+      onOk: async () => {
+        await testcaseStore.create(test)
+        $Message.success('成功创建！')
+        fetch()
+        test.in = test.out = ''
+      },
+      onCancel: () => {
+        $Message.info('已取消创建！')
+      },
+    })
+  }
 }
 
 fetch()
