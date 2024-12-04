@@ -1,6 +1,7 @@
 const Discuss = require('../models/Discuss')
 const logger = require('../utils/logger')
 const redis = require('../config/redis')
+const { isLogined, isAdmin } = require('../utils/helper')
 
 const preload = async (ctx, next) => {
   const did = Number.parseInt(ctx.params.did)
@@ -12,7 +13,17 @@ const preload = async (ctx, next) => {
 }
 
 const find = async (ctx) => {
-  const list = await Discuss.find().exec()
+  if (!isLogined(ctx)) {
+    ctx.body = { list: [] }
+    return
+  }
+
+  let list
+  if (isAdmin(ctx.session.profile)) {
+    list = await Discuss.find().exec()
+  } else {
+    list = await Discuss.find({ uid: ctx.session.profile.uid }).exec()
+  }
 
   ctx.body = {
     list,
@@ -21,6 +32,11 @@ const find = async (ctx) => {
 
 const findOne = async (ctx) => {
   const discuss = ctx.state.discuss
+
+  if (discuss.uid !== ctx.session.profile.uid && !isAdmin(ctx.session.profile)) {
+    ctx.throw(400, 'You do not have permission to enter this discuss!')
+  }
+
   ctx.body = {
     discuss,
   }
@@ -54,6 +70,11 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const discuss = ctx.state.discuss
+
+  if (discuss.uid !== ctx.session.profile.uid && !isAdmin(ctx.session.profile)) {
+    ctx.throw(400, 'You do not have permission to reply this discuss!')
+  }
+
   try {
     discuss.comments.push({
       uid: ctx.session.profile.uid,

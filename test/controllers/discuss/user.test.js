@@ -61,6 +61,53 @@ test.serial('Add a comment', async (t) => {
   t.is(comments[comments.length - 1].content, 'nothing')
 })
 
+test('Discuss list', async (t) => {
+  const res = await request
+    .get('/api/discuss/list')
+
+  t.is(res.status, 200)
+  t.is(res.type, 'application/json')
+  t.truthy(Array.isArray(res.body.list))
+  res.body.list.forEach((item) => {
+    t.truthy(item.title)
+    t.truthy(item.uid)
+    t.is(item.uid, user.uid)
+    t.truthy(item.update)
+  })
+})
+
+test('Reply other\'s discuss should fail', async (t) => {
+  const update = await request
+    .put(`/api/discuss/1`)
+    .send({ content: 'nothing' })
+
+  t.is(update.status, 400)
+  t.is(update.type, 'application/json')
+
+  t.truthy(update.body.error)
+})
+
+
+test('Did is not a number', async (t) => {
+  const res = await request
+    .get('/api/discuss/xx')
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
+test('Find Discuss 1 should fail', async (t) => {
+  const res = await request
+    .get('/api/discuss/1')
+
+  t.is(res.status, 400)
+  t.is(res.type, 'application/json')
+
+  t.truthy(res.body.error)
+})
+
 test('Title can not be empty', async (t) => {
   const res = await request
     .post('/api/discuss')
