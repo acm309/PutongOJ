@@ -24,7 +24,7 @@ export const useDiscussStore = defineStore('discuss', {
       return api.discuss.update(payload).then(({ data }) => data)
     },
     create (payload) {
-      return api.discuss.create(payload).then(({ data }) => data.did)
+      return api.discuss.create(payload).then(({ data }) => data)
     },
     async delete (payload) {
       await api.discuss.delete(payload)
