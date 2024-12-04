@@ -6,7 +6,6 @@ export interface TimeResp {
 
 export interface WebsiteConfigResp {
   website: {
-    discussOnProblem: boolean // obsolete
     semi_restful: boolean
     title: string
   }

@@ -68,9 +68,8 @@ fetch()
           :disabled="!isLogined"
           @click="createNew"
         >
-          {{ t('oj.add_a_reply') }}
+          {{ isLogined ? t('oj.add_a_reply') : t('oj.login_to_reply') }}
         </Button>
-        <span v-if="!isLogined">{{ t('oj.login_to_reply') }}</span>
       </FormItem>
     </Form>
   </div>

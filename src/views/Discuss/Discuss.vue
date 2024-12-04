@@ -27,7 +27,7 @@ const { find, create, 'delete': remove } = discussStore
 
 const fetch = () => find()
 
-async function createNew () {
+async function createNew() {
   if (!form.title || !form.content) {
     $Message.warning('Title or Content can not be empty')
     return
@@ -35,6 +35,7 @@ async function createNew () {
   loading = true
   try {
     const { did } = await create(form)
+    $Message.success(`Create new thread ${did} success!`)
     router.push({
       name: 'discussInfo',
       params: { did },
@@ -44,10 +45,10 @@ async function createNew () {
   }
 }
 
-function del (did) {
+function del(did) {
   $Modal.confirm({
     title: '提示',
-    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    content: '<p>此操作将永久删除该帖子，是否继续？</p>',
     onOk: async () => {
       remove({ did })
       $Message.success(`成功删除 ${did}！`)
@@ -74,7 +75,7 @@ fetch()
         </th>
       </tr>
       <template v-for="item in list" :key="item.did">
-        <tr v-if="isAdmin || item.uid === sessionStore.profile.uid">
+        <tr>
           <td>
             {{ item.did }}
           </td>
@@ -113,9 +114,8 @@ fetch()
       </FormItem>
       <FormItem>
         <Button type="primary" :loading="loading" :disabled="!isLogined" @click="createNew">
-          {{ t('oj.submit') }}
+          {{ isLogined ? t('oj.submit') : t('oj.login_to_reply') }}
         </Button>
-        <span v-if="!isLogined">{{ t('oj.login_to_reply') }}</span>
       </FormItem>
     </Form>
   </div>
