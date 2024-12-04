@@ -52,7 +52,7 @@ export default {
 <template>
   <div class="nav-wrap">
     <Layout>
-      <Header :style="{ 'position': 'fixed', 'width': '100%', 'z-index': 100 }">
+      <Header :style="{ 'position': 'fixed', 'width': '100%', 'z-index': 100 , 'top': 0, 'left': 0 }">
         <Menu mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
           <div class="left">
             <MenuItem name="home">
