@@ -187,7 +187,7 @@ onRouteQueryUpdate(fetch)
       </template>
     </table>
     <Page
-      v-model:current="page"
+      :model-value="page"
       :total="sum"
       :page-size="pageSize"
       show-elevator
