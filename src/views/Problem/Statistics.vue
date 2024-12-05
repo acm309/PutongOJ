@@ -15,6 +15,7 @@ import {
 import { PieChart } from 'echarts/charts'
 import { useRoute, useRouter } from 'vue-router'
 import { useStatisticsStore } from '@/store/modules/statistics'
+import { useSessionStore } from '@/store/modules/session'
 import constant from '@/util/constant'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
@@ -28,6 +29,7 @@ use([
   LegendComponent,
 ])
 
+const sessionStore = useSessionStore()
 const statisticsStore = useStatisticsStore()
 const rootStore = useRootStore()
 const route = useRoute()
@@ -37,6 +39,7 @@ const name = constant.statisTableObj
 const lang = constant.language
 const { list, countList, sumCharts, sumStatis } = $(storeToRefs(statisticsStore))
 const { changeDomTitle } = rootStore
+const { profile, isAdmin } = $(storeToRefs(sessionStore))
 const { find } = statisticsStore
 const pid = $computed(() => route.params.pid)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
@@ -172,12 +175,13 @@ onRouteQueryUpdate(getStatistics)
           </td>
           <td>{{ item.memory }}</td>
           <td>{{ item.length }}</td>
-          <td>
+          <td v-if="isAdmin || (profile && profile.uid === item.uid)">
             <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-              <Button type="text">
-                {{ lang[item.language] }}
-              </Button>
+              {{ lang[item.language] }}
             </router-link>
+          </td>
+          <td v-else>
+            {{ lang[item.language] }}
           </td>
           <td>{{ timePretty(item.create) }}</td>
         </tr>
