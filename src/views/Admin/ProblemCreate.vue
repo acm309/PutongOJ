@@ -4,12 +4,13 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OJProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
+import { useTestcaseStore } from '@/store/modules/testcase'
 
 const { t } = useI18n()
 
 const router = useRouter()
 const problemStore = useProblemStore()
-const { create } = problemStore
+const testcaseStore = useTestcaseStore()
 const problem = $ref({
   title: '',
   memory: 32268,
@@ -22,17 +23,46 @@ const problem = $ref({
   out: '',
 })
 
-const Message = inject('$Message')
+const $Message = inject('$Message')
+const $Modal = inject('$Modal')
 
-async function submit () {
-  if (!problem.title.trim()) {
-    Message.error(t('oj.title_is_required'))
-  } else if (!problem.description.trim()) {
-    Message.error(t('oj.description_is_required'))
+async function submit() {
+  const pid = await problemStore.create(problem)
+  $Message.success(t('oj.create_problem_success', { pid }))
+  if (!problem.in && !problem.out) {
+    $Message.info('样例输入输出均为空，已跳过测试点创建！')
   } else {
-    const pid = await create(problem)
-    Message.success(t('oj.create_problem_success', { pid }))
-    router.push({ name: 'problemInfo', params: { pid } })
+    let test = {
+      pid: pid,
+      in: problem.in,
+      out: problem.out,
+    }
+    await testcaseStore.create(test)
+    $Message.success('成功创建样例数据测试点！')
+  }
+  router.push({ name: 'problemInfo', params: { pid } })
+}
+
+async function submitCheck() {
+  if (!problem.title.trim()) {
+    $Message.error(t('oj.title_is_required'))
+  } else if (!problem.description.trim()) {
+    $Message.error(t('oj.description_is_required'))
+  } else {
+    if (!problem.in || !problem.out) {
+      $Modal.confirm({
+        title: '提示',
+        content: '<p>样例输入输出不完整，是否继续？</p>',
+        onOk: async () => {
+          await submit()
+        },
+        onCancel: () => {
+          $Message.info('已取消创建！')
+        },
+      })
+    } else {
+      await submit()
+    }
   }
 }
 </script>
@@ -46,15 +76,15 @@ async function submit () {
       <Step :title="t('oj.add_context')" :content="t('oj.add_context_explanation')" status="process" />
       <Step :title="t('oj.input_format')" :content="t('oj.input_format_explanation')" status="process" />
       <Step :title="t('oj.create_test_data')" :content="t('oj.create_test_data_explanation')" status="process" />
-      <Step :title="t('oj.test_problem')" :content="t('oj.test_problem_explanation')" icon="ios-star" status="process" />
+      <Step :title="t('oj.test_problem')" :content="t('oj.test_problem_explanation')" icon="ios-star"
+        status="process" />
     </Steps>
     <br>
     <OJProblemEdit :problem="problem" />
-    <Button type="primary" size="large" @click="submit">
+    <Button type="primary" size="large" @click="submitCheck">
       {{ t('oj.submit') }}
     </Button>
   </div>
 </template>
 
-<style>
-</style>
+<style></style>
