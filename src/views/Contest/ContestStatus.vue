@@ -69,7 +69,7 @@ function fetch () {
 function reload (payload = {}) {
   router.push({
     name: 'contestStatus',
-    query: purify(Object.assign({}, query, payload)),
+    query: purify(Object.assign({}, route.query, payload)),
   })
 }
 
