@@ -1,4 +1,47 @@
 <script setup>
+import highlight from 'highlight.js/lib/core'
+import cpp from 'highlight.js/lib/languages/cpp'
+import java from 'highlight.js/lib/languages/java'
+import python from 'highlight.js/lib/languages/python'
+import 'highlight.js/styles/atom-one-light.css'
+
+highlight.registerLanguage('c', cpp)
+highlight.registerLanguage('java', java)
+highlight.registerLanguage('python', python)
+
+function prettyCode(code, language) {
+  return highlight.highlight(`${code}`, {
+    language: language,
+  }).value
+}
+
+const exampleCode = {
+  C: `#include <stdio.h>
+
+int main() {
+#ifdef ONLINE_JUDGE
+    printf("Running on the judge\\n");
+#else
+    printf("Not running on the judge\\n");
+#endif
+    return 0;
+}`,
+  Java: `public class Main {
+    public static void main(String[] args) {
+        if (System.getProperty("ONLINE_JUDGE") != null) {
+            System.out.println("Running on the judge");
+        } else {
+            System.out.println("Not running on the judge");
+        }
+    }
+}`,
+  Python: `import os
+
+if os.getenv("ONLINE_JUDGE") == "1":
+    print("Running on the judge")
+else:
+    print("Not running on the judge")`
+}
 </script>
 
 <template>
@@ -163,10 +206,22 @@
       Q: Can my program know it is running on the judge?
     </h3>
     <p>
-      答：是的，你可以通过检查环境变量 <code>ONLINE_JUDGE</code> 来判断你的程序是否在评测机上运行。<br />
-      A: Yes, you can check the environment variable <code>ONLINE_JUDGE</code> to determine if your program is running
-      on the judge.
+      答：是的，你可以通过不同的方式来判断你的程序是否在评测机上运行。C 和 C++ 通过宏定义，Java 通过系统属性，Python
+      通过环境变量来得知程序是否在评测机上运行。下面给出了一些示例：<br />
+      A: Yes, you can determine whether your program is running on the judge in different ways. C and C++ use macro
+      definitions, Java uses system properties, and Python uses environment variables to determine whether the program is
     </p>
+    <Tabs value="example-code" :animated="false">
+      <TabPane label="C/C++" name="c">
+        <pre><code v-html="prettyCode(exampleCode['C'], 'C')" /></pre>
+      </TabPane>
+      <TabPane label="Java" name="java">
+        <pre><code v-html="prettyCode(exampleCode['Java'], 'Java')" /></pre>
+      </TabPane>
+      <TabPane label="Python 3" name="python">
+        <pre><code v-html="prettyCode(exampleCode['Python'], 'Python')" /></pre>
+      </TabPane>
+    </Tabs>
     <h3>
       问：为什么我得到了一个编译错误？<br />
       Q: Why did I get a Compile Error? It's well done!
@@ -176,7 +231,8 @@
       A: There are some differences between GNU and MS-VC++, such as:
     </p>
     <ol>
-      <li><code>main</code> must be declared as <code>int</code>, <code>void main</code> will end up with a Compile Error.</li>
+      <li><code>main</code> must be declared as <code>int</code>, <code>void main</code> will end up with a Compile
+        Error.</li>
       <li><code>i</code> is out of definition after block <code>for (int i=0; ...) {...}</code></li>
       <li><code>itoa</code> is not an ANSI function.</li>
       <li><code>__int64</code> of VC is not ANSI, but you can use <code>long long</code> for 64-bit integer.</li>
@@ -221,6 +277,8 @@ table
   border-radius: 4px
   text-align: center
   padding: 2px
+pre
+  margin: 0
 code
   margin: 0 3px
 ol
