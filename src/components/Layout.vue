@@ -139,8 +139,8 @@ export default {
       </Content>
       <Footer class="layout-footer-center">
         <p>Server Time: {{ timePretty(currentTime) }}</p>
-        <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309 <Icon type="social-github" />.</a>
-        The source code is licensed <a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
+        <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309<Icon type="logo-github" /></a>.
+        The source code is licensed <a href="https://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
       </Footer>
     </Layout>
     <Dialog />
@@ -178,6 +178,9 @@ export default {
     text-align: center
     p
       margin-bottom: 8px
+    .ivu-icon
+      margin-left: 3px
+      vertical-align: -0.07em
   .i18n::before
     content: url('../assets/i18n.svg')
     // margin-right: 5px
