@@ -23,6 +23,7 @@ config.judge = {
   PresentationError: 9,
   SystemError: 10,
   RejudgePending: 11,
+  Skipped: 12,
 }
 
 config.limitation = {

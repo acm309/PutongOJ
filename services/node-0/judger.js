@@ -52,6 +52,8 @@ function judgeCode (code) {
     return config.judge.CompileError
   } else if (code === 14) {
     return config.judge.SystemError
+  } else if (code === 16) {
+    return config.judge.Skipped
   } else {
     return config.judge.RuntimeError
   }
