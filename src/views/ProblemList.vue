@@ -29,8 +29,8 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 
-const type = $ref(route.query.type || 'pid')
-const content = $ref(route.query.content || '')
+let type = $ref(route.query.type || 'pid')
+let content = $ref(route.query.content || '')
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
 const problemVisible = $ref(constant.status)
@@ -50,7 +50,11 @@ function reload (payload = {}) {
   router.push({ name: 'problemList', query: routeQuery })
 }
 
-const fetch = () => find(query)
+const fetch = () => {
+  type = route.query.type || 'pid'
+  content = route.query.content || ''
+  find(query)
+}
 
 const search = () => reload({ page: 1, type, content })
 const pageChange = val => reload({ page: val })
