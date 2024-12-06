@@ -6,6 +6,7 @@ import { privilege } from '@/util/constant'
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
+    timeDiff: 0,
     website: {} as WebsiteConfigResp['website'],
     // Todo: remove
     privilege,
@@ -41,13 +42,22 @@ export const useRootStore = defineStore('root', {
       window.document.title += ` | ${this.website.title}`
     },
     async fetchTime () {
-      const { data } = await api.getTime()
-      this.currentTime = data.serverTime
+      const { data: first } = await api.getTime();
+      const midTime = Date.now();
+      const { data: second } = await api.getTime();
+      const endTime = Date.now();
+    
+      const serverTime = Math.round((first.serverTime + second.serverTime) / 2);
+      this.timeDiff = midTime - serverTime;
+      this.currentTime = endTime - this.timeDiff;
     },
     updateTime () {
-      setInterval(() => {
-        this.currentTime += 1000
-      }, 1000)
+      setTimeout(() => {
+        this.currentTime = Date.now() - this.timeDiff
+        setInterval(() => {
+          this.currentTime = Date.now() - this.timeDiff
+        }, 1000)
+      }, 1000 - this.currentTime % 1000)
     },
     async fetchWebsiteConfig () {
       const { data } = await api.getWebsiteConfig()

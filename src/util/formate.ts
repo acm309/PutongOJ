@@ -23,3 +23,11 @@ export function timeContest (time: number) {
   const mm = `${m}`.padStart(2, '0')
   return `${h}:${mm}:${ss}`
 }
+
+export function timeDiffPretty (ms: number) {
+  const sign = ms > 0 ? '+' : ''
+  if (ms < 1000)
+    return `${sign}${ms}ms`
+  else
+    return `${sign}${Math.floor(ms / 1000)}.${Math.round(ms % 1000 / 100)}s`
+}

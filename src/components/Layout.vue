@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 import Dialog from './LoginAndRegister'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
-import { timePretty } from '@/util/formate'
+import { timePretty, timeDiffPretty } from '@/util/formate'
 import { useHumanLanguage } from '@/util/helper'
 
 const rootStore = useRootStore()
@@ -15,7 +15,7 @@ const route = useRoute()
 const router = useRouter()
 const $Message = inject('$Message')
 const { toggleLoginState, logout } = sessionStore
-const { currentTime } = $(storeToRefs(rootStore))
+const { currentTime, timeDiff } = $(storeToRefs(rootStore))
 const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
 
 const active = $computed(() => route.name)
@@ -40,6 +40,11 @@ function profileAction (name) {
 function langSelected (lang) {
   locale.value = selectedLang = lang
 }
+
+const formattedTimeDiff = $computed(() => {
+  return timeDiffPretty(timeDiff)
+})
+
 </script>
 
 <script>
@@ -138,7 +143,7 @@ export default {
         <router-view />
       </Content>
       <Footer class="layout-footer-center">
-        <p>Server Time: {{ timePretty(currentTime) }}</p>
+        <p>Server Time: {{ timePretty(currentTime) }} ({{ formattedTimeDiff }})</p>
         <strong>Putong OJ</strong> by <a href="https://github.com/acm309" target="_blank">acm309<Icon type="logo-github" /></a>.
         The source code is licensed <a href="https://opensource.org/licenses/mit-license.php" target="_blank">MIT</a>.
       </Footer>
