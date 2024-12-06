@@ -21,7 +21,7 @@ const test = $ref({
 
 const fetch = () => testcaseStore.find(route.params)
 
-function search (item) {
+function search(item) {
   return testcaseStore.findOne({
     pid: route.params.pid,
     uuid: item.uuid,
@@ -29,7 +29,7 @@ function search (item) {
   })
 }
 
-function del (item) {
+function del(item) {
   $Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该文件, 是否继续?</p>',
@@ -47,26 +47,27 @@ function del (item) {
   })
 }
 
-async function create () {
-  if (!test.in && !test.out) {
+async function create() {
+  await testcaseStore.create(test)
+  $Message.success('成功创建！')
+  fetch()
+  test.in = test.out = ''
+}
+
+async function createCheck() {
+  if (!test.in.trim() && !test.out.trim()) {
     $Message.error('输入输出不能同时为空！')
-    return
-  }
-  if (!test.in || !test.out) {
+  } else if (!test.in.trim() || !test.out.trim()) {
     $Modal.confirm({
       title: '提示',
       content: '<p>输入输出不完整，是否继续？</p>',
-      onOk: async () => {
-        await testcaseStore.create(test)
-        $Message.success('成功创建！')
-        fetch()
-        test.in = test.out = ''
-      },
+      onOk: create,
       onCancel: () => {
         $Message.info('已取消创建！')
       },
     })
-  }
+  } else
+    create()
 }
 
 fetch()
@@ -100,7 +101,7 @@ fetch()
     <Input v-model="test.out" type="textarea" :autosize="{ minRows: 5, maxRows: 25 }" />
     <br>
     <br>
-    <Button type="primary" @click="create">
+    <Button type="primary" @click="createCheck">
       Submit
     </Button>
   </div>
