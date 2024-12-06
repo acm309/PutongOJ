@@ -32,6 +32,7 @@ export const useRootStore = defineStore('root', {
       PresentationError: 9,
       SystemError: 10,
       RejudgePending: 11,
+      Skipped: 12,
     },
   }),
   actions: {

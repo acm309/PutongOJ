@@ -11,6 +11,7 @@ export const result = {
   9: 'Presentation Error',
   10: 'System Error',
   11: 'Rejudge Pending',
+  12: 'Skipped',
 } as const
 
 export const language = {
@@ -72,6 +73,10 @@ export const judgeList = [
   {
     value: 11,
     label: 'Rejudge Pending',
+  },
+  {
+    value: 12,
+    label: 'Skipped',
   },
 ] as const
 
