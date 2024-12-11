@@ -7,13 +7,19 @@ const { generatePwd } = require('../utils/helper')
 const config = require('.')
 
 async function databaseSetup () {
-  const models = [
-    'Solution', 'Contest', 'News', 'Group', 'Discuss',
-  ]
-  const ps = models.map(async (model) => {
+  const models = {
+    'Contest': 1,
+    'Discuss': 0,
+    'Group': 0,
+    'News': 0,
+    'Problem': 999,
+    'Solution': 0,
+  }
+  
+  const ps = Object.entries(models).map(async ([model, id]) => {
     const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= 0) { return }
-    return new ID({ name: model, id: 0 }).save()
+    if (item != null && item.id >= id) return
+    return new ID({ name: model, id: id }).save()
   })
 
   const admin = await User.findOne({ uid: 'admin' }).exec()
@@ -28,7 +34,6 @@ async function databaseSetup () {
 
   const count = await Problem.count().exec()
   if (count === 0) {
-    await new ID({ name: 'Problem', id: 999 }).save()
     ps.push(new Problem({
       title: 'A + B',
       description: 'This is a test problem without any test data. Go to Edit tab to complete the description and other fields. Go to Test Data to upload new test data',
