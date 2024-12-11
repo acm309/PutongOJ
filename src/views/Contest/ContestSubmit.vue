@@ -22,7 +22,10 @@ const currentProblemId = computed(() => Number(route.params.id))
 const currentContestId = computed(() => route.params.cid)
 const currentTitle = computed(() => overview.value[currentProblemId.value - 1]?.title)
 
-const pageChange = val => router.push({ name: 'contestSubmit', params: { id: val } })
+const pageChange = val => {
+  if (overview[val - 1].invalid) return
+  router.push({ name: 'contestSubmit', params: { cid: contest.cid, id: val } })
+}
 const reset = clearCode
 
 async function submit() {
@@ -42,12 +45,8 @@ async function submit() {
 <template>
   <div>
     <ul>
-      <li
-        v-for="i in totalProblems"
-        :key="i"
-        :class="{ active: i === currentProblemId }"
-        @click="pageChange(i)"
-      >
+      <li v-for="i in totalProblems" :key="i" @click="pageChange(i)"
+        :class="{ active: i === currentProblemId, invalid: overview[i - 1].invalid }">
         {{ i }}
       </li>
     </ul>
@@ -87,4 +86,7 @@ ul
     color: #fff
     background-color: #e040fb
     border-color: #e040fb
+  .invalid
+    cursor: not-allowed
+    color: #aaa
 </style>

@@ -23,7 +23,10 @@ function fetch () {
   findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
 }
 
-const pageChange = val => router.push({ name: 'contestProblem', params: { id: val } })
+const pageChange = val => {
+  if (overview[val - 1].invalid) return
+  router.push({ name: 'contestProblem', params: { cid: contest.cid, id: val } })
+}
 const submit = () => router.push({ name: 'contestSubmit', params: router.params })
 
 fetch()
@@ -33,7 +36,8 @@ onRouteParamUpdate(fetch)
 <template>
   <div class="conpro-wrap">
     <ul>
-      <li v-for="i in totalProblems" :key="i" :class="{ active: i === proIndex }" @click="pageChange(i)">
+      <li v-for="i in totalProblems" :key="i" @click="pageChange(i)"
+        :class="{ active: i === proIndex, invalid: overview[i - 1].invalid }">
         {{ i }}
       </li>
     </ul>
@@ -68,4 +72,7 @@ ul
     color: #fff
     background-color: #e040fb
     border-color: #e040fb
+  .invalid
+    cursor: not-allowed
+    color: #aaa
 </style>

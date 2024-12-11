@@ -76,7 +76,7 @@ function del (pid) {
     title: t('oj.warning'),
     content: t('oj.will_remove_problem', { pid }),
     onOk: async () => {
-      // await remove({ pid })
+      await remove({ pid })
       $Message.success(t('oj.remove_problem_success', { pid }))
     },
     onCancel: () => $Message.info(t('oj.cancel_remove')),

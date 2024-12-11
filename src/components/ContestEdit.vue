@@ -42,11 +42,18 @@ const options = [
 let pid = $ref('')
 let pwd = $ref('')
 
+const $Message = inject('$Message')
+
 if (contest != null) {
   contest.start = contest.start || new Date().getTime()
   contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
   if (contest.encrypt === encrypt.Password)
     pwd = contest.argument
+  overview.forEach(item => {
+    if (!item.invalid) return
+    $Message.error(`Problem ${item.pid} is invalid, auto removed`)
+    contest.list.splice(contest.list.indexOf(item.pid), 1)
+  })
 }
 
 async function add () {

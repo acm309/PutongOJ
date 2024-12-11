@@ -30,15 +30,18 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
         </td>
         <td>{{ index + 1 }}</td>
         <td>
-          <router-link :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
+          <router-link v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
             <Button type="text">
               {{ item.title }}
             </Button>
           </router-link>
+          <span v-else>Problem is invalid</span>
         </td>
         <td>
-          <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
-          ({{ item.solve }} / {{ item.submit }})
+          <span v-if="!item.invalid">
+            {{ formate(item.solve / (item.submit + 0.000001)) }}
+            ({{ item.solve }} / {{ item.submit }})
+          </span>
         </td>
       </tr>
     </table>
