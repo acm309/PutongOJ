@@ -76,18 +76,26 @@ const findOne = async (ctx) => {
   const procedure = list.map((pid, index) => {
     return Problem.findOne({ pid }).lean().exec()
       .then((problem) => {
-        overview[index] = only(problem, 'title pid')
+        if (!problem) {
+          overview[index] = { pid, invalid: true }
+          return Promise.resolve()
+        }
+        overview[index] = only(problem, 'pid title')
       })
       .then(() => {
+        if (overview[index].invalid) return 0
         return Solution.count({ pid, mid: cid }).lean().exec()
       })
       .then((count) => {
+        if (overview[index].invalid) return
         overview[index].submit = count
       })
       .then(() => {
+        if (overview[index].invalid) return 0
         return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec()
       })
       .then((count) => {
+        if (overview[index].invalid) return
         overview[index].solve = count
       })
   })
