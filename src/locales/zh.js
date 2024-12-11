@@ -75,7 +75,7 @@ export default {
     remove_user_success: '成功删除用户 {uid}！',
     cancel_remove: '已取消删除！',
     will_remove_problem: '此操作将永久删除题目 {pid}, 是否继续?',
-    remove_problem_success: '`成功删除题目 {pid}！',
+    remove_problem_success: '成功删除题目 {pid}！',
     create_problem_success: '成功创建题目 {pid}！',
     steps_of_create_a_problem: '创建题目的步骤',
     algorithm_design: '算法设计',
