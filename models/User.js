@@ -1,77 +1,119 @@
+const config = require('../config')
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
-const config = require('../config')
 
 const userSchema = mongoose.Schema({
   uid: {
     type: String,
+    required: true,
+    validate: {
+      validator: function (v) {
+        return /^[a-zA-Z0-9]{3,20}$/.test(v)
+      },
+      message:
+        'Invalid uid. It should be 3-20 characters long ' +
+        'and only contains letters and numbers',
+    },
     index: {
       unique: true,
     },
-  },
-  nick: {
-    type: String,
-    required: true,
   },
   pwd: {
     type: String,
     required: true,
   },
+  privilege: {
+    type: Number,
+    default: config.privilege.PrimaryUser,
+    validate: {
+      validator: function (v) {
+        return Object.values(config.privilege).includes(v)
+      },
+      message:
+        `Invalid privilege. Valid values are ` +
+        `[${Object.values(config.privilege).join(', ')}]`,
+    },
+  },
+  nick: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (v) {
+        return v.length <= 20
+      },
+      message:
+        'Nick is too long. It should be less than 20 characters long',
+    },
+  },
+  motto: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (v) {
+        return v.length <= 100
+      },
+      message:
+        'Motto is too long. It should be less than 100 characters long',
+    },
+  },
+  mail: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (v) {
+        return v.length == 0 || v.length <= 254 &&
+          /^[a-zA-Z0-9._%+-]{1,64}@[a-zA-Z0-9.-]{1,255}\.[a-zA-Z]{2,}$/i.test(v)
+      },
+      message: 'Invalid email address',
+    },
+  },
+  school: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (v) {
+        return v.length <= 20
+      },
+      message:
+        'School name is too long. It should be less than 20 characters long',
+    },
+  },
   create: {
     type: Number,
     default: Date.now,
   },
-  privilege: {
-    type: Number,
-    default: 1,
-  },
-  timerecord: {
-    type: [ Number ],
-    default: [ 0, 0, 0, 0, 0 ],
-  },
-  iprecord: {
-    type: [ String ],
-    default: [ '', '', '', '', '' ],
-  },
-  status: {
-    type: Number,
-    default: config.status.Available,
-  },
-  solve: {
-    type: Number,
-    default: 0,
+  gid: {
+    type: [Number],
+    default: [],
+    index: true,
   },
   submit: {
     type: Number,
     default: 0,
   },
-  gid: {
-    type: [ Number ],
-    default: [],
-    index: true,
+  solve: {
+    type: Number,
+    default: 0,
   },
-  motto: String,
-  mail: String,
-  school: String,
+  // DEPRECATED
+  timerecord: {
+    type: [Number],
+    default: [0, 0, 0, 0, 0],
+  },
+  // DEPRECATED
+  iprecord: {
+    type: [String],
+    default: ['', '', '', '', ''],
+  },
+  // DEPRECATED
+  status: {
+    type: Number,
+    default: config.status.Available,
+  },
 }, {
   collection: 'User',
 })
 
 userSchema.plugin(mongoosePaginate)
-
-userSchema.pre('validate', function (next) {
-  // 验证字段 做了这样限制 之前不符合此规则的用户无法被查询 TODO
-  if (this.uid.length < 3) {
-    next(new Error('The length of the username must be greater than 3'))
-  } else if (this.uid.length >= 50) {
-    next(new Error('The length of the username must be less than 50'))
-  } else if (this.nick.length < 1) {
-    next(new Error('The length of the nick must be greater than 1'))
-  } else if (this.nick.length >= 50) {
-    next(new Error('The length of the nick must be less than 50'))
-  } else {
-    next()
-  }
-})
 
 module.exports = mongoose.model('User', userSchema)
