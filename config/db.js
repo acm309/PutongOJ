@@ -4,6 +4,8 @@ const mongoosePaginate = require('mongoose-paginate-v2')
 const logger = require('../utils/logger')
 const config = require('./')
 
+mongoose.set('strictQuery', true);
+
 mongoose.Promise = globalThis.Promise
 
 // 连接MongoDB数据库
