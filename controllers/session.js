@@ -1,6 +1,7 @@
 const only = require('only')
 const User = require('../models/User')
 const { generatePwd } = require('../utils/helper')
+const { privilege } = require('../config')
 
 // 登录
 const login = async (ctx) => {
@@ -11,12 +12,12 @@ const login = async (ctx) => {
     .findOne({ uid })
     .exec()
 
-  if (user == null) {
+  if (user == null)
     ctx.throw(400, 'No such a user')
-  }
-  if (user.pwd !== pwd) {
+  if (user.pwd !== pwd)
     ctx.throw(400, 'Wrong password')
-  }
+  if (user.privilege === privilege.Banned)
+    ctx.throw(403, 'Account banned')
 
   ctx.session.profile = only(user, 'uid nick privilege pwd')
   ctx.session.profile.verifyContest = []

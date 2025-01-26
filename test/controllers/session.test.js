@@ -1,10 +1,22 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../app')
+const users = require('../seed/users')
 const config = require('../../config')
 
 const server = app.listen()
 const request = supertest.agent(server)
+
+test('Bannded user login', async (t) => {
+  const res = await request
+    .post('/api/session')
+    .send({
+      uid: users.data.banned.uid,
+      pwd: users.data.banned.pwd,
+    })
+
+  t.is(res.status, 403)
+})
 
 test.before(async (t) => {
   const res = await request

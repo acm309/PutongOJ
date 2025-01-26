@@ -18,7 +18,7 @@ const users = {
       nick: 'user',
       pwd: 'testtest',
     },
-    "hulllinda": { uid: "hulllinda", nick: "HULLLINDA", pwd: ")zD1d_mh)7" },
+    "banned": { uid: "banned", pwd: ")zD1d_mh)7", privilege: config.privilege.Banned },
     "kevin63": { uid: "kevin63", pwd: "^I^+6XYfGV" },
     "ugordon": { uid: "ugordon", nick: "UGORDON", pwd: "BwcTvXC%&8" },
     "hallpatrick": { uid: "hallpatrick", nick: "HALLPATRICK", pwd: "(7#gZxV)5+" },

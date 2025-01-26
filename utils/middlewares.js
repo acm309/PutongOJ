@@ -1,5 +1,6 @@
 const { RateLimit } = require('koa2-ratelimit')
 const { isAdmin, isRoot } = require('./helper')
+const { privilege } = require('../config')
 const User = require('../models/User')
 
 const login = async (ctx, next) => {
@@ -8,7 +9,10 @@ const login = async (ctx, next) => {
     ctx.throw(401, 'Login required')
   }
   const user = await User.findOne({ uid: ctx.session.profile.uid }).exec()
-  if (user == null || user.pwd !== ctx.session.profile.pwd) {
+  if (user == null ||
+    user.pwd !== ctx.session.profile.pwd ||
+    user.privilege == privilege.Banned
+  ) {
     delete ctx.session.profile
     ctx.throw(401, 'Login required')
   }

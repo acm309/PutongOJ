@@ -7,6 +7,7 @@ const config = {
   secretKey: String(process.env.secretKey),
 
   privilege: {
+    Banned: 0,
     PrimaryUser: 1,
     Teacher: 2,
     Root: 3,
