@@ -44,7 +44,7 @@ let pwd = $ref('')
 
 const $Message = inject('$Message')
 
-if (contest != null) {
+if (typeof overview !== 'undefined') {
   contest.start = contest.start || new Date().getTime()
   contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
   if (contest.encrypt === encrypt.Password)
