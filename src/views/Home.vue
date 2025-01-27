@@ -27,11 +27,11 @@ const query = $computed(() => {
   return purify(opt)
 })
 
-function fetch () {
+function fetch() {
   find(query)
 }
 
-function reload (payload = {}) {
+function reload(payload = {}) {
   router.push({
     name: 'home',
     query: Object.assign(query, purify(payload)),
@@ -39,7 +39,7 @@ function reload (payload = {}) {
 }
 
 const pageChange = val => reload({ page: val })
-function del (nid) {
+function del(nid) {
   return $Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该消息, 是否继续?</p>',
@@ -64,25 +64,30 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="home-wrap">
     <div class="news">
+      <span>Welcome to Putong OJ</span><br />
       {{ t('oj.news_list') }}
     </div>
-    <Card v-for="item in list" :key="item.nid">
-      <Row type="flex" align="middle">
-        <Col :span="2">
-          <Icon type="md-chatbubbles" />
-        </Col>
-        <Col :span="20">
-          <router-link :to="{ name: 'newsInfo', params: { nid: item.nid } }">
-            <span>{{ item.title }}</span>
-          </router-link>
+    <router-link v-for="item in list" :key="item.nid" :to="{ name: 'newsInfo', params: { nid: item.nid } }"
+      style="text-decoration: none; color: inherit;">
+      <Card dis-hover>
+        <Row type="flex" :gutter="16">
+          <Col flex="68px" class="news-icon">
+          <Icon type="md-paper" />
+          </Col>
+          <Col flex="auto">
+          <span>{{ item.title }}</span>
           <p>{{ timePretty(item.create) }}</p>
-        </Col>
-        <Col :span="2">
-          <Icon v-if="isAdmin && canRemove" type="md-close-circle" @click="del(item.nid)" />
-        </Col>
-      </Row>
-    </Card>
-    <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
+          </Col>
+          <Col flex="68px" class="close-icon" v-if="isAdmin && canRemove">
+          <Icon type="md-close-circle" @click.stop="del(item.nid)" />
+          </Col>
+        </Row>
+      </Card>
+    </router-link>
+    <Page class="page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+      @on-change="pageChange" />
+    <Page class="page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+      @on-change="pageChange" />
   </div>
 </template>
 
@@ -91,26 +96,36 @@ onRouteQueryUpdate(fetch)
   width 100%
   max-width 1024px
   .news
-    font-size: 40px
-    padding-bottom: 10px
-  .content
-    padding-left: 20px
-    padding-bottom: 20px
-    margin-bottom: 20px
-    border-bottom: 1px solid #dfd8d8
+    font-size: 28px
+    padding-bottom: 16px
+    span
+      font-size 12px
+  .news-icon, .close-icon
+    display: flex
+    align-items: center
+    justify-content: center
   .ivu-card
     margin-bottom: 20px
-    .ivu-icon-md-chatbubbles
-      font-size: 24px
-      margin-left: 30%
-      // color: alpha($primary-color, 0.9)
+    .ivu-icon-md-paper
+      font-size: 32px
       color: var(--oj-primary-color)
       opacity: 0.85
+    span
+      color var(--oj-primary-color)
+      font-size 16px
     p
-      margin-top: 10px
+      margin-top: 7px
     .ivu-icon-md-close-circle
       opacity: 0.85
       font-size: 1.5rem
       // color: #c3c2c2
       cursor: pointer
+@media screen and (max-width: 768px)
+  .page-table
+    display: none
+  .news-icon
+    display: none !important
+@media screen and (min-width: 769px)
+  .page-mobile
+    display: none
 </style>
