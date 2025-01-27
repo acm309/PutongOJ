@@ -37,88 +37,55 @@ function profileAction(name) {
 function langSelected(lang) {
   locale.value = selectedLang = lang
 }
+
+function getMenuItems() {
+  return [
+    { name: 'home', icon: 'ios-home', label: t('oj.home') },
+    { name: 'problemList', icon: 'ios-keypad', label: t('oj.problem_list') },
+    { name: 'status', icon: 'md-refresh', label: t('oj.status_list') },
+    { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
+    { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
+    { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
+    { name: 'faq', icon: 'md-help-circle', label: t('oj.faq') },
+  ]
+}
+
+function getAdminMenuItems() {
+  return [
+    { name: 'problemCreate', label: t('oj.create_problem') },
+    { name: 'contestCreate', label: t('oj.create_contest') },
+    { name: 'newsCreate', label: t('oj.create_news') },
+    { name: 'userEdit', label: t('oj.user_management') },
+  ]
+}
 </script>
 
 <template>
   <Header class="layout-header">
     <Menu class="menu-table" mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
-      <MenuItem name="home">
-      <Icon type="ios-home" />{{ t('oj.home') }}
-      </MenuItem>
-      <MenuItem name="problemList">
-      <Icon type="ios-keypad" />{{ t('oj.problem_list') }}
-      </MenuItem>
-      <MenuItem name="status">
-      <Icon type="md-refresh" />{{ t('oj.status_list') }}
-      </MenuItem>
-      <MenuItem name="ranklist">
-      <Icon type="ios-stats" />{{ t('oj.ranklist') }}
-      </MenuItem>
-      <MenuItem name="contestList">
-      <Icon type="ios-trophy" />{{ t('oj.contest_list') }}
-      </MenuItem>
-      <MenuItem name="discuss">
-      <Icon type="ios-quote" />{{ t('oj.discussion_list') }}
-      </MenuItem>
-      <MenuItem name="faq">
-      <Icon type="md-help-circle" />{{ t('oj.faq') }}
+      <MenuItem v-for="item in getMenuItems()" :key="item.name" :name="item.name">
+      <Icon :type="item.icon" />{{ item.label }}
       </MenuItem>
       <Submenu v-if="isAdmin" name="admin">
         <template #title>
           <Icon type="md-paper-plane" />{{ t('oj.admin') }}
         </template>
-        <MenuItem name="problemCreate">
-        {{ t('oj.create_problem') }}
-        </MenuItem>
-        <MenuItem name="contestCreate">
-        {{ t('oj.create_contest') }}
-        </MenuItem>
-        <MenuItem name="newsCreate">
-        {{ t('oj.create_news') }}
-        </MenuItem>
-        <MenuItem name="userEdit">
-        {{ t('oj.user_management') }}
+        <MenuItem v-for="item in getAdminMenuItems()" :key="item.name" :name="item.name">
+        {{ item.label }}
         </MenuItem>
       </Submenu>
     </Menu>
     <Menu class="menu-mobile" mode="horizontal" :active-name="active" @on-select="routerTo">
       <Submenu name="site">
-        <template #title >
+        <template #title>
           <span style="margin-right: 8px">Putong OJ</span>
         </template>
-        <MenuItem name="home">
-        <Icon type="ios-home" />{{ t('oj.home') }}
-        </MenuItem>
-        <MenuItem name="problemList">
-        <Icon type="ios-keypad" />{{ t('oj.problem_list') }}
-        </MenuItem>
-        <MenuItem name="status">
-        <Icon type="md-refresh" />{{ t('oj.status_list') }}
-        </MenuItem>
-        <MenuItem name="ranklist">
-        <Icon type="ios-stats" />{{ t('oj.ranklist') }}
-        </MenuItem>
-        <MenuItem name="contestList">
-        <Icon type="ios-trophy" />{{ t('oj.contest_list') }}
-        </MenuItem>
-        <MenuItem name="discuss">
-        <Icon type="ios-quote" />{{ t('oj.discussion_list') }}
-        </MenuItem>
-        <MenuItem name="faq">
-        <Icon type="md-help-circle" />{{ t('oj.faq') }}
+        <MenuItem v-for="item in getMenuItems()" :key="item.name" :name="item.name">
+        <Icon :type="item.icon" />{{ item.label }}
         </MenuItem>
         <MenuGroup v-if="isAdmin" title="Admin">
-          <MenuItem name="problemCreate">
-          {{ t('oj.create_problem') }}
-          </MenuItem>
-          <MenuItem name="contestCreate">
-          {{ t('oj.create_contest') }}
-          </MenuItem>
-          <MenuItem name="newsCreate">
-          {{ t('oj.create_news') }}
-          </MenuItem>
-          <MenuItem name="userEdit">
-          {{ t('oj.user_management') }}
+          <MenuItem v-for="item in getAdminMenuItems()" :key="item.name" :name="item.name">
+          {{ item.label }}
           </MenuItem>
         </MenuGroup>
       </Submenu>
@@ -177,12 +144,14 @@ function langSelected(lang) {
   background #fff
   border-bottom 1px solid #d7dde4
   justify-content space-between
-  box-shadow 0 2px 3px hsla(0,0%,4%,.1)
+  box-shadow 0 3px 5px -1px rgba(0, 0, 0, .1), 
+             0 6px 10px 0 rgba(0, 0, 0, .07),  
+             0 1px 18px 0 rgba(0, 0, 0, .06)
 .ivu-menu-horizontal
   flex none
   background none
-  height 61.5px
-  line-height 61.5px
+  height 62px
+  line-height 62px
 .ivu-menu-horizontal.ivu-menu-light:after
   height 0
 .right
