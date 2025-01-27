@@ -6,7 +6,7 @@ import { privilege } from '@/util/constant'
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
-    timeDiff: 0,
+    timeDiff: NaN,
     website: {} as WebsiteConfigResp['website'],
     // Todo: remove
     privilege,
@@ -36,23 +36,25 @@ export const useRootStore = defineStore('root', {
     },
   }),
   actions: {
-    changeDomTitle (payload: { title: string }) {
+    changeDomTitle(payload: { title: string }) {
       if (payload && payload.title)
         window.document.title = payload.title
-
       window.document.title += ` | ${this.website.title}`
     },
-    async fetchTime () {
+    async fetchTime() {
+      const time1 = Date.now();
       const { data: first } = await api.getTime();
-      const midTime = Date.now();
+      const time2 = Date.now();
       const { data: second } = await api.getTime();
-      const endTime = Date.now();
-    
-      const serverTime = Math.round((first.serverTime + second.serverTime) / 2);
-      this.timeDiff = midTime - serverTime;
-      this.currentTime = endTime - this.timeDiff;
+      const time3 = Date.now();
+
+      const localMidTime = (time2 + (time3 + time1) / 2) / 2
+      const serverMidTime = (first.serverTime + second.serverTime) / 2
+
+      this.timeDiff = localMidTime - serverMidTime
+      this.currentTime = Date.now() - this.timeDiff;
     },
-    updateTime () {
+    updateTime() {
       setTimeout(() => {
         this.currentTime = Date.now() - this.timeDiff
         setInterval(() => {
@@ -60,7 +62,7 @@ export const useRootStore = defineStore('root', {
         }, 1000)
       }, 1000 - this.currentTime % 1000)
     },
-    async fetchWebsiteConfig () {
+    async fetchWebsiteConfig() {
       const { data } = await api.getWebsiteConfig()
       this.website = data.website
     },

@@ -54,7 +54,7 @@ setErrorHandler((err) => {
 
 const { changeDomTitle, fetchTime, updateTime } = useRootStore()
 
-fetchTime().then(updateTime)
+setTimeout(() => fetchTime().then(updateTime), 1000)
 watch(() => route.meta, () => changeDomTitle(route.meta))
 </script>
 
