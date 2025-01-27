@@ -29,7 +29,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="news-wrap">
     <Tabs v-if="isAdmin" :model-value="current" @on-click="change">
       <TabPane :label="t('oj.overview')" name="newsInfo" />
       <TabPane :label="t('oj.edit')" name="newsEdit" />
@@ -37,3 +37,9 @@ onBeforeMount(async () => {
     <router-view />
   </div>
 </template>
+
+<style lang="stylus" scoped>
+.news-wrap
+  width: 100%
+  max-width: 1024px
+</style>

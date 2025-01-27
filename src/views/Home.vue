@@ -88,7 +88,8 @@ onRouteQueryUpdate(fetch)
 
 <style lang="stylus">
 .home-wrap
-  margin: 0 10%
+  width 100%
+  max-width 1024px
   .news
     font-size: 40px
     padding-bottom: 10px

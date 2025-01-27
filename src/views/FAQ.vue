@@ -250,6 +250,9 @@ else:
 </template>
 
 <style lang="stylus" scoped>
+.faq-wrap
+  width: 100%
+  max-width: 1024px
 h1, hr
   margin-bottom: 10px
 h3
