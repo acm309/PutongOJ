@@ -253,6 +253,10 @@ else:
 .faq-wrap
   width: 100%
   max-width: 1024px
+  padding-top: 30px
+@media screen and (max-width: 1024px)
+  .faq-wrap
+    padding-top: 20px
 h1, hr
   margin-bottom: 10px
 h3

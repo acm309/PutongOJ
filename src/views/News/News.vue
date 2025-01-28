@@ -15,7 +15,7 @@ const router = useRouter()
 const current = $computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
-function change (name) {
+function change(name) {
   return router.push({
     name,
     params: { nid: route.params.nid },
@@ -42,4 +42,8 @@ onBeforeMount(async () => {
 .news-wrap
   width: 100%
   max-width: 1024px
+  padding-top: 30px
+@media screen and (max-width: 1024px)
+  .news-wrap
+    padding-top: 20px
 </style>

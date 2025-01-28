@@ -22,3 +22,13 @@ h1, h4
   text-align: left
   border-top: 1px solid #dfd8d8
 </style>
+
+<style>
+.news-cont a {
+  line-break: anywhere;
+}
+.news-cont img {
+  width: auto;
+  max-width: 100%;
+}
+</style>
