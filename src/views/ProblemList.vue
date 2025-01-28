@@ -11,18 +11,9 @@ import { useRootStore } from '@/store'
 import { formate } from '@/util/formate'
 
 const options = reactive([
-  {
-    value: 'pid',
-    label: 'Pid',
-  },
-  {
-    value: 'title',
-    label: 'Title',
-  },
-  {
-    value: 'tag',
-    label: 'Tag',
-  },
+  { value: 'pid', label: 'Pid' },
+  { value: 'title', label: 'Title' },
+  { value: 'tag', label: 'Tag' },
 ])
 
 const route = useRoute()
@@ -45,7 +36,7 @@ const { status, judge } = $(storeToRefs(rootStore))
 const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
 const { find, update, 'delete': remove } = problemStore
 
-function reload (payload = {}) {
+function reload(payload = {}) {
   const routeQuery = Object.assign({}, query, purify(payload))
   router.push({ name: 'problemList', query: routeQuery })
 }
@@ -59,17 +50,15 @@ const fetch = () => {
 const search = () => reload({ page: 1, type, content })
 const pageChange = val => reload({ page: val })
 
-function change (problem) {
-  problem.status = problem.status === status.Reserve
-    ? status.Available
-    : status.Reserve
+function change(problem) {
+  problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
   update(problem).then(fetch)
 }
 
 const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 
-function del (pid) {
+function del(pid) {
   $Modal.confirm({
     okText: t('oj.ok'),
     cancelText: t('oj.cancel'),
@@ -89,111 +78,190 @@ onProfileUpdate(fetch)
 </script>
 
 <template>
-  <div class="prolist-wrap">
-    <Row style="margin-bottom: 20px">
-      <Col span="16">
-        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
-      </Col>
-      <Col :span="2">
-        <Select v-model="type">
+  <div class="problem-list-wrap">
+    <div class="problem-list-header">
+      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="problem-list-filter">
+        <Select v-model="type" class="search-type-select">
           <Option v-for="item in options" :key="item.value" :value="item.value">
             {{ item.label }}
           </Option>
         </Select>
-      </Col>
-      <Col :span="4">
-        <Input
-          v-model="content" icon="search" class="ivu-ml-8 ivu-pr-16"
-          @keyup.enter="search"
-        />
-      </Col>
-      <Col :span="2">
-        <Button type="primary" @click="search">
+        <Input v-model="content" class="search-input" @keyup.enter="search" />
+        <Button type="primary" class="search-button" @click="search">
           {{ t('oj.search') }}
         </Button>
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>#</th>
-        <th>PID</th>
-        <th>Title</th>
-        <th>Ratio</th>
-        <th>Tags</th>
-        <th v-if="isAdmin">
-          Visible
-        </th>
-        <th v-if="isAdmin && canRemove">
-          Delete
-        </th>
-      </tr>
-      <template v-for="item in list" :key="item.pid">
-        <tr v-if="isAdmin || item.status === status.Available" :key="item.pid">
-          <td>
-            <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
-          </td>
-          <td>{{ item.pid }}</td>
-          <td>
-            <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-              <Button type="text">
-                {{ item.title }}
-              </Button>
-            </router-link>
-          </td>
-          <td>
-            <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
-            (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
-              <Button type="text">
-                {{ item.solve }}
-              </Button>
-            </router-link> /
-            <router-link :to="{ name: 'status', query: { pid: item.pid } }">
-              <Button type="text">
-                {{ item.submit }}
-              </Button>
-            </router-link>)
-          </td>
-          <td>
-            <template v-for="(item2, index2) in item.tags" :key="index2">
-              <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
-                <Tag>{{ item2 }}</Tag>
+      </div>
+    </div>
+    <div class="problem-table-container">
+      <table class="problem-table">
+        <thead>
+          <tr>
+            <th class="problem-status">#</th>
+            <th class="problem-pid">PID</th>
+            <th class="problem-title">Title</th>
+            <th class="problem-tags">Tags</th>
+            <th class="problem-ratio">Ratio</th>
+            <th v-if="isAdmin" class="problem-visible">Visible</th>
+            <th v-if="isAdmin && canRemove" class="problem-delete">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="item in list" :key="item.pid">
+            <tr v-if="isAdmin || item.status === status.Available">
+              <td class="problem-status">
+                <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
+              </td>
+              <td class="problem-pid">{{ item.pid }}</td>
+              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+                <td class="problem-title">
+                  {{ item.title }}
+                </td>
               </router-link>
-            </template>
-          </td>
-          <td v-if="isAdmin">
-            <Tooltip content="Click to change status" placement="right">
-              <Button type="text" @click="change(item)">
-                {{ problemVisible[item.status] }}
-              </Button>
-            </Tooltip>
-          </td>
-          <td v-if="isAdmin && canRemove">
-            <Button type="text" @click="del(item.pid)">
-              Delete
-            </Button>
-          </td>
-        </tr>
-      </template>
-    </table>
+              <td class="problem-tags">
+                <template v-for="(item2, index2) in item.tags" :key="index2">
+                  <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
+                    <Tag class="problem-tag">{{ item2 }}</Tag>
+                  </router-link>
+                </template>
+              </td>
+              <td class="problem-ratio">
+                <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
+                (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
+                  <Button type="text" class="problem-ratio-button">
+                    {{ item.solve }}
+                  </Button>
+                </router-link> /
+                <router-link :to="{ name: 'status', query: { pid: item.pid } }">
+                  <Button type="text" class="problem-ratio-button">
+                    {{ item.submit }}
+                  </Button>
+                </router-link>)
+              </td>
+              <td v-if="isAdmin" class="problem-visible">
+                <Tooltip content="Click to change status" placement="right">
+                  <Button type="text" class="problem-visible-button" @click="change(item)">
+                    {{ problemVisible[item.status] }}
+                  </Button>
+                </Tooltip>
+              </td>
+              <td v-if="isAdmin && canRemove" class="problem-delete">
+                <Button type="text" class="problem-delete-button" @click="del(item.pid)">
+                  Delete
+                </Button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <div class="problem-list-footer">
+      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <Page class="problem-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+        show-elevator @on-change="pageChange" />
+    </div>
   </div>
 </template>
 
 <style lang="stylus" scoped>
 @import '../styles/common'
 
-table
-  th:nth-child(1)
-    width: 5%
-  th:nth-child(2)
-    width: 10%
-  th:nth-child(3)
-    width: 20%
-  th:nth-child(4)
-    width: 20%
-  th:nth-child(5)
-    width: 20%
-  th:nth-child(6)
-    width: 10%
-  th:nth-child(7)
-    width: 10%
+.problem-list-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+.problem-list-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  .problem-page-table
+    flex none
+    display flex
+  .problem-list-filter
+    flex none
+    display flex
+.problem-list-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
+.problem-page-mobile
+  display none
+
+@media screen and (max-width: 1024px)
+  .problem-list-wrap
+    padding 20px 0
+  .problem-list-header
+    padding 0 20px
+    margin-bottom 5px
+    .problem-page-table
+      display none !important
+  .problem-status
+    padding-left 20px
+  .problem-list-footer
+    padding 0 20px
+    margin-top 20px
+
+@media screen and (max-width: 768px)
+  .problem-page-table
+    display none !important
+  .problem-list-filter
+    width 100%
+    .search-input
+      width 100%
+  .problem-page-mobile
+    display block
+
+.search-type-select, .search-input, .search-button
+  margin-left 4px
+.search-type-select, .search-button
+  width 80px
+  min-width 80px
+.search-input
+  width 160px
+
+.problem-table-container
+  overflow-x auto
+  width 100%
+.problem-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+
+.problem-status
+  width 70px
+  text-align center
+  padding-left 40px !important
+
+.problem-pid
+  width 70px
+  text-align right
+.problem-title
+  width 300px
+  max-width 300px
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.problem-tags
+  text-align right
+  white-space nowrap
+  overflow-y scroll
+  &::-webkit-scrollbar
+    display: none
+.problem-ratio
+  width 200px
+.problem-visible, .problem-delete
+  width 110px
+  text-align center
+  padding-left 0 !important
+
+.problem-title-button, .problem-ratio-button, .problem-visible-button, .problem-delete-button
+  padding 0
+  margin 0
+.problem-tag
+  margin 0px 0px 4px 8px
 </style>

@@ -70,6 +70,7 @@ export default {
   & > div
     margin 0 auto
     padding 40px
+    max-width 1280px
     border 1px solid #d7dde4
     border-radius 7px
     background #fff
@@ -80,9 +81,9 @@ export default {
 .layout-footer
   text-align center
   background none !important
-  padding-top 36px !important
+  padding-top 42px !important
   p
-    margin-bottom 8px
+    margin-bottom 16px
 
   .lang-radio-group
     margin-bottom 4px
