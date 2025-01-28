@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
-import { useHumanLanguage } from '@/util/helper'
 
 import { Menu, MenuItem, MenuGroup, Submenu, Icon, Dropdown, DropdownMenu, DropdownItem, Button } from 'view-ui-plus'
 
@@ -14,119 +13,121 @@ const router = useRouter()
 const $Message = inject('$Message')
 const { toggleLoginState, logout } = sessionStore
 const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
-
 const active = $computed(() => route.name)
-const { t, locale } = useI18n()
-let selectedLang = $(useHumanLanguage())
-locale.value = selectedLang
-
+const { t } = useI18n()
 const login = toggleLoginState
 
 function routerTo(name) {
-  if (route.name !== name)
+  if (route.name !== name) {
     router.push({ name })
+  }
 }
 
 function profileAction(name) {
-  if (name === 'logout')
+  if (name === 'logout') {
     logout().then(() => $Message.info('bye bye!'))
-  else if (name === 'profile')
+  } else if (name === 'profile') {
     router.push({ name: 'userInfo', params: { uid: profile.uid } })
-}
-
-function langSelected(lang) {
-  locale.value = selectedLang = lang
+  }
 }
 
 function getMenuItems() {
-  return [
+  const menuItems = [
     { name: 'home', icon: 'ios-home', label: t('oj.home') },
     { name: 'problemList', icon: 'ios-keypad', label: t('oj.problem_list') },
-    { name: 'status', icon: 'md-refresh', label: t('oj.status_list') },
+    { name: 'status', icon: 'ios-pulse', label: t('oj.status_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
-    { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
-    { name: 'faq', icon: 'md-help-circle', label: t('oj.faq') },
+    {
+      name: 'help',
+      icon: 'md-help-circle',
+      label: t('oj.help'),
+      children: [
+        { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
+        { name: 'faq', icon: 'md-help-circle', label: t('oj.faq') },
+      ],
+    },
   ]
-}
 
-function getAdminMenuItems() {
-  return [
-    { name: 'problemCreate', label: t('oj.create_problem') },
-    { name: 'contestCreate', label: t('oj.create_contest') },
-    { name: 'newsCreate', label: t('oj.create_news') },
-    { name: 'userEdit', label: t('oj.user_management') },
-  ]
+  if (isAdmin) {
+    menuItems.push({
+      name: 'admin',
+      icon: 'md-paper-plane',
+      label: t('oj.admin'),
+      children: [
+        { name: 'problemCreate', label: t('oj.create_problem') },
+        { name: 'contestCreate', label: t('oj.create_contest') },
+        { name: 'newsCreate', label: t('oj.create_news') },
+        { name: 'userEdit', label: t('oj.user_management') },
+      ],
+    })
+  }
+
+  return menuItems
 }
 </script>
 
 <template>
   <Header class="layout-header">
     <Menu class="menu-table" mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
-      <MenuItem v-for="item in getMenuItems()" :key="item.name" :name="item.name">
-      <Icon :type="item.icon" />{{ item.label }}
-      </MenuItem>
-      <Submenu v-if="isAdmin" name="admin">
-        <template #title>
-          <Icon type="md-paper-plane" />{{ t('oj.admin') }}
-        </template>
-        <MenuItem v-for="item in getAdminMenuItems()" :key="item.name" :name="item.name">
-        {{ item.label }}
+      <template v-for="item in getMenuItems()" :key="item.name">
+        <MenuItem v-if="!item.children" :name="item.name" class="menu-item">
+        <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
         </MenuItem>
-      </Submenu>
+        <Submenu v-else :name="item.name" class="submenu">
+          <template #title>
+            <Icon :type="item.icon" class="menu-icon" />
+            <span class="submenu-title">{{ item.label }}</span>
+          </template>
+          <MenuItem v-for="child in item.children" :key="child.name" :name="child.name" class="submenu-item">
+          <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />{{ child.label }}
+          </MenuItem>
+        </Submenu>
+      </template>
     </Menu>
     <Menu class="menu-mobile" mode="horizontal" :active-name="active" @on-select="routerTo">
-      <Submenu name="site">
+      <Submenu name="site" class="mobile-submenu">
         <template #title>
-          <span style="margin-right: 8px">Putong OJ</span>
+          <span class="mobile-submenu-title">Putong OJ</span>
         </template>
-        <MenuItem v-for="item in getMenuItems()" :key="item.name" :name="item.name">
-        <Icon :type="item.icon" />{{ item.label }}
-        </MenuItem>
-        <MenuGroup v-if="isAdmin" title="Admin">
-          <MenuItem v-for="item in getAdminMenuItems()" :key="item.name" :name="item.name">
-          {{ item.label }}
-          </MenuItem>
-        </MenuGroup>
+        <div v-for="item in getMenuItems()" :key="item.name">
+          <template v-if="!item.children">
+            <MenuItem :name="item.name" class="mobile-menu-item">
+            <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
+            </MenuItem>
+          </template>
+          <template v-else>
+            <MenuGroup :title="item.label" class="mobile-menu-group">
+              <MenuItem v-for="child in item.children" :key="child.name" :name="child.name" class="mobile-submenu-item">
+              <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />
+              {{ child.label }}
+              </MenuItem>
+            </MenuGroup>
+          </template>
+        </div>
       </Submenu>
     </Menu>
-    <div class="right">
-      <Dropdown v-if="isLogined" @on-click="profileAction">
-        <a href="javascript:void(0)">
-          <Icon type="md-contact" />
+    <div class="header-right">
+      <Dropdown v-if="isLogined" @on-click="profileAction" class="profile-dropdown">
+        <a href="javascript:void(0)" class="profile-link">
+          <Icon type="md-contact" class="profile-icon" />
           {{ profile.uid }}
-          <Icon type="ios-arrow-down" />
+          <Icon type="ios-arrow-down" class="dropdown-arrow" />
         </a>
         <template #list>
-          <DropdownMenu>
-            <DropdownItem name="profile">
+          <DropdownMenu class="dropdown-menu">
+            <DropdownItem name="profile" class="dropdown-item">
               {{ t('oj.profile') }}
             </DropdownItem>
-            <DropdownItem name="logout">
+            <DropdownItem name="logout" class="dropdown-item">
               {{ t('oj.logout') }}
             </DropdownItem>
           </DropdownMenu>
         </template>
       </Dropdown>
-      <Button v-else type="text" @click="login">
+      <Button v-else type="text" class="login-button" @click="login">
         {{ t("oj.login") }} / {{ t("oj.register") }}
       </Button>
-      <Dropdown @on-click="langSelected">
-        <Button type="text">
-          <span>({{ t('oj.human_language') }})</span>
-          <img src="../assets/i18n.svg" alt="" style="height: 1.2em">
-        </Button>
-        <template #list>
-          <DropdownMenu>
-            <DropdownItem name="en-US">
-              English
-            </DropdownItem>
-            <DropdownItem name="zh-CN">
-              简中
-            </DropdownItem>
-          </DropdownMenu>
-        </template>
-      </Dropdown>
     </div>
   </Header>
 </template>
@@ -147,26 +148,61 @@ function getAdminMenuItems() {
   box-shadow 0 3px 5px -1px rgba(0, 0, 0, .1), 
              0 6px 10px 0 rgba(0, 0, 0, .07),  
              0 1px 18px 0 rgba(0, 0, 0, .06)
-.ivu-menu-horizontal
+
+.menu-table, .menu-mobile
   flex none
   background none
   height 62px
   line-height 62px
-.ivu-menu-horizontal.ivu-menu-light:after
-  height 0
-.right
+  &:after
+    height 0 !important
+
+.menu-item, .submenu-item, .mobile-menu-item, .mobile-submenu-item
+  font-size 14px
+  color #515a6e
+.menu-icon
+  margin-right 8px
+.submenu, .mobile-submenu
+  padding-right 8px !important
+.mobile-submenu
+  font-size 16px
+.submenu-title, .mobile-submenu-title
+  margin-right 8px
+
+.header-right
+  margin-left 16px
   flex none
-  .ivu-btn
-    font-size: 14px
-    margin-bottom: 6px
+  display flex
+  align-items center
+
+.profile-dropdown
+  margin-right 16px
+.profile-link
+  display flex
+  align-items center
+  color #515a6e
+  text-decoration none
+.profile-icon
+  margin-right 8px
+.dropdown-arrow, .profile-icon
+  margin-bottom -4px
+
+.dropdown-arrow
+  margin-left 8px
+.dropdown-item
+  padding 8px 16px
+  color #515a6e
+
+.login-button
+  font-size 14px
+  color #515a6e
+
 @media screen and (max-width: 1024px)
-  .ivu-layout-header
+  .layout-header
     padding 0 14px
-  .ivu-menu-horizontal .ivu-menu-submenu
-    font-size 16px
-    padding 0 0 0 12px
   .menu-table
     display none
+
 @media screen and (min-width: 1025px)
   .menu-mobile
     display none

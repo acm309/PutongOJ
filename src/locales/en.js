@@ -12,10 +12,11 @@ export default {
     ranklist: 'Ranklist',
     contest_list: 'Contest',
     discussion_list: 'Discuss',
+    help: 'Help',
     faq: 'FAQ',
 
     // Home
-    news_list: 'Announcement',
+    news_list: 'Announcements',
 
     // News
     news_has_been_updated: 'Announcement "{title}" has been updated!',

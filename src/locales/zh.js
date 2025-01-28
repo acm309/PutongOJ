@@ -3,14 +3,15 @@ import zh from 'view-ui-plus/dist/locale/zh-CN'
 export default {
   ...zh,
   oj: {
-    human_language: '简中',
+    human_language: '简体中文',
     home: '首页',
     problem_list: '题目',
     status_list: '状态',
     ranklist: '排名',
     contest_list: '比赛',
     discussion_list: '讨论',
-    faq: 'FAQ',
+    help: '帮助',
+    faq: '常见问题',
 
     news_list: '通知',
     news_has_been_updated: '通知 "{title}" 已更新！',
