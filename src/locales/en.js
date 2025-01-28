@@ -150,6 +150,9 @@ export default {
     cancel: 'Cancel',
     warning: 'Warning',
 
+    go_home: 'Go home',
+    go_back: 'Go back',
+
     // Errors
     error_500: 'Σ(;ﾟдﾟ) Server Error',
     error_403: '╮(╯_╰)╭ Unauthorized',
