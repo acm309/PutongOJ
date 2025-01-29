@@ -8,6 +8,8 @@ import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
 
+import { Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
+
 const { t } = useI18n()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
@@ -32,7 +34,7 @@ const color = $ref(constant.color)
 
 const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-function fetch () {
+function fetch() {
   uid = route.query.uid || ''
   pid = route.query.pid || ''
   judge = Number.parseInt(route.query.judge) || ''
@@ -42,14 +44,14 @@ function fetch () {
   find(query)
 }
 
-function reload (payload = {}) {
+function reload(payload = {}) {
   router.push({
     name: 'status',
     query: purify(Object.assign({}, query, payload)),
   })
 }
 
-function search () {
+function search() {
   return reload({
     page: 1,
     uid,
@@ -67,146 +69,172 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="status-wrap">
-    <Row class="filter">
-      <Col :offset="1" :span="5">
-        <Row>
-          <Col :span="6">
-            <label>User</label>
-          </Col>
-          <Col :span="15">
-            <Input v-model="uid" placeholder="username" />
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="4">
-        <Row>
-          <Col :span="6">
-            <label>Pid</label>
-          </Col>
-          <Col :span="15">
-            <Input v-model="pid" placeholder="pid" />
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="6">
-        <Row>
-          <Col :span="6">
-            <label>Judge</label>
-          </Col>
-          <Col :span="16">
-            <Select v-model="judge">
-              <Option
-                v-for="item in judgeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </Select>
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="4">
-        <Row>
-          <Col :span="10">
-            <label>Language</label>
-          </Col>
-          <Col :span="14">
-            <Select v-model="language">
-              <Option
-                v-for="item in languageList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </Select>
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="4">
-        <Button type="primary" icon="ios-search" @click="search">
-          {{ t('oj.search') }}
-        </Button>
-      </Col>
-    </Row>
-    <Row class="pagination">
-      <Col :span="16">
-        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>SID</th>
-        <th>PID</th>
-        <th>Username</th>
-        <th>Judge</th>
-        <th>Time/ms</th>
-        <th>Memory/kb</th>
-        <th>Language</th>
-        <th>Submit Time</th>
-      </tr>
-      <tr v-for="item in list" :key="item.sid">
-        <td>{{ item.sid }}</td>
-        <td>
-          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-            {{ item.pid }}
-          </router-link>
-        </td>
-        <td>
-          <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
-            <Button type="text">
-              {{ item.uid }}
-            </Button>
-          </router-link>
-        </td>
-        <td :class="color[item.judge]">
-          {{ result[item.judge] }}
-          <Tag v-if="item.sim" color="warning">
-            [{{ item.sim }}%]{{ item.sim_s_id }}
-          </Tag>
-        </td>
-        <td>{{ item.time }}</td>
-        <td>{{ item.memory }}</td>
-        <td v-if="isAdmin || (profile && profile.uid === item.uid)">
-          <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-            {{ lang[item.language] }}
-          </router-link>
-        </td>
-        <td v-else>
-          {{ lang[item.language] }}
-        </td>
-        <td>{{ timePretty(item.create) }}</td>
-      </tr>
-    </table>
+    <div class="status-header">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize"
+        @on-change="pageChange" />
+      <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="status-filter">
+        <Input type="text" v-model="uid" placeholder="Username" />
+        <Input type="number" v-model="pid" placeholder="PID" />
+        <Select v-model="judge" placeholder="Judge">
+          <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
+        </Select>
+        <Select v-model="language" placeholder="Language">
+          <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
+        </Select>
+        <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
+      </div>
+    </div>
+    <div class="status-table-container">
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th class="status-sid">SID</th>
+            <th class="status-pid">PID</th>
+            <th class="status-username">Username</th>
+            <th class="status-judge">Judge</th>
+            <th class="status-time">Time</th>
+            <th class="status-memory">Memory</th>
+            <th class="status-language">Language</th>
+            <th class="status-submit-time">Submit Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in list" :key="item.sid">
+            <td class="status-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
+              <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
+                {{ item.sid }}
+              </router-link>
+            </td>
+            <td class="status-sid" v-else>{{ item.sid }}</td>
+            <td class="status-pid">
+              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+                {{ item.pid }}
+              </router-link>
+            </td>
+            <td class="status-username">
+              <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+                {{ item.uid }}
+              </router-link>
+            </td>
+            <td class="status-judge">
+              <span :class="color[item.judge]">{{ result[item.judge] }}</span>
+              <Poptip trigger="hover" v-if="item.sim" placement="right">
+                <Tag color="gold" class="status-sim-tag">
+                  {{ item.sim }}%
+                </Tag>
+                <template #content>
+                  <b>Sim SID:</b> {{ item.sim_s_id }}
+                </template>
+              </Poptip>
+            </td>
+            <td class="status-time">{{ item.time }}</td>
+            <td class="status-memory">{{ item.memory }}</td>
+            <td class="status-language">{{ lang[item.language] }}</td>
+            <td class="status-submit-time">{{ timePretty(item.create) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="status-footer">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange" />
+      <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange" />
+    </div>
   </div>
 </template>
 
 <style lang="stylus" scoped>
-.filter
-  margin-bottom: 20px
-  label
-    height: 32px
-    line-height: 32px
-  .ivu-col
-    text-align: center
-  .ivu-select-item
-    text-align: left
-.pagination
-  margin-bottom: 10px
-table
-  th:nth-child(1)
-    width: 8%
-  th:nth-child(2)
-    width: 8%
-  th:nth-child(3)
-    width: 10%
-  th:nth-child(4)
-    width: 15%
-  th:nth-child(5)
-    width: 8%
-  th:nth-child(6)
-    width: 8%
-  th:nth-child(7)
-    width: 8%
-  th:nth-child(8)
-    width: 15%
+.status-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+
+.status-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  align-items center
+
+.status-filter
+  display flex
+  align-items center
+  > *
+    margin-left 4px
+
+.status-page-mobile, .status-page-simple
+  display none
+
+@media screen and (max-width: 1280px)
+  .status-header
+    .status-page-table
+      display none
+    .status-page-simple
+      display block
+
+@media screen and (max-width: 1024px)
+  .status-wrap
+    padding 20px 0
+  .status-footer
+    padding 0 20px
+    margin-top 20px !important
+  .status-header
+    padding 0 20px
+    margin-bottom 5px
+    display block
+    .status-page-simple
+      display none
+
+@media screen and (max-width: 768px)
+  .status-page-table
+    display none
+  .status-page-mobile
+    display block
+
+.status-page
+  flex none
+
+.status-table-container
+  overflow-x auto
+  width 100%
+
+.status-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+
+.status-sid
+  width 110px
+  text-align right
+.status-pid
+  width 80px
+  text-align right
+.status-username
+  width 170px
+  max-width 170px
+  text-align center
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.status-time
+.status-memory
+  width 100px
+  text-align right
+.status-language
+  width 110px
+  text-align center
+.status-submit-time
+  width 190px
+.status-sim-tag
+  margin 0px 0px 4px 8px
+
+.status-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
 </style>
