@@ -58,9 +58,11 @@ export default {
 </template>
 
 <style lang="stylus">
+html
+  background #f5f7f9
+
 .app-layout
   min-height 100vh
-  background #f5f7f9
   position relative
   overflow hidden
 

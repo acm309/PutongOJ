@@ -159,7 +159,6 @@ function getMenuItems() {
 
 .menu-item, .submenu-item, .mobile-menu-item, .mobile-submenu-item
   font-size 14px
-  color #515a6e
 .menu-icon
   margin-right 8px
 .submenu, .mobile-submenu
@@ -180,7 +179,7 @@ function getMenuItems() {
 .profile-link
   display flex
   align-items center
-  color #515a6e
+  color var(--oj-primary-color) !important
   text-decoration none
 .profile-icon
   margin-right 8px
@@ -191,11 +190,9 @@ function getMenuItems() {
   margin-left 8px
 .dropdown-item
   padding 8px 16px
-  color #515a6e
 
 .login-button
   font-size 14px
-  color #515a6e
 
 @media screen and (max-width: 1024px)
   .layout-header

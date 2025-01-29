@@ -116,6 +116,7 @@ onRouteQueryUpdate(fetch)
     display block
   .pagination-mobile
     display none
+    text-align center
 
 @media screen and (max-width: 1024px)
   .home-wrap

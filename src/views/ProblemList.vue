@@ -82,6 +82,8 @@ onProfileUpdate(fetch)
     <div class="problem-list-header">
       <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
         @on-change="pageChange" />
+      <Page class="problem-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
       <div class="problem-list-filter">
         <Select v-model="type" class="search-type-select">
           <Option v-for="item in options" :key="item.value" :value="item.value">
@@ -108,66 +110,62 @@ onProfileUpdate(fetch)
           </tr>
         </thead>
         <tbody>
-          <template v-for="item in list" :key="item.pid">
-            <tr v-if="isAdmin || item.status === status.Available">
-              <td class="problem-status">
-                <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
+          <tr v-for="item in list" :key="item.pid">
+            <td class="problem-status">
+              <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
+            </td>
+            <td class="problem-pid">{{ item.pid }}</td>
+            <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+              <td class="problem-title">
+                {{ item.title }}
               </td>
-              <td class="problem-pid">{{ item.pid }}</td>
-              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-                <td class="problem-title">
-                  {{ item.title }}
-                </td>
-              </router-link>
-              <td class="problem-tags">
-                <template v-for="(item2, index2) in item.tags" :key="index2">
-                  <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
-                    <Tag class="problem-tag">{{ item2 }}</Tag>
-                  </router-link>
-                </template>
-              </td>
-              <td class="problem-ratio">
-                <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
-                (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
-                  <Button type="text" class="problem-ratio-button">
-                    {{ item.solve }}
-                  </Button>
-                </router-link> /
-                <router-link :to="{ name: 'status', query: { pid: item.pid } }">
-                  <Button type="text" class="problem-ratio-button">
-                    {{ item.submit }}
-                  </Button>
-                </router-link>)
-              </td>
-              <td v-if="isAdmin" class="problem-visible">
-                <Tooltip content="Click to change status" placement="right">
-                  <Button type="text" class="problem-visible-button" @click="change(item)">
-                    {{ problemVisible[item.status] }}
-                  </Button>
-                </Tooltip>
-              </td>
-              <td v-if="isAdmin && canRemove" class="problem-delete">
-                <Button type="text" class="problem-delete-button" @click="del(item.pid)">
-                  Delete
+            </router-link>
+            <td class="problem-tags">
+              <template v-for="(item2, index2) in item.tags" :key="index2">
+                <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
+                  <Tag class="problem-tag">{{ item2 }}</Tag>
+                </router-link>
+              </template>
+            </td>
+            <td class="problem-ratio">
+              <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
+              (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
+                <Button type="text" class="problem-ratio-button">
+                  {{ item.solve }}
                 </Button>
-              </td>
-            </tr>
-          </template>
+              </router-link> /
+              <router-link :to="{ name: 'status', query: { pid: item.pid } }">
+                <Button type="text" class="problem-ratio-button">
+                  {{ item.submit }}
+                </Button>
+              </router-link>)
+            </td>
+            <td v-if="isAdmin" class="problem-visible">
+              <Tooltip content="Click to change status" placement="right">
+                <Button type="text" class="problem-visible-button" @click="change(item)">
+                  {{ problemVisible[item.status] }}
+                </Button>
+              </Tooltip>
+            </td>
+            <td v-if="isAdmin && canRemove" class="problem-delete">
+              <Button type="text" class="problem-delete-button" @click="del(item.pid)">
+                Delete
+              </Button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
     <div class="problem-list-footer">
-      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
         @on-change="pageChange" />
-      <Page class="problem-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+      <Page class="problem-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-total
         show-elevator @on-change="pageChange" />
     </div>
   </div>
 </template>
 
 <style lang="stylus" scoped>
-@import '../styles/common'
-
 .problem-list-wrap
   width 100%
   margin 0 auto
@@ -183,6 +181,8 @@ onProfileUpdate(fetch)
   .problem-list-filter
     flex none
     display flex
+  .problem-page-simple
+    display none
 .problem-list-footer
   padding 0 40px
   margin-top 40px
@@ -198,6 +198,8 @@ onProfileUpdate(fetch)
     margin-bottom 5px
     .problem-page-table
       display none !important
+    .problem-page-simple
+      display block
   .problem-status
     padding-left 20px
   .problem-list-footer
@@ -205,7 +207,7 @@ onProfileUpdate(fetch)
     margin-top 20px
 
 @media screen and (max-width: 768px)
-  .problem-page-table
+  .problem-page-table, .problem-page-simple
     display none !important
   .problem-list-filter
     width 100%
@@ -254,10 +256,10 @@ onProfileUpdate(fetch)
     display: none
 .problem-ratio
   width 200px
-.problem-visible, .problem-delete
-  width 110px
-  text-align center
-  padding-left 0 !important
+.problem-visible
+  width 120px
+.problem-delete
+  width 100px
 
 .problem-title-button, .problem-ratio-button, .problem-visible-button, .problem-delete-button
   padding 0
