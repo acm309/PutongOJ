@@ -5,8 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
+import { ref } from 'vue'
 
-import { Row, Col, Icon, Page } from 'view-ui-plus'
+import { Card, Row, Col, Icon, Page, Spin } from 'view-ui-plus'
 
 const { t } = useI18n()
 const newsStore = useNewsStore()
@@ -24,8 +25,12 @@ const query = $computed(() => {
   })
 })
 
-function fetch() {
-  find(query)
+const loading = ref(false)
+
+async function fetch() {
+  loading.value = true
+  await find(query)
+  loading.value = false
 }
 
 function reload(payload = {}) {
@@ -67,6 +72,7 @@ onRouteQueryUpdate(fetch)
     <div class="pagination-mobile">
       <Page size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
     </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

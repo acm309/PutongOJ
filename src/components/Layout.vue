@@ -70,6 +70,7 @@ html
   margin 82px 20px 0
   min-height 512px
   & > div
+    position relative
     margin 0 auto
     padding 40px
     max-width 1280px
@@ -79,6 +80,9 @@ html
     box-shadow 0 7px 8px -4px rgba(0, 0, 0, .1), 
                0 12px 17px 2px rgba(0, 0, 0, .07), 
                0 5px 22px 4px rgba(0, 0, 0, .06)
+  .wrap-loading
+    z-index 50
+    border-radius 7px
 
 .layout-footer
   text-align center
@@ -113,5 +117,7 @@ html
   .layout-content
     margin 61px 0 0
     & > div
+      border-radius 0
+    .wrap-loading
       border-radius 0
 </style>

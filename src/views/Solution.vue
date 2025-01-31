@@ -5,7 +5,7 @@ import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
 import 'highlight.js/styles/atom-one-light.css'
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount } from 'vue'
+import { inject, onBeforeMount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
@@ -35,20 +35,25 @@ const route = useRoute()
 
 const $Message = inject('$Message')
 const { copy } = useClipboard()
-function onCopy (content) {
+
+const loading = ref(false)
+
+function onCopy(content) {
   copy(content)
   $Message.success('Copied!')
 }
 
-function prettyCode (code) {
+function prettyCode(code) {
   return highlight.highlight(`${code}`, {
     language: language[solution.language],
   }).value
 }
 
 onBeforeMount(async () => {
+  loading.value = true
   await findOne(route.params)
   root.changeDomTitle({ title: `Solution ${solution.pid}` })
+  loading.value = false
 })
 </script>
 
@@ -111,6 +116,7 @@ onBeforeMount(async () => {
       </router-link>
       <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>
     </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

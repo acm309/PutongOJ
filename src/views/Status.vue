@@ -7,6 +7,7 @@ import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
+import { ref } from 'vue'
 
 import { Badge, Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
 
@@ -31,17 +32,20 @@ const languageList = $ref(constant.languageList)
 const result = $ref(constant.result)
 const lang = $ref(constant.language)
 const color = $ref(constant.color)
-
 const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-function fetch() {
+const loading = ref(false)
+
+async function fetch() {
+  loading.value = true
   uid = route.query.uid || ''
   pid = route.query.pid || ''
   judge = Number.parseInt(route.query.judge) || ''
   language = Number.parseInt(route.query.language) || ''
   page = Number.parseInt(route.query.page) || 1
   pageSize = Number.parseInt(route.query.pageSize) || 30
-  find(query)
+  await find(query)
+  loading.value = false
 }
 
 function reload(payload = {}) {
@@ -146,6 +150,7 @@ onRouteQueryUpdate(fetch)
       <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
         show-total @on-change="pageChange" />
     </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

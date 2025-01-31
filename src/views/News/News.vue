@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
-import { onBeforeMount } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useNewsStore } from '@/store/modules/news'
@@ -15,6 +15,8 @@ const router = useRouter()
 const current = $computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
+const loading = ref(false)
+
 function change(name) {
   return router.push({
     name,
@@ -23,8 +25,10 @@ function change(name) {
 }
 
 onBeforeMount(async () => {
+  loading.value = true
   await newsStore.findOne(route.params)
-  rootStore.changeDomTitle({ title: `News -- ${newsStore.news.title}` })
+  rootStore.changeDomTitle({ title: `${newsStore.news.title} - News` })
+  loading.value = false
 })
 </script>
 
@@ -35,6 +39,7 @@ onBeforeMount(async () => {
       <TabPane :label="t('oj.edit')" name="newsEdit" />
     </Tabs>
     <router-view />
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

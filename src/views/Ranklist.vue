@@ -8,6 +8,7 @@ import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { formate } from '@/util/formate'
+import { ref } from 'vue'
 
 import { Text, Button, Page, Select, Option } from 'view-ui-plus'
 
@@ -37,14 +38,20 @@ const { judge } = $(storeToRefs(rootStore))
 const { list, sum } = $(storeToRefs(ranklistStore))
 const groupList = $computed(() => [{ gid: '', title: 'ALL' }].concat(groups))
 
+const loading = ref(false)
+
 function reload(payload = {}) {
   const routeQuery = Object.assign({}, query, payload)
   router.push({ name: 'ranklist', query: routeQuery })
 }
 
 async function fetch() {
-  ranklistStore.find(query)
-  await groupStore.find({ lean: 1 })
+  loading.value = true
+  await Promise.all([
+    ranklistStore.find(query),
+    groupStore.find({ lean: 1 })
+  ])
+  loading.value = false
 }
 
 const pageChange = val => reload({ page: val })
@@ -123,6 +130,7 @@ onRouteQueryUpdate(fetch)
       <Page class="ranklist-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
         show-elevator show-total @on-change="pageChange" />
     </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
