@@ -8,7 +8,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
 
-import { Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
+import { Badge, Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()
@@ -70,17 +70,16 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="status-wrap">
     <div class="status-header">
-      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize"
-        @on-change="pageChange" />
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" @on-change="pageChange" />
       <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
         @on-change="pageChange" />
       <div class="status-filter">
-        <Input type="text" v-model="uid" placeholder="Username" />
-        <Input type="number" v-model="pid" placeholder="PID" />
-        <Select v-model="judge" placeholder="Judge">
+        <Input type="text" v-model="uid" placeholder="Username" class="status-filter-input" />
+        <Input type="number" v-model="pid" placeholder="PID" class="status-filter-input" />
+        <Select v-model="judge" placeholder="Judge" class="status-filter-input">
           <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
-        <Select v-model="language" placeholder="Language">
+        <Select v-model="language" placeholder="Language" class="status-filter-input">
           <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
         <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
@@ -94,8 +93,12 @@ onRouteQueryUpdate(fetch)
             <th class="status-pid">PID</th>
             <th class="status-username">Username</th>
             <th class="status-judge">Judge</th>
-            <th class="status-time">Time</th>
-            <th class="status-memory">Memory</th>
+            <th class="status-time">
+              <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
+            </th>
+            <th class="status-memory">
+              <Badge>Memory<template #count><span class="status-badge">(KB)</span></template></Badge>
+            </th>
             <th class="status-language">Language</th>
             <th class="status-submit-time">Submit Time</th>
           </tr>
@@ -147,6 +150,8 @@ onRouteQueryUpdate(fetch)
 </template>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 .status-wrap
   width 100%
   margin 0 auto
@@ -158,12 +163,15 @@ onRouteQueryUpdate(fetch)
   display flex
   justify-content space-between
   align-items center
-
+.status-page
+  flex none
 .status-filter
   display flex
   align-items center
   > *
     margin-left 4px
+  .status-filter-input
+    width 120px
 
 .status-page-mobile, .status-page-simple
   display none
@@ -187,6 +195,8 @@ onRouteQueryUpdate(fetch)
     display block
     .status-page-simple
       display none
+    .status-filter-input
+      width 100% !important
 
 @media screen and (max-width: 768px)
   .status-page-table
@@ -194,19 +204,19 @@ onRouteQueryUpdate(fetch)
   .status-page-mobile
     display block
 
-.status-page
-  flex none
-
 .status-table-container
   overflow-x auto
   width 100%
-
 .status-table
   width 100%
   min-width 1024px
   table-layout fixed
   th, td
     padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
 
 .status-sid
   width 110px
@@ -221,8 +231,7 @@ onRouteQueryUpdate(fetch)
   white-space nowrap
   text-overflow ellipsis
   overflow hidden
-.status-time
-.status-memory
+.status-time, .status-memory
   width 100px
   text-align right
 .status-language
@@ -232,6 +241,11 @@ onRouteQueryUpdate(fetch)
   width 190px
 .status-sim-tag
   margin 0px 0px 4px 8px
+.status-badge
+  position absolute
+  font-size 8px
+  top 10px
+  right 8px
 
 .status-footer
   padding 0 40px

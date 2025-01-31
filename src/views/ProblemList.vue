@@ -115,11 +115,11 @@ onProfileUpdate(fetch)
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
             </td>
             <td class="problem-pid">{{ item.pid }}</td>
-            <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-              <td class="problem-title">
-                {{ item.title }}
-              </td>
-            </router-link>
+            <td class="problem-title">
+              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+                <Button type="text" class="table-button">{{ item.title }}</Button>
+              </router-link>
+            </td>
             <td class="problem-tags">
               <template v-for="(item2, index2) in item.tags" :key="index2">
                 <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
@@ -129,28 +129,22 @@ onProfileUpdate(fetch)
             </td>
             <td class="problem-ratio">
               <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
-              (<router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
-                <Button type="text" class="problem-ratio-button">
-                  {{ item.solve }}
-                </Button>
+              (
+              <router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
+                {{ item.solve }}
               </router-link> /
               <router-link :to="{ name: 'status', query: { pid: item.pid } }">
-                <Button type="text" class="problem-ratio-button">
-                  {{ item.submit }}
-                </Button>
-              </router-link>)
+                {{ item.submit }}
+              </router-link>
+              )
             </td>
             <td v-if="isAdmin" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
-                <Button type="text" class="problem-visible-button" @click="change(item)">
-                  {{ problemVisible[item.status] }}
-                </Button>
+                <a @click="change(item)">{{ problemVisible[item.status] }}</a>
               </Tooltip>
             </td>
             <td v-if="isAdmin && canRemove" class="problem-delete">
-              <Button type="text" class="problem-delete-button" @click="del(item.pid)">
-                Delete
-              </Button>
+              <a @click="del(item.pid)">Delete</a>
             </td>
           </tr>
         </tbody>
@@ -166,6 +160,8 @@ onProfileUpdate(fetch)
 </template>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 .problem-list-wrap
   width 100%
   margin 0 auto
@@ -233,21 +229,28 @@ onProfileUpdate(fetch)
   table-layout fixed
   th, td
     padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+  .table-button
+    padding 0
+    border-width 0
+    width 100%
+    &:hover
+      background-color transparent
 
 .problem-status
   width 70px
   text-align center
   padding-left 40px !important
-
 .problem-pid
   width 70px
   text-align right
 .problem-title
   width 300px
-  max-width 300px
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
+  .table-button
+    text-align left
 .problem-tags
   text-align right
   white-space nowrap
@@ -261,9 +264,6 @@ onProfileUpdate(fetch)
 .problem-delete
   width 100px
 
-.problem-title-button, .problem-ratio-button, .problem-visible-button, .problem-delete-button
-  padding 0
-  margin 0
 .problem-tag
   margin 0px 0px 4px 8px
 </style>
