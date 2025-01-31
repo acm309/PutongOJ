@@ -14,7 +14,7 @@ const route = useRoute()
 const router = useRouter()
 const $Message = inject('$Message')
 
-const { problems, overview, totalProblems } = storeToRefs(contestStore)
+const { problems, overview, contest, totalProblems } = storeToRefs(contestStore)
 const { solution } = storeToRefs(solutionStore)
 const { clearCode, create } = solutionStore
 
@@ -23,7 +23,7 @@ const currentContestId = computed(() => route.params.cid)
 const currentTitle = computed(() => overview.value[currentProblemId.value - 1]?.title)
 
 const pageChange = val => {
-  if (overview[val - 1].invalid) return
+  if (overview.value[val - 1].invalid) return
   router.push({ name: 'contestSubmit', params: { cid: contest.cid, id: val } })
 }
 const reset = clearCode
