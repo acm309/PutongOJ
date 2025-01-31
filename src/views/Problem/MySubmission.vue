@@ -103,6 +103,7 @@ onRouteQueryUpdate(fetch)
 </template>
 
 <style lang="stylus" scoped>
+@import '../../styles/common'
 .pagination
   margin-top: 10px
   margin-bottom: 10px

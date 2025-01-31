@@ -205,6 +205,7 @@ onProfileUpdate(fetch)
 
 <style lang="stylus">
 .user-wrap
+  max-width: 1024px !important
   text-align: left
   line-height: 30px
   img

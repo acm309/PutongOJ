@@ -106,3 +106,7 @@ fetch()
     </Button>
   </div>
 </template>
+
+<style lang="stylus" scoped>
+@import '../../styles/common'
+</style>

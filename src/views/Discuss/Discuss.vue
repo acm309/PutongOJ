@@ -63,7 +63,7 @@ fetch()
 </script>
 
 <template>
-  <div>
+  <div class="discuss-wrap">
     <table>
       <tr>
         <th>Did</th>
@@ -122,6 +122,10 @@ fetch()
 </template>
 
 <style lang="stylus" scoped>
+@import '../../styles/common'
+
+.discuss-wrap
+  max-width: 1024px
 h3
   margin-top: 20px
 .form

@@ -77,6 +77,7 @@ fetch()
 
 <style lang="stylus">
 .discuss-wrap
+  max-width: 1024px !important
   .ivu-card-body
     padding: 0 16px
   .ivu-card

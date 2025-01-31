@@ -197,7 +197,8 @@ onRouteQueryUpdate(getStatistics)
   </div>
 </template>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
+@import '../../styles/common'
 .statis-wrap
   display: flex
   justify-content: space-around
