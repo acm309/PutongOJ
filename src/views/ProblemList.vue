@@ -97,7 +97,7 @@ onProfileUpdate(fetch)
             {{ item.label }}
           </Option>
         </Select>
-        <Input v-model="content" class="search-input" @keyup.enter="search" />
+        <Input v-model="content" class="search-input" @keyup.enter="search" clearable />
         <Button type="primary" class="search-button" @click="search">
           {{ t('oj.search') }}
         </Button>

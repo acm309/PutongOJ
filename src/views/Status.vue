@@ -78,12 +78,12 @@ onRouteQueryUpdate(fetch)
       <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
         @on-change="pageChange" />
       <div class="status-filter">
-        <Input type="text" v-model="uid" placeholder="Username" class="status-filter-input" />
-        <Input type="number" v-model="pid" placeholder="PID" class="status-filter-input" />
-        <Select v-model="judge" placeholder="Judge" class="status-filter-input">
+        <Input type="text" v-model="uid" placeholder="Username" class="status-filter-input" clearable />
+        <Input type="number" v-model="pid" placeholder="PID" class="status-filter-input" clearable />
+        <Select v-model="judge" placeholder="Judge" class="status-filter-input" clearable>
           <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
-        <Select v-model="language" placeholder="Language" class="status-filter-input">
+        <Select v-model="language" placeholder="Language" class="status-filter-input" clearable>
           <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
         <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
@@ -208,6 +208,7 @@ onRouteQueryUpdate(fetch)
       display none
     .status-filter-input
       width 100% !important
+      min-width 60px
 
 @media screen and (max-width: 768px)
   .status-page-table

@@ -23,10 +23,6 @@ export const language = {
 
 export const judgeList = [
   {
-    value: '',
-    label: 'ALL',
-  },
-  {
     value: 0,
     label: 'Pending',
   },
@@ -81,10 +77,6 @@ export const judgeList = [
 ] as const
 
 export const languageList = [
-  {
-    value: '',
-    label: 'ALL',
-  },
   {
     value: 1,
     label: 'C',

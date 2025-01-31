@@ -250,6 +250,8 @@ else:
 </template>
 
 <style lang="stylus" scoped>
+@import '../styles/common'
+
 .faq-wrap
   width: 100%
   max-width: 1024px
