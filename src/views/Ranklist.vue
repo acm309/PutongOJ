@@ -9,6 +9,8 @@ import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { formate } from '@/util/formate'
 
+import { Text, Button, Page, Select, Option } from 'view-ui-plus'
+
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
@@ -17,7 +19,7 @@ const group = $ref('')
 const query = $computed(() => {
   const opt = Object.assign(
     {},
-    pick(route.query, [ 'page', 'pageSize' ]),
+    pick(route.query, ['page', 'pageSize']),
     { gid: group },
   )
   return purify(opt)
@@ -33,14 +35,14 @@ const groupStore = useGroupStore()
 const { list: groups } = $(storeToRefs(groupStore))
 const { judge } = $(storeToRefs(rootStore))
 const { list, sum } = $(storeToRefs(ranklistStore))
-const groupList = $computed(() => [ { gid: '', title: 'ALL' } ].concat(groups))
+const groupList = $computed(() => [{ gid: '', title: 'ALL' }].concat(groups))
 
-function reload (payload = {}) {
+function reload(payload = {}) {
   const routeQuery = Object.assign({}, query, payload)
   router.push({ name: 'ranklist', query: routeQuery })
 }
 
-async function fetch () {
+async function fetch() {
   ranklistStore.find(query)
   await groupStore.find({ lean: 1 })
 }
@@ -54,88 +56,167 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="rank-wrap">
-    <Row style="margin-bottom: 20px" type="flex" justify="end">
-      <Col :span="1">
-        <label>{{ t('oj.group') }}</label>
-      </Col>
-      <Col :span="3">
-        <Select v-model="group">
+  <div class="ranklist-wrap">
+    <div class="ranklist-header">
+      <Page class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <Page class="ranklist-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="ranklist-filter">
+        <Select v-model="group" class="ranklist-filter-select" :placeholder="t('oj.group')">
           <Option v-for="item in groupList" :key="item.gid" :value="item.gid">
             {{ item.title }}
           </Option>
         </Select>
-      </Col>
-      <Col :span="2">
-        <Button type="primary" class="ivu-ml-8" @click="search">
+        <Button type="primary" class="ranklist-filter-button" @click="search">
           {{ t('oj.search') }}
         </Button>
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>Rank</th>
-        <th>{{ t('oj.username') }}</th>
-        <th>{{ t('oj.nick') }}</th>
-        <th>{{ t('oj.motto') }}</th>
-        <th>{{ t('oj.solved') }}</th>
-        <th>{{ t('oj.submit') }}</th>
-        <th>Ratio</th>
-      </tr>
-      <tr v-for="(item, index) in list" :key="item.uid">
-        <td>{{ index + 1 + (page - 1) * pageSize }}</td>
-        <td>
-          <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
-            <Button type="text">
-              {{ item.uid }}
-            </Button>
-          </router-link>
-        </td>
-        <td>{{ item.nick }}</td>
-        <td>{{ item.motto }}</td>
-        <td>
-          <router-link :to="{ name: 'status', query: { uid: item.uid, judge: judge.Accepted } }">
-            <Button type="text">
-              {{ item.solve }}
-            </Button>
-          </router-link>
-        </td>
-        <td>
-          <router-link :to="{ name: 'status', query: { uid: item.uid } }">
-            <Button type="text">
-              {{ item.submit }}
-            </Button>
-          </router-link>
-        </td>
-        <td>
-          <span>{{ formate(item.solve / (item.submit + 0.0000001)) }}</span>
-        </td>
-      </tr>
-    </table>
-    <Page
-      :model-value="page"
-      :total="sum"
-      :page-size="pageSize"
-      show-elevator
-      @on-change="pageChange"
-    />
+      </div>
+    </div>
+    <div class="ranklist-table-container">
+      <table class="ranklist-table">
+        <thead>
+          <tr>
+            <th class="ranklist-rank">Rank</th>
+            <th class="ranklist-username">{{ t('oj.username') }}</th>
+            <th class="ranklist-nick">{{ t('oj.nick') }}</th>
+            <th class="ranklist-motto">{{ t('oj.motto') }}</th>
+            <th class="ranklist-solved">{{ t('oj.solved') }}</th>
+            <th class="ranklist-submit">{{ t('oj.submit') }}</th>
+            <th class="ranklist-ratio">Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in list" :key="item.uid">
+            <td class="ranklist-rank">{{ index + 1 + (page - 1) * pageSize }}</td>
+            <td class="ranklist-username">
+              <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+                {{ item.uid }}
+              </router-link>
+            </td>
+            <td class="ranklist-nick">{{ item.nick }}</td>
+            <td class="ranklist-motto">
+              <Text class="ranklist-motto-text" :ellipsis="true" :ellipsis-config="{ tooltip: true }">
+                {{ item.motto }}
+              </Text>
+            </td>
+            <td class="ranklist-solved">
+              <router-link :to="{ name: 'status', query: { uid: item.uid, judge: judge.Accepted } }">
+                {{ item.solve }}
+              </router-link>
+            </td>
+            <td class="ranklist-submit">
+              <router-link :to="{ name: 'status', query: { uid: item.uid } }">
+                {{ item.submit }}
+              </router-link>
+            </td>
+            <td class="ranklist-ratio">
+              <span>{{ formate(item.solve / (item.submit + 0.0000001)) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ranklist-footer">
+      <Page class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange" />
+      <Page class="ranklist-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+        show-elevator show-total @on-change="pageChange" />
+    </div>
   </div>
 </template>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 @import '../styles/common'
 
-.rank-wrap
-  margin-bottom: 20px
-  label
-    line-height: 30px
-  table
-    margin-bottom: 20px
-    td
-      word-break: break-all
-      line-height: 20px
-      font-size: 14px
-    td:nth-child(4)
-      width: 50%
-      padding-right: 10px
+.ranklist-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+
+.ranklist-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  align-items center
+.ranklist-page-simple, .ranklist-page-mobile
+  display none
+.ranklist-filter
+  display flex
+  align-items center
+  > *
+    margin-left 4px
+  .ranklist-filter-select
+    width 160px
+
+@media screen and (max-width: 1024px)
+  .ranklist-wrap
+    padding 20px 0
+  .ranklist-header
+    padding 0 20px
+    margin-bottom 5px
+    .ranklist-page-table
+      display none
+    .ranklist-page-simple
+      display block
+  .ranklist-footer
+    padding 0 20px
+    margin-top 20px !important
+  
+@media screen and (max-width: 768px)
+  .ranklist-page-table
+    display none
+  .ranklist-page-mobile
+    display block
+
+.ranklist-table-container
+  overflow-x auto
+  width 100%
+.ranklist-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+
+.ranklist-rank
+  width 90px
+  text-align right
+.ranklist-username
+  width 170px
+  max-width 170px
+  text-align center
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.ranklist-nick
+  width 200px
+  max-width 200px
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.ranklist-motto-text
+  width 100%
+.ranklist-solved
+  width 100px
+  text-align center
+.ranklist-submit
+  width 80px  
+  text-align center
+.ranklist-ratio
+  width 120px
+  text-align right
+  padding-right 40px !important
+th.ranklist-ratio
+  text-align center
+
+.ranklist-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
 </style>
