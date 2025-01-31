@@ -94,6 +94,12 @@ onRouteQueryUpdate(fetch)
           </tr>
         </thead>
         <tbody>
+          <tr v-if="list.length == 0" class="status-empty">
+            <td colspan="7">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
           <tr v-for="(item, index) in list" :key="item.uid">
             <td class="ranklist-rank">{{ index + 1 + (page - 1) * pageSize }}</td>
             <td class="ranklist-username">
@@ -222,6 +228,18 @@ onRouteQueryUpdate(fetch)
   padding-right 40px !important
 th.ranklist-ratio
   text-align center
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
 
 .ranklist-footer
   padding 0 40px

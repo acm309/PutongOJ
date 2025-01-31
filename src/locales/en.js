@@ -153,6 +153,8 @@ export default {
     go_home: 'Go home',
     go_back: 'Go back',
 
+    empty_content: 'It seemed that you have arrived at a desolate land where no data exists.',
+
     // Errors
     error_500: 'Σ(;ﾟдﾟ) Server Error',
     error_403: '╮(╯_╰)╭ Unauthorized',

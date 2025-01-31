@@ -52,8 +52,8 @@ onRouteQueryUpdate(fetch)
       <span class="welcome-text">Welcome to Putong OJ</span><br />
       {{ t('oj.news_list') }}
     </div>
-    <router-link v-for="item in list" :key="item.nid" :to="{ name: 'newsInfo', params: { nid: item.nid } }"
-      class="news-link">
+    <router-link v-if="list.length > 0" v-for="item in list" :key="item.nid"
+      :to="{ name: 'newsInfo', params: { nid: item.nid } }" class="news-link">
       <Card dis-hover class="news-card">
         <Row type="flex" :gutter="16">
           <Col flex="68px" class="news-icon">
@@ -66,6 +66,10 @@ onRouteQueryUpdate(fetch)
         </Row>
       </Card>
     </router-link>
+    <div v-else class="news-empty">
+      <Icon type="ios-planet-outline" class="empty-icon" />
+      <span class="empty-text">{{ t('oj.empty_content') }}</span>
+    </div>
     <div class="pagination-table">
       <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
     </div>
@@ -123,6 +127,19 @@ onRouteQueryUpdate(fetch)
   .pagination-mobile
     display none
     text-align center
+
+.news-empty
+  margin-bottom 20px
+  padding 32px
+  border 1px solid #dcdee2
+  border-radius 4px
+  display flex
+  align-items center
+  justify-content center
+  .empty-icon
+    font-size 32px
+  .empty-text
+    margin-left 32px
 
 @media screen and (max-width: 1024px)
   .home-wrap

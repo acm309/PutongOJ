@@ -108,6 +108,12 @@ onRouteQueryUpdate(fetch)
           </tr>
         </thead>
         <tbody>
+          <tr v-if="list.length == 0" class="status-empty">
+            <td colspan="8">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
           <tr v-for="item in list" :key="item.sid">
             <td class="status-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
               <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
@@ -251,6 +257,18 @@ onRouteQueryUpdate(fetch)
   font-size 8px
   top 10px
   right 8px
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
 
 .status-footer
   padding 0 40px

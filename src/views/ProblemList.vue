@@ -117,6 +117,12 @@ onProfileUpdate(fetch)
           </tr>
         </thead>
         <tbody>
+          <tr v-if="list.length == 0" class="status-empty">
+            <td colspan="7">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
           <tr v-for="item in list" :key="item.pid">
             <td class="problem-status">
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
@@ -274,4 +280,16 @@ onProfileUpdate(fetch)
 
 .problem-tag
   margin 0px 0px 4px 8px
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
 </style>
