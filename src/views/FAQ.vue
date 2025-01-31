@@ -58,7 +58,7 @@ else:
     </p>
     <table>
       <thead>
-        <th>状态 / Status</th>
+        <th style="width: 180px;">状态 / Status</th>
         <th>含义 / Meaning</th>
       </thead>
       <tbody>
@@ -209,7 +209,7 @@ else:
       答：是的，你可以通过不同的方式来判断你的程序是否在评测机上运行。C 和 C++ 通过宏定义，Java 通过系统属性，Python
       通过环境变量来得知程序是否在评测机上运行。下面给出了一些示例：<br />
       A: Yes, you can determine whether your program is running on the judge in different ways. C and C++ use macro
-      definitions, Java uses system properties, and Python uses environment variables to determine whether the program is
+      definitions, Java uses system properties, and Python uses environment variables to determine whether the program is:
     </p>
     <Tabs value="example-code" :animated="false">
       <TabPane label="C/C++" name="c">
@@ -275,19 +275,20 @@ table
   tr
     border-bottom: 1px solid #dbdbdb
     line-height 25px
-    td:nth-child(1)
-      width: 180px
-    td:nth-child(2)
-      padding: 5px
-      padding-left: 20px
+  th
+    padding 0 5px
+  td
+    padding 5px
 .info
   border-radius: 4px
   text-align: center
   padding: 2px
 pre
-  margin: 0
+  margin 0
+  code
+    margin 0
 code
-  margin: 0 3px
+  margin 0 3px
 ol
   margin-top: 10px
   margin-bottom: 10px
