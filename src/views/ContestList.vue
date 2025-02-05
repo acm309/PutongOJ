@@ -3,7 +3,7 @@ import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Input } from 'view-ui-plus'
+import { Input, Button, Page, Poptip, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '../util/helper'
 import constant from '../util/constant'
@@ -31,10 +31,17 @@ let enterPwd = $ref('')
 const query = $computed(() => purify({ page, pageSize }))
 const contestTitle = $ref('')
 
-const { find, verify, update, 'delete': remove } = contestStore
-const fetch = () => find(query)
+let loading = $ref(false)
 
-function reload (payload = {}) {
+const { find, verify, update, 'delete': remove } = contestStore
+
+async function fetch() {
+  loading = true
+  await find(query)
+  loading = false
+}
+
+function reload(payload = {}) {
   router.push({
     name: 'contestList',
     query: Object.assign({}, query, payload),
@@ -43,7 +50,7 @@ function reload (payload = {}) {
 
 const pageChange = val => reload({ page: val })
 
-async function enter (item) {
+async function enter(item) {
   const opt = Object.assign(
     only(item, 'cid'),
     { pwd: enterPwd },
@@ -55,7 +62,7 @@ async function enter (item) {
     $Message.error('Wrong password!')
 }
 
-async function visit (item) {
+async function visit(item) {
   if (!isLogined) {
     sessionStore.toggleLoginState()
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
@@ -89,31 +96,37 @@ async function visit (item) {
   }
 }
 
-async function change (contest) {
+async function change(contest) {
+  loading = true
   contest.status = contest.status === status.Reserve
     ? status.Available
     : status.Reserve
   await update(contest)
   find(query)
+  loading = false
 }
 
-function del (cid) {
+function del(cid) {
   $Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该文件, 是否继续?</p>',
     onOk: async () => {
+      loading = true
       await remove({ cid })
       $Message.success(`成功删除 ${cid}！`)
+      loading = false
     },
     onCancel: () => $Message.info('已取消删除！'),
   })
 }
 
-function search () {
-  find(Object.assign({}, query, {
+async function search() {
+  loading = true
+  await find(Object.assign({}, query, {
     type: 'title',
     content: contestTitle,
   }))
+  loading = false
 }
 
 fetch()
@@ -121,120 +134,210 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="con-wrap">
-    <Row>
-      <Col span="16" order="1" />
-      <Col span="6" order="2" class="ivu-pr-8">
-        <Input v-model="contestTitle" :placeholder="t('oj.title')" />
-      </Col>
-      <Col span="2" order="3">
-        <Button type="primary" @click="search">
+  <div class="contest-wrap">
+    <div class="contest-header">
+      <Page class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <Page class="contest-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="contest-filter">
+        <Input v-model="contestTitle" :placeholder="t('oj.title')" class="search-input" clearable />
+        <Button type="primary" class="contest-filter-button" @click="search">
           {{ t('oj.search') }}
         </Button>
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>CID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Start Time</th>
-        <th>Type</th>
-        <th v-if="isAdmin">
-          Visible
-        </th>
-        <th v-if="isAdmin && canRemove">
-          Delete
-        </th>
-      </tr>
-      <template v-for="(item, index) in list">
-        <tr v-if="isAdmin || item.status === status.Available" :key="index">
-          <td>{{ item.cid }}</td>
-          <td>
-            <Button type="text" @click="visit(item)">
-              {{ item.title }}
-            </Button>
-            <Tooltip content="This item is reserved, no one could see this, except admin" placement="right">
-              <strong v-show="item.status === status.Reserve">Reserved</strong>
-            </Tooltip>
-          </td>
-          <td>
-            <span v-if="item.start > currentTime" class="ready">Ready</span>
-            <span v-if="item.start < currentTime && item.end > currentTime" class="run">Running</span>
-            <span v-if="item.end < currentTime" class="end">Ended</span>
-          </td>
-          <td>
-            <span>{{ timePretty(item.start) }}</span>
-          </td>
-          <td>
-            <span :class="{ password: +item.encrypt === encrypt.Password, private: +item.encrypt === encrypt.Private, public: +item.encrypt === encrypt.Public }">
-              {{ type[item.encrypt] }}
-            </span>
-          </td>
-          <td v-if="isAdmin">
-            <Tooltip content="Click to change status" placement="right">
-              <Button type="text" @click="change(item)">
-                {{ contestVisible[item.status] }}
+      </div>
+    </div>
+    <div class="contest-table-container">
+      <table class="contest-table">
+        <thead>
+          <tr>
+            <th class="contest-cid">CID</th>
+            <th class="contest-title">Title</th>
+            <th class="contest-status">Status</th>
+            <th class="contest-type">Type</th>
+            <th class="contest-start-time">Start Time</th>
+            <th v-if="isAdmin" class="contest-visible">Visible</th>
+            <th v-if="isAdmin && canRemove" class="contest-delete">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="list.length == 0" class="contest-empty">
+            <td colspan="7">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
+          <tr v-for="(item, index) in list" :key="index">
+            <td class="contest-cid">{{ item.cid }}</td>
+            <td class="contest-title">
+              <Button type="text" class="table-button" @click="visit(item)">
+                <span class="button-text">{{ item.title }}</span>
+                <Poptip trigger="hover" v-show="item.status === status.Reserve"
+                  content="This item is reserved, no one could see this, except admin" placement="top">
+                  <Tag class="contest-mark">Reserved</Tag>
+                </Poptip>
               </Button>
-            </Tooltip>
-          </td>
-          <td v-if="isAdmin && canRemove">
-            <Button type="text" @click="del(item.cid)">
-              Delete
-            </Button>
-          </td>
-        </tr>
-      </template>
-    </table>
-    <Page
-      :model-value="page"
-      :total="sum"
-      :page-size="pageSize"
-      show-elevator
-      @on-change="pageChange"
-    />
+            </td>
+            <td class="contest-status">
+              <span v-if="item.start > currentTime" class="contest-status-ready">Ready</span>
+              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">Running</span>
+              <span v-if="item.end < currentTime" class="contest-status-end">Ended</span>
+            </td>
+            <td class="contest-type">
+              <span :class="{
+                'contest-type-password': +item.encrypt === encrypt.Password,
+                'contest-type-private': +item.encrypt === encrypt.Private,
+                'contest-type-public': +item.encrypt === encrypt.Public,
+              }">
+                {{ type[item.encrypt] }}
+              </span>
+            </td>
+            <td class="contest-start-time">{{ timePretty(item.start) }}</td>
+            <td v-if="isAdmin" class="contest-visible">
+              <Poptip trigger="hover" content="Click to change status" placement="right">
+                <a @click="change(item)">{{ contestVisible[item.status] }}</a>
+              </Poptip>
+            </td>
+            <td v-if="isAdmin && canRemove" class="contest-delete">
+              <a @click="del(item.cid)">Delete</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="contest-footer">
+      <Page class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange" />
+      <Page class="contest-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+        show-elevator show-total @on-change="pageChange" />
+    </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
 @import '../styles/common'
 
-.con-wrap
-  margin-bottom: 20px
-  table
-    margin-bottom: 20px
-    th:nth-child(1)
-      padding-left: 30px
-      width: 5%
-    th:nth-child(2)
-      width: 30%
-    th:nth-child(3)
-      width: 10%
-    th:nth-child(4)
-      width: 15%
-    th:nth-child(5)
-      width: 10%
-    th:nth-child(6)
-      width: 10%
-    th:nth-child(7)
-      width: 10%
-    td:nth-child(1)
-      padding-left: 30px
-  .ready
-    font-weight: bold
-    color: blue
-  .run
-    font-weight: bold
-    color: red
-  .end
-    font-weight: bold
-    color: black
-  .public
-    font-weight: 500
-  .password
-    color: green
-    font-weight: 500
-  .private
-    color: red
-    font-weight: 500
+.contest-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+
+.contest-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  align-items center
+
+.contest-filter
+  display flex
+  align-items center
+  .search-input
+    width 200px
+    margin-right 8px
+
+.contest-page-simple, .contest-page-mobile
+  display none
+
+@media screen and (max-width: 1024px)
+  .contest-wrap
+    padding 20px 0
+  .contest-header
+    padding 0 20px
+    margin-bottom 5px
+    .contest-page-table
+      display none !important
+    .contest-page-simple
+      display block
+  .contest-footer
+    padding 0 20px
+    margin-top 20px !important
+
+@media screen and (max-width: 768px)
+  .contest-page-table, .contest-page-simple
+    display none !important
+  .contest-filter
+    width 100%
+    .search-input
+      width 100%
+  .contest-page-mobile
+    display block
+
+.contest-table-container
+  overflow-x auto
+  width 100%
+
+.contest-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+    text-align left
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+  .table-button
+    padding 0
+    border-width 0
+    width 100%
+    &:hover
+      background-color transparent
+
+.contest-cid
+  width 90px
+  text-align right !important
+.contest-title
+  text-align left
+  .table-button
+    text-align left
+  .contest-mark
+    margin 0px 0px 4px 8px
+.contest-status, .contest-type
+  text-align center !important
+.contest-status
+  width 90px
+.contest-type
+  width 120px
+td.contest-status
+  font-weight bold
+.contest-start-time
+  width 190px
+td.contest-type
+  font-weight 500
+.contest-visible
+  width 120px
+.contest-delete
+  width 100px
+
+.contest-status-ready
+  color blue
+.contest-status-run
+  color red
+.contest-status-end
+  color black
+
+.contest-type-password
+  color green
+.contest-type-private
+  color red
+
+.contest-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
+
+.contest-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
 </style>
