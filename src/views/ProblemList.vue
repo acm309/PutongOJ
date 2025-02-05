@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount, reactive, ref } from 'vue'
+import { inject, onBeforeMount, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
@@ -36,7 +36,7 @@ const { status, judge } = $(storeToRefs(rootStore))
 const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
 const { find, update, 'delete': remove } = problemStore
 
-const loading = ref(false)
+let loading = $ref(false)
 
 function reload(payload = {}) {
   const routeQuery = Object.assign({}, query, purify(payload))
@@ -44,18 +44,18 @@ function reload(payload = {}) {
 }
 
 const fetch = async () => {
-  loading.value = true
+  loading = true
   type = route.query.type || 'pid'
   content = route.query.content || ''
   await find(query)
-  loading.value = false
+  loading = false
 }
 
 const search = () => reload({ page: 1, type, content })
 const pageChange = val => reload({ page: val })
 
 function change(problem) {
-  loading.value = true
+  loading = true
   problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
   update(problem).then(fetch)
 }
@@ -70,10 +70,10 @@ function del(pid) {
     title: t('oj.warning'),
     content: t('oj.will_remove_problem', { pid }),
     onOk: async () => {
-      loading.value = true
+      loading = true
       await remove({ pid })
       $Message.success(t('oj.remove_problem_success', { pid }))
-      loading.value = false
+      loading = false
     },
     onCancel: () => $Message.info(t('oj.cancel_remove')),
   })

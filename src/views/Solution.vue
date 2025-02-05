@@ -5,7 +5,7 @@ import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
 import 'highlight.js/styles/atom-one-light.css'
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount, ref } from 'vue'
+import { inject, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
@@ -36,7 +36,7 @@ const route = useRoute()
 const $Message = inject('$Message')
 const { copy } = useClipboard()
 
-const loading = ref(false)
+let loading = $ref(false)
 
 function onCopy(content) {
   copy(content)
@@ -50,10 +50,10 @@ function prettyCode(code) {
 }
 
 onBeforeMount(async () => {
-  loading.value = true
+  loading = true
   await findOne(route.params)
   root.changeDomTitle({ title: `Solution ${solution.pid}` })
-  loading.value = false
+  loading = false
 })
 </script>
 

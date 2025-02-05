@@ -8,7 +8,6 @@ import { useRootStore } from '@/store'
 import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { formate } from '@/util/formate'
-import { ref } from 'vue'
 
 import { Text, Button, Page, Select, Option } from 'view-ui-plus'
 
@@ -38,7 +37,7 @@ const { judge } = $(storeToRefs(rootStore))
 const { list, sum } = $(storeToRefs(ranklistStore))
 const groupList = $computed(() => [{ gid: '', title: 'ALL' }].concat(groups))
 
-const loading = ref(false)
+let loading = $ref(false)
 
 function reload(payload = {}) {
   const routeQuery = Object.assign({}, query, payload)
@@ -46,12 +45,12 @@ function reload(payload = {}) {
 }
 
 async function fetch() {
-  loading.value = true
+  loading = true
   await Promise.all([
     ranklistStore.find(query),
     groupStore.find({ lean: 1 })
   ])
-  loading.value = false
+  loading = false
 }
 
 const pageChange = val => reload({ page: val })

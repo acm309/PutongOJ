@@ -5,14 +5,18 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
+import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
 const newsStore = useNewsStore()
+const sessionStore = useSessionStore()
 const router = useRouter()
 const $Message = inject('$Message')
 const { news } = $(storeToRefs(newsStore))
+const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const $Modal = inject('$Modal')
 
-async function submit () {
+async function submit() {
   if (news.title.length === 0) {
     $Message.error(t('oj.title_is_required'))
     return
@@ -26,6 +30,21 @@ async function submit () {
     $Message.error(err.message)
   }
 }
+
+function del(nid) {
+  return $Modal.confirm({
+    title: '提示',
+    content: '<p>此操作将永久删除该消息, 是否继续?</p>',
+    onOk: async () => {
+      await newsStore.delete({ nid })
+      $Message.success(`成功删除 ${nid}！`)
+      reload({ page: currentPage })
+    },
+    onCancel: () => {
+      $Message.info('已取消删除！')
+    },
+  })
+}
 </script>
 
 <template>
@@ -34,6 +53,7 @@ async function submit () {
     <Button type="primary" size="large" @click="submit">
       {{ t('oj.submit') }}
     </Button>
+    <Icon type="md-close-circle" v-if="isAdmin && canRemove" @click.stop="del(news.nid)" />
   </div>
 </template>
 

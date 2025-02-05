@@ -7,7 +7,6 @@ import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import { timePretty } from '@/util/formate'
-import { ref } from 'vue'
 
 import { Badge, Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
 
@@ -34,10 +33,10 @@ const lang = $ref(constant.language)
 const color = $ref(constant.color)
 const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize }))
 
-const loading = ref(false)
+let loading = $ref(false)
 
 async function fetch() {
-  loading.value = true
+  loading = true
   uid = route.query.uid || ''
   pid = route.query.pid || ''
   judge = Number.parseInt(route.query.judge) || ''
@@ -45,7 +44,7 @@ async function fetch() {
   page = Number.parseInt(route.query.page) || 1
   pageSize = Number.parseInt(route.query.pageSize) || 30
   await find(query)
-  loading.value = false
+  loading = false
 }
 
 function reload(payload = {}) {

@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
-import { ref } from 'vue'
 
 import { Card, Row, Col, Icon, Page, Spin } from 'view-ui-plus'
 
@@ -25,12 +24,12 @@ const query = $computed(() => {
   })
 })
 
-const loading = ref(false)
+let loading = $ref(false)
 
 async function fetch() {
-  loading.value = true
+  loading = true
   await find(query)
-  loading.value = false
+  loading = false
 }
 
 function reload(payload = {}) {

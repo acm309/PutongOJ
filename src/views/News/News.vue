@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useNewsStore } from '@/store/modules/news'
@@ -15,7 +15,7 @@ const router = useRouter()
 const current = $computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
-const loading = ref(false)
+let loading = $ref(false)
 
 function change(name) {
   return router.push({
@@ -25,10 +25,10 @@ function change(name) {
 }
 
 onBeforeMount(async () => {
-  loading.value = true
+  loading = true
   await newsStore.findOne(route.params)
   rootStore.changeDomTitle({ title: `${newsStore.news.title} - News` })
-  loading.value = false
+  loading = false
 })
 </script>
 
