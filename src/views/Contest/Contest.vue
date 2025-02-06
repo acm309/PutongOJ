@@ -5,8 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
-import { timePretty } from '@/util/formate'
+import { timePretty, timeContest } from '@/util/formate'
 import { onProfileUpdate, onRouteParamUpdate, purify } from '@/util/helper'
+
+import { Card, Progress, Tabs, Poptip } from 'view-ui-plus'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
@@ -24,27 +26,37 @@ const { profile } = sessionStore
 
 const display = $computed(() => route.name || 'contest')
 
+let loading = $ref(false)
+
 const timePercentage = $computed(() => {
-  if (currentTime < contest.start) {
-    return 0
-  } else if (currentTime > contest.end) {
-    return 100
-  } else {
-    return +((currentTime - contest.start) * 100
-      / (contest.end - contest.start)).toFixed(1)
-  }
+  if (currentTime < contest.start) return 0
+  if (currentTime > contest.end) return 100
+  return +((currentTime - contest.start) * 100
+    / (contest.end - contest.start)).toFixed(1)
+})
+const progressStatus = $computed(() => {
+  if (timePercentage == 100) return 'success'
+  if (timePercentage > 0) return 'active'
+  return 'normal'
+})
+const contestCountdown = $computed(() => {
+  if (currentTime < contest.start) return timeContest(contest.start - currentTime)
+  if (currentTime < contest.end) return timeContest(contest.end - currentTime)
+  return 'Contest Ended'
 })
 
-function handleClick (name) {
+function handleClick(name) {
   if (name === 'contestProblem' || name === 'contestSubmit')
     router.push({ name, params: { cid: route.params.cid, id: route.params.id || 1 } })
   else
     router.push({ name, params: { cid: route.params.cid } })
 }
 
-async function fetch () {
+async function fetch() {
+  loading = true
   await findOne(purify({ cid: route.params.cid, uid: profile?.uid }))
   changeDomTitle(contest.name)
+  loading = false
 }
 
 fetch()
@@ -54,28 +66,30 @@ onProfileUpdate(fetch)
 </script>
 
 <template>
-  <div class="conin-wrap">
-    <Card class="card">
-      <Row type="flex" justify="center">
-        <Col :span="6">
-          Begin: {{ timePretty(contest.start) }}
-        </Col>
-        <Col v-if="currentTime < contest.start" :span="12">
-          Ready
-        </Col>
-        <Col v-if="currentTime > contest.start && currentTime < contest.end" :span="12">
-          Running
-        </Col>
-        <Col v-if="currentTime > contest.end" :span="12">
-          Ended
-        </Col>
-        <Col :span="6">
-          End: {{ timePretty(contest.end) }}
-        </Col>
-      </Row>
-      <Progress :stroke-width="18" :percent="timePercentage" />
-    </Card>
-    <Tabs :model-value="display" @on-click="handleClick">
+  <div :class="{ 'contest-wrap': true, 'contest-ranklist-warp': $route.name === 'contestRanklist' }">
+    <Poptip class="contest-poptip" trigger="hover" placement="bottom">
+      <Card class="contest-card" dis-hover>
+        <div class="contest-info">
+          <span class="contest-begin-time">
+            <span class="tag">Begin</span>
+            <span class="time">{{ timePretty(contest.start) }}</span>
+          </span>
+          <span class="contest-status ready" v-if="currentTime < contest.start">Ready</span>
+          <span class="contest-status running" v-else-if="currentTime < contest.end">Running</span>
+          <span class="contest-status ended" v-else>Ended</span>
+          <span class="contest-end-time">
+            <span class="tag">End</span>
+            <span class="time">{{ timePretty(contest.end) }}</span>
+          </span>
+        </div>
+        <Progress class="contest-progress" :stroke-width="19" :status="progressStatus" :percent="timePercentage"
+          text-inside />
+      </Card>
+      <template #content>
+        <span class="contest-countdown">{{ contestCountdown }}</span>
+      </template>
+    </Poptip>
+    <Tabs class="contest-tabs" :model-value="display" @on-click="handleClick">
       <TabPane :label="t('oj.overview')" name="contestOverview" />
       <TabPane :label="t('oj.problem')" name="contestProblem" />
       <TabPane :label="t('oj.submit')" name="contestSubmit" />
@@ -83,22 +97,89 @@ onProfileUpdate(fetch)
       <TabPane :label="t('oj.ranklist')" name="contestRanklist" />
       <TabPane v-if="isAdmin" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
-    <router-view v-if="contest && contest.cid" />
-    <!-- 为了确保之后的 children 能拿到 contest -->
+    <!-- 此处 if：为了确保之后的 children 能拿到 contest -->
+    <router-view class="contest-children" v-if="contest && contest.cid" />
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus">
-.conin-wrap
-  margin-bottom: 20px
-  .card
-    margin-bottom: 20px
-  .ivu-col
-    text-align: center
-    margin-bottom: 20px
-    font-size: 16px
-  .ivu-progress-bg
-    background-color: #e040fb
-  .ivu-progress-text
-    color: #e040fb
+.contest-poptip
+  width 100%
+  .ivu-poptip-rel
+    display block
+
+.contest-progress
+  .ivu-progress-inner-text
+    display block
+
+.contest-tabs
+  .ivu-tabs-nav-scroll
+    padding 0 32px
+  .ivu-tabs-nav-scrollable
+    .ivu-tabs-nav-scroll
+      padding 0 !important
+
+.contest-children
+  padding 0 32px 32px
+
+@media screen and (max-width: 1024px)
+  .contest-tabs
+    .ivu-tabs-nav-scroll
+      padding 0 16px
+  .contest-children
+    padding 0 16px 16px
+</style>
+
+<style lang="stylus" scoped>
+.contest-countdown
+  display block
+  width 100%
+  text-align center
+  font-family verdana, arial, sans-serif
+
+.contest-card
+  margin 32px 32px 8px
+  .contest-info
+    width 100%
+    padding 8px 32px 20px
+    display flex
+    justify-content space-between
+    align-items center
+    font-size 16px
+    font-family verdana, arial, sans-serif
+    .contest-begin-time
+      text-align left
+    .contest-end-time
+      text-align right
+    .contest-status
+      padding 0 32px
+      font-size 18px
+      font-weight bold
+      &.ready
+        color #2d8cf0
+      &.running
+        color var(--oj-primary-color)
+      &.ended
+        color #19be6b
+    .contest-begin-time, .contest-end-time
+      .tag
+        font-size 12px
+      .time
+        display block
+
+@media screen and (max-width: 1024px)
+  .contest-card
+    margin 16px 16px 4px
+
+@media screen and (max-width: 768px)
+  .contest-card
+    .contest-info
+      padding 8px 16px 20px
+      font-size 14px
+
+.contest-wrap
+  padding 0
+.contest-ranklist-warp
+  max-width: 1920px
 </style>
