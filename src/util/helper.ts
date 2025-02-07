@@ -1,12 +1,13 @@
-import pickBy from 'lodash.pickby'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useSessionStore } from '@/store/modules/session'
 
-export function purify (obj: object) {
-  return pickBy(obj, x => x != null && x !== '')
+export function purify(obj: Record<string, any>) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, value]) => value != null && value !== '')
+  );
 }
 
 // TODO: 后期这里应该会改 URL

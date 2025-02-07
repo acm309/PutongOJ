@@ -1,7 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
-import pick from 'lodash.pick'
 import { useI18n } from 'vue-i18n'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useRootStore } from '@/store'
@@ -16,17 +15,12 @@ const router = useRouter()
 const { t } = useI18n()
 
 const group = $ref('')
-const query = $computed(() => {
-  const opt = Object.assign(
-    {},
-    pick(route.query, ['page', 'pageSize']),
-    { gid: group },
-  )
-  return purify(opt)
-})
+const page = $ref(Number.parseInt(route.query.page) || 1)
+const pageSize = $ref(Number.parseInt(route.query.pageSize) || 30)
 
-const page = $computed(() => Number.parseInt(query.page) || 1)
-const pageSize = $computed(() => Number.parseInt(query.pageSize) || 30)
+const query = $computed(() => purify({
+  page, pageSize, gid: group
+}))
 
 const rootStore = useRootStore()
 const ranklistStore = useRanklistStore()

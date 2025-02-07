@@ -20,7 +20,8 @@
             "dom"
         ],
         // TODO: remove after migration
-        "allowJs": true
+        "allowJs": true,
+        "outDir": "dist"
     },
     "include": [
         "src/**/*.ts",
