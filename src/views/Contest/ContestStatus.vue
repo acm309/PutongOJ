@@ -12,6 +12,8 @@ import { useContestStore } from '@/store/modules/contest'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/util/formate'
 
+import { Badge, Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
+
 const { t } = useI18n()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
@@ -39,6 +41,8 @@ const result = $ref(constant.result)
 const lang = $ref(constant.language)
 const color = $ref(constant.color)
 
+let loading = $ref(false)
+
 const query = $computed(() => {
   const opt = Object.assign(
     {},
@@ -55,8 +59,9 @@ const query = $computed(() => {
 
 const getId = pid => problems.indexOf(pid) + 1
 
-function fetch () {
-  findSolutions(query)
+async function fetch() {
+  loading = true
+  await findSolutions(query)
   const routeQuery = route.query
   page = Number.parseInt(routeQuery.page) || 1
   pageSize = Number.parseInt(routeQuery.pageSize) || 30
@@ -64,16 +69,17 @@ function fetch () {
   pid = routeQuery.pid || ''
   judge = Number.parseInt(routeQuery.judge) || ''
   language = Number.parseInt(routeQuery.language) || ''
+  loading = false
 }
 
-function reload (payload = {}) {
+function reload(payload = {}) {
   router.push({
     name: 'contestStatus',
     query: purify(Object.assign({}, route.query, payload)),
   })
 }
 
-function search () {
+function search() {
   return reload({
     page: 1,
     uid,
@@ -86,9 +92,9 @@ function search () {
 const pageChange = val => reload({ page: val })
 
 onBeforeMount(async () => {
+  loading = true
   if (problems == null)
     await findOne({ cid: mid })
-
   fetch()
   changeDomTitle({ title: `Contest ${route.params.cid}` })
 })
@@ -97,135 +103,212 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div>
-    <Row class="filter">
-      <Col :offset="1" :span="5">
-        <Row>
-          <Col :span="6">
-            <label>User</label>
-          </Col>
-          <Col :span="15">
-            <Input v-model="uid" placeholder="username" />
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="4">
-        <Row>
-          <Col :span="6">
-            <label>Pid</label>
-          </Col>
-          <Col :span="15">
-            <Input v-model="pid" placeholder="pid" />
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="6">
-        <Row>
-          <Col :span="6">
-            <label>Judge</label>
-          </Col>
-          <Col :span="16">
-            <Select v-model="judge">
-              <Option
-                v-for="item in judgeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </Select>
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="4">
-        <Row>
-          <Col :span="12">
-            <label>Language</label>
-          </Col>
-          <Col :span="12">
-            <Select v-model="language">
-              <Option
-                v-for="item in languageList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </Select>
-          </Col>
-        </Row>
-      </Col>
-      <Col :span="3">
-        <Button type="primary" icon="ios-search" @click="search">
-          {{ t('oj.search') }}
-        </Button>
-      </Col>
-    </Row>
-    <Row class="pagination" type="flex" justify="start">
-      <Col :span="16">
-        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>SID</th>
-        <th>PID</th>
-        <th>Username</th>
-        <th>Judge</th>
-        <th>Time/ms</th>
-        <th>Memory/kb</th>
-        <th>Language</th>
-        <th>Submit Time</th>
-      </tr>
-      <tr v-for="item in list" :key="item.sid">
-        <td>{{ item.sid }}</td>
-        <td>
-          <router-link :to="{ name: 'contestProblem', params: { cid: mid, id: getId(item.pid) } }">
-            {{ getId(item.pid) }}
-          </router-link>
-        </td>
-        <td>
-          <Button type="text">
-            {{ item.uid }}
-          </Button>
-        </td>
-        <td :class="color[item.judge]">
-          {{ result[item.judge] }}
-          <Tag v-if="item.sim" color="yellow">
-            [{{ item.sim }}%]{{ item.sim_s_id }}
-          </Tag>
-        </td>
-        <td>{{ item.time }}</td>
-        <td>{{ item.memory }}</td>
-        <td v-if="isAdmin || (profile && profile.uid === item.uid)">
-          <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-            {{ lang[item.language] }}
-          </router-link>
-        </td>
-        <td v-else>
-          {{ lang[item.language] }}
-        </td>
-        <td>{{ timePretty(item.create) }}</td>
-      </tr>
-    </table>
+  <div class="contest-children status-wrap">
+    <div class="status-header">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" @on-change="pageChange" />
+      <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="status-filter">
+        <Input type="text" v-model="uid" placeholder="Username" class="status-filter-input" clearable />
+        <Input type="number" v-model="pid" placeholder="PID" class="status-filter-input" clearable />
+        <Select v-model="judge" placeholder="Judge" class="status-filter-input" clearable>
+          <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
+        </Select>
+        <Select v-model="language" placeholder="Language" class="status-filter-input" clearable>
+          <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
+        </Select>
+        <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
+      </div>
+    </div>
+    <div class="status-table-container">
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th class="status-sid">SID</th>
+            <th class="status-pid">PID</th>
+            <th class="status-username">Username</th>
+            <th class="status-judge">Judge</th>
+            <th class="status-time">
+              <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
+            </th>
+            <th class="status-memory">
+              <Badge>Memory<template #count><span class="status-badge">(KB)</span></template></Badge>
+            </th>
+            <th class="status-language">Language</th>
+            <th class="status-submit-time">Submit Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="list.length == 0" class="status-empty">
+            <td colspan="8">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
+          <tr v-for="item in list" :key="item.sid">
+            <td class="status-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
+              <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
+                {{ item.sid }}
+              </router-link>
+            </td>
+            <td class="status-sid" v-else>{{ item.sid }}</td>
+            <td class="status-pid">
+              <router-link :to="{ name: 'contestProblem', params: { cid: mid, id: getId(item.pid) } }">
+                {{ getId(item.pid) }}
+              </router-link>
+            </td>
+            <td class="status-username">
+              <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+                {{ item.uid }}
+              </router-link>
+            </td>
+            <td class="status-judge">
+              <span :class="color[item.judge]">{{ result[item.judge] }}</span>
+              <Poptip trigger="hover" v-if="item.sim" placement="right">
+                <Tag color="gold" class="status-sim-tag">
+                  {{ item.sim }}%
+                </Tag>
+                <template #content>
+                  <b>Sim SID:</b> {{ item.sim_s_id }}
+                </template>
+              </Poptip>
+            </td>
+            <td class="status-time">{{ item.time }}</td>
+            <td class="status-memory">{{ item.memory }}</td>
+            <td class="status-language">{{ lang[item.language] }}</td>
+            <td class="status-submit-time">{{ timePretty(item.create) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="status-footer">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange" />
+      <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange" />
+    </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
 @import '../../styles/common'
 
-.filter
-  margin-bottom: 20px
-  label
-    height: 32px
-    line-height: 32px
-  .ivu-col
-    text-align: center
-    margin-bottom: 0
-    font-size: 14px
-  .ivu-select-item
-    text-align: left
-.pagination
-  margin-left: 10px
-  .ivu-col
-    text-align: left
-    margin-bottom: 10px
+.contest-children
+  margin-top -16px !important
+  padding-top 0
+  position relative
+
+.status-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+
+.status-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  align-items center
+.status-page
+  flex none
+.status-filter
+  display flex
+  align-items center
+  > *
+    margin-left 4px
+  .status-filter-input
+    width 120px
+
+.status-page-mobile, .status-page-simple
+  display none
+
+@media screen and (max-width: 1280px)
+  .status-header
+    .status-page-table
+      display none
+    .status-page-simple
+      display block
+
+@media screen and (max-width: 1024px)
+  .status-wrap
+    padding 20px 0
+  .status-footer
+    padding 0 20px
+    margin-top 20px !important
+  .status-header
+    padding 0 20px
+    margin-bottom 5px
+    display block
+    .status-page-simple
+      display none
+    .status-filter-input
+      width 100% !important
+      min-width 60px
+
+@media screen and (max-width: 768px)
+  .status-page-table
+    display none
+  .status-page-mobile
+    display block
+
+.status-table-container
+  overflow-x auto
+  width 100%
+.status-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+
+.status-sid
+  width 110px
+  text-align right
+.status-pid
+  width 80px
+  text-align right
+.status-username
+  width 170px
+  max-width 170px
+  text-align center
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.status-time, .status-memory
+  width 100px
+  text-align right
+.status-language
+  width 110px
+  text-align center
+.status-submit-time
+  width 190px
+.status-sim-tag
+  margin 0px 0px 4px 8px
+.status-badge
+  position absolute
+  font-size 8px
+  top 10px
+  right 8px
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
+
+.status-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
 </style>

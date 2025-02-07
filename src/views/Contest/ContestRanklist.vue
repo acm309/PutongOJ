@@ -156,7 +156,7 @@ onBeforeUnmount(() => clearInterval(timer))
   &>tbody>tr:last-child>td
     border-bottom 0
   tr
-    height 56px
+    height 60px
   tbody tr
     transition background-color 0.2s ease
     td.table-problem

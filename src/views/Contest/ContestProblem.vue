@@ -7,6 +7,8 @@ import { useProblemStore } from '@/store/modules/problem'
 import { useContestStore } from '@/store/modules/contest'
 import { onRouteParamUpdate } from '@/util/helper'
 
+import { Space, Button, Spin } from 'view-ui-plus'
+
 const { t } = useI18n()
 const problemStore = useProblemStore()
 const contestStore = useContestStore()
@@ -19,8 +21,12 @@ const { overview, contest, totalProblems } = $(storeToRefs(contestStore))
 
 const proIndex = $computed(() => Number.parseInt(route.params.id || 1))
 
-function fetch () {
-  findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
+let loading = $ref(false)
+
+async function fetch() {
+  loading = true
+  await findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
+  loading = false
 }
 
 const pageChange = val => {
@@ -34,45 +40,44 @@ onRouteParamUpdate(fetch)
 </script>
 
 <template>
-  <div class="conpro-wrap">
-    <ul>
-      <li v-for="i in totalProblems" :key="i" @click="pageChange(i)"
-        :class="{ active: i === proIndex, invalid: overview[i - 1].invalid }">
+  <div class="contest-children">
+    <Space class="problem-nav" wrap :size="[8, 8]">
+      <Button class="problem-nav-item" v-for="i in totalProblems" :key="i" @click="pageChange(i)"
+        :type="i === proIndex ? 'primary' : 'default'" :disabled="overview[i - 1].invalid">
         {{ i }}
-      </li>
-    </ul>
-    <Problem :problem="problem">
-      <template #title>
-        {{ $route.params.id }}:  {{ problem.title }}
-      </template>
-    </Problem>
-    <Button shape="circle" icon="md-paper-plane" @click="submit">
-      {{ t('oj.submit') }}
-    </Button>
+      </Button>
+    </Space>
+    <div class="problem-content">
+      <Problem :problem="problem">
+        <template #title>
+          {{ $route.params.id }}: {{ problem.title }}
+        </template>
+      </Problem>
+      <Button class="problem-submit" shape="circle" icon="md-paper-plane" @click="submit">
+        {{ t('oj.submit') }}
+      </Button>
+    </div>
+    <Spin size="large" fix :show="loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
-ul
-  margin-left: 10px
-  li
-    display: inline-block
-    vertical-align: middle
-    min-width: 32px
-    height: 32px
-    line-height: 30px
-    margin-right: 8px
-    text-align: center
-    list-style: none
-    background-color: #fff
-    border: 1px solid #dddee1
-    border-radius: 4px
-    cursor: pointer
-  .active
-    color: #fff
-    background-color: #e040fb
-    border-color: #e040fb
-  .invalid
-    cursor: not-allowed
-    color: #aaa
+.contest-children
+  margin-top -16px
+  padding 40px 0
+  position relative
+.problem-nav
+  padding 0 40px
+  .problem-nav-item
+    padding 0 11.66px
+.problem-content
+  padding 20px 40px 0
+
+@media screen and (max-width: 1024px)
+  .contest-children
+    padding 20px 0
+  .problem-nav
+    padding 0 20px
+  .problem-content
+    padding 10px 20px 0
 </style>

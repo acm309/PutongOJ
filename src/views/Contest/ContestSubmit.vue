@@ -7,6 +7,8 @@ import OJSubmit from '@/components/Submit'
 import { useSolutionStore } from '@/store/modules/solution'
 import { useContestStore } from '@/store/modules/contest'
 
+import { Space, Button } from 'view-ui-plus'
+
 const { t } = useI18n()
 const contestStore = useContestStore()
 const solutionStore = useSolutionStore()
@@ -29,11 +31,12 @@ const pageChange = val => {
 const reset = clearCode
 
 async function submit() {
-  await create({
+  let response = await create({
     ...solution.value,
     pid: problems.value[currentProblemId.value - 1],
     mid: currentContestId.value,
   })
+  if (response.isAxiosError) return
   router.push({
     name: 'contestStatus',
     params: route.params,
@@ -43,50 +46,49 @@ async function submit() {
 </script>
 
 <template>
-  <div>
-    <ul>
-      <li v-for="i in totalProblems" :key="i" @click="pageChange(i)"
-        :class="{ active: i === currentProblemId, invalid: overview[i - 1].invalid }">
+  <div class="contest-children">
+    <Space class="problem-nav" wrap :size="[8, 8]">
+      <Button class="problem-nav-item" v-for="i in totalProblems" :key="i" @click="pageChange(i)"
+        :type="i === currentProblemId ? 'primary' : 'default'" :disabled="overview[i - 1].invalid">
         {{ i }}
-      </li>
-    </ul>
-    <h1>{{ currentProblemId }}: {{ currentTitle }}</h1>
-    <OJSubmit />
-    <Button type="primary" @click="submit">
-      {{ t('oj.submit') }}
-    </Button>
-    <Button style="margin-left: 8px" @click="reset">
-      {{ t('oj.reset') }}
-    </Button>
+      </Button>
+    </Space>
+    <div class="problem-content">
+      <h1>{{ currentProblemId }}: {{ currentTitle }}</h1>
+      <OJSubmit />
+      <Button type="primary" @click="submit">
+        {{ t('oj.submit') }}
+      </Button>
+      <Button style="margin-left: 8px" @click="reset">
+        {{ t('oj.reset') }}
+      </Button>
+    </div>
   </div>
 </template>
 
 <style lang="stylus" scoped>
+.contest-children
+  margin-top -16px
+  padding 40px 0
+  position relative
+.problem-nav
+  padding 0 40px
+  .problem-nav-item
+    padding 0 11.66px
+.problem-content
+  padding 20px 40px 0
+
+@media screen and (max-width: 1024px)
+  .contest-children
+    padding 20px 0
+  .problem-nav
+    padding 0 20px
+  .problem-content
+    padding 10px 20px 0
+
 h1
-  color: #9799ca
+  color: #757575
   margin-top: 10px
   margin-bottom: 20px
   text-align: center
-ul
-  margin-left: 10px
-  li
-    display: inline-block
-    vertical-align: middle
-    min-width: 32px
-    height: 32px
-    line-height: 30px
-    margin-right: 8px
-    text-align: center
-    list-style: none
-    background-color: #fff
-    border: 1px solid #dddee1
-    border-radius: 4px
-    cursor: pointer
-  .active
-    color: #fff
-    background-color: #e040fb
-    border-color: #e040fb
-  .invalid
-    cursor: not-allowed
-    color: #aaa
 </style>
