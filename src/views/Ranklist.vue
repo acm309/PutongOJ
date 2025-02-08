@@ -31,7 +31,6 @@ const groupStore = useGroupStore()
 const { list: groups } = $(storeToRefs(groupStore))
 const { judge } = $(storeToRefs(rootStore))
 const { list, sum } = $(storeToRefs(ranklistStore))
-const groupList = $computed(() => [{ gid: '', title: 'ALL' }].concat(groups))
 
 let loading = $ref(false)
 
@@ -65,8 +64,8 @@ onRouteQueryUpdate(fetch)
       <Page class="ranklist-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
         @on-change="pageChange" />
       <div class="ranklist-filter">
-        <Select v-model="group" class="ranklist-filter-select" :placeholder="t('oj.group')">
-          <Option v-for="item in groupList" :key="item.gid" :value="item.gid">
+        <Select v-model="group" class="ranklist-filter-select" filterable clearable :placeholder="t('oj.group')">
+          <Option v-for="item in groups" :key="item.gid" :value="item.gid">
             {{ item.title }}
           </Option>
         </Select>

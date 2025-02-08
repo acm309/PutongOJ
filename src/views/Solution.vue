@@ -44,6 +44,7 @@ function onCopy(content) {
 }
 
 function prettyCode(code) {
+  if (!code) return ''
   return highlight.highlight(`${code}`, {
     language: language[solution.language],
   }).value
