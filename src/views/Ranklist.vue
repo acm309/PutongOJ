@@ -8,6 +8,8 @@ import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
 import { formate } from '@/util/formate'
 
+import pangu from 'pangu'
+
 import { Text, Button, Page, Select, Option } from 'view-ui-plus'
 
 const route = useRoute()
@@ -103,7 +105,7 @@ onRouteQueryUpdate(fetch)
             <td class="ranklist-nick">{{ item.nick }}</td>
             <td class="ranklist-motto">
               <Text class="ranklist-motto-text" :ellipsis="true" :ellipsis-config="{ tooltip: true }">
-                {{ item.motto }}
+                {{ pangu.spacing(item.motto || '').trim() }}
               </Text>
             </td>
             <td class="ranklist-solved">

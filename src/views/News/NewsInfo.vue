@@ -3,12 +3,14 @@ import { storeToRefs } from 'pinia'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
+import pangu from 'pangu'
+
 const { news } = $(storeToRefs(useNewsStore()))
 </script>
 
 <template>
   <div class="news">
-    <h1>{{ news.title }}</h1>
+    <h1>{{ pangu.spacing(news.title) }}</h1>
     <h4>{{ timePretty(news.create) }}</h4>
     <div class="news-cont" v-html="news.content" />
   </div>

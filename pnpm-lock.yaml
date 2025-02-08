@@ -17,6 +17,9 @@ importers:
       axios:
         specifier: ^0.27.2
         version: 0.27.2
+      pangu:
+        specifier: ^4.0.7
+        version: 4.0.7
       pinia:
         specifier: ^2.3.1
         version: 2.3.1(typescript@5.7.3)(vue@3.3.13(typescript@5.7.3))
@@ -2912,6 +2915,10 @@ packages:
 
   package-manager-detector@0.2.9:
     resolution: {integrity: sha512-+vYvA/Y31l8Zk8dwxHhL3JfTuHPm6tlxM2A3GeQyl7ovYnSp1+mzAxClxaOr0qO1TtPxbQxetI7v5XqKLJZk7Q==}
+
+  pangu@4.0.7:
+    resolution: {integrity: sha512-weZKJIwwy5gjt4STGVUH9bix3BGk7wZ2ahtIypwe3e/mllsrIZIvtfLx1dPX56GcpZFOCFKmeqI1qVuB9enRzA==}
+    hasBin: true
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -7194,6 +7201,8 @@ snapshots:
   package-json-from-dist@1.0.1: {}
 
   package-manager-detector@0.2.9: {}
+
+  pangu@4.0.7: {}
 
   param-case@3.0.4:
     dependencies:

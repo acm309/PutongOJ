@@ -6,6 +6,8 @@ import { onRouteQueryUpdate, purify } from '@/util/helper'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
+import pangu from 'pangu'
+
 import { Card, Row, Col, Icon, Page, Spin } from 'view-ui-plus'
 
 const { t } = useI18n()
@@ -59,7 +61,7 @@ onRouteQueryUpdate(fetch)
           <Icon type="md-paper" class="icon-paper" />
           </Col>
           <Col flex="auto" class="news-content">
-          <span class="news-title">{{ item.title }}</span>
+          <span class="news-title">{{ pangu.spacing(item.title) }}</span>
           <p class="news-date">{{ timePretty(item.create) }}</p>
           </Col>
         </Row>
