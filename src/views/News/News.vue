@@ -34,21 +34,40 @@ onBeforeMount(async () => {
 
 <template>
   <div class="news-wrap">
-    <Tabs v-if="isAdmin" :model-value="current" @on-click="change">
+    <Tabs class="news-tabs" v-if="isAdmin" :model-value="current" @on-click="change">
       <TabPane :label="t('oj.overview')" name="newsInfo" />
       <TabPane :label="t('oj.edit')" name="newsEdit" />
     </Tabs>
-    <router-view />
+    <router-view class="news-children" />
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
+<style lang="stylus">
+.news-tabs
+  .ivu-tabs-nav-scroll
+    padding 0 40px
+
+@media screen and (max-width: 1024px)
+  .news-tabs
+    .ivu-tabs-nav-scroll
+      padding 0 20px
+</style>
+
 <style lang="stylus" scoped>
 .news-wrap
-  width: 100%
-  max-width: 1024px
-  padding-top: 30px
+  width 100%
+  max-width 1024px
+  padding 24px 0 0
+
+.news-children
+  margin-top -16px
+  padding 40px
+
 @media screen and (max-width: 1024px)
   .news-wrap
-    padding-top: 20px
+    padding 12px 0 0
+
+  .news-children
+    padding 20px
 </style>

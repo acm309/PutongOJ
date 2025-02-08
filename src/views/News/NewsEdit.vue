@@ -7,6 +7,8 @@ import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
 import { useSessionStore } from '@/store/modules/session'
 
+import { Button, Space } from 'view-ui-plus'
+
 const { t } = useI18n()
 const newsStore = useNewsStore()
 const sessionStore = useSessionStore()
@@ -50,10 +52,14 @@ function del(nid) {
 <template>
   <div>
     <OjNewsEdit />
-    <Button type="primary" size="large" @click="submit">
-      {{ t('oj.submit') }}
-    </Button>
-    <Icon type="md-close-circle" v-if="isAdmin && canRemove" @click.stop="del(news.nid)" />
+    <Space :size="20">
+      <Button type="primary" size="large" @click="submit">
+        {{ t('oj.submit') }}
+      </Button>
+      <Button v-if="isAdmin && canRemove" size="large" @click.stop="del(news.nid)">
+        {{ t('oj.delete') }}
+      </Button>
+    </Space>
   </div>
 </template>
 

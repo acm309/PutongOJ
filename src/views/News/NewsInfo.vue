@@ -9,28 +9,38 @@ const { news } = $(storeToRefs(useNewsStore()))
 </script>
 
 <template>
-  <div class="news">
-    <h1>{{ pangu.spacing(news.title) }}</h1>
-    <h4>{{ timePretty(news.create) }}</h4>
-    <div class="news-cont" v-html="news.content" />
+  <div class="news-info">
+    <div class="news-header-container">
+      <div class="news-header">
+        <h1>{{ pangu.spacing(news.title || '') }}</h1>
+        <h4>{{ timePretty(news.create) }}</h4>
+      </div>
+    </div>
+    <div class="news-content" v-html="news.content" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
-h1, h4
-  margin-bottom: 10px
-.news-cont
-  padding-top: 10px
-  text-align: left
-  border-top: 1px solid #dfd8d8
+.news-header-container
+  width 100%
+  padding 20px 0 40px
+.news-header
+  margin 0 auto
+  max-width 640px
+  text-align center
+  h1, h4
+    margin-bottom: 10px
+.news-content
+  padding-bottom 20px
 </style>
 
 <style>
-.news-cont a {
+.news-content a {
   line-break: anywhere;
 }
-.news-cont img {
+
+.news-content img {
   width: auto;
-  max-width: 100%;
+  max-width: 100% !important;
 }
 </style>
