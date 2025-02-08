@@ -17,8 +17,8 @@ const router = useRouter()
 const { t } = useI18n()
 
 const group = $ref('')
-const page = $ref(Number.parseInt(route.query.page) || 1)
-const pageSize = $ref(Number.parseInt(route.query.pageSize) || 30)
+const page = $computed(() => Number.parseInt(route.query.page) || 1)
+const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
 
 const query = $computed(() => purify({
   page, pageSize, gid: group
