@@ -16,7 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 
-const group = $ref('')
+const group = $ref(Number.parseInt(route.query.gid) || '')
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
 
