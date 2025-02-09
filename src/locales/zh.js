@@ -125,6 +125,8 @@ export default {
     password_confirm: '确认密码',
     leave_it_blank_if_no_change: '不修改请留空',
     edit_user: '编辑用户',
+    security: '安全',
+    privilege: '权限',
 
     password_requirement: '密码长度至少为5位，只能包含数字和字母',
     password_not_match: '密码不匹配',

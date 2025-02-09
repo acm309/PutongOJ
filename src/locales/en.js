@@ -136,6 +136,8 @@ export default {
     password_confirm: 'Confirm Password',
     leave_it_blank_if_no_change: 'Leave it blank if it is not change',
     edit_user: 'Edit User',
+    security: 'Security',
+    privilege: 'Privilege',
 
     password_requirement: 'At least 5 characters long and only numbers and letters',
     password_not_match: 'Password not match',
