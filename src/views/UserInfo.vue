@@ -113,7 +113,7 @@ onProfileUpdate(fetch)
     </Tabs>
     <div class="user-tab user-overwiew" v-show="view === 'overview'">
       <div class="user-infobar">
-        <img class="user-avatar" src="../assets/logo.png" alt="Avatar" />
+        <img class="user-avatar" src="../assets/logo.jpg" alt="Avatar" />
         <div class="user-name">
           <div class="user-nickname">{{ nickname }}</div>
           <div class="user-username" v-if="username">{{ username }}</div>
