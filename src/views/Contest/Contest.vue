@@ -115,20 +115,20 @@ onProfileUpdate(fetch)
 
 .contest-tabs
   .ivu-tabs-nav-scroll
-    padding 0 32px
+    padding 0 40px
   .ivu-tabs-nav-scrollable
     .ivu-tabs-nav-scroll
       padding 0 !important
 
 .contest-children
-  padding 0 32px 32px
+  padding 0 40px 40px
 
 @media screen and (max-width: 1024px)
   .contest-tabs
     .ivu-tabs-nav-scroll
-      padding 0 16px
+      padding 0 20px
   .contest-children
-    padding 0 16px 16px
+    padding 0 20px 20px
 </style>
 
 <style lang="stylus" scoped>
@@ -139,10 +139,10 @@ onProfileUpdate(fetch)
   font-family verdana, arial, sans-serif
 
 .contest-card
-  margin 32px 32px 8px
+  margin 40px 40px 24px
   .contest-info
     width 100%
-    padding 8px 32px 20px
+    padding 8px 40px 20px
     display flex
     justify-content space-between
     align-items center
@@ -153,7 +153,7 @@ onProfileUpdate(fetch)
     .contest-end-time
       text-align right
     .contest-status
-      padding 0 32px
+      padding 0 40px
       font-size 18px
       font-weight bold
       &.ready
@@ -170,12 +170,12 @@ onProfileUpdate(fetch)
 
 @media screen and (max-width: 1024px)
   .contest-card
-    margin 16px 16px 4px
+    margin 20px 20px 12px
 
 @media screen and (max-width: 768px)
   .contest-card
     .contest-info
-      padding 8px 16px 20px
+      padding 8px 20px 20px
       font-size 14px
 
 .contest-wrap

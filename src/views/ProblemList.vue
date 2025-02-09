@@ -136,7 +136,7 @@ onProfileUpdate(fetch)
             <td class="problem-tags">
               <template v-for="(item2, index2) in item.tags" :key="index2">
                 <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
-                  <Tag class="problem-tag">{{ item2 }}</Tag>
+                  <span class="problem-tag">{{ item2 }}</span>
                 </router-link>
               </template>
             </td>
@@ -279,6 +279,16 @@ onProfileUpdate(fetch)
   width 100px
 
 .problem-tag
+  display inline-block
+  height 22px;
+  line-height 22px;
+  padding 0 8px
+  border 1px solid #e8eaec
+  border-radius 3px
+  background #f7f7f7
+  font-size 12px
+  vertical-align middle
+  color #515a6e
   margin 0px 0px 4px 8px
 
 .status-empty
