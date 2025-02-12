@@ -22,7 +22,7 @@ const clean = (html) => DOMPurify.sanitize(html)
   <div class="proinfo-wrap">
     <h1>
       <slot name="title">
-        {{ problem.pid }}:  {{ problem.title }}
+        {{ problem.pid }}: {{ problem.title }}
       </slot>
     </h1>
     <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
@@ -57,6 +57,12 @@ const clean = (html) => DOMPurify.sanitize(html)
   </div>
 </template>
 
+<style lang="stylus">
+.proinfo-wrap
+  img
+    max-width: 100%
+</style>
+
 <style lang="stylus" scoped>
 h1
   color: #757575
@@ -66,7 +72,7 @@ h1
 h5
   margin-bottom: 10px
   text-align:center
-h2+
+h2
   border-bottom: 1px solid #e8e8e8
   padding: 10px 0
   color: #757575

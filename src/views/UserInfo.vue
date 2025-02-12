@@ -22,13 +22,12 @@ const groupStore = useGroupStore()
 
 const { judge, privilege } = $(storeToRefs(rootStore))
 const { list: groups } = $(storeToRefs(groupStore))
-const { findOne, update, 'delete': remove } = userStore
+const { findOne, update } = userStore
 const { user, solved, unsolved, group } = $(storeToRefs(userStore))
 const { isAdmin, profile, canRemove } = $(storeToRefs(sessionStore))
 
 const route = useRoute()
 const $Message = inject('$Message')
-const $Modal = inject('$Modal')
 const userForm = $ref(null)
 
 let loading = $ref(false)
