@@ -3,14 +3,19 @@ import { inject } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-defineProps([ 'problem' ])
+import DOMPurify from 'dompurify';
+
+defineProps(['problem'])
 const { t } = useI18n()
 const $Message = inject('$Message')
 const { copy } = useClipboard()
-function onCopy (content) {
+
+function onCopy(content) {
   copy(content)
   $Message.success('Copied!')
 }
+
+const clean = (html) => DOMPurify.sanitize(html)
 </script>
 
 <template>
@@ -24,11 +29,11 @@ function onCopy (content) {
     <h2 class="text-primary">
       {{ t('oj.description') }}
     </h2>
-    <div class="cont" v-html="problem.description" />
+    <div class="cont" v-html="clean(problem.description)" />
     <h2>{{ t('oj.input') }}</h2>
-    <div class="cont" v-html="problem.input" />
+    <div class="cont" v-html="clean(problem.input)" />
     <h2>{{ t('oj.output') }}</h2>
-    <div class="cont" v-html="problem.output" />
+    <div class="cont" v-html="clean(problem.output)" />
     <h2>
       {{ t('oj.sample_input') }}
       <Tooltip content="Click to copy" placement="top">
@@ -47,7 +52,7 @@ function onCopy (content) {
       <h2>
         {{ t('oj.hint') }}
       </h2>
-      <div class="cont" v-html="problem.hint" />
+      <div class="cont" v-html="clean(problem.hint)" />
     </div>
   </div>
 </template>

@@ -4,8 +4,11 @@ import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
 import pangu from 'pangu'
+import DOMPurify from 'dompurify';
 
 const { news } = $(storeToRefs(useNewsStore()))
+
+const clean = (html) => DOMPurify.sanitize(html)
 </script>
 
 <template>
@@ -16,7 +19,7 @@ const { news } = $(storeToRefs(useNewsStore()))
         <h4>{{ timePretty(news.create) }}</h4>
       </div>
     </div>
-    <div class="news-content" v-html="news.content" />
+    <div class="news-content" v-html="clean(news.content)" />
   </div>
 </template>
 
