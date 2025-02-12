@@ -4,7 +4,7 @@ import api from '@/api'
 export const useSolutionStore = defineStore('solution', {
   state: () => ({
     list: [],
-    solution: null,
+    solution: {},
     sum: 0,
   }),
   actions: {
