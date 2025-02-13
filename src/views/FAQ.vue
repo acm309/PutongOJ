@@ -234,7 +234,7 @@ else:
 
 .faq-header
   margin-bottom: 20px
-  color hsla(0, 0%, 0%, 0.85)
+  color hsl(0, 0%, 20%)
   .faq-subtitle
     font-size 12px
     font-family verdana, arial, sans-serif

@@ -3,7 +3,7 @@ import { inject } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import DOMPurify from 'dompurify';
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 defineProps(['problem'])
 const { t } = useI18n()
@@ -14,8 +14,6 @@ function onCopy(content) {
   copy(content)
   $Message.success('Copied!')
 }
-
-const clean = (html) => DOMPurify.sanitize(html)
 </script>
 
 <template>
@@ -26,14 +24,12 @@ const clean = (html) => DOMPurify.sanitize(html)
       </slot>
     </h1>
     <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
-    <h2 class="text-primary">
-      {{ t('oj.description') }}
-    </h2>
-    <div class="cont" v-html="clean(problem.description)" />
+    <h2 class="text-primary">{{ t('oj.description') }}</h2>
+    <MarkdownPreview class="cont" v-model="problem.description" />
     <h2>{{ t('oj.input') }}</h2>
-    <div class="cont" v-html="clean(problem.input)" />
+    <MarkdownPreview class="cont" v-model="problem.input" />
     <h2>{{ t('oj.output') }}</h2>
-    <div class="cont" v-html="clean(problem.output)" />
+    <MarkdownPreview class="cont" v-model="problem.output" />
     <h2>
       {{ t('oj.sample_input') }}
       <Tooltip content="Click to copy" placement="top">
@@ -48,20 +44,14 @@ const clean = (html) => DOMPurify.sanitize(html)
       </Tooltip>
     </h2>
     <pre><code>{{ problem.out }}</code></pre>
-    <div v-if="problem.hint">
+    <template v-if="problem.hint">
       <h2>
         {{ t('oj.hint') }}
       </h2>
-      <div class="cont" v-html="clean(problem.hint)" />
-    </div>
+      <MarkdownPreview class="cont" v-model="problem.hint" />
+    </template>
   </div>
 </template>
-
-<style lang="stylus">
-.proinfo-wrap
-  img
-    max-width: 100%
-</style>
 
 <style lang="stylus" scoped>
 h1

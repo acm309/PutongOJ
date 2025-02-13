@@ -1,21 +1,21 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import ContentEditor from '@/components/ContentEditor'
 import { useNewsStore } from '@/store/modules/news'
-
 import { Input } from 'view-ui-plus'
 
-const newsStore = useNewsStore()
-const { t } = useI18n()
+import MarkdownEditor from '@/components/MarkdownEditor'
 
+const newsStore = useNewsStore()
+
+const { t } = useI18n()
 const { news } = storeToRefs(newsStore)
 </script>
 
 <template>
-  <div>
+  <div v-if="typeof news.content === 'string'">
     <Input class="news-title" size="large" v-model="news.title" :placeholder="t('oj.title')" />
-    <ContentEditor v-model="news.content" />
+    <MarkdownEditor v-model="news.content" :height="768" />
   </div>
 </template>
 

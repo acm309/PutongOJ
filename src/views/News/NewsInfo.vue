@@ -3,12 +3,10 @@ import { storeToRefs } from 'pinia'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
 
+import MarkdownPreview from '@/components/MarkdownPreview'
 import pangu from 'pangu'
-import DOMPurify from 'dompurify';
 
 const { news } = $(storeToRefs(useNewsStore()))
-
-const clean = (html) => DOMPurify.sanitize(html)
 </script>
 
 <template>
@@ -19,7 +17,7 @@ const clean = (html) => DOMPurify.sanitize(html)
         <h4>{{ timePretty(news.create) }}</h4>
       </div>
     </div>
-    <div class="news-content" v-html="clean(news.content)" />
+    <MarkdownPreview class="news-content" v-model="news.content" />
   </div>
 </template>
 
@@ -33,17 +31,7 @@ const clean = (html) => DOMPurify.sanitize(html)
   text-align center
   h1, h4
     margin-bottom: 10px
+    color hsl(0, 0%, 20%)
 .news-content
   padding-bottom 20px
-</style>
-
-<style>
-.news-content a {
-  line-break: anywhere;
-}
-
-.news-content img {
-  width: auto;
-  max-width: 100% !important;
-}
 </style>

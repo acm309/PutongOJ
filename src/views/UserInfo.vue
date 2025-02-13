@@ -264,7 +264,7 @@ onProfileUpdate(fetch)
     font-weight bold
   .user-username
     font-size 16px
-    color hsla(0, 0%, 0%, 0.45)
+    color hsl(0, 0%, 50%)
   .user-nickname, .user-username
     word-break break-all
     line-break anywhere
@@ -296,10 +296,10 @@ onProfileUpdate(fetch)
     h1
       font-size 24px
       font-weight bold
-      color hsla(0, 0%, 0%, 0.85)
+      color hsl(0, 0%, 30%)
     h4
       font-size 12px
-      color hsla(0, 0%, 0%, 0.45)
+      color hsl(0, 0%, 50%)
 .user-name, .user-motto, .user-info, .user-groups, .user-statistic
   margin 16px 0
 
