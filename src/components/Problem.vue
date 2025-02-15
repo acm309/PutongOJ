@@ -55,7 +55,6 @@ function onCopy(content) {
 
 <style lang="stylus" scoped>
 h1
-  color: #757575
   margin-top: 10px
   margin-bottom: 8px
   text-align: center
@@ -65,7 +64,6 @@ h5
 h2
   border-bottom: 1px solid #e8e8e8
   padding: 10px 0
-  color: #757575
 .cont
   margin-top: 10px
   margin-bottom: 20px
