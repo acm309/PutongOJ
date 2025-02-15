@@ -28,6 +28,5 @@
         "src/**/*.d.ts",
         "src/**/*.tsx",
         "src/**/*.vue",
-        "src/store/modules/session.ts"
     ]
 }
