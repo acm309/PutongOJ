@@ -140,8 +140,8 @@ export const status = {
 
 export const privilege = {
   Banned: 0,
-  PrimaryUser: 1,
-  Teacher: 2,
+  User: 1,
+  Admin: 2,
   Root: 3,
 } as const
 

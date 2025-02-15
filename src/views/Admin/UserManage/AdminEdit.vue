@@ -20,11 +20,11 @@ const fetchAdmin = () => userStore.find({ privilege: 'admin' })
 
 function getOptions () {
   return [ {
-    value: privilege.Teacher,
-    label: 'Teacher',
+    value: privilege.Admin,
+    label: 'Admin',
   }, {
     value: privilege.Root,
-    label: 'Admin',
+    label: 'Root',
   } ]
 }
 
@@ -39,7 +39,7 @@ async function update (user) {
 async function add () {
   const user = {
     uid: admin,
-    privilege: privilege.Teacher,
+    privilege: privilege.Admin,
   }
   await useUserStore().update(user)
   Message.success(t('oj.update_success'))
@@ -50,7 +50,7 @@ async function add () {
 async function remove (item) {
   const user = Object.assign(
     only(item, 'uid nick'),
-    { privilege: privilege.PrimaryUser },
+    { privilege: privilege.User },
   )
   Modal.confirm({
     title: t('oj.warning'),

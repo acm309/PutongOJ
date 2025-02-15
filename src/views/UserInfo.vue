@@ -94,9 +94,9 @@ const ruleValidate = {
 
 const privilegeOptions = [
   { label: 'Banned', value: privilege.Banned, disabled: true },
-  { label: 'User', value: privilege.PrimaryUser },
-  { label: 'Teacher', value: privilege.Teacher },
-  { label: 'Admin', value: privilege.Root }
+  { label: 'User', value: privilege.User },
+  { label: 'Admin', value: privilege.Admin },
+  { label: 'Root', value: privilege.Root }
 ]
 
 fetch()
