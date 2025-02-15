@@ -7,7 +7,7 @@ const route = useRoute()
 const router = useRouter()
 
 const sessionStore = useSessionStore()
-const { canRemove } = $(storeToRefs(sessionStore))
+const { isRoot } = $(storeToRefs(sessionStore))
 
 const active = $computed(() => route.name)
 const change = name => router.push({ name })
@@ -18,7 +18,7 @@ const change = name => router.push({ name })
     <Tabs :model-value="active" @on-click="change">
       <TabPane label="UserEdit" name="userEdit" />
       <TabPane label="GroupEdit" name="groupEdit" />
-      <TabPane v-if="canRemove" label="AdminEdit" name="adminEdit" />
+      <TabPane v-if="isRoot" label="AdminEdit" name="adminEdit" />
       <TabPane label="TagEdit" name="tagEdit" />
     </Tabs>
     <router-view />

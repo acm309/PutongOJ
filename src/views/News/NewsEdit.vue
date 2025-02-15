@@ -15,7 +15,7 @@ const sessionStore = useSessionStore()
 const router = useRouter()
 const $Message = inject('$Message')
 const { news } = $(storeToRefs(newsStore))
-const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { isAdmin, isRoot } = $(storeToRefs(sessionStore))
 const $Modal = inject('$Modal')
 
 async function submit() {
@@ -56,7 +56,7 @@ function del(nid) {
       <Button type="primary" size="large" @click="submit">
         {{ t('oj.submit') }}
       </Button>
-      <Button v-if="isAdmin && canRemove" size="large" @click.stop="del(news.nid)">
+      <Button v-if="isRoot" size="large" @click.stop="del(news.nid)">
         {{ t('oj.delete') }}
       </Button>
     </Space>

@@ -21,7 +21,7 @@ const form = $ref({
 })
 let loading = $ref(false)
 
-const { isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { isLogined, isAdmin, isRoot } = $(storeToRefs(sessionStore))
 const { list } = $(storeToRefs(discussStore))
 const { find, create, 'delete': remove } = discussStore
 
@@ -70,7 +70,7 @@ fetch()
         <th>Title</th>
         <th>Author</th>
         <th>Updated</th>
-        <th v-if="isAdmin && canRemove">
+        <th v-if="isRoot">
           Action
         </th>
       </tr>
@@ -96,7 +96,7 @@ fetch()
           <td>
             {{ timeagoPretty(item.update) }}
           </td>
-          <td v-if="isAdmin && canRemove">
+          <td v-if="isRoot">
             <Button type="text" @click="del(item.did)">
               {{ t('oj.delete') }}
             </Button>

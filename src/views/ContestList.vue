@@ -22,7 +22,7 @@ const router = useRouter()
 
 const { list, sum } = $(storeToRefs(contestStore))
 const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
-const { profile, isLogined, isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { profile, isLogined, isAdmin, isRoot } = $(storeToRefs(sessionStore))
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
 const $Message = inject('$Message')
@@ -157,7 +157,7 @@ onRouteQueryUpdate(fetch)
             <th class="contest-type">Type</th>
             <th class="contest-start-time">Start Time</th>
             <th v-if="isAdmin" class="contest-visible">Visible</th>
-            <th v-if="isAdmin && canRemove" class="contest-delete">Delete</th>
+            <th v-if="isRoot" class="contest-delete">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -198,7 +198,7 @@ onRouteQueryUpdate(fetch)
                 <a @click="change(item)">{{ contestVisible[item.status] }}</a>
               </Poptip>
             </td>
-            <td v-if="isAdmin && canRemove" class="contest-delete">
+            <td v-if="isRoot" class="contest-delete">
               <a @click="del(item.cid)">Delete</a>
             </td>
           </tr>

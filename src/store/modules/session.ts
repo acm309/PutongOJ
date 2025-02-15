@@ -1,8 +1,7 @@
-import { defineStore } from 'pinia'
-import { useRootStore } from '..'
-import api from '@/api'
 import type { LoginParam, Profile } from '@/types'
+import { defineStore } from 'pinia'
 import { privilege } from '@/util/constant'
+import api from '@/api'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -13,32 +12,33 @@ export const useSessionStore = defineStore('session', {
     isLogined: state => state.profile != null,
     // Return type must be set in order to use `this`
     // https://pinia.vuejs.org/core-concepts/getters.html#getters
-    isAdmin (): boolean {
+    isAdmin(): boolean {
       return this.isLogined
         && (this.profile?.privilege === privilege.Root
-        || this.profile?.privilege === privilege.Teacher)
+          || this.profile?.privilege === privilege.Teacher)
     },
-    canRemove (): boolean {
-      return this.isLogined && (this.profile?.privilege === useRootStore().privilege.Root)
+    isRoot(): boolean {
+      return this.isLogined
+        && (this.profile?.privilege === privilege.Root)
     },
   },
   actions: {
-    toggleLoginState () {
+    toggleLoginState() {
       this.loginDialog = !this.loginDialog
     },
-    setLoginProfile (profile: Profile) {
+    setLoginProfile(profile: Profile) {
       this.profile = profile
     },
-    async login (opt: LoginParam) {
+    async login(opt: LoginParam) {
       const { data } = await api.login(opt)
       this.profile = data.profile
       return data
     },
-    async logout () {
+    async logout() {
       await api.logout()
       this.profile = null
     },
-    async fetch () {
+    async fetch() {
       const { data } = await api.session.fetch()
       this.profile = data.profile
     },

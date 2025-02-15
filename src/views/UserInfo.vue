@@ -24,7 +24,7 @@ const { judge, privilege } = $(storeToRefs(rootStore))
 const { list: groups } = $(storeToRefs(groupStore))
 const { findOne, update } = userStore
 const { user, solved, unsolved, group } = $(storeToRefs(userStore))
-const { isAdmin, profile, canRemove } = $(storeToRefs(sessionStore))
+const { isAdmin, profile, isRoot } = $(storeToRefs(sessionStore))
 
 const route = useRoute()
 const $Message = inject('$Message')
@@ -51,7 +51,7 @@ const updateProfile = () =>
     if (!valid) return
     loading = true
     const updatedUser = only(user, 'uid nick motto mail school')
-    if (canRemove) updatedUser.privilege = user.privilege
+    if (isRoot) updatedUser.privilege = user.privilege
     const response = await update(updatedUser)
     if (!response.isAxiosError) {
       display = 'overview'
@@ -194,7 +194,7 @@ onProfileUpdate(fetch)
         <FormItem :label="t('oj.school')" prop="school">
           <Input v-model="user.school" />
         </FormItem>
-        <FormItem v-if="canRemove" :label="t('oj.privilege')">
+        <FormItem v-if="isRoot" :label="t('oj.privilege')">
           <RadioGroup v-model="user.privilege" type="button">
             <Radio v-for="item in privilegeOptions" :key="item.value" :label="item.value" :disabled="item.disabled">
               {{ item.label }}

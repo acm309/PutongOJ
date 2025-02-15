@@ -33,7 +33,7 @@ const sessionStore = useSessionStore()
 
 const { list, sum, solved } = $(storeToRefs(problemStore))
 const { status, judge } = $(storeToRefs(rootStore))
-const { isAdmin, canRemove } = $(storeToRefs(sessionStore))
+const { isAdmin, isRoot } = $(storeToRefs(sessionStore))
 const { find, update, 'delete': remove } = problemStore
 
 let loading = $ref(false)
@@ -113,7 +113,7 @@ onProfileUpdate(fetch)
             <th class="problem-tags">Tags</th>
             <th class="problem-ratio">Ratio</th>
             <th v-if="isAdmin" class="problem-visible">Visible</th>
-            <th v-if="isAdmin && canRemove" class="problem-delete">Delete</th>
+            <th v-if="isRoot" class="problem-delete">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -156,7 +156,7 @@ onProfileUpdate(fetch)
                 <a @click="change(item)">{{ problemVisible[item.status] }}</a>
               </Tooltip>
             </td>
-            <td v-if="isAdmin && canRemove" class="problem-delete">
+            <td v-if="isRoot" class="problem-delete">
               <a @click="del(item.pid)">Delete</a>
             </td>
           </tr>
