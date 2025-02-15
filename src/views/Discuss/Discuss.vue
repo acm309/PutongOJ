@@ -87,7 +87,7 @@ fetch()
             </router-link>
           </td>
           <td>
-            <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+            <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
               <Button type="text">
                 {{ item.uid }}
               </Button>

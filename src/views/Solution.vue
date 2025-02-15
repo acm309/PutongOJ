@@ -75,7 +75,7 @@ fetch()
         </span>
         <Divider type="vertical" />
         <span>Author:
-          <router-link v-if="solution.uid" :to="{ name: 'userInfo', params: { uid: solution.uid } }">
+          <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
             {{ solution.uid }}
           </router-link>
         </span>
@@ -140,7 +140,7 @@ fetch()
         <hr>
         {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
         From: {{ solution.simSolution.sid }} by
-        <router-link :to="{ name: 'userInfo', params: { uid: solution.simSolution.uid } }">
+        <router-link :to="{ name: 'userProfile', params: { uid: solution.simSolution.uid } }">
           {{ solution.simSolution.uid }}
         </router-link>
         <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>

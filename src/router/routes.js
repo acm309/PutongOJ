@@ -19,33 +19,36 @@ import ContestRanklist from '@/views/Contest/ContestRanklist'
 
 // news
 import News from '@/views/News/News'
-import NewsInfo from '@/views/News/NewsInfo'
+
+// user
+import User from '@/views/User/User'
+import UserProfile from '@/views/User/UserProfile'
+import UserEdit from '@/views/User/UserEdit'
 
 // discuss
 import Discuss from '@/views/Discuss/Discuss'
 import DiscussInfo from '@/views/Discuss/DiscussInfo'
 
-// status & solution & ranklist & user & news & faq
+// status & solution & ranklist & news & faq
 import Status from '@/views/Status'
 import Solution from '@/views/Solution'
 import Ranklist from '@/views/Ranklist'
-import UserInfo from '@/views/UserInfo'
 import FAQ from '@/views/FAQ'
 
 // 路由懒加载
-const ProblemStatistics = () => import('@/views/Problem/Statistics')
-const ProblemEdit = () => import('@/views/Problem/ProblemEdit')
-const Testcase = () => import('@/views/Problem/Testcase')
-const ContestEdit = () => import('@/views/Contest/ContestEdit')
-const NewsEdit = () => import('@/views/News/NewsEdit')
-const ProblemCreate = () => import('@/views/Admin/ProblemCreate')
-const ContestCreate = () => import('@/views/Admin/ContestCreate')
-const NewsCreate = () => import('@/views/Admin/NewsCreate')
-const UserManage = () => import('@/views/Admin/UserManage/UserManage')
-const UserEdit = () => import('@/views/Admin/UserManage/UserEdit')
-const GroupEdit = () => import('@/views/Admin/UserManage/GroupEdit')
 const AdminEdit = () => import('@/views/Admin/UserManage/AdminEdit')
+const ContestCreate = () => import('@/views/Admin/ContestCreate')
+const ContestEdit = () => import('@/views/Contest/ContestEdit')
+const GroupEdit = () => import('@/views/Admin/UserManage/GroupEdit')
+const NewsCreate = () => import('@/views/Admin/NewsCreate')
+const NewsEdit = () => import('@/views/News/NewsEdit')
+const NewsInfo = () => import('@/views/News/NewsInfo')
+const ProblemCreate = () => import('@/views/Admin/ProblemCreate')
+const ProblemEdit = () => import('@/views/Problem/ProblemEdit')
+const ProblemStatistics = () => import('@/views/Problem/Statistics')
 const TagEdit = () => import('@/views/Admin/UserManage/TagEdit')
+const Testcase = () => import('@/views/Problem/Testcase')
+const UserManage = () => import('@/views/Admin/UserManage/UserManage')
 
 export default [
   {
@@ -172,9 +175,21 @@ export default [
   },
   {
     path: '/user/:uid',
-    name: 'userInfo',
-    component: UserInfo,
-    meta: { title: 'User Info' },
+    component: User,
+    children: [
+      {
+        path: '',
+        name: 'userProfile',
+        component: UserProfile,
+        meta: { title: 'User Profile' }
+      },
+      {
+        path: 'edit',
+        name: 'userEdit',
+        component: UserEdit,
+        meta: { title: 'Edit User' }
+      }
+    ]
   },
   {
     path: '/manage/user',
@@ -189,7 +204,7 @@ export default [
       },
       {
         path: '/userEdit',
-        name: 'userEdit',
+        name: 'adminUserEdit',
         component: UserEdit,
         meta: { title: 'Admin', requiresAdmin: true },
       },

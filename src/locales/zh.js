@@ -20,6 +20,7 @@ export default {
     register: '注册',
     logout: '退出登陆',
     profile: '个人信息',
+    settings: '用户设置',
     please_login: '请先登陆',
 
     overview: '概览',

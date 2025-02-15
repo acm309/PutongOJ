@@ -164,7 +164,7 @@ onRouteQueryUpdate(getStatistics)
         <tr v-for="(item, index) in list" :key="index">
           <td>{{ index + 1 }}</td>
           <td>
-            <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+            <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
               <Button type="text">
                 {{ item.uid }}
               </Button>

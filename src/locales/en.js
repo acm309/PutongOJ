@@ -26,6 +26,7 @@ export default {
     register: 'Register',
     logout: 'Logout',
     profile: 'Profile',
+    settings: 'Settings',
     please_login: 'Please login first',
 
     // Common

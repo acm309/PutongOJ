@@ -84,7 +84,7 @@ onBeforeUnmount(() => clearInterval(timer))
           <tr v-for="(item, index) in ranklist" :key="item.uid">
             <td class="table-rank">{{ index + 1 }}</td>
             <td class="table-uid">
-              <router-link :to="{ name: 'userInfo', params: { uid: item.uid } }">
+              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>

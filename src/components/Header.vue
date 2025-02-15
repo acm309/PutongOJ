@@ -27,7 +27,9 @@ function profileAction(name) {
   if (name === 'logout') {
     logout().then(() => $Message.info('bye bye!'))
   } else if (name === 'profile') {
-    router.push({ name: 'userInfo', params: { uid: profile.uid } })
+    router.push({ name: 'userProfile', params: { uid: profile.uid } })
+  } else if (name === 'settings') {
+    router.push({ name: 'userEdit', params: { uid: profile.uid } })
   }
 }
 
@@ -58,7 +60,7 @@ function getMenuItems() {
         { name: 'problemCreate', label: t('oj.create_problem') },
         { name: 'contestCreate', label: t('oj.create_contest') },
         { name: 'newsCreate', label: t('oj.create_news') },
-        { name: 'userEdit', label: t('oj.user_management') },
+        { name: 'adminUserEdit', label: t('oj.user_management') },
       ],
     })
   }
@@ -118,6 +120,9 @@ function getMenuItems() {
           <DropdownMenu class="dropdown-menu">
             <DropdownItem name="profile" class="dropdown-item">
               {{ t('oj.profile') }}
+            </DropdownItem>
+            <DropdownItem name="settings" class="dropdown-item">
+              {{ t('oj.settings') }}
             </DropdownItem>
             <DropdownItem name="logout" class="dropdown-item">
               {{ t('oj.logout') }}

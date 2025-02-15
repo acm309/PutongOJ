@@ -16,7 +16,7 @@ const change = name => router.push({ name })
 <template>
   <div class="usermanage">
     <Tabs :model-value="active" @on-click="change">
-      <TabPane label="UserEdit" name="userEdit" />
+      <TabPane label="UserEdit" name="adminUserEdit" />
       <TabPane label="GroupEdit" name="groupEdit" />
       <TabPane v-if="isRoot" label="AdminEdit" name="adminEdit" />
       <TabPane label="TagEdit" name="tagEdit" />
