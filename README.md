@@ -41,7 +41,7 @@
 
 # 修改颜色
 
-- src/my-theme/index.less
+- src/theme/index.less
 - src/styles/common.styl
 
 # TODO
