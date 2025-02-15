@@ -165,7 +165,7 @@ fetch()
     font-size 24px
     font-weight bold
     margin 10px 0
-    font-family verdana, arial, sans-serif
+    font-family var(--font-verdana)
 
 .testcase-table-container
   overflow-x auto

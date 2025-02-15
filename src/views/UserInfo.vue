@@ -31,12 +31,13 @@ const $Message = inject('$Message')
 const userForm = $ref(null)
 
 let loading = $ref(false)
-let display = $ref(route.query.view || 'overview')
+let display = $ref('overview')
 let newPwd = $ref('')
 let checkPwd = $ref('')
 
 async function fetch() {
   loading = true
+  display = route.query.view === 'edit' ? 'edit' : 'overview'
   if (route.params.uid == null) return
   await Promise.all([
     findOne(route.params),
@@ -81,7 +82,8 @@ const getGID = groupName => groups.find(item => item.title === groupName)?.gid
 const nickname = $computed(() => user.nick || user.uid)
 const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid : '')
 
-const editable = $computed(() => isAdmin || profile && profile.uid === user.uid)
+const isSelf = $computed(() => profile?.uid === user.uid)
+const editable = $computed(() => isSelf || (user.privilege === privilege.Root ? isRoot : isAdmin))
 const view = $computed(() => editable ? display : 'overview')
 
 const ruleValidate = {
@@ -183,22 +185,22 @@ onProfileUpdate(fetch)
           <Input v-model="user.uid" disabled />
         </FormItem>
         <FormItem :label="t('oj.nick')" prop="nick">
-          <Input v-model="user.nick" />
+          <Input v-model="user.nick" :maxlength="20" show-word-limit />
         </FormItem>
         <FormItem :label="t('oj.motto')" prop="motto">
-          <Input v-model="user.motto" type="textarea" />
+          <Input v-model="user.motto" type="textarea" maxlength="100" show-word-limit
+            :autosize="{ minRows: 2, maxRows: 5 }" />
         </FormItem>
         <FormItem :label="t('oj.mail')" prop="mail">
-          <Input v-model="user.mail" />
+          <Input v-model="user.mail" maxlength="254" />
         </FormItem>
         <FormItem :label="t('oj.school')" prop="school">
-          <Input v-model="user.school" />
+          <Input v-model="user.school" maxlength="20" show-word-limit />
         </FormItem>
         <FormItem v-if="isRoot" :label="t('oj.privilege')">
           <RadioGroup v-model="user.privilege" type="button">
-            <Radio v-for="item in privilegeOptions" :key="item.value" :label="item.value" :disabled="item.disabled">
-              {{ item.label }}
-            </Radio>
+            <Radio v-for="item in privilegeOptions" :key="item.value" :label="item.value"
+              :disabled="item.disabled || isSelf">{{ item.label }}</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem>
@@ -231,6 +233,9 @@ onProfileUpdate(fetch)
   .user-tabs
     .ivu-tabs-nav-scroll
       padding 0 20px
+
+.user-wrap .ivu-radio-group-button .ivu-radio-wrapper-checked:before
+  background transparent !important
 </style>
 
 <style lang="stylus" scoped>
@@ -292,7 +297,7 @@ onProfileUpdate(fetch)
   .user-statistic-item
     flex 1
     text-align center
-    font-family verdana, arial, sans-serif
+    font-family var(--font-verdana)
     h1
       font-size 24px
       font-weight bold

@@ -164,24 +164,22 @@ onBeforeUnmount(() => clearInterval(timer))
     &:hover
       background-color #f7f7f7
 
-.table-rank
-  min-width 50px
+.table-rank, .table-solve
+  min-width 70px
 .table-uid
-  width 170px
-  max-width 170px
+  width 140px
+  max-width 140px
   text-align center
   white-space nowrap
   text-overflow ellipsis
   overflow hidden
 .table-nick
-  min-width 200px
+  min-width 210px
   line-break anywhere
 td.table-nick
   text-align left
-.table-solve
-  min-width 70px
 .table-penalty
-  min-width 100px
+  min-width 105px
   white-space nowrap
 .table-problem
   min-width 70px
@@ -199,7 +197,7 @@ td.table-nick
 
 .table-problem, .table-rank, 
 td.table-solve, td.table-penalty
-  font-family verdana, arial, sans-serif  
+  font-family var(--font-verdana)  
 
 .prime
   background-color hsl(200 80% 45%)

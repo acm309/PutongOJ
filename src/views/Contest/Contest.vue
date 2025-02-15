@@ -136,7 +136,7 @@ onProfileUpdate(fetch)
   display block
   width 100%
   text-align center
-  font-family verdana, arial, sans-serif
+  font-family var(--font-verdana)
 
 .contest-card
   margin 40px 40px 24px
@@ -147,7 +147,7 @@ onProfileUpdate(fetch)
     justify-content space-between
     align-items center
     font-size 16px
-    font-family verdana, arial, sans-serif
+    font-family var(--font-verdana)
     .contest-begin-time
       text-align left
     .contest-end-time

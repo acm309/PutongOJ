@@ -237,7 +237,7 @@ else:
   color hsl(0, 0%, 20%)
   .faq-subtitle
     font-size 12px
-    font-family verdana, arial, sans-serif
+    font-family var(--font-verdana)
   .faq-title
     display: block
     font-size 28px
