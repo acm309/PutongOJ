@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 import Status from '@/views/Status.vue'
 import Solution from '@/views/Solution.vue'

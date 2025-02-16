@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 const AdminEdit = () => import('@/views/Admin/UserManage/AdminEdit.vue')
 const GroupEdit = () => import('@/views/Admin/UserManage/GroupEdit.vue')

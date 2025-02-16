@@ -1,8 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
-
-import Home from '@/views/Home.vue'
-import FAQ from '@/views/FAQ.vue'
-import NotFound from '@/views/404.vue'
+import type { RouteRecordRaw } from 'vue-router'
 
 import newsRoutes from './news'
 import problemRoutes from './problem'
@@ -12,6 +8,10 @@ import contestRoutes from './contest'
 import discussRoutes from './discuss'
 import userRoutes from './user'
 import adminRoutes from './admin'
+
+import NotFound from '@/views/404.vue'
+import FAQ from '@/views/FAQ.vue'
+import Home from '@/views/Home.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {

@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 import ContestList from '@/views/ContestList.vue'
 import Contest from '@/views/Contest/Contest.vue'

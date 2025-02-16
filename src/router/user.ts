@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 import User from '@/views/User/User.vue'
 import UserEdit from '@/views/User/UserEdit.vue'
@@ -13,15 +13,15 @@ const userRoutes: Array<RouteRecordRaw> = [
         path: '',
         name: 'userProfile',
         component: UserProfile,
-        meta: { title: 'User Profile' }
+        meta: { title: 'User Profile' },
       },
       {
         path: 'edit',
         name: 'userEdit',
         component: UserEdit,
-        meta: { title: 'Edit User' }
-      }
-    ]
+        meta: { title: 'Edit User' },
+      },
+    ],
   },
 ]
 

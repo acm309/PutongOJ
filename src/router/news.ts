@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 
 import News from '@/views/News/News.vue'
 import NewsInfo from '@/views/News/NewsInfo.vue'
