@@ -1,10 +1,15 @@
-const zipFolder = require('zip-folder')
+const { zip } = require('zip-a-folder')
 const { resolve } = require('path')
 
-zipFolder(resolve(__dirname, '../dist'), resolve(__dirname, '../dist.zip'), function (err) {
-  if (err) {
-    console.log('oh no!', err)
-  } else {
-    console.log('EXCELLENT')
-  }
-})
+const sourcePath = resolve(__dirname, '../dist')
+const targetPath = resolve(__dirname, '../dist.zip')
+
+zip(sourcePath, targetPath)
+  .then(() => {
+    console.log('✅ 已将 dist 目录打包为 dist.zip')
+  })
+  .catch((err) => {
+    console.error('❌ Oh no，打包失败！')
+    console.error(err)
+    process.exit(1)
+  })
