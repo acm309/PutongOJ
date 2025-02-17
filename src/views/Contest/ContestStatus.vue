@@ -139,7 +139,7 @@ onRouteQueryUpdate(fetch)
           </tr>
         </thead>
         <tbody>
-          <tr v-if="list.length == 0" class="status-empty">
+          <tr v-if="list.length === 0" class="status-empty">
             <td colspan="8">
               <Icon type="ios-planet-outline" class="empty-icon" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>

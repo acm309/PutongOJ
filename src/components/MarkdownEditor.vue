@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
 
 watch(() => props.modelValue, (value) => {
   if (!editor) return
-  if (value == editor.getValue()) return
+  if (value === editor.getValue()) return
   nextTick(() => {
     editor.setValue(value)
   })

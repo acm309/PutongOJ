@@ -31,7 +31,7 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
           </tr>
         </thead>
         <tbody>
-          <tr v-if="overview.length == 0" class="status-empty">
+          <tr v-if="overview.length === 0" class="status-empty">
             <td colspan="4">
               <Icon type="ios-planet-outline" class="empty-icon" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>

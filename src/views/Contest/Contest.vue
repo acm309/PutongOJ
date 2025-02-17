@@ -35,7 +35,7 @@ const timePercentage = $computed(() => {
     / (contest.end - contest.start)).toFixed(1)
 })
 const progressStatus = $computed(() => {
-  if (timePercentage == 100) return 'success'
+  if (timePercentage === 100) return 'success'
   if (timePercentage > 0) return 'active'
   return 'normal'
 })
