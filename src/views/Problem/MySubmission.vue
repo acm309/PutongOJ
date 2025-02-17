@@ -1,127 +1,245 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import only from 'only'
+import { inject, onBeforeMount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import constant from '@/util/constant'
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
+
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
+import { result, language, color } from '@/util/constant'
 import { timePretty } from '@/util/formate'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 
-const solutionStore = useSolutionStore()
-const sessionStore = useSessionStore()
-const rootStore = useRootStore()
+import { Badge, Icon, Page } from 'view-ui-plus'
+
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const message = inject('$Message')
+
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
+const solutionStore = useSolutionStore()
+
+const { changeDomTitle } = rootStore
+const { find } = solutionStore
+const { isLogined, profile } = $(storeToRefs(sessionStore))
+const { list, sum } = $(storeToRefs(solutionStore))
+
+let loading = $ref(false)
+let refreshing = $ref(false)
 
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
-const { result, language: lang, color } = constant
+const query = $computed(() => purify({ pid: route.params.pid, uid: profile.uid, page, pageSize }))
 
-const { list, sum } = $(storeToRefs(solutionStore))
-const { profile } = $(storeToRefs(sessionStore))
-const { find } = solutionStore
-const { changeDomTitle } = rootStore
-const query = $computed(() => {
-  const opt = Object.assign(
-    {},
-    only(route.query, 'page pageSize language judge'),
-    {
-      pid: route.params.pid,
-      uid: 'err',
-    },
-  )
-  // Test optional chaining
-  if (profile?.uid)
-    opt.uid = profile.uid
-
-  return purify(opt)
-})
-
-const fetch = () => find(query)
-function reload (payload = {}) {
+function reload(payload = {}) {
   return router.push({
     name: 'mySubmission',
-    query: purify(Object.assign({}, query, payload)),
+    query: purify(Object.assign({ page, pageSize }, payload)),
   })
 }
+
 const pageChange = val => reload({ page: val })
 
-fetch()
-changeDomTitle({ title: `Problem ${route.params.pid} - My Submission` })
-onProfileUpdate(fetch)
-onRouteQueryUpdate(fetch)
+async function refresh() {
+  refreshing = loading = true
+  await find(query)
+  loading = false
+  setTimeout(() => refreshing = false, 1000)
+}
+
+function init() {
+  loading = true
+  changeDomTitle({ title: `Problem ${route.params.pid} - My Submission` })
+  if (!isLogined) {
+    message.error(t('oj.error_403'))
+    return router.push({ name: 'problemInfo', params: { pid: route.params.pid } })
+  }
+  refresh()
+}
+
+onBeforeMount(init)
+onProfileUpdate(init)
+onRouteQueryUpdate(init)
 </script>
 
 <template>
   <div class="status-wrap">
-    <Row class="pagination">
-      <Col :span="16">
-        <Page :model-value="page" :total="sum" :page-size="pageSize" show-elevator @on-change="pageChange" />
-      </Col>
-    </Row>
-    <table>
-      <tr>
-        <th>ID</th>
-        <th>PID</th>
-        <th>Username</th>
-        <th>Judge</th>
-        <th>Time/ms</th>
-        <th>Memory/kb</th>
-        <th>Language</th>
-        <th>Submit Time</th>
-      </tr>
-      <tr v-for="item in list" :key="item.sid">
-        <td>{{ item.sid }}</td>
-        <td>
-          <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-            {{ item.pid }}
-          </router-link>
-        </td>
-        <td>
-          <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
-            <Button type="text">
-              {{ item.uid }}
-            </Button>
-          </router-link>
-        </td>
-        <td :class="color[item.judge]">
-          {{ result[item.judge] }}
-        </td>
-        <td>{{ item.time }}</td>
-        <td>{{ item.memory }}</td>
-        <td>
-          <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-            {{ lang[item.language] }}
-          </router-link>
-        </td>
-        <td>{{ timePretty(item.create) }}</td>
-      </tr>
-    </table>
+    <div class="status-header">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange" />
+      <div class="status-action">
+        <Button type="primary" icon="md-refresh" :loading="refreshing" @click="refresh">{{ t('oj.refresh') }}</Button>
+      </div>
+    </div>
+    <div class="status-table-container">
+      <table class="status-table">
+        <thead>
+          <tr>
+            <th class="status-sid">SID</th>
+            <th class="status-pid">PID</th>
+            <th class="status-username">Username</th>
+            <th class="status-judge">Judge</th>
+            <th class="status-time">
+              <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
+            </th>
+            <th class="status-memory">
+              <Badge>Memory<template #count><span class="status-badge">(KB)</span></template></Badge>
+            </th>
+            <th class="status-language">Language</th>
+            <th class="status-submit-time">Submit Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="list.length === 0" class="status-empty">
+            <td colspan="8">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
+          <tr v-for="item in list" :key="item.sid">
+            <td class="status-sid">
+              <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
+                {{ item.sid }}
+              </router-link>
+            </td>
+            <td class="status-pid">
+              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+                {{ item.pid }}
+              </router-link>
+            </td>
+            <td class="status-username">
+              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+                {{ item.uid }}
+              </router-link>
+            </td>
+            <td class="status-judge">
+              <span :class="color[item.judge]">{{ result[item.judge] }}</span>
+            </td>
+            <td class="status-time">{{ item.time }}</td>
+            <td class="status-memory">{{ item.memory }}</td>
+            <td class="status-language">{{ language[item.language] }}</td>
+            <td class="status-submit-time">{{ timePretty(item.create) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="status-footer">
+      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange" />
+      <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange" />
+    </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
 @import '../../styles/common'
-.pagination
-  margin-top: 10px
-  margin-bottom: 10px
-table
-  th:nth-child(1)
-    width: 8%
-  th:nth-child(2)
-    width: 8%
-  th:nth-child(3)
-    width: 10%
-  th:nth-child(4)
-    width: 15%
-  th:nth-child(5)
-    width: 8%
-  th:nth-child(6)
-    width: 8%
-  th:nth-child(7)
-    width: 8%
-  th:nth-child(8)
-    width: 15%
+
+.status-wrap
+  width 100%
+  margin 0 auto
+  padding 40px 0
+  margin-top -40px
+
+.status-header
+  padding 0 40px
+  margin-bottom 25px
+  display flex
+  justify-content space-between
+  align-items center
+.status-page
+  flex none
+
+.status-page-mobile, .status-page-simple
+  display none
+
+@media screen and (max-width: 1280px)
+  .status-header
+    .status-page-table
+      display none
+    .status-page-simple
+      display block
+
+@media screen and (max-width: 1024px)
+  .status-wrap
+    padding 20px 0
+    margin-top -20px
+  .status-footer
+    padding 0 20px
+    margin-top 20px !important
+  .status-header
+    padding 0 20px
+    margin-bottom 5px
+
+@media screen and (max-width: 768px)
+  .status-page-table
+    display none
+  .status-page-mobile
+    display block
+
+.status-table-container
+  overflow-x auto
+  width 100%
+.status-table
+  width 100%
+  min-width 1024px
+  table-layout fixed
+  th, td
+    padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+
+.status-sid
+  width 110px
+  text-align right
+.status-pid
+  width 80px
+  text-align right
+.status-username
+  width 170px
+  max-width 170px
+  text-align center
+  white-space nowrap
+  text-overflow ellipsis
+  overflow hidden
+.status-time, .status-memory
+  width 100px
+  text-align right
+.status-language
+  width 110px
+  text-align center
+.status-submit-time
+  width 190px
+.status-sim-tag
+  margin 0px 0px 4px 8px
+.status-badge
+  position absolute
+  font-size 8px
+  top 10px
+  right 8px
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
+
+.status-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
 </style>

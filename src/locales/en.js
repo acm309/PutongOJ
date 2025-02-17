@@ -68,6 +68,7 @@ export default {
     sample_output: 'Sample Output',
 
     // Contest
+    refresh: 'Refresh',
     auto_refresh: 'Auto refresh (every 10 seconds)',
     refreshed: 'Refreshed!',
 

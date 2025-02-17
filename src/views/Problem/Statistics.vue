@@ -60,7 +60,7 @@ const pie = $computed(() => {
       orient: 'horizontal',
       x: 'center',
       y: 'bottom',
-      data: [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ],
+      data: ['CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE'],
     },
     calculable: true,
     series: [
@@ -68,7 +68,7 @@ const pie = $computed(() => {
         name: 'Statistics',
         type: 'pie',
         radius: '55%',
-        center: [ '50%', '50%' ],
+        center: ['50%', '50%'],
         data: [
           { value: countList[0] || 0, name: 'CE' },
           { value: countList[1] || 0, name: 'AC' },
@@ -86,17 +86,21 @@ const pie = $computed(() => {
   return data
 })
 
-function getStatistics () {
-// https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
+let loading = $ref(false)
+
+async function getStatistics() {
+  loading = true
+  // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
   const opt = {
     page: route.query.page || 1,
     pageSize: route.query.pageSize || 20,
     pid: route.params.pid,
   }
-  find(opt)
+  await find(opt)
+  loading = false
 }
 
-function handleCurrentChange (val) {
+function handleCurrentChange(val) {
   router.push({
     name: 'problemStatistics',
     params: { pid: route.params.pid },
@@ -186,14 +190,10 @@ onRouteQueryUpdate(getStatistics)
           <td>{{ timePretty(item.create) }}</td>
         </tr>
       </table>
-      <Page
-        :model-value="currentPage"
-        :total="sumStatis"
-        :page-size="pageSize"
-        show-elevator
-        @on-change="handleCurrentChange"
-      />
+      <Page :model-value="currentPage" :total="sumStatis" :page-size="pageSize" show-elevator
+        @on-change="handleCurrentChange" />
     </div>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

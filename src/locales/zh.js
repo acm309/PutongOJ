@@ -63,6 +63,7 @@ export default {
     sample_input: '样例输入',
     sample_output: '样例输出',
 
+    refresh: '刷新',
     auto_refresh: '自动刷新（每10秒刷新一次）',
     refreshed: '刷新成功！',
 

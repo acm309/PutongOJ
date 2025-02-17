@@ -1,6 +1,11 @@
 <script setup>
+import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
+import { useSessionStore } from '@/store/modules/session'
+
+const sessionStore = useSessionStore()
+const { isRoot } = $(storeToRefs(sessionStore))
 
 defineProps(['problem'])
 const { t } = useI18n()
@@ -96,10 +101,10 @@ const { t } = useI18n()
       <MarkdownEditor v-model="problem.hint" />
       </Col>
     </Row>
-    <div class="label">
+    <div class="label" v-if="isRoot">
       {{ t('oj.spj') }} <i-switch v-model="problem.spj" />
     </div>
-    <Row>
+    <Row v-if="isRoot && problem.spj">
       <Col :span="23">
       <!-- eslint-disable-next-line vue/no-mutating-props -->
       <Input v-model="problem.spjcode" type="textarea" :rows="8" :placeholder="t('oj.spj_code')" />

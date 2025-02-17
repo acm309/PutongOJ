@@ -1,38 +1,49 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+
 import Problem from '@/components/Problem.vue'
-import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
+import { useProblemStore } from '@/store/modules/problem'
 
 const { t } = useI18n()
-const problemStore = useProblemStore()
-const rootStore = useRootStore()
 const route = useRoute()
 const router = useRouter()
 
-const { problem } = $(storeToRefs(problemStore))
-const { findOne } = problemStore
-const { changeDomTitle } = rootStore
+const rootStore = useRootStore()
+const problemStore = useProblemStore()
 
-function submit () {
+const { changeDomTitle } = rootStore
+const { findOne } = problemStore
+const { problem } = $(storeToRefs(problemStore))
+
+let loading = $ref(false)
+
+function submit() {
   return router.push({
     name: 'problemSubmit',
     params: router.params,
   })
 }
 
-findOne(route.params).then(() => {
-  changeDomTitle(problem.title)
-})
+async function init() {
+  loading = true
+  await findOne(route.params)
+  changeDomTitle({ title: problem.title })
+  loading = false
+}
+
+onBeforeMount(init)
 </script>
 
 <template>
-  <div class="proinfo-wrap">
+  <div>
     <Problem :problem="problem" />
     <Button shape="circle" icon="md-paper-plane" @click="submit">
       {{ t('oj.submit') }}
     </Button>
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
