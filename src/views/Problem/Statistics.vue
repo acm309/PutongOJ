@@ -1,74 +1,82 @@
 <script setup>
-import Chart from 'vue-echarts'
-import 'echarts/lib/chart/pie'
-import 'echarts/lib/component/title'
-import 'echarts/lib/component/tooltip'
-import 'echarts/lib/component/legend'
 import { storeToRefs } from 'pinia'
-import { CanvasRenderer } from 'echarts/renderers'
-import { use } from 'echarts/core'
-import {
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components'
-import { PieChart } from 'echarts/charts'
 import { useRoute, useRouter } from 'vue-router'
-import { useStatisticsStore } from '@/store/modules/statistics'
-import { useSessionStore } from '@/store/modules/session'
-import constant from '@/util/constant'
+import { useI18n } from 'vue-i18n'
+
 import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
+import { useStatisticsStore } from '@/store/modules/statistics'
+import { language } from '@/util/constant'
 import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
 
+import { Badge, Icon, Page, Spin } from 'view-ui-plus'
+
+import Chart from 'vue-echarts'
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+
 use([
-  TooltipComponent,
-  PieChart,
-  CanvasRenderer,
-  TitleComponent,
   LegendComponent,
+  PieChart,
+  SVGRenderer,
+  TooltipComponent,
 ])
 
-const sessionStore = useSessionStore()
-const statisticsStore = useStatisticsStore()
-const rootStore = useRootStore()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-const name = constant.statisTableObj
-const lang = constant.language
-const { list, countList, sumCharts, sumStatis } = $(storeToRefs(statisticsStore))
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
+const statisticsStore = useStatisticsStore()
+
 const { changeDomTitle } = rootStore
-const { profile, isAdmin } = $(storeToRefs(sessionStore))
 const { find } = statisticsStore
+const { profile, isAdmin } = $(storeToRefs(sessionStore))
+const { list, countList, sumStatis } = $(storeToRefs(statisticsStore))
+
 const pid = $computed(() => route.params.pid)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
 const currentPage = $computed(() => Number.parseInt(route.query.page) || 1)
 
-const pie = $computed(() => {
-  const data = {
-    title: {
-      text: `Statistics for ${route.params.pid}`,
-      x: 'center',
-      y: 'top',
-    },
+const pieOption = $computed(() => {
+  return {
     tooltip: {
       trigger: 'item',
-      formatter: '{b} </br>{d}%',
     },
     legend: {
-      orient: 'horizontal',
-      x: 'center',
-      y: 'bottom',
-      data: ['CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE'],
+      top: '5%',
+      left: 'center',
     },
-    calculable: true,
     series: [
       {
-        name: 'Statistics',
+        name: `Statistics of Problem ${pid}`,
         type: 'pie',
-        radius: '55%',
-        center: ['50%', '50%'],
+        radius: ['45%', '70%'],
+        center: ['50%', '55%'],
+        itemStyle: {
+          borderRadius: 5,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false,
+          position: 'center'
+        },
+        minAngle: 5,
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 40,
+            fontWeight: 'bold'
+          },
+        },
+        labelLine: {
+          show: false
+        },
         data: [
           { value: countList[0] || 0, name: 'CE' },
           { value: countList[1] || 0, name: 'AC' },
@@ -83,14 +91,12 @@ const pie = $computed(() => {
       },
     ],
   }
-  return data
 })
 
 let loading = $ref(false)
 
 async function getStatistics() {
   loading = true
-  // https://github.com/Justineo/vue-echarts/blob/master/demo/Demo.vue
   const opt = {
     page: route.query.page || 1,
     pageSize: route.query.pageSize || 20,
@@ -119,79 +125,57 @@ onRouteQueryUpdate(getStatistics)
 
 <template>
   <div class="statis-wrap">
-    <div class="left">
-      <table>
-        <tr>
-          <th class="t1">
-            Result
-          </th>
-          <th class="t2">
-            Amount
-          </th>
-        </tr>
-        <tr>
-          <td class="t1">
-            Total Submissions
-          </td>
-          <td class="t2">
-            <router-link :to="{ name: 'status', query: { pid } }">
-              {{ sumCharts }}
-            </router-link>
-          </td>
-        </tr>
-      </table>
-      <Chart ref="pie" :option="pie" auto-resize />
-      <table>
-        <tr v-for="(item, index) in countList" :key="index">
-          <td class="t1">
-            {{ name[index] }}
-          </td>
-          <td class="t2">
-            <router-link :to="{ name: 'status', query: { pid, judge: index + 2 } }">
-              {{ item }}
-            </router-link>
-          </td>
-        </tr>
+    <div class="statis-charts-contain">
+      <Chart class="statis-charts" :option="pieOption" autoresize :loading="loading" />
+    </div>
+    <div class="statis-table-container">
+      <table class="statis-table">
+        <thead>
+          <tr>
+            <th class="statis-sid">SID</th>
+            <th class="statis-username">Username</th>
+            <th class="statis-time">
+              <Badge>Time<template #count><span class="statis-badge">(ms)</span></template></Badge>
+            </th>
+            <th class="statis-memory">
+              <Badge>Memory<template #count><span class="statis-badge">(KB)</span></template></Badge>
+            </th>
+            <th class="statis-language">Language</th>
+            <th class="statis-submit-time">Submit Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="list.length === 0" class="statis-empty">
+            <td colspan="6">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
+          <tr v-for="item in list" :key="item.sid">
+            <td class="statis-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
+              <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
+                {{ item.sid }}
+              </router-link>
+            </td>
+            <td class="statis-sid" v-else>{{ item.sid }}</td>
+            <td class="statis-username">
+              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+                {{ item.uid }}
+              </router-link>
+            </td>
+            <td class="statis-time">{{ item.time }}</td>
+            <td class="statis-memory">{{ item.memory }}</td>
+            <td class="statis-language">{{ language[item.language] }}</td>
+            <td class="statis-submit-time">{{ timePretty(item.create) }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
-    <div class="right">
-      <table>
-        <tr>
-          <th>Rank</th>
-          <th>Username</th>
-          <th>Time</th>
-          <th>Memory</th>
-          <th>Length</th>
-          <th>Lang</th>
-          <th>Submit Time</th>
-        </tr>
-        <tr v-for="(item, index) in list" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
-              <Button type="text">
-                {{ item.uid }}
-              </Button>
-            </router-link>
-          </td>
-          <td>
-            {{ item.time }}
-          </td>
-          <td>{{ item.memory }}</td>
-          <td>{{ item.length }}</td>
-          <td v-if="isAdmin || (profile && profile.uid === item.uid)">
-            <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
-              {{ lang[item.language] }}
-            </router-link>
-          </td>
-          <td v-else>
-            {{ lang[item.language] }}
-          </td>
-          <td>{{ timePretty(item.create) }}</td>
-        </tr>
-      </table>
-      <Page :model-value="currentPage" :total="sumStatis" :page-size="pageSize" show-elevator
-        @on-change="handleCurrentChange" />
+    <div class="statis-footer">
+      <Page class="statis-page-table" :model-value="currentPage" :total="sumStatis" :page-size="pageSize" show-elevator
+        show-total @on-change="handleCurrentChange" />
+      <Page class="statis-page-mobile" size="small" :model-value="currentPage" :total="sumStatis" :page-size="pageSize"
+        show-elevator show-total @on-change="handleCurrentChange" />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
@@ -199,44 +183,93 @@ onRouteQueryUpdate(getStatistics)
 
 <style lang="stylus" scoped>
 @import '../../styles/common'
+
+.statis-charts-contain
+  margin-top -20px
+  padding 0 20px
+  .statis-charts
+    width 0
+    width 100%
+    height 400px
+
 .statis-wrap
-  display: flex
-  justify-content: space-around
-  .left
-    margin-bottom: 20px
-    margin-right: 3%
-    width: 32%
-    table
-      tr:hover
-        background: #f5f7fa
-      tr
-        height: 37px
-        border-bottom: 1px solid #e6ebf5
-      td
-        .t2
-          cursor: pointer
-          color: #e040fb
-      .t1
-        width: 60%
-        padding-left: 30px
-        text-align: left
-      .t2
-        width: 40%
-        text-align: center
-    .echarts
-      height: 420px
-      width: 95%
-      margin-top: 10px
-      margin-bottom: 20px
-  .right
-    width: 65%
-    margin-bottom: 20px
-    margin-right: 0
-    table
-      margin-bottom: 20px
-  .ivu-btn
-    vertical-align: baseline
-    color: #e040fb
-    padding: 0 1px
-    font-size: 14px
+  width 100%
+  margin 0
+  padding 0 0 40px
+
+.statis-page
+  flex none
+.statis-page-mobile
+  display none
+
+@media screen and (max-width: 1024px)
+  .statis-charts-contain
+    margin-top 0
+  .statis-wrap
+    padding 0 0 20px
+  .statis-footer
+    padding 0 20px
+    margin-top 20px !important
+
+@media screen and (max-width: 768px)
+  .statis-page-table
+    display none
+  .statis-page-mobile
+    display block
+
+.statis-table-container
+  overflow-x auto
+  width 100%
+.statis-table
+  width 100%
+  min-width 800px
+  table-layout fixed
+  th, td
+    padding 0 16px
+  tbody tr
+    transition background-color 0.2s ease
+    &:hover
+      background-color #f7f7f7
+
+.statis-sid
+  width 110px
+  text-align right
+.statis-pid
+  width 80px
+  text-align right
+.statis-username
+  text-align left
+  overflow hidden
+.statis-time, .statis-memory
+  width 100px
+  text-align right
+.statis-language
+  width 110px
+  text-align center
+.statis-submit-time
+  width 190px
+.statis-sim-tag
+  margin 0px 0px 4px 8px
+.statis-badge
+  position absolute
+  font-size 8px
+  top 10px
+  right 8px
+
+.statis-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
+
+.statis-footer
+  padding 0 40px
+  margin-top 40px
+  text-align center
 </style>

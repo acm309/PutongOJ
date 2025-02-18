@@ -81,8 +81,6 @@ onRouteQueryUpdate(init)
         <thead>
           <tr>
             <th class="status-sid">SID</th>
-            <th class="status-pid">PID</th>
-            <th class="status-username">Username</th>
             <th class="status-judge">Judge</th>
             <th class="status-time">
               <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
@@ -96,7 +94,7 @@ onRouteQueryUpdate(init)
         </thead>
         <tbody>
           <tr v-if="list.length === 0" class="status-empty">
-            <td colspan="8">
+            <td colspan="6">
               <Icon type="ios-planet-outline" class="empty-icon" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>
             </td>
@@ -105,16 +103,6 @@ onRouteQueryUpdate(init)
             <td class="status-sid">
               <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
                 {{ item.sid }}
-              </router-link>
-            </td>
-            <td class="status-pid">
-              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-                {{ item.pid }}
-              </router-link>
-            </td>
-            <td class="status-username">
-              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
-                {{ item.uid }}
               </router-link>
             </td>
             <td class="status-judge">
@@ -188,7 +176,7 @@ onRouteQueryUpdate(init)
   width 100%
 .status-table
   width 100%
-  min-width 1024px
+  min-width 800px
   table-layout fixed
   th, td
     padding 0 16px
@@ -200,16 +188,6 @@ onRouteQueryUpdate(init)
 .status-sid
   width 110px
   text-align right
-.status-pid
-  width 80px
-  text-align right
-.status-username
-  width 170px
-  max-width 170px
-  text-align center
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
 .status-time, .status-memory
   width 100px
   text-align right
@@ -218,8 +196,6 @@ onRouteQueryUpdate(init)
   text-align center
 .status-submit-time
   width 190px
-.status-sim-tag
-  margin 0px 0px 4px 8px
 .status-badge
   position absolute
   font-size 8px

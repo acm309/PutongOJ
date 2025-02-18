@@ -51,6 +51,7 @@ function handleClick(name) {
 <style lang="stylus" scoped>
 .problem-wrap
   padding 0
+  max-width 1024px
 .problem-tabs
   padding-top 24px
   margin-bottom 24px
