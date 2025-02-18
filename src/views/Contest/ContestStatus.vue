@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { onBeforeMount } from 'vue'
+import { onBeforeMount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import constant from '@/util/constant'
@@ -42,6 +42,7 @@ const lang = $ref(constant.language)
 const color = $ref(constant.color)
 
 let loading = $ref(false)
+let refreshing = $ref(false)
 
 const query = $computed(() => {
   const opt = Object.assign(
@@ -57,10 +58,15 @@ const query = $computed(() => {
   return purify(opt)
 })
 
+const queryUpdated = $computed(() =>
+  (route.query.uid || '') !== (uid || '') ||
+  (route.query.pid || '') !== (pid || '') ||
+  (Number.parseInt(route.query.judge) || '') !== (judge || '') ||
+  (Number.parseInt(route.query.language) || '') !== (language || ''))
 const getId = pid => problems.indexOf(pid) + 1
 
 async function fetch() {
-  loading = true
+  refreshing = loading = true
   await findSolutions(query)
   const routeQuery = route.query
   page = Number.parseInt(routeQuery.page) || 1
@@ -70,6 +76,7 @@ async function fetch() {
   judge = Number.parseInt(routeQuery.judge) || ''
   language = Number.parseInt(routeQuery.language) || ''
   loading = false
+  setTimeout(() => refreshing = false, 1000)
 }
 
 function reload(payload = {}) {
@@ -98,7 +105,6 @@ onBeforeMount(async () => {
   fetch()
   changeDomTitle({ title: `Contest ${route.params.cid}` })
 })
-
 onRouteQueryUpdate(fetch)
 </script>
 
@@ -117,7 +123,12 @@ onRouteQueryUpdate(fetch)
         <Select v-model="language" placeholder="Language" class="status-filter-input" clearable>
           <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
-        <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
+        <Button type="primary" icon="md-search" :loading="refreshing" @click="search" v-if="queryUpdated">
+          {{ t('oj.search') }}
+        </Button>
+        <Button type="primary" icon="md-refresh" :loading="refreshing" @click="fetch" v-else>
+          {{ t('oj.refresh') }}
+        </Button>
       </div>
     </div>
     <div class="status-table-container">
