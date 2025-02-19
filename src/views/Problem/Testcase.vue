@@ -32,35 +32,36 @@ async function fetch() {
   loading = false
 }
 
-function search(item) {
-  return testcaseStore.findOne({
-    pid: route.params.pid,
-    uuid: item.uuid,
-    type: 'in',
-  })
-}
+// function search(item) {
+//   return testcaseStore.findOne({
+//     pid: route.params.pid,
+//     uuid: item.uuid,
+//     type: 'in',
+//   })
+// }
 
 function del(item) {
+  const sort_uuid = item.uuid.slice(0, 8)
   modal.confirm({
-    title: '提示',
-    content: '<p>此操作将永久删除该文件, 是否继续?</p>',
+    title: t('oj.alert'),
+    content: t('oj.testcase.delete_confirm', { uuid: sort_uuid }),
     onOk: async () => {
       const testcase = {
         pid: route.params.pid,
         uuid: item.uuid,
       }
       await testcaseStore.delete(testcase)
-      message.success(`成功删除${item.uuid}！`)
+      message.success(t('oj.testcase.delete_success', { uuid: sort_uuid }))
     },
     onCancel: () => {
-      message.info('已取消删除！')
+      message.info(t('oj.testcase.delete_cancel'))
     },
   })
 }
 
 async function create(testcase) {
   await testcaseStore.create(testcase)
-  message.success('成功创建！')
+  message.success(t('oj.testcase.create_success'))
   fetch()
   test.in = test.out = ''
   testcaseFile.in = testcaseFile.out = null
@@ -74,19 +75,19 @@ async function createCheck() {
       try {
         testcase[key] = await readFile(key)
       } catch (e) {
-        return message.error(`文件读取失败: ${e.message}`)
+        return message.error(t('oj.testcase.error_read_file', { error: e.message }))
       }
     }
   }
 
   if (!testcase.in.trim() && !testcase.out.trim()) {
-    message.error('输入输出不能同时为空！')
+    message.error(t('oj.testcase.error_empty'))
   } else if (!testcase.in.trim() || !testcase.out.trim()) {
     modal.confirm({
-      title: '提示',
-      content: '<p>输入输出不完整，是否继续？</p>',
+      title: t('oj.alert'),
+      content: t('oj.testcase.error_incomplete'),
       onOk: () => create(testcase),
-      onCancel: () => message.info('已取消创建！'),
+      onCancel: () => message.info(t('oj.testcase.create_cancel')),
     })
   } else
     create(testcase)
@@ -109,7 +110,7 @@ async function readFile(type) {
       if (/^[\x00-\x7F]*$/.test(content)) {
         resolve(content)
       } else {
-        reject(new Error('File contains non-ASCII characters'))
+        reject(new Error(t('oj.testcase.error_encoding')))
       }
     }
     reader.onerror = reject
@@ -141,8 +142,8 @@ fetch()
       <thead>
         <tr>
           <th class="testcase-uuid">UUID</th>
-          <th class="testcase-files">Files</th>
-          <th class="testcase-action">Action</th>
+          <th class="testcase-files">{{ t('oj.files') }}</th>
+          <th class="testcase-action">{{ t('oj.action') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -163,26 +164,24 @@ fetch()
           </td>
           <td class="testcase-files">
             <Space :size="4">
-              <a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank">Input</a>
+              <a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank">{{ t('oj.problem.input') }}</a>
               <Divider type="vertical" />
-              <a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">Output</a>
+              <a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">{{ t('oj.problem.output') }}</a>
             </Space>
           </td>
           <td class="testcase-action">
-            <Button type="text" @click="del(item)">
-              Delete
-            </Button>
+            <a @click="del(item)">{{ t('oj.delete') }}</a>
           </td>
         </tr>
       </tbody>
     </table>
     <div class="testcase-create">
-      <h1>Create New</h1>
+      <h1>{{ t('oj.testcase.create') }}</h1>
       <div class="testcase-flex">
-        <span class="testcase-title">Input</span>
+        <span class="testcase-title">{{ t('oj.problem.input') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('in', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            Select the file to import
+            {{ t('oj.testcase.from_file') }}
           </Button>
         </Upload>
       </div>
@@ -190,14 +189,14 @@ fetch()
         :autosize="{ minRows: 5, maxRows: 15 }" />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">File selected</span>
+        <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
         <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">{{ filename('in') }}</Tag>
       </div>
       <div class="testcase-flex">
-        <span class="testcase-title">Output</span>
+        <span class="testcase-title">{{ t('oj.problem.output') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('out', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            Select the file to import
+            {{ t('oj.testcase.from_file') }}
           </Button>
         </Upload>
       </div>
@@ -205,11 +204,11 @@ fetch()
         :autosize="{ minRows: 5, maxRows: 15 }" />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">File selected</span>
+        <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
         <Tag class="file-name" type="dot" closable @on-close="removeFile('out')">{{ filename('out') }}</Tag>
       </div>
-      <Button class="testcase-submit" type="primary" @click="createCheck">
-        Submit
+      <Button class="testcase-submit" size="large" type="primary" @click="createCheck">
+        {{ t('oj.submit') }}
       </Button>
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />

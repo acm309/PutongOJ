@@ -51,6 +51,9 @@ export default {
     type: 'Type',
     save: 'Save',
     add: 'Add',
+    files: 'Files',
+    action: 'Action',
+    alert: 'Alert',
 
     // Problem
     solved: 'Solved',
@@ -66,6 +69,25 @@ export default {
     spj_code: 'Special Judge Code',
     sample_input: 'Sample Input',
     sample_output: 'Sample Output',
+
+    problem: {
+      input: 'Input',
+      output: 'Output',
+    },
+    testcase: {
+      from_file: 'Import from file',
+      file_selected: 'File selected',
+      delete_confirm: 'This will delete testcase {uuid} permanently, continue?',
+      delete_success: 'Testcase {uuid} has been deleted!',
+      delete_cancel: 'Delete cancelled!',
+      create: 'Create Testcase',
+      create_success: 'New testcase has been created!',
+      create_cancel: 'Create cancelled!',
+      error_encoding: 'File contains non-ASCII characters',
+      error_read_file: 'Error reading file: {error}',
+      error_empty: 'Input and output can not be empty at the same time!',
+      error_incomplete: 'Input or output is missing, continue?',
+    },
 
     // Contest
     refresh: 'Refresh',

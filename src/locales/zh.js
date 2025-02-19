@@ -44,6 +44,9 @@ export default {
     type: '类型',
     save: '保存',
     add: '添加',
+    files: '文件',
+    action: '操作',
+    alert: '警告',
 
     create_new_thread: '创建新帖',
     login_to_reply: '登陆后可回复',
@@ -63,11 +66,29 @@ export default {
     sample_input: '样例输入',
     sample_output: '样例输出',
 
+    problem: {
+      input: '输入',
+      output: '输出',
+    },
+    testcase: {
+      from_file: '从文件导入',
+      file_selected: '已选择文件',
+      delete_confirm: '此操作将永久删除测试数据 {uuid}, 是否继续?',
+      delete_success: '成功删除测试数据 {uuid}！',
+      delete_cancel: '已取消删除！',
+      create: '创建测试数据',
+      create_success: '成功创建测试数据！',
+      create_cancel: '已取消创建！',
+      error_encoding: '文件包含非 ASCII 字符',
+      error_read_file: '读取文件错误：{error}',
+      error_empty: '输入和输出不能同时为空！',
+      error_incomplete: '输入或输出为空，是否继续？',
+    },
+
     refresh: '刷新',
     auto_refresh: '自动刷新（每10秒刷新一次）',
     refreshed: '刷新成功！',
 
-    // Admin
     admin: '管理员',
     create_problem: '创建题目',
     create_contest: '创建比赛',

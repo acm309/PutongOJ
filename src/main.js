@@ -56,7 +56,7 @@ const i18n = createI18n({
   globalInjection: true,
   legacy: false,
   locale: 'en-US',
-  fallbackLocale: 'zh-CN',
+  fallbackLocale: 'en-US',
   messages: {
     'zh-CN': zh,
     'en-US': en,
