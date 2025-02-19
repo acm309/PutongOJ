@@ -42,5 +42,24 @@ watch(() => props.modelValue, render)
 </script>
 
 <template>
-  <div ref="preview"></div>
+  <div ref="preview">
+    <div class="vidtor-uninitialized">
+      <Icon type="ios-loading" class="card-icon" />
+      <span class="card-text">Rendering...</span>
+    </div>
+  </div>
 </template>
+
+<style lang="stylus" scoped>
+.vidtor-uninitialized
+  margin-bottom 20px
+  padding 32px
+  border-radius 4px
+  display flex
+  align-items center
+  justify-content center
+  .card-icon
+    font-size 32px
+  .card-text
+    margin-left 32px
+</style>

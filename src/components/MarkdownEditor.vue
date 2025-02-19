@@ -120,10 +120,30 @@ watch(() => locale.value, () => nextTick(init))
 </script>
 
 <template>
-  <div ref="vditor"></div>
+  <div ref="vditor">
+    <div class="vidtor-uninitialized">
+      <Icon type="ios-loading" class="card-icon" />
+      <span class="card-text">Initializing...</span>
+    </div>
+  </div>
 </template>
 
 <style lang="stylus">
 .vditor-preview__action
-    display none
+  display none
+</style>
+
+<style lang="stylus" scoped>
+.vidtor-uninitialized
+  margin-bottom 20px
+  padding 32px
+  border 1px solid #dcdee2
+  border-radius 4px
+  display flex
+  align-items center
+  justify-content center
+  .card-icon
+    font-size 32px
+  .card-text
+    margin-left 32px
 </style>
