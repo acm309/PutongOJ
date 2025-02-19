@@ -61,7 +61,7 @@ onRouteParamUpdate((to, from) => {
 </script>
 
 <template>
-  <div :class="{ 'user-wrap': true, 'user-warp-edit': $route.name === 'userEdit' }">
+  <div :class="{ 'user-wrap': true, 'user-wrap-edit': $route.name === 'userEdit' }">
     <Tabs class="user-tabs" v-if="editable" :model-value="currentTab" @on-click="change">
       <TabPane :label="t('oj.overview')" name="userProfile" />
       <TabPane :label="t('oj.edit')" name="userEdit" />
@@ -87,7 +87,7 @@ onRouteParamUpdate((to, from) => {
   width 100%
   max-width 1024px
   padding 0
-.user-warp-edit
+.user-wrap-edit
   max-width 768px
 .user-tabs
   padding-top 24px

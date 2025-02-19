@@ -33,7 +33,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="news-wrap">
+  <div :class="{ 'news-wrap': true, 'news-wrap-edit': current === 'newsEdit' }">
     <Tabs class="news-tabs" v-if="isAdmin" :model-value="current" @on-click="change">
       <TabPane :label="t('oj.overview')" name="newsInfo" />
       <TabPane :label="t('oj.edit')" name="newsEdit" />
@@ -59,6 +59,8 @@ onBeforeMount(async () => {
   width 100%
   max-width 1024px
   padding 24px 0 0
+.news-wrap-edit
+  max-width 1280px !important
 
 .news-children
   margin-top -16px

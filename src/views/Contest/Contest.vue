@@ -68,7 +68,7 @@ onProfileUpdate(fetch)
 <template>
   <div :class="{
     'contest-wrap': true,
-    'contest-ranklist-warp': $route.name === 'contestRanklist',
+    'contest-ranklist-wrap': $route.name === 'contestRanklist',
     'contest-status-wrap': $route.name === 'contestStatus'
   }">
     <Poptip class="contest-poptip" trigger="hover" placement="bottom">
@@ -185,7 +185,7 @@ onProfileUpdate(fetch)
 .contest-wrap
   padding 0
   max-width 1024px
-.contest-ranklist-warp
+.contest-ranklist-wrap
   max-width: 1920px
 .contest-status-wrap
   max-width: 1280px

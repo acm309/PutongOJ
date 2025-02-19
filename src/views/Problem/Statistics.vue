@@ -50,6 +50,8 @@ const pieOption = $computed(() => {
     legend: {
       top: '5%',
       left: 'center',
+      inactiveBorderColor: '#fff',
+      inactiveBorderWidth: 2
     },
     series: [
       {
@@ -188,7 +190,6 @@ onRouteQueryUpdate(getStatistics)
   margin-top -20px
   padding 0 20px
   .statis-charts
-    width 0
     width 100%
     height 400px
 
