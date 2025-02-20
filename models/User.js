@@ -95,21 +95,6 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  // DEPRECATED
-  timerecord: {
-    type: [ Number ],
-    default: [ 0, 0, 0, 0, 0 ],
-  },
-  // DEPRECATED
-  iprecord: {
-    type: [ String ],
-    default: [ '', '', '', '', '' ],
-  },
-  // DEPRECATED
-  status: {
-    type: Number,
-    default: config.status.Available,
-  },
 }, {
   collection: 'User',
 })
