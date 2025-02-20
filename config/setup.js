@@ -8,18 +8,18 @@ const config = require('.')
 
 async function databaseSetup () {
   const models = {
-    'Contest': 1,
-    'Discuss': 0,
-    'Group': 0,
-    'News': 0,
-    'Problem': 999,
-    'Solution': 0,
+    Contest: 1,
+    Discuss: 0,
+    Group: 0,
+    News: 0,
+    Problem: 999,
+    Solution: 0,
   }
-  
-  const ps = Object.entries(models).map(async ([model, id]) => {
+
+  const ps = Object.entries(models).map(async ([ model, id ]) => {
     const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= id) return
-    return new ID({ name: model, id: id }).save()
+    if (item != null && item.id >= id) { return }
+    return new ID({ name: model, id }).save()
   })
 
   const admin = await User.findOne({ uid: 'admin' }).exec()

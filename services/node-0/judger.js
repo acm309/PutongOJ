@@ -24,7 +24,7 @@ const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
 
-const extensions = ['', 'c', 'cpp', 'java', 'py']
+const extensions = [ '', 'c', 'cpp', 'java', 'py' ]
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
@@ -95,13 +95,12 @@ async function beforeJudge (problem, solution) {
   }))
 
   fse.writeFileSync(resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
-  if (spj) fse.writeFileSync(resolve(__dirname, 'testdata/spj.cpp'), spjcode)
+  if (spj) { fse.writeFileSync(resolve(__dirname, 'testdata/spj.cpp'), spjcode) }
 
   return { solution, problem }
 }
 
 async function judge (problem, solution) {
-
   // 判题命令
   let judge_command = './Judge '
   judge_command += `-l ${solution.language} `
@@ -110,7 +109,7 @@ async function judge (problem, solution) {
   judge_command += `-t ${problem.time} `
   judge_command += `-m ${problem.memory} `
   judge_command += `-o 81920`
-  if (problem.spj) judge_command += ' -S tt'
+  if (problem.spj) { judge_command += ' -S tt' }
 
   // 进行判题
   await execaCommand(judge_command)

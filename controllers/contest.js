@@ -83,19 +83,19 @@ const findOne = async (ctx) => {
         overview[index] = only(problem, 'pid title')
       })
       .then(() => {
-        if (overview[index].invalid) return 0
+        if (overview[index].invalid) { return 0 }
         return Solution.count({ pid, mid: cid }).lean().exec()
       })
       .then((count) => {
-        if (overview[index].invalid) return
+        if (overview[index].invalid) { return }
         overview[index].submit = count
       })
       .then(() => {
-        if (overview[index].invalid) return 0
+        if (overview[index].invalid) { return 0 }
         return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec()
       })
       .then((count) => {
-        if (overview[index].invalid) return
+        if (overview[index].invalid) { return }
         overview[index].solve = count
       })
   })
@@ -164,8 +164,8 @@ const ranklist = async (ctx) => {
     await redis.set(`oj:ranklist:${contest.cid}`, str) // 更新该比赛的最新排名信息
     res = ranklist
   } else if (!isAdmin(ctx.session.profile)
-  && Date.now() + deadline > contest.end
-  && Date.now() < contest.end) {
+    && Date.now() + deadline > contest.end
+    && Date.now() < contest.end) {
     // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
     const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
     res = JSON.parse(mid)

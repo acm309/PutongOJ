@@ -87,7 +87,6 @@ test('Reply other\'s discuss should fail', async (t) => {
   t.truthy(update.body.error)
 })
 
-
 test('Did is not a number', async (t) => {
   const res = await request
     .get('/api/discuss/xx')

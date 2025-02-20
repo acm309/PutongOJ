@@ -78,7 +78,7 @@ const problemSchema = mongoose.Schema({
     default: config.status.Reserve,
   },
   tags: { // 标签
-    type: [String],
+    type: [ String ],
     default: [],
     index: true,
   },

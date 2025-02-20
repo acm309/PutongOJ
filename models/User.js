@@ -1,18 +1,18 @@
-const config = require('../config')
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
+const config = require('../config')
 
 const userSchema = mongoose.Schema({
   uid: {
     type: String,
     required: true,
     validate: {
-      validator: function (v) {
-        return /^[a-zA-Z0-9]{3,20}$/.test(v)
+      validator (v) {
+        return /^[a-z0-9]{3,20}$/i.test(v)
       },
       message:
-        'Invalid uid. It should be 3-20 characters long ' +
-        'and only contains letters and numbers',
+        'Invalid uid. It should be 3-20 characters long '
+        + 'and only contains letters and numbers',
     },
     index: {
       unique: true,
@@ -26,19 +26,19 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: config.privilege.PrimaryUser,
     validate: {
-      validator: function (v) {
+      validator (v) {
         return Object.values(config.privilege).includes(v)
       },
       message:
-        `Invalid privilege. Valid values are ` +
-        `[${Object.values(config.privilege).join(', ')}]`,
+        `Invalid privilege. Valid values are `
+        + `[${Object.values(config.privilege).join(', ')}]`,
     },
   },
   nick: {
     type: String,
     default: '',
     validate: {
-      validator: function (v) {
+      validator (v) {
         return v.length <= 20
       },
       message:
@@ -49,7 +49,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator: function (v) {
+      validator (v) {
         return v.length <= 100
       },
       message:
@@ -60,9 +60,9 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator: function (v) {
-        return v.length == 0 || v.length <= 254 &&
-          /^[a-zA-Z0-9._%+-]{1,64}@[a-zA-Z0-9.-]{1,255}\.[a-zA-Z]{2,}$/i.test(v)
+      validator (v) {
+        return v.length === 0
+          || (v.length <= 254 && /^[\w.%+-]{1,64}@[a-z0-9.-]{1,255}\.[a-z]{2,}$/i.test(v))
       },
       message: 'Invalid email address',
     },
@@ -71,7 +71,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator: function (v) {
+      validator (v) {
         return v.length <= 20
       },
       message:
@@ -83,7 +83,7 @@ const userSchema = mongoose.Schema({
     default: Date.now,
   },
   gid: {
-    type: [Number],
+    type: [ Number ],
     default: [],
     index: true,
   },
@@ -97,13 +97,13 @@ const userSchema = mongoose.Schema({
   },
   // DEPRECATED
   timerecord: {
-    type: [Number],
-    default: [0, 0, 0, 0, 0],
+    type: [ Number ],
+    default: [ 0, 0, 0, 0, 0 ],
   },
   // DEPRECATED
   iprecord: {
-    type: [String],
-    default: ['', '', '', '', ''],
+    type: [ String ],
+    default: [ '', '', '', '', '' ],
   },
   // DEPRECATED
   status: {

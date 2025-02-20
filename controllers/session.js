@@ -12,12 +12,9 @@ const login = async (ctx) => {
     .findOne({ uid })
     .exec()
 
-  if (user == null)
-    ctx.throw(400, 'No such a user')
-  if (user.pwd !== pwd)
-    ctx.throw(400, 'Wrong password')
-  if (user.privilege === privilege.Banned)
-    ctx.throw(403, 'Account banned')
+  if (user == null) { ctx.throw(400, 'No such a user') }
+  if (user.pwd !== pwd) { ctx.throw(400, 'Wrong password') }
+  if (user.privilege === privilege.Banned) { ctx.throw(403, 'Account banned') }
 
   ctx.session.profile = only(user, 'uid nick privilege pwd')
   ctx.session.profile.verifyContest = []

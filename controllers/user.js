@@ -116,8 +116,9 @@ const update = async (ctx) => {
     }
   })
   if (!isUndefined(opt.privilege) && opt.privilege !== user.privilege) {
-    if (!isRoot(ctx.session.profile))
+    if (!isRoot(ctx.session.profile)) {
       ctx.throw(400, 'You do not have permission to change the privilege!')
+    }
     user.privilege = Number.parseInt(opt.privilege)
   }
   if (opt.newPwd) {

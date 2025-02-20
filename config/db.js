@@ -4,7 +4,7 @@ const mongoosePaginate = require('mongoose-paginate-v2')
 const logger = require('../utils/logger')
 const config = require('./')
 
-mongoose.set('strictQuery', true);
+mongoose.set('strictQuery', true)
 
 mongoose.Promise = globalThis.Promise
 

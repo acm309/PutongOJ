@@ -1,7 +1,7 @@
 const { RateLimit } = require('koa2-ratelimit')
-const { isAdmin, isRoot } = require('./helper')
 const { privilege } = require('../config')
 const User = require('../models/User')
+const { isAdmin, isRoot } = require('./helper')
 
 const login = async (ctx, next) => {
   if (!ctx.session || ctx.session.profile == null) {
@@ -9,15 +9,16 @@ const login = async (ctx, next) => {
     ctx.throw(401, 'Login required')
   }
   const user = await User.findOne({ uid: ctx.session.profile.uid }).exec()
-  if (user == null ||
-    user.pwd !== ctx.session.profile.pwd ||
-    user.privilege == privilege.Banned
+  if (user == null
+    || user.pwd !== ctx.session.profile.pwd
+    || user.privilege === privilege.Banned
   ) {
     delete ctx.session.profile
     ctx.throw(401, 'Login required')
   }
-  if (user.privilege !== ctx.session.profile.privilege)
+  if (user.privilege !== ctx.session.profile.privilege) {
     ctx.session.profile.privilege = user.privilege
+  }
   await next()
 }
 
@@ -50,7 +51,7 @@ const handler = async function (ctx) {
 const solutionCreateRateLimit = RateLimit.middleware({
   interval: { min: 1 },
   max: 12,
-  async keyGenerator(ctx) {
+  async keyGenerator (ctx) {
     const user = ctx.session.profile
     return `solutions/${user.uid}`
   },

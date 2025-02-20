@@ -7,6 +7,7 @@ module.exports = antfu({
     'public/**',
     '.vscode/**',
     'node_modules/**',
+    '*.md',
   ],
 }, {
   rules: {
