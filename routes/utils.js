@@ -4,7 +4,7 @@ const { auth } = require('../utils/middlewares')
 
 const router = new Router()
 
-router.post('/submit', auth.admin, utils.submit)
+router.post('/upload', auth.admin, utils.upload)
 router.get('/servertime', utils.serverTime)
 router.get('/website', utils.websiteConfig)
 
