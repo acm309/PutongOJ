@@ -90,7 +90,9 @@ const config = $computed(() => ({
       console.log(files, responseText)
     },
   },
-  value: props.modelValue,
+  after: () => {
+    editor.setValue(props.modelValue || '')
+  },
 }))
 
 let editor = null
