@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useRootStore } from '@/store'
-import { useGroupStore } from '@/store/modules/group'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 import { onProfileUpdate, onRouteParamUpdate } from '@/util/helper'
@@ -17,7 +16,6 @@ const route = useRoute()
 const router = useRouter()
 const message = inject('$Message')
 
-const groupStore = useGroupStore()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const userStore = useUserStore()
@@ -41,10 +39,7 @@ const change = (name) => {
 
 const init = async () => {
   loading = true
-  await Promise.all([
-    userStore.findOne(route.params),
-    groupStore.find({ lean: 1 })
-  ])
+  await userStore.findOne(route.params)
   rootStore.changeDomTitle({ title: user.uid })
   if (route.name === 'userEdit' && !editable) {
     message.error(t('oj.error_403'))

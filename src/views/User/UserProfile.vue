@@ -4,25 +4,21 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
 import { useRootStore } from '@/store'
-import { useGroupStore } from '@/store/modules/group'
 import { useUserStore } from '@/store/modules/user'
+import { timePretty } from '@/util/formate'
 
 import { Button, Divider, Icon, Space } from 'view-ui-plus'
 
 const { t } = useI18n()
 
-const groupStore = useGroupStore()
 const rootStore = useRootStore()
 const userStore = useUserStore()
 
 const { judge } = $(storeToRefs(rootStore))
-const { list: groups } = $(storeToRefs(groupStore))
-const { group, solved, unsolved, user } = $(storeToRefs(userStore))
+const { solved, unsolved, user } = $(storeToRefs(userStore))
 
 const nickname = $computed(() => user.nick || user.uid)
 const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid : '')
-
-const gid = groupName => groups.find(item => item.title === groupName)?.gid
 </script>
 
 <template>
@@ -34,19 +30,22 @@ const gid = groupName => groups.find(item => item.title === groupName)?.gid
         <div class="user-username" v-if="username">{{ username }}</div>
       </div>
       <div class="user-motto" v-if="user.motto">{{ pangu.spacing(user.motto).trim() }}</div>
-      <div class="user-info" v-if="user.mail || user.school">
+      <div class="user-info">
         <div v-if="user.mail" class="user-mail">
           <Icon class="icon" type="md-mail" />{{ user.mail }}
         </div>
         <div v-if="user.school" class="user-school">
           <Icon class="icon" type="md-school" />{{ user.school }}
         </div>
+        <div class="user-create">
+          <Icon class="icon" type="md-calendar" />{{ timePretty(user.create, 'yyyy-MM-dd') }}
+        </div>
       </div>
-      <div class="user-groups" v-if="group.length > 0">
+      <div class="user-groups" v-if="user.groups?.length > 0">
         <Divider plain>{{ t('oj.group') }}</Divider>
         <Space :size="8" class="user-group-container" wrap>
-          <router-link v-for="item in group" :key="item" :to="{ name: 'ranklist', query: { gid: gid(item) } }">
-            <span class="user-group">{{ item }}</span>
+          <router-link v-for="group in user.groups" :key="group.gid" :to="{ name: 'ranklist', query: { gid: group.gid } }">
+            <span class="user-group">{{ group.title }}</span>
           </router-link>
         </Space>
       </div>
@@ -55,11 +54,11 @@ const gid = groupName => groups.find(item => item.title === groupName)?.gid
         <div class="user-statistic-container">
           <router-link class="user-statistic-item"
             :to="{ name: 'status', query: { uid: user.uid, judge: judge.Accepted } }">
-            <h1>{{ user.solve }}</h1>
+            <h1>{{ solved.length }}</h1>
             <h4>{{ t('oj.solved') }}</h4>
           </router-link>
           <router-link class="user-statistic-item" :to="{ name: 'status', query: { uid: user.uid } }">
-            <h1>{{ user.submit }}</h1>
+            <h1>{{ solved.length + unsolved.length }}</h1>
             <h4>{{ t('oj.submit') }}</h4>
           </router-link>
         </div>

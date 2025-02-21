@@ -8,7 +8,6 @@ export const useUserStore = defineStore('user', {
     user: {},
     solved: [],
     unsolved: [],
-    group: [],
     adminList: [],
   }),
   actions: {
@@ -27,7 +26,6 @@ export const useUserStore = defineStore('user', {
       this.user = data.user
       this.solved = data.solved
       this.unsolved = data.unsolved
-      this.group = data.group
     },
     update (payoad) {
       return api.user.update(payoad)

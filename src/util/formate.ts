@@ -7,8 +7,11 @@ export function formate(value: number) {
   return `${num.toFixed(2)}%`
 }
 
-export function timePretty(time: number | string = 0) {
-  return format(toDate(Number(time)), 'yyyy-MM-dd HH:mm:ss')
+export function timePretty(
+  time: number | string = 0,
+  formatStr: string = 'yyyy-MM-dd HH:mm:ss',
+) {
+  return format(toDate(Number(time)), formatStr)
 }
 
 export function timeagoPretty(time: number | string) {
