@@ -81,7 +81,7 @@ const config = $computed(() => ({
     },
   ],
   upload: {
-    url: '/api/submit',
+    url: '/api/upload',
     accept: 'image/*',
     max: 5 * 1024 * 1024,
     multiple: false,

@@ -50,8 +50,6 @@ const api = {
   getStatistics: (data: object) => instance.get(`/statistics/${data.pid}`, { params: data }),
   // 获取排名列表
   getRanklist: (data: object) => instance.get('/ranklist/list', { params: data }),
-  // 图片上传
-  getImage: (data: object) => instance.post('/submit', data),
   // 获取服务器时间
   getTime: () => instance.get<TimeResp>('/servertime'),
   getWebsiteConfig: () => instance.get<WebsiteConfigResp>('/website'),
