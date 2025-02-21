@@ -72,7 +72,7 @@ fetchAdmin()
 </script>
 
 <template>
-  <div>
+  <div class="usermanage">
     <h1>{{ t('oj.add_remove_admin') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
@@ -130,4 +130,14 @@ fetchAdmin()
   margin-left: 1%
 table
   margin-bottom: 20px
+
+.usermanage
+  h1
+    margin-bottom: 20px
+  .ivu-row-flex
+    margin-bottom: 10px
+  .label
+    line-height: 32px
+  .submit
+    margin-bottom: 20px
 </style>

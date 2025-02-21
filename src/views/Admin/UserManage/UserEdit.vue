@@ -30,7 +30,7 @@ async function saveUser () {
 </script>
 
 <template>
-  <div>
+  <div class="usermanage">
     <h1>{{ t('oj.edit_user') }}</h1>
     <Row type="flex" justify="start">
       <Col :span="2" class="label">
@@ -100,4 +100,13 @@ async function saveUser () {
 <style lang="stylus" scoped>
 .ivu-col-offset-1
   margin-left: 1%
+.usermanage
+  h1
+    margin-bottom: 20px
+  .ivu-row-flex
+    margin-bottom: 10px
+  .label
+    line-height: 32px
+  .submit
+    margin-bottom: 20px
 </style>

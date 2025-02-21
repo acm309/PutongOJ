@@ -94,6 +94,8 @@ export default {
     create_contest: '创建比赛',
     create_news: '创建通知',
     user_management: '用户管理',
+    tag_management: '标签管理',
+    group_management: '小组管理',
     user_remove: '删除用户',
     will_remove_user_continue_or_not: '此操作将永久删除用户 {uid}, 是否继续?',
     remove_user_success: '成功删除用户 {uid}！',

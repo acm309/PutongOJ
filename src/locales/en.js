@@ -105,6 +105,8 @@ export default {
     create_contest: 'Create Contest',
     create_news: 'Create Announcement',
     user_management: 'User Management',
+    tag_management: 'Tag Management',
+    group_management: 'Group Management',
     user_remove: 'REMOVE THIS USER',
     will_remove_user_continue_or_not: 'This will remove {uid} permanently, continue?',
     remove_user_success: 'User {uid} has been removed!',
