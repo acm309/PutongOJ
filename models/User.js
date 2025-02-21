@@ -14,6 +14,7 @@ const userSchema = mongoose.Schema({
         'Invalid uid. It should be 3-20 characters long '
         + 'and only contains letters and numbers',
     },
+    immutable: true,
     index: {
       unique: true,
     },
@@ -81,6 +82,7 @@ const userSchema = mongoose.Schema({
   create: {
     type: Number,
     default: Date.now,
+    immutable: true,
   },
   gid: {
     type: [ Number ],

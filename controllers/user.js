@@ -1,4 +1,5 @@
 const difference = require('lodash.difference')
+const only = require('only')
 const User = require('../models/User')
 const Solution = require('../models/Solution')
 const Group = require('../models/Group')
@@ -40,37 +41,36 @@ const find = async (ctx) => {
   }
 }
 
-// 查询用户具体信息
+/**
+ * 查询特定用户信息
+ */
 const findOne = async (ctx) => {
-  const uid = ctx.params.uid
-  const [ user, solved, unsolved ] = await Promise.all([
-    User
-      .findOne({ uid })
-      .select('-timerecord -iprecord -create -_id -pwd')
-      .lean()
-      .exec(),
+  const user = ctx.state.user
+  const [ solved, failed, groups ] = await Promise.all([
     Solution
-      .find({ uid, judge: config.judge.Accepted })
+      .find({ uid: user.uid, judge: config.judge.Accepted })
       .distinct('pid')
       .lean()
       .exec(),
     Solution
-      .find({ uid, judge: { $ne: config.judge.Accepted } })
+      .find({ uid: user.uid, judge: { $ne: config.judge.Accepted } })
       .distinct('pid')
+      .lean()
+      .exec(),
+    Group
+      .find({ gid: { $in: user.gid } })
+      .select('-_id gid title')
       .lean()
       .exec(),
   ])
-  const procedure = user.gid.map(gid => Group.findOne({ gid })
-    .lean()
-    .exec()
-    .then(item => item.title))
-  const group = await Promise.all(procedure)
 
   ctx.body = {
-    user,
+    user: {
+      ...only(user, 'uid nick motto mail school privilege create'),
+      groups,
+    },
     solved,
-    unsolved: difference(unsolved, solved),
-    group,
+    unsolved: difference(failed, solved),
   }
 }
 
