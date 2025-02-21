@@ -3,13 +3,9 @@ name: Node.js CI
 on:
   push:
     branches: [master]
-
-    # Allows you to run this workflow manually from the Actions tab
   pull_request:
     branches:
       - master
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -17,39 +13,55 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [16.x, 18.x, 20.x]
         redis-version: [6]
         mongodb-version: ['5.0']
 
     steps:
       - uses: actions/checkout@v3
+      
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          
       - name: Start Redis
         uses: supercharge/redis-github-action@1.4.0
         with:
           redis-version: ${{ matrix.redis-version }}
+          
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
+          
       - uses: pnpm/action-setup@v2.0.1
         name: Install pnpm
         id: pnpm-install
         with:
           version: 7
           run_install: false
+          
       - name: Install dependencies
         run: pnpm install
-      - run: pnpm test && pnpm coverage
+        
+      - name: Run tests
+        run: pnpm test
         env:
           CI: true
+
+      - name: Run coverage and upload
+        if: matrix.node-version == '18.x'
+        run: |
+          pnpm coverage
+        env:
+          CI: true
+          
       - name: Upload coverage to Codecov
+        if: matrix.node-version == '18.x'
         uses: codecov/codecov-action@v4
         with:
-          fail_ci_if_error: true # optional (default = false)
-          verbose: true # optional (default = false)
+          fail_ci_if_error: true
+          verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

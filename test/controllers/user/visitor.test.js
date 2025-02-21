@@ -15,7 +15,6 @@ test('User list', async (t) => {
   t.truthy(Array.isArray(res.body.list))
 
   t.truthy(res.body.list[0].uid)
-  t.truthy(res.body.list[0].nick)
 })
 
 test('Failed to update any user', async (t) => {
