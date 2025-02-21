@@ -173,10 +173,14 @@ onRouteQueryUpdate(fetch)
     margin-top 20px !important
   
 @media screen and (max-width: 768px)
-  .ranklist-page-table
-    display none
+  .ranklist-page-table, .ranklist-page-simple
+    display none !important
   .ranklist-page-mobile
     display block
+  .ranklist-filter
+    width 100%
+    .ranklist-filter-select
+      width 100%
 
 .ranklist-table-container
   overflow-x auto
