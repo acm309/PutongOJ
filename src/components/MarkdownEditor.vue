@@ -87,7 +87,9 @@ const config = $computed(() => ({
     multiple: false,
     fieldName: 'image',
     format: (files, responseText) => {
-      console.log(files, responseText)
+      const filename = files[0].name
+      const url = JSON.parse(responseText).url
+      return JSON.stringify({ data: { succMap: { [filename]: url } } })
     },
   },
   after: () => {
