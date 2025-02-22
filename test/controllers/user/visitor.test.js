@@ -25,6 +25,15 @@ test('Fetch user list', async (t) => {
   t.is(typeof u.privilege, 'number')
 })
 
+test('Fetch entire user list', async (t) => {
+  const r = await request
+    .get('/api/user/list?page=-1')
+  t.is(r.status, 200)
+  t.true(Array.isArray(r.body.docs))
+  t.true(r.body.docs.length > 0)
+  t.is(typeof r.body.total, 'number')
+})
+
 test('Create user already exists', async (t) => {
   const r = await request
     .post('/api/user')

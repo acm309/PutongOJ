@@ -40,14 +40,23 @@ const find = async (ctx) => {
   if (filterType === 'uid' && isAdmin(profile)) {
     filter.uid = { $regex: new RegExp(filterContent, 'i') }
   }
-  const result = await User.paginate(filter, {
-    sort: { create: 1 },
-    page,
-    limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id uid nick privilege create',
-  })
+  let result
+  if (page !== -1) {
+    result = await User.paginate(filter, {
+      sort: { create: 1 },
+      page,
+      limit: pageSize,
+      lean: true,
+      leanWithId: false,
+      select: '-_id uid nick privilege create',
+    })
+  } else {
+    const docs = await User.find({}, { uid: 1, nick: 1, _id: 0 }).lean().exec()
+    result = {
+      docs,
+      total: docs.length,
+    }
+  }
   ctx.body = result
 }
 
