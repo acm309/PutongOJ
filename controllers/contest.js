@@ -39,8 +39,8 @@ const find = async (ctx) => {
   const profile = ctx.session.profile
   const page = Number.parseInt(opt.page) || 1
   const pageSize = Number.parseInt(opt.pageSize) || 20
-  const filterType = String(opt.type) || ''
-  const filterContent = String(opt.content) || ''
+  const filterType = String(opt.type || '')
+  const filterContent = String(opt.content || '')
 
   const filter = !isAdmin(profile)
     ? { status: config.status.Available }
