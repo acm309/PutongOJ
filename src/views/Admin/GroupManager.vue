@@ -40,7 +40,7 @@ onBeforeRouteLeave(() => {
 
 async function fetchGroup () {
   Spin.show()
-  await Promise.all([ userStore.find(), find() ])
+  await Promise.all([ userStore.find({ page: -1 }), find() ])
   Spin.hide()
 }
 
