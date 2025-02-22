@@ -20,6 +20,17 @@ test('Contest list', async (t) => {
   }
 })
 
+test('Search contest', async (t) => {
+  const res = await request
+    .get('/api/contest/list')
+    .query({ type: 'title', content: '2' })
+
+  t.is(res.status, 200)
+  t.is(res.type, 'application/json')
+  t.truthy(res.body.list.docs.length > 0)
+  t.truthy(res.body.list.docs[0].title.includes('2'))
+})
+
 test.after.always('close server', () => {
   server.close()
 })

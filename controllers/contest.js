@@ -31,20 +31,22 @@ const preload = async (ctx, next) => {
   return next()
 }
 
-// 返回竞赛列表
+/**
+ * 返回竞赛列表
+ */
 const find = async (ctx) => {
   const opt = ctx.request.query
+  const profile = ctx.session.profile
   const page = Number.parseInt(opt.page) || 1
   const pageSize = Number.parseInt(opt.pageSize) || 20
+  const filterType = String(opt.type) || ''
+  const filterContent = String(opt.content) || ''
 
-  const filter = ctx.session.profile && isAdmin(ctx.session.profile) ? {} : { status: config.status.Available }
-  if (ctx.query.type === 'title') {
-    filter.$expr = {
-      $regexMatch: {
-        input: { $toString: '$title' },
-        regex: new RegExp(ctx.query.content, 'i'),
-      },
-    }
+  const filter = !isAdmin(profile)
+    ? { status: config.status.Available }
+    : {}
+  if (filterType === 'title') {
+    filter.title = { $regex: new RegExp(filterContent, 'i') }
   }
   const list = await Contest.paginate(filter, {
     sort: { cid: -1 },
@@ -52,67 +54,49 @@ const find = async (ctx) => {
     limit: pageSize,
     lean: true,
     leanWithId: false,
-    select: '-_id -creator -argument', // -表示不要的字段
+    select: '-_id cid title start end encrypt status',
   })
 
-  ctx.body = {
-    list,
-  }
+  ctx.body = { list }
 }
 
-// 返回一个竞赛
+/**
+ * 返回一个竞赛
+ */
 const findOne = async (ctx) => {
-  const opt = ctx.params
-  const cid = Number.parseInt(opt.cid)
-  let contest = ctx.state.contest
+  const profile = ctx.session.profile
+  const contest = ctx.state.contest
+  const cid = contest.cid
+  const problemList = contest.list
+  const totalProblems = problemList.length
 
-  // 普通用户不能获取argument的值
-  if (!ctx.session.profile || !isAdmin(ctx.session.profile)) {
-    contest = only(contest, 'title start end encrypt list create status cid')
-  }
-  const list = contest.list
-  const totalProblems = list.length
-  const overview = []
-  const procedure = list.map((pid, index) => {
-    return Problem.findOne({ pid }).lean().exec()
-      .then((problem) => {
-        if (!problem) {
-          overview[index] = { pid, invalid: true }
-          return Promise.resolve()
-        }
-        overview[index] = only(problem, 'pid title')
+  const overview = await Promise.all(problemList.map(async (pid) => {
+    const problem = await Problem.findOne({ pid }).lean().exec()
+    if (!problem) { return { pid, invalid: true } }
+    const { title } = problem
+    const [ solve, submit ] = await Promise.all([
+      Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec(),
+      Solution.count({ pid, mid: cid }).lean().exec(),
+    ])
+    return { pid, title, solve, submit }
+  }))
+  const solved = profile
+    ? await Solution
+      .find({
+        mid: cid,
+        pid: { $in: problemList },
+        uid: profile.uid,
+        judge: config.judge.Accepted,
       })
-      .then(() => {
-        if (overview[index].invalid) { return 0 }
-        return Solution.count({ pid, mid: cid }).lean().exec()
-      })
-      .then((count) => {
-        if (overview[index].invalid) { return }
-        overview[index].submit = count
-      })
-      .then(() => {
-        if (overview[index].invalid) { return 0 }
-        return Solution.count({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec()
-      })
-      .then((count) => {
-        if (overview[index].invalid) { return }
-        overview[index].solve = count
-      })
-  })
-  await Promise.all(procedure)
-
-  const solved = await Solution
-    .find({
-      uid: ctx.query.uid || ctx.session.profile.uid,
-      mid: cid,
-      judge: config.judge.Accepted,
-    })
-    .distinct('pid')
-    .lean()
-    .exec()
+      .distinct('pid')
+      .lean()
+      .exec()
+    : []
 
   ctx.body = {
-    contest,
+    contest: isAdmin(profile)
+      ? only(contest, 'cid title start end encrypt status list argument create')
+      : only(contest, 'cid title start end encrypt status list'),
     overview,
     totalProblems,
     solved,
