@@ -6,43 +6,53 @@ const Group = require('../models/Group')
 const config = require('../config')
 const logger = require('../utils/logger')
 const { generatePwd } = require('../utils/helper')
-const { isAdmin, isRoot, isUndefined } = require('../utils/helper')
+const { isAdmin, isRoot } = require('../utils/helper')
 
+/**
+ * 预加载用户信息
+ */
 const preload = async (ctx, next) => {
   const uid = ctx.params.uid
   const user = await User.findOne({ uid }).exec()
-  if (user == null) { ctx.throw(400, 'No such a user') }
+  if (!user) {
+    ctx.throw(404, 'User not found!')
+  }
   ctx.state.user = user
   return next()
 }
 
-// 查询用户组
+/**
+ * 查询用户列表
+ */
 const find = async (ctx) => {
+  const profile = ctx.session.profile
+  const opt = ctx.request.query
+  const page = Number.parseInt(opt.page) || 1
+  const pageSize = Number.parseInt(opt.pageSize) || 30
+  const privilege = String(opt.privilege || '')
+  const filterType = String(opt.type || 'nick')
+  const filterContent = String(opt.content || '')
+
   const filter = {}
-  if (!isUndefined(ctx.query.privilege) && ctx.query.privilege === 'admin') {
-    filter.privilege = {
-      $in: [ config.privilege.Root, config.privilege.Admin ],
-    }
+  if (privilege === 'admin' && isAdmin(profile)) {
+    filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
   }
-  if (isAdmin(ctx.session.profile) && ctx.query.type === 'uid') {
-    filter.$expr = {
-      $regexMatch: {
-        input: { $toString: '$uid' },
-        regex: new RegExp(ctx.query.content, 'i'),
-      },
-    }
+  if (filterType === 'uid' && isAdmin(profile)) {
+    filter.uid = { $regex: new RegExp(filterContent, 'i') }
   }
-  const list = await User
-    .find(filter, { _id: 0, uid: 1, nick: 1, privilege: 1 })
-    .lean()
-    .exec()
-  ctx.body = {
-    list,
-  }
+  const result = await User.paginate(filter, {
+    sort: { create: 1 },
+    page,
+    limit: pageSize,
+    lean: true,
+    leanWithId: false,
+    select: '-_id uid nick privilege create',
+  })
+  ctx.body = result
 }
 
 /**
- * 查询特定用户信息
+ * 查询用户信息
  */
 const findOne = async (ctx) => {
   const user = ctx.state.user
@@ -74,87 +84,86 @@ const findOne = async (ctx) => {
   }
 }
 
-// 注册
+/**
+ * 创建用户
+ */
 const create = async (ctx) => {
-  if (!ctx.request.body.pwd || ctx.request.body.pwd.length <= 5) {
-    ctx.throw(400, 'the length of the password must be greater than 5')
+  const opt = ctx.request.body
+  const uid = String(opt.uid || '')
+  const pwd = String(opt.pwd || '')
+  const nick = String(opt.nick || '')
+
+  if (pwd.length <= 5) {
+    ctx.throw(400, 'The length of the password must be greater than 5!')
+  }
+  const exists = await User.findOne({ uid }).exec()
+  if (exists) {
+    ctx.throw(400, 'The username has been registered!')
   }
   const user = new User({
-    uid: ctx.request.body.uid,
-    nick: ctx.request.body.nick,
-    pwd: generatePwd(ctx.request.body.pwd),
+    uid, nick, pwd: generatePwd(pwd),
   })
-  // 将objectid转换为用户创建时间(可以不用)
-  // user.create = moment(objectIdToTimestamp(user._id)).format('YYYY-MM-DD HH:mm:ss')
-  const doc = await User.findOne({ uid: user.uid }).exec()
-  if (doc) {
-    ctx.throw(400, '用户名已被占用!')
-  }
+
   try {
     await user.save()
   } catch (err) {
     ctx.throw(400, err.message)
   }
-
   ctx.body = {}
 }
 
-// 修改用户信息
+/**
+ * 更新用户信息
+ */
 const update = async (ctx) => {
-  if (!isAdmin(ctx.session.profile) && ctx.session.profile.uid !== ctx.state.user.uid) {
-    ctx.throw(400, 'You do not have permission to change this user information!')
-  }
-  if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
-    ctx.throw(400, 'You do not have permission to change Root\'s information!')
-  }
-  const opt = ctx.request.body
+  const profile = ctx.session.profile
   const user = ctx.state.user
+
+  if (!(
+    profile.uid === user.uid || (
+      user.privilege === config.privilege.Root
+        ? isRoot(profile)
+        : isAdmin(profile)
+    ))
+  ) {
+    ctx.throw(403, 'You don\'t have permission to change this user\'s information!')
+  }
+
+  const opt = ctx.request.body
   const fields = [ 'nick', 'motto', 'school', 'mail' ]
   fields.forEach((field) => {
-    if (!isUndefined(opt[field])) {
+    if (typeof opt[field] === 'string') {
       user[field] = opt[field]
     }
   })
-  if (!isUndefined(opt.privilege) && opt.privilege !== user.privilege) {
-    if (!isRoot(ctx.session.profile)) {
-      ctx.throw(400, 'You do not have permission to change the privilege!')
-    }
-    user.privilege = Number.parseInt(opt.privilege)
+
+  const privilege = Number.parseInt(opt.privilege) || user.privilege
+  if (privilege !== user.privilege && !(
+    isRoot(profile)
+    && profile.uid !== user.uid
+  )) {
+    ctx.throw(403, 'You don\'t have permission to change the privilege!')
   }
-  if (opt.newPwd) {
-    user.pwd = generatePwd(opt.newPwd)
+  user.privilege = privilege
+
+  const oldPwd = String(opt.oldPwd || '')
+  const newPwd = String(opt.newPwd || '')
+  if (newPwd !== '') {
+    if (user.pwd !== generatePwd(oldPwd)) {
+      ctx.throw(400, 'Old password is wrong!')
+    }
+    if (newPwd.length <= 5) {
+      ctx.throw(400, 'The length of the password must be greater than 5!')
+    }
+    user.pwd = generatePwd(newPwd)
   }
 
   try {
     await user.save()
-    logger.info(`One user is updated" ${user.uid}`)
+    logger.info(`User updated: ${user.uid}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
-
-  ctx.body = {
-    success: true,
-    uid: user.uid,
-  }
-}
-
-const del = async (ctx) => {
-  if (!isAdmin(ctx.session.profile) && ctx.session.profile.uid !== ctx.state.user.uid) {
-    ctx.throw(400, 'You do not have permission to change this user information!')
-  }
-  if (ctx.state.user.uid === 'admin' && !isRoot(ctx.session.profile)) {
-    ctx.throw(400, 'You do not have permission to change Root\'s information!')
-  }
-
-  const { uid } = ctx.state.user
-
-  try {
-    await User.deleteOne({ uid }).exec()
-    logger.info(`One User is removed ${uid}`)
-  } catch (e) {
-    ctx.throw(400, e.message)
-  }
-
   ctx.body = {}
 }
 
@@ -164,5 +173,4 @@ module.exports = {
   findOne,
   create,
   update,
-  del,
 }

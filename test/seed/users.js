@@ -12,6 +12,11 @@ const users = {
       privilege: config.privilege.Root,
       pwd: config.deploy.adminInitPwd,
     },
+    tobeadmin:
+    {
+      uid: 'tobeadmin',
+      pwd: 'tobeadmin',
+    },
     primaryuser:
     {
       uid: 'primaryuser',
