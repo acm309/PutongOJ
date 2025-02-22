@@ -149,7 +149,7 @@ const update = async (ctx) => {
   const oldPwd = String(opt.oldPwd || '')
   const newPwd = String(opt.newPwd || '')
   if (newPwd !== '') {
-    if (user.pwd !== generatePwd(oldPwd)) {
+    if (user.pwd !== generatePwd(oldPwd) && !isAdmin(profile)) {
       ctx.throw(400, 'Old password is wrong!')
     }
     if (newPwd.length <= 5) {
