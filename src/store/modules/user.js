@@ -5,6 +5,7 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     registerDialog: false,
     list: [],
+    sum: 0,
     user: {},
     solved: [],
     unsolved: [],
@@ -16,10 +17,8 @@ export const useUserStore = defineStore('user', {
     },
     async find (payload) {
       const { data } = await api.user.find(payload)
-      if (payload)
-        this.adminList = data.list
-      else
-        this.list = data.list
+      this.list = data.docs
+      this.sum = data.total
     },
     async findOne (payload) {
       const { data } = await api.user.findOne(payload)

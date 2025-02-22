@@ -16,12 +16,12 @@ export default {
     news_list: '通知',
     news_has_been_updated: '通知 "{title}" 已更新！',
 
-    login: '登陆',
+    login: '登录',
     register: '注册',
-    logout: '退出登陆',
+    logout: '退出登录',
     profile: '个人信息',
     settings: '用户设置',
-    please_login: '请先登陆',
+    please_login: '请先登录',
 
     overview: '概览',
     edit: '修改',
@@ -49,7 +49,7 @@ export default {
     alert: '警告',
 
     create_new_thread: '创建新帖',
-    login_to_reply: '登陆后可回复',
+    login_to_reply: '登录后可回复',
     add_a_reply: '添加回复',
 
     solved: '已解决',
@@ -137,17 +137,20 @@ export default {
 
     nick: '昵称',
     username: '用户名',
-    username_description: '用户名用于登陆，不能修改',
+    username_description: '用户名用于登录，不能修改',
     group: '组别',
     motto: '签名',
     school: '学校',
     mail: '邮箱',
     password: '密码',
     password_confirm: '确认密码',
+    password_old: '旧密码',
+    password_new: '新密码',
     leave_it_blank_if_no_change: '不修改请留空',
     edit_user: '编辑用户',
     security: '安全',
     privilege: '权限',
+    please_relogin: '请重新登录',
 
     password_requirement: '密码长度至少为5位，只能包含数字和字母',
     password_not_match: '密码不匹配',
