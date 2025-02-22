@@ -12,7 +12,7 @@ function generatePwd (pwd) {
 
 function isAdmin (profile) {
   if (profile == null || profile.privilege == null) { return false }
-  if (Number.parseInt(profile.privilege) === config.privilege.Root || Number.parseInt(profile.privilege) === config.privilege.Teacher) {
+  if (Number.parseInt(profile.privilege) === config.privilege.Root || Number.parseInt(profile.privilege) === config.privilege.Admin) {
     return true
   } else {
     return false

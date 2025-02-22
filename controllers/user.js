@@ -21,7 +21,7 @@ const find = async (ctx) => {
   const filter = {}
   if (!isUndefined(ctx.query.privilege) && ctx.query.privilege === 'admin') {
     filter.privilege = {
-      $in: [ config.privilege.Root, config.privilege.Teacher ],
+      $in: [ config.privilege.Root, config.privilege.Admin ],
     }
   }
   if (isAdmin(ctx.session.profile) && ctx.query.type === 'uid') {

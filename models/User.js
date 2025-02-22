@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema({
   },
   privilege: {
     type: Number,
-    default: config.privilege.PrimaryUser,
+    default: config.privilege.User,
     validate: {
       validator (v) {
         return Object.values(config.privilege).includes(v)
