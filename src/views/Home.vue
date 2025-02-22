@@ -62,7 +62,7 @@ onRouteQueryUpdate(fetch)
           </Col>
           <Col flex="auto" class="news-content">
           <span class="news-title">{{ pangu.spacing(item.title) }}</span>
-          <p class="news-date">{{ timePretty(item.create) }}</p>
+          <p class="news-date">{{ timePretty(item.create, 'yyyy-MM-dd HH:mm') }}</p>
           </Col>
         </Row>
       </Card>

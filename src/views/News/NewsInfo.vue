@@ -14,7 +14,7 @@ const { news } = $(storeToRefs(useNewsStore()))
     <div class="news-header-container">
       <div class="news-header">
         <h1>{{ pangu.spacing(news.title || '') }}</h1>
-        <h4>{{ timePretty(news.create) }}</h4>
+        <h4>{{ timePretty(news.create, 'yyyy-MM-dd HH:mm') }}</h4>
       </div>
     </div>
     <MarkdownPreview class="news-content" v-model="news.content" />
