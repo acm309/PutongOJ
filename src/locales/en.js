@@ -70,10 +70,6 @@ export default {
     sample_input: 'Sample Input',
     sample_output: 'Sample Output',
 
-    problem: {
-      input: 'Input',
-      output: 'Output',
-    },
     testcase: {
       from_file: 'Import from file',
       file_selected: 'File selected',

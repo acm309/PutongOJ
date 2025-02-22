@@ -164,9 +164,9 @@ fetch()
           </td>
           <td class="testcase-files">
             <Space :size="4">
-              <a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank">{{ t('oj.problem.input') }}</a>
+              <a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
               <Divider type="vertical" />
-              <a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">{{ t('oj.problem.output') }}</a>
+              <a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
             </Space>
           </td>
           <td class="testcase-action">
@@ -178,7 +178,7 @@ fetch()
     <div class="testcase-create">
       <h1>{{ t('oj.testcase.create') }}</h1>
       <div class="testcase-flex">
-        <span class="testcase-title">{{ t('oj.problem.input') }}</span>
+        <span class="testcase-title">{{ t('oj.input') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('in', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
             {{ t('oj.testcase.from_file') }}
@@ -193,7 +193,7 @@ fetch()
         <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">{{ filename('in') }}</Tag>
       </div>
       <div class="testcase-flex">
-        <span class="testcase-title">{{ t('oj.problem.output') }}</span>
+        <span class="testcase-title">{{ t('oj.output') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('out', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
             {{ t('oj.testcase.from_file') }}

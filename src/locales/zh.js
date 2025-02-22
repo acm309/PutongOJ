@@ -66,10 +66,6 @@ export default {
     sample_input: '样例输入',
     sample_output: '样例输出',
 
-    problem: {
-      input: '输入',
-      output: '输出',
-    },
     testcase: {
       from_file: '从文件导入',
       file_selected: '已选择文件',
