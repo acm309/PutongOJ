@@ -2,8 +2,8 @@ const process = require('node:process')
 
 module.exports = {
   title: process.env.title || 'Putong OJ',
-  discussOnProblem: process.env.discussOnProblem == null ? false : process.env.discussOnProblem.toLocaleLowerCase() === 'true',
-  semi_restful: process.env.semiRestful == null ? false : process.env.semiRestful.toLocaleLowerCase() === 'true',
+  discussOnProblem: (process.env.discussOnProblem || 'false').toLocaleLowerCase() === 'true',
+  semi_restful: (process.env.semiRestful || 'false').toLocaleLowerCase() === 'true',
 }
 
 /**
