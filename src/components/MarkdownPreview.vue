@@ -10,6 +10,9 @@ const props = defineProps(['modelValue'])
 const preview = ref(null)
 const config = {
   lang: locale.value.replace('-', '_'),
+  after() {
+    rendering = false
+  },
   render: {
     media: {
       enable: false,
@@ -17,20 +20,22 @@ const config = {
   },
 }
 
-let rendering = Promise.resolve()
-let waiting = false
+let rendering = $ref(false)
+let renderPromise = $ref(Promise.resolve())
+let waiting = $ref(false)
 
 async function render() {
   if (!preview.value || !props.modelValue || waiting) return
 
   waiting = true
   try {
-    await rendering
+    await renderPromise
   } catch (e) {
     console.error(e)
   }
   waiting = false
-  rendering = VditorPreview.preview(
+  rendering = true
+  renderPromise = VditorPreview.preview(
     preview.value,
     props.modelValue,
     config
@@ -42,11 +47,12 @@ watch(() => props.modelValue, render)
 </script>
 
 <template>
-  <div ref="preview">
-    <div class="vidtor-uninitialized">
+  <div>
+    <div class="vidtor-uninitialized" v-if="rendering">
       <Icon type="ios-loading" class="card-icon" />
       <span class="card-text">Rendering...</span>
     </div>
+    <div ref="preview" v-show="!rendering"></div>
   </div>
 </template>
 
