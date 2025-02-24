@@ -48,7 +48,7 @@ config.deploy = {
   adminInitPwd: 'kplkplkpl',
 }
 
-config.secretKey = process.env.secretKey
+config.secretKey = process.env.secretKey || ''
 
 config.dbURL = process.env.DBURL || process.env.dbURL // 之所以两个只为了兼容旧版命名；请优先采用后者
 
@@ -65,7 +65,7 @@ config.mail = {
 }
 
 config.port = Number.parseInt(
-  process.env.PORT,
+  process.env.PORT || 3000,
 )
 
 module.exports = config

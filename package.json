@@ -24,7 +24,7 @@
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
     "pretest": "cross-env NODE_ENV=test node test/pretest.js",
-    "test": "cross-env NODE_ENV=test node test/pretest.js && nyc ava && node test/posttest.js",
+    "test": "cross-env-shell NODE_ENV=test \"node test/pretest.js && nyc ava && node test/posttest.js\"",
     "report": "nyc report --reporter=html",
     "posttest": "cross-env NODE_ENV=test node test/posttest.js",
     "lint": "eslint .",
@@ -67,6 +67,7 @@
   "devDependencies": {
     "ava": "^4.3.3",
     "codecov": "^3.8.3",
+    "commander": "^12.1.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-node": "^6.0.1",
