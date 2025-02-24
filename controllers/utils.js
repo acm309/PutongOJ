@@ -1,8 +1,20 @@
 const path = require('node:path')
+const fse = require('fs-extra')
 const websiteConf = require('../config/website')
 
-const submit = (ctx) => {
-  const filename = path.basename(ctx.request.body.files.image.path) // 文件名
+const uploadDir = path.join(__dirname, '../public/uploads')
+
+const upload = async (ctx) => {
+  const file = ctx.request.body.files.image
+  if (!file) {
+    ctx.throw(400, 'No file uploaded')
+  }
+  const filename = path.basename(file.path)
+  try {
+    await fse.move(file.path, path.join(uploadDir, filename))
+  } catch (err) {
+    ctx.throw(500, `Failed to save file: ${err.message}`)
+  }
   ctx.body = {
     url: `/uploads/${filename}`,
   }
@@ -21,7 +33,7 @@ const websiteConfig = (ctx) => {
 }
 
 module.exports = {
-  submit,
+  upload,
   serverTime,
   websiteConfig,
 }

@@ -115,7 +115,7 @@ const create = async (ctx) => {
   const opt = ctx.request.body
 
   const problem = new Problem(Object.assign(
-    only(opt, 'title description input output in out hint'),
+    only(opt, 'title description input output in out hint spj spjcode'),
     { // pid 会自动生成
       time: Number.parseInt(opt.time) || 1000,
       memory: Number.parseInt(opt.memory) || 32768,
@@ -153,7 +153,10 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
-  const fields = [ 'title', 'time', 'memory', 'description', 'input', 'output', 'hint', 'in', 'out', 'status' ]
+  const fields = [
+    'title', 'time', 'memory', 'description', 'input', 'output',
+    'hint', 'in', 'out', 'status', 'spj', 'spjcode' ]
+
   fields.filter(field => opt[field] != null).forEach((field) => {
     problem[field] = opt[field]
   })

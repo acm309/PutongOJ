@@ -1,128 +1,219 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../app')
-const users = require('../../seed/users')
 const config = require('../../../config')
 
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.before('Login', async (t) => {
-  const login = await request
+const uid = 'test18315'
+const pwd = 'Aa@123456'
+const newPwd = 'Aa@654321'
+const mail = 'account@example.com'
+
+test.before('Create user and login', async (t) => {
+  let r = await request
+    .post('/api/user')
+    .send({ uid, pwd })
+  t.is(r.status, 200)
+
+  r = await request
     .post('/api/session')
-    .send({
-      uid: 'admin',
-      pwd: config.deploy.adminInitPwd,
-    })
+    .send({ uid, pwd })
+  t.is(r.status, 200)
 
-  t.is(login.status, 200)
+  r = await request
+    .get('/api/session')
+  t.is(r.status, 200)
+  t.is(r.body.profile.uid, uid)
+  t.is(r.body.profile.nick, '')
+  t.is(r.body.profile.privilege, config.privilege.User)
 })
 
-test('create a new user', async (t) => {
-  const res = await request
-    .post('/api/user')
-    .send({
-      uid: 'testxxx',
-      pwd: '123456',
-      nick: '1234',
-    })
-
-  t.is(res.status, 200, res.body.error)
-  t.is(res.type, 'application/json')
-
-  const res2 = await request
-    .get('/api/user/testxxx')
-
-  t.is(res2.status, 200)
-  t.is(res2.type, 'application/json')
-  t.is(res2.body.user.uid, 'testxxx')
-  t.is(res2.body.user.nick, '1234')
+test('Update other\'s profile', async (t) => {
+  const r = await request
+    .put('/api/user/admin')
+    .send({ nick: 'failed' })
+  t.is(r.status, 403)
 })
 
-test('Username is too long', async (t) => {
-  const res = await request
-    .post('/api/user')
-    .send({
-      uid: 'testxxx'.repeat(10),
-      pwd: '123456',
-      nick: '1234',
-    })
-
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-  t.truthy(res.body.error)
+test('Update user with nick not valid (too long)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ nick: 'a'.repeat(21) })
+  t.is(r.status, 400)
 })
 
-test('Username is too short', async (t) => {
-  const res = await request
-    .post('/api/user')
-    .send({
-      uid: 'xx',
-      pwd: '123456',
-      nick: '1234',
-    })
+test('Update user\'s nick then clear', async (t) => {
+  let r = await request
+    .put(`/api/user/${uid}`)
+    .send({ nick: 'test20424' })
+  t.is(r.status, 200)
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-  t.truthy(res.body.error)
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.nick, 'test20424')
+
+  r = await request
+    .put(`/api/user/${uid}`)
+    .send({ nick: '' })
+  t.is(r.status, 200)
+
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.nick, '')
 })
 
-test('Nick is too long', async (t) => {
-  const res = await request
-    .post('/api/user')
-    .send({
-      uid: 'testyyy',
-      pwd: '123456',
-      nick: '123456'.repeat(10),
-    })
-
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-  t.truthy(res.body.error)
+test('Update user with motto not valid (too long)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ motto: 'a'.repeat(101) })
+  t.is(r.status, 400)
 })
 
-test('can update user\'s own info', async (t) => {
-  const user = Object.values(users.data)[5]
-  const res = await request
-    .put(`/api/user/${user.uid}`)
-    .send({
-      nick: 'new nick name',
-    })
+test('Update user\'s motto then clear', async (t) => {
+  let r = await request
+    .put(`/api/user/${uid}`)
+    .send({ motto: 'test19025' })
+  t.is(r.status, 200)
 
-  t.is(res.status, 200)
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.motto, 'test19025')
 
-  const find = await request
-    .get(`/api/user/${user.uid}`)
-    .send({
-      nick: 'new nick name',
-    })
-  t.is(find.body.user.nick, 'new nick name')
+  r = await request
+    .put(`/api/user/${uid}`)
+    .send({ motto: '' })
+  t.is(r.status, 200)
+
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.motto, '')
 })
 
-test('user uid is been used', async (t) => {
-  const user = Object.values(users.data)[10]
-  const res = await request
-    .post('/api/user/')
-    .send({
-      uid: user.uid,
-      pwd: '123456',
-      nick: user.nick,
-    })
-
-  t.is(res.status, 400)
+test('Update user with school not valid (too long)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ school: 'a'.repeat(21) })
+  t.is(r.status, 400)
 })
 
-test('password is too short', async (t) => {
-  const user = Object.values(users.data)[10]
-  const res = await request
-    .post('/api/user/')
-    .send({
-      uid: user.uid,
-      pwd: '12345',
-      nick: user.nick,
-    })
+test('Update user\'s school then clear', async (t) => {
+  let r = await request
+    .put(`/api/user/${uid}`)
+    .send({ school: 'test31975' })
+  t.is(r.status, 200)
 
-  t.is(res.status, 400)
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.school, 'test31975')
+
+  r = await request
+    .put(`/api/user/${uid}`)
+    .send({ school: '' })
+  t.is(r.status, 200)
+
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.school, '')
+})
+
+test('Update user with mail not valid (too long)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ mail: 'a'.repeat(255) })
+  t.is(r.status, 400)
+})
+
+test('Update user with mail not valid (invalid email)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ mail: 'test' })
+  t.is(r.status, 400)
+})
+
+test('Update user\'s mail then clear', async (t) => {
+  let r = await request
+    .put(`/api/user/${uid}`)
+    .send({ mail })
+  t.is(r.status, 200)
+
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.mail, mail)
+
+  r = await request
+    .put(`/api/user/${uid}`)
+    .send({ mail: '' })
+  t.is(r.status, 200)
+
+  r = await request
+    .get(`/api/user/${uid}`)
+  t.is(r.status, 200)
+  t.is(r.body.user.mail, '')
+})
+
+test('Update user with privilege remains unchanged', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ privilege: config.privilege.User })
+  t.is(r.status, 200)
+})
+
+test('Update user with privilege up to admin', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ privilege: config.privilege.Admin })
+  t.is(r.status, 403)
+})
+
+test('Update user with privilege up to root', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ privilege: config.privilege.Root })
+  t.is(r.status, 403)
+})
+
+test('Update user with new pwd not valid (too short)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ oldPwd: pwd, newPwd: 'Aa@12' })
+  t.is(r.status, 400)
+})
+
+test('Update user with wrong old pwd', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ oldPwd: `${pwd}7`, newPwd })
+  t.is(r.status, 400)
+})
+
+test.after('Update user\'s pwd then check', async (t) => {
+  let r = await request
+    .put(`/api/user/${uid}`)
+    .send({ oldPwd: pwd, newPwd })
+  t.is(r.status, 200)
+
+  r = await request
+    .put(`/api/user/${uid}`)
+  t.is(r.status, 401)
+
+  r = await request
+    .post('/api/session')
+    .send({ uid, pwd: newPwd })
+  t.is(r.status, 200)
+
+  r = await request
+    .get('/api/session')
+  t.is(r.status, 200)
+  t.is(r.body.profile.uid, uid)
 })
 
 test.after.always('close server', () => {

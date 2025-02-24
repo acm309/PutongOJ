@@ -24,7 +24,7 @@ const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
 
-const extensions = ['', 'c', 'cpp', 'java', 'py']
+const extensions = [ '', 'c', 'cpp', 'java', 'py' ]
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
@@ -52,6 +52,8 @@ function judgeCode (code) {
     return config.judge.CompileError
   } else if (code === 14) {
     return config.judge.SystemError
+  } else if (code === 16) {
+    return config.judge.Skipped
   } else {
     return config.judge.RuntimeError
   }
@@ -71,6 +73,8 @@ async function beforeJudge (problem, solution) {
 
   // 复制测试数据和清空上一次的文件夹
   const { pid } = problem
+  const spj = problem.spj || false
+  const spjcode = problem.spjcode || ''
   const dir = resolve(__dirname, `../../data/${pid}`)
 
   // meta 记录了有哪些数据
@@ -83,22 +87,33 @@ async function beforeJudge (problem, solution) {
   ])
 
   // 把所有 testcases 复制过来
-  // 输入
-  await Promise.all(meta.testcases.map((test) => {
+  await Promise.all(meta.testcases.map((test) => { // 输入
     return fse.copy(resolve(dir, `${test.uuid}.in`), resolve(__dirname, `testdata/${test.uuid}.in`))
   }))
-
-  // 输出
-  await Promise.all(meta.testcases.map((test) => {
+  await Promise.all(meta.testcases.map((test) => { // 输出
     return fse.copy(resolve(dir, `${test.uuid}.out`), resolve(__dirname, `testdata/${test.uuid}.out`))
   }))
 
   fse.writeFileSync(resolve(__dirname, `temp/Main.${extensions[solution.language]}`), solution.code) // 重点
+  if (spj) { fse.writeFileSync(resolve(__dirname, 'testdata/spj.cpp'), spjcode) }
+
   return { solution, problem }
 }
 
 async function judge (problem, solution) {
-  await execaCommand(`./Judge -l ${solution.language} -D ./testdata -d ./temp -t ${problem.time} -m ${problem.memory} -o 81920`)
+  // 判题命令
+  let judge_command = './Judge '
+  judge_command += `-l ${solution.language} `
+  judge_command += `-D ./testdata `
+  judge_command += `-d ./temp `
+  judge_command += `-t ${problem.time} `
+  judge_command += `-m ${problem.memory} `
+  judge_command += `-o 81920`
+  if (problem.spj) { judge_command += ' -S tt' }
+
+  // 进行判题
+  await execaCommand(judge_command)
+
   // 查看编译信息，是否错误之类的
   const ce = fse.readFileSync(resolve(__dirname, 'temp/ce.txt'), { encoding: 'utf8' }).trim()
   if (ce) { // 非空，有错

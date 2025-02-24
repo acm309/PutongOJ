@@ -4,7 +4,7 @@ const path = require('node:path')
 const process = require('node:process')
 const Koa = require('koa')
 const koaLogger = require('koa-logger')
-const bodyparser = require('koa-body')
+const koaBody = require('koa-body')
 const staticServe = require('koa-static')
 const session = require('koa-session')
 const send = require('koa-send')
@@ -32,12 +32,14 @@ app.use(session({
   signed: true, /** (boolean) signed or not (default true) */
 }, app))
 
-app.use(bodyparser({
+app.use(koaBody({
+  jsonLimit: '8mb', // 限制 JSON 数据大小
+  formLimit: '8mb', // 限制表单数据大小
+  textLimit: '8mb', // 限制文本数据大小
+  multipart: true, // 支持文件上传
   formidable: {
-    uploadDir: path.resolve(__dirname, 'public/uploads'),
+    maxFileSize: 4 * 1024 * 1024, // 限制文件大小
   },
-  multipart: true,
-  urlencoded: true,
 }))
 
 app.use(staticServe(path.join(__dirname, 'public'), {

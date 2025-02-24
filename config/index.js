@@ -1,71 +1,74 @@
 const process = require('node:process')
 
 const config = {
-  redisURL: process.env.redisURL,
-}
+  port: Number.parseInt(process.env.PORT || 3000),
+  dbURL: String(process.env.dbURL),
+  redisURL: String(process.env.redisURL),
+  secretKey: String(process.env.secretKey),
 
-config.privilege = {
-  PrimaryUser: 1,
-  Teacher: 2,
-  Root: 3,
-}
+  privilege: {
+    Banned: 0,
+    User: 1,
+    Admin: 2,
+    Root: 3,
+  },
 
-config.judge = {
-  Pending: 0,
-  Running: 1,
-  CompileError: 2,
-  Accepted: 3,
-  RuntimeError: 4,
-  WrongAnswer: 5,
-  TimeLimitExceeded: 6,
-  MemoryLimitExceed: 7,
-  OutputLimitExceed: 8,
-  PresentationError: 9,
-  SystemError: 10,
-  RejudgePending: 11,
-}
+  judge: {
+    Pending: 0,
+    Running: 1,
+    CompileError: 2,
+    Accepted: 3,
+    RuntimeError: 4,
+    WrongAnswer: 5,
+    TimeLimitExceeded: 6,
+    MemoryLimitExceed: 7,
+    OutputLimitExceed: 8,
+    PresentationError: 9,
+    SystemError: 10,
+    RejudgePending: 11,
+    Skipped: 12,
+  },
 
-config.module = {
-  Problem: 1,
-  Contest: 2,
-}
+  limitation: {
+    time: 10 * 1000,
+    memory: 256 * 1024,
+  },
 
-// 是否开放给普通用户
-config.status = {
-  Reserve: 0,
-  Available: 2,
-}
+  module: {
+    Problem: 1,
+    Contest: 2,
+  },
 
-// 比赛类型
-config.encrypt = {
-  Public: 1,
-  Private: 2,
-  Password: 3,
-}
+  // 是否开放给普通用户
+  status: {
+    Reserve: 0,
+    Available: 2,
+  },
 
-config.deploy = {
-  judgers: 2,
-  adminInitPwd: 'kplkplkpl',
-}
+  // 比赛类型
+  encrypt: {
+    Public: 1,
+    Private: 2,
+    Password: 3,
+  },
 
-config.secretKey = process.env.secretKey || ''
+  deploy: {
+    judgers: 2,
+    adminInitPwd: 'kplkplkpl',
+  },
 
-config.dbURL = process.env.DBURL || process.env.dbURL // 之所以两个只为了兼容旧版命名；请优先采用后者
-
-config.mail = {
-  enable: true, // set false to disable email notifications
-  // https://nodemailer.com/about/
-  host: 'smtp-mail.outlook.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.MAIL_ADDRESS,
-    pass: process.env.MAIL_PASSWORD,
+  mail: {
+    // set false to disable email notifications
+    enable: false,
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    // true for 465, false for other ports
+    secure: false,
+    auth: {
+      user: process.env.MAIL_ADDRESS,
+      pass: process.env.MAIL_PASSWORD,
+    },
   },
 }
-
-config.port = Number.parseInt(
-  process.env.PORT || 3000,
-)
 
 module.exports = config

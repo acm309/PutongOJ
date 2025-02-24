@@ -38,10 +38,10 @@ test('helper.isAdmin', (t) => {
     privilege: config.privilege.Root,
   }))
   t.true(helper.isAdmin({
-    privilege: config.privilege.Teacher,
+    privilege: config.privilege.Admin,
   }))
   t.false(helper.isAdmin({
-    privilege: config.privilege.PrimaryUser,
+    privilege: config.privilege.User,
   }))
   t.false(helper.isAdmin({}))
   t.false(helper.isAdmin())
@@ -69,10 +69,10 @@ test('helper.isRoot', (t) => {
     privilege: null,
   }))
   t.false(helper.isRoot({
-    privilege: config.privilege.Teacher,
+    privilege: config.privilege.Admin,
   }))
   t.false(helper.isRoot({
-    privilege: config.privilege.PrimaryUser,
+    privilege: config.privilege.User,
   }))
   t.true(helper.isRoot({
     privilege: config.privilege.Root,

@@ -12,6 +12,7 @@ const problems = {
       in: '1 2\r\n3 4',
       out: '3\r\n7',
       tags: [ 'level1' ],
+      status: config.status.Available,
     },
     {
       title: 'Ruby And Array',
@@ -21,6 +22,7 @@ const problems = {
       in: '2\r\n1 2\r\n3\r\n3 2 1\r\n4\r\n4 3 2 1',
       out: 'YES\r\nYES\r\nNO',
       tags: [ 'level1' ],
+      status: config.status.Available,
     },
     {
       title: 'Sapphire and Robot',
@@ -30,6 +32,7 @@ const problems = {
       in: '2 2\r\nRU\r\n1 2\r\nRU\r\n-1 1000000000\r\nLRRLU\r\n0 0\r\nD',
       out: 'Yes\r\nNo\r\nYes\r\nYes\r\n',
       tags: [ 'level2' ],
+      status: config.status.Available,
     },
     {
       title: '简单题',
@@ -39,6 +42,7 @@ const problems = {
       in: '',
       out: '',
       tags: [ 'level2' ],
+      status: config.status.Available,
     },
     {
       title: '跟奥巴马一起画方块',

@@ -33,7 +33,7 @@ test('Website config', async (t) => {
 
 test('Visitor can not submit file', async (t) => {
   const res = await request
-    .post('/api/submit')
+    .post('/api/upload')
     .attach('image', filepath)
   t.is(res.status, 403)
 })
@@ -48,7 +48,7 @@ test('Admin could submit file', async (t) => {
   t.is(res.status, 200)
 
   const submit = await request
-    .post('/api/submit')
+    .post('/api/upload')
     .attach('image', filepath)
 
   t.is(submit.status, 200)
