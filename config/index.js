@@ -1,7 +1,7 @@
 const process = require('node:process')
 
 const config = {
-  port: Number.parseInt(process.env.PORT),
+  port: Number.parseInt(process.env.PORT || 3000),
   dbURL: String(process.env.dbURL),
   redisURL: String(process.env.redisURL),
   secretKey: String(process.env.secretKey),

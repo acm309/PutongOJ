@@ -38,7 +38,13 @@ Currently Not available
 git clone https://github.com/acm309/PutongOJ.git PutongOJ
 ```
 
-2. compose up
+2. 配置环境变量
+
+```bash
+mv .env.sample .env
+```
+
+3. compose up
 
 ```bash
 docker-compose up
@@ -80,27 +86,22 @@ npm i -g pnpm
 pnpm i
 ```
 
-5. 尝试连接数据库
-
-设置环境变量
+5. 配置环境变量
 
 ```bash
-export redisURL='your redis url'
-export dbURL='your mongodb url'
+mv .env.sample .env
 ```
 
-更新 `config/index.js`
-
-```js
-const prod = {
-  port: 3000 // the port the application will listen on
-}
+```bash
+redisURL='your redis url'
+dbURL='your mongodb url'
+port=3000 #the port the application will listen on
 ```
 
 6. 下载静态文件和启动判题端
 
 ```bash
-node manager.js
+node manager.js setup
 ```
 
 `pm2.config.json` 会自动生成.

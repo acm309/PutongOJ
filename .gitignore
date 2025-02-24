@@ -1,10 +1,11 @@
 docker-compose.debug.yml
+.env
+data/*
+!data/example
 
 # customary
 .tern-project
 requests/
-data/*
-!data/1000
 migrations/db
 migrations/backup
 !migrations/db/.gitkeep
