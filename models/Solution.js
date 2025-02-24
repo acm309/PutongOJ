@@ -25,7 +25,7 @@ const solutionSchema = mongoose.Schema({
   },
   mid: {
     type: Number,
-    default: 1, // 历史遗留问题，这里的 mid 指代 cid, 默认为 1,
+    default: -1, // mid 指代 contest id / CID (历史遗留问题)
     index: true,
   },
   time: {

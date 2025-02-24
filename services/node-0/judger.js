@@ -17,14 +17,15 @@ const fse = require('fs-extra')
 const { command: execaCommand } = require('execa')
 
 require('../../config/db')
+
 const Solution = require('../../models/Solution')
 const Problem = require('../../models/Problem')
-const User = require('../../models/User')
+
 const logger = require('../../utils/logger')
 const config = require('../../config')
 const redis = require('../../config/redis')
 
-const extensions = [ '', 'c', 'cpp', 'java', 'py' ]
+const extensions = { 1: 'c', 2: 'cpp', 3: 'java', 4: 'py' }
 
 // 转化代码
 // 因为判题端各数字表示的含义与 OJ 默认的不同，因此需要做一次转化
@@ -32,30 +33,21 @@ const extensions = [ '', 'c', 'cpp', 'java', 'py' ]
 // 判题端的 judge 代码见 README
 // OJ 默认的见 config/index.js
 function judgeCode (code) {
-  if (Number.isNaN(+code)) {
+  if (typeof code !== 'number') {
     throw new TypeError(`${code}, which has type ${typeof code}, should be able to be converted into a number`)
   }
   code = Number.parseInt(code)
-  if (code === 2) {
-    return config.judge.Accepted
-  } else if (code === 3) {
-    return config.judge.PresentationError
-  } else if (code === 4) {
-    return config.judge.TimeLimitExceeded
-  } else if (code === 5) {
-    return config.judge.MemoryLimitExceed
-  } else if (code === 6) {
-    return config.judge.WrongAnswer
-  } else if (code === 7) {
-    return config.judge.OutputLimitExceed
-  } else if (code === 8) {
-    return config.judge.CompileError
-  } else if (code === 14) {
-    return config.judge.SystemError
-  } else if (code === 16) {
-    return config.judge.Skipped
-  } else {
-    return config.judge.RuntimeError
+  switch (code) {
+    case 2: return config.judge.Accepted
+    case 3: return config.judge.PresentationError
+    case 4: return config.judge.TimeLimitExceeded
+    case 5: return config.judge.MemoryLimitExceed
+    case 6: return config.judge.WrongAnswer
+    case 7: return config.judge.OutputLimitExceed
+    case 8: return config.judge.CompileError
+    case 14: return config.judge.SystemError
+    case 16: return config.judge.Skipped
+    default: return config.judge.RuntimeError
   }
 }
 
@@ -149,7 +141,7 @@ async function judge (problem, solution) {
   return solution
 }
 
-async function afterJudge (problem, solution) {
+async function afterJudge (solution) {
   if (solution.judge === config.judge.Accepted) { // 作对的话要进行 sim 测试，判断是否有 "抄袭" 可能
     const sim = await simTest(solution)
     if (sim.sim !== 0) { // 有 "抄袭可能"
@@ -160,7 +152,6 @@ async function afterJudge (problem, solution) {
   return Promise.all([
     solution.save(),
     solutionArchive(solution),
-    userUpdate(solution),
   ])
 }
 
@@ -194,79 +185,13 @@ async function simTest (solution) {
   }
 }
 
-/**
- * 如果用户之前没有提交过这题，那么 user.submit += 1, problem.submit += 1
- * 如果用户之前没有 ac 过这题，那么 user.solved += 1, problem.solved += 1
- */
-async function userUpdate (solution) {
-  const user = await User.findOne({ uid: solution.uid }).exec()
-  if (user == null) {
-    logger.error(`Excuse me? No such a user with uid "${solution.uid}"`)
-    return
-  }
-  const problem = await Problem.findOne({ pid: solution.pid }).exec()
-  if (problem == null) {
-    logger.error(`Excuse me? No such a problem with pid "${solution.pid}"`)
-  }
-  // 这道题之前提交过了么?
-  const isSubmittedBefore = await Solution.count({
-    uid: user.uid,
-    pid: solution.pid,
-    sid: { $ne: solution.sid }, // 把自身排除
-  }).exec()
-  if (isSubmittedBefore === 0) {
-    await User.findOneAndUpdate({
-      uid: user.uid,
-    }, {
-      $inc: {
-        submit: 1,
-      },
-    }).exec()
-    await Problem.findOneAndUpdate({
-      pid: problem.pid,
-    }, {
-      $inc: {
-        submit: 1,
-      },
-    }).exec()
-  }
-  console.log('submit', isSubmittedBefore)
-  if (solution.judge === config.judge.Accepted) {
-    // 之前 ac 过了么
-    const isAcBefore = await Solution.count({
-      uid: user.uid,
-      pid: solution.pid,
-      sid: { $ne: solution.sid },
-      judge: config.judge.Accepted,
-    }).exec()
-    console.log('isAc', isAcBefore)
-    if (isAcBefore === 0) {
-      await User.findOneAndUpdate({
-        uid: user.uid,
-      }, {
-        $inc: {
-          solve: 1,
-        },
-      }).exec()
-      await Problem.findOneAndUpdate({
-        pid: problem.pid,
-      }, {
-        $inc: {
-          solve: 1,
-        },
-      }).exec()
-    }
-  }
-}
-
 async function main () {
   await execaCommand(`chmod 755 ${resolve(__dirname, 'sim_text')}`)
   await execaCommand(`chmod 755 ${resolve(__dirname, 'sim.sh')}`)
   while (1) {
-    // 移出并获取oj:solutions列表中的最后一个元素
-    const res = await redis.brpop('oj:solutions', 365 * 24 * 60) // one year 最长等一年(阻塞时间)
-    if (res == null) { continue }
-    const sid = +res[1]
+    // 移出并获取 oj:solutions 列表中的最后一个元素
+    const item = await redis.brpop('oj:solutions', 0)
+    const sid = Number.parseInt(item[1])
     const baseInfo = await fetchProblemAndSolution(sid)
     if (baseInfo == null) {
       logger.info(`Start judge: <sid ${sid}> null`)
@@ -282,11 +207,9 @@ async function main () {
       logger.error(`${e}`)
       solution.judge = config.judge.SystemError
     }
-    await afterJudge(problem, solution)
+    await afterJudge(solution)
     logger.info(`End judge: <sid ${sid}> <pid: ${problem.pid}> by <uid: ${solution.uid}> with result ${solution.judge}`)
-    if (solution.mid) {
-      redis.lpush('oj:contest:solution', solution.sid)
-    }
+    redis.lpush('oj:updates', solution.sid)
   }
 }
 

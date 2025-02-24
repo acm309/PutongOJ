@@ -8,7 +8,7 @@ const config = require('.')
 
 async function databaseSetup () {
   const models = {
-    Contest: 1,
+    Contest: 0,
     Discuss: 0,
     Group: 0,
     News: 0,
