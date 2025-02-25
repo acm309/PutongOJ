@@ -79,7 +79,14 @@ test('Create user without pwd', async (t) => {
 test('Create user with pwd not valid (too short)', async (t) => {
   const r = await request
     .post('/api/user')
-    .send({ uid: 'test17873', pwd: '12345' })
+    .send({ uid: 'test17873', pwd: 'Aa@1' })
+  t.is(r.status, 400)
+})
+
+test('Create user with pwd not valid (too simple)', async (t) => {
+  const r = await request
+    .post('/api/user')
+    .send({ uid: 'test28699', pwd: '12345678' })
   t.is(r.status, 400)
 })
 

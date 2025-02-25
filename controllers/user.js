@@ -5,7 +5,7 @@ const Solution = require('../models/Solution')
 const Group = require('../models/Group')
 const config = require('../config')
 const logger = require('../utils/logger')
-const { generatePwd } = require('../utils/helper')
+const { generatePwd, isComplexPwd } = require('../utils/helper')
 const { isAdmin, isRoot } = require('../utils/helper')
 
 /**
@@ -102,8 +102,8 @@ const create = async (ctx) => {
   const pwd = String(opt.pwd || '')
   const nick = String(opt.nick || '')
 
-  if (pwd.length <= 5) {
-    ctx.throw(400, 'The length of the password must be greater than 5!')
+  if (!isComplexPwd(pwd)) {
+    ctx.throw(400, 'The password is not complex enough!')
   }
   const exists = await User.findOne({ uid }).exec()
   if (exists) {
@@ -161,8 +161,8 @@ const update = async (ctx) => {
     if (user.pwd !== generatePwd(oldPwd) && !isAdmin(profile)) {
       ctx.throw(400, 'Old password is wrong!')
     }
-    if (newPwd.length <= 5) {
-      ctx.throw(400, 'The length of the password must be greater than 5!')
+    if (!isComplexPwd(newPwd)) {
+      ctx.throw(400, 'The new password is not complex enough!')
     }
     user.pwd = generatePwd(newPwd)
   }

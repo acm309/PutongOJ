@@ -188,6 +188,13 @@ test('Update user with new pwd not valid (too short)', async (t) => {
   t.is(r.status, 400)
 })
 
+test('Update user with new pwd not valid (too simple)', async (t) => {
+  const r = await request
+    .put(`/api/user/${uid}`)
+    .send({ oldPwd: pwd, newPwd: '12345678' })
+  t.is(r.status, 400)
+})
+
 test('Update user with wrong old pwd', async (t) => {
   const r = await request
     .put(`/api/user/${uid}`)

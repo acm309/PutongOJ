@@ -10,6 +10,14 @@ function generatePwd (pwd) {
   return crypto.createHash('md5').update(pwd).digest('hex') + crypto.createHash('sha1').update(pwd).digest('hex')
 }
 
+function isComplexPwd (pwd) {
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
+}
+
+function isLogined (ctx) {
+  return ctx.session != null && ctx.session.profile != null && ctx.session.profile.uid != null
+}
+
 function isAdmin (profile) {
   if (profile == null || profile.privilege == null) { return false }
   if (Number.parseInt(profile.privilege) === config.privilege.Root || Number.parseInt(profile.privilege) === config.privilege.Admin) {
@@ -32,15 +40,12 @@ function isUndefined (item) {
   return typeof item === 'undefined'
 }
 
-function isLogined (ctx) {
-  return ctx.session != null && ctx.session.profile != null && ctx.session.profile.uid != null
-}
-
 module.exports = {
-  generatePwd,
   purify,
+  generatePwd,
+  isComplexPwd,
+  isLogined,
   isAdmin,
   isRoot,
   isUndefined,
-  isLogined,
 }
