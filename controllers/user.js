@@ -146,7 +146,7 @@ const update = async (ctx) => {
     }
   })
 
-  const privilege = Number.parseInt(opt.privilege) || user.privilege
+  const privilege = Number.parseInt(opt.privilege ?? user.privilege)
   if (privilege !== user.privilege && !(
     isRoot(profile)
     && profile.uid !== user.uid
