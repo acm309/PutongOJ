@@ -60,7 +60,7 @@ const userSecurityValidate = $computed(() => ({
 }))
 
 const privilegeOptions = [
-  { label: 'Banned', value: privilege.Banned, disabled: true },
+  { label: 'Banned', value: privilege.Banned },
   { label: 'User', value: privilege.User },
   { label: 'Admin', value: privilege.Admin },
   { label: 'Root', value: privilege.Root },
@@ -128,10 +128,7 @@ async function updatePassword () {
       </FormItem>
       <FormItem v-if="isRoot" :label="t('oj.privilege')">
         <RadioGroup v-model="user.privilege">
-          <Radio
-            v-for="item in privilegeOptions" :key="item.value" :label="item.value"
-            :disabled="item.disabled || isSelf" border
-          >
+          <Radio v-for="item in privilegeOptions" :key="item.value" :label="item.value" :disabled="isSelf" border>
             {{ item.label }}
           </Radio>
         </RadioGroup>
