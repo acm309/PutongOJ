@@ -19,7 +19,7 @@ const setup = require('./config/setup')
 const app = new Koa()
 
 // 日志，会在控制台显示请求的方法和路由
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV === 'development') {
   app.use(koaLogger())
 }
 
