@@ -2,12 +2,14 @@ import { defineStore } from 'pinia'
 import api from '@/api'
 import type { WebsiteConfigResp } from '@/types'
 import { privilege } from '@/util/constant'
+import vditorInfo from 'vditor/package.json'
 
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
     timeDiff: NaN,
     website: {} as WebsiteConfigResp['website'],
+    vditorCDN: `${location.origin}/static/vditor-${vditorInfo.version}`,
     // Todo: remove
     privilege,
     status: {

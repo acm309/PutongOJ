@@ -1,30 +1,35 @@
 <script setup>
+import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VditorPreview from 'vditor/dist/method.min'
 import 'vditor/dist/index.css'
+import { useRootStore } from '@/store'
 
+const props = defineProps([ 'modelValue' ])
 const { locale } = useI18n()
-
-const props = defineProps(['modelValue'])
-const preview = ref(null)
-const config = {
-  lang: locale.value.replace('-', '_'),
-  after() {
-    rendering = false
-  },
-  render: {
-    media: {
-      enable: false,
-    },
-  },
-}
+const rootStore = useRootStore()
+const { vditorCDN } = $(storeToRefs(rootStore))
 
 let rendering = $ref(false)
 let renderPromise = $ref(Promise.resolve())
 let waiting = $ref(false)
 
-async function render() {
+const preview = ref(null)
+const config = $computed(() => ({
+  after () {
+    rendering = false
+  },
+  cdn: vditorCDN,
+  lang: locale.value.replace('-', '_'),
+  render: {
+    media: {
+      enable: false,
+    },
+  },
+}))
+
+async function render () {
   if (!preview.value || !props.modelValue || waiting) return
 
   waiting = true
@@ -38,7 +43,7 @@ async function render() {
   renderPromise = VditorPreview.preview(
     preview.value,
     props.modelValue,
-    config
+    config,
   )
 }
 
@@ -48,11 +53,11 @@ watch(() => props.modelValue, render)
 
 <template>
   <div>
-    <div class="vidtor-uninitialized" v-if="rendering">
+    <div v-if="rendering" class="vidtor-uninitialized">
       <Icon type="ios-loading" class="card-icon" />
       <span class="card-text">Rendering...</span>
     </div>
-    <div ref="preview" v-show="!rendering"></div>
+    <div v-show="!rendering" ref="preview" />
   </div>
 </template>
 

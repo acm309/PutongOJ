@@ -1,13 +1,11 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
+import { useRootStore } from '@/store'
 
-const { locale } = useI18n()
-
-const lang = $computed(() => locale.value.replace('-', '_'))
-const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: String,
   height: {
@@ -15,11 +13,20 @@ const props = defineProps({
     default: 512,
   },
 })
+const emit = defineEmits([ 'update:modelValue' ])
+const { locale } = useI18n()
+const rootStore = useRootStore()
+const { vditorCDN } = $(storeToRefs(rootStore))
+
+let editor = null
+
+const lang = $computed(() => locale.value.replace('-', '_'))
 const vditor = ref(null)
 const config = $computed(() => ({
   cache: {
     enable: false,
   },
+  cdn: vditorCDN,
   fullscreen: {
     index: 110,
   },
@@ -43,40 +50,40 @@ const config = $computed(() => ({
     position: 'bottom',
   },
   toolbar: [
-    "headings",
-    "bold",
-    "italic",
-    "strike",
-    "link",
-    "|",
-    "list",
-    "ordered-list",
-    "check",
-    "outdent",
-    "indent",
-    "|",
-    "quote",
-    "line",
-    "code",
-    "inline-code",
-    "insert-before",
-    "insert-after",
-    "|",
-    "upload",
-    "table",
-    "|",
-    "undo",
-    "redo",
-    "|",
-    "fullscreen",
-    "edit-mode",
-    "preview",
+    'headings',
+    'bold',
+    'italic',
+    'strike',
+    'link',
+    '|',
+    'list',
+    'ordered-list',
+    'check',
+    'outdent',
+    'indent',
+    '|',
+    'quote',
+    'line',
+    'code',
+    'inline-code',
+    'insert-before',
+    'insert-after',
+    '|',
+    'upload',
+    'table',
+    '|',
+    'undo',
+    'redo',
+    '|',
+    'fullscreen',
+    'edit-mode',
+    'preview',
     {
-      name: "more",
+      name: 'more',
       toolbar: [
-        "both",
-        "export",
-        "outline",
+        'both',
+        'export',
+        'outline',
       ],
     },
   ],
@@ -97,9 +104,7 @@ const config = $computed(() => ({
   },
 }))
 
-let editor = null
-
-function init() {
+function init () {
   if (editor) editor.destroy()
   editor = new Vditor(vditor.value, config)
 }
