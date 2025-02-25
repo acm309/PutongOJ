@@ -152,12 +152,12 @@ export default {
     privilege: '权限',
     please_relogin: '请重新登录',
 
-    password_requirement: '密码长度至少为5位，只能包含数字和字母',
+    password_requirement: '密码长度至少为 8 个字符，且必须包含大小写字母和数字',
     password_not_match: '密码不匹配',
     password_missing: '请输入密码',
     password_confirm_missing: '请确认输入密码',
     username_missing: '请输入用户名',
-    username_length_requirement: '用户名长度至少为4位',
+    username_length_requirement: '用户名长度在 3 到 20 个字符之间',
     username_char_requirement: '用户名只能包含数字和字母',
 
     update_success: '更新成功！',

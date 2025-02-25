@@ -164,12 +164,12 @@ export default {
     privilege: 'Privilege',
     please_relogin: 'Please relogin',
 
-    password_requirement: 'At least 5 characters long and only numbers and letters',
+    password_requirement: 'At least 8 chars with uppercase, lowercase and number',
     password_not_match: 'Password not match',
     password_missing: 'Password is missing',
     password_confirm_missing: 'Confirm password is missing',
     username_missing: 'Username is missing',
-    username_length_requirement: 'Username must be at least 4 characters long',
+    username_length_requirement: 'Username must be between 3 and 20 characters',
     username_char_requirement: 'Username can only contain number and letters',
 
     update_success: 'Update success!',

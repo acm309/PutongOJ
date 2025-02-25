@@ -7,7 +7,6 @@ import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n()
 
-const password_requiremnt = $computed(() => t('oj.password_requirement'))
 let mode = $ref('login')
 const form = $ref({
   uid: '',
@@ -16,26 +15,15 @@ const form = $ref({
   checkPwd: '',
 })
 
-function validatePass1 (rule, value, callback) {
-  const error = !/[0-9a-zA-Z]{5,50}$/.test(value)
-    ? new Error(password_requiremnt)
-    : null
-  error ? callback(error) : callback()
-}
-// 验证密码是否重复
-function validatePass2 (rule, value, callback) {
+function checkPwdValidator (rule, value, callback) {
   const error = value !== form.pwd ? new Error(t('oj.password_not_match')) : null
-  error ? callback(error) : callback()
+  if (error) { callback(error) } else { callback() }
 }
-const basicRules = {
-  uid: [
-    { required: true, message: t('oj.username_missing'), trigger: 'change' },
-    { min: 4, max: 50, message: t('oj.username_length_requirement'), trigger: 'change' },
-  ],
-  pwd: [
-    { required: true, message: t('oj.password_missing'), trigger: 'change' },
-  ],
-}
+
+const basicRules = $computed(() => ({
+  uid: [ { required: true, message: t('oj.username_missing'), trigger: 'change' } ],
+  pwd: [ { required: true, message: t('oj.password_missing'), trigger: 'change' } ],
+}))
 
 const sessionStore = useSessionStore()
 const userStore = useUserStore()
@@ -48,23 +36,21 @@ const registerForm = ref(null)
 const $Message = inject('$Message')
 
 const loginRules = basicRules
-const registerRules = {
-  uid: basicRules.uid.concat({
-    required: true,
-    type: 'string',
-    pattern: /^\w+$/ig,
-    message: t('oj.username_char_requirement'),
-    trigger: 'change',
-  }),
+const registerRules = $computed(() => ({
+  uid: [
+    ...basicRules.uid,
+    { min: 3, max: 20, message: t('oj.username_length_requirement'), trigger: 'change' },
+    { required: true, type: 'string', pattern: /^[a-z0-9]+$/i, message: t('oj.username_char_requirement'), trigger: 'change' },
+  ],
   pwd: [
     { required: true, message: t('oj.password_missing'), trigger: 'change' },
-    { validator: validatePass1, trigger: 'change' },
+    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, message: t('oj.password_requirement'), trigger: 'change' },
   ],
   checkPwd: [
     { required: true, message: t('oj.password_confirm_missing'), trigger: 'change' },
-    { validator: validatePass2, trigger: 'change' },
+    { validator: checkPwdValidator, trigger: 'change' },
   ],
-}
+}))
 
 function submit () {
   if (mode === 'login') {
@@ -89,17 +75,17 @@ function submit () {
   <Modal v-model="visible" :closable="false" @on-cancel="triggerLogin">
     <Tabs v-model="mode">
       <TabPane :label="t('oj.login')" name="login">
-        <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100">
-          <FormItem class="loginuid" :label="t('oj.username')" prop="uid">
+        <Form ref="loginForm" :model="form" :rules="loginRules" :label-width="100" class="login-form">
+          <FormItem :label="t('oj.username')" prop="uid">
             <Input v-model="form.uid" />
           </FormItem>
-          <FormItem class="loginpwd" :label="t('oj.password')" prop="pwd">
+          <FormItem :label="t('oj.password')" prop="pwd">
             <Input v-model="form.pwd" type="password" @keyup.enter="submit" />
           </FormItem>
         </Form>
       </TabPane>
       <TabPane :label="t('oj.register')" name="register">
-        <Form ref="registerForm" :model="form" :rules="registerRules" :label-width="100">
+        <Form ref="registerForm" :model="form" :rules="registerRules" :label-width="100" class="register-form">
           <FormItem :label="t('oj.username')" prop="uid">
             <Input v-model="form.uid" :placeholder="t('oj.username_description')" />
           </FormItem>
@@ -109,7 +95,7 @@ function submit () {
           <FormItem :label="t('oj.password')" prop="pwd">
             <Input v-model="form.pwd" type="password" />
           </FormItem>
-          <FormItem :label="t('oj.password_confirm')" prop="checkPwd" class="checkpwd">
+          <FormItem :label="t('oj.password_confirm')" prop="checkPwd">
             <Input v-model="form.checkPwd" type="password" />
           </FormItem>
         </Form>
@@ -135,9 +121,8 @@ function submit () {
     padding: 8px 16px 12px 16px
 .ivu-form-item
   margin-right: 20px
-.checkpwd
-  margin-bottom: 5px
-.loginuid
-  margin-top: 56px
-  margin-bottom: 30px
+.login-form
+  padding-top 82px
+.register-form
+  padding-top 24px
 </style>

@@ -24,20 +24,40 @@ const { isRoot, isAdmin, profile } = $(storeToRefs(sessionStore))
 const { user } = $(storeToRefs(userStore))
 
 let loading = $ref(false)
-let oldPwd = $ref('')
-let newPwd = $ref('')
-let checkPwd = $ref('')
 
-const userForm = $ref(null)
+const userInfoForm = $ref(null)
+const userSecurityForm = $ref(null)
 const isSelf = $computed(() => profile?.uid === user.uid)
+const securityForm = $ref({
+  oldPwd: '',
+  newPwd: '',
+  checkPwd: '',
+})
 
-const ruleValidate = {
+const userInfoValidate = {
   uid: [ { required: true, trigger: 'blur' } ],
   nick: [ { type: 'string', max: 20, trigger: 'change' } ],
   motto: [ { type: 'string', max: 100, trigger: 'change' } ],
   mail: [ { type: 'email', trigger: 'change' } ],
   school: [ { type: 'string', max: 20, trigger: 'change' } ],
 }
+
+function checkPwdValidator (rule, value, callback) {
+  const error = value !== securityForm.newPwd ? new Error(t('oj.password_not_match')) : null
+  if (error) { callback(error) } else { callback() }
+}
+
+const userSecurityValidate = $computed(() => ({
+  oldPwd: [ { required: !isAdmin, message: t('oj.password_missing'), trigger: 'change' } ],
+  newPwd: [
+    { required: true, message: t('oj.password_missing'), trigger: 'change' },
+    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, message: t('oj.password_requirement'), trigger: 'change' },
+  ],
+  checkPwd: [
+    { required: true, message: t('oj.password_confirm_missing'), trigger: 'change' },
+    { validator: checkPwdValidator, trigger: 'change' },
+  ],
+}))
 
 const privilegeOptions = [
   { label: 'Banned', value: privilege.Banned, disabled: true },
@@ -58,40 +78,36 @@ function updateProfile () {
     }
     loading = false
   }
-  userForm.validate(submit)
+  userInfoForm.validate(submit)
 }
 
 async function updatePassword () {
-  if ((!isAdmin && !oldPwd) || !newPwd) {
-    message.error(t('oj.password_missing'))
-    return
-  }
-  if (!checkPwd) {
-    message.error(t('oj.password_confirm_missing'))
-    return
-  }
-  if (newPwd !== checkPwd) {
-    message.error(t('oj.password_not_match'))
-    return
-  }
-  loading = true
-  const response = await update({ uid: user.uid, oldPwd, newPwd })
-  if (!response.isAxiosError) {
-    oldPwd = ''
-    newPwd = ''
-    checkPwd = ''
-    message.success(t('oj.update_success'))
-    if (isSelf) {
-      logout().then(() => message.info(t('oj.please_relogin')))
+  const submit = async (valid) => {
+    if (!valid) return
+    loading = true
+    const response = await update({
+      uid: user.uid,
+      oldPwd: securityForm.oldPwd,
+      newPwd: securityForm.newPwd,
+    })
+    if (!response.isAxiosError) {
+      securityForm.oldPwd = ''
+      securityForm.newPwd = ''
+      securityForm.checkPwd = ''
+      message.success(t('oj.update_success'))
+      if (isSelf) {
+        logout().then(() => message.info(t('oj.please_relogin')))
+      }
     }
+    loading = false
   }
-  loading = false
+  userSecurityForm.validate(submit)
 }
 </script>
 
 <template>
   <div class="user-edit">
-    <Form ref="userForm" :label-width="isZH ? 80 : 130" :rules="ruleValidate" :model="user">
+    <Form ref="userInfoForm" :label-width="isZH ? 80 : 130" :rules="userInfoValidate" :model="user">
       <FormItem :label="t('oj.username')" prop="uid">
         <Input v-model="user.uid" disabled />
       </FormItem>
@@ -126,18 +142,18 @@ async function updatePassword () {
         </Button>
       </FormItem>
     </Form>
-    <Form :label-width="isZH ? 80 : 130">
+    <Form ref="userSecurityForm" :label-width="isZH ? 80 : 130" :rules="userSecurityValidate" :model="securityForm">
       <Divider simple class="user-divider">
         {{ t('oj.security') }}
       </Divider>
-      <FormItem v-if="!isAdmin" :label="t('oj.password_old')">
-        <Input v-model="oldPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
+      <FormItem v-if="!isAdmin" :label="t('oj.password_old')" prop="oldPwd">
+        <Input v-model="securityForm.oldPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
       </FormItem>
-      <FormItem :label="t('oj.password_new')">
-        <Input v-model="newPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
+      <FormItem :label="t('oj.password_new')" prop="newPwd">
+        <Input v-model="securityForm.newPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
       </FormItem>
-      <FormItem :label="t('oj.password_confirm')">
-        <Input v-model="checkPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
+      <FormItem :label="t('oj.password_confirm')" prop="checkPwd">
+        <Input v-model="securityForm.checkPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
       </FormItem>
       <FormItem>
         <Button type="primary" size="large" @click="updatePassword">
