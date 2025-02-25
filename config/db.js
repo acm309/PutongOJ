@@ -9,7 +9,7 @@ mongoose.set('strictQuery', true)
 mongoose.Promise = globalThis.Promise
 
 // 连接MongoDB数据库
-mongoose.connect(config.dbURL)
+mongoose.connect(config.dbURL, { authSource: 'admin' })
 
 mongoose.Promise = globalThis.Promise
 
