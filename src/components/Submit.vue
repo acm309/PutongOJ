@@ -25,7 +25,7 @@ solutionStore.clearSavedSolution()
           <Option :value="3">
             Java (openJDK)
           </Option>
-          <Option :value="4">
+          <Option :value="4" disabled>
             Python 3
           </Option>
         </Select>
