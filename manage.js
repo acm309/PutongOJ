@@ -60,7 +60,7 @@ if (config.mail && config.mail.enable) {
 }
 
 async function judgeSetup () {
-  let judgers = +config.judgers
+  let judgers = +config.deploy.judgers
   if (!(judgers >= 1 && judgers <= 10)) { judgers = 1 }
 
   const judgersDir = resolve(__dirname, 'services')
