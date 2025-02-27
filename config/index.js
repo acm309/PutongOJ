@@ -34,11 +34,6 @@ const config = {
     memory: 256 * 1024,
   },
 
-  module: {
-    Problem: 1,
-    Contest: 2,
-  },
-
   // 是否开放给普通用户
   status: {
     Reserve: 0,

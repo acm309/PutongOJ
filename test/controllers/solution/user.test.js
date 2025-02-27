@@ -85,7 +85,7 @@ test('Code is too long', async (t) => {
     using namespace std;
 
     int main () {
-      "${'a'.repeat(10000)}";
+      "${'a'.repeat(20000)}";
       return 0;
     }
   `

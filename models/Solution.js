@@ -1,5 +1,3 @@
-// optimize
-// https://itnext.io/performance-tips-for-mongodb-mongoose-190732a5d382
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
 const config = require('../config')
@@ -8,25 +6,80 @@ const ids = require('./ID')
 const solutionSchema = mongoose.Schema({
   sid: {
     type: Number,
+    default: -1,
+    immutable: true,
     index: {
       unique: true,
     },
-    default: -1,
   },
   pid: {
     type: Number,
-    required: true,
+    immutable: true,
     index: true,
+    required: true,
   },
   uid: {
     type: String,
+    immutable: true,
+    index: true,
     required: true,
+  },
+  mid: { // mid 指代 contest id (历史遗留问题)
+    type: Number,
+    default: -1,
+    immutable: true,
     index: true,
   },
-  mid: {
+  code: {
+    type: String,
+    immutable: true,
+    required: true,
+    validate: {
+      validator (v) {
+        return v.length >= 8 && v.length <= 16384
+      },
+      message:
+        'The length of code should be greater than 8 and less than 16384',
+    },
+  },
+  length: {
     type: Number,
-    default: -1, // mid 指代 contest id / CID (历史遗留问题)
-    index: true,
+    immutable: true,
+    required: true,
+  },
+  language: {
+    type: Number,
+    immutable: true,
+    required: true,
+  },
+  create: {
+    type: Number,
+    default: Date.now,
+    immutable: true,
+  },
+  status: {
+    type: Number,
+    default: config.status.Available,
+    validate: {
+      validator (v) {
+        return Object.values(config.status).includes(v)
+      },
+      message:
+        `Invalid status. Valid values are `
+        + `[${Object.values(config.status).join(', ')}]`,
+    },
+  },
+  judge: {
+    type: Number,
+    default: config.judge.Pending,
+    validate: {
+      validator (v) {
+        return Object.values(config.judge).includes(v)
+      },
+      message:
+        `Invalid judge. Valid values are `
+        + `[${Object.values(config.judge).join(', ')}]`,
+    },
   },
   time: {
     type: Number,
@@ -35,23 +88,6 @@ const solutionSchema = mongoose.Schema({
   memory: {
     type: Number,
     default: 0,
-  },
-  create: {
-    type: Number,
-    default: Date.now,
-  },
-  length: Number,
-  judge: {
-    type: Number,
-    default: config.judge.Pending,
-  },
-  status: {
-    type: Number,
-    default: config.judge.Pending,
-  },
-  language: {
-    type: Number,
-    required: true,
   },
   error: {
     type: String,
@@ -65,14 +101,6 @@ const solutionSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  code: {
-    type: String,
-    required: true,
-  },
-  module: {
-    type: Number,
-    default: config.module.Problem,
-  },
   testcases: {
     type: mongoose.Schema.Types.Mixed,
     default: [],
@@ -83,46 +111,18 @@ const solutionSchema = mongoose.Schema({
 
 solutionSchema.plugin(mongoosePaginate)
 
-/**
- * @example
- * const s = await Solution.findOne({ sid }).exec()
- * if (s.isAccepted) console.log(`${s.sid} has been Accepted`)
- * else console.log(`Try again to solve it`)
- */
 solutionSchema.virtual('isAccepted').get(function () {
   return this.judge === config.judge.Accepted
 })
-
 solutionSchema.virtual('isPending').get(function () {
   return this.judge === config.judge.Pending
 })
 
-solutionSchema.pre('validate', function (next) {
-  // 验证字段
-  if (Number.isNaN(this.pid)) {
-    next(new Error('Pid should be a number'))
-  } else if (this.code.length <= 5) {
-    next(new Error('The length of code should be greater than 5'))
-  } else if (this.code.length >= 10000) {
-    next(new Error('The length of code should be less than 10000'))
-  } else {
-    next()
-  }
-})
-
-solutionSchema.pre('save', function (next) {
-  // 保存
+solutionSchema.pre('save', async function (next) {
   if (this.sid === -1) {
-    // 表示新的提交被创建了，因此赋予一个新的 id
-    ids
-      .generateId('Solution')
-      .then((id) => {
-        this.sid = id
-      })
-      .then(next)
-  } else {
-    next()
+    this.sid = await ids.generateId('Solution')
   }
+  next()
 })
 
 module.exports = mongoose.model('Solution', solutionSchema)
