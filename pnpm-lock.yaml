@@ -11,6 +11,9 @@ importers:
       '@antfu/eslint-config':
         specifier: ^2.27.3
         version: 2.27.3(@typescript-eslint/utils@8.24.1(eslint@8.57.1)(typescript@4.9.5))(@vue/compiler-sfc@3.5.10)(eslint@8.57.1)(typescript@4.9.5)
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
       cross-env:
         specifier: ^5.2.1
         version: 5.2.1
@@ -105,9 +108,6 @@ importers:
       codecov:
         specifier: ^3.8.3
         version: 3.8.3
-      commander:
-        specifier: ^12.1.0
-        version: 12.1.0
       eslint-config-standard:
         specifier: ^11.0.0
         version: 11.0.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.24.1(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1))(eslint-plugin-node@6.0.1(eslint@8.57.1))(eslint-plugin-promise@3.8.0)(eslint-plugin-standard@3.1.0(eslint@8.57.1))(eslint@8.57.1)
