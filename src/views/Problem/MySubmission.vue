@@ -47,7 +47,7 @@ async function refresh() {
   refreshing = loading = true
   await find(query)
   loading = false
-  setTimeout(() => refreshing = false, 1000)
+  setTimeout(() => refreshing = false, 500)
 }
 
 function init() {
