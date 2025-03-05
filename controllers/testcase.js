@@ -67,9 +67,17 @@ const fetch = async (ctx) => {
 // 返回该题拥有的测试数据
 const find = async (ctx) => {
   const pid = ctx.params.pid
-  const meta = await fse.readJson(
-    path.resolve(__dirname, `../data/${pid}/meta.json`),
-  )
+
+  let meta = { testcases: [] }
+  const dir = path.resolve(__dirname, `../data/${pid}`)
+  const file = path.resolve(dir, 'meta.json')
+  if (!fse.existsSync(file)) {
+    fse.ensureDirSync(dir)
+    fse.outputJsonSync(file, meta, { spaces: 2 })
+  } else {
+    meta = await fse.readJson(file)
+  }
+  
   ctx.body = meta
 }
 
