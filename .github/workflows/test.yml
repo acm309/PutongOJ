@@ -1,19 +1,20 @@
-name: Node.js CI
+name: Test and Coverage
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
+    name: Node ${{ matrix.node-version }} Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
         redis-version: [6]
         mongodb-version: ['5.0']
 
@@ -50,15 +51,32 @@ jobs:
         env:
           CI: true
 
-      - name: Run coverage and upload
+      - name: Run coverage
         if: matrix.node-version == '18.x'
         run: |
           pnpm coverage
         env:
           CI: true
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage artifacts
         if: matrix.node-version == '18.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.lcov
+
+  coverage:
+    name: Upload Coverage
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.lcov
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
