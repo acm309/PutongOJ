@@ -77,7 +77,7 @@ const find = async (ctx) => {
   } else {
     meta = await fse.readJson(file)
   }
-  
+
   ctx.body = meta
 }
 

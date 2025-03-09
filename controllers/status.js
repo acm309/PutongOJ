@@ -1,7 +1,10 @@
 const Buffer = require('node:buffer').Buffer
+const path = require('node:path')
+const fse = require('fs-extra')
 const only = require('only')
-const Solution = require('../models/Solution')
 const Contest = require('../models/Contest')
+const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
 const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 const redis = require('../config/redis')
@@ -46,41 +49,90 @@ const findOne = async (ctx) => {
   }
 }
 
-// 创建一个提交
+/**
+ * 创建一个提交
+ */
 const create = async (ctx) => {
+  const profile = ctx.session.profile
   const opt = ctx.request.body
-  if (opt.mid) {
-    const cid = Number.parseInt(opt.mid)
-    const contest = await Contest.findOne({ cid }).exec()
-    if (contest.end < Date.now()) {
-      ctx.throw(400, 'Contest is ended!')
+  const required = [ 'pid', 'code', 'language' ]
+  for (const key of required) {
+    if (!opt[key]) {
+      ctx.throw(400, `Missing parameter: ${key}`)
     }
   }
 
-  const { pid, code, language } = opt
-  const { uid } = ctx.session.profile
-  const solution = new Solution({
-    pid: +pid,
-    uid,
-    code,
-    language,
-    length: Buffer.from(code).length, // 这个属性是不是没啥用?
-  })
+  const uid = profile.uid
+  const pid = Number.parseInt(opt.pid)
+  const code = String(opt.code)
+  const language = Number.parseInt(opt.language)
+  const mid = Number.parseInt(opt.mid) || -1
 
-  if (opt.mid) {
-    solution.mid = Number.parseInt(opt.mid)
+  if (language < 0 || language > 4) {
+    ctx.throw(400, 'Invalid language')
+  }
+  if (code.length < 8 || code.length > 16384) {
+    ctx.throw(400, 'Code length should between 8 and 16384')
+  }
+  if (mid > 0) {
+    const mid = Number.parseInt(opt.mid)
+    const contest = await Contest.findOne({ mid }).lean().exec()
+    if (!contest) {
+      ctx.throw(400, 'No such a contest')
+    }
+    if (contest.end < Date.now()) {
+      ctx.throw(400, 'Contest is ended!')
+    }
+    if (!contest.list.includes(pid)) {
+      ctx.throw(400, 'No such a problem in the contest')
+    }
+  }
+  const problem = await Problem.findOne({ pid }).lean().exec()
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
   }
 
   try {
+    const timeLimit = problem.time
+    const memoryLimit = problem.memory
+    let meta = { testcases: [] }
+    const dir = path.resolve(__dirname, `../data/${pid}`)
+    const file = path.resolve(dir, 'meta.json')
+    if (fse.existsSync(file)) {
+      meta = await fse.readJson(file)
+    }
+    const testcases = meta.testcases.map((item) => {
+      return {
+        uuid: item.uuid,
+        input: {
+          src: `/app/data/${pid}/${item.uuid}.in`,
+        },
+        output: {
+          src: `/app/data/${pid}/${item.uuid}.out`,
+        },
+      }
+    })
+
+    const solution = new Solution({
+      pid, mid, uid, code, language,
+      length: Buffer.from(code).length, // 这个属性是不是没啥用？
+    })
+
     await solution.save()
-    redis.lpush('oj:solutions', solution.sid)
+
+    const sid = solution.sid
+    const submission = {
+      sid, timeLimit, memoryLimit,
+      testcases,
+      language, code,
+    }
+
+    redis.rpush('judger:task', JSON.stringify(submission))
     logger.info(`One solution is created ${solution.pid} -- ${solution.uid}`)
+
+    ctx.body = { sid }
   } catch (e) {
     ctx.throw(400, e.message)
-  }
-
-  ctx.body = {
-    sid: solution.sid,
   }
 }
 
