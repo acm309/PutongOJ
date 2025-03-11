@@ -20,7 +20,7 @@ function handleClick(name) {
 </script>
 
 <template>
-  <div :class="{ 'problem-wrap': true, 'problem-wrap-edit': display === 'problemEdit' }">
+  <div class="problem-wrap">
     <Tabs class="problem-tabs" :model-value="display" @on-click="handleClick">
       <TabPane :label="t('oj.description')" name="problemInfo" />
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
@@ -52,8 +52,6 @@ function handleClick(name) {
 .problem-wrap
   padding 0
   max-width 1024px
-.problem-wrap-edit
-  max-width 1280px !important
 .problem-tabs
   padding-top 24px
   margin-bottom 24px

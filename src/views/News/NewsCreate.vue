@@ -25,7 +25,7 @@ newsStore.setCurrentNews($$(addNews))
 </script>
 
 <template>
-  <div>
+  <div class="news-wrap">
     <h1>{{ t('oj.add_news') }}</h1>
     <OjNewsEdit />
     <Button type="primary" size="large" @click="submit">
@@ -35,6 +35,8 @@ newsStore.setCurrentNews($$(addNews))
 </template>
 
 <style lang="stylus" scoped>
+.news-wrap
+  max-width 1024px
 h1
   margin-bottom: 20px
 .ivu-btn

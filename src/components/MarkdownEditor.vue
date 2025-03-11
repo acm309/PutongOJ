@@ -36,7 +36,7 @@ const config = $computed(() => ({
   },
   lang,
   minHeight: 256,
-  mode: 'sv',
+  mode: 'wysiwyg',
   placeholder: 'Type something...',
   preview: {
     render: {
