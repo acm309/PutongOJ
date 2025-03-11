@@ -26,7 +26,7 @@ async function main () {
   await removeall()
   await Promise.all([
     new ID({
-      id: 1000,
+      id: 999,
       name: 'Problem',
     }).save(),
     new ID({
