@@ -76,7 +76,7 @@ const create = async (ctx) => {
   }
   if (mid > 0) {
     const mid = Number.parseInt(opt.mid)
-    const contest = await Contest.findOne({ mid }).lean().exec()
+    const contest = await Contest.findOne({ cid: mid }).lean().exec()
     if (!contest) {
       ctx.throw(400, 'No such a contest')
     }
