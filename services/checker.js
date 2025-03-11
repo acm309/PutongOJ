@@ -23,6 +23,7 @@ async function similarityCheck (sid) {
     logger.error(`Solution <${sid}> not found`)
     return
   }
+  const start_time = new Date().getTime()
 
   const solutions = await Solution.find({
     pid: solution.pid,
@@ -41,12 +42,19 @@ async function similarityCheck (sid) {
       result.sim_s_id = s.sid
     }
   }
+  result.sim = Math.round(result.sim * 100)
 
-  if (result.sim < 0.5) { return }
-  solution.sim = Math.round(result.sim * 100)
+  const end_time = new Date().getTime()
+  logger.info(
+    `Solution <${sid}> has similarity with <${result.sim_s_id}>`
+    + ` (${result.sim}%) in ${end_time - start_time}ms`
+    + ` (${solutions.length} solutions checked)`)
+
+  if (result.sim < 50) { return }
+
+  solution.sim = result.sim
   solution.sim_s_id = result.sim_s_id
   await solution.save()
-  logger.info(`Solution <${sid}> has similarity with <${result.sim_s_id}>`)
 }
 
 async function main () {
