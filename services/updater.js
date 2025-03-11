@@ -1,10 +1,7 @@
 require('dotenv-flow').config()
 require('../config/db')
 
-const { resolve } = require('node:path')
-const fse = require('fs-extra')
-
-const config = require('../config')
+const { judge } = require('../config')
 const logger = require('../utils/logger')
 const redis = require('../config/redis')
 
@@ -14,7 +11,6 @@ const Solution = require('../models/Solution')
 const User = require('../models/User')
 
 const NO_CONTEST = -1
-const extensions = { 1: 'c', 2: 'cpp', 3: 'java', 4: 'py' }
 
 /**
  * 更新排行榜
@@ -22,7 +18,6 @@ const extensions = { 1: 'c', 2: 'cpp', 3: 'java', 4: 'py' }
 async function updateRanklist (solution) {
   // cid: Contest, pid: Problem, uid: User
   const { mid: cid, pid, uid } = solution
-  if (cid === NO_CONTEST) { return }
 
   const contest = await Contest.findOne({ cid }).lean().exec()
   if (!contest) {
@@ -45,7 +40,7 @@ async function updateRanklist (solution) {
   const grid = ranklist[uid][pid]
   if (grid.create) { return } // 已经有正确提交了
 
-  if (solution.judge === config.judge.Accepted) {
+  if (solution.judge === judge.Accepted) {
     // 正确的提交
     grid.create = solution.create
     if (!grid.wa) { grid.wa = 0 }
@@ -56,7 +51,7 @@ async function updateRanklist (solution) {
   }
 
   await Contest.findOneAndUpdate({ cid }, { ranklist })
-  logger.info(`Ranklist of contest <${cid}> updated`)
+  logger.info(`Ranklist of contest <${cid}> updated because of solution <${solution.sid}>`)
 }
 
 /**
@@ -73,20 +68,16 @@ async function updateStatistic (solution) {
     Problem.findOne({ pid }).exec(),
   ])
 
-  if (!user) {
-    logger.error(`User <${uid}> not found`)
-    return
-  }
-  if (!problem) {
-    logger.error(`Problem <${pid}> not found`)
+  if (!user || !problem) {
+    logger.error(`User <${uid}> or problem <${pid}> not found`)
     return
   }
 
-  if (solution.judge === config.judge.Running) {
-    // 这道题之前提交过了么？
+  if (solution.judge === judge.Running) {
+    // Judger 开始评测
     const isSubmittedBefore = await Solution.count({
-      uid, pid, sid: { $ne: sid }, judge: { $ne: config.judge.Pending },
-    }).exec()
+      uid, pid, sid: { $ne: sid }, judge: { $ne: judge.Pending },
+    }).exec() // 这道题之前提交过了么？
     if (isSubmittedBefore === 0) {
       await Promise.all([
         User.findOneAndUpdate({ uid }, { $inc: { submit: 1 } }).exec(),
@@ -94,11 +85,13 @@ async function updateStatistic (solution) {
       ])
       logger.info(`User <${uid}> and problem <${pid}> submit count updated`)
     }
-  } else if (solution.judge === config.judge.Accepted) {
-    // 这道题之前 AC 过了么？
+  }
+
+  if (solution.judge === judge.Accepted) {
+    // Judger 评测为 AC
     const isAcBefore = await Solution.count({
-      uid, pid, sid: { $ne: sid }, judge: config.judge.Accepted,
-    }).exec()
+      uid, pid, sid: { $ne: sid }, judge: judge.Accepted,
+    }).exec() // 这道题之前 AC 过了么？
     if (isAcBefore === 0) {
       await Promise.all([
         User.findOneAndUpdate({ uid }, { $inc: { solve: 1 } }).exec(),
@@ -109,15 +102,7 @@ async function updateStatistic (solution) {
   }
 }
 
-async function solutionArchive (solution) {
-  const dir = resolve(__dirname, `../../data/${solution.pid}/ac/`)
-  const filename = `${solution.sid}.${extensions[solution.language]}`
-  const target = resolve(dir, filename)
-  fse.ensureDirSync(dir)
-  fse.outputFile(target, solution.code)
-}
-
-async function process (result) {
+async function resultUpdate (result) {
   const sid = result.sid
   const solution = await Solution.findOne({ sid }).exec()
   if (solution == null) {
@@ -135,9 +120,12 @@ async function process (result) {
   logger.info(`Solution <${sid}> update to status ${solution.judge}`)
 
   const tasks = [ updateStatistic(solution) ]
-  if (solution.judge !== config.judge.Running) { tasks.push(updateRanklist(solution)) }
-  if (solution.judge === config.judge.Accepted) { tasks.push(solutionArchive(solution)) }
-
+  if (solution.judge !== judge.Running && solution.mid !== NO_CONTEST) {
+    tasks.push(updateRanklist(solution))
+  }
+  if (solution.judge === judge.Accepted) {
+    redis.rpush('checker:task', String(solution.sid))
+  }
   await Promise.all(tasks)
 }
 
@@ -147,7 +135,7 @@ async function main () {
     try {
       const item = await redis.blpop('judger:result', 0)
       const result = JSON.parse(item[1])
-      await process(result)
+      await resultUpdate(result)
     } catch (e) {
       logger.error(e)
     }
