@@ -1,11 +1,6 @@
 <script setup>
-import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
-import { useSessionStore } from '@/store/modules/session'
-
-const sessionStore = useSessionStore()
-const { isRoot } = $(storeToRefs(sessionStore))
 
 defineProps(['problem'])
 const { t } = useI18n()
@@ -13,118 +8,84 @@ const { t } = useI18n()
 
 <template>
   <div class="proadd-wrap" v-if="typeof problem.description === 'string'">
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+    <div class="form-item">
       <Input v-model="problem.title">
-      <template #prepend>
-        {{ t('oj.title') }}
-      </template>
+        <template #prepend>
+          {{ t('oj.title') }}
+        </template>
       </Input>
-      </Col>
-    </Row>
-    <Row>
-      <Col :span="11">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
-      <Input v-model="problem.time">
-      <template #prepend>
-        Time
-      </template>
-      <template #append>
-        MS
-      </template>
-      </Input>
-      </Col>
-      <Col :offset="1" :span="11">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
-      <Input v-model="problem.memory">
-      <template #prepend>
-        Memory
-      </template>
-      <template #append>
-        KB
-      </template>
-      </Input>
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.description') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-row">
+      <Input v-model="problem.time" class="form-item">
+        <template #prepend>
+          Time
+        </template>
+        <template #append>
+          ms
+        </template>
+      </Input>
+      <Input v-model="problem.memory" class="form-item">
+        <template #prepend>
+          Memory
+        </template>
+        <template #append>
+          KB
+        </template>
+      </Input>
+    </div>
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.description') }}</div>
       <MarkdownEditor v-model="problem.description" />
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.input') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.input') }}</div>
       <MarkdownEditor v-model="problem.input" />
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.output') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.output') }}</div>
       <MarkdownEditor v-model="problem.output" />
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.sample_input') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.sample_input') }}</div>
       <Input v-model="problem.in" type="textarea" :rows="8" />
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.sample_output') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.sample_output') }}</div>
       <Input v-model="problem.out" type="textarea" :rows="8" />
-      </Col>
-    </Row>
-    <div class="label">
-      {{ t('oj.hint') }}
     </div>
-    <Row>
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
+
+    <div class="form-item">
+      <div class="label">{{ t('oj.hint') }}</div>
       <MarkdownEditor v-model="problem.hint" />
-      </Col>
-    </Row>
-    <div class="label" v-if="isRoot">
-      {{ t('oj.spj') }} <i-switch v-model="problem.spj" />
     </div>
-    <Row v-if="isRoot && problem.spj">
-      <Col :span="23">
-      <!-- eslint-disable-next-line vue/no-mutating-props -->
-      <Input v-model="problem.spjcode" type="textarea" :rows="8" :placeholder="t('oj.spj_code')" />
-      </Col>
-    </Row>
   </div>
 </template>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .proadd-wrap
   margin-bottom: 20px
-  .ivu-input-wrapper
-    margin-bottom: 14px
-  .label
-    text-align:left
-    margin-bottom: 10px
-  .ql-container
-    // text-align: left
-    height: 220px
-    margin-bottom: 2em
-  .el-textarea
+
+  .form-item
     margin-bottom: 20px
+
+    .label
+      text-align: left
+      margin-bottom: 10px
+      font-size: 16px
+      font-weight: bold
+
+  .form-row
+    display: flex
+    gap: 20px
+    margin-bottom: 20px
+
+    .form-item
+      flex: 1
+      margin: 0
 </style>

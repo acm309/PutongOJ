@@ -69,15 +69,14 @@ async function submitCheck() {
 
 <template>
   <div>
-    <h1>{{ t('oj.steps_of_create_a_problem') }}</h1>
+    <h2>{{ t('oj.steps_of_create_a_problem') }}</h2>
     <br>
-    <Steps :current="5" :style="{ color: 'black' }">
+    <Steps direction="vertical" :style="{ color: 'black' }">
       <Step :title="t('oj.algorithm_design')" :content="t('oj.algorithm_design_explanation')" status="process" />
       <Step :title="t('oj.add_context')" :content="t('oj.add_context_explanation')" status="process" />
       <Step :title="t('oj.input_format')" :content="t('oj.input_format_explanation')" status="process" />
       <Step :title="t('oj.create_test_data')" :content="t('oj.create_test_data_explanation')" status="process" />
-      <Step :title="t('oj.test_problem')" :content="t('oj.test_problem_explanation')" icon="ios-star"
-        status="process" />
+      <Step :title="t('oj.test_problem')" :content="t('oj.test_problem_explanation')" status="process" />
     </Steps>
     <br>
     <OJProblemEdit :problem="problem" />
