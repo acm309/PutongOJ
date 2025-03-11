@@ -2,10 +2,12 @@
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
+import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
 const solutionStore = useSolutionStore()
 const { solution } = $(storeToRefs(solutionStore))
+const { isAdmin } = storeToRefs(useSessionStore())
 // Clear the saved solution in case of the user visits this page after
 // they viewed other's solution.
 solutionStore.clearSavedSolution()
@@ -25,7 +27,7 @@ solutionStore.clearSavedSolution()
           <Option :value="3">
             Java (openJDK)
           </Option>
-          <Option :value="4" disabled>
+          <Option :value="4" :disabled="!isAdmin">
             Python 3
           </Option>
         </Select>
