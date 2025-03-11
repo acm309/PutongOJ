@@ -151,26 +151,29 @@ else:
           <tbody>
             <tr>
               <td><b>C</b></td>
-              <td>gcc (Debian 8.3.0-6) 8.3.0</td>
-              <td><code>gcc Main.c -o Main -Wall -lm --static -std=c11 -DONLINE_JUDGE -w</code></td>
+              <td>gcc 12.2.0</td>
+              <td><code>gcc Main.c -o Main -std=c11 -O2 -lm -DONLINE_JUDGE -w --static</code></td>
             </tr>
             <tr>
               <td><b>C++</b></td>
-              <td>g++ (Debian 8.3.0-6) 8.3.0</td>
-              <td><code>g++ Main.cpp -o Main -std=c++11 -Wall -lm --static -DONLINE_JUDGE -w</code></td>
+              <td>g++ 12.2.0</td>
+              <td><code>g++ Main.cpp -o Main -std=c++11 -O2 -lm -DONLINE_JUDGE -w --static</code></td>
             </tr>
             <tr>
               <td><b>Java</b></td>
-              <td>openjdk &amp; javac 11.0.23</td>
+              <td>openjdk &amp; javac 17.0.14</td>
               <td>
-                <code>javac -J-Xms128M -J-Xmx512M Main.java</code><br />
-                <code>java -Xms128M -Xms512M -DONLINE_JUDGE=true Main</code>
+                <code>javac Main.java -encoding UTF-8</code><br />
+                <code>java -DONLINE_JUDGE Main</code>
               </td>
             </tr>
             <tr>
               <td><b>Python 3</b></td>
-              <td>Python 3.7.3</td>
-              <td><code>env ONLINE_JUDGE=1 python Main.py</code></td>
+              <td>Python 3.11.2</td>
+              <td>
+                <code>python -m py_compile Main.py</code><br />
+                <code>env ONLINE_JUDGE=1 python Main.py</code>
+              </td>
             </tr>
           </tbody>
         </table>
