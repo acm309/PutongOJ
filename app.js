@@ -6,7 +6,7 @@ const Koa = require('koa')
 const koaLogger = require('koa-logger')
 const koaBody = require('koa-body')
 const staticServe = require('koa-static')
-const session = require('koa-session')
+const { createSession: session } = require('koa-session')
 const send = require('koa-send')
 // In order to apply the moongoose plugin,
 // DB must be inited before others.
