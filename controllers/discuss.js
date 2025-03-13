@@ -1,7 +1,7 @@
-const Discuss = require('../models/Discuss')
-const logger = require('../utils/logger')
 const redis = require('../config/redis')
+const Discuss = require('../models/Discuss')
 const { isLogined, isAdmin } = require('../utils/helper')
+const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
   const did = Number.parseInt(ctx.params.did)

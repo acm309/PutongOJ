@@ -1,12 +1,12 @@
-const User = require('../models/User')
-const Problem = require('../models/Problem')
-const ID = require('../models/ID')
-const Solution = require('../models/Solution')
-const Group = require('../models/Group')
-const News = require('../models/News')
-const Tag = require('../models/Tag')
-const Discuss = require('../models/Discuss')
 const Contest = require('../models/Contest')
+const Discuss = require('../models/Discuss')
+const Group = require('../models/Group')
+const ID = require('../models/ID')
+const News = require('../models/News')
+const Problem = require('../models/Problem')
+const Solution = require('../models/Solution')
+const Tag = require('../models/Tag')
+const User = require('../models/User')
 
 function removeall () {
   return Promise.all([

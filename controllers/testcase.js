@@ -1,8 +1,8 @@
 const path = require('node:path')
 const fse = require('fs-extra')
-const { v4: uuid } = require('uuid')
-const remove = require('lodash.remove')
 const send = require('koa-send')
+const remove = require('lodash.remove')
+const { v4: uuid } = require('uuid')
 
 /**
  * 拿到输入输出的测试文件，然后将它移动到专门放测试数据的地方

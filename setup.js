@@ -3,7 +3,7 @@ require('dotenv-flow').config()
 const { resolve } = require('node:path')
 const fse = require('fs-extra')
 
-async function main() {
+async function main () {
   const logDir = resolve(__dirname, 'logs')
 
   const pm2config = {

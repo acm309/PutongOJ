@@ -1,10 +1,10 @@
 const path = require('node:path')
 const fse = require('fs-extra')
-const ID = require('../models/ID')
-const User = require('../models/User')
-const Problem = require('../models/Problem')
-const { generatePwd } = require('../utils/helper')
 const config = require('.')
+const ID = require('../models/ID')
+const Problem = require('../models/Problem')
+const User = require('../models/User')
+const { generatePwd } = require('../utils/helper')
 
 async function databaseSetup () {
   const models = {

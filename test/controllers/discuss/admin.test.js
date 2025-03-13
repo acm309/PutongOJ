@@ -1,6 +1,6 @@
 const test = require('ava')
-const supertest = require('supertest')
 const only = require('only')
+const supertest = require('supertest')
 const app = require('../../../app')
 const config = require('../../../config')
 const discuss = require('../../seed/discuss')

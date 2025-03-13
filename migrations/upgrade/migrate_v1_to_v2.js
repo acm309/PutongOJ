@@ -1,15 +1,15 @@
 require('../../config/db')
-const process = require('node:process')
 const { resolve } = require('node:path')
+const process = require('node:process')
+const fse = require('fs-extra')
 const mongoose = require('mongoose')
 const { v4: uuid } = require('uuid')
-const fse = require('fs-extra')
-const Solution = require('../../models/Solution')
-const Problem = require('../../models/Problem')
-const Contest = require('../../models/Contest')
-const ID = require('../../models/ID')
-const Discuss = require('../../models/Discuss')
 const config = require('../../config')
+const Contest = require('../../models/Contest')
+const Discuss = require('../../models/Discuss')
+const ID = require('../../models/ID')
+const Problem = require('../../models/Problem')
+const Solution = require('../../models/Solution')
 
 /*
 对原有的 testcase 增加 id 标记

@@ -35,7 +35,8 @@ IdSchema.statics.generateId = async function (field = '') {
     .findOneAndUpdate(
       { name: field },
       { $inc: { id: 1 } }, // $inc表示该字段自增
-    ).exec()
+    )
+    .exec()
   // 记得取 id 字段加 1 才是新的可用的 id
   return obj.id + 1
 }

@@ -1,7 +1,7 @@
 const only = require('only')
+const { privilege } = require('../config')
 const User = require('../models/User')
 const { generatePwd } = require('../utils/helper')
-const { privilege } = require('../config')
 
 // 登录
 const login = async (ctx) => {

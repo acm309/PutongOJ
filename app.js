@@ -3,18 +3,18 @@ require('dotenv-flow').config()
 const path = require('node:path')
 const process = require('node:process')
 const Koa = require('koa')
-const koaLogger = require('koa-logger')
 const koaBody = require('koa-body')
-const staticServe = require('koa-static')
-const { createSession: session } = require('koa-session')
+const koaLogger = require('koa-logger')
 const send = require('koa-send')
+const { createSession: session } = require('koa-session')
+const staticServe = require('koa-static')
 // In order to apply the moongoose plugin,
 // DB must be inited before others.
 require('./config/db')
 const config = require('./config')
+const setup = require('./config/setup')
 const router = require('./routes')
 const logger = require('./utils/logger')
-const setup = require('./config/setup')
 
 const app = new Koa()
 

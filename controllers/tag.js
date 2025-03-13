@@ -1,8 +1,8 @@
-const only = require('only')
-const without = require('lodash.without')
 const difference = require('lodash.difference')
-const Tag = require('../models/Tag')
+const without = require('lodash.without')
+const only = require('only')
 const Problem = require('../models/Problem')
+const Tag = require('../models/Tag')
 const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
@@ -55,17 +55,14 @@ const create = async (ctx) => {
   }
 
   const procedure = opt.list.map((pid) => {
-    return Problem.findOne({ pid }).exec()
-      .then((problem) => {
-        problem.tags.push(tag.tid)
-        return problem.save()
-      })
-      .then((problem) => {
-        logger.info(`Problem is updated" ${problem.uid} -- ${problem.tags}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return Problem.findOne({ pid }).exec().then((problem) => {
+      problem.tags.push(tag.tid)
+      return problem.save()
+    }).then((problem) => {
+      logger.info(`Problem is updated" ${problem.uid} -- ${problem.tags}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(procedure)
 
@@ -90,35 +87,29 @@ const update = async (ctx) => {
 
   // 删除 tag 表里的原 problem 表的 tid
   const delProcedure = pidsOfRemovedTids.map((pid) => {
-    return Problem.findOne({ pid }).exec()
-      .then((problem) => {
-        if (problem == null) { return { pid: `${pid} not found` } }
-        problem.tags = without(problem.tags, tid)
-        return problem.save()
-      })
-      .then((problem) => {
-        logger.info(`Problem's old tag is deleted" ${problem.pid} -- ${tid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return Problem.findOne({ pid }).exec().then((problem) => {
+      if (problem == null) { return { pid: `${pid} not found` } }
+      problem.tags = without(problem.tags, tid)
+      return problem.save()
+    }).then((problem) => {
+      logger.info(`Problem's old tag is deleted" ${problem.pid} -- ${tid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(delProcedure)
 
   // 新增 tag 表里 user 的 tid
   const addProcedure = pidsOfImportedTids.map((pid) => {
-    return Problem.findOne({ pid }).exec()
-      .then((problem) => {
-        if (problem == null) { return { pid: `${pid} not found` } }
-        problem.tags.push(tid)
-        return problem.save()
-      })
-      .then((problem) => {
-        logger.info(`Problem's new tag is updated" ${problem.pid} -- ${tid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return Problem.findOne({ pid }).exec().then((problem) => {
+      if (problem == null) { return { pid: `${pid} not found` } }
+      problem.tags.push(tid)
+      return problem.save()
+    }).then((problem) => {
+      logger.info(`Problem's new tag is updated" ${problem.pid} -- ${tid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(addProcedure)
 
@@ -144,17 +135,14 @@ const del = async (ctx) => {
 
   // 删除 problem 表里的 tid
   const procedure = list.map((pid) => {
-    return Problem.findOne({ pid }).exec()
-      .then((problem) => {
-        problem.tags = without(problem.tags, tid)
-        return problem.save()
-      })
-      .then((problem) => {
-        logger.info(`Problem's tag is deleted" ${problem.pid} -- ${tid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return Problem.findOne({ pid }).exec().then((problem) => {
+      problem.tags = without(problem.tags, tid)
+      return problem.save()
+    }).then((problem) => {
+      logger.info(`Problem's tag is deleted" ${problem.pid} -- ${tid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(procedure)
 

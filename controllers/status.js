@@ -2,12 +2,12 @@ const Buffer = require('node:buffer').Buffer
 const path = require('node:path')
 const fse = require('fs-extra')
 const only = require('only')
+const redis = require('../config/redis')
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
-const redis = require('../config/redis')
 
 // 返回提交列表
 const find = async (ctx) => {

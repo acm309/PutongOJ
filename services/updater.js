@@ -2,13 +2,13 @@ require('dotenv-flow').config()
 require('../config/db')
 
 const { judge } = require('../config')
-const logger = require('../utils/logger')
 const redis = require('../config/redis')
-
 const Contest = require('../models/Contest')
+
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
 const User = require('../models/User')
+const logger = require('../utils/logger')
 
 const NO_CONTEST = -1
 

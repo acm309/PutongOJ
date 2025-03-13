@@ -1,6 +1,6 @@
-const only = require('only')
-const without = require('lodash.without')
 const difference = require('lodash.difference')
+const without = require('lodash.without')
+const only = require('only')
 const Group = require('../models/Group')
 const User = require('../models/User')
 const logger = require('../utils/logger')
@@ -85,17 +85,14 @@ const update = async (ctx) => {
 
   // 删除 user 表里的原 user 的 gid
   const delProcedure = removedUids.map((uid) => {
-    return User.findOne({ uid }).exec()
-      .then((user) => {
-        user.gid = without(user.gid, gid)
-        return user.save()
-      })
-      .then((user) => {
-        logger.info(`User's old group is deleted" ${user.uid} -- ${gid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return User.findOne({ uid }).exec().then((user) => {
+      user.gid = without(user.gid, gid)
+      return user.save()
+    }).then((user) => {
+      logger.info(`User's old group is deleted" ${user.uid} -- ${gid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(delProcedure)
 
@@ -105,17 +102,14 @@ const update = async (ctx) => {
 
   // 新增 user 表里 user 的 gid
   const addProcedure = importedUids.map((uid) => {
-    return User.findOne({ uid }).exec()
-      .then((user) => {
-        user.gid.push(gid)
-        return user.save()
-      })
-      .then((user) => {
-        logger.info(`User's new group is updated" ${user.uid} -- ${gid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return User.findOne({ uid }).exec().then((user) => {
+      user.gid.push(gid)
+      return user.save()
+    }).then((user) => {
+      logger.info(`User's new group is updated" ${user.uid} -- ${gid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(addProcedure)
 
@@ -139,17 +133,14 @@ const del = async (ctx) => {
 
   // 删除user表里的gid
   const procedure = list.map((uid) => {
-    return User.findOne({ uid }).exec()
-      .then((user) => {
-        user.gid = without(user.gid, gid)
-        return user.save()
-      })
-      .then((user) => {
-        logger.info(`User's group is deleted" ${user.uid} -- ${gid}`)
-      })
-      .catch((e) => {
-        ctx.throw(400, e.message)
-      })
+    return User.findOne({ uid }).exec().then((user) => {
+      user.gid = without(user.gid, gid)
+      return user.save()
+    }).then((user) => {
+      logger.info(`User's group is deleted" ${user.uid} -- ${gid}`)
+    }).catch((e) => {
+      ctx.throw(400, e.message)
+    })
   })
   await Promise.all(procedure)
 

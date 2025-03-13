@@ -4,10 +4,10 @@ require('../config/db')
 const levenshtein = require('damerau-levenshtein')
 
 const { judge } = require('../config')
-const logger = require('../utils/logger')
 const redis = require('../config/redis')
-
 const Solution = require('../models/Solution')
+
+const logger = require('../utils/logger')
 
 function codeNormalize (code) {
   return code

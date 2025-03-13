@@ -1,12 +1,12 @@
 const path = require('node:path')
-const only = require('only')
 const fse = require('fs-extra')
+const only = require('only')
 const config = require('../config')
+const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
-const Contest = require('../models/Contest')
-const logger = require('../utils/logger')
 const { isLogined, isAdmin } = require('../utils/helper')
+const logger = require('../utils/logger')
 
 const preload = async (ctx, next) => {
   const pid = Number.parseInt(ctx.params.pid)

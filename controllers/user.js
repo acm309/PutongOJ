@@ -1,12 +1,12 @@
 const difference = require('lodash.difference')
 const only = require('only')
-const User = require('../models/User')
-const Solution = require('../models/Solution')
-const Group = require('../models/Group')
 const config = require('../config')
-const logger = require('../utils/logger')
+const Group = require('../models/Group')
+const Solution = require('../models/Solution')
+const User = require('../models/User')
 const { generatePwd, isComplexPwd } = require('../utils/helper')
 const { isAdmin, isRoot } = require('../utils/helper')
+const logger = require('../utils/logger')
 
 /**
  * 预加载用户信息

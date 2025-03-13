@@ -1,5 +1,5 @@
-const Solution = require('../models/Solution')
 const config = require('../config')
+const Solution = require('../models/Solution')
 
 // 获取statistics信息
 const find = async (ctx) => {
