@@ -20,6 +20,9 @@ importers:
       fs-extra:
         specifier: ^5.0.0
         version: 5.0.0
+      husky:
+        specifier: ^8.0.3
+        version: 8.0.3
       ioredis:
         specifier: ^3.2.2
         version: 3.2.2
@@ -90,9 +93,6 @@ importers:
       eslint:
         specifier: ^9.22.0
         version: 9.22.0
-      eslint-config-standard:
-        specifier: ^17.1.0
-        version: 17.1.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0))(eslint-plugin-n@17.16.2(eslint@9.22.0))(eslint-plugin-promise@7.2.1(eslint@9.22.0))(eslint@9.22.0)
       eslint-plugin-import:
         specifier: ^2.31.0
         version: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)
@@ -102,9 +102,6 @@ importers:
       eslint-plugin-promise:
         specifier: ^7.2.1
         version: 7.2.1(eslint@9.22.0)
-      husky:
-        specifier: ^8.0.3
-        version: 8.0.3
       nodemon:
         specifier: ^3.1.9
         version: 3.1.9
@@ -1597,15 +1594,6 @@ packages:
     resolution: {integrity: sha512-cJzNJ7L+psWp5mXM7jBX+fjHtBvvh06RBlcweMhKD8jWqQw0G78hOW5tpVALGHGFPsBV+ot2H+pdDGJy6CV8pA==}
     peerDependencies:
       eslint: ^9.5.0
-
-  eslint-config-standard@17.1.0:
-    resolution: {integrity: sha512-IwHwmaBNtDK4zDHQukFDW5u/aTb8+meQWZvNFWkiGmbWjD6bqyuSSBxxXKkCftCUzc1zwCH2m/baCNDLGmuO5Q==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      eslint: ^8.0.1
-      eslint-plugin-import: ^2.25.2
-      eslint-plugin-n: '^15.0.0 || ^16.0.0 '
-      eslint-plugin-promise: ^6.0.0
 
   eslint-flat-config-utils@2.0.1:
     resolution: {integrity: sha512-brf0eAgQ6JlKj3bKfOTuuI7VcCZvi8ZCD1MMTVoEvS/d38j8cByZViLFALH/36+eqB17ukmfmKq3bWzGvizejA==}
@@ -6158,13 +6146,6 @@ snapshots:
     dependencies:
       '@eslint/compat': 1.2.7(eslint@9.22.0)
       eslint: 9.22.0
-
-  eslint-config-standard@17.1.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0))(eslint-plugin-n@17.16.2(eslint@9.22.0))(eslint-plugin-promise@7.2.1(eslint@9.22.0))(eslint@9.22.0):
-    dependencies:
-      eslint: 9.22.0
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0)(typescript@5.8.2))(eslint@9.22.0)
-      eslint-plugin-n: 17.16.2(eslint@9.22.0)
-      eslint-plugin-promise: 7.2.1(eslint@9.22.0)
 
   eslint-flat-config-utils@2.0.1:
     dependencies:
