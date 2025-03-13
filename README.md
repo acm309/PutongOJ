@@ -1,5 +1,7 @@
 # Putong Online Judge v2
 
+> README is currently outdated, please relax, we are working on it.
+
 > (初代版本 [here](https://github.com/acm309/PutongOJ/tree/v1))
 
 > (English [here](./README_en.md))
