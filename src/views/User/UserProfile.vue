@@ -24,7 +24,8 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
 <template>
   <div class="user-overwiew">
     <div class="user-infobar">
-      <img class="user-avatar" src="@/assets/logo.jpg" alt="Avatar" />
+      <img class="user-avatar" v-if="user.avatar" :src="user.avatar" :alt="`${nickname}'s Avatar`" />
+      <img class="user-avatar" v-else src="@/assets/logo.jpg" alt="Default Avatar" />
       <div class="user-name">
         <div class="user-nickname">{{ nickname }}</div>
         <div class="user-username" v-if="username">{{ username }}</div>
