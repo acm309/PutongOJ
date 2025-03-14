@@ -18,14 +18,14 @@ import { useSolutionStore } from '@/store/modules/solution'
 
 import { Card, Space, Button, Spin, Divider, Badge, Icon, Poptip } from 'view-ui-plus'
 
-highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('c', cpp)
+highlight.registerLanguage('cpp', cpp)
 highlight.registerLanguage('java', java)
 highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
 const result = $ref(constant.result)
-const language = $ref(constant.language)
+const lang = $ref(constant.languageHighlight)
 const color = $ref(constant.color)
 
 const session = useSessionStore()
@@ -49,7 +49,7 @@ function onCopy(content) {
 function prettyCode(code) {
   if (!code) return ''
   return highlight.highlight(`${code}`, {
-    language: language[solution.language],
+    language: lang[solution.language],
   }).value
 }
 

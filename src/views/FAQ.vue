@@ -155,9 +155,14 @@ else:
               <td><code>gcc Main.c -o Main -std=c11 -O2 -lm -DONLINE_JUDGE -w --static</code></td>
             </tr>
             <tr>
-              <td><b>C++</b></td>
+              <td><b>C++ 11</b></td>
               <td>g++ 12.2.0</td>
               <td><code>g++ Main.cpp -o Main -std=c++11 -O2 -lm -DONLINE_JUDGE -w --static</code></td>
+            </tr>
+            <tr>
+              <td><b>C++ 17</b></td>
+              <td>g++ 12.2.0</td>
+              <td><code>g++ Main.cpp -o Main -std=c++17 -O2 -lm -DONLINE_JUDGE -w --static</code></td>
             </tr>
             <tr>
               <td><b>Java</b></td>

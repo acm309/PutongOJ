@@ -14,13 +14,6 @@ export const result = {
   12: 'Skipped',
 } as const
 
-export const language = {
-  1: 'C',
-  2: 'C++',
-  3: 'Java',
-  4: 'Python',
-} as const
-
 export const judgeList = [
   {
     value: 0,
@@ -76,24 +69,28 @@ export const judgeList = [
   },
 ] as const
 
-export const languageList = [
-  {
-    value: 1,
-    label: 'C',
-  },
-  {
-    value: 2,
-    label: 'C++',
-  },
-  {
-    value: 3,
-    label: 'Java',
-  },
-  {
-    value: 4,
-    label: 'Python',
-  },
-] as const
+export const language = {
+  1: 'C',
+  2: 'C++ 11',
+  3: 'Java',
+  4: 'Python 3',
+  5: 'C++ 17',
+} as const
+
+export const languageList = Object.entries(language)
+  .map(([ value, label ]) => ({
+    value: Number.parseInt(value),
+    label,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label))
+
+export const languageHighlight = {
+  1: 'c',
+  2: 'cpp',
+  3: 'java',
+  4: 'python',
+  5: 'cpp',
+} as const
 
 export const color = {
   0: 'pd',
@@ -147,9 +144,10 @@ export const privilege = {
 
 export default {
   result,
-  language,
   judgeList,
+  language,
   languageList,
+  languageHighlight,
   color,
   statisTableObj,
   contestStatus,
