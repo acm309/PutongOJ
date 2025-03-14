@@ -37,6 +37,7 @@ export const useUserStore = defineStore('user', {
       return api.user.delete(payload)
     },
     async fetchAvatar () {
+      this.user.avatar = null
       if (typeof this.user.mail === 'string'
         && this.user.privilege > 1
         && this.user.mail.trim().length > 0
@@ -46,6 +47,8 @@ export const useUserStore = defineStore('user', {
         const response = await axios.get(cravatar, {
           withCredentials: false,
           responseType: 'blob',
+        }).catch(() => {
+          return { status: 404 }
         })
         if (response.status === 200) {
           this.user.avatar = URL.createObjectURL(response.data)
