@@ -14,7 +14,7 @@ const { t } = useI18n()
 const rootStore = useRootStore()
 const userStore = useUserStore()
 
-const { judge } = $(storeToRefs(rootStore))
+const { judge, privilege } = $(storeToRefs(rootStore))
 const { solved, unsolved, user } = $(storeToRefs(userStore))
 
 const nickname = $computed(() => user.nick || user.uid)
@@ -42,10 +42,15 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
           <Icon class="icon" type="md-calendar" />{{ timePretty(user.create, 'yyyy-MM-dd') }}
         </div>
       </div>
-      <div class="user-groups" v-if="user.groups?.length > 0">
+      <div class="user-groups" v-if="user.groups?.length > 0 || user.privilege > privilege.User">
         <Divider plain>{{ t('oj.group') }}</Divider>
         <Space :size="8" class="user-group-container" wrap>
-          <router-link v-for="group in user.groups" :key="group.gid" :to="{ name: 'ranklist', query: { gid: group.gid } }">
+          <Tag v-if="user.privilege > privilege.User" class="user-admin" size="medium"
+            :color="user.privilege === privilege.Root ? 'gold' : 'cyan'">
+            {{ t('oj.admin') }}
+          </Tag>
+          <router-link v-for="group in user.groups" :key="group.gid"
+            :to="{ name: 'ranklist', query: { gid: group.gid } }">
             <span class="user-group">{{ group.title }}</span>
           </router-link>
         </Space>
@@ -138,6 +143,8 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
     font-size 12px
     vertical-align middle
     color #515a6e
+  .user-admin
+    margin 0
 .user-statistic-container
   display flex
   gap 10px
