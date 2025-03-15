@@ -98,7 +98,7 @@ test('Update user\'s motto then clear', async (t) => {
 test('Update user with school not valid (too long)', async (t) => {
   const r = await request
     .put(`/api/user/${uid}`)
-    .send({ school: 'a'.repeat(21) })
+    .send({ school: 'a'.repeat(31) })
   t.is(r.status, 400)
 })
 

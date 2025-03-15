@@ -73,10 +73,10 @@ const userSchema = mongoose.Schema({
     default: '',
     validate: {
       validator (v) {
-        return v.length <= 20
+        return v.length <= 30
       },
       message:
-        'School name is too long. It should be less than 20 characters long',
+        'School name is too long. It should be less than 30 characters long',
     },
   },
   create: {
