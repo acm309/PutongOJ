@@ -8,11 +8,11 @@ const userSchema = mongoose.Schema({
     required: true,
     validate: {
       validator (v) {
-        return /^[a-z0-9]{3,20}$/i.test(v)
+        return /^[a-z0-9_-]{3,20}$/i.test(v)
       },
       message:
         'Invalid uid. It should be 3-20 characters long '
-        + 'and only contains letters and numbers',
+        + 'and only contains letters, numbers, dash and underscore',
     },
     immutable: true,
     index: {
