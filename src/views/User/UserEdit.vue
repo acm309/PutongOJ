@@ -39,7 +39,7 @@ const userInfoValidate = {
   nick: [ { type: 'string', max: 20, trigger: 'change' } ],
   motto: [ { type: 'string', max: 100, trigger: 'change' } ],
   mail: [ { type: 'email', trigger: 'change' } ],
-  school: [ { type: 'string', max: 20, trigger: 'change' } ],
+  school: [ { type: 'string', max: 30, trigger: 'change' } ],
 }
 
 function checkPwdValidator (rule, value, callback) {
