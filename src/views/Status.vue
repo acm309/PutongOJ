@@ -243,7 +243,7 @@ onRouteQueryUpdate(fetch)
   text-overflow ellipsis
   overflow hidden
 .status-time, .status-memory
-  width 100px
+  width 90px
   text-align right
 .status-language
   width 110px
