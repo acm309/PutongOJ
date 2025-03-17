@@ -62,7 +62,7 @@ onRouteQueryUpdate(fetch)
     </div>
     <router-link v-if="list.length > 0" v-for="item in list" :key="item.nid"
       :to="{ name: 'newsInfo', params: { nid: item.nid } }" class="news-link">
-      <Card dis-hover class="news-card">
+      <Card dis-hover :class="{ 'news-card': true, 'news-hidden': item.status === 0 }">
         <Row type="flex" :gutter="16">
           <Col flex="68px" class="news-icon">
           <Icon type="md-paper" class="icon-paper" />
@@ -113,14 +113,22 @@ onRouteQueryUpdate(fetch)
       .news-date
         color var(--oj-primary-color)
 
+  .news-hidden
+    .news-icon, .news-title
+      color hsl(0, 0%, 40%) !important
+    &:hover
+      border-color hsl(0, 0%, 60%) !important
+      .news-date
+        color unset
+
   .news-icon
     display flex
     align-items center
     justify-content center
+    color var(--oj-primary-color)
+    opacity 0.85
     .icon-paper
       font-size 32px
-      color var(--oj-primary-color)
-      opacity 0.85
 
   .news-content
     .news-title

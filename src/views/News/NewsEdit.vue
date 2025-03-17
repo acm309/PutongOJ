@@ -15,7 +15,7 @@ const sessionStore = useSessionStore()
 const router = useRouter()
 const $Message = inject('$Message')
 const { news } = $(storeToRefs(newsStore))
-const { isAdmin, isRoot } = $(storeToRefs(sessionStore))
+const { isRoot } = $(storeToRefs(sessionStore))
 const $Modal = inject('$Modal')
 
 async function submit() {
@@ -47,6 +47,14 @@ function del(nid) {
     },
   })
 }
+
+function switchVisible() {
+  if (news.status === 2) {
+    news.status = 0
+  } else {
+    news.status = 2
+  }
+}
 </script>
 
 <template>
@@ -55,6 +63,9 @@ function del(nid) {
     <Space :size="20">
       <Button type="primary" size="large" @click="submit">
         {{ t('oj.submit') }}
+      </Button>
+      <Button v-if="isRoot" size="large" @click="switchVisible">
+        {{ news.status === 2 ? 'Hide' : 'Show' }}
       </Button>
       <Button v-if="isRoot" size="large" @click.stop="del(news.nid)">
         {{ t('oj.delete') }}
