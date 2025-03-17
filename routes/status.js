@@ -8,6 +8,7 @@ const router = new Router({
 
 router.get('/list', status.find)
 router.get('/:sid', auth.login, status.findOne)
+router.put('/:sid', auth.root, status.update)
 router.post('/', auth.login, solutionCreateRateLimit, status.create)
 
 module.exports = router

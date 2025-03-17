@@ -68,7 +68,7 @@ test('Status fails to update', async (t) => {
   const res = await request
     .put('/api/status/1000')
 
-  t.is(res.status, 405)
+  t.is(res.status, 403)
 })
 
 test('Can not see solution of another user', async (t) => {

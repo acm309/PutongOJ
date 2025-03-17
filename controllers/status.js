@@ -2,6 +2,7 @@ const Buffer = require('node:buffer').Buffer
 const path = require('node:path')
 const fse = require('fs-extra')
 const only = require('only')
+const config = require('../config')
 const redis = require('../config/redis')
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
@@ -104,12 +105,8 @@ const create = async (ctx) => {
     const testcases = meta.testcases.map((item) => {
       return {
         uuid: item.uuid,
-        input: {
-          src: `/app/data/${pid}/${item.uuid}.in`,
-        },
-        output: {
-          src: `/app/data/${pid}/${item.uuid}.out`,
-        },
+        input: { src: `/app/data/${pid}/${item.uuid}.in` },
+        output: { src: `/app/data/${pid}/${item.uuid}.out` },
       }
     })
 
@@ -136,8 +133,61 @@ const create = async (ctx) => {
   }
 }
 
+const update = async (ctx) => {
+  const opt = ctx.request.body
+  if (opt.judge !== config.judge.RejudgePending) {
+    ctx.throw(400, 'Invalid update')
+  }
+
+  const sid = Number.parseInt(ctx.params.sid)
+  const solution = await Solution.findOne({ sid }).exec()
+  if (!solution) {
+    ctx.throw(400, 'No such a solution')
+  }
+
+  solution.judge = config.judge.RejudgePending
+  await solution.save()
+
+  const pid = solution.pid
+  const problem = await Problem.findOne({ pid }).lean().exec()
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
+
+  try {
+    const timeLimit = problem.time
+    const memoryLimit = problem.memory
+    let meta = { testcases: [] }
+    const dir = path.resolve(__dirname, `../data/${pid}`)
+    const file = path.resolve(dir, 'meta.json')
+    if (fse.existsSync(file)) {
+      meta = await fse.readJson(file)
+    }
+    const testcases = meta.testcases.map((item) => {
+      return {
+        uuid: item.uuid,
+        input: { src: `/app/data/${pid}/${item.uuid}.in` },
+        output: { src: `/app/data/${pid}/${item.uuid}.out` },
+      }
+    })
+    const submission = {
+      sid, timeLimit, memoryLimit, testcases,
+      language: solution.language,
+      code: solution.code,
+    }
+
+    redis.rpush('judger:task', JSON.stringify(submission))
+    logger.info(`One solution is rejudged ${solution.sid}`)
+
+    ctx.body = only(solution, 'sid judge')
+  } catch (e) {
+    ctx.throw(400, e.message)
+  }
+}
+
 module.exports = {
   find,
   findOne,
   create,
+  update,
 }

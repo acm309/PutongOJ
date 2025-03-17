@@ -27,6 +27,14 @@ test('Can see solution and sim of other users', async (t) => {
   t.truthy(res.body.solution.code)
 })
 
+test('Push solution to rejudge', async (t) => {
+  const res = await request
+    .put('/api/status/3')
+    .send({ judge: config.judge.RejudgePending })
+
+  t.is(res.status, 200)
+})
+
 test.after.always('close server', () => {
   server.close()
 })
