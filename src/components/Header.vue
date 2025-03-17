@@ -60,6 +60,7 @@ function getMenuItems() {
         { name: 'problemCreate', label: t('oj.create_problem') },
         { name: 'contestCreate', label: t('oj.create_contest') },
         { name: 'newsCreate', label: t('oj.create_news') },
+        { name: 'userManager', label: t('oj.user_management') },
         { name: 'tagManager', label: t('oj.tag_management') },
         { name: 'groupManager', label: t('oj.group_management') },
       ],
