@@ -10,7 +10,8 @@ import pangu from 'pangu'
 
 import { Card, Row, Col, Icon, Page, Spin } from 'view-ui-plus'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
+const isZH = $computed(() => locale.value === 'zh-CN')
 const newsStore = useNewsStore()
 const route = useRoute()
 const router = useRouter()
@@ -50,7 +51,13 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="home-wrap">
     <div class="news-header">
-      <span class="welcome-text">Welcome to Putong OJ</span><br />
+      <span v-if="isZH" class="welcome-text">
+        中国计量大学在线评测系统
+      </span>
+      <span v-else class="welcome-text">
+        Welcome to CJLU Online Judge
+      </span>
+      <br />
       {{ t('oj.news_list') }}
     </div>
     <router-link v-if="list.length > 0" v-for="item in list" :key="item.nid"
@@ -92,7 +99,7 @@ onRouteQueryUpdate(fetch)
     font-size 28px
     padding-bottom 16px
     .welcome-text
-      font-size 12px
+      font-size 14px
 
   .news-link
     text-decoration none
