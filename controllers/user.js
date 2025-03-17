@@ -105,7 +105,9 @@ const create = async (ctx) => {
   if (!isComplexPwd(pwd)) {
     ctx.throw(400, 'The password is not complex enough!')
   }
-  const exists = await User.findOne({ uid }).exec()
+  const exists = await User.findOne({
+    uid: { $regex: new RegExp(`^${uid}$`, 'i') },
+  }).exec()
   if (exists) {
     ctx.throw(400, 'The username has been registered!')
   }
