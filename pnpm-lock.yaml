@@ -20,9 +20,6 @@ importers:
       fs-extra:
         specifier: ^5.0.0
         version: 5.0.0
-      husky:
-        specifier: ^8.0.3
-        version: 8.0.3
       ioredis:
         specifier: ^3.2.2
         version: 3.2.2
@@ -2151,11 +2148,6 @@ packages:
 
   humanize-number@0.0.2:
     resolution: {integrity: sha512-un3ZAcNQGI7RzaWGZzQDH47HETM4Wrj6z6E4TId8Yeq9w5ZKUVB1nrT2jwFheTUjEmqcgTjXDc959jum+ai1kQ==}
-
-  husky@8.0.3:
-    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -6819,8 +6811,6 @@ snapshots:
       - supports-color
 
   humanize-number@0.0.2: {}
-
-  husky@8.0.3: {}
 
   iconv-lite@0.4.24:
     dependencies:

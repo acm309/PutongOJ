@@ -6,9 +6,6 @@ data/*
 # customary
 .tern-project
 requests/
-migrations/db
-migrations/backup
-!migrations/db/.gitkeep
 public/uploads/*
 !public/uploads/.gitkeep
 package-lock.json
