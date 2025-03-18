@@ -28,7 +28,6 @@ async function similarityCheck (sid) {
   const solutions = await Solution.find({
     pid: solution.pid,
     uid: { $ne: solution.uid },
-    language: solution.language,
     create: { $lt: solution.create },
     judge: judge.Accepted,
   }).lean().exec()
@@ -50,7 +49,7 @@ async function similarityCheck (sid) {
     + ` (${result.sim}%) in ${end_time - start_time}ms`
     + ` (${solutions.length} solutions checked)`)
 
-  if (result.sim < 50) { return }
+  if (result.sim < 70) { return }
 
   solution.sim = result.sim
   solution.sim_s_id = result.sim_s_id

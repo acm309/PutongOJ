@@ -133,6 +133,9 @@ const create = async (ctx) => {
   }
 }
 
+/**
+ * 重测一个提交
+ */
 const update = async (ctx) => {
   const opt = ctx.request.body
   if (opt.judge !== config.judge.RejudgePending) {
@@ -146,6 +149,8 @@ const update = async (ctx) => {
   }
 
   solution.judge = config.judge.RejudgePending
+  solution.sim = 0
+  solution.sim_s_id = 0
   await solution.save()
 
   const pid = solution.pid
