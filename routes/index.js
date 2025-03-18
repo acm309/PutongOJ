@@ -1,32 +1,4 @@
 const Router = require('koa-router')
-const urlJoin = require('url-join')
-const website = require('../config/website')
-
-if (website.semi_restful) {
-  Router.prototype.put = function (...args) {
-    let [ name, path, middleware ] = args
-    if (typeof path === 'string' || path instanceof RegExp) {
-      middleware = Array.prototype.slice.call(args, 2)
-    } else {
-      middleware = Array.prototype.slice.call(args, 1)
-      path = name
-      name = null
-    }
-    return this.post(urlJoin(path, '/update'), ...middleware)
-  }
-
-  Router.prototype.del = function (...args) {
-    let [ name, path, middleware ] = args
-    if (typeof path === 'string' || path instanceof RegExp) {
-      middleware = Array.prototype.slice.call(args, 2)
-    } else {
-      middleware = Array.prototype.slice.call(args, 1)
-      path = name
-      name = null
-    }
-    return this.post(urlJoin(path, '/delete'), ...middleware)
-  }
-}
 
 const router = new Router({
   prefix: '/api',
