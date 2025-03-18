@@ -5,8 +5,9 @@ const app = require('../../app')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('ranklist', async (t) => {
-  const res = await request.get('/api/ranklist/list')
+test('Fetch ranklist', async (t) => {
+  const res = await request
+    .get('/api/ranklist/list')
 
   t.is(res.status, 200)
   t.truthy(res.body.list)
@@ -17,4 +18,12 @@ test('ranklist', async (t) => {
       t.fail('ranklist is not correctly sorted')
     }
   }
+})
+
+test('Fetch ranklist filtered by group', async (t) => {
+  const res = await request
+    .get('/api/ranklist/list?gid=1')
+
+  t.is(res.status, 200)
+  t.truthy(res.body.list)
 })
