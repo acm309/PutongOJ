@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-        redis-version: [6]
-        mongodb-version: ['5.0']
+        node-version: [20.x, 22.x]
+        redis-version: [7]
+        mongodb-version: ['8.0']
 
     steps:
       - uses: actions/checkout@v3
@@ -27,20 +27,19 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Start Redis
-        uses: supercharge/redis-github-action@1.4.0
+        uses: supercharge/redis-github-action@1.7.0
         with:
           redis-version: ${{ matrix.redis-version }}
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.7.0
+        uses: supercharge/mongodb-github-action@1.12.0
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
 
-      - uses: pnpm/action-setup@v2.0.1
-        name: Install pnpm
-        id: pnpm-install
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
         with:
-          version: 7
+          version: 9
           run_install: false
 
       - name: Install dependencies
@@ -52,14 +51,14 @@ jobs:
           CI: true
 
       - name: Run coverage
-        if: matrix.node-version == '18.x'
+        if: matrix.node-version == '22.x'
         run: |
           pnpm coverage
         env:
           CI: true
 
       - name: Upload coverage artifacts
-        if: matrix.node-version == '18.x'
+        if: matrix.node-version == '22.x'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
