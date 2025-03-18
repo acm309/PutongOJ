@@ -9,6 +9,7 @@ const find = async (ctx) => {
   const pageSize = Number.parseInt(opt.pageSize) || 30
   const filter = {
     solve: { $gt: 0 },
+    privilege: { $ne: 0 },
   }
   if (opt.gid && !Number.isNaN(Number.parseInt(opt.gid))) {
     filter.gid = Number.parseInt(opt.gid)
