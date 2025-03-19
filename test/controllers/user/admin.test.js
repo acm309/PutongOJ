@@ -9,7 +9,7 @@ const requestRoot = supertest.agent(server)
 const requestAdmin = supertest.agent(server)
 
 const userRoot = users.data.admin
-const userAdmin = users.data.tobeadmin
+const userAdmin = users.data.toelevate
 const userPrimary = users.data.primaryuser
 
 test.before('Login as admin', async (t) => {
@@ -39,7 +39,7 @@ test('Fetch user list filter by privilege', async (t) => {
 
 test('Fetch user list filter by uid', async (t) => {
   const r = await requestRoot
-    .get(`/api/user/list?type=uid&content=^${userRoot.uid}$`)
+    .get(`/api/user/list?type=uid&content=${userRoot.uid}`)
   t.is(r.status, 200)
   t.true(Array.isArray(r.body.docs))
   t.is(r.body.docs.length, 1)
