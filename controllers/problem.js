@@ -1,5 +1,6 @@
 const path = require('node:path')
 const fse = require('fs-extra')
+const escapeRegExp = require('lodash.escaperegexp')
 const only = require('only')
 const config = require('../config')
 const Contest = require('../models/Contest')
@@ -45,14 +46,14 @@ const find = async (ctx) => {
   if (opt.content) {
     if (opt.type === 'tag') {
       filter.tags = {
-        $in: [ new RegExp(opt.content, 'i') ],
+        $in: [ new RegExp(escapeRegExp(opt.content), 'i') ],
       }
     } else {
       // https://stackoverflow.com/questions/2908100/mongodb-regex-search-on-integer-value
       filter.$expr = {
         $regexMatch: {
           input: { $toString: `$${opt.type}` },
-          regex: new RegExp(opt.content, 'i'),
+          regex: new RegExp(escapeRegExp(opt.content), 'i'),
         },
       }
     }

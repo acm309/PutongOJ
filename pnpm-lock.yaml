@@ -50,6 +50,9 @@ importers:
       lodash.difference:
         specifier: ^4.5.0
         version: 4.5.0
+      lodash.escaperegexp:
+        specifier: ^4.1.2
+        version: 4.1.2
       lodash.pickby:
         specifier: ^4.6.0
         version: 4.6.0
@@ -2574,6 +2577,9 @@ packages:
 
   lodash.difference@4.5.0:
     resolution: {integrity: sha512-dS2j+W26TQ7taQBGN8Lbbq04ssV3emRw4NY58WErlTO29pIqS0HmoT5aJ9+TUQ1N3G+JOZSji4eugsWwGp9yPA==}
+
+  lodash.escaperegexp@4.1.2:
+    resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
 
   lodash.flatten@4.4.0:
     resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
@@ -7274,6 +7280,8 @@ snapshots:
   lodash.defaults@4.2.0: {}
 
   lodash.difference@4.5.0: {}
+
+  lodash.escaperegexp@4.1.2: {}
 
   lodash.flatten@4.4.0: {}
 

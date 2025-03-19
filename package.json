@@ -48,6 +48,7 @@
     "koa-static": "^5.0.0",
     "koa2-ratelimit": "^0.9.1",
     "lodash.difference": "^4.5.0",
+    "lodash.escaperegexp": "^4.1.2",
     "lodash.pickby": "^4.6.0",
     "lodash.remove": "^4.7.0",
     "lodash.without": "^4.4.0",

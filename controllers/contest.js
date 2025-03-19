@@ -1,3 +1,4 @@
+const escapeRegExp = require('lodash.escaperegexp')
 const only = require('only')
 const config = require('../config')
 const redis = require('../config/redis')
@@ -46,7 +47,7 @@ const find = async (ctx) => {
     ? { status: config.status.Available }
     : {}
   if (filterType === 'title') {
-    filter.title = { $regex: new RegExp(filterContent, 'i') }
+    filter.title = { $regex: new RegExp(escapeRegExp(filterContent), 'i') }
   }
   const list = await Contest.paginate(filter, {
     sort: { cid: -1 },

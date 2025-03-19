@@ -1,4 +1,5 @@
 const difference = require('lodash.difference')
+const escapeRegExp = require('lodash.escaperegexp')
 const only = require('only')
 const config = require('../config')
 const Group = require('../models/Group')
@@ -38,7 +39,7 @@ const find = async (ctx) => {
     filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
   }
   if (filterType === 'uid' && isAdmin(profile)) {
-    filter.uid = { $regex: new RegExp(filterContent, 'i') }
+    filter.uid = { $regex: new RegExp(escapeRegExp(filterContent), 'i') }
   }
   let result
   if (page !== -1) {
@@ -106,7 +107,7 @@ const create = async (ctx) => {
     ctx.throw(400, 'The password is not complex enough!')
   }
   const exists = await User.findOne({
-    uid: { $regex: new RegExp(`^${uid}$`, 'i') },
+    uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
   }).exec()
   if (exists) {
     ctx.throw(400, 'The username has been registered!')
