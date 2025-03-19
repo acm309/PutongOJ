@@ -1,4 +1,7 @@
 name: Test and Coverage
+permissions:
+  contents: read
+  pull-requests: write
 
 on:
   push:
@@ -68,6 +71,7 @@ jobs:
     name: Upload Coverage
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
