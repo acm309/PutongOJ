@@ -4,15 +4,29 @@ const send = require('koa-send')
 const remove = require('lodash.remove')
 const { v4: uuid } = require('uuid')
 
+const loadPID = (ctx) => {
+  const pid = Number(ctx.params.pid)
+  if (!Number.isInteger(pid) || pid <= 0) {
+    ctx.throw(400, 'Invalid problem ID')
+  }
+  return pid
+}
+
+const loadUUID = (ctx) => {
+  const uuid = ctx.params.uuid
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(uuid)) {
+    ctx.throw(400, 'Invalid UUID')
+  }
+  return uuid
+}
+
 /**
  * 拿到输入输出的测试文件，然后将它移动到专门放测试数据的地方
  * 记得中间要修改对应的 meta.json
  */
 const create = async (ctx) => {
-  const pid = +ctx.params.pid
-  // 输入
+  const pid = loadPID(ctx)
   const testin = ctx.request.body.in || ''
-  // 输出
   const testout = ctx.request.body.out || ''
 
   if (!testin && !testout) {
@@ -40,7 +54,9 @@ const create = async (ctx) => {
  * 保留测试数据的文件，原因是为了能够继续查看测试样例, 比如 一个提交的测试数据用的是 id 为 1 的测试数据，即时管理员不再用这个数据了，我们仍然能够看到当时这个提交用的测试数据
  */
 const del = async (ctx) => {
-  const { pid, uuid } = ctx.params
+  const pid = loadPID(ctx)
+  const uuid = loadUUID(ctx)
+
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
   remove(meta.testcases, item => item.uuid === uuid)
@@ -52,21 +68,24 @@ const del = async (ctx) => {
  * 这里是将文件返回
  */
 const fetch = async (ctx) => {
-  const { pid, uuid } = ctx.params
-  const type = ctx.query.type // 必须指明要输入文件还是输出文件
-  // 原则上需要判断一下请求的文件在不在
+  const pid = loadPID(ctx)
+  const uuid = loadUUID(ctx)
+  const type = ctx.query.type
+  if (type !== 'in' && type !== 'out') {
+    ctx.throw(400, 'Invalid type')
+  }
+
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   if (!fse.existsSync(path.resolve(testDir, `${uuid}.${type}`))) {
     ctx.throw(400, 'No such a testcase')
   }
-  await send(ctx, `${uuid}.${type}`, { root: testDir })
-  // 使其在浏览器中打开
   ctx.type = 'text/plain; charset=utf-8'
+  await send(ctx, `${uuid}.${type}`, { root: testDir })
 }
 
 // 返回该题拥有的测试数据
 const find = async (ctx) => {
-  const pid = ctx.params.pid
+  const pid = loadPID(ctx)
 
   let meta = { testcases: [] }
   const dir = path.resolve(__dirname, `../data/${pid}`)
