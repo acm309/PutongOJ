@@ -48,21 +48,7 @@ const config = {
   },
 
   deploy: {
-    judgers: 2,
     adminInitPwd: 'kplkplkpl',
-  },
-
-  mail: {
-    // set false to disable email notifications
-    enable: false,
-    host: 'smtp-mail.outlook.com',
-    port: 587,
-    // true for 465, false for other ports
-    secure: false,
-    auth: {
-      user: process.env.MAIL_ADDRESS,
-      pass: process.env.MAIL_PASSWORD,
-    },
   },
 }
 
