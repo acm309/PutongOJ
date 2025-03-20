@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema({
     required: true,
     validate: {
       validator (v) {
-        return /^[a-z0-9_-]{3,20}$/i.test(v)
+        return /^[\w-]{3,20}$/.test(v)
       },
       message:
         'Invalid uid. It should be 3-20 characters long '
@@ -25,15 +25,8 @@ const userSchema = mongoose.Schema({
   },
   privilege: {
     type: Number,
+    enum: Object.values(config.privilege),
     default: config.privilege.User,
-    validate: {
-      validator (v) {
-        return Object.values(config.privilege).includes(v)
-      },
-      message:
-        `Invalid privilege. Valid values are `
-        + `[${Object.values(config.privilege).join(', ')}]`,
-    },
   },
   nick: {
     type: String,
@@ -62,8 +55,8 @@ const userSchema = mongoose.Schema({
     default: '',
     validate: {
       validator (v) {
-        return v.length === 0
-          || (v.length <= 254 && /^[\w.%+-]{1,64}@[a-z0-9.-]{1,255}\.[a-z]{2,}$/i.test(v))
+        return v.length === 0 || (v.length <= 254
+          && /^[\w.%+-]{1,64}@[a-z0-9.-]{1,255}\.[a-z]{2,}$/i.test(v))
       },
       message: 'Invalid email address',
     },
