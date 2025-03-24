@@ -13,7 +13,7 @@ const problemStore = useProblemStore()
 const testcaseStore = useTestcaseStore()
 const problem = $ref({
   title: '',
-  memory: 32268,
+  memory: 32768,
   time: 1000,
   description: '',
   input: '',
