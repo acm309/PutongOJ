@@ -30,7 +30,9 @@ const config = $computed(() => ({
 }))
 
 async function render () {
-  if (!preview.value || !props.modelValue || waiting) return
+  if (!preview.value || waiting
+    || props.modelValue === undefined
+  ) { return }
 
   waiting = true
   try {
