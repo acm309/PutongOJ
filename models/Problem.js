@@ -1,86 +1,94 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
-
 const config = require('../config')
-const ids = require('./ID')
+const ID = require('./ID')
 
 const problemSchema = mongoose.Schema({
-  isdone: Boolean,
-  pid: { // 唯一标识符，-1 表示新题目
+  pid: {
     type: Number,
+    default: -1,
+    immutable: true,
     index: {
       unique: true,
     },
-    default: -1,
   },
-  time: { // 时间限制，单位 ms
-    type: Number,
-    default: 1000,
-    min: 100,
-    max: config.limitation.time,
-  },
-  memory: { // 内存限制，单位 KB
-    type: Number,
-    default: 32768,
-    min: 128,
-    max: config.limitation.memory,
-  },
-  title: { // 标题
+  title: {
     type: String,
     required: true,
+    validate: {
+      validator (v) {
+        return v.length <= 80
+      },
+      message:
+        'Title is too long. It should be less than 80 characters long',
+    },
   },
-  create: { // 创建时间
+  time: {
     type: Number,
-    default: Date.now,
+    default: 1000,
+    min: 500,
+    max: config.limitation.time,
   },
-  description: { // 描述
-    type: String,
-    default: '',
-  },
-  input: { // 输入格式
-    type: String,
-    default: '',
-  },
-  output: { // 输出格式
-    type: String,
-    default: '',
-  },
-  in: { // 输入样例
-    type: String,
-    default: '',
-  },
-  out: { // 输出样例
-    type: String,
-    default: '',
-  },
-  hint: { // 提示
-    type: String,
-    default: '',
-  },
-  spj: { // 是否是特判题目
-    type: Boolean,
-    default: false,
-  },
-  spjcode: { // 特判代码
-    type: String,
-    default: '',
-  },
-  solve: { // 解决人数
+  memory: {
     type: Number,
-    default: 0,
+    default: 32768,
+    min: 32768,
+    max: config.limitation.memory,
   },
-  submit: { // 提交人数
-    type: Number,
-    default: 0,
+  description: {
+    type: String,
+    default: '',
   },
-  status: { // 状态，默认新建的题目不显示
+  input: {
+    type: String,
+    default: '',
+  },
+  output: {
+    type: String,
+    default: '',
+  },
+  in: {
+    type: String,
+    default: '',
+  },
+  out: {
+    type: String,
+    default: '',
+  },
+  hint: {
+    type: String,
+    default: '',
+  },
+  status: {
     type: Number,
     default: config.status.Reserve,
   },
-  tags: { // 标签
+  type: {
+    type: Number,
+    enum: Object.values(config.problemType),
+    default: config.problemType.Traditional,
+  },
+  code: {
+    type: String,
+    default: '',
+  },
+  tags: {
     type: [ String ],
     default: [],
     index: true,
+  },
+  create: {
+    type: Number,
+    default: Date.now,
+    immutable: true,
+  },
+  submit: {
+    type: Number,
+    default: 0,
+  },
+  solve: {
+    type: Number,
+    default: 0,
   },
 }, {
   collection: 'Problem',
@@ -88,30 +96,11 @@ const problemSchema = mongoose.Schema({
 
 problemSchema.plugin(mongoosePaginate)
 
-problemSchema.pre('validate', function (next) {
-  // 验证字段
-  if (this.time > config.limitation.time) {
-    next(new Error(`Time should not be longer than ${config.limitation.time} ms`))
-  } else if (this.memory > config.limitation.memory) {
-    next(new Error(`Memory should not be greater than ${config.limitation.memory} KB`))
-  } else {
-    next()
-  }
-})
-
-problemSchema.pre('save', function (next) {
-  // 保存
+problemSchema.pre('save', async function (next) {
   if (this.pid === -1) {
-    // 表示新的题目被创建了，因此赋予一个新的 id
-    ids
-      .generateId('Problem')
-      .then((id) => {
-        this.pid = id
-      })
-      .then(next)
-  } else {
-    next()
+    this.pid = await ID.generateId('Problem')
   }
+  next()
 })
 
 module.exports = mongoose.model('Problem', problemSchema)

@@ -107,7 +107,8 @@ const findOne = async (ctx) => {
   const problem = ctx.state.problem
 
   ctx.body = {
-    problem,
+    problem: only(problem,
+      'pid title time memory description input output in out hint status type tags'),
   }
 }
 
@@ -116,7 +117,7 @@ const create = async (ctx) => {
   const opt = ctx.request.body
 
   const problem = new Problem(Object.assign(
-    only(opt, 'title description input output in out hint spj spjcode'),
+    only(opt, 'title description input output in out hint type code'),
     { // pid 会自动生成
       time: Number.parseInt(opt.time) || 1000,
       memory: Number.parseInt(opt.memory) || 32768,
@@ -156,7 +157,7 @@ const update = async (ctx) => {
   const problem = ctx.state.problem
   const fields = [
     'title', 'time', 'memory', 'description', 'input', 'output',
-    'hint', 'in', 'out', 'status', 'spj', 'spjcode' ]
+    'in', 'out', 'hint', 'status', 'type', 'code' ]
 
   fields.filter(field => opt[field] != null).forEach((field) => {
     problem[field] = opt[field]

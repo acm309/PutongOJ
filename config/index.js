@@ -51,6 +51,12 @@ const config = {
     Password: 3,
   },
 
+  problemType: {
+    Traditional: 1,
+    Interaction: 2,
+    SpecialJudge: 3,
+  },
+
   deploy: {
     adminInitPwd: 'kplkplkpl',
   },
