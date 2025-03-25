@@ -70,7 +70,7 @@ const find = async (ctx) => {
       limit: pageSize,
       lean: true,
       leanWithId: false,
-      select: '-_id -hint -description -in -out -input -output -__v', // -表示不要的字段
+      select: '-_id pid title status type tags submit solve',
     })
   } else {
     const docs = await Problem.find({}, { title: 1, pid: 1, _id: 0 }).lean().exec()
@@ -105,11 +105,13 @@ const find = async (ctx) => {
 // 返回一道题目
 const findOne = async (ctx) => {
   const problem = ctx.state.problem
+  const profile = ctx.session.profile
 
-  ctx.body = {
-    problem: only(problem,
-      'pid title time memory description input output in out hint status type tags'),
-  }
+  let fields = 'pid title time memory status type tags '
+    + 'description input output in out hint'
+  if (isAdmin(profile)) { fields += ' code' }
+
+  ctx.body = { problem: only(problem, fields) }
 }
 
 // 新建一个题目
@@ -159,7 +161,7 @@ const update = async (ctx) => {
     'title', 'time', 'memory', 'description', 'input', 'output',
     'in', 'out', 'hint', 'status', 'type', 'code' ]
 
-  fields.filter(field => opt[field] != null).forEach((field) => {
+  fields.filter(field => opt[field] !== null).forEach((field) => {
     problem[field] = opt[field]
   })
   try {

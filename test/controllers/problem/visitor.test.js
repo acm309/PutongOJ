@@ -18,7 +18,6 @@ test('Problem list', async (t) => {
   if (res.body.list.docs.length > 0) {
     t.truthy(res.body.list.docs[0].title)
     t.truthy(res.body.list.docs[0].pid)
-    t.truthy(res.body.list.docs[0].time)
   }
 })
 
