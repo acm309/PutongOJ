@@ -14,60 +14,11 @@ export const result = {
   12: 'Skipped',
 } as const
 
-export const judgeList = [
-  {
-    value: 0,
-    label: 'Pending',
-  },
-  {
-    value: 1,
-    label: 'Running & Judge',
-  },
-  {
-    value: 2,
-    label: 'Compile Error',
-  },
-  {
-    value: 3,
-    label: 'Accepted',
-  },
-  {
-    value: 4,
-    label: 'Runtime Error',
-  },
-  {
-    value: 5,
-    label: 'Wrong Answer',
-  },
-  {
-    value: 6,
-    label: 'Time Limit Exceeded',
-  },
-  {
-    value: 7,
-    label: 'Memory Limit Exceeded',
-  },
-  {
-    value: 8,
-    label: 'Output Limit Exceeded',
-  },
-  {
-    value: 9,
-    label: 'Presentation Error',
-  },
-  {
-    value: 10,
-    label: 'System Error',
-  },
-  {
-    value: 11,
-    label: 'Rejudge Pending',
-  },
-  {
-    value: 12,
-    label: 'Skipped',
-  },
-] as const
+export const judgeList = Object.entries(result)
+  .map(([ value, label ]) => ({
+    value: Number.parseInt(value),
+    label,
+  }))
 
 export const language = {
   1: 'C',
@@ -130,6 +81,12 @@ export const contestType = {
   3: 'Password',
 } as const
 
+export const problemType = {
+  1: 'Traditional',
+  2: 'Interaction',
+  3: 'Special Judge',
+} as const
+
 export const status = {
   0: 'Reserve', // 是否开放给普通用户
   2: 'Available',
@@ -152,6 +109,7 @@ export default {
   statisTableObj,
   contestStatus,
   contestType,
+  problemType,
   status,
   privilege,
 } as const
