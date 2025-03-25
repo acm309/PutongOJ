@@ -49,7 +49,7 @@ if (typeof overview !== 'undefined') {
   contest.end = contest.end || new Date().getTime() + 60 * 1000 * 60
   if (contest.encrypt === encrypt.Password)
     pwd = contest.argument
-  overview.forEach(item => {
+  overview.forEach((item) => {
     if (!item.invalid) return
     $Message.error(`Problem ${item.pid} is invalid, auto removed`)
     contest.list.splice(contest.list.indexOf(item.pid), 1)
@@ -148,8 +148,9 @@ onBeforeRouteLeave(() => { source = [] })
       </Col>
       <Col :span="8">
         <DatePicker
-          :model-value="new Date(contest?.start || new Date().getTime())"
           type="datetime"
+          :model-value="new Date(contest.start)"
+          format="yyyy-MM-dd HH:mm:ss"
           @on-change="(time) => changeTime('start', time)"
         />
       </Col>
@@ -161,7 +162,8 @@ onBeforeRouteLeave(() => { source = [] })
       <Col :span="8">
         <DatePicker
           type="datetime"
-          :model-value="new Date(contest?.end || new Date().getTime() + 60 * 1000 * 60)"
+          :model-value="new Date(contest.end)"
+          format="yyyy-MM-dd HH:mm:ss"
           @on-change="(time) => changeTime('end', time)"
         />
       </Col>
@@ -271,4 +273,9 @@ onBeforeRouteLeave(() => { source = [] })
     font-size: 20px
 .add
   margin-bottom: 20px
+</style>
+
+<style lang="stylus">
+.ivu-picker-panel-content .ivu-picker-panel-content .ivu-time-picker-cells-with-seconds .ivu-time-picker-cells-list
+  width 72px
 </style>

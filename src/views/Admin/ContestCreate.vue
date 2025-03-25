@@ -16,10 +16,15 @@ const { create } = contestStore
 const Message = inject('$Message')
 const router = useRouter()
 
+function now () {
+  const timestamp = new Date().getTime()
+  return timestamp - timestamp % (60 * 1000)
+}
+
 const contest = $ref({
   title: '',
-  start: '',
-  end: '',
+  start: now(),
+  end: now() + 60 * 1000 * 60,
   list: [],
   encrypt: encrypt.Public,
   argument: '',
