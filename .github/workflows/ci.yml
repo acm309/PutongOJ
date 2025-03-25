@@ -19,7 +19,7 @@ jobs:
       matrix:
         node-version: [20.x, 22.x]
         redis-version: [7]
-        mongodb-version: ['8.0']
+        mongodb-version: ["8.0"]
 
     steps:
       - uses: actions/checkout@v3
@@ -73,6 +73,8 @@ jobs:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     steps:
+      - uses: actions/checkout@v3
+
       - name: Download coverage artifacts
         uses: actions/download-artifact@v4
         with:
@@ -80,7 +82,7 @@ jobs:
           path: coverage.lcov
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
