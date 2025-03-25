@@ -30,6 +30,8 @@ async function similarityCheck (sid) {
     uid: { $ne: solution.uid },
     create: { $lt: solution.create },
     judge: judge.Accepted,
+  }, {
+    code: 1, sid: 1 
   }).lean().exec()
 
   const code = codeNormalize(solution.code)
