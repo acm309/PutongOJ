@@ -1,13 +1,23 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { Input, Radio, RadioGroup } from 'view-ui-plus'
 import MarkdownEditor from '@/components/MarkdownEditor'
+import { problemType } from '@/util/constant'
 
-defineProps(['problem'])
+defineProps([ 'problem' ])
+
+const problemTypeOptions = Object.entries(problemType)
+  .map(([ value, label ]) => ({
+    value: Number(value),
+    label,
+  }))
+
 const { t } = useI18n()
 </script>
 
 <template>
-  <div class="proadd-wrap" v-if="typeof problem.description === 'string'">
+  <!-- eslint-disable vue/no-mutating-props -->
+  <div v-if="typeof problem.description === 'string'" class="proadd-wrap">
     <div class="form-item">
       <Input v-model="problem.title">
         <template #prepend>
@@ -15,9 +25,8 @@ const { t } = useI18n()
         </template>
       </Input>
     </div>
-
     <div class="form-row">
-      <Input v-model="problem.time" class="form-item">
+      <Input v-model="problem.time" class="form-item" type="number">
         <template #prepend>
           Time
         </template>
@@ -25,7 +34,7 @@ const { t } = useI18n()
           ms
         </template>
       </Input>
-      <Input v-model="problem.memory" class="form-item">
+      <Input v-model="problem.memory" class="form-item" type="number">
         <template #prepend>
           Memory
         </template>
@@ -34,35 +43,57 @@ const { t } = useI18n()
         </template>
       </Input>
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.description') }}</div>
+      <div class="label">
+        {{ t('oj.description') }}
+      </div>
       <MarkdownEditor v-model="problem.description" />
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.input') }}</div>
+      <div class="label">
+        {{ t('oj.input') }}
+      </div>
       <MarkdownEditor v-model="problem.input" />
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.output') }}</div>
+      <div class="label">
+        {{ t('oj.output') }}
+      </div>
       <MarkdownEditor v-model="problem.output" />
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.sample_input') }}</div>
+      <div class="label">
+        {{ t('oj.sample_input') }}
+      </div>
       <Input v-model="problem.in" type="textarea" :rows="8" />
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.sample_output') }}</div>
+      <div class="label">
+        {{ t('oj.sample_output') }}
+      </div>
       <Input v-model="problem.out" type="textarea" :rows="8" />
     </div>
-
     <div class="form-item">
-      <div class="label">{{ t('oj.hint') }}</div>
+      <div class="label">
+        {{ t('oj.hint') }}
+      </div>
       <MarkdownEditor v-model="problem.hint" />
+    </div>
+    <div class="form-item">
+      <div class="label">
+        Problem Type
+      </div>
+      <RadioGroup v-model="problem.type">
+        <Radio v-for="item in problemTypeOptions" :key="item.value" :label="item.value" border>
+          {{ item.label }}
+        </Radio>
+      </RadioGroup>
+    </div>
+    <div v-if="[2, 3].includes(problem.type)" class="form-item">
+      <div class="label">
+        Code of {{ { 2: "Interactor", 3: "Checker" }[problem.type] }}
+      </div>
+      <Input v-model="problem.code" type="textarea" :rows="8" />
     </div>
   </div>
 </template>

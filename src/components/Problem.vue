@@ -44,7 +44,7 @@ function onCopy(content) {
       </Tooltip>
     </h2>
     <pre><code>{{ problem.out }}</code></pre>
-    <template v-if="problem.hint">
+    <template v-if="problem.hint?.trim()">
       <h2>
         {{ t('oj.hint') }}
       </h2>
