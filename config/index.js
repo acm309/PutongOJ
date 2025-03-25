@@ -51,6 +51,13 @@ const config = {
     Password: 3,
   },
 
+  permission: {
+    Guest: 0,
+    Student: 1,
+    Teacher: 2,
+    Owner: 3,
+  },
+
   deploy: {
     adminInitPwd: 'kplkplkpl',
   },

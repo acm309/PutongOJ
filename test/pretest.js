@@ -49,6 +49,10 @@ async function main () {
       id: 0,
       name: 'Contest',
     }).save(),
+    new ID({
+      id: 0,
+      name: 'Course',
+    }).save(),
   ])
 
   const groups = Promise.all(
