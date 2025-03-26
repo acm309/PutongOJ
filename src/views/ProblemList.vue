@@ -1,4 +1,5 @@
 <script setup>
+import only from 'only'
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeMount, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -57,7 +58,7 @@ const pageChange = val => reload({ page: val })
 function change(problem) {
   loading = true
   problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
-  update(problem).then(fetch)
+  update(only(problem, 'pid status')).then(fetch)
 }
 
 const $Message = inject('$Message')
