@@ -96,6 +96,9 @@ const create = async (ctx) => {
   try {
     const timeLimit = problem.time
     const memoryLimit = problem.memory
+    const type = problem.type
+    const additionCode = problem.code
+
     let meta = { testcases: [] }
     const dir = path.resolve(__dirname, `../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
@@ -120,8 +123,8 @@ const create = async (ctx) => {
     const sid = solution.sid
     const submission = {
       sid, timeLimit, memoryLimit,
-      testcases,
-      language, code,
+      testcases, language, code,
+      type, additionCode,
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
@@ -162,6 +165,9 @@ const update = async (ctx) => {
   try {
     const timeLimit = problem.time
     const memoryLimit = problem.memory
+    const type = problem.type
+    const additionCode = problem.code
+
     let meta = { testcases: [] }
     const dir = path.resolve(__dirname, `../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
@@ -179,6 +185,7 @@ const update = async (ctx) => {
       sid, timeLimit, memoryLimit, testcases,
       language: solution.language,
       code: solution.code,
+      type, additionCode,
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
