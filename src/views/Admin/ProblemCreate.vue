@@ -21,19 +21,21 @@ const problem = $ref({
   hint: '',
   in: '',
   out: '',
+  type: 1,
+  code: '',
 })
 
 const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 
-async function submit() {
+async function submit () {
   const pid = await problemStore.create(problem)
   $Message.success(t('oj.create_problem_success', { pid }))
   if (!problem.in && !problem.out) {
     $Message.info('样例输入输出均为空，已跳过测试点创建！')
   } else {
-    let test = {
-      pid: pid,
+    const test = {
+      pid,
       in: problem.in,
       out: problem.out,
     }
@@ -43,7 +45,7 @@ async function submit() {
   router.push({ name: 'problemInfo', params: { pid } })
 }
 
-async function submitCheck() {
+async function submitCheck () {
   if (!problem.title.trim()) {
     $Message.error(t('oj.title_is_required'))
   } else if (!problem.description.trim()) {
@@ -68,7 +70,7 @@ async function submitCheck() {
 </script>
 
 <template>
-  <div>
+  <div class="new-problem-wrap">
     <h2>{{ t('oj.steps_of_create_a_problem') }}</h2>
     <br>
     <Steps direction="vertical" :style="{ color: 'black' }">
@@ -86,4 +88,9 @@ async function submitCheck() {
   </div>
 </template>
 
-<style></style>
+<style lang="stylus" scoped>
+@import '../../styles/common'
+
+.new-problem-wrap
+  max-width 1024px
+</style>

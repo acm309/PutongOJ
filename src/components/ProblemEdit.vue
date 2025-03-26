@@ -93,7 +93,7 @@ const { t } = useI18n()
       <div class="label">
         Code of {{ { 2: "Interactor", 3: "Checker" }[problem.type] }}
       </div>
-      <Input v-model="problem.code" type="textarea" :rows="8" />
+      <Input v-model="problem.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }" />
     </div>
   </div>
 </template>
@@ -119,4 +119,7 @@ const { t } = useI18n()
     .form-item
       flex: 1
       margin: 0
+
+  .code-input
+    font-family var(--font-code)
 </style>
