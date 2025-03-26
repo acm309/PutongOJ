@@ -207,11 +207,16 @@ const update = async (ctx) => {
   const { cid } = ctx.params
   const contest = await Contest.findOne({ cid }).exec()
   const fields = [ 'title', 'encrypt', 'list', 'argument', 'start', 'end', 'status' ]
+
   opt.start = new Date(opt.start).getTime()
   opt.end = new Date(opt.end).getTime()
-  fields.filter(field => opt[field] != null).forEach((field) => {
-    contest[field] = opt[field]
+
+  fields.forEach((field) => {
+    if (opt[field] !== undefined && opt[field] !== null) {
+      contest[field] = opt[field]
+    }
   })
+
   try {
     await contest.save()
     logger.info(`One contest is updated" ${contest.cid} -- ${contest.title}`)

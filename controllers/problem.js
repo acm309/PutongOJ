@@ -161,9 +161,12 @@ const update = async (ctx) => {
     'title', 'time', 'memory', 'description', 'input', 'output',
     'in', 'out', 'hint', 'status', 'type', 'code' ]
 
-  fields.filter(field => opt[field] !== null).forEach((field) => {
-    problem[field] = opt[field]
+  fields.forEach((key) => {
+    if (opt[key] !== undefined && opt[key] !== null) {
+      problem[key] = opt[key]
+    }
   })
+
   try {
     await problem.save()
     logger.info(`One problem is updated" ${problem.pid} -- ${problem.title}`)
