@@ -60,15 +60,15 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.10.1",
+    "@antfu/eslint-config": "^4.11.0",
     "ava": "^4.3.3",
-    "eslint": "^9.22.0",
+    "eslint": "^9.23.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^7.2.1",
     "nodemon": "^3.1.9",
     "nyc": "^17.1.0",
-    "supertest": "^7.0.0",
+    "supertest": "^7.1.0",
     "typescript": "^5.8.2"
   },
   "nodemonConfig": {
