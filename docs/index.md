@@ -14,11 +14,13 @@ hero:
   #     text: API Examples
   #     link: /api-examples
 
-# features:
-#   - title: Feature A
-#     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-#   - title: Feature B
-#     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-#   - title: Feature C
-#     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+features:
+  - title: 特判
+    details: 特判程序用于处理多解题目或允许误差范围的情况。
+    link: /user/special-judge
+    linkText: 了解更多
+  - title: 交互题
+    details: 交互题是一种特殊的编程题型，要求选手编写的程序与评测系统进行动态交互。
+    link: /user/interaction
+    linkText: 了解更多
 ---
