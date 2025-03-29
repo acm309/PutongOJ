@@ -7,6 +7,12 @@
 
 Putong OJ is an online judge system designed for competitive programming and algorithmic problem-solving. A live instance is available at [acm.cjlu.edu.cn](https://acm.cjlu.edu.cn/).
 
+> [!IMPORTANT]
+> 
+> The development of Putong OJ is closely tailored to the practical needs of the ACM Lab at CJLU, incorporating numerous customized features. 
+> 
+> If you wish to deploy your own instance, we recommend forking the repository and modifying the code according to your requirements. Currently, Putong OJ does not support configuration options for these customized features.
+
 ## Features ✨
 
 - **One-Click Deployment** – Easily deploy with Docker.
