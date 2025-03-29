@@ -26,7 +26,7 @@ const problemSchema = mongoose.Schema({
   time: {
     type: Number,
     default: 1000,
-    min: 500,
+    min: 100,
     max: config.limitation.time,
   },
   memory: {
