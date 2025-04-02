@@ -59,7 +59,7 @@ watch(() => props.modelValue, render)
       <Icon type="ios-loading" class="card-icon" />
       <span class="card-text">Rendering...</span>
     </div>
-    <div v-show="!rendering" ref="preview" />
+    <div v-show="!rendering" ref="preview" class="vditor-initialized" />
   </div>
 </template>
 
@@ -75,4 +75,7 @@ watch(() => props.modelValue, render)
     font-size 32px
   .card-text
     margin-left 32px
+
+.vditor-initialized
+  overflow visible
 </style>
