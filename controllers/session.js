@@ -16,7 +16,7 @@ const login = async (ctx) => {
   if (user.pwd !== pwd) { ctx.throw(400, 'Wrong password') }
   if (user.privilege === privilege.Banned) { ctx.throw(403, 'Account banned') }
 
-  ctx.session.profile = only(user, 'uid nick privilege pwd')
+  ctx.session.profile = only(user, '_id uid nick privilege pwd')
   ctx.session.profile.verifyContest = []
   ctx.body = {
     profile: ctx.session.profile,

@@ -19,6 +19,9 @@ const login = async (ctx, next) => {
   if (user.privilege !== ctx.session.profile.privilege) {
     ctx.session.profile.privilege = user.privilege
   }
+  if (!ctx.session.profile._id) {
+    ctx.session.profile._id = user._id
+  }
   await next()
 }
 
