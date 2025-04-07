@@ -1,6 +1,5 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
-import envCompatible from 'vite-plugin-env-compatible'
 import { injectHtml } from 'vite-plugin-html'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -46,7 +45,6 @@ export default defineConfig({
     viteCommonjs(),
     // support browsers which don't support esm
     legacy(),
-    envCompatible(),
     injectHtml(),
     visualizer({
       // generate stats.html in project root
