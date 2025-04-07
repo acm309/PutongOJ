@@ -1,5 +1,4 @@
 import axios from 'axios'
-import urlJoin from 'url-join'
 import { useSessionStore } from './store/modules/session'
 import type { LoginParam, Profile, TimeResp, WebsiteConfigResp } from './types'
 
@@ -11,23 +10,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 const instance = axios.create()
 
 let errHandler: null | ((err: any) => void) = null
-let isSemiRestful = false
 
 export function setErrorHandler (handler: typeof errHandler) {
   errHandler = handler
 }
-
-instance.interceptors.request.use((config) => {
-  if (!isSemiRestful) return config
-  if (config.method === 'put') {
-    config.method = 'post'
-    config.url = urlJoin(config.url!, '/update')
-  } else if (config.method === 'delete') {
-    config.method = 'post'
-    config.url = urlJoin(config.url!, '/delete')
-  }
-  return config
-})
 
 instance.interceptors.response.use((resp) => {
   const data: { profile: Profile | null } = resp.data
@@ -181,8 +167,4 @@ export default {
   login: api.session.create,
   logout: api.session.delete,
   register: api.user.create,
-}
-
-export function semiRestful () {
-  isSemiRestful = true
 }

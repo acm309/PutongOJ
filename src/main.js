@@ -40,7 +40,6 @@ import { createI18n } from 'vue-i18n'
 import App from './App'
 import router from './router'
 import '@/theme/index.less'
-import { semiRestful } from './api'
 import zh from '@/locales/zh'
 import en from '@/locales/en'
 import { useSessionStore } from '@/store/modules/session'
@@ -113,9 +112,6 @@ Promise.all([
   useSessionStore().fetch(),
   useRootStore().fetchWebsiteConfig(),
 ]).then(() => {
-  if (useRootStore().website.semi_restful)
-    semiRestful()
-
   // Router must be loaded after session/website config is loaded
   app.use(router)
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
