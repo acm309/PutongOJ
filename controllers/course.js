@@ -1,10 +1,10 @@
 const only = require('only')
-const { encrypt, permission } = require('../config')
+const { encrypt, coursePermission } = require('../config')
 const Course = require('../models/Course')
 const CoursePermission = require('../models/CoursePermission')
-const User = require('../models/User')
+// const User = require('../models/User')
 // const logger = require('../utils/logger')
-const { isAdmin, isRoot } = require('../utils/helper')
+const { isAdmin, hasPermission } = require('../utils/helper')
 
 /**
  * 预加载课程信息
@@ -14,24 +14,27 @@ const preload = async (ctx, next) => {
   if (!Number.isInteger(id) || id <= 0) {
     return ctx.throw(400, 'Invalid course ID')
   }
-
   const course = await Course.findOne({ id }).exec()
   if (!course) {
     return ctx.throw(404, 'Course not found')
   }
 
-  const coursePermission = await CoursePermission.findOne({
-    user: ctx.session.profile._id,
-    course: course._id,
-  }).lean().exec()
-
-  const courseRole = coursePermission
-    ? coursePermission.role
-    : permission.Guest
+  const profile = ctx.state.profile
+  let courseRole = coursePermission.None
+  if (isAdmin(ctx.session.profile)) {
+    courseRole = coursePermission.Entire
+  } else {
+    const userPermission = await CoursePermission.findOne({
+      user: profile._id,
+      course: course._id,
+    }).lean().exec()
+    if (userPermission) {
+      courseRole = userPermission.role
+    }
+  }
 
   if (course.encrypt === encrypt.Private
-    && courseRole < permission.Student
-    && !isAdmin(ctx.session.profile)
+    && !hasPermission(courseRole, coursePermission.Basic)
   ) {
     return ctx.throw(403, 'Permission denied')
   }

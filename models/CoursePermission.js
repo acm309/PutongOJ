@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
-const { permission } = require('../config')
+const { coursePermission } = require('../config')
 
 const CoursePermissionSchema = new mongoose.Schema({
   user: {
@@ -17,7 +17,9 @@ const CoursePermissionSchema = new mongoose.Schema({
   },
   role: {
     type: Number,
-    enum: Object.values(permission),
+    default: coursePermission.Basic,
+    min: coursePermission.Basic,
+    max: coursePermission.Entire,
     required: true,
   },
   create: {

@@ -4,24 +4,22 @@ const User = require('../models/User')
 const { isAdmin, isRoot } = require('./helper')
 
 const login = async (ctx, next) => {
-  if (!ctx.session || ctx.session.profile == null) {
-    delete ctx.session.profile
+  if (!ctx.session?.profile) {
     ctx.throw(401, 'Login required')
   }
-  const user = await User.findOne({ uid: ctx.session.profile.uid }).exec()
-  if (user == null
-    || user.pwd !== ctx.session.profile.pwd
-    || user.privilege === privilege.Banned
-  ) {
+
+  const { uid, pwd } = ctx.session.profile
+  const user = await User.findOne({ uid }).lean().exec()
+
+  if (!user || user.pwd !== pwd || user.privilege === privilege.Banned) {
     delete ctx.session.profile
     ctx.throw(401, 'Login required')
   }
   if (user.privilege !== ctx.session.profile.privilege) {
     ctx.session.profile.privilege = user.privilege
   }
-  if (!ctx.session.profile._id) {
-    ctx.session.profile._id = user._id
-  }
+
+  ctx.state.profile = user
   await next()
 }
 
