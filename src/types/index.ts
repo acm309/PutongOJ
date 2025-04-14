@@ -27,13 +27,11 @@ export interface LoginParam {
 }
 
 export interface Paginated<T> {
-  list: {
-    docs: T[]
-    limit: number
-    page: number
-    pages: number
-    total: number
-  }
+  docs: T[]
+  limit: number
+  page: number
+  pages: number
+  total: number
 }
 
 export interface Problem {
@@ -42,4 +40,12 @@ export interface Problem {
   description: string
   input: string
   output: string
+}
+
+export interface Course {
+  id: number
+  name: string
+  description: string
+  encrypt: 1 | 2
+  create: number | null
 }

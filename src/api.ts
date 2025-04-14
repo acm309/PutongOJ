@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
-import type { LoginParam, Profile, TimeResp, WebsiteConfigResp } from './types'
+import type { Course, LoginParam, Paginated, Profile, TimeResp, WebsiteConfigResp } from './types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -159,6 +159,11 @@ const api = {
       instance.post<{ profile: Profile }>('/session', data),
     delete: () => instance.delete<object>('/session'),
     fetch: () => instance.get<{ profile: Profile | null }>('/session'),
+  },
+
+  course: {
+    find: (params: { page: number, pageSize: number }) =>
+      instance.get<Paginated<Course>>('/course', { params }),
   },
 }
 

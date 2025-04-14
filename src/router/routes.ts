@@ -7,6 +7,7 @@ import ranklistRoutes from './ranklist'
 import contestRoutes from './contest'
 import discussRoutes from './discuss'
 import userRoutes from './user'
+import courseRoutes from './course'
 import adminRoutes from './admin'
 
 import NotFound from '@/views/404.vue'
@@ -27,6 +28,7 @@ const routes: Array<RouteRecordRaw> = [
   ...contestRoutes,
   ...discussRoutes,
   ...userRoutes,
+  ...courseRoutes,
   ...adminRoutes,
   {
     path: '/faq',
