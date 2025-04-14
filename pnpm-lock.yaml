@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@types/pangu':
+        specifier: ^4.0.2
+        version: 4.0.2
       '@vitejs/plugin-legacy':
         specifier: ^1.8.2
         version: 1.8.2(vite@2.9.14(less@4.3.0)(stylus@0.64.0))
@@ -429,6 +432,9 @@ packages:
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
+
+  '@types/pangu@4.0.2':
+    resolution: {integrity: sha512-rVwVCkOFTWpmBjZuxTiVhLE8cwIKff3jWEKjs+DDg6bMkQwjp9Bp03pNanHQTtTzP53SDHJutb/kfGFHNhOJaQ==}
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
@@ -2882,6 +2888,8 @@ snapshots:
       '@types/unist': 2.0.11
 
   '@types/normalize-package-data@2.4.4': {}
+
+  '@types/pangu@4.0.2': {}
 
   '@types/unist@2.0.11': {}
 
