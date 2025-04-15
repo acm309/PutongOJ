@@ -51,7 +51,7 @@ const coursePermission = Object.freeze({
   ManageProblem: 1 << 3,
   ManageContest: 1 << 4,
   ManageCourse: 1 << 5,
-  Entire: 1 << 6 - 1,
+  Entire: (1 << 6) - 1,
 })
 
 const deploy = Object.freeze({
