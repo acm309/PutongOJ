@@ -8,5 +8,6 @@ const router = new Router({
 
 router.get('/', course.find)
 router.get('/:id', auth.login, course.preload, course.findOne)
+router.post('/', auth.login, auth.root, course.create)
 
 module.exports = router

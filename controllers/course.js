@@ -2,9 +2,9 @@ const only = require('only')
 const { encrypt, coursePermission } = require('../config')
 const Course = require('../models/Course')
 const CoursePermission = require('../models/CoursePermission')
+const { isAdmin, hasPermission } = require('../utils/helper')
 // const User = require('../models/User')
 // const logger = require('../utils/logger')
-const { isAdmin, hasPermission } = require('../utils/helper')
 
 /**
  * 预加载课程信息
@@ -75,8 +75,28 @@ const findOne = async (ctx) => {
   }
 }
 
+/**
+ * 创建课程
+ */
+const create = async (ctx) => {
+  const opt = ctx.request.body
+  const course = new Course(only(opt, 'name description encrypt'))
+
+  try {
+    await course.save()
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return ctx.throw(400, err.message)
+    }
+    return ctx.throw(500, 'Internal server error')
+  }
+
+  ctx.body = only(course, 'id name description encrypt create')
+}
+
 module.exports = {
   preload,
   find,
   findOne,
+  create,
 }
