@@ -46,6 +46,6 @@ export interface Course {
   id: number
   name: string
   description: string
-  encrypt: 1 | 2
-  create: number | null
+  encrypt: number
+  create?: number
 }

@@ -164,6 +164,8 @@ const api = {
   course: {
     find: (params: { page: number, pageSize: number }) =>
       instance.get<Paginated<Course>>('/course', { params }),
+    create: (course: Partial<Course>) =>
+      instance.post<Course>('/course', course),
   },
 }
 

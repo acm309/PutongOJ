@@ -14,5 +14,10 @@ export const useCourseStore = defineStore('course', {
       this.list = data.docs
       this.total = data.total
     },
+    async create (course: Partial<Course>) {
+      const { data } = await api.course.create(course)
+      this.list.push(data)
+      this.total++
+    },
   },
 })

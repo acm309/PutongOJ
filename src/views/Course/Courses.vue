@@ -9,6 +9,7 @@ import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/util/helper'
 import { useRootStore } from '@/store'
+import CourseCreate from '@/components/CourseCreate.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -27,6 +28,7 @@ const pageSize = $computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string) || 5, 100), 1))
 
 let loading = $ref(false)
+const openCreate = $ref(false)
 
 async function fetch () {
   loading = true
@@ -52,7 +54,7 @@ onRouteQueryUpdate(fetch)
         Courses
       </span>
       <div v-if="isRoot" class="courses-actions">
-        <Button type="primary" icon="md-add">
+        <Button type="primary" icon="md-add" @click="openCreate = true">
           Create
         </Button>
       </div>
@@ -100,6 +102,7 @@ onRouteQueryUpdate(fetch)
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
+    <CourseCreate v-if="isRoot" v-model="openCreate" />
   </div>
 </template>
 
