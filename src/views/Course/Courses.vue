@@ -73,8 +73,11 @@ onRouteQueryUpdate(fetch)
               </Tag>
               <span class="courses-title">{{ spacing(item.name) }}</span>
             </div>
-            <p class="courses-description">
+            <p v-if="item.description.trim()" class="courses-description">
               {{ spacing(item.description) }}
+            </p>
+            <p v-else class="courses-description">
+              <i>Nothing found here...</i>
             </p>
           </Col>
         </Row>
