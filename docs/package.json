@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "@braintree/sanitize-url": "^7.1.1",
-    "cytoscape": "^3.31.1",
+    "cytoscape": "^3.31.2",
     "cytoscape-cose-bilkent": "^4.1.0",
     "dayjs": "^1.11.13",
     "debug": "^4.4.0",
