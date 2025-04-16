@@ -1,7 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-const Courses = () => import('@/views/Course/Courses.vue')
-const Course = () => import('@/views/Course/Course.vue')
+import Courses from '@/views/Courses.vue'
+
+const Layout = () => import('@/views/Course/Layout.vue')
 
 const courseRoutes: Array<RouteRecordRaw> = [
   {
@@ -13,7 +14,7 @@ const courseRoutes: Array<RouteRecordRaw> = [
   {
     path: '/course/:id(\\d+)',
     name: 'course',
-    component: Course,
+    component: Layout,
     meta: { title: 'Course', requiresLogin: true },
   },
 ]
