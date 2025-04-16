@@ -162,10 +162,12 @@ const api = {
   },
 
   course: {
+    create: (course: Partial<Course>) =>
+      instance.post<{ id: number }>('/course', course),
     find: (params: { page: number, pageSize: number }) =>
       instance.get<Paginated<Course>>('/course', { params }),
-    create: (course: Partial<Course>) =>
-      instance.post<Course>('/course', course),
+    findOne: (id: number) =>
+      instance.get<Course>(`/course/${id}`),
   },
 }
 

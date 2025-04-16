@@ -60,30 +60,35 @@ onRouteQueryUpdate(fetch)
       </div>
     </div>
     <div v-if="list.length > 0">
-      <Card v-for="item in list" :key="item.id" dis-hover class="courses-card">
-        <Row type="flex" :gutter="16" :wrap="false">
-          <Col flex="68px" class="courses-icon">
-            <Icon type="md-filing" class="icon-course" />
-          </Col>
-          <Col flex="auto" class="courses-content">
-            <div class="courses-headline">
-              <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
-                Public
-              </Tag>
-              <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
-                Private
-              </Tag>
-              <span class="courses-title">{{ spacing(item.name) }}</span>
-            </div>
-            <p v-if="item.description.trim()" class="courses-description">
-              {{ spacing(item.description) }}
-            </p>
-            <p v-else class="courses-description">
-              <i>Nothing found here...</i>
-            </p>
-          </Col>
-        </Row>
-      </Card>
+      <router-link
+        v-for="item in list" :key="item.id"
+        :to="{ name: 'course', params: { id: item.id } }" class="courses-link"
+      >
+        <Card dis-hover class="courses-card">
+          <Row type="flex" :gutter="16" :wrap="false">
+            <Col flex="68px" class="courses-icon">
+              <Icon type="md-filing" class="icon-course" />
+            </Col>
+            <Col flex="auto" class="courses-content">
+              <div class="courses-headline">
+                <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
+                  Public
+                </Tag>
+                <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
+                  Private
+                </Tag>
+                <span class="courses-title">{{ spacing(item.name) }}</span>
+              </div>
+              <p v-if="item.description.trim()" class="courses-description">
+                {{ spacing(item.description) }}
+              </p>
+              <p v-else class="courses-description">
+                <i>No description found yet...</i>
+              </p>
+            </Col>
+          </Row>
+        </Card>
+      </router-link>
     </div>
     <div v-else class="courses-empty">
       <Icon type="ios-planet-outline" class="empty-icon" />
@@ -122,6 +127,9 @@ onRouteQueryUpdate(fetch)
     flex none
     display flex
 
+.courses-link
+  text-decoration none
+  color inherit
 .courses-card
   margin-bottom 20px
   transition border-color 0.2s ease

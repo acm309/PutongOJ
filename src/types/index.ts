@@ -42,10 +42,20 @@ export interface Problem {
   output: string
 }
 
+export interface CourseRole {
+  basic: boolean
+  manageContest: boolean
+  manageCourse: boolean
+  manageProblem: boolean
+  viewSolution: boolean
+  viewTestcase: boolean
+}
+
 export interface Course {
   id: number
   name: string
   description: string
   encrypt: number
   create?: number
+  role?: CourseRole
 }

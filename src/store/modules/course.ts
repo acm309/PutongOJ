@@ -9,15 +9,18 @@ export const useCourseStore = defineStore('course', {
     course: {} as Course,
   }),
   actions: {
+    async create (course: Partial<Course>): Promise<number> {
+      const { data } = await api.course.create(course)
+      return data.id
+    },
     async find (params: { page: number, pageSize: number }) {
       const { data } = await api.course.find(params)
       this.list = data.docs
       this.total = data.total
     },
-    async create (course: Partial<Course>) {
-      const { data } = await api.course.create(course)
-      this.list.push(data)
-      this.total++
+    async findOne (id: number) {
+      const { data } = await api.course.findOne(id)
+      this.course = data
     },
   },
 })

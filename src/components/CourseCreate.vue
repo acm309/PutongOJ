@@ -2,6 +2,7 @@
 import type { Message } from 'view-ui-plus'
 import { Form, FormItem, Input, Modal, Radio, RadioGroup } from 'view-ui-plus'
 import { inject, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCourseStore } from '@/store/modules/course'
 
 const props = defineProps({
@@ -15,6 +16,7 @@ const emit = defineEmits([ 'update:modelValue' ])
 const message = inject('$Message') as typeof Message
 const courseStore = useCourseStore()
 const { create } = courseStore
+const router = useRouter()
 
 let modal = $ref(false)
 
@@ -41,20 +43,13 @@ const courseForm = $ref({
 })
 const courseFormRef = ref<any>(null)
 
-function reset () {
-  courseFormRef.value.resetFields()
-  courseForm.name = ''
-  courseForm.description = ''
-  courseForm.encrypt = 2
-}
-
 function submit () {
   courseFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        await create(courseForm)
+        const id = await create(courseForm)
         message.success('Course created successfully.')
-        reset()
+        router.push({ name: 'course', params: { id } })
       } catch (e: any) {
         message.error(`Failed to create course: ${e.message}`)
       }
