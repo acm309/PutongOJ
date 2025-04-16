@@ -7,6 +7,18 @@ const { isAdmin, hasPermission } = require('../utils/helper')
 // const logger = require('../utils/logger')
 
 /**
+ * 拆分权限信息
+ */
+const reprRole = permission => ({
+  basic: hasPermission(permission, coursePermission.Basic),
+  viewTestcase: hasPermission(permission, coursePermission.ViewTestcase),
+  viewSolution: hasPermission(permission, coursePermission.ViewSolution),
+  manageProblem: hasPermission(permission, coursePermission.ManageProblem),
+  manageContest: hasPermission(permission, coursePermission.ManageContest),
+  manageCourse: hasPermission(permission, coursePermission.ManageCourse),
+})
+
+/**
  * 预加载课程信息
  */
 const preload = async (ctx, next) => {
@@ -20,27 +32,24 @@ const preload = async (ctx, next) => {
   }
 
   const profile = ctx.state.profile
-  let courseRole = coursePermission.None
+  let permission = coursePermission.None
   if (isAdmin(ctx.session.profile)) {
-    courseRole = coursePermission.Entire
+    permission = coursePermission.Entire
   } else {
     const userPermission = await CoursePermission.findOne({
       user: profile._id,
       course: course._id,
     }).lean().exec()
     if (userPermission) {
-      courseRole = userPermission.role
+      permission = userPermission.role
     }
   }
-
-  if (course.encrypt === encrypt.Private
-    && !hasPermission(courseRole, coursePermission.Basic)
-  ) {
-    return ctx.throw(403, 'Permission denied')
+  if (course.encrypt === encrypt.Public) {
+    permission |= coursePermission.Basic
   }
 
   ctx.state.course = course
-  ctx.state.courseRole = courseRole
+  ctx.state.courseRole = reprRole(permission)
   await next()
 }
 
@@ -49,8 +58,8 @@ const preload = async (ctx, next) => {
  */
 const find = async (ctx) => {
   const opt = ctx.request.query
-  const page = Number.parseInt(opt.page) || 1
-  const pageSize = Number.parseInt(opt.pageSize) || 10
+  const page = Math.max(Number.parseInt(opt.page) || 1, 1)
+  const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize) || 5, 100), 1)
 
   const list = await Course.paginate({}, {
     sort: { id: 1 },
@@ -67,10 +76,9 @@ const find = async (ctx) => {
  * 查询课程信息
  */
 const findOne = async (ctx) => {
-  const course = ctx.state.course
-  const courseRole = ctx.state.courseRole
+  const { course, courseRole } = ctx.state
   ctx.body = {
-    ...only(course, 'id name description encrypt create'),
+    ...only(course, 'id name description encrypt'),
     role: courseRole,
   }
 }
@@ -84,14 +92,13 @@ const create = async (ctx) => {
 
   try {
     await course.save()
+    ctx.body = only(course, 'id')
   } catch (err) {
     if (err.name === 'ValidationError') {
       return ctx.throw(400, err.message)
     }
-    return ctx.throw(500, 'Internal server error')
+    ctx.throw(500, 'Internal server error')
   }
-
-  ctx.body = only(course, 'id name description encrypt create')
 }
 
 module.exports = {
