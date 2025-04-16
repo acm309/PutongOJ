@@ -40,10 +40,6 @@ function isUndefined (item) {
   return typeof item === 'undefined'
 }
 
-function hasPermission (userPermissions, requiredPermission) {
-  return (userPermissions & requiredPermission) === requiredPermission
-}
-
 module.exports = {
   purify,
   generatePwd,
@@ -52,5 +48,4 @@ module.exports = {
   isAdmin,
   isRoot,
   isUndefined,
-  hasPermission,
 }

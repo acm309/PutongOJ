@@ -2,24 +2,10 @@ const only = require('only')
 const { encrypt, coursePermission } = require('../config')
 const Course = require('../models/Course')
 const CoursePermission = require('../models/CoursePermission')
-const { isAdmin, hasPermission } = require('../utils/helper')
-// const User = require('../models/User')
-// const logger = require('../utils/logger')
+const { isAdmin } = require('../utils/helper')
 
 /**
- * 拆分权限信息
- */
-const reprRole = permission => ({
-  basic: hasPermission(permission, coursePermission.Basic),
-  viewTestcase: hasPermission(permission, coursePermission.ViewTestcase),
-  viewSolution: hasPermission(permission, coursePermission.ViewSolution),
-  manageProblem: hasPermission(permission, coursePermission.ManageProblem),
-  manageContest: hasPermission(permission, coursePermission.ManageContest),
-  manageCourse: hasPermission(permission, coursePermission.ManageCourse),
-})
-
-/**
- * 预加载课程信息
+ * 课程预加载中间件
  */
 const preload = async (ctx, next) => {
   const id = Number(ctx.params.id)
@@ -48,9 +34,35 @@ const preload = async (ctx, next) => {
     permission |= coursePermission.Basic
   }
 
+  const hasRole = (userPermissions, requiredPermission) => {
+    return (userPermissions & requiredPermission) === requiredPermission
+  }
+  const reprRole = permission => ({
+    basic: hasRole(permission, coursePermission.Basic),
+    viewTestcase: hasRole(permission, coursePermission.ViewTestcase),
+    viewSolution: hasRole(permission, coursePermission.ViewSolution),
+    manageProblem: hasRole(permission, coursePermission.ManageProblem),
+    manageContest: hasRole(permission, coursePermission.ManageContest),
+    manageCourse: hasRole(permission, coursePermission.ManageCourse),
+  })
+
   ctx.state.course = course
   ctx.state.courseRole = reprRole(permission)
   await next()
+}
+
+/**
+ * 课程权限要求中间件
+ */
+const role = (role) => {
+  return async (ctx, next) => {
+    const { courseRole } = ctx.state
+    if (courseRole[role] === true) {
+      await next()
+    } else {
+      ctx.throw(403, 'Permission denied')
+    }
+  }
 }
 
 /**
@@ -73,7 +85,7 @@ const find = async (ctx) => {
 }
 
 /**
- * 查询课程信息
+ * 查询课程详情
  */
 const findOne = async (ctx) => {
   const { course, courseRole } = ctx.state
@@ -103,6 +115,7 @@ const create = async (ctx) => {
 
 module.exports = {
   preload,
+  role,
   find,
   findOne,
   create,
