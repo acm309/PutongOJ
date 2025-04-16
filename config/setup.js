@@ -33,7 +33,7 @@ async function databaseSetup () {
     }).save())
   }
 
-  const count = await Problem.count().exec()
+  const count = await Problem.countDocuments().exec()
   if (count === 0) {
     ps.push(new Problem({
       title: 'A + B',

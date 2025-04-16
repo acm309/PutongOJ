@@ -13,6 +13,12 @@ Putong OJ is an online judge system designed for competitive programming and alg
 > 
 > If you wish to deploy your own instance, we recommend forking the repository and modifying the code according to your requirements. Currently, Putong OJ does not support configuration options for these customized features.
 
+> [!CAUTION]  
+>   
+> The current branch may contain untested changes after dependency upgrades. For production use, we strongly recommend using the last stable version from commit [`6c7b68c`](https://github.com/net-escape/ptoj-backend/tree/6c7b68c183af0ba0a5512ff273c1955d250cc892).  
+>   
+> Some features might be unstable until comprehensive testing is completed. Proceed with caution when deploying this version.
+
 ## Features ✨
 
 - **One-Click Deployment** – Easily deploy with Docker.

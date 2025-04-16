@@ -75,7 +75,7 @@ async function updateStatistic (solution) {
 
   if (solution.judge === judge.Running) {
     // Judger 开始评测
-    const isSubmittedBefore = await Solution.count({
+    const isSubmittedBefore = await Solution.countDocuments({
       uid, pid, sid: { $ne: sid }, judge: { $ne: judge.Pending },
     }).exec() // 这道题之前提交过了么？
     if (isSubmittedBefore === 0) {
@@ -89,7 +89,7 @@ async function updateStatistic (solution) {
 
   if (solution.judge === judge.Accepted) {
     // Judger 评测为 AC
-    const isAcBefore = await Solution.count({
+    const isAcBefore = await Solution.countDocuments({
       uid, pid, sid: { $ne: sid }, judge: judge.Accepted,
     }).exec() // 这道题之前 AC 过了么？
     if (isAcBefore === 0) {
