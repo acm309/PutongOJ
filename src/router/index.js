@@ -19,7 +19,7 @@ router.beforeEach((to, from, next) => {
     } else {
       session.toggleLoginState()
       next({
-        name: 'contestList',
+        name: 'home',
       })
     }
   } else if (to.meta.requiresAdmin) {

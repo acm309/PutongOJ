@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Exception, Button } from 'view-ui-plus'
+import { Button, Exception } from 'view-ui-plus'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -24,9 +24,10 @@ const back = () => router.go(-1)
 
 <style lang="stylus" scoped>
 .exception-box
-  height: 100% !important
-  max-width: 1024px
+  padding 20px
+  height 100% !important
+  max-width 1024px
 @media screen and (max-width: 576px)
   .exception-box
-    padding-bottom: 100px
+    padding-bottom 100px
 </style>
