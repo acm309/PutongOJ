@@ -12,28 +12,16 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   LoadingBar.start()
   const session = useSessionStore()
-  if (to.meta.requiresLogin) {
-    const isLogined = session.isLogined
-    if (isLogined) {
-      next()
-    } else {
-      session.toggleLoginState()
-      next({
-        name: 'home',
-      })
-    }
-  } else if (to.meta.requiresAdmin) {
-    const isAdmin = session.isAdmin
-    if (isAdmin) {
-      next()
-    } else {
-      next({
-        name: 'home',
-      })
-    }
-  } else {
-    next()
+
+  if (to.meta.requiresLogin && !session.isLogined) {
+    session.toggleLoginState()
+    return next({ name: 'home' })
   }
+  if (to.meta.requiresAdmin && !session.isAdmin) {
+    return next({ name: 'home' })
+  }
+
+  next()
 })
 
 router.afterEach(() => {
