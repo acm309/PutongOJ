@@ -2,6 +2,7 @@ const only = require('only')
 const { encrypt, coursePermission } = require('../config')
 const Course = require('../models/Course')
 const CoursePermission = require('../models/CoursePermission')
+const User = require('../models/User')
 const { isAdmin } = require('../utils/helper')
 
 const roleFields = [
@@ -114,10 +115,78 @@ const createCourse = async (ctx) => {
   }
 }
 
+/**
+ * 查询课程成员
+ */
+const findMembers = async (ctx) => {
+  const opt = ctx.request.query
+  const page = Math.max(Number.parseInt(opt.page) || 1, 1)
+  const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize) || 30, 200), 1)
+
+  const { course } = ctx.state
+  const filter = { course: course._id }
+  const { docs, ...metadata } = await CoursePermission.paginate(filter, {
+    sort: { role: -1 },
+    page,
+    populate: { path: 'user', select: '-_id uid nick' },
+    limit: pageSize,
+    lean: true,
+    leanWithId: false,
+    select: '-_id user role update',
+  })
+
+  ctx.body = {
+    docs: docs.map(({ user: { uid, nick }, role, ...rest }) => ({
+      uid, nick,
+      role: reprRole(role),
+      ...rest,
+    })),
+    ...metadata,
+  }
+}
+
+/**
+ * 更新课程成员权限
+ */
+const updateMember = async (ctx) => {
+  const { uid, role } = ctx.request.body
+  if (!uid || !role) {
+    return ctx.throw(400, 'Missing uid or role')
+  }
+  const invalidField = roleFields.find(field => typeof role[field] !== 'boolean')
+  if (invalidField) {
+    return ctx.throw(400, `Invalid role field: ${invalidField}`)
+  }
+  const user = await User.findOne({ uid }).lean().exec()
+  if (!user) {
+    return ctx.throw(404, 'User not found')
+  }
+
+  const permission = role.manageCourse
+    ? coursePermission.Entire
+    : roleFields.reduce((acc, field) => {
+        if (role[field]) {
+          acc |= coursePermission[field.charAt(0).toUpperCase() + field.slice(1)]
+        }
+        return acc
+      }, coursePermission.None)
+
+  const { course } = ctx.state
+  await CoursePermission.findOneAndUpdate(
+    { user: user._id, course: course._id },
+    { user: user._id, course: course._id, role: permission, update: Date.now() },
+    { upsert: true },
+  ).exec()
+
+  ctx.body = { success: true }
+}
+
 module.exports = {
   preload,
   role,
   findCourses,
   findCourse,
   createCourse,
+  findMembers,
+  updateMember,
 }

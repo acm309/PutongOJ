@@ -38,10 +38,12 @@ const CoursePermissionSchema = new mongoose.Schema({
 CoursePermissionSchema.plugin(mongoosePaginate)
 
 CoursePermissionSchema.index({
-  userId: 1,
-  courseId: 1,
-}, {
-  unique: true,
-})
+  course: 1,
+  user: 1,
+}, { unique: true })
+CoursePermissionSchema.index({
+  course: 1,
+  role: 1,
+}, { unique: false })
 
 module.exports = mongoose.model('CoursePermission', CoursePermissionSchema)
