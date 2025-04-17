@@ -38,8 +38,11 @@ const find = async (ctx) => {
   if (privilege === 'admin' && isAdmin(profile)) {
     filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
   }
-  if (filterType === 'uid' && isAdmin(profile)) {
-    filter.uid = { $regex: new RegExp(escapeRegExp(filterContent), 'i') }
+  if (filterType === 'uid' || filterType === 'name') {
+    filter.$or = [
+      { uid: { $regex: new RegExp(escapeRegExp(filterContent), 'i') } },
+      { nick: { $regex: new RegExp(escapeRegExp(filterContent), 'i') } },
+    ]
   }
   let result
   if (page !== -1) {
@@ -52,7 +55,7 @@ const find = async (ctx) => {
       select: '-_id uid nick privilege create',
     })
   } else {
-    const docs = await User.find({}, { uid: 1, nick: 1, _id: 0 }).lean().exec()
+    const docs = await User.find(filter, { uid: 1, nick: 1, _id: 0 }).lean().exec()
     result = {
       docs,
       total: docs.length,
