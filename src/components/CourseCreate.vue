@@ -15,7 +15,7 @@ const emit = defineEmits([ 'update:modelValue' ])
 
 const message = inject('$Message') as typeof Message
 const courseStore = useCourseStore()
-const { create } = courseStore
+const { createCourse } = courseStore
 const router = useRouter()
 
 let modal = $ref(false)
@@ -47,7 +47,7 @@ function submit () {
   courseFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const id = await create(courseForm)
+        const id = await createCourse(courseForm)
         message.success('Course created successfully.')
         router.push({ name: 'course', params: { id } })
       } catch (e: any) {

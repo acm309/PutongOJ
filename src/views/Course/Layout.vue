@@ -11,7 +11,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
-const { findOne } = courseStore
+const { findCourse } = courseStore
 const { course } = $(storeToRefs(courseStore))
 
 let loading = $ref(false)
@@ -25,7 +25,7 @@ function handleClick (name: string) {
 async function fetch () {
   const id = Number.parseInt(route.params.id as string)
   loading = true
-  await findOne(id)
+  await findCourse(id)
   loading = false
 }
 

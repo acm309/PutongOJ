@@ -18,7 +18,7 @@ const rootStore = useRootStore()
 const courseStore = useCourseStore()
 const sessionStore = useSessionStore()
 
-const { find } = courseStore
+const { findCourses } = courseStore
 const { toggleLoginState } = sessionStore
 const { encrypt } = $(storeToRefs(rootStore))
 const { list, total } = $(storeToRefs(courseStore))
@@ -34,7 +34,7 @@ const openCreate = $ref(false)
 
 async function fetch () {
   loading = true
-  await find({ page, pageSize })
+  await findCourses({ page, pageSize })
   loading = false
 }
 

@@ -12,8 +12,8 @@ export interface WebsiteConfigResp {
 }
 
 export interface User {
-  nick: 'string'
   uid: number
+  nick?: string
   privilege: (typeof privilege)[keyof typeof privilege]
 }
 
@@ -58,4 +58,10 @@ export interface Course {
   encrypt: number
   create?: number
   role?: CourseRole
+}
+
+export interface CourseMember {
+  user: User
+  role: CourseRole
+  update: number
 }
