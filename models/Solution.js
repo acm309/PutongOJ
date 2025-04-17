@@ -50,6 +50,7 @@ const solutionSchema = mongoose.Schema({
   language: {
     type: Number,
     immutable: true,
+    index: true,
     required: true,
   },
   create: {
@@ -80,6 +81,7 @@ const solutionSchema = mongoose.Schema({
         `Invalid judge. Valid values are `
         + `[${Object.values(config.judge).join(', ')}]`,
     },
+    index: true,
   },
   time: {
     type: Number,

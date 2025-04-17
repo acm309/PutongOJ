@@ -23,6 +23,7 @@ const find = async (ctx) => {
     select: '-_id -code -error',
     lean: true,
     leanWithId: false,
+    useEstimatedCount: Object.keys(filter).length === 0,
   })
 
   ctx.body = {
