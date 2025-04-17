@@ -6,8 +6,8 @@ const router = new Router({
   prefix: '/course',
 })
 
-router.get('/', course.find)
-router.get('/:id', auth.login, course.preload, course.findOne)
-router.post('/', auth.login, auth.root, course.create)
+router.get('/', course.findCourses)
+router.get('/:id', auth.login, course.preload, course.findCourse)
+router.post('/', auth.login, auth.root, course.createCourse)
 
 module.exports = router
