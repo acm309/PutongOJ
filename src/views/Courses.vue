@@ -17,10 +17,12 @@ const router = useRouter()
 const rootStore = useRootStore()
 const courseStore = useCourseStore()
 const sessionStore = useSessionStore()
+
 const { find } = courseStore
+const { toggleLoginState } = sessionStore
 const { encrypt } = $(storeToRefs(rootStore))
 const { list, total } = $(storeToRefs(courseStore))
-const { isRoot } = $(storeToRefs(sessionStore))
+const { isLogined, isRoot } = $(storeToRefs(sessionStore))
 
 const page = $computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
@@ -36,10 +38,20 @@ async function fetch () {
   loading = false
 }
 
-function pageChange (val: number) {
+function pageChange (page: number) {
   router.push({
-    name: 'Course',
-    query: { page: val, pageSize },
+    name: 'courses',
+    query: { page, pageSize },
+  })
+}
+
+function visit (id: number) {
+  if (!isLogined) {
+    return toggleLoginState()
+  }
+  router.push({
+    name: 'course',
+    params: { id },
   })
 }
 
@@ -60,35 +72,33 @@ onRouteQueryUpdate(fetch)
       </div>
     </div>
     <div v-if="list.length > 0">
-      <router-link
-        v-for="item in list" :key="item.id"
-        :to="{ name: 'course', params: { id: item.id } }" class="courses-link"
+      <Card
+        v-for="item in list" :key="item.id" class="courses-card"
+        dis-hover @click="visit(item.id)"
       >
-        <Card dis-hover class="courses-card">
-          <Row type="flex" :gutter="16" :wrap="false">
-            <Col flex="68px" class="courses-icon">
-              <Icon type="md-filing" class="icon-course" />
-            </Col>
-            <Col flex="auto" class="courses-content">
-              <div class="courses-headline">
-                <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
-                  Public
-                </Tag>
-                <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
-                  Private
-                </Tag>
-                <span class="courses-title">{{ spacing(item.name) }}</span>
-              </div>
-              <p v-if="item.description.trim()" class="courses-description">
-                {{ spacing(item.description) }}
-              </p>
-              <p v-else class="courses-description">
-                <i>No description found yet...</i>
-              </p>
-            </Col>
-          </Row>
-        </Card>
-      </router-link>
+        <Row type="flex" :gutter="16" :wrap="false">
+          <Col flex="68px" class="courses-icon">
+            <Icon type="md-filing" class="icon-course" />
+          </Col>
+          <Col flex="auto" class="courses-content">
+            <div class="courses-headline">
+              <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
+                Public
+              </Tag>
+              <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
+                Private
+              </Tag>
+              <span class="courses-title">{{ spacing(item.name) }}</span>
+            </div>
+            <p v-if="item.description.trim()" class="courses-description">
+              {{ spacing(item.description) }}
+            </p>
+            <p v-else class="courses-description">
+              <i>No description found yet...</i>
+            </p>
+          </Col>
+        </Row>
+      </Card>
     </div>
     <div v-else class="courses-empty">
       <Icon type="ios-planet-outline" class="empty-icon" />
@@ -127,9 +137,6 @@ onRouteQueryUpdate(fetch)
     flex none
     display flex
 
-.courses-link
-  text-decoration none
-  color inherit
 .courses-card
   margin-bottom 20px
   transition border-color 0.2s ease
