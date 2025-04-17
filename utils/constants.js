@@ -48,10 +48,12 @@ const coursePermission = Object.freeze({
   Basic: 1 << 0,
   ViewTestcase: 1 << 1,
   ViewSolution: 1 << 2,
-  ManageProblem: 1 << 3,
-  ManageContest: 1 << 4,
-  ManageCourse: 1 << 5,
-  Entire: (1 << 6) - 1,
+  CreateProblem: 1 << 3,
+  CreateContest: 1 << 4,
+  ManageProblem: 1 << 5,
+  ManageContest: 1 << 6,
+  ManageCourse: 1 << 7,
+  Entire: (1 << 8) - 1,
 })
 
 const deploy = Object.freeze({

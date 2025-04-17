@@ -128,7 +128,7 @@ const findMembers = async (ctx) => {
   const { docs, ...metadata } = await CoursePermission.paginate(filter, {
     sort: { role: -1 },
     page,
-    populate: { path: 'user', select: '-_id uid nick' },
+    populate: { path: 'user', select: '-_id uid nick privilege' },
     limit: pageSize,
     lean: true,
     leanWithId: false,
@@ -136,10 +136,9 @@ const findMembers = async (ctx) => {
   })
 
   ctx.body = {
-    docs: docs.map(({ user: { uid, nick }, role, ...rest }) => ({
-      uid, nick,
-      role: reprRole(role),
+    docs: docs.map(({ role, ...rest }) => ({
       ...rest,
+      role: reprRole(role),
     })),
     ...metadata,
   }
@@ -156,6 +155,12 @@ const updateMember = async (ctx) => {
   const invalidField = roleFields.find(field => typeof role[field] !== 'boolean')
   if (invalidField) {
     return ctx.throw(400, `Invalid role field: ${invalidField}`)
+  }
+  if (!role.Basic) {
+    return ctx.throw(400, 'Basic permission is required, remove member if not needed')
+  }
+  if (role.ManageProblem) {
+    role.ViewTestcase = true
   }
   const user = await User.findOne({ uid }).lean().exec()
   if (!user) {
