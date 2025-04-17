@@ -5,7 +5,7 @@ import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import { visualizer } from 'rollup-plugin-visualizer'
 import vue from '@vitejs/plugin-vue'
 import createImportPlugin from 'vite-plugin-import'
-import viteCompression from 'vite-plugin-compression'
+import { compression } from 'vite-plugin-compression2'
 import legacy from '@vitejs/plugin-legacy'
 
 // https://vitejs.dev/config/
@@ -34,9 +34,9 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       less: {
-        javascriptEnabled: true
-      }
-    }
+        javascriptEnabled: true,
+      },
+    },
   },
   plugins: [
     vue({
@@ -52,7 +52,7 @@ export default defineConfig({
       // brotliSize: true,
       gzipSize: true,
     }),
-    viteCompression(),
+    compression(),
     createImportPlugin([
       {
         libraryName: 'view-ui-plus',
