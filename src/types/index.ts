@@ -11,10 +11,12 @@ export interface WebsiteConfigResp {
   }
 }
 
+export type UserPrivilege = (typeof privilege)[keyof typeof privilege]
+
 export interface User {
   uid: number
   nick?: string
-  privilege: (typeof privilege)[keyof typeof privilege]
+  privilege: UserPrivilege
 }
 
 export type Profile = User & {

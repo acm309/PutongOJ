@@ -27,6 +27,10 @@ async function fetch () {
   loading = true
   await findCourse(id)
   loading = false
+
+  if (route.name === 'course') {
+    router.push({ name: 'courseMember', params: { id } })
+  }
 }
 
 const home = () => router.push({ name: 'home' })
@@ -52,6 +56,7 @@ onBeforeMount(fetch)
       <Tabs class="course-tabs" :model-value="display" @on-click="handleClick">
         <TabPane label="Problem" name="courseProblem" />
         <TabPane label="Contest" name="courseContest" />
+        <TabPane label="Member" name="courseMember" />
         <TabPane label="Setting" name="courseSetting" />
       </Tabs>
       <router-view class="course-children" />
@@ -93,12 +98,11 @@ onBeforeMount(fetch)
 <style lang="stylus" scoped>
 .course-wrap
   padding 0
-  max-width 1024px
 .course-tabs
   padding-top 24px
   margin-bottom 24px
 .course-children
-  padding 0 40px 40px
+  padding 0 0 40px
   position relative
 
 .course-header
@@ -115,7 +119,7 @@ onBeforeMount(fetch)
   .course-header
     padding 20px 20px 0
   .course-children
-    padding 0 20px 20px
+    padding 0 0 20px
   .course-tabs
     padding-top 12px
     margin-bottom 4px
