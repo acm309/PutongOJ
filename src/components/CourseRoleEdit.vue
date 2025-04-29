@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import debounce from 'lodash/debounce'
 import { watch } from 'vue'
-import { Checkbox, Form, FormItem, Input, Modal } from 'view-ui-plus'
+import { Checkbox, Form, FormItem, Modal, Option, Select } from 'view-ui-plus'
 import type { CourseRole } from '@/types'
+import api from '@/api'
 
 const props = defineProps({
   modelValue: {
@@ -41,6 +43,8 @@ const roleConfig = {
 
 let modal: boolean = $ref(false)
 let uid: string = $ref('')
+let edit: boolean = $ref(!!props.uid)
+let loadingUsers: boolean = $ref(false)
 const role = $ref({ ...props.role })
 const disabled = $ref({
   basic: true,
@@ -50,6 +54,12 @@ const disabled = $ref({
   manageContest: false,
   manageCourse: false,
 })
+const users = $ref(props.uid
+  ? [ {
+      value: props.uid,
+      label: props.uid,
+    } ]
+  : [])
 
 watch(() => props.modelValue, (val) => {
   modal = val
@@ -61,6 +71,14 @@ watch(() => props.role, (val) => {
 })
 watch(() => props.uid, (val) => {
   uid = val
+  edit = !!val
+  users.length = 0
+  if (val) {
+    users.push({
+      value: val,
+      label: val,
+    })
+  }
 })
 function close () {
   modal = false
@@ -81,22 +99,40 @@ watch(() => role.manageProblem, (val) => {
   disabled.viewTestcase = val
   if (val) role.viewTestcase = true
 })
+
+const fetchUsers = debounce(
+  async (query: string) => {
+    if (query.length === 0) {
+      users.length = 0
+      return
+    }
+    loadingUsers = true
+    const { data: found } = await api.user.find({ type: 'name', content: query, page: 1, pageSize: 30 })
+    users.length = 0
+    found.docs.forEach((user) => {
+      users.push({
+        value: user.uid,
+        label: user.uid + (user.nick ? ` (${user.nick})` : ''),
+      })
+    })
+    loadingUsers = false
+  },
+  500,
+)
 </script>
 
 <template>
-  <Modal
-    v-model="modal" :loading="true"
-    title="Edit Course Role" :closable="false"
-    @on-cancel="close" @on-ok="close"
-  >
+  <Modal v-model="modal" :loading="true" title="Edit Course Role" :closable="false" @on-cancel="close" @on-ok="close">
     <Form class="role-form" :label-width="80">
       <FormItem label="User">
-        <Input v-model="uid" disabled />
+        <Select v-model="uid" :disabled="edit" filterable :remote-method="fetchUsers" :loading="loadingUsers">
+          <Option v-for="user in users" :key="user.value" :value="user.value" :label="user.label" />
+        </Select>
       </FormItem>
       <FormItem label="Role">
         <Checkbox
-          v-for="(label, field) in roleConfig" :key="field" v-model="role[field]"
-          class="role-checkbox" :disabled="disabled[field]" border
+          v-for="(label, field) in roleConfig" :key="field" v-model="role[field]" class="role-checkbox"
+          :disabled="disabled[field]" border
         >
           {{ label }}
         </Checkbox>

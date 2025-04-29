@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
-import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, WebsiteConfigResp } from './types'
+import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -55,7 +55,7 @@ const user = {
   findOne: (data: { [key: string]: any }) =>
     instance.get(`/user/${data.uid}`, { params: data }),
   find: (data: { [key: string]: any }) =>
-    instance.get('/user/list', { params: data }),
+    instance.get<Paginated<User>>('/user/list', { params: data }),
   create: (data: { [key: string]: any }) =>
     instance.post('/user', data),
   update: (data: { [key: string]: any }) =>
