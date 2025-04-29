@@ -70,6 +70,8 @@ export default {
     sample_input: 'Sample Input',
     sample_output: 'Sample Output',
 
+    java_class_alert: 'Ensure your Java program\'s main function is within a class named "Main".',
+
     testcase: {
       from_file: 'Import from file',
       file_selected: 'File selected',

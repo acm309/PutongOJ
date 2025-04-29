@@ -66,6 +66,8 @@ export default {
     sample_input: '样例输入',
     sample_output: '样例输出',
 
+    java_class_alert: '请确保你的 Java 程序的 main 函数在一个名为 "Main" 的类中。',
+
     testcase: {
       from_file: '从文件导入',
       file_selected: '已选择文件',

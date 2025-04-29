@@ -57,6 +57,9 @@ onBeforeUnmount(solutionStore.clearSavedSolution)
         </Select>
       </FormItem>
       <FormItem>
+        <Alert v-if="solution.language === 3 && !solution.code?.includes('Main')" show-icon>
+          {{ t('oj.java_class_alert') }}
+        </Alert>
         <Input
           v-model="solution.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }"
           :placeholder="t('oj.paste_your_code')"
