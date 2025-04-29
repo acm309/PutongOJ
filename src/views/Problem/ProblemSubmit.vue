@@ -30,16 +30,18 @@ const { solution } = $(storeToRefs(solutionStore))
 let title = $ref('')
 let loading = $ref(false)
 
-async function submitSolution() {
-  await create(Object.assign({}, solution, { pid: problem.pid }))
+const pid = $computed(() => route.params.pid)
+
+async function submitSolution () {
+  await create(Object.assign({}, solution, { pid }))
   message.info(`submit pid:${problem.pid} success!`)
-  router.push({ name: 'mySubmission', params: { pid: route.params.pid } })
+  router.push({ name: 'mySubmission', params: { pid } })
 }
 
-async function init() {
+async function init () {
   loading = true
   if (problem.title == null)
-    await findOne({ pid: route.params.pid })
+    await findOne({ pid })
   title = problem.title
   changeDomTitle({ title })
   loading = false
@@ -50,17 +52,14 @@ onBeforeMount(init)
 
 <template>
   <div>
-    <h1>{{ route.params.pid }}: {{ title }}</h1>
-    <Submit />
+    <h1>{{ pid }}: {{ title }}</h1>
+    <Submit :pid="pid" />
     <Button type="primary" :disabled="!isLogined" @click="submitSolution">
-      {{ t('oj.submit') }}
+      {{ isLogined ? t('oj.submit') : t('oj.please_login') }}
     </Button>
     <Button style="margin-left: 8px" @click="clearCode">
       {{ t('oj.reset') }}
     </Button>
-    <p v-if="!isLogined">
-      {{ t('oj.please_login') }}
-    </p>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>

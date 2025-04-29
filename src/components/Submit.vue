@@ -1,16 +1,49 @@
-<script setup>
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import constant from '@/util/constant'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
+import debounce from 'lodash/debounce'
+import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
 import { useSolutionStore } from '@/store/modules/solution'
+import { language } from '@/util/constant'
+import { useSolutionStorage } from '@/util/helper'
 
+const props = defineProps({
+  pid: {
+    type: String,
+    default: '',
+  },
+})
 const { t } = useI18n()
 const solutionStore = useSolutionStore()
 const { solution } = $(storeToRefs(solutionStore))
-const language = $ref(constant.language)
-// Clear the saved solution in case of the user visits this page after
-// they viewed other's solution.
-solutionStore.clearSavedSolution()
+const solutionStorage = $ref(useSolutionStorage())
+
+const languagesOrder: (keyof typeof language)[] = [ 2, 5, 1, 3, 4 ]
+const languages = $computed(() =>
+  languagesOrder.map(key => ({
+    value: key,
+    label: language[key],
+  })),
+)
+
+async function init () {
+  solutionStore.clearSavedSolution()
+  if (solutionStorage[props.pid]) {
+    Object.assign(solution, solutionStorage[props.pid])
+  }
+}
+
+watch(
+  () => solution,
+  debounce((updatedSolution) => {
+    solutionStorage[props.pid] = updatedSolution
+  }, 500),
+  { deep: true },
+)
+
+onMounted(init)
+onBeforeUnmount(solutionStore.clearSavedSolution)
 </script>
 
 <template>
@@ -18,16 +51,16 @@ solutionStore.clearSavedSolution()
     <Form v-model="solution">
       <FormItem label="Language" label-position="left">
         <Select v-model="solution.language">
-          <Option :value="2">{{ language[2] }}</Option>
-          <Option :value="5">{{ language[5] }}</Option>
-          <Option :value="1">{{ language[1] }}</Option>
-          <Option :value="3">{{ language[3] }}</Option>
-          <Option :value="4">{{ language[4] }}</Option>
+          <Option v-for="option in languages" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </Option>
         </Select>
       </FormItem>
       <FormItem>
-        <Input class="code-input" v-model="solution.code" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }"
-          :placeholder="t('oj.paste_your_code')" />
+        <Input
+          v-model="solution.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }"
+          :placeholder="t('oj.paste_your_code')"
+        />
       </FormItem>
     </Form>
   </div>

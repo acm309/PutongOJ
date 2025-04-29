@@ -68,3 +68,8 @@ export interface CourseMember {
   role: CourseRole
   update: number
 }
+
+export interface Solution {
+  language: number | null
+  code: string
+}

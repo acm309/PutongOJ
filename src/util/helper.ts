@@ -1,13 +1,14 @@
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
-import { useStorage } from '@vueuse/core'
+import { useSessionStorage, useStorage } from '@vueuse/core'
 import { useSessionStore } from '@/store/modules/session'
+import type { Solution } from '@/types'
 
-export function purify(obj: Record<string, any>) {
+export function purify (obj: Record<string, any>) {
   return Object.fromEntries(
-    Object.entries(obj).filter(([_, value]) => value != null && value !== '')
-  );
+    Object.entries(obj).filter(([ _, value ]) => value != null && value !== ''),
+  )
 }
 
 // TODO: 后期这里应该会改 URL
@@ -46,4 +47,8 @@ export function onProfileUpdate (callback: (...args: any[]) => void) {
 
 export function useHumanLanguage () {
   return useStorage('oj_human_language', 'en-US')
+}
+
+export function useSolutionStorage () {
+  return useSessionStorage<Record<string, Solution>>('oj_solution_codes', {})
 }
