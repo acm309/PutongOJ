@@ -1,61 +1,62 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { inject, computed } from 'vue'
+import { inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import OJSubmit from '@/components/Submit'
-import { useSolutionStore } from '@/store/modules/solution'
-import { useContestStore } from '@/store/modules/contest'
+import { Button, Space } from 'view-ui-plus'
 
-import { Space, Button } from 'view-ui-plus'
+import Submit from '@/components/Submit'
+import { useContestStore } from '@/store/modules/contest'
+import { useSolutionStore } from '@/store/modules/solution'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
 const solutionStore = useSolutionStore()
 const route = useRoute()
 const router = useRouter()
-const $Message = inject('$Message')
+const message = inject('$Message')
 
-const { problems, overview, contest, totalProblems } = storeToRefs(contestStore)
-const { solution } = storeToRefs(solutionStore)
-const { clearCode, create } = solutionStore
+const { problems, overview, contest, totalProblems } = $(storeToRefs(contestStore))
+const { solution } = $(storeToRefs(solutionStore))
+const { clearCode: reset, create } = solutionStore
 
-const currentProblemId = computed(() => Number(route.params.id))
-const currentContestId = computed(() => route.params.cid)
-const currentTitle = computed(() => overview.value[currentProblemId.value - 1]?.title)
+const currentProblemId = $computed(() => Number(route.params.id))
+const currentContestId = $computed(() => route.params.cid)
+const currentTitle = $computed(() => overview[currentProblemId - 1]?.title)
 
-const pageChange = val => {
-  if (overview.value[val - 1].invalid) return
+const pid = $computed(() => problems[currentProblemId - 1])
+const mid = $computed(() => currentContestId)
+
+function pageChange (val) {
+  if (overview[val - 1]?.invalid) return
   router.push({ name: 'contestSubmit', params: { cid: contest.cid, id: val } })
 }
-const reset = clearCode
 
-async function submit() {
-  let response = await create({
-    ...solution.value,
-    pid: problems.value[currentProblemId.value - 1],
-    mid: currentContestId.value,
-  })
+async function submit () {
+  const response = await create({ pid, mid, ...solution })
   if (response.isAxiosError) return
-  router.push({
-    name: 'contestStatus',
-    params: route.params,
-  })
-  $Message.info(`submit id:${currentProblemId.value} success!`)
+  router.push({ name: 'contestStatus', params: route.params })
+  message.info(t('oj.submitSuccess', { id: currentProblemId }))
 }
 </script>
 
 <template>
   <div class="contest-children">
     <Space class="problem-nav" wrap :size="[8, 8]">
-      <Button class="problem-nav-item" v-for="i in totalProblems" :key="i" @click="pageChange(i)"
-        :type="i === currentProblemId ? 'primary' : 'default'" :disabled="overview[i - 1].invalid">
+      <Button
+        v-for="i in totalProblems"
+        :key="i"
+        class="problem-nav-item"
+        :type="i === currentProblemId ? 'primary' : 'default'"
+        :disabled="overview[i - 1]?.invalid"
+        @click="pageChange(i)"
+      >
         {{ i }}
       </Button>
     </Space>
     <div class="problem-content">
       <h1>{{ currentProblemId }}: {{ currentTitle }}</h1>
-      <OJSubmit />
+      <Submit :pid="String(pid)" />
       <Button type="primary" @click="submit">
         {{ t('oj.submit') }}
       </Button>
@@ -71,10 +72,12 @@ async function submit() {
   margin-top -16px
   padding 40px 0
   position relative
+
 .problem-nav
   padding 0 40px
   .problem-nav-item
     padding 0 11.66px
+
 .problem-content
   padding 20px 40px 0
 
@@ -88,7 +91,7 @@ async function submit() {
 
 h1
   color: #757575
-  margin-top: 10px
-  margin-bottom: 20px
-  text-align: center
+  margin-top 10px
+  margin-bottom 20px
+  text-align center
 </style>

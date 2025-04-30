@@ -41,6 +41,7 @@ watch(
   }, 500),
   { deep: true },
 )
+watch(() => props.pid, init)
 
 onMounted(init)
 onBeforeUnmount(solutionStore.clearSavedSolution)
