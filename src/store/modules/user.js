@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', {
         && this.user.mail.trim().length > 0
       ) {
         const mailHash = MD5(this.user.mail.trim().toLowerCase()).toString()
-        const cravatar = `https://cravatar.cn/avatar/${mailHash}?d=404&s=256`
+        const cravatar = `https://cn.cravatar.com/avatar/${mailHash}?d=404&s=256`
         const response = await axios.get(cravatar, {
           withCredentials: false,
           responseType: 'blob',
