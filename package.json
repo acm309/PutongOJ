@@ -20,8 +20,7 @@
   },
   "scripts": {
     "build": "npm run config && vite build",
-    "config": "npm run config:vditor",
-    "config:vditor": "node build/vditor.js",
+    "config": "node build/vditor.js",
     "dev": "npm run config && vite",
     "lint": "eslint ./src --fix",
     "preview": "vite preview",
@@ -29,7 +28,6 @@
     "zip": "node build/zip.js"
   },
   "dependencies": {
-    "@types/pangu": "^4.0.2",
     "@vitejs/plugin-legacy": "^1.8.2",
     "@vitejs/plugin-vue": "^2.3.4",
     "@vueuse/core": "^13.1.0",
@@ -58,6 +56,7 @@
     "@antfu/eslint-config": "^2.27.3",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@types/lodash": "^4.17.16",
+    "@types/pangu": "^4.0.2",
     "eslint": "^9.25.1",
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.8.3",

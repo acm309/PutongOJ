@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/pangu':
-        specifier: ^4.0.2
-        version: 4.0.2
       '@vitejs/plugin-legacy':
         specifier: ^1.8.2
         version: 1.8.2(vite@2.9.14(less@4.3.0)(stylus@0.64.0))
@@ -90,6 +87,9 @@ importers:
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.16
+      '@types/pangu':
+        specifier: ^4.0.2
+        version: 4.0.2
       eslint:
         specifier: ^9.25.1
         version: 9.25.1
