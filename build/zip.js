@@ -1,5 +1,5 @@
+const { resolve } = require('node:path')
 const { zip } = require('zip-a-folder')
-const { resolve } = require('path')
 
 const sourcePath = resolve(__dirname, '../dist')
 const targetPath = resolve(__dirname, '../dist.zip')
