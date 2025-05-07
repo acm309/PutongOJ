@@ -1,49 +1,47 @@
-# PutongOJ-FE
+# Putong OJ - Frontend
 
-[Putong OJ](https://github.com/acm309/PutongOJ) 的前端部分
+[![Vue.js](https://img.shields.io/github/package-json/dependency-version/net-escape/ptoj-frontend/vue?color=42b883
+)](https://vuejs.org/)
+[![Axios](https://img.shields.io/github/package-json/dependency-version/net-escape/ptoj-frontend/axios?color=5a29e4)](https://axios-http.com/)
+[![Pinia](https://img.shields.io/github/package-json/dependency-version/net-escape/ptoj-frontend/pinia?color=c99513)](https://pinia.vuejs.org/)
+[![View UI Plus](https://img.shields.io/github/package-json/dependency-version/net-escape/ptoj-frontend/view-ui-plus?color=2d8cf0)](https://www.iviewui.com/)
 
-[Preview](http://acm.cjlu.edu.cn)
+The frontend component of [Putong OJ](https://github.com/net-escape/ptoj-backend), a modern single-page application built with Vue. A live instance is available at [acm.cjlu.edu.cn](https://acm.cjlu.edu.cn/).
 
-一个采用 vue, vue-router, pinia 而成的单页应用
+> [!IMPORTANT]
+> 
+> The development of Putong OJ is closely tailored to the practical needs of the ACM Lab at CJLU, incorporating numerous customized features. 
+> 
+> If you wish to deploy your own instance, we recommend forking the repository and modifying the code according to your requirements. Currently, Putong OJ does not support configuration options for these customized features.
 
-# 主要组件的版本
-- Vue 3
-- vue-router 4 
-- pinia 2
-- view-ui-plus 1.1.0
+> [!CAUTION]  
+>   
+> The current branch may contain untested changes after dependency upgrades. For production use, we strongly recommend using the last stable version from commit [`ce13bf1`](https://github.com/net-escape/ptoj-frontend/commit/ce13bf1988bb4923947b9b72a0b8a371d3110469).  
+>   
+> Some features might be unstable until comprehensive testing is completed. Proceed with caution when deploying this version.
 
-# 项目结构
+## Getting Started 🚀
 
-```
-├── dist // 生成打包好的文件
-│   ├── static
-|   |   ├── css
-|   |   ├── fonts
-|   |   ├── img
-|   |   └── js
-│   └── index.html
-└── src
-    ├── main.js // 项目入口
-    ├── router // 路由文件，说明了各个路由将会使用的组件
-    |   ├── index.js // router的配置以及引用组件
-    |   └── routes.js // 定义各个路由
-    ├── assets // 网站logo图资源
-    ├── components // 一些小组件
-    ├── store // vuex 文件
-    │   └── modules // 子模块
-    └── views // 路由对应的组件 (这些组件在 router.js 中都被引入)
-        ├── Admin
-        ├── Contest
-        ├── News
-        └── Problem
+### Installation
 
+```bash
+pnpm install
 ```
 
-# 修改颜色
+### Development
 
-- src/theme/index.less
-- src/styles/common.styl
+```bash
+pnpm run dev
+```
 
-# TODO
+### Building for Production
 
-- [ ] 开发文档
+```bash
+pnpm run build
+```
+
+### Customizing Styles
+
+Modify these files to change the visual appearance:
+- `src/theme/index.less`
+- `src/styles/common.styl`
