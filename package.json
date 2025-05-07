@@ -28,10 +28,10 @@
     "zip": "node build/zip.js"
   },
   "dependencies": {
-    "@vitejs/plugin-legacy": "^1.8.2",
-    "@vitejs/plugin-vue": "^2.3.4",
+    "@vitejs/plugin-legacy": "^6.1.1",
+    "@vitejs/plugin-vue": "^5.2.3",
     "@vueuse/core": "^13.1.0",
-    "axios": "^0.27.2",
+    "axios": "^1.9.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "echarts": "^5.6.0",
@@ -41,33 +41,31 @@
     "lodash": "^4.17.21",
     "only": "^0.0.2",
     "pangu": "^4.0.7",
-    "pinia": "^2.3.1",
-    "rollup": "^2.79.2",
+    "pinia": "^3.0.2",
     "stylus": "^0.64.0",
     "vditor": "^3.11.0",
     "view-ui-plus": "^1.3.20",
-    "vue": "3.3.13",
+    "vue": "3.5.13",
     "vue-echarts": "^7.0.3",
     "vue-i18n": "^11.1.3",
     "vue-router": "^4.5.1",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.27.3",
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@antfu/eslint-config": "^4.13.0",
     "@types/lodash": "^4.17.16",
     "@types/pangu": "^4.0.2",
-    "eslint": "^9.25.1",
+    "@vue-macros/reactivity-transform": "3.0.0-beta.10",
+    "eslint": "^9.26.0",
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.8.3",
-    "vite": "2.9.14",
-    "vite-plugin-compression2": "^1.3.3",
-    "vite-plugin-import": "^0.4.0",
+    "vite": "6.3.5",
     "zip-a-folder": "^3.1.9"
   },
   "browserslist": [
-    "> 1%",
+    "> 0.3%",
     "last 2 versions",
-    "not ie <= 8"
+    "not dead",
+    "Firefox ESR"
   ]
 }
