@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { MD5 } from 'crypto-js'
+import MD5 from 'crypto-js/md5'
 import api from '@/api'
 
 export const useUserStore = defineStore('user', {

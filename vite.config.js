@@ -28,7 +28,7 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1024,
-    gzipSize: false,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks: {
