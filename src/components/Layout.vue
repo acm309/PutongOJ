@@ -1,31 +1,34 @@
-<script setup>
-import { useRootStore } from '@/store'
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { timePretty, timeDiffPretty } from '@/util/formate'
-import { Layout, Footer, Icon } from 'view-ui-plus'
+import { Footer, Icon, Layout, Poptip, Radio, RadioGroup } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { useHumanLanguage } from '@/util/helper'
-import Header from './Header.vue'
-import Dialog from './LoginAndRegister'
-import { RadioGroup, Radio } from 'view-ui-plus'
 
-const rootStore = useRootStore()
-const { currentTime, timeDiff } = $(storeToRefs(rootStore))
-const formattedTimeDiff = $computed(() => timeDiffPretty(timeDiff))
-const serverTime = $computed(() => isNaN(timeDiff) ? 'Syncing...' : `${timePretty(currentTime)} (${formattedTimeDiff})`)
+import { useRootStore } from '@/store'
+import { useHumanLanguage } from '@/util/helper'
+import { timeDiffPretty, timePretty } from '@/util/formate'
+
+import Dialog from '@/components/LoginAndRegister.vue'
+import Header from '@/components/Header.vue'
 
 const { locale } = useI18n()
+const rootStore = useRootStore()
+const { currentTime, timeDiff } = $(storeToRefs(rootStore))
+
+const serverTime = $computed(() =>
+  Number.isNaN(timeDiff)
+    ? 'Syncing...'
+    : `${timePretty(currentTime)} (${timeDiffPretty(timeDiff)})`)
+const buildSHA = import.meta.env.VITE_BUILD_SHA || 'unknown'
+const buildTime = timePretty(
+  Number.parseInt(import.meta.env.VITE_BUILD_TIME) || Date.now(),
+  'yyyy-MM-dd\'T\'HH:mm:ssXXX',
+)
+
 let selectedLang = $(useHumanLanguage())
 locale.value = selectedLang
 
-function langSelected(lang) {
+function langSelected (lang: string) {
   locale.value = selectedLang = lang
-}
-</script>
-
-<script>
-export default {
-  name: 'OjLayout',
 }
 </script>
 
@@ -36,22 +39,35 @@ export default {
       <router-view />
     </Content>
     <Footer class="layout-footer">
-      <RadioGroup v-model="selectedLang" type="button" size="small" @on-change="langSelected" class="lang-radio-group">
-        <Radio label="zh-CN" class="lang-radio">简体中文</Radio>
-        <Radio label="en-US" class="lang-radio">English</Radio>
+      <RadioGroup v-model="selectedLang" type="button" size="small" class="lang-radio-group" @on-change="langSelected">
+        <Radio label="zh-CN" class="lang-radio">
+          简体中文
+        </Radio>
+        <Radio label="en-US" class="lang-radio">
+          English
+        </Radio>
       </RadioGroup>
       <p>Server Time: {{ serverTime }}</p>
-      <p>
-        <strong>Putong OJ</strong> by
-        <a href="https://github.com/acm309" target="_blank" class="github-link">
-          acm309
-          <Icon type="logo-github" class="github-icon" />
-        </a>.
-        <br />
-        The source code is under the
-        <a href="https://github.com/acm309/PutongOJ/blob/master/LICENSE" target="_blank" class="license-link">
-          MIT License</a>.
-      </p>
+      <Poptip trigger="hover">
+        <p>
+          <strong>Putong OJ</strong> by
+          <a href="https://github.com/acm309" target="_blank" class="github-link">
+            acm309
+            <Icon type="logo-github" class="github-icon" />
+          </a>.
+          <br>
+          The source code is under the
+          <a href="https://github.com/acm309/PutongOJ/blob/master/LICENSE" target="_blank" class="license-link">
+            MIT License
+          </a>.
+        </p>
+        <template #content>
+          <div class="version-info">
+            <code><b>Putong OJ Frontend</b> #{{ buildSHA }}</code><br>
+            <code>Built at {{ buildTime }}</code>
+          </div>
+        </template>
+      </Poptip>
     </Footer>
   </Layout>
   <Dialog />
@@ -74,8 +90,8 @@ export default {
     border 1px solid #d7dde4
     border-radius 7px
     background #fff
-    box-shadow 0 7px 8px -4px rgba(0, 0, 0, .1), 
-               0 12px 17px 2px rgba(0, 0, 0, .07), 
+    box-shadow 0 7px 8px -4px rgba(0, 0, 0, .1),
+               0 12px 17px 2px rgba(0, 0, 0, .07),
                0 5px 22px 4px rgba(0, 0, 0, .06)
   .wrap-loading
     z-index 50
@@ -103,6 +119,9 @@ export default {
     text-decoration none
     &:hover
       text-decoration underline
+
+  .version-info
+    text-align left
 
 @media screen and (max-width 1024px)
   .layout-content
