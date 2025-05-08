@@ -1,18 +1,21 @@
-<script setup>
-import { inject } from 'vue'
+<script setup lang="ts">
+import type { Message } from 'view-ui-plus'
+import MarkdownPreview from '@/components/MarkdownPreview.vue'
 import { useClipboard } from '@vueuse/core'
+import { Space } from 'view-ui-plus'
+import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import MarkdownPreview from '@/components/MarkdownPreview'
-
-defineProps(['problem'])
+const props = defineProps([ 'modelValue' ])
 const { t } = useI18n()
-const $Message = inject('$Message')
+const message = inject('$Message') as typeof Message
 const { copy } = useClipboard()
 
-function onCopy(content) {
+const problem = $computed(() => props.modelValue)
+
+function onCopy (content: string) {
   copy(content)
-  $Message.success('Copied!')
+  message.success('Copied!')
 }
 </script>
 
@@ -23,32 +26,47 @@ function onCopy(content) {
         {{ problem.pid }}: {{ problem.title }}
       </slot>
     </h1>
-    <h5>Time Limit: {{ problem.time }}MS&nbsp;&nbsp;&nbsp;Memory Limit: {{ problem.memory }}KB</h5>
-    <h2 class="text-primary">{{ t('oj.description') }}</h2>
-    <MarkdownPreview class="cont" v-model="problem.description" />
-    <h2>{{ t('oj.input') }}</h2>
-    <MarkdownPreview class="cont" v-model="problem.input" />
-    <h2>{{ t('oj.output') }}</h2>
-    <MarkdownPreview class="cont" v-model="problem.output" />
-    <h2>
-      {{ t('oj.sample_input') }}
-      <Tooltip content="Click to copy" placement="top">
-        <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.in)" />
-      </Tooltip>
+    <h5>
+      <Space split>
+        <span>Time Limit: {{ problem.time }}ms</span>
+        <span>Memory Limit: {{ problem.memory }}KB</span>
+      </Space>
+    </h5>
+    <h2 class="text-primary">
+      {{ t('oj.description') }}
     </h2>
-    <pre><code>{{ problem.in }}</code></pre>
-    <h2>
-      {{ t('oj.sample_output') }}
-      <Tooltip :content="t('oj.click_to_copy_code')" placement="top">
-        <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.out)" />
-      </Tooltip>
-    </h2>
-    <pre><code>{{ problem.out }}</code></pre>
+    <MarkdownPreview v-model="problem.description" class="cont" />
+    <template v-if="problem.input?.trim()">
+      <h2>{{ t('oj.input') }}</h2>
+      <MarkdownPreview v-model="problem.input" class="cont" />
+    </template>
+    <template v-if="problem.output?.trim()">
+      <h2>{{ t('oj.output') }}</h2>
+      <MarkdownPreview v-model="problem.output" class="cont" />
+    </template>
+    <template v-if="problem.in?.trim()">
+      <h2>
+        {{ t('oj.sample_input') }}
+        <Tooltip content="Click to copy" placement="top">
+          <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.in)" />
+        </Tooltip>
+      </h2>
+      <pre><code>{{ problem.in }}</code></pre>
+    </template>
+    <template v-if="problem.out?.trim()">
+      <h2>
+        {{ t('oj.sample_output') }}
+        <Tooltip :content="t('oj.click_to_copy_code')" placement="top">
+          <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.out)" />
+        </Tooltip>
+      </h2>
+      <pre><code>{{ problem.out }}</code></pre>
+    </template>
     <template v-if="problem.hint?.trim()">
       <h2>
         {{ t('oj.hint') }}
       </h2>
-      <MarkdownPreview class="cont" v-model="problem.hint" />
+      <MarkdownPreview v-model="problem.hint" class="cont" />
     </template>
   </div>
 </template>

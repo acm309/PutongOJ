@@ -48,7 +48,7 @@ onRouteParamUpdate(fetch)
       </Button>
     </Space>
     <div class="problem-content">
-      <Problem :problem="problem">
+      <Problem v-model="problem">
         <template #title>
           {{ $route.params.id }}: {{ problem.title }}
         </template>

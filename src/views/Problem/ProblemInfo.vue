@@ -40,7 +40,7 @@ onBeforeMount(init)
 
 <template>
   <div>
-    <Problem :problem="problem" />
+    <Problem v-model="problem" />
     <Button shape="circle" icon="md-paper-plane" @click="submit">
       {{ t('oj.submit') }}
     </Button>
