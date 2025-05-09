@@ -50,8 +50,8 @@ const handler = async function (ctx) {
 }
 
 const solutionCreateRateLimit = RateLimit.middleware({
-  interval: { min: 1 },
-  max: 12,
+  interval: { sec: 5 },
+  max: 1,
   async keyGenerator (ctx) {
     const user = ctx.session.profile
     return `solutions/${user.uid}`
@@ -61,14 +61,25 @@ const solutionCreateRateLimit = RateLimit.middleware({
 
 const userCreateRateLimit = RateLimit.middleware({
   interval: { min: 1 },
-  max: 30,
+  max: 1,
   prefixKey: 'user',
+  handler,
+})
+
+const commentCreateRateLimit = RateLimit.middleware({
+  interval: { sec: 5 },
+  max: 1,
+  async keyGenerator (ctx) {
+    const user = ctx.session.profile
+    return `comments/${user.uid}`
+  },
   handler,
 })
 
 module.exports = {
   solutionCreateRateLimit,
   userCreateRateLimit,
+  commentCreateRateLimit,
   auth: {
     login,
     admin,
