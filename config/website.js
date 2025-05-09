@@ -1,7 +1,7 @@
-const process = require('node:process')
+const { env } = require('node:process')
 
 module.exports = {
-  title: process.env.title || 'Putong OJ',
-  discussOnProblem: (process.env.discussOnProblem || 'false').toLocaleLowerCase() === 'true',
-  semi_restful: false,
+  title: env.title || 'Putong OJ',
+  buildSHA: env.NODE_BUILD_SHA || 'unknown',
+  buildTime: Number.parseInt(env.NODE_BUILD_TIME) || Date.now(),
 }
