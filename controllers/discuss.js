@@ -1,57 +1,66 @@
-const redis = require('../config/redis')
+const only = require('only')
 const Discuss = require('../models/Discuss')
 const { isLogined, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 
+/**
+ * 讨论预加载中间件
+ */
 const preload = async (ctx, next) => {
-  const did = Number.parseInt(ctx.params.did)
-  if (Number.isNaN(did)) { ctx.throw(400, 'Did has to be a number') }
+  const did = Number(ctx.params.did)
+  if (!Number.isInteger(did) || did <= 0) {
+    return ctx.throw(400, 'Invalid discuss ID')
+  }
   const discuss = await Discuss.findOne({ did }).exec()
-  if (discuss == null) { ctx.throw(400, 'No such a discuss') }
+  if (!discuss) {
+    return ctx.throw(404, 'Discuss not found')
+  }
+
+  const { profile } = ctx.state
+  if (discuss.uid !== profile.uid && !isAdmin(profile)) {
+    return ctx.throw(403, 'Permission denied')
+  }
+
   ctx.state.discuss = discuss
   return next()
 }
 
+/**
+ * 讨论列表
+ */
 const find = async (ctx) => {
   if (!isLogined(ctx)) {
     ctx.body = { list: [] }
     return
   }
 
-  let list
-  if (isAdmin(ctx.session.profile)) {
-    list = await Discuss.find().exec()
-  } else {
-    list = await Discuss.find({ uid: ctx.session.profile.uid }).exec()
-  }
+  const { profile } = ctx.state
+  const query = isAdmin(profile) ? {} : { uid: profile.uid }
+  const list = await Discuss
+    .find(query, { did: 1, title: 1, update: 1, uid: 1, _id: 0 })
+    .sort({ update: -1 })
+    .lean()
+    .exec()
 
-  ctx.body = {
-    list,
-  }
+  ctx.body = { list }
 }
 
+/**
+ * 获取单个讨论
+ */
 const findOne = async (ctx) => {
-  const discuss = ctx.state.discuss
-
-  if (discuss.uid !== ctx.session.profile.uid && !isAdmin(ctx.session.profile)) {
-    ctx.throw(400, 'You do not have permission to enter this discuss!')
-  }
-
-  ctx.body = {
-    discuss,
-  }
+  const { discuss } = ctx.state
+  ctx.body = { discuss: only(discuss, 'did title uid comments') }
 }
 
+/**
+ * 创建讨论
+ */
 const create = async (ctx) => {
-  const opt = ctx.request.body
+  const { title, content } = ctx.request.body
+  const { profile: { uid } } = ctx.state
   const discuss = new Discuss({
-    title: opt.title,
-    uid: ctx.session.profile.uid,
-    comments: [ {
-      uid: ctx.session.profile.uid,
-      content: opt.content,
-    } ],
-    update: Date.now(),
+    title, uid, comments: [ { uid, content } ],
   })
 
   try {
@@ -61,36 +70,27 @@ const create = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  ctx.body = {
-    did: discuss.did,
-  }
+  ctx.body = only(discuss, 'did')
 }
 
-// 新增评论
+/**
+ * 新增评论
+ */
 const update = async (ctx) => {
-  const opt = ctx.request.body
-  const discuss = ctx.state.discuss
-
-  if (discuss.uid !== ctx.session.profile.uid && !isAdmin(ctx.session.profile)) {
-    ctx.throw(400, 'You do not have permission to reply this discuss!')
-  }
+  const { content } = ctx.request.body
+  const { discuss, profile: { uid } } = ctx.state
 
   try {
-    discuss.comments.push({
-      uid: ctx.session.profile.uid,
-      content: opt.content,
-    })
+    discuss.comments.push({ uid, content })
     discuss.update = Date.now()
     await discuss.save()
-    redis.lpush('oj:comment', discuss.did)
+    // redis.lpush('oj:comment', discuss.did)
     logger.info(`One discuss is updated" ${discuss.did} -- ${discuss.title}`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
 
-  ctx.body = {
-    did: discuss.did,
-  }
+  ctx.body = only(discuss, 'did')
 }
 
 const del = async (ctx) => {

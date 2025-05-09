@@ -7,28 +7,22 @@ const discussSchema = mongoose.Schema({
     index: {
       unique: true,
     },
-    default: -1, // 表示新组
+    default: -1,
   },
   title: {
     type: String,
     required: true,
   },
-  create: {
-    type: Number,
-    default: Date.now,
-  },
-  update: {
-    type: Number,
-    default: Date.now,
-  },
   uid: {
     type: String,
     required: true,
+    immutable: true,
   },
   comments: [ {
     uid: {
       type: String,
       required: true,
+      immutable: true,
     },
     content: {
       type: String,
@@ -37,8 +31,18 @@ const discussSchema = mongoose.Schema({
     create: {
       type: Number,
       default: Date.now,
+      immutable: true,
     },
   } ],
+  create: {
+    type: Number,
+    default: Date.now,
+    immutable: true,
+  },
+  update: {
+    type: Number,
+    default: Date.now,
+  },
 }, {
   collection: 'Discuss',
 })
