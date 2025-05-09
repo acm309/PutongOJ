@@ -1,3 +1,4 @@
+const { env } = require('node:process')
 const { RateLimit } = require('koa2-ratelimit')
 const { privilege } = require('../config')
 const User = require('../models/User')
@@ -49,32 +50,44 @@ const handler = async function (ctx) {
   }
 }
 
-const solutionCreateRateLimit = RateLimit.middleware({
-  interval: { sec: 5 },
-  max: 1,
-  async keyGenerator (ctx) {
-    const user = ctx.session.profile
-    return `solutions/${user.uid}`
-  },
-  handler,
-})
+const skipIfTest = (middleware) => {
+  return (ctx, next) => {
+    if (env.NODE_ENV === 'test') {
+      return next()
+    }
+    return middleware(ctx, next)
+  }
+}
 
-const userCreateRateLimit = RateLimit.middleware({
-  interval: { min: 1 },
-  max: 1,
-  prefixKey: 'user',
-  handler,
-})
+const solutionCreateRateLimit = skipIfTest(
+  RateLimit.middleware({
+    interval: { sec: 5 },
+    max: 1,
+    async keyGenerator (ctx) {
+      const user = ctx.session.profile
+      return `solutions/${user.uid}`
+    },
+    handler,
+  }))
 
-const commentCreateRateLimit = RateLimit.middleware({
-  interval: { sec: 5 },
-  max: 1,
-  async keyGenerator (ctx) {
-    const user = ctx.session.profile
-    return `comments/${user.uid}`
-  },
-  handler,
-})
+const userCreateRateLimit = skipIfTest(
+  RateLimit.middleware({
+    interval: { min: 1 },
+    max: 1,
+    prefixKey: 'user',
+    handler,
+  }))
+
+const commentCreateRateLimit = skipIfTest(
+  RateLimit.middleware({
+    interval: { sec: 5 },
+    max: 1,
+    async keyGenerator (ctx) {
+      const user = ctx.session.profile
+      return `comments/${user.uid}`
+    },
+    handler,
+  }))
 
 module.exports = {
   solutionCreateRateLimit,

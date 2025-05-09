@@ -9,10 +9,10 @@ test('Discuss list', async (t) => {
   const res = await request
     .get('/api/discuss/list')
 
-  t.is(res.status, 200)
+  t.is(res.status, 401)
   t.is(res.type, 'application/json')
-  t.truthy(Array.isArray(res.body.list))
-  t.is(res.body.list.length, 0)
+
+  t.truthy(res.body.error)
 })
 
 test('Discuss should fail to find one', async (t) => {

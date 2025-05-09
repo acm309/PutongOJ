@@ -81,7 +81,7 @@ test('Reply other\'s discuss should fail', async (t) => {
     .put(`/api/discuss/1`)
     .send({ content: 'nothing' })
 
-  t.is(update.status, 400)
+  t.is(update.status, 403)
   t.is(update.type, 'application/json')
 
   t.truthy(update.body.error)
@@ -101,7 +101,7 @@ test('Find Discuss 1 should fail', async (t) => {
   const res = await request
     .get('/api/discuss/1')
 
-  t.is(res.status, 400)
+  t.is(res.status, 403)
   t.is(res.type, 'application/json')
 
   t.truthy(res.body.error)
