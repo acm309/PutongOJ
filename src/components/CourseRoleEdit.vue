@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import debounce from 'lodash/debounce'
+import debounce from 'lodash.debounce'
 import { watch } from 'vue'
 import { Checkbox, Form, FormItem, Modal, Option, Select } from 'view-ui-plus'
 import type { CourseRole } from '@/types'

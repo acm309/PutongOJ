@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { onBeforeUnmount, onMounted, watch } from 'vue'
-import debounce from 'lodash/debounce'
+import debounce from 'lodash.debounce'
 import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
 import { useSolutionStore } from '@/store/modules/solution'
 import { language } from '@/util/constant'
