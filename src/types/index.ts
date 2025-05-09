@@ -6,8 +6,9 @@ export interface TimeResp {
 
 export interface WebsiteConfigResp {
   website: {
-    semi_restful: boolean
     title: string
+    buildSHA: string
+    buildTime: number
   }
 }
 

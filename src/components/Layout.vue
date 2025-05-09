@@ -1,28 +1,25 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { Footer, Icon, Layout, Poptip, Radio, RadioGroup } from 'view-ui-plus'
-import { useI18n } from 'vue-i18n'
-
-import { useRootStore } from '@/store'
-import { useHumanLanguage } from '@/util/helper'
-import { timeDiffPretty, timePretty } from '@/util/formate'
-
-import Dialog from '@/components/LoginAndRegister.vue'
 import Header from '@/components/Header.vue'
+import Dialog from '@/components/LoginAndRegister.vue'
+import { useRootStore } from '@/store'
+import { timeDiffPretty, timePretty } from '@/util/formate'
+import { useHumanLanguage } from '@/util/helper'
+import { storeToRefs } from 'pinia'
+import { Footer, Icon, Layout, Poptip, Radio, RadioGroup, Space } from 'view-ui-plus'
+import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()
 const rootStore = useRootStore()
-const { currentTime, timeDiff } = $(storeToRefs(rootStore))
+const { website: backend, currentTime, timeDiff } = $(storeToRefs(rootStore))
 
 const serverTime = $computed(() =>
   Number.isNaN(timeDiff)
     ? 'Syncing...'
     : `${timePretty(currentTime)} (${timeDiffPretty(timeDiff)})`)
-const buildSHA = import.meta.env.VITE_BUILD_SHA || 'unknown'
-const buildTime = timePretty(
-  Number.parseInt(import.meta.env.VITE_BUILD_TIME) || Date.now(),
-  'yyyy-MM-dd\'T\'HH:mm:ssXXX',
-)
+const frontend = {
+  buildSHA: import.meta.env.VITE_BUILD_SHA || 'unknown',
+  buildTime: Number.parseInt(import.meta.env.VITE_BUILD_TIME) || Date.now(),
+}
 
 let selectedLang = $(useHumanLanguage())
 locale.value = selectedLang
@@ -62,10 +59,22 @@ function langSelected (lang: string) {
           </a>.
         </p>
         <template #content>
-          <div class="version-info">
-            <code><b>Putong OJ Frontend</b> #{{ buildSHA }}</code><br>
-            <code>Built at {{ buildTime }}</code>
-          </div>
+          <Space direction="vertical">
+            <div>
+              <div class="component-version">
+                <code><b>Putong OJ Backend</b></code>
+                <code>#{{ backend.buildSHA }}</code>
+              </div>
+              <code>Built at {{ timePretty(backend.buildTime) }}</code>
+            </div>
+            <div>
+              <div class="component-version">
+                <code><b>Putong OJ Frontend</b></code>
+                <code>#{{ frontend.buildSHA }}</code>
+              </div>
+              <code>Built at {{ timePretty(frontend.buildTime) }}</code>
+            </div>
+          </Space>
         </template>
       </Poptip>
     </Footer>
@@ -120,8 +129,10 @@ function langSelected (lang: string) {
     &:hover
       text-decoration underline
 
-  .version-info
-    text-align left
+  .component-version
+    display flex
+    justify-content space-between
+    width 100%
 
 @media screen and (max-width 1024px)
   .layout-content
