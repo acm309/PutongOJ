@@ -1,5 +1,5 @@
-const difference = require('lodash.difference')
-const without = require('lodash.without')
+const difference = require('lodash/difference')
+const without = require('lodash/without')
 const only = require('only')
 const Problem = require('../models/Problem')
 const Tag = require('../models/Tag')

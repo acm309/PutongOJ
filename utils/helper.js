@@ -1,5 +1,5 @@
 const crypto = require('node:crypto')
-const pickBy = require('lodash.pickby')
+const pickBy = require('lodash/pickBy')
 const config = require('../config')
 
 function purify (obj) {

@@ -1,7 +1,7 @@
 const path = require('node:path')
 const fse = require('fs-extra')
 const send = require('koa-send')
-const remove = require('lodash.remove')
+const remove = require('lodash/remove')
 const { v4: uuid } = require('uuid')
 
 const loadPID = (ctx) => {

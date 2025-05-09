@@ -1,5 +1,5 @@
-const difference = require('lodash.difference')
-const escapeRegExp = require('lodash.escaperegexp')
+const difference = require('lodash/difference')
+const escapeRegExp = require('lodash/escapeRegExp')
 const only = require('only')
 const config = require('../config')
 const Group = require('../models/Group')

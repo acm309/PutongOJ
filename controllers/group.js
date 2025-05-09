@@ -1,5 +1,5 @@
-const difference = require('lodash.difference')
-const without = require('lodash.without')
+const difference = require('lodash/difference')
+const without = require('lodash/without')
 const only = require('only')
 const Group = require('../models/Group')
 const User = require('../models/User')

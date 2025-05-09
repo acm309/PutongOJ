@@ -1,6 +1,6 @@
 const path = require('node:path')
 const fse = require('fs-extra')
-const escapeRegExp = require('lodash.escaperegexp')
+const escapeRegExp = require('lodash/escapeRegExp')
 const only = require('only')
 const config = require('../config')
 const Contest = require('../models/Contest')

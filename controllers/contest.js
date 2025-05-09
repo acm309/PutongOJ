@@ -1,4 +1,4 @@
-const escapeRegExp = require('lodash.escaperegexp')
+const escapeRegExp = require('lodash/escapeRegExp')
 const only = require('only')
 const config = require('../config')
 const redis = require('../config/redis')

@@ -1,3 +1,4 @@
+const upperFirst = require('lodash/upperFirst')
 const only = require('only')
 const { encrypt, coursePermission } = require('../config')
 const Course = require('../models/Course')
@@ -10,10 +11,7 @@ const roleFields = [
   'manageProblem', 'manageContest', 'manageCourse' ]
 const reprRole = permission =>
   roleFields.reduce((acc, field) => {
-    acc[field] = (
-      permission
-      & coursePermission[field.charAt(0).toUpperCase() + field.slice(1)]
-    ) !== 0
+    acc[field] = (permission & coursePermission[upperFirst(field)]) !== 0
     return acc
   }, {})
 
