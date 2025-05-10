@@ -83,7 +83,7 @@ async function search (val) {
   try {
     Spin.show()
     const { data } = await api.user.find({ type: 'uid', content: val })
-    source = data.list.map(item => ({
+    source = data.docs.map(item => ({
       // Transfer component is using v-html, so we need to escape the html
       key: escape(item.uid),
       label: escape(`${item.uid} -- ${item.nick}`),
