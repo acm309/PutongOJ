@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { onBeforeMount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
-import { useRootStore } from '@/store'
-import api from '@/api'
 import type { CourseMember, UserPrivilege } from '@/types'
-import { onRouteQueryUpdate } from '@/util/helper'
-import { timePretty } from '@/util/formate'
+import type { Message, Modal } from 'view-ui-plus'
+import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
+import { useRootStore } from '@/store'
+import { courseRoleFields } from '@/util/constant'
+import { timePretty } from '@/util/formate'
+import { onRouteQueryUpdate } from '@/util/helper'
+import { storeToRefs } from 'pinia'
+import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { inject, onBeforeMount, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
@@ -17,6 +19,8 @@ const { t } = useI18n()
 const { course } = api
 const rootStore = useRootStore()
 const { privilege } = $(storeToRefs(rootStore))
+const modal = inject('$Modal') as typeof Modal
+const message = inject('$Message') as typeof Message
 
 const id = Number.parseInt(route.params.id as string)
 const page = $computed<number>(() =>
@@ -27,7 +31,8 @@ const pageSize = $computed<number>(() =>
 let docs: CourseMember[] = $ref([])
 let total: number = $ref(0)
 let loading: boolean = $ref(false)
-const openEdit: boolean = $ref(false)
+let openEdit: boolean = $ref(false)
+let editUserId: string = $ref('')
 
 async function fetch () {
   loading = true
@@ -43,6 +48,32 @@ function pageChange (page: number) {
     query: { page, pageSize },
   })
 }
+
+function openEditDialog (userId: string) {
+  editUserId = userId
+  openEdit = true
+}
+
+function removeMember (userId: string) {
+  modal.confirm({
+    title: t('oj.delete'),
+    content: 'Are you sure to delete this member?',
+    okText: t('oj.ok'),
+    cancelText: t('oj.cancel'),
+    onOk () {
+      course.removeMember(id, userId).then(() => {
+        message.success('Delete member successfully')
+        fetch()
+      })
+    },
+  })
+}
+
+watch(() => openEdit, (val: boolean) => {
+  if (val) return
+  editUserId = ''
+  fetch()
+})
 
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
@@ -127,10 +158,13 @@ onRouteQueryUpdate(fetch)
               </router-link>
             </td>
             <td class="member-nick">
-              <Tooltip
-                v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege)"
-                placement="top"
-              >
+              <span v-if="doc.user.nick?.trim()">{{ doc.user.nick }}</span>
+            </td>
+            <td
+              v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege)"
+              colspan="6"
+            >
+              <Tooltip placement="top">
                 <template #content>
                   <p>This user is an admin, will not limited</p>
                   <p>by the course role setting here.</p>
@@ -142,32 +176,18 @@ onRouteQueryUpdate(fetch)
                   Root
                 </Tag>
               </Tooltip>
-              <span v-if="doc.user.nick?.trim()">{{ doc.user.nick }}</span>
             </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.basic" class="role-checkbox" disabled />
-            </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.viewTestcase" class="role-checkbox" disabled />
-            </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.viewSolution" class="role-checkbox" disabled />
-            </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.manageProblem" class="role-checkbox" disabled />
-            </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.manageContest" class="role-checkbox" disabled />
-            </td>
-            <td class="member-role">
-              <Checkbox v-model="doc.role.manageCourse" class="role-checkbox" disabled />
-            </td>
+            <template v-else>
+              <td v-for="field in courseRoleFields" :key="field" class="member-role">
+                <Checkbox v-model="doc.role[field]" class="role-checkbox" disabled />
+              </td>
+            </template>
             <td class="member-update">
               {{ timePretty(doc.update) }}
             </td>
             <td class="member-action">
-              <span class="role-action">{{ t('oj.edit') }}</span>
-              <span class="role-action">{{ t('oj.delete') }}</span>
+              <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>
+              <span class="role-action" @click="() => removeMember(doc.user.uid)">{{ t('oj.delete') }}</span>
             </td>
           </tr>
         </tbody>
@@ -184,7 +204,7 @@ onRouteQueryUpdate(fetch)
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
-    <CourseRoleEdit v-model="openEdit" :course="id" />
+    <CourseRoleEdit v-model="openEdit" :course-id="id" :user-id="editUserId" />
   </div>
 </template>
 
@@ -249,10 +269,6 @@ onRouteQueryUpdate(fetch)
   white-space nowrap
   text-overflow ellipsis
   overflow hidden
-  span
-    margin-left 8px
-  .privilege-tag
-    margin 0 0 4px
 .member-role
   width 48px
   text-align center
@@ -273,6 +289,8 @@ onRouteQueryUpdate(fetch)
     cursor pointer
   .role-action:first-child
     margin-left 0
+.privilege-tag
+  margin 0 0 4px
 
 .members-empty
   &:hover

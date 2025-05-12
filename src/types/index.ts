@@ -67,7 +67,7 @@ export interface Course {
 export interface CourseMember {
   user: User
   role: CourseRole
-  update: number
+  update?: number
 }
 
 export interface Solution {

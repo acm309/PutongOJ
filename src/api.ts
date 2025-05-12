@@ -175,6 +175,8 @@ const course = {
     instance.get<CourseMember>(`/course/${courseId}/member/${userId}`),
   updateMember: (courseId: number, userId: string, role: CourseRole) =>
     instance.post<{ success: boolean }>(`/course/${courseId}/member/${userId}`, { role }),
+  removeMember: (courseId: number, userId: string) =>
+    instance.delete<{ success: boolean }>(`/course/${courseId}/member/${userId}`),
 }
 
 export default {

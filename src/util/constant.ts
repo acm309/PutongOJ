@@ -1,3 +1,5 @@
+import type { CourseRole } from '@/types'
+
 export const result = {
   0: 'Pending',
   1: 'Running & Judge',
@@ -99,6 +101,15 @@ export const privilege = {
   Root: 3,
 } as const
 
+export const courseRoleFields: readonly (keyof CourseRole)[] = [
+  'basic',
+  'viewTestcase',
+  'viewSolution',
+  'manageProblem',
+  'manageContest',
+  'manageCourse',
+]
+
 export default {
   result,
   judgeList,
@@ -112,4 +123,5 @@ export default {
   problemType,
   status,
   privilege,
+  courseRoleFields,
 } as const

@@ -104,7 +104,9 @@ function langSelected (lang: string) {
                0 5px 22px 4px rgba(0, 0, 0, .06)
   .wrap-loading
     z-index 50
-    border-radius 7px
+
+.wrap-loading, .modal-loading
+  border-radius 7px
 
 .layout-footer
   text-align center
