@@ -19,7 +19,7 @@ const reprRole = permission =>
  * 课程预加载中间件
  */
 const preload = async (ctx, next) => {
-  const id = Number(ctx.params.id)
+  const id = Number(ctx.params.courseId)
   if (!Number.isInteger(id) || id <= 0) {
     return ctx.throw(400, 'Invalid course ID')
   }
@@ -87,7 +87,7 @@ const findCourses = async (ctx) => {
 /**
  * 查询课程详情
  */
-const findCourse = async (ctx) => {
+const getCourse = async (ctx) => {
   const { course, courseRole } = ctx.state
   ctx.body = {
     ...only(course, 'id name description encrypt'),
@@ -143,10 +143,43 @@ const findMembers = async (ctx) => {
 }
 
 /**
+ * 获取课程成员权限
+ */
+const getMember = async (ctx) => {
+  const { userId: uid } = ctx.params
+  if (!uid) {
+    return ctx.throw(400, 'Missing uid')
+  }
+  const user = await User
+    .findOne({ uid })
+    .select('_id uid nick')
+    .lean()
+    .exec()
+  if (!user) {
+    return ctx.throw(404, 'User not found')
+  }
+  const { course } = ctx.state
+  const permission = await CoursePermission
+    .findOne({ user: user._id, course: course._id })
+    .select('role')
+    .lean()
+    .exec()
+  let role = coursePermission.None
+  if (permission) {
+    role = permission.role
+  }
+  ctx.body = {
+    ...only(user, 'uid nick'),
+    role: reprRole(role),
+  }
+}
+
+/**
  * 更新课程成员权限
  */
 const updateMember = async (ctx) => {
-  const { uid, role } = ctx.request.body
+  const { userId: uid } = ctx.params
+  const { role } = ctx.request.body
   if (!uid || !role) {
     return ctx.throw(400, 'Missing uid or role')
   }
@@ -188,8 +221,9 @@ module.exports = {
   preload,
   role,
   findCourses,
-  findCourse,
+  getCourse,
   createCourse,
   findMembers,
+  getMember,
   updateMember,
 }

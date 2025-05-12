@@ -2,14 +2,20 @@ const Router = require('koa-router')
 const course = require('../controllers/course')
 const { auth } = require('../utils/middlewares')
 
-const router = new Router({
-  prefix: '/course',
-})
+const router = new Router({ prefix: '/course' })
 
+// Courses
 router.get('/', course.findCourses)
-router.get('/:id', auth.login, course.preload, course.findCourse)
 router.post('/', auth.login, auth.root, course.createCourse)
-router.get('/:id/member', auth.login, course.preload, course.role('manageCourse'), course.findMembers)
-router.post('/:id/member', auth.login, course.preload, course.role('manageCourse'), course.updateMember)
+
+// Course
+router.get('/:courseId', auth.login, course.preload, course.getCourse)
+
+// Course Members
+router.get('/:courseId/member', auth.login, course.preload, course.role('manageCourse'), course.findMembers)
+
+// Course Member
+router.get('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.getMember)
+router.post('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.updateMember)
 
 module.exports = router
