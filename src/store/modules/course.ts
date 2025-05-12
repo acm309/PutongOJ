@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import api from '@/api'
 import type { Course } from '@/types'
+import api from '@/api'
+import { defineStore } from 'pinia'
 
 export const useCourseStore = defineStore('course', {
   state: () => ({
@@ -18,8 +18,8 @@ export const useCourseStore = defineStore('course', {
       this.list = data.docs
       this.total = data.total
     },
-    async findCourse (id: number) {
-      const { data } = await api.course.findCourse(id)
+    async findCourse (courseId: number) {
+      const { data } = await api.course.getCourse(courseId)
       this.course = data
     },
   },

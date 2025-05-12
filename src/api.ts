@@ -1,6 +1,6 @@
+import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
-import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -163,16 +163,18 @@ const session = {
 }
 
 const course = {
-  createCourse: (course: Partial<Course>) =>
-    instance.post<{ id: number }>('/course', course),
   findCourses: (params: { page: number, pageSize: number }) =>
     instance.get<Paginated<Course>>('/course', { params }),
-  findCourse: (id: number) =>
-    instance.get<Course>(`/course/${id}`),
-  findMembers: (id: number, params: { page: number, pageSize: number }) =>
-    instance.get<Paginated<CourseMember>>(`/course/${id}/member`, { params }),
-  updateMember: (id: number, uid: string, role: CourseRole) =>
-    instance.post<{ success: boolean }>(`/course/${id}/member`, { uid, role }),
+  createCourse: (course: Partial<Course>) =>
+    instance.post<{ id: number }>('/course', course),
+  getCourse: (courseId: number) =>
+    instance.get<Course>(`/course/${courseId}`),
+  findMembers: (courseId: number, params: { page: number, pageSize: number }) =>
+    instance.get<Paginated<CourseMember>>(`/course/${courseId}/member`, { params }),
+  getMember: (courseId: number, userId: string) =>
+    instance.get<CourseMember>(`/course/${courseId}/member/${userId}`),
+  updateMember: (courseId: number, userId: string, role: CourseRole) =>
+    instance.post<{ success: boolean }>(`/course/${courseId}/member/${userId}`, { role }),
 }
 
 export default {
