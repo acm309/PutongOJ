@@ -11,6 +11,8 @@ import { useProblemStore } from '@/store/modules/problem'
 import { useRootStore } from '@/store'
 import { useGroupStore } from '@/store/modules/group'
 import api from '@/api'
+import {Transfer, Select, Option, Input, Button, DatePicker, Row, Col, Icon} from 'view-ui-plus'
+import { contestType } from '@/util/constant'
 
 const props = defineProps([ 'contest', 'overview' ])
 const { t } = useI18n()
@@ -25,20 +27,11 @@ const { list: groups } = $(storeToRefs(groupStore))
 
 const { contest, overview } = $(toRefs(props))
 const jobs = $ref({})
-const options = [
-  {
-    value: 1,
-    label: 'Public',
-  },
-  {
-    value: 2,
-    label: 'Private',
-  },
-  {
-    value: 3,
-    label: 'Password',
-  },
-]
+const options = Object.entries(contestType)
+.map((item) => ({
+  value: item[0],
+  label: t(item[1]),
+}))
 let pid = $ref('')
 let pwd = $ref('')
 
@@ -112,9 +105,9 @@ function handleGroupChanges (data) {
 }
 function changeTime (label, time) {
   if (label === 'start')
-    contest.start = time
+    contest.start = (new Date(time)).getTime()
   else
-    contest.end = time
+    contest.end = (new Date(time)).getTime()
 }
 
 groupStore.find({ lean: 1 })
