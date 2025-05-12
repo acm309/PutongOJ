@@ -10,10 +10,9 @@ const roleFields = [
   'basic', 'viewTestcase', 'viewSolution',
   'manageProblem', 'manageContest', 'manageCourse' ]
 const reprRole = permission =>
-  roleFields.reduce((acc, field) => {
-    acc[field] = (permission & coursePermission[upperFirst(field)]) !== 0
-    return acc
-  }, {})
+  Object.fromEntries(roleFields.map(field =>
+    [ field, (permission & coursePermission[upperFirst(field)]) !== 0 ],
+  ))
 
 /**
  * 课程预加载中间件
@@ -152,7 +151,7 @@ const getMember = async (ctx) => {
   }
   const user = await User
     .findOne({ uid })
-    .select('_id uid nick')
+    .select('_id uid nick privilege')
     .lean()
     .exec()
   if (!user) {
@@ -161,7 +160,7 @@ const getMember = async (ctx) => {
   const { course } = ctx.state
   const permission = await CoursePermission
     .findOne({ user: user._id, course: course._id })
-    .select('role')
+    .select('role update')
     .lean()
     .exec()
   let role = coursePermission.None
@@ -169,7 +168,7 @@ const getMember = async (ctx) => {
     role = permission.role
   }
   ctx.body = {
-    ...only(user, 'uid nick'),
+    user: only(user, 'uid nick privilege'),
     role: reprRole(role),
   }
 }
@@ -187,12 +186,22 @@ const updateMember = async (ctx) => {
   if (invalidField) {
     return ctx.throw(400, `Invalid role field: ${invalidField}`)
   }
-  if (!role.Basic) {
+  if (!role.basic) {
     return ctx.throw(400, 'Basic permission is required, remove member if not needed')
   }
-  if (role.ManageProblem) {
-    role.ViewTestcase = true
-  }
+
+  Object.assign(role, ((role) => {
+    let { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse } = role
+
+    basic = true
+    manageContest ||= manageCourse
+    manageProblem ||= manageCourse
+    viewSolution ||= manageCourse
+    viewTestcase ||= manageProblem || manageCourse
+
+    return { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse }
+  })(role))
+
   const user = await User.findOne({ uid }).lean().exec()
   if (!user) {
     return ctx.throw(404, 'User not found')
@@ -217,6 +226,35 @@ const updateMember = async (ctx) => {
   ctx.body = { success: true }
 }
 
+/**
+ * 删除课程成员
+ */
+const removeMember = async (ctx) => {
+  const { userId: uid } = ctx.params
+  if (!uid) {
+    return ctx.throw(400, 'Missing uid')
+  }
+  const user = await User
+    .findOne({ uid })
+    .select('_id uid nick privilege')
+    .lean()
+    .exec()
+  if (!user) {
+    return ctx.throw(404, 'User not found')
+  }
+  const { course } = ctx.state
+  const permission = await CoursePermission
+    .findOne({ user: user._id, course: course._id })
+    .select('_id')
+    .lean()
+    .exec()
+  if (!permission) {
+    return ctx.throw(404, 'Permission not found')
+  }
+  await CoursePermission.deleteOne({ _id: permission._id }).exec()
+  ctx.body = { success: true }
+}
+
 module.exports = {
   preload,
   role,
@@ -226,4 +264,5 @@ module.exports = {
   findMembers,
   getMember,
   updateMember,
+  removeMember,
 }

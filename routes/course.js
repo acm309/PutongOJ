@@ -17,5 +17,6 @@ router.get('/:courseId/member', auth.login, course.preload, course.role('manageC
 // Course Member
 router.get('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.getMember)
 router.post('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.updateMember)
+router.delete('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.removeMember)
 
 module.exports = router
