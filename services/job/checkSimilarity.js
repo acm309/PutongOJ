@@ -1,13 +1,7 @@
-require('dotenv-flow').config()
-require('../config/db')
-
 const levenshtein = require('damerau-levenshtein')
-
-const { judge } = require('../config')
-const redis = require('../config/redis')
-const Solution = require('../models/Solution')
-
-const logger = require('../utils/logger')
+const { judge } = require('../../config')
+const Solution = require('../../models/Solution')
+const logger = require('../../utils/logger')
 
 function codeNormalize (code) {
   return code
@@ -17,7 +11,8 @@ function codeNormalize (code) {
     .trim()
 }
 
-async function similarityCheck (sid) {
+async function checkSimilarity (item) {
+  const sid = Number.parseInt(item, 10)
   const solution = await Solution.findOne({ sid }).exec()
   if (!solution) {
     logger.error(`Solution <${sid}> not found`)
@@ -31,7 +26,7 @@ async function similarityCheck (sid) {
     create: { $lt: solution.create },
     judge: judge.Accepted,
   }, {
-    code: 1, sid: 1 
+    code: 1, sid: 1,
   }).lean().exec()
 
   const code = codeNormalize(solution.code)
@@ -58,17 +53,4 @@ async function similarityCheck (sid) {
   await solution.save()
 }
 
-async function main () {
-  logger.info('Updater is running...')
-  while (true) {
-    try {
-      const item = await redis.blpop('checker:task', 0)
-      const sid = Number(item[1])
-      await similarityCheck(sid)
-    } catch (e) {
-      logger.error(e)
-    }
-  }
-}
-
-main()
+module.exports = checkSimilarity

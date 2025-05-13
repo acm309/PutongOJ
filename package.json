@@ -21,7 +21,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "dev:updater": "cross-env NODE_ENV=development nodemon services/updater.js",
-    "dev:checker": "cross-env NODE_ENV=development nodemon services/checker.js",
+    "dev:worker": "cross-env NODE_ENV=development nodemon services/worker.js",
     "start": "cross-env NODE_ENV=production node app.js",
     "deploy:init": "cross-env NODE_ENV=production node manage.js",
     "deploy:start": "npx pm2 start pm2.config.json",
