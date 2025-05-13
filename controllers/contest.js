@@ -10,6 +10,10 @@ const User = require('../models/User')
 const { isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 
+/**
+ * @TODO bugfix
+ * TypeError: Cannot read properties of undefined (reading 'verifyContest')
+ */
 const preload = async (ctx, next) => {
   const cid = Number.parseInt(ctx.params.cid)
   if (Number.isNaN(cid)) { ctx.throw(400, 'Cid has to be a number') }
@@ -104,75 +108,88 @@ const findOne = async (ctx) => {
   }
 }
 
-// 返回比赛排行榜
+/**
+ * 返回比赛排行榜
+ */
 const ranklist = async (ctx) => {
-  const contest = ctx.state.contest.toObject()
-  const { ranklist = {} } = contest
-  let res
-  // 最小 10 分钟 或者 20% 的时长
-  const deadline = Math.max(0.2 * (contest.end - contest.start), 10 * 60 * 1000)
-  // const cid = parseInt(ctx.query.cid)
-  // const solutions = await Solution.find({ mid: cid }).exec()
-  // 临时注释，但请暂时不要删除
-  // for (const solution of solutions) {
-  //   const { uid } = solution
-  //   const row = (uid in ranklist) ? ranklist[uid] : { uid }
-  //   const { pid } = solution
-  //   const item = (pid in row) ? row[pid] : {}
-  //   if ('wa' in item) {
-  //     if (item.wa >= 0) continue
-  //     if (solution.judge === config.judge.Accepted) {
-  //       item.wa = -item.wa
-  //       item.create = solution.create
-  //     } else item.wa --
-  //   } else {
-  //     if (solution.judge === config.judge.Accepted) {
-  //       item.wa = 0
-  //       item.create = solution.create
-  //     } else item.wa = -1
-  //   }
-  //   row[pid] = item
-  //   ranklist[uid] = row
-  // }
-  // ctx.state.contest.ranklist = ranklist
-  // await ctx.state.contest.save()
-  await Promise.all(Object.keys(ranklist).map(uid =>
-    User
-      .findOne({ uid })
-      .lean()
-      .exec()
-      .then((user) => { if (user != null) { ranklist[user.uid].nick = user.nick } })))
+  const { contest, profile } = ctx.state
 
-  if (Date.now() + deadline < contest.end) {
-    // 若比赛未进入最后一小时，最新的 ranklist 推到 redis 里
-    const str = JSON.stringify(ranklist)
-    await redis.set(`oj:ranklist:${contest.cid}`, str) // 更新该比赛的最新排名信息
-    res = ranklist
-  } else if (!isAdmin(ctx.session.profile)
-    && Date.now() + deadline > contest.end
-    && Date.now() < contest.end) {
-    // 比赛最后一小时封榜，普通用户只能看到题目提交的变化
-    const mid = await redis.get(`oj:ranklist:${contest.cid}`) // 获取 redis 中该比赛的排名信息
-    res = JSON.parse(mid)
-    Object.entries(ranklist).forEach(([ uid, problems ]) => {
-      Object.entries(problems).forEach(([ pid, sub ]) => {
-        if (sub.wa < 0) {
-          res[uid][pid] = {
-            wa: sub.wa,
-          }
-        }
-      })
-    })
-    const str = JSON.stringify(res)
-    await redis.set(`oj:ranklist:${contest.cid}`, str) // 将更新后的 ranklist 更新到 redis
-    res = ranklist
-  } else {
-    // 比赛结束或管理员，这边有个问题 管理员是否有权限在封榜时间看所有排名
-    res = ranklist
+  // 封榜时长：20% 的比赛时间（最小 10 分钟）
+  const freezeDuration = Math.max(0.2 * (contest.end - contest.start), 10 * 60 * 1000)
+  const freezeTime = contest.end - freezeDuration
+  const isFrozen = (Date.now() < contest.end) && (Date.now() > freezeTime) && !isAdmin(profile)
+
+  const cacheKey = `ranklist:${contest.cid}${isFrozen ? ':freeze' : ''}`
+  const cache = await redis.get(cacheKey)
+  if (cache) {
+    ctx.body = { ranklist: JSON.parse(cache) }
+    return
   }
-  ctx.body = {
-    ranklist: res,
-  }
+
+  const submissions = await Solution
+    .find(
+      { mid: contest.cid },
+      { _id: 0, pid: 1, uid: 1, judge: 1, create: 1 },
+    )
+    .sort({ create: 1 })
+    .lean()
+    .exec()
+
+  const uidSet = new Set()
+  const ranklist = {}
+  submissions.forEach((submission) => {
+    const { pid, uid, judge, create } = submission
+
+    if (!ranklist[uid]) {
+      ranklist[uid] = {}
+      uidSet.add(uid)
+    }
+    if (!ranklist[uid][pid]) {
+      ranklist[uid][pid] = {
+        accepted: -1, // 第一个正确提交的时间（若无则为 -1）
+        failed: 0, // 错误提交的计数
+        pending: 0, // 无结果的提交计数
+      }
+    }
+    const item = ranklist[uid][pid]
+
+    if (item.accepted > 0) {
+      // 已经有正确提交了则不需要再更新了
+      return
+    }
+    if (isFrozen && create > freezeTime) {
+      // 封榜时间内的提交视为无结果
+      item.pending += 1
+      return
+    }
+    if (judge === config.judge.Pending || judge === config.judge.Running) {
+      // 如果是 Pending / Running 视为无结果
+      item.pending += 1
+      return
+    }
+    if (judge === config.judge.Accepted) {
+      // 如果是 Accepted 视为正确提交
+      item.accepted = create
+    } else {
+      // 否则视为错误提交
+      item.failed += 1
+    }
+  })
+
+  const users = await User
+    .find(
+      { uid: { $in: Array.from(uidSet) } },
+      { _id: 0, uid: 1, nick: 1 },
+    )
+    .lean()
+    .exec()
+  const nickMap = Object.fromEntries(users.map(user => [ user.uid, user.nick ]))
+  Object.keys(ranklist).forEach((uid) => {
+    ranklist[uid].nick = nickMap[uid]
+  })
+
+  await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', 9)
+  ctx.body = { ranklist }
 }
 
 // 新建一个比赛
