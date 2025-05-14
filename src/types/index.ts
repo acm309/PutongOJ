@@ -74,3 +74,45 @@ export interface Solution {
   language: number | null
   code: string
 }
+
+export interface Contest {
+  cid: number
+  title: string
+  start: number
+  end: number
+  encrypt: number
+  status: number
+
+}
+
+export type ContestDetail = Contest & {
+  list: number[]
+  argument: string
+  create: number
+}
+
+export interface RawRanklist {
+  [uid: string]: {
+    nick: string
+    [pid: number]: {
+      accepted: number
+      failed: number
+      pending: number
+    } | null
+  }
+}
+
+export interface RanklistRow {
+  uid: string
+  nick: string
+  solved: number
+  penalty: number
+  [pid: number]: {
+    accepted: number
+    failed: number
+    pending: number
+    isPrime?: boolean
+  } | null
+}
+
+export type Ranklist = RanklistRow[]

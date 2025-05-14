@@ -1,12 +1,12 @@
 <script setup>
-import { inject, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 import { useContestStore } from '@/store/modules/contest'
 import { timeContest } from '@/util/formate'
+import { storeToRefs } from 'pinia'
+import { BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
+import { inject, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import { Switch, Icon, Space, Spin, Poptip, BackTop } from 'view-ui-plus'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
@@ -20,13 +20,13 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
 let timer = $ref(null)
 let loading = $ref(false)
 
-async function getRank() {
+async function getRank () {
   loading = true
   await getRanklist(route.params)
   loading = false
 }
 
-function change(enabled) {
+function change (enabled) {
   if (enabled) {
     timer = setInterval(async () => {
       await getRank()
@@ -50,10 +50,10 @@ onBeforeUnmount(() => clearInterval(timer))
       <Button size="small" shape="circle" type="primary" :loading="loading" icon="ios-refresh" @click="getRank" />
       <Switch @on-change="change">
         <template #open>
-          <Icon type="md-checkmark"></Icon>
+          <Icon type="md-checkmark" />
         </template>
         <template #close>
-          <Icon type="md-close"></Icon>
+          <Icon type="md-close" />
         </template>
       </Switch>
       <span>{{ t('oj.auto_refresh') }}</span>
@@ -62,12 +62,22 @@ onBeforeUnmount(() => clearInterval(timer))
       <table class="board-table">
         <thead>
           <tr>
-            <th class="table-rank">#</th>
-            <th class="table-uid">User</th>
-            <th class="table-nick">Nick</th>
-            <th class="table-solve">Solve</th>
-            <th class="table-penalty">Penalty</th>
-            <th class="table-problem" v-for="(item, index) in overview" :key="index">
+            <th class="table-rank">
+              #
+            </th>
+            <th class="table-uid">
+              User
+            </th>
+            <th class="table-nick">
+              Nick
+            </th>
+            <th class="table-solve">
+              Solve
+            </th>
+            <th class="table-penalty">
+              Penalty
+            </th>
+            <th v-for="(item, index) in overview" :key="index" class="table-problem">
               <Poptip trigger="hover" placement="bottom">
                 <router-link :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
                   <span class="cell-pid">{{ index + 1 }}</span>
@@ -82,29 +92,41 @@ onBeforeUnmount(() => clearInterval(timer))
         </thead>
         <tbody>
           <tr v-for="(item, index) in ranklist" :key="item.uid">
-            <td class="table-rank">{{ index + 1 }}</td>
+            <td class="table-rank">
+              {{ index + 1 }}
+            </td>
             <td class="table-uid">
               <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>
-            <td class="table-nick">{{ item.nick }}</td>
-            <td class="table-solve">{{ item.solved }}</td>
-            <td class="table-penalty">{{ timeContest(item.penalty) }}</td>
+            <td class="table-nick">
+              {{ item.nick }}
+            </td>
+            <td class="table-solve">
+              {{ item.solved }}
+            </td>
+            <td class="table-penalty">
+              {{ timeContest(item.penalty) }}
+            </td>
             <template v-for="(pid, pindex) in contest.list">
-              <td class="table-problem" v-if="!item[pid]" :key="`${pid} ${1}`"></td>
-              <td class="table-problem" v-else-if="item[pid].wa >= 0" :key="`${pid} ${2}`"
-                :class="[item[pid].prime ? 'prime' : 'normal']">
+              <td v-if="!item[pid]" :key="`${pid} ${1}`" class="table-problem" />
+              <td
+                v-else-if="item[pid].accepted > -1" :key="`${pid} ${2}`" class="table-problem"
+                :class="[item[pid].isPrime ? 'prime' : 'normal']"
+              >
                 <router-link
-                  :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }">
-                  <span class="cell-accept">{{ item[pid].wa ? '+' + item[pid].wa : '+' }}</span>
-                  <span class="cell-time">{{ timeContest(item[pid].create - contest.start) }}</span>
+                  :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }"
+                >
+                  <span class="cell-accept">{{ item[pid].failed > 0 ? `+${item[pid].failed}` : '+' }}</span>
+                  <span class="cell-time">{{ timeContest(item[pid].accepted - contest.start) }}</span>
                 </router-link>
               </td>
-              <td class="table-problem" v-else :key="`${pid} ${3}`" :class="{ red: item[pid].wa }">
+              <td v-else :key="`${pid} ${3}`" class="table-problem" :class="{ red: item[pid].failed }">
                 <router-link
-                  :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }">
-                  <span v-if="item[pid].wa">{{ item[pid].wa }}</span>
+                  :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }"
+                >
+                  <span v-if="item[pid].failed">-{{ item[pid].failed }}</span>
                 </router-link>
               </td>
             </template>
@@ -136,7 +158,7 @@ onBeforeUnmount(() => clearInterval(timer))
   display block
   border 1px solid #dbdbdb
   border-radius 4px
-  
+
 .board-table
   min-width 100%
   table-layout fixed
@@ -195,9 +217,9 @@ td.table-nick
   .cell-solve
     color #9c9fa5
 
-.table-problem, .table-rank, 
+.table-problem, .table-rank,
 td.table-solve, td.table-penalty
-  font-family var(--font-verdana)  
+  font-family var(--font-verdana)
 
 .prime
   background-color hsl(200 80% 45%)

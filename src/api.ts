@@ -96,7 +96,7 @@ const contest = {
   update: (data: { [key: string]: any }) =>
     instance.put(`/contest/${data.cid}`, data),
   rank: (data: { [key: string]: any }) =>
-    instance.get(`/contest/${data.cid}/rank`, { params: data }),
+    instance.get(`/contest/${data.cid}/ranklist`, { params: data }),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/contest/${data.cid}`, data),
   verify: (data: { [key: string]: any }) =>
