@@ -32,10 +32,10 @@ async function main () {
         },
       },
       {
-        name: 'checker',
-        script: resolve(__dirname, 'services', 'checker.js'),
-        out_file: resolve(logDir, 'checker.out.log'),
-        error_file: resolve(logDir, 'checker.err.log'),
+        name: 'worker',
+        script: resolve(__dirname, 'services', 'worker.js'),
+        out_file: resolve(logDir, 'worker.out.log'),
+        error_file: resolve(logDir, 'worker.err.log'),
         log_date_format: 'YYYY-MM-DD HH:mm:ss X',
         merge_logs: true,
         env: {
