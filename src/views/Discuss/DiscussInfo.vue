@@ -1,10 +1,10 @@
 <script setup>
+import { useDiscussStore } from '@/store/modules/discuss'
+import { useSessionStore } from '@/store/modules/session'
+import { timeagoPretty } from '@/util/formate'
 import { storeToRefs } from 'pinia'
 import { toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSessionStore } from '@/store/modules/session'
-import { useDiscussStore } from '@/store/modules/discuss'
-import { timeagoPretty } from '@/util/formate'
 
 const props = defineProps([ 'did' ])
 const { did } = $(toRefs(props))
@@ -54,7 +54,7 @@ fetch()
           {{ timeagoPretty(comment.create) }}
         </span>
       </template>
-      <pre><code>{{ comment.content }}</code></pre>
+      <pre class="discuss-content"><code>{{ comment.content }}</code></pre>
     </Card>
     <br>
     <Form :model="form" label-position="top" class="form">
@@ -88,4 +88,10 @@ fetch()
     top: 4px
   .ivu-card-head
     padding: 4px 16px
+</style>
+
+<style lang="stylus" scoped>
+.discuss-content
+  white-space break-spaces
+  line-break anywhere
 </style>

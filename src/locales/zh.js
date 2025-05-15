@@ -12,6 +12,7 @@ export default {
     discussion_list: '讨论',
     help: '帮助',
     faq: '常见问题',
+    more: '更多',
 
     news_list: '通知',
     news_has_been_updated: '通知 "{title}" 已更新！',

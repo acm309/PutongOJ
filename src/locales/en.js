@@ -14,6 +14,7 @@ export default {
     discussion_list: 'Discuss',
     help: 'Help',
     faq: 'FAQ',
+    more: 'More',
 
     // Home
     news_list: 'Announcements',

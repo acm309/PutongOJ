@@ -1,11 +1,11 @@
 <script setup>
+import { useSessionStore } from '@/store/modules/session'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Button, Dropdown, DropdownItem, DropdownMenu, Icon, Menu, MenuGroup, MenuItem, Submenu } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSessionStore } from '@/store/modules/session'
 
-import { Menu, MenuItem, MenuGroup, Submenu, Icon, Dropdown, DropdownMenu, DropdownItem, Button } from 'view-ui-plus'
+import { useRoute, useRouter } from 'vue-router'
 
 const sessionStore = useSessionStore()
 const route = useRoute()
@@ -17,13 +17,13 @@ const active = $computed(() => route.name)
 const { t } = useI18n()
 const login = toggleLoginState
 
-function routerTo(name) {
+function routerTo (name) {
   if (route.name !== name) {
     router.push({ name })
   }
 }
 
-function profileAction(name) {
+function profileAction (name) {
   if (name === 'logout') {
     logout().then(() => $Message.info('bye bye!'))
   } else if (name === 'profile') {
@@ -33,19 +33,19 @@ function profileAction(name) {
   }
 }
 
-function getMenuItems() {
+function getMenuItems () {
   const menuItems = [
     { name: 'home', icon: 'ios-home', label: t('oj.home') },
     { name: 'problemList', icon: 'ios-keypad', label: t('oj.problem_list') },
-    { name: 'status', icon: 'ios-pulse', label: t('oj.status_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
+    { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
     {
-      name: 'help',
-      icon: 'md-help-circle',
-      label: t('oj.help'),
+      name: 'more',
+      icon: 'md-analytics',
+      label: t('oj.more'),
       children: [
-        { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
+        { name: 'status', icon: 'ios-pulse', label: t('oj.status_list') },
         { name: 'faq', icon: 'md-help-circle', label: t('oj.faq') },
       ],
     },
@@ -76,7 +76,7 @@ function getMenuItems() {
     <Menu class="menu-table" mode="horizontal" theme="light" :active-name="active" @on-select="routerTo">
       <template v-for="item in getMenuItems()" :key="item.name">
         <MenuItem v-if="!item.children" :name="item.name" class="menu-item">
-        <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
+          <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
         </MenuItem>
         <Submenu v-else :name="item.name" class="submenu">
           <template #title>
@@ -84,7 +84,7 @@ function getMenuItems() {
             <span class="submenu-title">{{ item.label }}</span>
           </template>
           <MenuItem v-for="child in item.children" :key="child.name" :name="child.name" class="submenu-item">
-          <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />{{ child.label }}
+            <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />{{ child.label }}
           </MenuItem>
         </Submenu>
       </template>
@@ -97,14 +97,14 @@ function getMenuItems() {
         <div v-for="item in getMenuItems()" :key="item.name">
           <template v-if="!item.children">
             <MenuItem :name="item.name" class="mobile-menu-item">
-            <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
+              <Icon :type="item.icon" class="menu-icon" />{{ item.label }}
             </MenuItem>
           </template>
           <template v-else>
             <MenuGroup :title="item.label" class="mobile-menu-group">
               <MenuItem v-for="child in item.children" :key="child.name" :name="child.name" class="mobile-submenu-item">
-              <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />
-              {{ child.label }}
+                <Icon v-if="child.icon" :type="child.icon" class="menu-icon" />
+                {{ child.label }}
               </MenuItem>
             </MenuGroup>
           </template>
@@ -112,7 +112,7 @@ function getMenuItems() {
       </Submenu>
     </Menu>
     <div class="header-right">
-      <Dropdown v-if="isLogined" @on-click="profileAction" class="profile-dropdown">
+      <Dropdown v-if="isLogined" class="profile-dropdown" @on-click="profileAction">
         <a href="javascript:void(0)" class="profile-link">
           <Icon type="md-contact" class="profile-icon" />
           {{ profile.uid }}
@@ -152,8 +152,8 @@ function getMenuItems() {
   background #fff
   border-bottom 1px solid #d7dde4
   justify-content space-between
-  box-shadow 0 3px 5px -1px rgba(0, 0, 0, .1), 
-             0 6px 10px 0 rgba(0, 0, 0, .07),  
+  box-shadow 0 3px 5px -1px rgba(0, 0, 0, .1),
+             0 6px 10px 0 rgba(0, 0, 0, .07),
              0 1px 18px 0 rgba(0, 0, 0, .06)
 
 .menu-table, .menu-mobile
