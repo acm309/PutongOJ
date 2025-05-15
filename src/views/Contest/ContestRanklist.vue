@@ -1,63 +1,85 @@
-<script setup>
+<script setup lang="ts">
+import type { ContestDetail, Ranklist, RanklistInfo } from '@/types'
+import type { Message } from 'view-ui-plus'
+import type { Ref } from 'vue'
+import api from '@/api'
 import { useContestStore } from '@/store/modules/contest'
-import { timeContest } from '@/util/formate'
+import { timeContest, timePretty } from '@/util/formate'
+import { normalize } from '@/util/ranklist'
 import { storeToRefs } from 'pinia'
-import { BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
-import { inject, onBeforeUnmount } from 'vue'
+import { Alert, BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
+import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-
 import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
 const route = useRoute()
-const $Message = inject('$Message')
+const message = inject('$Message') as typeof Message
 
-const { contest, overview, ranklist } = $(storeToRefs(contestStore))
-const { getRank: getRanklist } = contestStore
-const cid = $computed(() => Number.parseInt(route.params.cid || 1))
+const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
+const contest = storeToRefs(contestStore).contest as Ref<ContestDetail>
+const overview = storeToRefs(contestStore).overview as Ref<{ title: string, solve: number }[]>
 
-let timer = $ref(null)
-let loading = $ref(false)
+const ranklist = ref({} as Ranklist)
+const ranklistInfo = ref({} as RanklistInfo)
+const loading = ref(false)
 
-async function getRank () {
-  loading = true
-  await getRanklist(route.params)
-  loading = false
-}
+let autoRefresh: number | null = null
+const AUTO_REFRESH_GAP = 10 * 1000
 
-function change (enabled) {
-  if (enabled) {
-    timer = setInterval(async () => {
-      await getRank()
-      $Message.info({
-        content: t('oj.refreshed'),
-        duration: 1,
-      })
-    }, 10000)
-  } else {
-    clearInterval(timer)
+async function getRanklist () {
+  loading.value = true
+  try {
+    const { data } = await api.contest.ranklist(cid)
+    ranklist.value = normalize(data.ranklist, contest.value)
+    ranklistInfo.value = data.info
+  } finally {
+    loading.value = false
   }
 }
 
-getRank()
-onBeforeUnmount(() => clearInterval(timer))
+function setAutoRefresh (enabled: boolean) {
+  if (enabled) {
+    autoRefresh = setInterval(async () => {
+      await getRanklist()
+      message.info({
+        content: t('oj.refreshed'),
+        duration: 1,
+      })
+    }, AUTO_REFRESH_GAP)
+  } else {
+    clearAutoRefresh()
+  }
+}
+
+function clearAutoRefresh () {
+  autoRefresh && clearInterval(autoRefresh)
+}
+
+onBeforeMount(getRanklist)
+onBeforeUnmount(clearAutoRefresh)
 </script>
 
 <template>
   <div class="contest-children">
-    <Space class="board-header">
-      <Button size="small" shape="circle" type="primary" :loading="loading" icon="ios-refresh" @click="getRank" />
-      <Switch @on-change="change">
-        <template #open>
-          <Icon type="md-checkmark" />
-        </template>
-        <template #close>
-          <Icon type="md-close" />
-        </template>
-      </Switch>
-      <span>{{ t('oj.auto_refresh') }}</span>
-    </Space>
+    <div class="board-header">
+      <Space>
+        <Button size="small" shape="circle" type="primary" :loading="loading" icon="ios-refresh" @click="getRanklist" />
+        <Switch @on-change="setAutoRefresh">
+          <template #open>
+            <Icon type="md-checkmark" />
+          </template>
+          <template #close>
+            <Icon type="md-close" />
+          </template>
+        </Switch>
+        <span>{{ t('oj.auto_refresh') }}</span>
+      </Space>
+      <Alert v-if="ranklistInfo.isFrozen" type="info" style="margin-top: 14px" show-icon>
+        {{ t('oj.ranklist_frozen', { time: timePretty(ranklistInfo.freezeTime) }) }}
+      </Alert>
+    </div>
     <div class="board-table-container">
       <table class="board-table">
         <thead>
@@ -122,11 +144,14 @@ onBeforeUnmount(() => clearInterval(timer))
                   <span class="cell-time">{{ timeContest(item[pid].accepted - contest.start) }}</span>
                 </router-link>
               </td>
-              <td v-else :key="`${pid} ${3}`" class="table-problem" :class="{ red: item[pid].failed }">
+              <td v-else :key="`${pid} ${3}`" class="table-problem">
                 <router-link
                   :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }"
                 >
-                  <span v-if="item[pid].failed">-{{ item[pid].failed }}</span>
+                  <Space>
+                    <span v-if="item[pid].failed" class="cell-failed">-{{ item[pid].failed }}</span>
+                    <span v-if="item[pid].pending" class="cell-pending">+{{ item[pid].pending }}</span>
+                  </Space>
                 </router-link>
               </td>
             </template>
@@ -208,7 +233,7 @@ td.table-nick
   .cell-accept, .cell-time, .cell-solve, .cell-pid
     display block
     width 100%
-  .cell-accept
+  .cell-accept, .cell-failed, .cell-pending
     font-weight bold
   .cell-time, .cell-solve
     font-size 12px
@@ -216,6 +241,10 @@ td.table-nick
     color #515a6e
   .cell-solve
     color #9c9fa5
+  .cell-failed
+    color red
+  .cell-pending
+    color hsl(200 80% 45%)
 
 .table-problem, .table-rank,
 td.table-solve, td.table-penalty
@@ -232,6 +261,4 @@ td.table-solve, td.table-penalty
 .prime, .normal
   .cell-accept, .cell-time
     color white
-.red>a
-  color red
 </style>

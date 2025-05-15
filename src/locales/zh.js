@@ -86,6 +86,7 @@ export default {
     refresh: '刷新',
     auto_refresh: '自动刷新（每10秒刷新一次）',
     refreshed: '刷新成功！',
+    ranklist_frozen: '排名已冻结，对于 {time} 之后的提交，不公开展示其对排名的影响。',
 
     admin: '管理员',
     create_problem: '创建题目',

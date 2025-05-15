@@ -82,7 +82,6 @@ export interface Contest {
   end: number
   encrypt: number
   status: number
-
 }
 
 export type ContestDetail = Contest & {
@@ -100,6 +99,18 @@ export interface RawRanklist {
       pending: number
     } | null
   }
+}
+
+export interface RanklistInfo {
+  freezeTime: number
+  isFrozen: boolean
+  isEnded: boolean
+  isCache: boolean
+}
+
+export interface RanklistResp {
+  ranklist: RawRanklist
+  info: RanklistInfo
 }
 
 export interface RanklistRow {

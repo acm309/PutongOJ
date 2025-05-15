@@ -1,5 +1,4 @@
 import api from '@/api'
-import { normalize } from '@/util/ranklist'
 import { defineStore } from 'pinia'
 
 export const useContestStore = defineStore('contest', {
@@ -9,7 +8,6 @@ export const useContestStore = defineStore('contest', {
     contest: {},
     overview: [],
     totalProblems: 0,
-    ranklist: [],
     solved: [],
   }),
   getters: {
@@ -28,10 +26,6 @@ export const useContestStore = defineStore('contest', {
       this.totalProblems = data.totalProblems
       this.solved = data.solved
       return data
-    },
-    async getRank (payload) {
-      const { data } = await api.contest.rank(payload)
-      this.ranklist = normalize(data.ranklist, this.contest)
     },
     create (payload) {
       return api.contest.create(payload).then(({ data }) => data.cid)

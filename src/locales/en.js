@@ -91,6 +91,7 @@ export default {
     refresh: 'Refresh',
     auto_refresh: 'Auto refresh (every 10 seconds)',
     refreshed: 'Refreshed!',
+    ranklist_frozen: 'Ranklist frozen, all submissions after {time} are marked as "Pending".',
 
     // Discuss
     create_new_thread: 'Create new thread',

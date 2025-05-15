@@ -1,4 +1,4 @@
-import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
+import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, RanklistResp, TimeResp, User, WebsiteConfigResp } from './types'
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
 
@@ -95,8 +95,8 @@ const contest = {
     instance.post('/contest/', data),
   update: (data: { [key: string]: any }) =>
     instance.put(`/contest/${data.cid}`, data),
-  rank: (data: { [key: string]: any }) =>
-    instance.get(`/contest/${data.cid}/ranklist`, { params: data }),
+  ranklist: (cid: number) =>
+    instance.get<RanklistResp>(`/contest/${cid}/ranklist`),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/contest/${data.cid}`, data),
   verify: (data: { [key: string]: any }) =>
