@@ -115,14 +115,22 @@ const ranklist = async (ctx) => {
   const { contest, profile } = ctx.state
 
   // 封榜时长：20% 的比赛时间（最小 10 分钟）
-  const freezeDuration = Math.max(0.2 * (contest.end - contest.start), 10 * 60 * 1000)
-  const freezeTime = contest.end - freezeDuration
-  const isFrozen = (Date.now() < contest.end) && (Date.now() > freezeTime) && !isAdmin(profile)
+  const FREEZE_DURATION_RATE = 0.2
+  const MIN_FREEZE_DURATION = 10 * 60 * 1000
 
-  const cacheKey = `ranklist:${contest.cid}${isFrozen ? ':freeze' : ''}`
+  const freezeDuration = Math.ceil(Math.max(
+    FREEZE_DURATION_RATE * (contest.end - contest.start),
+    MIN_FREEZE_DURATION))
+  const freezeTime = contest.end - freezeDuration
+  const isEnded = Date.now() > contest.end
+  const isFrozen = !isEnded && Date.now() > freezeTime && !isAdmin(profile)
+  const info = { freezeTime, isFrozen, isEnded, isCache: false }
+
+  const cacheKey = `ranklist:${contest.cid}${isFrozen ? ':frozen' : ''}`
   const cache = await redis.get(cacheKey)
   if (cache) {
-    ctx.body = { ranklist: JSON.parse(cache) }
+    info.isCache = true
+    ctx.body = { ranklist: JSON.parse(cache), info }
     return
   }
 
@@ -157,7 +165,7 @@ const ranklist = async (ctx) => {
       // 已经有正确提交了则不需要再更新了
       return
     }
-    if (isFrozen && create > freezeTime) {
+    if (isFrozen && create >= freezeTime) {
       // 封榜时间内的提交视为无结果
       item.pending += 1
       return
@@ -188,8 +196,9 @@ const ranklist = async (ctx) => {
     ranklist[uid].nick = nickMap[uid]
   })
 
-  await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', 9)
-  ctx.body = { ranklist }
+  const cacheTime = isEnded ? 30 : 9
+  await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
+  ctx.body = { ranklist, info }
 }
 
 // 新建一个比赛

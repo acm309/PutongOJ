@@ -127,7 +127,7 @@ test('Can enter the contest because of right password', async (t) => {
 
 test('Find ranklist for contest 1', async (t) => {
   const rank = await request
-    .get('/api/contest/1/rank')
+    .get('/api/contest/1/ranklist')
 
   t.is(rank.status, 200)
   t.is(rank.type, 'application/json')
