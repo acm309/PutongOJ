@@ -1,18 +1,18 @@
 <script setup>
-import Draggable from 'vuedraggable'
-import only from 'only'
-import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount, toRefs, watch } from 'vue'
-import { onBeforeRouteLeave, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { escape } from 'html-escaper'
-import SearchableTransfer from './SearchableTransfer.vue'
-import { useProblemStore } from '@/store/modules/problem'
+import api from '@/api'
 import { useRootStore } from '@/store'
 import { useGroupStore } from '@/store/modules/group'
-import api from '@/api'
-import {Transfer, Select, Option, Input, Button, DatePicker, Row, Col, Icon} from 'view-ui-plus'
+import { useProblemStore } from '@/store/modules/problem'
 import { contestType } from '@/util/constant'
+import { escape } from 'html-escaper'
+import only from 'only'
+import { storeToRefs } from 'pinia'
+import { Button, Col, DatePicker, Icon, Input, Option, Row, Select, Transfer } from 'view-ui-plus'
+import { inject, onBeforeMount, toRefs, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import Draggable from 'vuedraggable'
+import SearchableTransfer from './SearchableTransfer.vue'
 
 const props = defineProps([ 'contest', 'overview' ])
 const { t } = useI18n()
@@ -28,10 +28,10 @@ const { list: groups } = $(storeToRefs(groupStore))
 const { contest, overview } = $(toRefs(props))
 const jobs = $ref({})
 const options = Object.entries(contestType)
-.map((item) => ({
-  value: item[0],
-  label: t(item[1]),
-}))
+  .map(item => ({
+    value: Number.parseInt(item[0]),
+    label: t(item[1]),
+  }))
 let pid = $ref('')
 let pwd = $ref('')
 
