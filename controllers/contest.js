@@ -10,28 +10,34 @@ const User = require('../models/User')
 const { isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 
-/**
- * @TODO bugfix
- * TypeError: Cannot read properties of undefined (reading 'verifyContest')
- */
 const preload = async (ctx, next) => {
-  const cid = Number.parseInt(ctx.params.cid)
-  if (Number.isNaN(cid)) { ctx.throw(400, 'Cid has to be a number') }
+  const cid = Number(ctx.params.cid)
+  if (!Number.isInteger(cid) || cid <= 0) {
+    return ctx.throw(400, 'Invalid contest ID')
+  }
   const contest = await Contest.findOne({ cid }).exec()
-  if (contest == null) { ctx.throw(400, 'No such a contest') }
-  if (isAdmin(ctx.session.profile)) {
-    ctx.state.contest = contest
-    return next()
+  if (!contest) {
+    return ctx.throw(404, 'Contest not found')
   }
-  if (contest.start > Date.now()) {
-    ctx.throw(400, 'This contest hasn\'t started yet')
+
+  const { profile } = ctx.session
+  if (!Array.isArray(profile.verifyContest)) {
+    profile.verifyContest = []
   }
-  if (contest.encrypt !== config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid)) {
-    ctx.throw(400, 'You do not have permission to enter this competition!')
+  if (!isAdmin(profile)) {
+    if (contest.start > Date.now()) {
+      return ctx.throw(400, 'This contest has not started yet')
+    }
+    if (!profile.verifyContest.includes(cid)) {
+      if (contest.encrypt === config.encrypt.Public) {
+        profile.verifyContest.push(contest.cid)
+        logger.info(`User <${profile.uid}> enter contest <${contest.cid}>`)
+      } else {
+        return ctx.throw(400, 'You have not verified to enter this contest')
+      }
+    }
   }
-  if (contest.encrypt === config.encrypt.Public && !ctx.session.profile.verifyContest.includes(contest.cid)) {
-    ctx.session.profile.verifyContest.push(contest.cid)
-  }
+
   ctx.state.contest = contest
   return next()
 }
@@ -308,7 +314,7 @@ const verify = async (ctx) => {
   }
   ctx.body = {
     isVerify,
-    profile: ctx.session.profile,
+    profile: only(ctx.session.profile, 'uid nick privilege verifyContest'),
   }
 }
 
