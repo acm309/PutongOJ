@@ -13,7 +13,7 @@ async function main () {
         script: resolve(__dirname, 'app.js'),
         out_file: resolve(logDir, 'app.out.log'),
         error_file: resolve(logDir, 'app.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
         merge_logs: true,
         restart_delay: 500,
         env: {
@@ -25,7 +25,7 @@ async function main () {
         script: resolve(__dirname, 'services', 'updater.js'),
         out_file: resolve(logDir, 'updater.out.log'),
         error_file: resolve(logDir, 'updater.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
         merge_logs: true,
         env: {
           NODE_ENV: 'production',
@@ -36,7 +36,7 @@ async function main () {
         script: resolve(__dirname, 'services', 'worker.js'),
         out_file: resolve(logDir, 'worker.out.log'),
         error_file: resolve(logDir, 'worker.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss X',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
         merge_logs: true,
         env: {
           NODE_ENV: 'production',

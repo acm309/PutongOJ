@@ -34,6 +34,7 @@ const findOne = async (ctx) => {
 // 新建一个tag
 const create = async (ctx) => {
   const opt = ctx.request.body
+  const { profile: { uid } } = ctx.state
 
   const doc = await Tag.findOne({ tid: opt.tid }).exec()
   if (doc) {
@@ -48,8 +49,7 @@ const create = async (ctx) => {
 
   try {
     await tag.save()
-
-    logger.info(`New tag is created" ${tag.tid}`)
+    logger.info(`Tag <${tag.tid}> is created by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -59,7 +59,7 @@ const create = async (ctx) => {
       problem.tags.push(tag.tid)
       return problem.save()
     }).then((problem) => {
-      logger.info(`Problem is updated" ${problem.uid} -- ${problem.tags}`)
+      logger.info(`Problem <${problem.pid}> is added to tag <${tag.tid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -92,7 +92,7 @@ const update = async (ctx) => {
       problem.tags = without(problem.tags, tid)
       return problem.save()
     }).then((problem) => {
-      logger.info(`Problem's old tag is deleted" ${problem.pid} -- ${tid}`)
+      logger.info(`Problem <${problem.pid}> is deleted from tag <${tag.tid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -106,7 +106,7 @@ const update = async (ctx) => {
       problem.tags.push(tid)
       return problem.save()
     }).then((problem) => {
-      logger.info(`Problem's new tag is updated" ${problem.pid} -- ${tid}`)
+      logger.info(`Problem <${problem.pid}> is added to tag <${tag.tid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -117,7 +117,7 @@ const update = async (ctx) => {
 
   try {
     await tag.save()
-    logger.info(`One tag is updated" ${tag.tid}`)
+    logger.info(`Tag <${tag.tid}> is updated`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -132,6 +132,7 @@ const del = async (ctx) => {
   const tid = ctx.params.tid
   const tag = ctx.state.tag
   const list = tag.list
+  const { profile: { uid } } = ctx.state
 
   // 删除 problem 表里的 tid
   const procedure = list.map((pid) => {
@@ -139,7 +140,7 @@ const del = async (ctx) => {
       problem.tags = without(problem.tags, tid)
       return problem.save()
     }).then((problem) => {
-      logger.info(`Problem's tag is deleted" ${problem.pid} -- ${tid}`)
+      logger.info(`Problem <${problem.pid}> is deleted from tag <${tag.tid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -149,7 +150,7 @@ const del = async (ctx) => {
   // 删除 tag 表里的 tid
   try {
     await Tag.deleteOne({ tid }).exec()
-    logger.info(`One Tag is delete ${tid}`)
+    logger.info(`Tag <${tid}> is deleted by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

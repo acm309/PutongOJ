@@ -65,7 +65,7 @@ const create = async (ctx) => {
 
   try {
     await discuss.save()
-    logger.info(`New Discuss is created" ${discuss.did} -- ${discuss.title}`)
+    logger.info(`Discuss <${discuss.did}> is created by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -85,7 +85,7 @@ const update = async (ctx) => {
     discuss.update = Date.now()
     await discuss.save()
     // redis.lpush('oj:comment', discuss.did)
-    logger.info(`One discuss is updated" ${discuss.did} -- ${discuss.title}`)
+    logger.info(`Discuss <${discuss.did}> is updated by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -95,10 +95,11 @@ const update = async (ctx) => {
 
 const del = async (ctx) => {
   const did = ctx.params.did
+  const { profile: { uid } } = ctx.state
 
   try {
     await Discuss.deleteOne({ did }).exec()
-    logger.info(`One Discuss is delete ${did}`)
+    logger.info(`Discuss <${did}> is deleted by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

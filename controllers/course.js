@@ -6,6 +6,10 @@ const CoursePermission = require('../models/CoursePermission')
 const User = require('../models/User')
 const { isAdmin } = require('../utils/helper')
 
+/**
+ * @TODO add logging
+ */
+
 const roleFields = [
   'basic', 'viewTestcase', 'viewSolution',
   'manageProblem', 'manageContest', 'manageCourse' ]

@@ -55,6 +55,7 @@ const findOne = async (ctx) => {
 // 新建一条消息
 const create = async (ctx) => {
   const opt = ctx.request.body
+  const { profile: { uid } } = ctx.state
   const news = new News(Object.assign(
     only(opt, 'title content'),
     { // nid 会自动生成
@@ -64,7 +65,7 @@ const create = async (ctx) => {
 
   try {
     await news.save()
-    logger.info(`New news is created" ${news.pid} -- ${news.title}`)
+    logger.info(`News <${news.nid}> is created by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -78,13 +79,14 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const news = ctx.state.news
+  const { profile: { uid } } = ctx.state
   const fields = [ 'title', 'content', 'status' ]
   fields.forEach((field) => {
     news[field] = opt[field]
   })
   try {
     await news.save()
-    logger.info(`One news is updated" ${news.nid} -- ${news.title}`)
+    logger.info(`News <${news.nid}> is updated by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -97,10 +99,11 @@ const update = async (ctx) => {
 // 删除一条消息
 const del = async (ctx) => {
   const nid = ctx.params.nid
+  const { profile: { uid } } = ctx.state
 
   try {
     await News.deleteOne({ nid }).exec()
-    logger.info(`One news is delete ${nid}`)
+    logger.info(`News <${nid}> is deleted by <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

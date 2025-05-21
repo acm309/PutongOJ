@@ -48,14 +48,22 @@ app.use(staticServe(path.join(__dirname, 'public'), {
 }))
 
 app.use(async (ctx, next) => {
+  ctx.state.requestId = ctx.get('X-Request-ID') || 'unknown'
+  await next()
+})
+
+app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
+    const { requestId = 'unknown' } = ctx.state
     ctx.status = err.status || 500
-    ctx.body = {
-      error: err.message,
+    ctx.body = { error: err.message }
+    if (err.status) {
+      logger.error(`HTTP/${err.status}: ${err.message} [${requestId}]`)
+    } else {
+      logger.error(`${err.message} [${requestId}]\n${err.stack}]`)
     }
-    logger.error(`${err.status} -- ${err.message}\n${err.stack}`)
   }
 })
 

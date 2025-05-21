@@ -204,12 +204,17 @@ const ranklist = async (ctx) => {
 
   const cacheTime = isEnded ? 30 : 9
   await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
+  logger.info(
+    `Contest <${contest.cid}> has updated its `
+    + `${isFrozen ? 'frozen ' : ''}ranklist and `
+    + `cached for ${cacheTime} seconds`)
   ctx.body = { ranklist, info }
 }
 
 // 新建一个比赛
 const create = async (ctx) => {
   const opt = ctx.request.body
+  const { profile: { uid } } = ctx.state
 
   const contest = new Contest(Object.assign(
     only(opt, 'title encrypt list argument'),
@@ -223,7 +228,7 @@ const create = async (ctx) => {
 
   try {
     await contest.save()
-    logger.info(`New Contest is created ${contest.cid} -- ${contest.title}`)
+    logger.info(`Contest <${contest.cid}> is created by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -236,7 +241,8 @@ const create = async (ctx) => {
 // 更新一个比赛
 const update = async (ctx) => {
   const opt = ctx.request.body
-  const { cid } = ctx.params
+  const cid = Number(ctx.params.cid)
+  const { profile: { uid } } = ctx.state
   const contest = await Contest.findOne({ cid }).exec()
   const fields = [ 'title', 'encrypt', 'list', 'argument', 'start', 'end', 'status' ]
 
@@ -251,7 +257,7 @@ const update = async (ctx) => {
 
   try {
     await contest.save()
-    logger.info(`One contest is updated" ${contest.cid} -- ${contest.title}`)
+    logger.info(`Contest <${contest.cid}> is updated by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -264,10 +270,11 @@ const update = async (ctx) => {
 // 删除一个比赛
 const del = async (ctx) => {
   const cid = ctx.params.cid
+  const { profile: { uid } } = ctx.state
 
   try {
     await Contest.deleteOne({ cid }).exec()
-    logger.info(`One Contest is delete ${cid}`)
+    logger.info(`Contest <${cid}> is deleted by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -278,7 +285,12 @@ const del = async (ctx) => {
 // 进入比赛前验证用户
 const verify = async (ctx) => {
   const opt = ctx.request.body
-  const cid = opt.cid
+  const cid = Number(opt.cid)
+  if (!Number.isInteger(cid) || cid <= 0) {
+    return ctx.throw(400, 'Invalid contest ID')
+  }
+  const { profile } = ctx.session
+
   // 普通用户的前端页面里没有argument的值，需要重新在数据库中找一遍
   const contest = await Contest.findOne({ cid }).lean().exec()
 
@@ -286,7 +298,7 @@ const verify = async (ctx) => {
   const arg = contest.argument
   let isVerify = false
   if (enc === config.encrypt.Private) {
-    const uid = ctx.session.profile.uid
+    const uid = profile.uid
     const arr = arg.split('\r\n')
     for (const item of arr) {
       if (item.startsWith('gid:')) {
@@ -310,11 +322,12 @@ const verify = async (ctx) => {
     }
   }
   if (isVerify) {
-    ctx.session.profile.verifyContest.push(contest.cid)
+    profile.verifyContest.push(contest.cid)
+    logger.info(`User <${profile.uid}> enter contest <${contest.cid}>`)
   }
   ctx.body = {
     isVerify,
-    profile: only(ctx.session.profile, 'uid nick privilege verifyContest'),
+    profile: only(profile, 'uid nick privilege verifyContest'),
   }
 }
 

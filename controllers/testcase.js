@@ -3,6 +3,7 @@ const fse = require('fs-extra')
 const send = require('koa-send')
 const remove = require('lodash/remove')
 const { v4: uuid } = require('uuid')
+const logger = require('../utils/logger')
 
 const loadPID = (ctx) => {
   const pid = Number(ctx.params.pid)
@@ -28,6 +29,7 @@ const create = async (ctx) => {
   const pid = loadPID(ctx)
   const testin = ctx.request.body.in || ''
   const testout = ctx.request.body.out || ''
+  const { profile: { uid } } = ctx.state
 
   if (!testin && !testout) {
     ctx.throw(400, 'Cannot create testcase without both input and output')
@@ -46,6 +48,8 @@ const create = async (ctx) => {
     fse.outputFile(path.resolve(testDir, `${id}.out`), testout),
     fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 }),
   ])
+  logger.info(`Testcase <${id}> for problem <${pid}> is created by user <${uid}>`)
+
   ctx.body = meta // 结构就是: {testcases: [{ uuid: 'axxx' }, { uuid: 'yyyy' }]}
 }
 
@@ -56,11 +60,13 @@ const create = async (ctx) => {
 const del = async (ctx) => {
   const pid = loadPID(ctx)
   const uuid = loadUUID(ctx)
+  const { profile: { uid } } = ctx.state
 
   const testDir = path.resolve(__dirname, `../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
   remove(meta.testcases, item => item.uuid === uuid)
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
+  logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
   ctx.body = meta
 }
 

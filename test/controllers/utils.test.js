@@ -35,7 +35,7 @@ test('Visitor can not submit file', async (t) => {
   const res = await request
     .post('/api/upload')
     .attach('image', filepath)
-  t.is(res.status, 403)
+  t.is(res.status, 401)
 })
 
 test('Admin could submit file', async (t) => {

@@ -129,7 +129,7 @@ const create = async (ctx) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`One solution is created ${solution.pid} -- ${solution.uid}`)
+    logger.info(`Submission <${sid}> is created by user <${uid}>`)
 
     ctx.body = { sid }
   } catch (e) {
@@ -142,6 +142,7 @@ const create = async (ctx) => {
  */
 const update = async (ctx) => {
   const opt = ctx.request.body
+  const { profile } = ctx.state
   if (opt.judge !== config.judge.RejudgePending) {
     ctx.throw(400, 'Invalid update')
   }
@@ -152,11 +153,6 @@ const update = async (ctx) => {
     ctx.throw(400, 'No such a solution')
   }
 
-  solution.judge = config.judge.RejudgePending
-  solution.sim = 0
-  solution.sim_s_id = 0
-  await solution.save()
-
   const pid = solution.pid
   const problem = await Problem.findOne({ pid }).lean().exec()
   if (!problem) {
@@ -164,6 +160,11 @@ const update = async (ctx) => {
   }
 
   try {
+    solution.judge = config.judge.RejudgePending
+    solution.sim = 0
+    solution.sim_s_id = 0
+    await solution.save()
+
     const timeLimit = problem.time
     const memoryLimit = problem.memory
     const type = problem.type
@@ -190,7 +191,7 @@ const update = async (ctx) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`One solution is rejudged ${solution.sid}`)
+    logger.info(`Submission <${sid}> is called for rejudge by user <${profile.uid}>`)
 
     ctx.body = only(solution, 'sid judge')
   } catch (e) {

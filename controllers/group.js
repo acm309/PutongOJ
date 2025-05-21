@@ -38,6 +38,7 @@ const findOne = async (ctx) => {
 // 新建一个group
 const create = async (ctx) => {
   const opt = ctx.request.body
+  const { profile: { uid } } = ctx.state
 
   const group = new Group(Object.assign(
     only(opt, 'title list'),
@@ -48,7 +49,7 @@ const create = async (ctx) => {
 
   try {
     await group.save()
-    logger.info(`New group is created" ${group.gid} -- ${group.title}`)
+    logger.info(`Group <${group.gid}> is created by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -58,7 +59,7 @@ const create = async (ctx) => {
       const user = await User.findOne({ uid }).exec()
       user.gid.push(group.gid)
       const savedUser = await user.save()
-      logger.info(`User is updated" ${savedUser.uid} -- ${savedUser.gid}`)
+      logger.info(`User <${savedUser.uid}> is added to group <${group.gid}>`)
     } catch (e) {
       ctx.throw(400, e.message)
     }
@@ -76,6 +77,7 @@ const update = async (ctx) => {
   const group = ctx.state.group
   const fields = [ 'title', 'list' ]
   const gid = group.gid
+  const { profile } = ctx.state
 
   // 这些 uid 不再属于这个用户组
   const removedUids = difference(group.list, opt.list)
@@ -89,7 +91,7 @@ const update = async (ctx) => {
       user.gid = without(user.gid, gid)
       return user.save()
     }).then((user) => {
-      logger.info(`User's old group is deleted" ${user.uid} -- ${gid}`)
+      logger.info(`User <${user.uid}> is removed from group <${gid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -106,7 +108,7 @@ const update = async (ctx) => {
       user.gid.push(gid)
       return user.save()
     }).then((user) => {
-      logger.info(`User's new group is updated" ${user.uid} -- ${gid}`)
+      logger.info(`User <${user.uid}> is added to group <${gid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -115,7 +117,7 @@ const update = async (ctx) => {
 
   try {
     await group.save()
-    logger.info(`One group is updated" ${group.gid} -- ${group.title}`)
+    logger.info(`Group <${gid}> is updated by user <${profile.uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -130,6 +132,7 @@ const del = async (ctx) => {
   const gid = Number.parseInt(ctx.params.gid)
   const group = ctx.state.group
   const list = group.list
+  const { profile } = ctx.state
 
   // 删除user表里的gid
   const procedure = list.map((uid) => {
@@ -137,7 +140,7 @@ const del = async (ctx) => {
       user.gid = without(user.gid, gid)
       return user.save()
     }).then((user) => {
-      logger.info(`User's group is deleted" ${user.uid} -- ${gid}`)
+      logger.info(`User <${user.uid}> is removed from group <${gid}>`)
     }).catch((e) => {
       ctx.throw(400, e.message)
     })
@@ -147,7 +150,7 @@ const del = async (ctx) => {
   // 删除group表里的gid
   try {
     await Group.deleteOne({ gid }).exec()
-    logger.info(`One Group is delete ${gid}`)
+    logger.info(`Group <${gid}> is deleted by user <${profile.uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

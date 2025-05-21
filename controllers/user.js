@@ -121,6 +121,8 @@ const create = async (ctx) => {
 
   try {
     await user.save()
+    const { requestId = 'unknown' } = ctx.state
+    logger.info(`User <${user.uid}> is created [${requestId}]`)
   } catch (err) {
     ctx.throw(400, err.message)
   }
@@ -175,7 +177,7 @@ const update = async (ctx) => {
 
   try {
     await user.save()
-    logger.info(`User updated: ${user.uid}`)
+    logger.info(`User <${user.uid}> is updated by user <${profile.uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }

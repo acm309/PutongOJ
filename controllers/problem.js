@@ -117,6 +117,7 @@ const findOne = async (ctx) => {
 // 新建一个题目
 const create = async (ctx) => {
   const opt = ctx.request.body
+  const { profile: { uid } } = ctx.state
 
   const problem = new Problem(Object.assign(
     only(opt, 'title description input output in out hint type code'),
@@ -128,7 +129,7 @@ const create = async (ctx) => {
 
   try {
     await problem.save()
-    logger.info(`New problem is created" ${problem.pid} -- ${problem.title}`)
+    logger.info(`Problem <${problem.pid}> is created by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -146,7 +147,7 @@ const create = async (ctx) => {
   fse.outputJsonSync(path.resolve(dir, 'meta.json'), {
     testcases: [],
   }, { spaces: 2 }) // 缩进2个空格
-  logger.info(`Testcase info for problem ${problem.pid} is created`)
+  logger.info(`Testcases meta file is created for problem <${problem.pid}>`)
 
   ctx.body = {
     pid: problem.pid,
@@ -157,6 +158,7 @@ const create = async (ctx) => {
 const update = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
+  const { profile: { uid } } = ctx.state
   const fields = [
     'title', 'time', 'memory', 'description', 'input', 'output',
     'in', 'out', 'hint', 'status', 'type', 'code' ]
@@ -169,7 +171,7 @@ const update = async (ctx) => {
 
   try {
     await problem.save()
-    logger.info(`One problem is updated" ${problem.pid} -- ${problem.title}`)
+    logger.info(`Problem <${problem.pid}> is updated by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
@@ -183,10 +185,11 @@ const update = async (ctx) => {
 // 删除一道题目
 const del = async (ctx) => {
   const pid = ctx.params.pid
+  const { profile: { uid } } = ctx.state
 
   try {
     await Problem.deleteOne({ pid }).exec()
-    logger.info(`One Problem is delete ${pid}`)
+    logger.info(`Problem <${pid}> is deleted by user <${uid}>`)
   } catch (e) {
     ctx.throw(400, e.message)
   }
