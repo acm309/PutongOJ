@@ -85,9 +85,9 @@ const findOne = async (ctx) => {
     const problem = await Problem.findOne({ pid }).lean().exec()
     if (!problem) { return { pid, invalid: true } }
     const { title } = problem
-    const [ solve, submit ] = await Promise.all([
-      Solution.countDocuments({ pid, mid: cid, judge: config.judge.Accepted }).lean().exec(),
-      Solution.countDocuments({ pid, mid: cid }).lean().exec(),
+    const [ {length: submit }, {length: solve } ] = await Promise.all([
+      Solution.distinct('uid', { pid, mid: cid }).lean().exec(),
+      Solution.distinct('uid', { pid, mid: cid, judge: config.judge.Accepted }).lean().exec(),
     ])
     return { pid, title, solve, submit }
   }))
