@@ -1,13 +1,13 @@
 <script setup>
-import only from 'only'
-import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-import { Button, Divider, Form, FormItem, Input, Radio, RadioGroup, Spin } from 'view-ui-plus'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
+import only from 'only'
+
+import { storeToRefs } from 'pinia'
+import { Button, Divider, Form, FormItem, Input, Radio, RadioGroup, Spin } from 'view-ui-plus'
+import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
 const isZH = $computed(() => locale.value === 'zh-CN')
@@ -36,8 +36,8 @@ const securityForm = $ref({
 
 const userInfoValidate = {
   uid: [ { required: true, trigger: 'blur' } ],
-  nick: [ { type: 'string', max: 20, trigger: 'change' } ],
-  motto: [ { type: 'string', max: 100, trigger: 'change' } ],
+  nick: [ { type: 'string', max: 30, trigger: 'change' } ],
+  motto: [ { type: 'string', max: 300, trigger: 'change' } ],
   mail: [ { type: 'email', trigger: 'change' } ],
   school: [ { type: 'string', max: 30, trigger: 'change' } ],
 }
@@ -112,19 +112,19 @@ async function updatePassword () {
         <Input v-model="user.uid" disabled />
       </FormItem>
       <FormItem :label="t('oj.nick')" prop="nick">
-        <Input v-model="user.nick" :maxlength="20" show-word-limit />
+        <Input v-model="user.nick" :maxlength="30" show-word-limit />
       </FormItem>
       <FormItem :label="t('oj.motto')" prop="motto">
         <Input
-          v-model="user.motto" type="textarea" maxlength="100" show-word-limit
-          :autosize="{ minRows: 2, maxRows: 5 }"
+          v-model="user.motto" type="textarea" maxlength="300" show-word-limit
+          :autosize="{ minRows: 3, maxRows: 10 }"
         />
       </FormItem>
       <FormItem :label="t('oj.mail')" prop="mail">
         <Input v-model="user.mail" maxlength="254" />
       </FormItem>
       <FormItem :label="t('oj.school')" prop="school">
-        <Input v-model="user.school" maxlength="20" show-word-limit />
+        <Input v-model="user.school" maxlength="30" show-word-limit />
       </FormItem>
       <FormItem v-if="isRoot" :label="t('oj.privilege')">
         <RadioGroup v-model="user.privilege">
