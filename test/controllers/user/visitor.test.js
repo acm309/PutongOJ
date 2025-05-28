@@ -93,7 +93,7 @@ test('Create user with pwd not valid (too simple)', async (t) => {
 test('Create user with nick not valid (too long)', async (t) => {
   const r = await request
     .post('/api/user')
-    .send({ uid: 'test14505', pwd, nick: 'a'.repeat(21) })
+    .send({ uid: 'test14505', pwd, nick: 'a'.repeat(31) })
   t.is(r.status, 400)
 })
 

@@ -33,10 +33,10 @@ const userSchema = mongoose.Schema({
     default: '',
     validate: {
       validator (v) {
-        return v.length <= 20
+        return v.length <= 30
       },
       message:
-        'Nick is too long. It should be less than 20 characters long',
+        'Nick is too long. It should be less than 30 characters long',
     },
   },
   motto: {
@@ -44,10 +44,10 @@ const userSchema = mongoose.Schema({
     default: '',
     validate: {
       validator (v) {
-        return v.length <= 100
+        return v.length <= 300
       },
       message:
-        'Motto is too long. It should be less than 100 characters long',
+        'Motto is too long. It should be less than 300 characters long',
     },
   },
   mail: {

@@ -40,7 +40,7 @@ test('Update other\'s profile', async (t) => {
 test('Update user with nick not valid (too long)', async (t) => {
   const r = await request
     .put(`/api/user/${uid}`)
-    .send({ nick: 'a'.repeat(21) })
+    .send({ nick: 'a'.repeat(31) })
   t.is(r.status, 400)
 })
 
@@ -69,7 +69,7 @@ test('Update user\'s nick then clear', async (t) => {
 test('Update user with motto not valid (too long)', async (t) => {
   const r = await request
     .put(`/api/user/${uid}`)
-    .send({ motto: 'a'.repeat(101) })
+    .send({ motto: 'a'.repeat(301) })
   t.is(r.status, 400)
 })
 
