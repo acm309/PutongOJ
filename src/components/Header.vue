@@ -39,12 +39,12 @@ function getMenuItems () {
     { name: 'problemList', icon: 'ios-keypad', label: t('oj.problem_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
-    { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
     {
       name: 'more',
-      icon: 'md-analytics',
+      icon: 'logo-buffer',
       label: t('oj.more'),
       children: [
+        { name: 'discuss', icon: 'ios-quote', label: t('oj.discussion_list') },
         { name: 'status', icon: 'ios-pulse', label: t('oj.status_list') },
         { name: 'faq', icon: 'md-help-circle', label: t('oj.faq') },
       ],
