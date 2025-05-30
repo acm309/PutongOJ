@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "cross-env": "^7.0.3",
-    "damerau-levenshtein": "^1.0.8",
     "dotenv-flow": "^4.1.0",
+    "fast-levenshtein": "^3.0.0",
     "fs-extra": "^11.3.0",
     "ioredis": "^5.6.1",
     "koa": "^2.16.1",

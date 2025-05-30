@@ -1,4 +1,4 @@
-const levenshtein = require('damerau-levenshtein')
+const levenshtein = require('fast-levenshtein')
 const { judge } = require('../../config')
 const Solution = require('../../models/Solution')
 const logger = require('../../utils/logger')
@@ -9,6 +9,10 @@ function codeNormalize (code) {
     .replace(/[a-z_]\w*/gi, 'VAR')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function similarity (a, b) {
+  return 1 - (levenshtein.get(a, b) / Math.max(a.length, b.length))
 }
 
 async function checkSimilarity (item) {
@@ -32,9 +36,9 @@ async function checkSimilarity (item) {
   const code = codeNormalize(solution.code)
   const result = { sim: 0, sim_s_id: 0 }
   for (const s of solutions) {
-    const lev = levenshtein(code, codeNormalize(s.code))
-    if (lev.similarity > result.sim) {
-      result.sim = lev.similarity
+    const sim = similarity(code, codeNormalize(s.code))
+    if (sim > result.sim) {
+      result.sim = sim
       result.sim_s_id = s.sid
     }
   }
