@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import type { ContestDetail, Ranklist, RanklistInfo } from '@/types'
 import type { Message } from 'view-ui-plus'
 import type { Ref } from 'vue'
-import api from '@/api'
-import { useContestStore } from '@/store/modules/contest'
-import { timeContest, timePretty } from '@/util/formate'
-import { normalize } from '@/util/ranklist'
+import type { ContestDetail, Ranklist, RanklistInfo } from '@/types'
 import { storeToRefs } from 'pinia'
 import { Alert, BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
 import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import api from '@/api'
+import { useContestStore } from '@/store/modules/contest'
+import { useSessionStore } from '@/store/modules/session'
+import { timeContest, timePretty } from '@/util/formate'
+import { exportSheet, normalize } from '@/util/ranklist'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
+const sessionStore = useSessionStore()
 const route = useRoute()
+const { isRoot } = $(storeToRefs(sessionStore))
 const message = inject('$Message') as typeof Message
 
 const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
@@ -65,7 +68,7 @@ onBeforeUnmount(clearAutoRefresh)
   <div class="contest-children">
     <div class="board-header">
       <Space>
-        <Button size="small" shape="circle" type="primary" :loading="loading" icon="ios-refresh" @click="getRanklist" />
+        <Button size="small" shape="circle" type="primary" :loading="loading" icon="md-refresh" @click="getRanklist" />
         <Switch @on-change="setAutoRefresh">
           <template #open>
             <Icon type="md-checkmark" />
@@ -75,6 +78,10 @@ onBeforeUnmount(clearAutoRefresh)
           </template>
         </Switch>
         <span>{{ t('oj.auto_refresh') }}</span>
+        <Button
+          v-if="isRoot && ranklistInfo.isEnded" size="small" shape="circle" type="primary" icon="md-download"
+          @click="() => exportSheet(contest, ranklist)"
+        />
       </Space>
       <Alert v-if="ranklistInfo.isFrozen" type="info" style="margin-top: 14px" show-icon>
         {{ t('oj.ranklist_frozen', { time: timePretty(ranklistInfo.freezeTime) }) }}

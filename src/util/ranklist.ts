@@ -1,3 +1,4 @@
+import type { Cell } from 'exceljs'
 import type { ContestDetail, Ranklist, RawRanklist } from '@/types'
 
 const PENALTY = 20 * 60 * 1000 // 失败提交罚时 20 分钟
@@ -53,4 +54,117 @@ export function normalize (ranklist: RawRanklist, contest: ContestDetail): Rankl
     }
   })
   return list
+}
+
+export async function exportSheet (
+  contest: ContestDetail,
+  ranklist: Ranklist,
+): Promise<void> {
+  const ExcelJS = await import('exceljs')
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Ranklist')
+
+  worksheet.columns = [
+    { header: 'Rank', width: 6 },
+    { header: 'Username', width: 16 },
+    { header: 'Nickname', width: 16 },
+    { header: 'Solved', width: 8 },
+    { header: 'Penalty', width: 8 },
+    ...contest.list.map((_, i) => ({
+      header: `${i + 1}`,
+      width: 10,
+    })),
+  ]
+
+  const applyStyle = (
+    cell: Cell,
+    options: {
+      bold?: boolean
+      color?: string
+      border?: boolean
+      fill?: string
+    },
+  ) => {
+    const { bold, color, border, fill } = options
+
+    if (bold || color) {
+      cell.font = {
+        bold: bold || false,
+        color: color ? { argb: color } : undefined,
+      }
+    }
+
+    if (border) {
+      cell.border = Object.fromEntries(
+        [ 'top', 'left', 'bottom', 'right' ]
+          .map(side => [ side, { style: 'thin' } ]),
+      )
+    }
+
+    if (fill) {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: fill },
+      }
+    }
+  }
+
+  const headerRow = worksheet.getRow(1)
+  headerRow.eachCell((cell) => {
+    applyStyle(cell, {
+      bold: true,
+      border: true,
+      fill: 'D9D9D9',
+    })
+  })
+
+  ranklist.forEach((row, rank) => {
+    const excelRow = worksheet.addRow([
+      rank + 1,
+      row.uid,
+      row.nick || '',
+      row.solved,
+      Math.floor(row.penalty / 60 / 1000),
+      ...contest.list.map((pid) => {
+        const status = row[pid]
+        if (!status) return '-'
+        if (status.accepted === -1) return `-${status.failed}`
+        const time = Math.floor((status.accepted - contest.start) / 60 / 1000)
+        return `+${status.failed > 0 ? status.failed : ''} (${time})`
+      }),
+    ])
+
+    contest.list.forEach((pid, index) => {
+      const cell = excelRow.getCell(index + 6)
+      const status = row[pid]
+
+      if (!status) return
+      if (status.accepted !== -1) {
+        applyStyle(cell, {
+          bold: true,
+          color: status.isPrime ? '0000FF' : '008000',
+          border: true,
+        })
+      } else if (status.failed > 0) {
+        applyStyle(cell, { color: 'FF0000', border: true })
+      }
+    })
+
+    excelRow.eachCell((cell) => {
+      if (!cell.border) {
+        applyStyle(cell, { border: true })
+      }
+    })
+  })
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([ buffer ], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `${contest.title} - Ranklist.xlsx`
+  link.click()
 }
