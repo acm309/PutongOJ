@@ -1,14 +1,14 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Badge, Button, Input, Option, Page, Poptip, Select, Tag } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import constant from '@/util/constant'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import { timePretty } from '@/util/formate'
+import constant from '@/util/constant'
+import { similarityColor, timePretty } from '@/util/formate'
 
-import { Badge, Poptip, Tag, Button, Input, Select, Option, Page } from 'view-ui-plus'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()
@@ -35,7 +35,7 @@ const query = $computed(() => purify({ uid, pid, judge, language, page, pageSize
 
 let loading = $ref(false)
 
-async function fetch() {
+async function fetch () {
   loading = true
   uid = route.query.uid || ''
   pid = route.query.pid || ''
@@ -47,14 +47,14 @@ async function fetch() {
   loading = false
 }
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   router.push({
     name: 'status',
     query: purify(Object.assign({}, query, payload)),
   })
 }
 
-function search() {
+function search () {
   return reload({
     page: 1,
     uid,
@@ -74,36 +74,60 @@ onRouteQueryUpdate(fetch)
   <div class="status-wrap">
     <div class="status-header">
       <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" @on-change="pageChange" />
-      <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
       <div class="status-filter">
-        <Input type="text" v-model="uid" placeholder="Username" class="status-filter-input" clearable />
-        <Input type="number" v-model="pid" placeholder="PID" class="status-filter-input" clearable />
+        <Input v-model="uid" type="text" placeholder="Username" class="status-filter-input" clearable />
+        <Input v-model="pid" type="number" placeholder="PID" class="status-filter-input" clearable />
         <Select v-model="judge" placeholder="Judge" class="status-filter-input" clearable>
           <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
         <Select v-model="language" placeholder="Language" class="status-filter-input" clearable>
           <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
-        <Button type="primary" @click="search">{{ t('oj.search') }}</Button>
+        <Button type="primary" @click="search">
+          {{ t('oj.search') }}
+        </Button>
       </div>
     </div>
     <div class="status-table-container">
       <table class="status-table">
         <thead>
           <tr>
-            <th class="status-sid">SID</th>
-            <th class="status-pid">PID</th>
-            <th class="status-username">Username</th>
-            <th class="status-judge">Judge</th>
+            <th class="status-sid">
+              SID
+            </th>
+            <th class="status-pid">
+              PID
+            </th>
+            <th class="status-username">
+              Username
+            </th>
+            <th class="status-judge">
+              Judge
+            </th>
             <th class="status-time">
-              <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
+              <Badge>
+                Time<template #count>
+                  <span class="status-badge">(ms)</span>
+                </template>
+              </Badge>
             </th>
             <th class="status-memory">
-              <Badge>Memory<template #count><span class="status-badge">(KB)</span></template></Badge>
+              <Badge>
+                Memory<template #count>
+                  <span class="status-badge">(KB)</span>
+                </template>
+              </Badge>
             </th>
-            <th class="status-language">Language</th>
-            <th class="status-submit-time">Submit Time</th>
+            <th class="status-language">
+              Language
+            </th>
+            <th class="status-submit-time">
+              Submit Time
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -114,12 +138,14 @@ onRouteQueryUpdate(fetch)
             </td>
           </tr>
           <tr v-for="item in list" :key="item.sid">
-            <td class="status-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
+            <td v-if="isAdmin || (profile && profile.uid === item.uid)" class="status-sid">
               <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
                 {{ item.sid }}
               </router-link>
             </td>
-            <td class="status-sid" v-else>{{ item.sid }}</td>
+            <td v-else class="status-sid">
+              {{ item.sid }}
+            </td>
             <td class="status-pid">
               <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
                 {{ item.pid }}
@@ -132,8 +158,8 @@ onRouteQueryUpdate(fetch)
             </td>
             <td class="status-judge">
               <span :class="color[item.judge]">{{ result[item.judge] }}</span>
-              <Poptip trigger="hover" v-if="item.sim" placement="right">
-                <Tag color="gold" class="status-sim-tag">
+              <Poptip v-if="item.sim" trigger="hover" placement="right">
+                <Tag class="status-sim-tag" :color="similarityColor(item.sim)">
                   {{ item.sim }}%
                 </Tag>
                 <template #content>
@@ -141,19 +167,31 @@ onRouteQueryUpdate(fetch)
                 </template>
               </Poptip>
             </td>
-            <td class="status-time">{{ item.time }}</td>
-            <td class="status-memory">{{ item.memory }}</td>
-            <td class="status-language">{{ lang[item.language] }}</td>
-            <td class="status-submit-time">{{ timePretty(item.create) }}</td>
+            <td class="status-time">
+              {{ item.time }}
+            </td>
+            <td class="status-memory">
+              {{ item.memory }}
+            </td>
+            <td class="status-language">
+              {{ lang[item.language] }}
+            </td>
+            <td class="status-submit-time">
+              {{ timePretty(item.create) }}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="status-footer">
-      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        show-total @on-change="pageChange" />
+      <Page
+        class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
