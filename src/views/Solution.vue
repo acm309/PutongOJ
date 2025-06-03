@@ -1,22 +1,21 @@
 <script setup>
+import { useClipboard } from '@vueuse/core'
 import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
-import 'highlight.js/styles/atom-one-light.css'
-
 import { storeToRefs } from 'pinia'
+import { Badge, Button, Card, Divider, Icon, Poptip, Space, Spin } from 'view-ui-plus'
 import { inject } from 'vue'
-import { useRoute } from 'vue-router'
-import { useClipboard } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
-import constant from '@/util/constant'
-import { useSessionStore } from '@/store/modules/session'
-import { testcaseUrl } from '@/util/helper'
+import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-
-import { Card, Space, Button, Spin, Divider, Badge, Icon, Poptip } from 'view-ui-plus'
+import constant from '@/util/constant'
+import { timePretty } from '@/util/formate'
+import { onRouteQueryUpdate, testcaseUrl } from '@/util/helper'
+import 'highlight.js/styles/atom-one-light.css'
 
 highlight.registerLanguage('c', cpp)
 highlight.registerLanguage('cpp', cpp)
@@ -25,7 +24,8 @@ highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
 const result = $ref(constant.result)
-const lang = $ref(constant.languageHighlight)
+const langHighlight = $ref(constant.languageHighlight)
+const lang = $ref(constant.language)
 const color = $ref(constant.color)
 
 const session = useSessionStore()
@@ -41,19 +41,19 @@ const { copy } = useClipboard()
 
 let loading = $ref(false)
 
-function onCopy(content) {
+function onCopy (content) {
   copy(content)
   $Message.success('Copied!')
 }
 
-function prettyCode(code) {
+function prettyCode (code) {
   if (!code) return ''
   return highlight.highlight(`${code}`, {
-    language: lang[solution.language],
+    language: langHighlight[solution.language],
   }).value
 }
 
-async function fetch() {
+async function fetch () {
   loading = true
   await findOne(route.params)
   root.changeDomTitle({ title: `Solution ${solution.pid}` })
@@ -61,43 +61,71 @@ async function fetch() {
 }
 
 fetch()
+onRouteQueryUpdate(fetch)
 </script>
 
 <template>
   <div class="solution-wrap">
     <Card class="solution-overview" dis-hover>
-      <div class="solution-result">{{ result[solution.judge || 0] }}</div>
-      <Space class="solution-info" :size="4">
-        <span>Problem:
-          <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
-            {{ solution.pid }}
-          </router-link>
-        </span>
-        <Divider type="vertical" />
-        <span>Author:
-          <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
-            {{ solution.uid }}
-          </router-link>
-        </span>
-        <Divider type="vertical" />
-        <span>Memory: {{ solution.memory }}KB</span>
-        <Divider type="vertical" />
-        <span>Time: {{ solution.time }}ms</span>
+      <div class="solution-result">
+        {{ result[solution.judge || 0] }}
+      </div>
+      <Space direction="vertical">
+        <Space class="solution-info" split wrap>
+          <span>
+            Problem:
+            <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
+              {{ solution.pid }}
+            </router-link>
+          </span>
+          <span>
+            Author:
+            <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
+              {{ solution.uid }}
+            </router-link>
+          </span>
+          <span v-if="solution.mid > 0">
+            Contest:
+            <router-link :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
+              {{ solution.mid }}
+            </router-link>
+          </span>
+        </Space>
+        <Space class="solution-info" split wrap>
+          <span>Time: {{ solution.time }}ms</span>
+          <span>Memory: {{ solution.memory }}KB</span>
+          <span>{{ lang[solution.language] }}</span>
+          <span>{{ timePretty(solution.create) }}</span>
+        </Space>
       </Space>
     </Card>
     <div class="testcase-table-container">
       <table class="testcase-table">
         <thead>
           <tr>
-            <th class="testcase-uuid">UUID</th>
-            <th class="testcase-files" v-if="isAdmin">Files</th>
+            <th class="testcase-uuid">
+              UUID
+            </th>
+            <th v-if="isAdmin" class="testcase-files">
+              Files
+            </th>
             <th class="testcase-time">
-              <Badge>Time<template #count><span class="testcase-badge">(ms)</span></template></Badge>
+              <Badge>
+                Time<template #count>
+                  <span class="testcase-badge">(ms)</span>
+                </template>
+              </Badge>
             </th>
             <th class="testcase-memory">
-              <Badge>Memory<template #count><span class="testcase-badge">(KB)</span></template></Badge>
+              <Badge>
+                Memory<template #count>
+                  <span class="testcase-badge">(KB)</span>
+                </template>
+              </Badge>
             </th>
-            <th class="testcase-result">Result</th>
+            <th class="testcase-result">
+              Result
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -116,16 +144,22 @@ fetch()
                 </template>
               </Poptip>
             </td>
-            <td class="testcase-files" v-if="isAdmin">
+            <td v-if="isAdmin" class="testcase-files">
               <Space :size="4">
                 <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">Input</a>
                 <Divider type="vertical" />
                 <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">Output</a>
               </Space>
             </td>
-            <td class="testcase-time">{{ item.time }}</td>
-            <td class="testcase-memory">{{ item.memory }}</td>
-            <td :class="['testcase-result', color[item.judge]]">{{ result[item.judge] }}</td>
+            <td class="testcase-time">
+              {{ item.time }}
+            </td>
+            <td class="testcase-memory">
+              {{ item.memory }}
+            </td>
+            <td class="testcase-result" :class="[color[item.judge]]">
+              {{ result[item.judge] }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -137,12 +171,24 @@ fetch()
       </Button>
       <pre><code v-html="prettyCode(solution.code)" /></pre>
       <div v-if="isAdmin && solution.sim && solution.simSolution">
-        <hr>
-        {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
-        From: {{ solution.simSolution.sid }} by
-        <router-link :to="{ name: 'userProfile', params: { uid: solution.simSolution.uid } }">
-          {{ solution.simSolution.uid }}
-        </router-link>
+        <Space split wrap>
+          <span>
+            Similar to
+            <router-link :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
+              {{ solution.simSolution.sid }}
+            </router-link>
+          </span>
+          <span>
+            {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
+          </span>
+          <span>
+            Author:
+            <router-link :to="{ name: 'userProfile', params: { uid: solution.simSolution.uid } }">
+              {{ solution.simSolution.uid }}
+            </router-link>
+          </span>
+          <span>{{ timePretty(solution.simSolution.create) }}</span>
+        </Space>
         <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>
       </div>
     </div>
@@ -182,7 +228,7 @@ fetch()
       background-color #f7f7f7
 
 .testcase-uuid
-  padding-left 40px !important 
+  padding-left 40px !important
   text-align left
 .testcase-time, .testcase-memory
   width 100px
@@ -215,6 +261,7 @@ fetch()
     border: 1px solid #e040fb
     border-radius: 4px
     padding: 10px
+    overflow-x auto
     &.error
       background-color: #FFF9C4
 
