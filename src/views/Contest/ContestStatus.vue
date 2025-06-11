@@ -199,13 +199,13 @@ onRouteQueryUpdate(fetch)
             </td>
             <td class="status-judge">
               <span :class="color[item.judge]">{{ result[item.judge] }}</span>
-              <Poptip v-if="item.sim" trigger="hover" placement="right">
+              <Poptip
+                v-if="item.sim" trigger="hover" word-wrap width="220"
+                :content="t('oj.similar_submission', { similar: item.sim_s_id, similarity: item.sim })"
+              >
                 <Tag class="status-sim-tag" :color="similarityColor(item.sim)">
                   {{ item.sim }}%
                 </Tag>
-                <template #content>
-                  <b>Sim SID:</b> {{ item.sim_s_id }}
-                </template>
               </Poptip>
             </td>
             <td class="status-time">

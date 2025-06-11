@@ -68,6 +68,7 @@ export default {
     sample_output: '样例输出',
 
     java_class_alert: '请确保你的 Java 程序的 main 函数在一个名为 "Main" 的类中。',
+    similar_submission: '该提交与另一个用户的提交 {similar} 有着 {similarity}% 相似度。',
 
     testcase: {
       from_file: '从文件导入',

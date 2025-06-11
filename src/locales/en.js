@@ -72,6 +72,7 @@ export default {
     sample_output: 'Sample Output',
 
     java_class_alert: 'Ensure your Java program\'s main function is within a class named "Main".',
+    similar_submission: 'This submission has a {similarity}% similarity with another user\'s submission {similar}.',
 
     testcase: {
       from_file: 'Import from file',
