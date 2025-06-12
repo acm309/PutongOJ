@@ -1,10 +1,20 @@
-node_modules
-npm-debug.log
+# Docker
 Dockerfile*
 docker-compose*
 .dockerignore
-.git
+
+# Git
+.git/
 .gitignore
-README.md
-LICENSE
-.vscode
+
+# Development
+.github/
+.nyc_output/
+dist/
+.env*
+node_modules/
+
+# Data
+data/
+logs/
+public/uploads/
