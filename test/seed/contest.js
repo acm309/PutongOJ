@@ -14,8 +14,6 @@ module.exports = {
       list: [
         1001,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Private Contest',
@@ -28,8 +26,6 @@ module.exports = {
       list: [
         1001,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Password Contest',
@@ -42,8 +38,6 @@ module.exports = {
       list: [
         1001,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Private Contest',
@@ -56,8 +50,6 @@ module.exports = {
       list: [
         1001,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Future Contest',
@@ -70,8 +62,6 @@ module.exports = {
       list: [
         1003,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Private Group Contest',
@@ -84,8 +74,6 @@ module.exports = {
       list: [
         1003,
       ],
-      ranklist: {
-      },
     },
     {
       title: 'Private Group Contest 2',
@@ -98,8 +86,6 @@ module.exports = {
       list: [
         1003,
       ],
-      ranklist: {
-      },
     },
   ],
 }

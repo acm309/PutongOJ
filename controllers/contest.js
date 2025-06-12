@@ -85,7 +85,7 @@ const findOne = async (ctx) => {
     const problem = await Problem.findOne({ pid }).lean().exec()
     if (!problem) { return { pid, invalid: true } }
     const { title } = problem
-    const [ {length: submit }, {length: solve } ] = await Promise.all([
+    const [ { length: submit }, { length: solve } ] = await Promise.all([
       Solution.distinct('uid', { pid, mid: cid }).lean().exec(),
       Solution.distinct('uid', { pid, mid: cid, judge: config.judge.Accepted }).lean().exec(),
     ])
@@ -93,15 +93,15 @@ const findOne = async (ctx) => {
   }))
   const solved = profile
     ? await Solution
-      .find({
-        mid: cid,
-        pid: { $in: problemList },
-        uid: profile.uid,
-        judge: config.judge.Accepted,
-      })
-      .distinct('pid')
-      .lean()
-      .exec()
+        .find({
+          mid: cid,
+          pid: { $in: problemList },
+          uid: profile.uid,
+          judge: config.judge.Accepted,
+        })
+        .distinct('pid')
+        .lean()
+        .exec()
     : []
 
   ctx.body = {
@@ -221,8 +221,6 @@ const create = async (ctx) => {
     { // cid 会自动生成
       start: new Date(opt.start).getTime(),
       end: new Date(opt.end).getTime(),
-      create: Date.now(),
-      ranklist: {},
     },
   ))
 
@@ -245,9 +243,6 @@ const update = async (ctx) => {
   const { profile: { uid } } = ctx.state
   const contest = await Contest.findOne({ cid }).exec()
   const fields = [ 'title', 'encrypt', 'list', 'argument', 'start', 'end', 'status' ]
-
-  opt.start = new Date(opt.start).getTime()
-  opt.end = new Date(opt.end).getTime()
 
   fields.forEach((field) => {
     if (opt[field] !== undefined && opt[field] !== null) {
