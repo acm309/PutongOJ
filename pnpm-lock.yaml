@@ -29,6 +29,9 @@ importers:
       koa-body:
         specifier: ^2.6.0
         version: 2.6.0
+      koa-compose:
+        specifier: ^4.1.0
+        version: 4.1.0
       koa-logger:
         specifier: ^3.2.1
         version: 3.2.1

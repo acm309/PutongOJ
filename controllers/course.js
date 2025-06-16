@@ -1,3 +1,4 @@
+const compose = require('koa-compose')
 const upperFirst = require('lodash/upperFirst')
 const only = require('only')
 const { encrypt, coursePermission } = require('../config')
@@ -10,9 +11,21 @@ const { isAdmin } = require('../utils/helper')
  * @TODO add logging
  */
 
-const roleFields = [
-  'basic', 'viewTestcase', 'viewSolution',
-  'manageProblem', 'manageContest', 'manageCourse' ]
+/**
+ * 课程权限字段
+ */
+const roleFields = Object.freeze([
+  'basic',
+  'viewTestcase',
+  'viewSolution',
+  'manageProblem',
+  'manageContest',
+  'manageCourse',
+])
+
+/**
+ * 权限表达转换
+ */
 const reprRole = permission =>
   Object.fromEntries(roleFields.map(field =>
     [ field, (permission & coursePermission[upperFirst(field)]) !== 0 ],
@@ -21,8 +34,8 @@ const reprRole = permission =>
 /**
  * 课程预加载中间件
  */
-const preload = async (ctx, next) => {
-  const id = Number(ctx.params.courseId)
+const coursePreload = async (ctx, next) => {
+  const id = Number(ctx.params.courseId || ctx.request.query.course)
   if (!Number.isInteger(id) || id <= 0) {
     return ctx.throw(400, 'Invalid course ID')
   }
@@ -57,7 +70,7 @@ const preload = async (ctx, next) => {
 /**
  * 课程权限要求中间件
  */
-const role = (role) => {
+const courseRoleRequire = (role) => {
   return async (ctx, next) => {
     const { courseRole } = ctx.state
     if (courseRole[role] === true) {
@@ -69,12 +82,31 @@ const role = (role) => {
 }
 
 /**
+ * 课程守护中间件
+ */
+const courseAware = (middlewares) => {
+  return async (ctx, next) => {
+    if (ctx.query.course) {
+      await compose(middlewares)(ctx, next)
+    } else {
+      await next()
+    }
+  }
+}
+
+/**
  * 查询课程列表
  */
 const findCourses = async (ctx) => {
   const opt = ctx.request.query
+
+  const MIN_PAGE_SIZE = 1
+  const MAX_PAGE_SIZE = 100
+  const DEFAULT_PAGE_SIZE = 5
+
   const page = Math.max(Number.parseInt(opt.page) || 1, 1)
-  const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize) || 5, 100), 1)
+  const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), MIN_PAGE_SIZE)
 
   const list = await Course.paginate({}, {
     sort: { id: -1 },
@@ -119,7 +151,7 @@ const createCourse = async (ctx) => {
 /**
  * 查询课程成员
  */
-const findMembers = async (ctx) => {
+const findCourseMembers = async (ctx) => {
   const opt = ctx.request.query
   const page = Math.max(Number.parseInt(opt.page) || 1, 1)
   const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize) || 30, 200), 1)
@@ -148,7 +180,7 @@ const findMembers = async (ctx) => {
 /**
  * 获取课程成员权限
  */
-const getMember = async (ctx) => {
+const getCourseMember = async (ctx) => {
   const { userId: uid } = ctx.params
   if (!uid) {
     return ctx.throw(400, 'Missing uid')
@@ -180,7 +212,7 @@ const getMember = async (ctx) => {
 /**
  * 更新课程成员权限
  */
-const updateMember = async (ctx) => {
+const updateCourseMember = async (ctx) => {
   const { userId: uid } = ctx.params
   const { role } = ctx.request.body
   if (!uid || !role) {
@@ -233,7 +265,7 @@ const updateMember = async (ctx) => {
 /**
  * 删除课程成员
  */
-const removeMember = async (ctx) => {
+const removeCourseMember = async (ctx) => {
   const { userId: uid } = ctx.params
   if (!uid) {
     return ctx.throw(400, 'Missing uid')
@@ -260,13 +292,14 @@ const removeMember = async (ctx) => {
 }
 
 module.exports = {
-  preload,
-  role,
+  coursePreload,
+  courseAware,
+  courseRoleRequire,
   findCourses,
   getCourse,
   createCourse,
-  findMembers,
-  getMember,
-  updateMember,
-  removeMember,
+  findCourseMembers,
+  getCourseMember,
+  updateCourseMember,
+  removeCourseMember,
 }

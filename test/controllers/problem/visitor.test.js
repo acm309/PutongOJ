@@ -8,7 +8,7 @@ const request = supertest.agent(server)
 
 test('Problem list', async (t) => {
   const res = await request
-    .get('/api/problem/list')
+    .get('/api/problem')
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')

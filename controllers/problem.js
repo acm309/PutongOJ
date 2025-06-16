@@ -9,7 +9,7 @@ const Solution = require('../models/Solution')
 const { isLogined, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 
-const preload = async (ctx, next) => {
+const problemPreload = async (ctx, next) => {
   const pid = Number.parseInt(ctx.params.pid)
   const cid = Number.parseInt(ctx.request.query.cid) || 0
   if (Number.isNaN(pid)) { ctx.throw(400, 'Pid has to be a number') }
@@ -37,73 +37,98 @@ const preload = async (ctx, next) => {
   return next()
 }
 
-// 返回题目列表
-const find = async (ctx) => {
+/**
+ * 查询题目列表
+ */
+const findProblems = async (ctx) => {
   const opt = ctx.request.query
-  const filter = {}
-  const page = Number.parseInt(opt.page) || 1
-  const pageSize = Number.parseInt(opt.pageSize) || 30
+  const { profile } = ctx.session
+
+  /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
+  if (Number.parseInt(opt.page) === -1 && isAdmin(profile)) {
+    const docs = await Problem
+      .find({}, { _id: 0, title: 1, pid: 1 })
+      .lean()
+      .exec()
+    ctx.body = {
+      list: {
+        docs,
+        total: docs.length,
+      },
+      solved: [],
+    }
+    return
+  }
+
+  const MIN_PAGE_SIZE = 1
+  const MAX_PAGE_SIZE = 100
+  const DEFAULT_PAGE_SIZE = 30
+
+  const page = Math.max(Number.parseInt(opt.page) || 1, 1)
+  const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), MIN_PAGE_SIZE)
+
+  const filters = []
+  if (!isAdmin(profile)) {
+    filters.push({ status: config.status.Available })
+  }
+
   if (opt.content) {
-    if (opt.type === 'tag') {
-      filter.tags = {
+    if (opt.type === 'title') {
+      filters.push({ title: {
+        $regex: new RegExp(escapeRegExp(opt.content), 'i'),
+      } })
+    } else if (opt.type === 'tag') {
+      filters.push({ tags: {
         $in: [ new RegExp(escapeRegExp(opt.content), 'i') ],
-      }
-    } else {
-      // https://stackoverflow.com/questions/2908100/mongodb-regex-search-on-integer-value
-      filter.$expr = {
+      } })
+    } else if (opt.type === 'pid') {
+      filters.push({ $expr: {
         $regexMatch: {
-          input: { $toString: `$${opt.type}` },
-          regex: new RegExp(escapeRegExp(opt.content), 'i'),
+          input: { $toString: '$pid' },
+          regex: new RegExp(`^${escapeRegExp(opt.content)}`, 'i'),
         },
-      }
+      } })
     }
   }
 
-  let list
-  if (page !== -1) {
-    if (!isAdmin(ctx.session.profile)) {
-      filter.status = config.status.Available
-    }
-    list = await Problem.paginate(filter, {
-      sort: { pid: 1 },
-      page,
-      limit: pageSize,
-      lean: true,
-      leanWithId: false,
-      select: '-_id pid title status type tags submit solve',
-    })
-  } else {
-    const docs = await Problem.find({}, { title: 1, pid: 1, _id: 0 }).lean().exec()
-    list = {
-      docs,
-      total: docs.length,
-    }
+  const { course } = ctx.state
+  if (course) {
+    filters.push({ course: course._id })
+  } else if (!isAdmin(profile)) {
+    filters.push({ $or: [
+      { course: { $exists: false } },
+      { course: null },
+    ] })
   }
+
+  const list = await Problem.paginate({ $and: filters }, {
+    sort: { pid: 1 },
+    page,
+    limit: pageSize,
+    lean: true,
+    leanWithId: false,
+    select: '-_id pid title status type tags submit solve',
+  })
 
   let solved = []
-  if (isLogined(ctx)) {
-    const query = Solution.find({
-      uid: ctx.session.profile.uid,
-      judge: config.judge.Accepted,
-    })
-    // 缩小查询范围
-    if (list.length > 0) {
-      query
-        .where('pid')
-        .gte(list.docs[0].pid)
-        .lte(list.docs[list.total - 1].pid)
-    }
-    solved = await query.distinct('pid').lean().exec()
+  if (isLogined(ctx) && list.total > 0) {
+    solved = await Solution
+      .find({
+        uid: profile.uid,
+        judge: config.judge.Accepted,
+        pid: { $in: list.docs.map(p => p.pid) },
+      })
+      .distinct('pid')
+      .lean()
+      .exec()
   }
 
-  ctx.body = {
-    list,
-    solved,
-  }
+  ctx.body = { list, solved }
 }
 
 // 返回一道题目
-const findOne = async (ctx) => {
+const getProblem = async (ctx) => {
   const problem = ctx.state.problem
   const profile = ctx.session.profile
 
@@ -115,7 +140,7 @@ const findOne = async (ctx) => {
 }
 
 // 新建一个题目
-const create = async (ctx) => {
+const createProblem = async (ctx) => {
   const opt = ctx.request.body
   const { profile: { uid } } = ctx.state
 
@@ -155,7 +180,7 @@ const create = async (ctx) => {
 }
 
 // 更新一道题目
-const update = async (ctx) => {
+const updateProblem = async (ctx) => {
   const opt = ctx.request.body
   const problem = ctx.state.problem
   const { profile: { uid } } = ctx.state
@@ -183,7 +208,7 @@ const update = async (ctx) => {
 }
 
 // 删除一道题目
-const del = async (ctx) => {
+const removeProblem = async (ctx) => {
   const pid = ctx.params.pid
   const { profile: { uid } } = ctx.state
 
@@ -198,10 +223,10 @@ const del = async (ctx) => {
 }
 
 module.exports = {
-  preload,
-  find,
-  findOne,
-  create,
-  update,
-  del,
+  problemPreload,
+  findProblems,
+  getProblem,
+  createProblem,
+  updateProblem,
+  removeProblem,
 }

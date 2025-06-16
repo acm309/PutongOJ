@@ -77,6 +77,17 @@ const problemSchema = mongoose.Schema({
     default: [],
     index: true,
   },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    default: null,
+    validate: {
+      validator (v) {
+        return v === null || mongoose.Types.ObjectId.isValid(v)
+      },
+      message: 'Invalid course ID',
+    },
+  },
   create: {
     type: Number,
     default: Date.now,

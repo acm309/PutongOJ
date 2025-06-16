@@ -1,22 +1,66 @@
 const Router = require('koa-router')
-const course = require('../controllers/course')
-const { auth } = require('../utils/middlewares')
 
-const router = new Router({ prefix: '/course' })
+const {
+  coursePreload,
+  courseRoleRequire,
+  findCourses,
+  getCourse,
+  createCourse,
+  findCourseMembers,
+  getCourseMember,
+  updateCourseMember,
+  removeCourseMember,
+} = require('../controllers/course')
+const { auth: {
+  login: loginRequire,
+  root: rootPrivilegeRequire,
+} } = require('../utils/middlewares')
+
+const courseRouter = new Router({ prefix: '/course' })
 
 // Courses
-router.get('/', course.findCourses)
-router.post('/', auth.login, auth.root, course.createCourse)
+courseRouter.get('/',
+  findCourses,
+)
+courseRouter.post('/',
+  loginRequire,
+  rootPrivilegeRequire,
+  createCourse,
+)
 
 // Course
-router.get('/:courseId', auth.login, course.preload, course.getCourse)
+courseRouter.get('/:courseId',
+  loginRequire,
+  coursePreload,
+  getCourse,
+)
 
 // Course Members
-router.get('/:courseId/member', auth.login, course.preload, course.role('manageCourse'), course.findMembers)
+courseRouter.get('/:courseId/member',
+  loginRequire,
+  coursePreload,
+  courseRoleRequire('manageCourse'),
+  findCourseMembers,
+)
 
 // Course Member
-router.get('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.getMember)
-router.post('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.updateMember)
-router.delete('/:courseId/member/:userId', auth.login, course.preload, course.role('manageCourse'), course.removeMember)
+courseRouter.get('/:courseId/member/:userId',
+  loginRequire,
+  coursePreload,
+  courseRoleRequire('manageCourse'),
+  getCourseMember,
+)
+courseRouter.post('/:courseId/member/:userId',
+  loginRequire,
+  coursePreload,
+  courseRoleRequire('manageCourse'),
+  updateCourseMember,
+)
+courseRouter.delete('/:courseId/member/:userId',
+  loginRequire,
+  coursePreload,
+  courseRoleRequire('manageCourse'),
+  removeCourseMember,
+)
 
-module.exports = router
+module.exports = courseRouter

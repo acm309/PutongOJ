@@ -1,15 +1,55 @@
 const Router = require('koa-router')
-const problem = require('../controllers/problem')
-const { auth } = require('../utils/middlewares')
 
-const router = new Router({
-  prefix: '/problem',
-})
+const {
+  courseAware,
+  coursePreload,
+  courseRoleRequire,
+} = require('../controllers/course')
+const {
+  problemPreload,
+  findProblems,
+  getProblem,
+  createProblem,
+  updateProblem,
+  removeProblem,
+} = require('../controllers/problem')
+const { auth: {
+  login: loginRequire,
+  admin: adminPrivilegeRequire,
+} } = require('../utils/middlewares')
 
-router.get('/list', problem.find)
-router.get('/:pid', problem.preload, problem.findOne)
-router.post('/', auth.login, auth.admin, problem.create)
-router.put('/:pid', auth.login, auth.admin, problem.preload, problem.update)
-router.del('/:pid', auth.login, auth.admin, problem.del)
+const problemRouter = new Router({ prefix: '/problem' })
 
-module.exports = router
+// Problems
+problemRouter.get('/',
+  courseAware([
+    loginRequire,
+    coursePreload,
+    courseRoleRequire('basic'),
+  ]),
+  findProblems,
+)
+problemRouter.post('/',
+  loginRequire,
+  adminPrivilegeRequire,
+  createProblem,
+)
+
+// Problem
+problemRouter.get('/:pid',
+  problemPreload,
+  getProblem,
+)
+problemRouter.put('/:pid',
+  loginRequire,
+  adminPrivilegeRequire,
+  problemPreload,
+  updateProblem,
+)
+problemRouter.del('/:pid',
+  loginRequire,
+  adminPrivilegeRequire,
+  removeProblem,
+)
+
+module.exports = problemRouter

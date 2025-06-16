@@ -29,7 +29,7 @@ test('Normal user can not visit reserved problem', async (t) => {
 
 test('Query problem list', async (t) => {
   const res = await request
-    .get('/api/problem/list')
+    .get('/api/problem')
 
   t.is(res.status, 200)
   t.true(Array.isArray(res.body.list.docs))
