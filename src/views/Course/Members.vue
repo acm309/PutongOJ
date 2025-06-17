@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { CourseMember, UserPrivilege } from '@/types'
 import type { Message, Modal } from 'view-ui-plus'
+import type { CourseMember, UserPrivilege } from '@/types'
+import { storeToRefs } from 'pinia'
+import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { inject, onBeforeMount, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useRootStore } from '@/store'
 import { courseRoleFields } from '@/util/constant'
 import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
-import { storeToRefs } from 'pinia'
-import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
-import { inject, onBeforeMount, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
@@ -22,11 +22,15 @@ const { privilege } = $(storeToRefs(rootStore))
 const modal = inject('$Modal') as typeof Modal
 const message = inject('$Message') as typeof Message
 
-const id = Number.parseInt(route.params.id as string)
+const DEFAULT_PAGE_SIZE = 30
+const MAX_PAGE_SIZE = 100
+
 const page = $computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
 const pageSize = $computed<number>(() =>
-  Math.max(Math.min(Number.parseInt(route.query.pageSize as string) || 30, 100), 1))
+  Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
+const id = Number.parseInt(route.params.id as string)
 
 let docs: CourseMember[] = $ref([])
 let total: number = $ref(0)
@@ -44,7 +48,7 @@ async function fetch () {
 
 function pageChange (page: number) {
   router.push({
-    name: 'courseSetting',
+    name: 'courseMembers',
     query: { page, pageSize },
   })
 }

@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { onBeforeMount } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { spacing } from 'pangu'
+import { storeToRefs } from 'pinia'
 import { Button, Card, Col, Icon, Page, Row, Spin, Tag } from 'view-ui-plus'
+import { onBeforeMount } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import CourseCreate from '@/components/CourseCreate.vue'
+import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/util/helper'
-import { useRootStore } from '@/store'
-import CourseCreate from '@/components/CourseCreate.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -21,13 +21,17 @@ const sessionStore = useSessionStore()
 const { findCourses } = courseStore
 const { toggleLoginState } = sessionStore
 const { encrypt } = $(storeToRefs(rootStore))
-const { list, total } = $(storeToRefs(courseStore))
+const { courses } = $(storeToRefs(courseStore))
 const { isLogined, isRoot } = $(storeToRefs(sessionStore))
+
+const DEFAULT_PAGE_SIZE = 5
+const MAX_PAGE_SIZE = 100
 
 const page = $computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
 const pageSize = $computed<number>(() =>
-  Math.max(Math.min(Number.parseInt(route.query.pageSize as string) || 5, 100), 1))
+  Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 
 let loading = $ref(false)
 const openCreate = $ref(false)
@@ -50,7 +54,7 @@ function visit (id: number) {
     return toggleLoginState()
   }
   router.push({
-    name: 'course',
+    name: 'courseProblems',
     params: { id },
   })
 }
@@ -71,9 +75,9 @@ onRouteQueryUpdate(fetch)
         </Button>
       </div>
     </div>
-    <div v-if="list.length > 0">
+    <div v-if="courses.total > 0">
       <Card
-        v-for="item in list" :key="item.id" class="courses-card"
+        v-for="item in courses.docs" :key="item.id" class="courses-card"
         dis-hover @click="visit(item.id)"
       >
         <Row type="flex" :gutter="16" :wrap="false">
@@ -107,12 +111,12 @@ onRouteQueryUpdate(fetch)
     <div class="courses-footer">
       <Page
         class="courses-page-table" :model-value="page"
-        :total="total" :page-size="pageSize" show-elevator
+        :total="courses.total" :page-size="courses.limit" show-elevator
         @on-change="pageChange"
       />
       <Page
         class="courses-page-mobile" :model-value="page" size="small"
-        :total="total" :page-size="pageSize" show-elevator
+        :total="courses.total" :page-size="courses.limit" show-elevator
         @on-change="pageChange"
       />
     </div>

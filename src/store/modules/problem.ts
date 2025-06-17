@@ -1,35 +1,46 @@
+import type { Paginated, ProblemBrief } from '@/types'
+import type { FindProblemsParams } from '@/types/api'
 import { defineStore } from 'pinia'
 import api from '@/api'
 
 export const useProblemStore = defineStore('problem', {
   state: () => ({
-    list: [],
+    /** @deprecated */
+    list: [] as ProblemBrief[],
     problem: {},
+    /** @deprecated */
     sum: 0,
-    solved: [],
+    solved: [] as number[],
+    problems: {} as Paginated<ProblemBrief>,
   }),
   actions: {
-    findOne (payload) {
+    async findProblems (params: FindProblemsParams) {
+      const { data } = await api.problem.findProblems(params)
+      this.problems = data.list
+      this.solved = data.solved
+    },
+    async findOne (payload: { [key: string]: any }) {
       return api.problem.findOne(payload).then(({ data }) => {
         this.problem = data.problem
         return data
       })
     },
-    async find (payload) {
+    /** @deprecated */
+    async find (payload: { [key: string]: any }) {
       const { data } = await api.problem.find(payload)
       this.list = data.list.docs
       this.sum = data.list.total
       this.solved = data.solved
     },
-    update (payload) {
+    async update (payload: { [key: string]: any }) {
       return api.problem.update(payload).then(({ data }) => {
         return data
       })
     },
-    create (payload) {
+    async create (payload: { [key: string]: any }) {
       return api.problem.create(payload).then(({ data }) => data.pid)
     },
-    delete (payload) {
+    async delete (payload: { [key: string]: any }) {
       return api.problem.delete(payload).then(() => {
         this.list = this.list.filter(p => p.pid !== +(payload.pid))
       })

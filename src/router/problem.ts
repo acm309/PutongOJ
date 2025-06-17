@@ -1,10 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import ProblemList from '@/views/ProblemList.vue'
+import MySubmission from '@/views/Problem/MySubmission.vue'
 import Problem from '@/views/Problem/Problem.vue'
 import ProblemInfo from '@/views/Problem/ProblemInfo.vue'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit.vue'
-import MySubmission from '@/views/Problem/MySubmission.vue'
+import Problems from '@/views/Problems.vue'
 
 const ProblemCreate = () => import('@/views/Admin/ProblemCreate.vue')
 const ProblemEdit = () => import('@/views/Problem/ProblemEdit.vue')
@@ -14,9 +14,9 @@ const Testcase = () => import('@/views/Problem/Testcase.vue')
 const problemRoutes: Array<RouteRecordRaw> = [
   {
     path: '/problems',
-    name: 'problemList',
-    component: ProblemList,
-    meta: { title: 'Problem List' },
+    name: 'problems',
+    component: Problems,
+    meta: { title: 'Problems' },
   },
   {
     path: '/problems/create',

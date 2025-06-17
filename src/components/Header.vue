@@ -1,11 +1,10 @@
 <script setup>
-import { useSessionStore } from '@/store/modules/session'
 import { storeToRefs } from 'pinia'
 import { Button, Dropdown, DropdownItem, DropdownMenu, Icon, Menu, MenuGroup, MenuItem, Submenu } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-
 import { useRoute, useRouter } from 'vue-router'
+import { useSessionStore } from '@/store/modules/session'
 
 const sessionStore = useSessionStore()
 const route = useRoute()
@@ -36,7 +35,7 @@ function profileAction (name) {
 function getMenuItems () {
   const menuItems = [
     { name: 'home', icon: 'ios-home', label: t('oj.home') },
-    { name: 'problemList', icon: 'ios-keypad', label: t('oj.problem_list') },
+    { name: 'problems', icon: 'ios-keypad', label: t('oj.problem_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
     {

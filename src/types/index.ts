@@ -1,4 +1,4 @@
-import type { privilege } from '@/util/constant'
+import type { privilege, status } from '@/util/constant'
 
 export interface TimeResp {
   serverTime: number
@@ -41,6 +41,16 @@ export interface Paginated<T> {
 export interface Problem {
   pid: number
   title: string
+}
+
+export interface ProblemBrief extends Problem {
+  solve: number
+  submit: number
+  status: keyof typeof status
+  tags: string[]
+}
+
+export interface ProblemDetail extends Problem {
   description: string
   input: string
   output: string
@@ -106,11 +116,6 @@ export interface RanklistInfo {
   isFrozen: boolean
   isEnded: boolean
   isCache: boolean
-}
-
-export interface RanklistResp {
-  ranklist: RawRanklist
-  info: RanklistInfo
 }
 
 export interface RanklistRow {

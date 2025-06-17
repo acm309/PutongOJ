@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 import { Auth, Divider, Exception, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { onBeforeMount } from 'vue'
-import { spacing } from 'pangu'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useCourseStore } from '@/store/modules/course'
+import { onProfileUpdate } from '@/util/helper'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -27,16 +28,13 @@ async function fetch () {
   loading = true
   await findCourse(id)
   loading = false
-
-  if (route.name === 'course') {
-    router.push({ name: 'courseMember', params: { id } })
-  }
 }
 
 const home = () => router.push({ name: 'home' })
 const back = () => router.go(-1)
 
 onBeforeMount(fetch)
+onProfileUpdate(fetch)
 </script>
 
 <template>
@@ -54,10 +52,10 @@ onBeforeMount(fetch)
     </div>
     <Auth :authority="!!course.role?.basic">
       <Tabs class="course-tabs" :model-value="display" @on-click="handleClick">
-        <TabPane label="Problem" name="courseProblem" />
-        <TabPane label="Contest" name="courseContest" />
-        <TabPane label="Member" name="courseMember" />
-        <TabPane label="Setting" name="courseSetting" />
+        <TabPane label="Problem" name="courseProblems" />
+        <TabPane label="Contest" name="courseContests" />
+        <TabPane label="Member" name="courseMembers" />
+        <TabPane label="Setting" name="courseSettings" />
       </Tabs>
       <router-view class="course-children" />
       <template #noMatch>

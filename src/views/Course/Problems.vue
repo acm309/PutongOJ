@@ -1,104 +1,101 @@
-<script setup>
-import only from 'only'
+<script setup lang="ts">
+import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
-import { inject, onBeforeMount, reactive } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { Button, Icon, Input, Option, Page, Select, Spin } from 'view-ui-plus'
+import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
-import constant from '@/util/constant'
-import { useSessionStore } from '@/store/modules/session'
-import { useProblemStore } from '@/store/modules/problem'
+import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
+import { useProblemStore } from '@/store/modules/problem'
+import { useSessionStore } from '@/store/modules/session'
+import constant from '@/util/constant'
 import { formate } from '@/util/formate'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 
-const options = reactive([
+const route = useRoute()
+const router = useRouter()
+const { t } = useI18n()
+const problemStore = useProblemStore()
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
+const { problems, solved } = $(storeToRefs(problemStore))
+const { judge } = $(storeToRefs(rootStore))
+const { isAdmin } = $(storeToRefs(sessionStore))
+const { findProblems } = problemStore
+
+const problemStatus = constant.status
+const searchOptions = Object.freeze([
   { value: 'pid', label: 'Pid' },
   { value: 'title', label: 'Title' },
   { value: 'tag', label: 'Tag' },
 ])
 
-const route = useRoute()
-const router = useRouter()
-const { t } = useI18n()
+const DEFAULT_PAGE_SIZE = 30
+const MAX_PAGE_SIZE = 100
 
-let type = $ref(route.query.type || 'pid')
-let content = $ref(route.query.content || '')
-const page = $computed(() => Number.parseInt(route.query.page) || 1)
-const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
-const problemVisible = $ref(constant.status)
-const query = $computed(() => purify({ type, content, page, pageSize }))
+const page = $computed<number>(() =>
+  Math.max(Number.parseInt(route.query.page as string) || 1, 1))
+const pageSize = $computed<number>(() =>
+  Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
+const id = Number.parseInt(route.params.id as string)
 
-const problemStore = useProblemStore()
-const rootStore = useRootStore()
-const sessionStore = useSessionStore()
-
-const { list, sum, solved } = $(storeToRefs(problemStore))
-const { status, judge } = $(storeToRefs(rootStore))
-const { isAdmin, isRoot } = $(storeToRefs(sessionStore))
-const { find, update, 'delete': remove } = problemStore
-
+const type = $ref(String(route.query.type || 'pid'))
+const content = $ref(String(route.query.content || ''))
 let loading = $ref(false)
 
-function reload(payload = {}) {
-  const routeQuery = Object.assign({}, query, purify(payload))
-  router.push({ name: 'problemList', query: routeQuery })
+const query = $computed<FindProblemsParams>(() => {
+  return {
+    page,
+    pageSize,
+    course: id,
+    type: String(route.query.type || type),
+    content: String(route.query.content || content),
+  }
+})
+
+function reload (payload: Partial<FindProblemsParams> = {}) {
+  const routeQuery = Object.assign(query, purify(payload))
+  router.push({
+    name: 'courseProblems',
+    params: { id },
+    query: routeQuery,
+  })
 }
 
-const fetch = async () => {
+async function fetch () {
   loading = true
-  type = route.query.type || 'pid'
-  content = route.query.content || ''
-  await find(query)
+  await findProblems(query)
   loading = false
 }
 
 const search = () => reload({ page: 1, type, content })
-const pageChange = val => reload({ page: val })
-
-function change(problem) {
-  loading = true
-  problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
-  update(only(problem, 'pid status')).then(fetch)
-}
-
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
-
-function del(pid) {
-  $Modal.confirm({
-    okText: t('oj.ok'),
-    cancelText: t('oj.cancel'),
-    title: t('oj.warning'),
-    content: t('oj.will_remove_problem', { pid }),
-    onOk: async () => {
-      loading = true
-      await remove({ pid })
-      $Message.success(t('oj.remove_problem_success', { pid }))
-      loading = false
-    },
-    onCancel: () => $Message.info(t('oj.cancel_remove')),
-  })
-}
+const pageChange = (val: number) => reload({ page: val })
 
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
-onProfileUpdate(fetch)
 </script>
 
 <template>
   <div class="problem-list-wrap">
     <div class="problem-list-header">
-      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
-      <Page class="problem-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="problem-page-table" :model-value="page"
+        :total="problems.total" :page-size="problems.limit" show-elevator
+        @on-change="pageChange"
+      />
+      <Page
+        class="problem-page-simple" :model-value="page" simple
+        :total="problems.total" :page-size="problems.limit" show-elevator
+        @on-change="pageChange"
+      />
       <div class="problem-list-filter">
         <Select v-model="type" class="search-type-select">
-          <Option v-for="item in options" :key="item.value" :value="item.value">
+          <Option v-for="item in searchOptions" :key="item.value" :value="item.value">
             {{ item.label }}
           </Option>
         </Select>
-        <Input v-model="content" class="search-input" @keyup.enter="search" clearable />
+        <Input v-model="content" class="search-input" clearable @keyup.enter="search" />
         <Button type="primary" class="search-button" @click="search">
           {{ t('oj.search') }}
         </Button>
@@ -108,35 +105,50 @@ onProfileUpdate(fetch)
       <table class="problem-table">
         <thead>
           <tr>
-            <th class="problem-status">#</th>
-            <th class="problem-pid">PID</th>
-            <th class="problem-title">Title</th>
-            <th class="problem-tags">Tags</th>
-            <th class="problem-ratio">Ratio</th>
-            <th v-if="isAdmin" class="problem-visible">Visible</th>
-            <th v-if="isRoot" class="problem-delete">Delete</th>
+            <th class="problem-status">
+              #
+            </th>
+            <th class="problem-pid">
+              PID
+            </th>
+            <th class="problem-title">
+              Title
+            </th>
+            <th class="problem-tags">
+              Tags
+            </th>
+            <th class="problem-ratio">
+              Ratio
+            </th>
+            <th v-if="isAdmin" class="problem-visible">
+              Visible
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="list.length === 0" class="status-empty">
+          <tr v-if="problems.total === 0" class="status-empty">
             <td colspan="7">
               <Icon type="ios-planet-outline" class="empty-icon" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>
             </td>
           </tr>
-          <tr v-for="item in list" :key="item.pid">
+          <tr v-for="item in problems.docs" :key="item.pid">
             <td class="problem-status">
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
             </td>
-            <td class="problem-pid">{{ item.pid }}</td>
+            <td class="problem-pid">
+              {{ item.pid }}
+            </td>
             <td class="problem-title">
               <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-                <Button type="text" class="table-button">{{ item.title }}</Button>
+                <Button type="text" class="table-button">
+                  {{ item.title }}
+                </Button>
               </router-link>
             </td>
             <td class="problem-tags">
               <template v-for="(item2, index2) in item.tags" :key="index2">
-                <router-link :to="{ name: 'problemList', query: { type: 'tag', content: item2 } }">
+                <router-link :to="{ name: 'problems', query: { type: 'tag', content: item2 } }">
                   <span class="problem-tag">{{ item2 }}</span>
                 </router-link>
               </template>
@@ -154,33 +166,36 @@ onProfileUpdate(fetch)
             </td>
             <td v-if="isAdmin" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
-                <a @click="change(item)">{{ problemVisible[item.status] }}</a>
+                <a>{{ problemStatus[item.status] }}</a>
               </Tooltip>
-            </td>
-            <td v-if="isRoot" class="problem-delete">
-              <a @click="del(item.pid)">Delete</a>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="problem-list-footer">
-      <Page class="problem-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="problem-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-total
-        show-elevator @on-change="pageChange" />
+      <Page
+        class="problem-page-table" :model-value="page"
+        :total="problems.total" :page-size="problems.limit" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="problem-page-mobile" :model-value="page" size="small"
+        :total="problems.total" :page-size="problems.limit" show-totalshow-elevator
+        @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
-@import '../styles/common'
+@import '../../styles/common'
 
 .problem-list-wrap
   width 100%
   margin 0 auto
-  padding 40px 0
+  padding 0 0 40px
 .problem-list-header
   padding 0 40px
   margin-bottom 25px
@@ -203,7 +218,7 @@ onProfileUpdate(fetch)
 
 @media screen and (max-width: 1024px)
   .problem-list-wrap
-    padding 20px 0
+    padding 0 0 20px
   .problem-list-header
     padding 0 20px
     margin-bottom 5px
@@ -276,8 +291,6 @@ onProfileUpdate(fetch)
   width 200px
 .problem-visible
   width 120px
-.problem-delete
-  width 100px
 
 .problem-tag
   display inline-block

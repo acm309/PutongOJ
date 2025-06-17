@@ -1,22 +1,21 @@
-import type { Course } from '@/types'
-import api from '@/api'
+import type { Course, Paginated } from '@/types'
+import type { PaginateParams } from '@/types/api'
 import { defineStore } from 'pinia'
+import api from '@/api'
 
 export const useCourseStore = defineStore('course', {
   state: () => ({
-    total: 0,
-    list: [] as Course[],
     course: {} as Course,
+    courses: {} as Paginated<Course>,
   }),
   actions: {
     async createCourse (course: Partial<Course>): Promise<number> {
       const { data } = await api.course.createCourse(course)
       return data.id
     },
-    async findCourses (params: { page: number, pageSize: number }) {
+    async findCourses (params: PaginateParams) {
       const { data } = await api.course.findCourses(params)
-      this.list = data.docs
-      this.total = data.total
+      this.courses = data
     },
     async findCourse (courseId: number) {
       const { data } = await api.course.getCourse(courseId)

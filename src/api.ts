@@ -1,4 +1,5 @@
-import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, RanklistResp, TimeResp, User, WebsiteConfigResp } from './types'
+import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
+import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
 
@@ -76,8 +77,11 @@ const solution = {
 const problem = {
   findOne: (data: { [key: string]: any }) =>
     instance.get(`/problem/${data.pid}`, { params: data }),
+  /** @deprecated */
   find: (data: { [key: string]: any }) =>
-    instance.get('/problem/list', { params: data }),
+    instance.get('/problem', { params: data }),
+  findProblems: (params: FindProblemsParams) =>
+    instance.get<FindProblemsResponse>('/problem', { params }),
   create: (data: { [key: string]: any }) =>
     instance.post('/problem/', data),
   update: (data: { [key: string]: any }) =>
@@ -96,7 +100,7 @@ const contest = {
   update: (data: { [key: string]: any }) =>
     instance.put(`/contest/${data.cid}`, data),
   ranklist: (cid: number) =>
-    instance.get<RanklistResp>(`/contest/${cid}/ranklist`),
+    instance.get<RanklistResponse>(`/contest/${cid}/ranklist`),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/contest/${data.cid}`, data),
   verify: (data: { [key: string]: any }) =>
@@ -163,13 +167,13 @@ const session = {
 }
 
 const course = {
-  findCourses: (params: { page: number, pageSize: number }) =>
+  findCourses: (params: PaginateParams) =>
     instance.get<Paginated<Course>>('/course', { params }),
   createCourse: (course: Partial<Course>) =>
     instance.post<{ id: number }>('/course', course),
   getCourse: (courseId: number) =>
     instance.get<Course>(`/course/${courseId}`),
-  findMembers: (courseId: number, params: { page: number, pageSize: number }) =>
+  findMembers: (courseId: number, params: PaginateParams) =>
     instance.get<Paginated<CourseMember>>(`/course/${courseId}/member`, { params }),
   getMember: (courseId: number, userId: string) =>
     instance.get<CourseMember>(`/course/${courseId}/member/${userId}`),
