@@ -1,51 +1,56 @@
 require('dotenv-flow').config()
 
 const { resolve } = require('node:path')
-const fse = require('fs-extra')
+const { outputJSON } = require('fs-extra')
 
-async function main () {
-  const logDir = resolve(__dirname, 'logs')
+const baseDir = resolve(__dirname)
+const logsDir = resolve(baseDir, 'logs')
+const jobsDir = resolve(baseDir, 'jobs')
 
-  const pm2config = {
-    apps: [
-      {
-        name: 'app',
-        script: resolve(__dirname, 'app.js'),
-        out_file: resolve(logDir, 'app.out.log'),
-        error_file: resolve(logDir, 'app.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-        merge_logs: true,
-        restart_delay: 500,
-        env: {
-          NODE_ENV: 'production',
-        },
-      },
-      {
-        name: 'updater',
-        script: resolve(__dirname, 'services', 'updater.js'),
-        out_file: resolve(logDir, 'updater.out.log'),
-        error_file: resolve(logDir, 'updater.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-        merge_logs: true,
-        env: {
-          NODE_ENV: 'production',
-        },
-      },
-      {
-        name: 'worker',
-        script: resolve(__dirname, 'services', 'worker.js'),
-        out_file: resolve(logDir, 'worker.out.log'),
-        error_file: resolve(logDir, 'worker.err.log'),
-        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-        merge_logs: true,
-        env: {
-          NODE_ENV: 'production',
-        },
-      },
-    ],
+const WORKER_INSTANCES = Number.parseInt(
+  process.env.PTOJ_WORKER_INSTANCES, 10) || 2
+
+async function main() {
+
+  const apps = []
+  const commons = {
+    env: {
+      NODE_ENV: 'production',
+    },
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    restart_delay: 1000,
+    merge_logs: true,
   }
 
-  return fse.outputJSON('pm2.config.json', pm2config, { spaces: 2, EOL: '\n' })
+  apps.push({
+    name: 'app',
+    script: resolve(baseDir, 'app.js'),
+    out_file: resolve(logsDir, 'app.out.log'),
+    error_file: resolve(logsDir, 'app.err.log'),
+    ...commons,
+  })
+  apps.push({
+    name: 'updater',
+    script: resolve(jobsDir, 'updater.js'),
+    out_file: resolve(logsDir, 'updater.out.log'),
+    error_file: resolve(logsDir, 'updater.err.log'),
+    ...commons,
+  })
+  for (let i = 0; i < WORKER_INSTANCES; i++) {
+    apps.push({
+      name: 'worker',
+      script: resolve(jobsDir, 'worker.js'),
+      out_file: resolve(logsDir, `worker-${i}.out.log`),
+      error_file: resolve(logsDir, `worker-${i}.err.log`),
+      ...commons,
+    })
+  }
+
+  outputJSON(
+    resolve(baseDir, 'pm2.config.json'),
+    { apps },
+    { spaces: 2, EOL: '\n' }
+  )
 }
 
 main()

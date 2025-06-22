@@ -4,8 +4,8 @@ require('../config/db')
 const redis = require('../config/redis')
 const logger = require('../utils/logger')
 
-const checkSimilarity = require('./job/checkSimilarity')
-const updateStatistic = require('./job/updateStatistic')
+const checkSimilarity = require('./tasks/checkSimilarity')
+const updateStatistic = require('./tasks/updateStatistic')
 
 async function main () {
   logger.info('Worker is running...')

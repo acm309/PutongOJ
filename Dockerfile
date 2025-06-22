@@ -21,9 +21,7 @@ RUN npm i -g pnpm@latest-9 && \
 COPY . .
 COPY --from=frontend_builder /app/dist /app/public
 
-RUN node setup.js
-
 EXPOSE 3000/tcp
 
 VOLUME [ "/app/data", "/app/logs", "/app/public/uploads" ]
-CMD ["npx", "pm2", "start", "pm2.config.json", "--no-daemon"]
+ENTRYPOINT [ "entrypoint.sh" ]
