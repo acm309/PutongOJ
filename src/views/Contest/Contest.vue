@@ -1,14 +1,13 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Card, Poptip, Progress, Tabs } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { useSessionStore } from '@/store/modules/session'
+import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
-import { timePretty, timeContest } from '@/util/formate'
+import { useSessionStore } from '@/store/modules/session'
+import { timeContest, timePretty } from '@/util/formate'
 import { onProfileUpdate, onRouteParamUpdate, purify } from '@/util/helper'
-
-import { Card, Progress, Tabs, Poptip } from 'view-ui-plus'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
@@ -30,9 +29,9 @@ let loading = $ref(false)
 
 const timePercentage = $computed(() => {
   if (currentTime < contest.start) return 0
-  if (currentTime > contest.end) return 100
-  return +((currentTime - contest.start) * 100
-    / (contest.end - contest.start)).toFixed(1)
+  if (currentTime >= contest.end) return 100
+  const percentage = (currentTime - contest.start) * 100 / (contest.end - contest.start)
+  return Math.floor(percentage * 10) / 10
 })
 const progressStatus = $computed(() => {
   if (timePercentage === 100) return 'success'
@@ -45,14 +44,14 @@ const contestCountdown = $computed(() => {
   return 'Contest Ended'
 })
 
-function handleClick(name) {
+function handleClick (name) {
   if (name === 'contestProblem' || name === 'contestSubmit')
     router.push({ name, params: { cid: route.params.cid, id: route.params.id || 1 } })
   else
     router.push({ name, params: { cid: route.params.cid } })
 }
 
-async function fetch() {
+async function fetch () {
   loading = true
   await findOne(purify({ cid: route.params.cid, uid: profile?.uid }))
   changeDomTitle(contest.name)
@@ -66,11 +65,12 @@ onProfileUpdate(fetch)
 </script>
 
 <template>
-  <div :class="{
-    'contest-wrap': true,
-    'contest-ranklist-wrap': $route.name === 'contestRanklist',
-    'contest-status-wrap': $route.name === 'contestStatus'
-  }">
+  <div
+    class="contest-wrap" :class="{
+      'contest-ranklist-wrap': $route.name === 'contestRanklist',
+      'contest-status-wrap': $route.name === 'contestStatus',
+    }"
+  >
     <Poptip class="contest-poptip" trigger="hover" placement="bottom">
       <Card class="contest-card" dis-hover>
         <div class="contest-info">
@@ -78,16 +78,18 @@ onProfileUpdate(fetch)
             <span class="tag">Begin</span>
             <span class="time">{{ timePretty(contest.start) }}</span>
           </span>
-          <span class="contest-status ready" v-if="currentTime < contest.start">Ready</span>
-          <span class="contest-status running" v-else-if="currentTime < contest.end">Running</span>
-          <span class="contest-status ended" v-else>Ended</span>
+          <span v-if="currentTime < contest.start" class="contest-status ready">Ready</span>
+          <span v-else-if="currentTime < contest.end" class="contest-status running">Running</span>
+          <span v-else class="contest-status ended">Ended</span>
           <span class="contest-end-time">
             <span class="tag">End</span>
             <span class="time">{{ timePretty(contest.end) }}</span>
           </span>
         </div>
-        <Progress class="contest-progress" :stroke-width="19" :status="progressStatus" :percent="timePercentage"
-          text-inside />
+        <Progress
+          class="contest-progress" :stroke-width="19" :status="progressStatus" :percent="timePercentage"
+          text-inside
+        />
       </Card>
       <template #content>
         <span class="contest-countdown">{{ contestCountdown }}</span>
@@ -102,7 +104,7 @@ onProfileUpdate(fetch)
       <TabPane v-if="isAdmin" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
     <!-- 此处 if：为了确保之后的 children 能拿到 contest -->
-    <router-view class="contest-children" v-if="contest && contest.cid" />
+    <router-view v-if="contest && contest.cid" class="contest-children" />
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
