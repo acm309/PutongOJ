@@ -30,9 +30,9 @@ let loading = $ref(false)
 
 const timePercentage = $computed(() => {
   if (currentTime < contest.start) return 0
-  if (currentTime > contest.end) return 100
-  return +((currentTime - contest.start) * 100
-    / (contest.end - contest.start)).toFixed(1)
+  if (currentTime >= contest.end) return 100
+  const percentage=(currentTime-contest.start)*100/(contest.end-contest.start)
+  return Math.floor(percentage*10)/10
 })
 const progressStatus = $computed(() => {
   if (timePercentage === 100) return 'success'
