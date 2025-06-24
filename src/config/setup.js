@@ -39,7 +39,7 @@ async function databaseSetup () {
       title: 'A + B',
       description: 'This is a test problem without any test data. Go to Edit tab to complete the description and other fields. Go to Test Data to upload new test data',
     }).save())
-    ps.push(fse.outputJsonSync(path.resolve(__dirname, '../data/1000/', 'meta.json'), {
+    ps.push(fse.outputJsonSync(path.resolve(__dirname, '../../data/1000/', 'meta.json'), {
       testcases: [],
     }, { spaces: 2 })) // 缩进2个空格
   }

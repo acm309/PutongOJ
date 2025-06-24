@@ -19,11 +19,11 @@
     "node": ">= 16.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon app.js",
-    "dev:updater": "cross-env NODE_ENV=development nodemon services/updater.js",
-    "dev:worker": "cross-env NODE_ENV=development nodemon services/worker.js",
-    "start": "cross-env NODE_ENV=production node app.js",
-    "deploy:init": "cross-env NODE_ENV=production node manage.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+    "dev:updater": "cross-env NODE_ENV=development nodemon src/jobs/updater.js",
+    "dev:worker": "cross-env NODE_ENV=development nodemon src/jobs/worker.js",
+    "start": "cross-env NODE_ENV=production node src/app.js",
+    "deploy:init": "cross-env NODE_ENV=production node setup.js",
     "deploy:start": "npx pm2 start pm2.config.json",
     "pretest": "cross-env NODE_ENV=test node test/pretest.js",
     "test": "cross-env-shell NODE_ENV=test \"node test/pretest.js && nyc ava && node test/posttest.js\"",

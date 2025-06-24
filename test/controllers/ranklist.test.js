@@ -1,6 +1,6 @@
 const test = require('ava')
 const supertest = require('supertest')
-const app = require('../../app')
+const app = require('../../src/app')
 
 const server = app.listen()
 const request = supertest.agent(server)

@@ -101,7 +101,7 @@ const create = async (ctx) => {
     const additionCode = problem.code
 
     let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../data/${pid}`)
+    const dir = path.resolve(__dirname, `../../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
     if (fse.existsSync(file)) {
       meta = await fse.readJson(file)
@@ -171,7 +171,7 @@ const update = async (ctx) => {
     const additionCode = problem.code
 
     let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../data/${pid}`)
+    const dir = path.resolve(__dirname, `../../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
     if (fse.existsSync(file)) {
       meta = await fse.readJson(file)

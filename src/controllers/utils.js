@@ -3,7 +3,7 @@ const fse = require('fs-extra')
 const websiteConf = require('../config/website')
 const logger = require('../utils/logger')
 
-const uploadDir = path.join(__dirname, '../public/uploads')
+const uploadDir = path.join(__dirname, '../../public/uploads')
 
 const upload = async (ctx) => {
   const file = ctx.request.body.files.image

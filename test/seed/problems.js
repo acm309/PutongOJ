@@ -1,4 +1,4 @@
-const config = require('../../config')
+const config = require('../../src/config')
 
 // 1005: reversed
 const problems = {

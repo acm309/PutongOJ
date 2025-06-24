@@ -158,7 +158,7 @@ const createProblem = async (ctx) => {
     ctx.throw(400, e.message)
   }
 
-  const dir = path.resolve(__dirname, `../data/${problem.pid}`)
+  const dir = path.resolve(__dirname, `../../data/${problem.pid}`)
   fse.ensureDirSync(dir) // 如果dir这个文件夹不存在，就创建它
 
   /**

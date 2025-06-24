@@ -1,4 +1,4 @@
-const config = require('../../config')
+const config = require('../../src/config')
 
 // user 5 will used to update pwd
 const users = {

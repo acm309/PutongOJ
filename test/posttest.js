@@ -1,7 +1,7 @@
 const process = require('node:process')
 
 require('dotenv-flow').config()
-require('../config/db')
+require('../src/config/db')
 const { removeall } = require('./helper')
 
 async function main () {

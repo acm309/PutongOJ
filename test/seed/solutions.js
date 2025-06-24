@@ -1,4 +1,4 @@
-const config = require('../../config')
+const config = require('../../src/config')
 
 module.exports = {
   size: 2,

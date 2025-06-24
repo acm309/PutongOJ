@@ -1,6 +1,6 @@
 const test = require('ava')
 const supertest = require('supertest')
-const app = require('../../../app')
+const app = require('../../../src/app')
 const news = require('../../seed/news')
 
 const server = app.listen()

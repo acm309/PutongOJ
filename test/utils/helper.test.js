@@ -1,6 +1,6 @@
 const test = require('ava')
-const config = require('../../config')
-const helper = require('../../utils/helper')
+const config = require('../../src/config')
+const helper = require('../../src/utils/helper')
 
 test('helper.purify', (t) => {
   t.deepEqual(helper.purify({

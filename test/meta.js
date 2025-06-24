@@ -1,5 +1,5 @@
-const config = require('../config')
-const { generatePwd } = require('../utils/helper')
+const config = require('../src/config')
+const { generatePwd } = require('../src/utils/helper')
 
 module.exports = {
   problems: {

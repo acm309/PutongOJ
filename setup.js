@@ -3,8 +3,8 @@ require('dotenv-flow').config()
 const { resolve } = require('node:path')
 const { outputJSON } = require('fs-extra')
 
-const baseDir = resolve(__dirname)
-const logsDir = resolve(baseDir, 'logs')
+const baseDir = resolve(__dirname, 'src')
+const logsDir = resolve(__dirname, 'logs')
 const jobsDir = resolve(baseDir, 'jobs')
 
 const WORKER_INSTANCES = Number.parseInt(
@@ -47,7 +47,7 @@ async function main() {
   }
 
   outputJSON(
-    resolve(baseDir, 'pm2.config.json'),
+    resolve(__dirname, 'pm2.config.json'),
     { apps },
     { spaces: 2, EOL: '\n' }
   )

@@ -35,7 +35,7 @@ const create = async (ctx) => {
     ctx.throw(400, 'Cannot create testcase without both input and output')
   }
 
-  const testDir = path.resolve(__dirname, `../data/${pid}`)
+  const testDir = path.resolve(__dirname, `../../data/${pid}`)
   const id = uuid() // 快速生成RFC4122 UUID
   // 将文件读取到meta对象
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
@@ -62,7 +62,7 @@ const del = async (ctx) => {
   const uuid = loadUUID(ctx)
   const { profile: { uid } } = ctx.state
 
-  const testDir = path.resolve(__dirname, `../data/${pid}`)
+  const testDir = path.resolve(__dirname, `../../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
   remove(meta.testcases, item => item.uuid === uuid)
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
@@ -81,7 +81,7 @@ const fetch = async (ctx) => {
     ctx.throw(400, 'Invalid type')
   }
 
-  const testDir = path.resolve(__dirname, `../data/${pid}`)
+  const testDir = path.resolve(__dirname, `../../data/${pid}`)
   if (!fse.existsSync(path.resolve(testDir, `${uuid}.${type}`))) {
     ctx.throw(400, 'No such a testcase')
   }
@@ -94,7 +94,7 @@ const find = async (ctx) => {
   const pid = loadPID(ctx)
 
   let meta = { testcases: [] }
-  const dir = path.resolve(__dirname, `../data/${pid}`)
+  const dir = path.resolve(__dirname, `../../data/${pid}`)
   const file = path.resolve(dir, 'meta.json')
   if (!fse.existsSync(file)) {
     fse.ensureDirSync(dir)
