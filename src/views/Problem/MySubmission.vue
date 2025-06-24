@@ -132,7 +132,7 @@ onRouteQueryUpdate(init)
 .status-wrap
   width 100%
   margin 0 auto
-  padding 40px 0
+  padding 40px 0 !important
   margin-top -40px
 
 .status-header
@@ -156,7 +156,7 @@ onRouteQueryUpdate(init)
 
 @media screen and (max-width: 1024px)
   .status-wrap
-    padding 20px 0
+    padding 20px 0 !important
     margin-top -20px
   .status-footer
     padding 0 20px
