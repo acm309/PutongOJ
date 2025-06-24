@@ -1,7 +1,7 @@
 # Frontend
 FROM node:22 AS frontend_builder
 
-RUN git clone https://github.com/net-escape/ptoj-Frontend.git /app
+RUN git clone https://github.com/net-escape/ptoj-frontend.git /app
 
 WORKDIR /app
 
