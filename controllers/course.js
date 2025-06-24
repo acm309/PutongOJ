@@ -100,13 +100,12 @@ const courseAware = (middlewares) => {
 const findCourses = async (ctx) => {
   const opt = ctx.request.query
 
-  const MIN_PAGE_SIZE = 1
-  const MAX_PAGE_SIZE = 100
   const DEFAULT_PAGE_SIZE = 5
+  const MAX_PAGE_SIZE = 100
 
   const page = Math.max(Number.parseInt(opt.page) || 1, 1)
   const pageSize = Math.max(Math.min(Number.parseInt(opt.pageSize)
-    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), MIN_PAGE_SIZE)
+    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1)
 
   const list = await Course.paginate({}, {
     sort: { id: -1 },
