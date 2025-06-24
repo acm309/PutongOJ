@@ -3,7 +3,7 @@ require('dotenv-flow').config()
 const { resolve } = require('node:path')
 const { outputJSON } = require('fs-extra')
 
-const baseDir = resolve(__dirname, 'src')
+const baseDir = resolve(__dirname, 'dist')
 const logsDir = resolve(__dirname, 'logs')
 const jobsDir = resolve(baseDir, 'jobs')
 

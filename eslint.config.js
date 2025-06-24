@@ -1,52 +1,27 @@
 const antfu = require('@antfu/eslint-config').default
 
-module.exports = antfu({
-  ignores: [
-    'coverage/**',
-    'dist/**',
-    'public/**',
-    '.vscode/**',
-    'node_modules/**',
-    '*.md',
-  ],
-}, {
-  rules: {
-    'style/max-statements-per-line': [ 'error', { max: 3 } ],
+module.exports = antfu(
+  {
+    ignores: [
+      '/coverage/',
+      '/dist/',
+      '/public/',
+      '/node_modules/',
+    ],
   },
-}, {
-  rules: {
-    'unused-imports/no-unused-vars': [ 'warn' ],
+  {
+    rules: {
+      'style/max-statements-per-line': [ 'error', { max: 3 } ],
+      'unused-imports/no-unused-vars': [ 'warn' ],
+      'style/brace-style': [ 'error', '1tbs', { allowSingleLine: true } ],
+      'style/space-before-function-paren': [ 'error', 'always' ],
+      'style/array-bracket-spacing': [ 'error', 'always' ],
+      'antfu/if-newline': [ 'off' ],
+      'antfu/top-level-function': [ 'off' ],
+      'antfu/consistent-list-newline': [ 'off' ],
+      'curly': [ 'error', 'all' ],
+      'no-console': 'off',
+      'no-unused-vars': 'off',
+    },
   },
-}, {
-  rules: {
-    'style/brace-style': [ 'error', '1tbs', { allowSingleLine: true } ],
-  },
-}, {
-  rules: {
-    'style/space-before-function-paren': [ 'error', 'always' ],
-  },
-}, {
-  rules: {
-    'style/array-bracket-spacing': [ 'error', 'always' ],
-  },
-}, {
-  rules: {
-    'antfu/if-newline': [ 'off' ],
-  },
-}, {
-  rules: {
-    'antfu/top-level-function': [ 'off' ],
-  },
-}, {
-  rules: {
-    'antfu/consistent-list-newline': [ 'off' ],
-  },
-}, {
-  rules: {
-    curly: [ 'error', 'all' ],
-  },
-}, {
-  rules: {
-    'no-console': 'off',
-  },
-})
+)

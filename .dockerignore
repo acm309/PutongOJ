@@ -11,6 +11,7 @@ docker-compose*
 .github/
 .nyc_output/
 dist/
+docs/
 .env*
 node_modules/
 

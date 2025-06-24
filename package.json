@@ -19,16 +19,17 @@
     "node": ">= 16.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/app.js",
-    "dev:updater": "cross-env NODE_ENV=development nodemon src/jobs/updater.js",
-    "dev:worker": "cross-env NODE_ENV=development nodemon src/jobs/worker.js",
-    "start": "cross-env NODE_ENV=production node src/app.js",
+    "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.js",
+    "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.js",
+    "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.js",
+    "build": "tsc",
+    "start": "cross-env NODE_ENV=production node dist/app.js",
     "deploy:init": "cross-env NODE_ENV=production node setup.js",
     "deploy:start": "npx pm2 start pm2.config.json",
-    "pretest": "cross-env NODE_ENV=test node test/pretest.js",
-    "test": "cross-env-shell NODE_ENV=test \"node test/pretest.js && nyc ava && node test/posttest.js\"",
+    "pretest": "cross-env NODE_ENV=test ts-node test/pretest.js",
+    "test": "cross-env-shell NODE_ENV=test \"ts-node test/pretest.js && nyc ava && ts-node test/posttest.js\"",
     "report": "nyc report --reporter=html",
-    "posttest": "cross-env NODE_ENV=test node test/posttest.js",
+    "posttest": "cross-env NODE_ENV=test ts-node test/posttest.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov"
@@ -59,6 +60,9 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.1",
+    "@types/koa": "^2.15.0",
+    "@types/koa-router": "^7.4.8",
+    "@types/node": "^24.0.3",
     "ava": "^6.4.0",
     "eslint": "^9.29.0",
     "eslint-plugin-import": "^2.32.0",
@@ -67,6 +71,7 @@
     "nodemon": "^3.1.10",
     "nyc": "^17.1.0",
     "supertest": "^7.1.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "nodemonConfig": {
