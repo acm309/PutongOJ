@@ -1,12 +1,13 @@
 # Frontend Builder
 FROM node:22 AS frontend_builder
-
-RUN git clone https://github.com/net-escape/ptoj-frontend.git /app
-
 WORKDIR /app
 
+COPY client/package.json .
+COPY client/pnpm-lock.yaml .
 RUN npm i -g pnpm@latest-9 && \
     pnpm install
+
+COPY client/ .
 RUN pnpm run build
 
 # Backend Builder
@@ -35,8 +36,7 @@ COPY --from=frontend_builder /app/dist /app/public
 
 COPY setup.js .
 COPY entrypoint.sh .
-RUN mkdir -p /app/data /app/logs /app/public/uploads && \
-    chmod +x entrypoint.sh
+RUN mkdir -p /app/data /app/logs /app/public/uploads
 
 EXPOSE 3000/tcp
 
