@@ -1,0 +1,25 @@
+.DS_Store
+node_modules/
+/dist/
+/dist-webpack/
+stats.html
+dist.zip
+npm-debug.log*
+package-lock.json
+yarn-debug.log*
+yarn-error.log*
+public/static
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
