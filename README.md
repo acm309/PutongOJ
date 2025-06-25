@@ -1,9 +1,9 @@
 # Putong OJ
 
-[![Node.JS](https://img.shields.io/badge/node-%3E=18-417e38.svg)](https://nodejs.org/)
-[![Test Status](https://img.shields.io/github/actions/workflow/status/net-escape/ptoj-backend/ci.yml?label=test)](https://github.com/net-escape/ptoj-backend/actions/workflows/ci.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/net-escape/ptoj-backend/main)](https://app.codecov.io/github/net-escape/ptoj-backend)
-[![GitHub License](https://img.shields.io/github/license/net-escape/ptoj-backend)](https://github.com/net-escape/ptoj-backend/blob/main/LICENSE)
+[![Node.JS](https://img.shields.io/badge/node-%3E=20-417e38.svg)](https://nodejs.org/)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/net-escape/putong-oj/ci.yml?label=test)](https://github.com/net-escape/putong-oj/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/net-escape/putong-oj/main)](https://app.codecov.io/github/net-escape/putong-oj)
+[![GitHub License](https://img.shields.io/github/license/net-escape/putong-oj)](https://github.com/net-escape/putong-oj/blob/main/LICENSE)
 
 Putong OJ is an online judge system designed for competitive programming and algorithmic problem-solving. A live instance is available at [acm.cjlu.edu.cn](https://acm.cjlu.edu.cn/).
 
@@ -15,7 +15,7 @@ Putong OJ is an online judge system designed for competitive programming and alg
 
 > [!CAUTION]  
 >   
-> The current branch may contain untested changes after dependency upgrades. For production use, we strongly recommend using the last stable version from commit [`6c7b68c`](https://github.com/net-escape/ptoj-backend/tree/6c7b68c183af0ba0a5512ff273c1955d250cc892).  
+> The current branch may contain untested changes after dependency upgrades and a project structure refactor. For production use, we strongly recommend using the last stable version: **backend** at commit [`6c7b68c`](https://github.com/net-escape/putong-oj/tree/6c7b68c183af0ba0a5512ff273c1955d250cc892) and **frontend** at commit [`ce13bf1`](https://github.com/net-escape/putong-oj/tree/ce13bf1988bb4923947b9b72a0b8a371d3110469).
 >   
 > Some features might be unstable until comprehensive testing is completed. Proceed with caution when deploying this version.
 
