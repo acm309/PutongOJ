@@ -1,9 +1,3 @@
-# Custom
-data/*
-!data/example
-public/uploads/*
-!public/uploads/.gitkeep
-
 # Logs
 logs
 *.log

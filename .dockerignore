@@ -1,21 +1,11 @@
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
-
-# Git
-.git/
-.gitignore
-
 # Development
 .github/
-.nyc_output/
-dist/
-docs/
-.env*
-node_modules/
+**/dist/
+**/node_modules/
+backend/.nyc_output/
+backend/.env*
 
 # Data
-data/
-logs/
-public/uploads/
+backend/data/
+backend/logs/
+backend/public/uploads/

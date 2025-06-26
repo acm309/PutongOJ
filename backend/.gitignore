@@ -1,0 +1,4 @@
+data/*
+!data/example
+public/uploads/*
+!public/uploads/.gitkeep

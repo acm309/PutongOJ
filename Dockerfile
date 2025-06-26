@@ -1,41 +1,41 @@
 # Frontend Builder
 FROM node:22 AS frontend_builder
-WORKDIR /app
+WORKDIR /app/frontend
 
-COPY client/package.json .
-COPY client/pnpm-lock.yaml .
-RUN npm i -g pnpm@latest-9 && \
+COPY frontend/package.json .
+COPY frontend/pnpm-lock.yaml .
+RUN npm i -g pnpm@latest-10 && \
     pnpm install
 
-COPY client/ .
+COPY . /app
 RUN pnpm run build
 
 # Backend Builder
 FROM node:22 AS backend_builder
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY package.json .
-COPY pnpm-lock.yaml .
-RUN npm i -g pnpm@latest-9 && \
+COPY backend/package.json .
+COPY backend/pnpm-lock.yaml .
+RUN npm i -g pnpm@latest-10 && \
     pnpm install
 
-COPY . .
+COPY . /app
 RUN pnpm run build
 
 # Runtime
 FROM node:22
 WORKDIR /app
 
-COPY package.json .
-COPY pnpm-lock.yaml .
-RUN npm i -g pnpm@latest-9 && \
+COPY backend/package.json .
+COPY backend/pnpm-lock.yaml .
+RUN npm i -g pnpm@latest-10 && \
     pnpm install -P
 
-COPY --from=backend_builder /app/dist /app/dist
-COPY --from=frontend_builder /app/dist /app/public
+COPY --from=backend_builder /app/backend/dist /app/dist
+COPY --from=frontend_builder /app/frontend/dist /app/public
 
-COPY setup.js .
-COPY entrypoint.sh .
+COPY backend/setup.js .
+COPY backend/entrypoint.sh .
 RUN mkdir -p /app/data /app/logs /app/public/uploads
 
 EXPOSE 3000/tcp
