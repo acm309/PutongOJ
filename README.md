@@ -1,7 +1,7 @@
 # Putong OJ
 
 [![Node.JS](https://img.shields.io/badge/node-%3E=20-417e38.svg)](https://nodejs.org/)
-[![Test Status](https://img.shields.io/github/actions/workflow/status/net-escape/putong-oj/ci.yml?label=test)](https://github.com/net-escape/putong-oj/actions/workflows/ci.yml)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/net-escape/putong-oj/backend-test.yml?label=test)](https://github.com/net-escape/putong-oj/actions/workflows/backend-test.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/net-escape/putong-oj/main)](https://app.codecov.io/github/net-escape/putong-oj)
 [![GitHub License](https://img.shields.io/github/license/net-escape/putong-oj)](https://github.com/net-escape/putong-oj/blob/main/LICENSE)
 

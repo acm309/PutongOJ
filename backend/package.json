@@ -16,7 +16,7 @@
   "repository": "https://github.com/acm309/PutongOJ.git",
   "main": "app.js",
   "engines": {
-    "node": ">= 16.0.0"
+    "node": ">= 20.0.0"
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.js",
