@@ -60,8 +60,10 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.16.1",
+    "@ava/typescript": "^6.0.0",
     "@types/koa": "^2.15.0",
     "@types/koa-router": "^7.4.8",
+    "@types/lodash": "^4.17.19",
     "@types/node": "^24.0.4",
     "ava": "^6.4.0",
     "eslint": "^9.29.0",
@@ -76,15 +78,29 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "data/*"
+      "data/*",
+      "dist/*"
     ]
   },
   "ava": {
+    "concurrency": 1,
     "files": [
       "test/**/*.test.js"
     ],
     "require": [
-      "test/force-exit.js"
+      "ts-node/register",
+      "./test/_force-exit.mjs"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.{js,ts}"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "require": [
+      "ts-node/register"
     ]
   }
 }

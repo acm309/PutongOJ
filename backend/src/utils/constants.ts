@@ -60,7 +60,7 @@ const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 
-export {
+export default Object.freeze({
   coursePermission,
   deploy,
   encrypt,
@@ -69,4 +69,4 @@ export {
   privilege,
   problemType,
   status,
-}
+})
