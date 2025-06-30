@@ -23,7 +23,7 @@ jobs:
         working-directory: backend
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22, 24]
         redis-version: [7]
         mongodb-version: ["8.0"]
 
