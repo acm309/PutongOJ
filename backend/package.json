@@ -79,13 +79,22 @@
   "nodemonConfig": {
     "ignore": [
       "data/*",
-      "dist/*"
+      "dist/*",
+      "test/*"
     ]
   },
   "ava": {
     "concurrency": 1,
+    "serial": true,
+    "environmentVariables": {
+      "NODE_ENV": "test"
+    },
     "files": [
-      "test/**/*.test.js"
+      "test/**/*.test.{js,ts}"
+    ],
+    "extensions": [
+      "ts",
+      "js"
     ],
     "require": [
       "ts-node/register",
