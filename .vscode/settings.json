@@ -1,0 +1,12 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/pnpm-lock.yaml": true,
+    "backend/.nyc_output": true,
+    "backend/coverage": true,
+    "backend/coverage.lcov": true,
+    "backend/tsconfig.tsbuildinfo": true,
+    "frontend/stats.html": true,
+  }
+}
