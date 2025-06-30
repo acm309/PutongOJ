@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const status = require('../controllers/status')
-const { auth, solutionCreateRateLimit } = require('../utils/middlewares')
+const { auth, solutionCreateRateLimit } = require('../middlewares')
 
 const router = new Router({
   prefix: '/status',

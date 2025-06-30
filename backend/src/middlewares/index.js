@@ -2,42 +2,31 @@ const { env } = require('node:process')
 const { RateLimit } = require('koa2-ratelimit')
 const { privilege } = require('../config')
 const User = require('../models/User')
-const { isAdmin, isRoot } = require('./helper')
+const { isAdmin, isRoot } = require('../utils/helper')
+const authn = require('../services/authn')
 
 const login = async (ctx, next) => {
-  if (!ctx.session?.profile) {
+  const isLogin = await authn.isLogin(ctx)
+  if (!isLogin) {
     ctx.throw(401, 'Login required')
   }
-
-  const { uid, pwd } = ctx.session.profile
-  const user = await User.findOne({ uid }).lean().exec()
-
-  if (!user || user.pwd !== pwd || user.privilege === privilege.Banned) {
-    delete ctx.session.profile
-    ctx.throw(401, 'Login required')
-  }
-  if (user.privilege !== ctx.session.profile.privilege) {
-    ctx.session.profile.privilege = user.privilege
-  }
-
-  ctx.state.profile = user
   await next()
 }
 
 const admin = async (ctx, next) => {
-  if (ctx.session.profile && isAdmin(ctx.session.profile)) {
-    return next()
-  } else {
+  const isAdmin = await authn.isAdmin(ctx)
+  if (!isAdmin) {
     ctx.throw(403, 'Permission denied')
   }
+  await next()
 }
 
 const root = async (ctx, next) => {
-  if (ctx.session.profile && isRoot(ctx.session.profile)) {
-    return next()
-  } else {
+  const isRoot = await authn.isRoot(ctx)
+  if (!isRoot) {
     ctx.throw(403, 'Permission denied')
   }
+  await next()
 }
 
 const handler = async function (ctx) {

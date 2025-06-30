@@ -16,7 +16,7 @@ const {
 const { auth: {
   login: loginRequire,
   admin: adminPrivilegeRequire,
-} } = require('../utils/middlewares')
+} } = require('../middlewares')
 
 const problemRouter = new Router({ prefix: '/problem' })
 

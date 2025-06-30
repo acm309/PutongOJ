@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const discuss = require('../controllers/discuss')
-const { auth, commentCreateRateLimit } = require('../utils/middlewares')
+const { auth, commentCreateRateLimit } = require('../middlewares')
 
 const router = new Router({
   prefix: '/discuss',

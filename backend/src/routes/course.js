@@ -14,7 +14,7 @@ const {
 const { auth: {
   login: loginRequire,
   root: rootPrivilegeRequire,
-} } = require('../utils/middlewares')
+} } = require('../middlewares')
 
 const courseRouter = new Router({ prefix: '/course' })
 
