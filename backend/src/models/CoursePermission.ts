@@ -1,8 +1,10 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const { coursePermission } = require('../config')
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import constants from '../utils/constants'
 
-const CoursePermissionSchema = new mongoose.Schema({
+const { coursePermission } = constants
+
+const coursePermissionSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -35,15 +37,15 @@ const CoursePermissionSchema = new mongoose.Schema({
   collection: 'CoursePermission',
 })
 
-CoursePermissionSchema.plugin(mongoosePaginate)
+coursePermissionSchema.plugin(mongoosePaginate)
 
-CoursePermissionSchema.index({
+coursePermissionSchema.index({
   course: 1,
   user: 1,
 }, { unique: true })
-CoursePermissionSchema.index({
+coursePermissionSchema.index({
   course: 1,
   role: 1,
 }, { unique: false })
 
-module.exports = mongoose.model('CoursePermission', CoursePermissionSchema)
+module.exports = mongoose.model('CoursePermission', coursePermissionSchema)

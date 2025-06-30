@@ -1,9 +1,9 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const config = require('../config')
-const ID = require('./ID')
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import config from '../config'
+import ID from './ID'
 
-const CourseSchema = mongoose.Schema({
+const courseSchema = new mongoose.Schema({
   id: {
     type: Number,
     index: {
@@ -15,7 +15,7 @@ const CourseSchema = mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length >= 3 && v.length <= 30
       },
       message:
@@ -26,7 +26,7 @@ const CourseSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length <= 100
       },
       message:
@@ -47,13 +47,13 @@ const CourseSchema = mongoose.Schema({
   collection: 'Course',
 })
 
-CourseSchema.plugin(mongoosePaginate)
+courseSchema.plugin(mongoosePaginate)
 
-CourseSchema.pre('save', async function (next) {
+courseSchema.pre('save', async function (next) {
   if (this.id === -1) {
     this.id = await ID.generateId('Course')
   }
   next()
 })
 
-module.exports = mongoose.model('Course', CourseSchema)
+module.exports = mongoose.model('Course', courseSchema)

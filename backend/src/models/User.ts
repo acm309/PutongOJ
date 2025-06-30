@@ -1,13 +1,31 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const config = require('../config')
+import type { Document, Model, Schema } from 'mongoose'
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import config from '../config'
 
-const userSchema = mongoose.Schema({
+export interface UserDocument extends Document {
+  _id: mongoose.Types.ObjectId
+  uid: string
+  pwd: string
+  privilege: number
+  nick: string
+  motto: string
+  mail: string
+  school: string
+  create: number
+  gid: number[]
+  submit: number
+  solve: number
+}
+
+interface UserModel extends Model<UserDocument> {}
+
+const userSchema: Schema = new mongoose.Schema({
   uid: {
     type: String,
     required: true,
     validate: {
-      validator (v) {
+      validator (v: string) {
         return /^[\w-]{3,20}$/.test(v)
       },
       message:
@@ -32,7 +50,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length <= 30
       },
       message:
@@ -43,7 +61,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length <= 300
       },
       message:
@@ -54,7 +72,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length === 0 || (v.length <= 254
           && /^[\w.%+-]{1,64}@[a-z0-9.-]{1,255}\.[a-z]{2,}$/i.test(v))
       },
@@ -65,7 +83,7 @@ const userSchema = mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v) {
+      validator (v: string) {
         return v.length <= 30
       },
       message:
@@ -96,4 +114,5 @@ const userSchema = mongoose.Schema({
 
 userSchema.plugin(mongoosePaginate)
 
-module.exports = mongoose.model('User', userSchema)
+export default module.exports
+ = mongoose.model<UserDocument, UserModel>('User', userSchema)
