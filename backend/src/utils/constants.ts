@@ -1,4 +1,4 @@
-const privilege = Object.freeze({
+export const privilege = Object.freeze({
   Banned: 0,
   User: 1,
   Admin: 2,

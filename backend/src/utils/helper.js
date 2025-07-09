@@ -18,6 +18,7 @@ function isLogined (ctx) {
   return ctx.session != null && ctx.session.profile != null && ctx.session.profile.uid != null
 }
 
+/** @deprecated */
 function isAdmin (profile) {
   if (profile == null || profile.privilege == null) { return false }
   if (Number.parseInt(profile.privilege) === config.privilege.Root || Number.parseInt(profile.privilege) === config.privilege.Admin) {
@@ -27,6 +28,7 @@ function isAdmin (profile) {
   }
 }
 
+/** @deprecated */
 function isRoot (profile) {
   if (profile == null || profile.privilege == null) { return false }
   if (Number.parseInt(profile.privilege) === config.privilege.Root) {
@@ -36,6 +38,7 @@ function isRoot (profile) {
   }
 }
 
+/** @deprecated */
 function isUndefined (item) {
   return typeof item === 'undefined'
 }

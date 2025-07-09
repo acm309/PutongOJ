@@ -1,5 +1,5 @@
 import type { Context as KoaContext } from 'koa'
-import type { UserDocument } from '../models/User'
+import type { UserEntity } from '../models/User'
 
 export interface AppSession {
   profile?: SessionProfile
@@ -7,7 +7,7 @@ export interface AppSession {
 
 export interface AppState {
   authnChecked?: boolean
-  profile?: UserDocument
+  profile?: UserEntity
 }
 
 export interface AppContext extends KoaContext {

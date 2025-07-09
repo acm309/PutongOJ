@@ -1,13 +1,10 @@
-import type { UserDocument } from '../models/User'
+import type { UserEntity } from '../models/User'
 import type { AppContext, SessionProfile } from '../types'
 import User from '../models/User'
-import constants from '../utils/constants'
-
-const { privilege } = constants
 
 async function checkSession (
   ctx: AppContext,
-): Promise<UserDocument | undefined> {
+): Promise<UserEntity | undefined> {
   if (ctx.state.authnChecked) {
     return ctx.state.profile
   }
@@ -17,11 +14,11 @@ async function checkSession (
   }
 
   const session = ctx.session.profile as SessionProfile
-  const user = await User.findOne({ uid: session.uid }).lean().exec()
+  const user = await User.findOne({ uid: session.uid }).exec()
 
   const sessionInvalid = !user
     || user.pwd !== session.pwd
-    || user.privilege === privilege.Banned
+    || user.isBanned
 
   if (sessionInvalid) {
     delete ctx.session.profile
@@ -40,20 +37,12 @@ export async function isLogin (ctx: AppContext): Promise<boolean> {
 
 export async function isAdmin (ctx: AppContext): Promise<boolean> {
   const profile = await checkSession(ctx)
-  if (!profile) {
-    return false
-  }
-
-  return profile.privilege >= privilege.Admin
+  return profile?.isAdmin ?? false
 }
 
 export async function isRoot (ctx: AppContext): Promise<boolean> {
   const profile = await checkSession(ctx)
-  if (!profile) {
-    return false
-  }
-
-  return profile.privilege >= privilege.Root
+  return profile?.isRoot ?? false
 }
 
 export default {
