@@ -1,8 +1,5 @@
 const { env } = require('node:process')
 const { RateLimit } = require('koa2-ratelimit')
-const { privilege } = require('../config')
-const User = require('../models/User')
-const { isAdmin, isRoot } = require('../utils/helper')
 const authn = require('../services/authn')
 
 const login = async (ctx, next) => {

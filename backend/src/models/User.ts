@@ -4,7 +4,6 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 import { privilege } from '../utils/constants'
 
 export interface UserDocument extends Document {
-  _id: mongoose.Types.ObjectId
   uid: string
   pwd: string
   privilege: number

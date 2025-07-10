@@ -1,17 +1,16 @@
 require('dotenv-flow').config()
 
 const { resolve } = require('node:path')
+const { env } = require('node:process')
 const { outputJSON } = require('fs-extra')
 
 const baseDir = resolve(__dirname, 'dist')
 const logsDir = resolve(__dirname, 'logs')
 const jobsDir = resolve(baseDir, 'jobs')
 
-const WORKER_INSTANCES = Number.parseInt(
-  process.env.PTOJ_WORKER_INSTANCES, 10) || 2
+const WORKER_INSTANCES = Number.parseInt(env.PTOJ_WORKER_INSTANCES, 10) || 2
 
-async function main() {
-
+async function main () {
   const apps = []
   const commons = {
     env: {
@@ -49,7 +48,7 @@ async function main() {
   outputJSON(
     resolve(__dirname, 'pm2.config.json'),
     { apps },
-    { spaces: 2, EOL: '\n' }
+    { spaces: 2, EOL: '\n' },
   )
 }
 

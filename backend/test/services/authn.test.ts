@@ -3,12 +3,10 @@ import test from 'ava'
 import dotenvFlow from 'dotenv-flow'
 import User from '../../src/models/User'
 import authnService from '../../src/services/authn'
-import constants from '../../src/utils/constants'
+import { privilege } from '../../src/utils/constants'
 import '../../src/config/db'
 
 dotenvFlow.config()
-
-const { privilege } = constants
 
 const nonExistUserId = 'nonExistYZB06'
 const anyPassword = '2e2dc4fac423cf06eb7fcf0337477a190d02d1472784c355c9508ddac3c1ce7a2e2dc4fa'

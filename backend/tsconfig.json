@@ -1,22 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2018",
+    "baseUrl": ".",
+    "rootDir": "./src",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "*": [
         "node_modules/*"
       ]
     },
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "strict": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*"
