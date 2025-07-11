@@ -11,6 +11,9 @@ export function timePretty (
   time: Date | number | string = 0,
   formatStr: string = 'yyyy-MM-dd HH:mm:ss',
 ) {
+  if (typeof time === 'string' && /^\d+$/.test(time)) {
+    time = Number(time)
+  }
   return format(toDate(time), formatStr)
 }
 
