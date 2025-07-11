@@ -8,6 +8,24 @@ import CoursePerm from '../models/CoursePerm'
 import User from '../models/User'
 import { encrypt } from '../utils/constants'
 
+const courseRoleNone = Object.freeze({
+  basic: false,
+  viewTestcase: false,
+  viewSolution: false,
+  manageProblem: false,
+  manageContest: false,
+  manageCourse: false,
+} as CourseRole)
+
+const courseRoleEntire = Object.freeze({
+  basic: true,
+  viewTestcase: true,
+  viewSolution: true,
+  manageProblem: true,
+  manageContest: true,
+  manageCourse: true,
+} as CourseRole)
+
 export async function findCourses (
   opt: PaginateOption & {},
 ): Promise<Paginated<CourseEntityLimited>> {
@@ -76,18 +94,16 @@ export async function getCourseMember (
   }
   const member = await CoursePerm
     .findOne({ course, user: user.id })
-  return member
-    ? {
-        user: {
-          uid: user.uid,
-          nick: user.nick,
-          privilege: user.privilege,
-        },
-        role: member.role,
-        createdAt: member.createdAt,
-        updatedAt: member.updatedAt,
-      }
-    : undefined
+  return {
+    user: {
+      uid: user.uid,
+      nick: user.nick,
+      privilege: user.privilege,
+    },
+    role: member?.role ?? courseRoleNone,
+    createdAt: member?.createdAt ?? new Date(),
+    updatedAt: member?.updatedAt ?? new Date(),
+  }
 }
 
 export async function updateCourseMember (
@@ -137,24 +153,6 @@ export async function removeCourseMember (
 
   return !!coursePerm
 }
-
-const courseRoleNone = Object.freeze({
-  basic: false,
-  viewTestcase: false,
-  viewSolution: false,
-  manageProblem: false,
-  manageContest: false,
-  manageCourse: false,
-} as CourseRole)
-
-const courseRoleEntire = Object.freeze({
-  basic: true,
-  viewTestcase: true,
-  viewSolution: true,
-  manageProblem: true,
-  manageContest: true,
-  manageCourse: true,
-} as CourseRole)
 
 export async function getUserRole (
   profile: UserDocument | undefined,
