@@ -59,6 +59,7 @@ const rootRequire: Middleware = async (ctx, next) => {
 }
 
 const authnMiddleware = {
+  checkSession,
   loginRequire,
   adminRequire,
   rootRequire,
