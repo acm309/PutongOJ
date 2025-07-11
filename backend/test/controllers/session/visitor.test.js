@@ -1,7 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -10,8 +10,8 @@ test('Bannded user login', async (t) => {
   const res = await request
     .post('/api/session')
     .send({
-      uid: users.data.banned.uid,
-      pwd: users.data.banned.pwd,
+      uid: userSeeds.banned.uid,
+      pwd: userSeeds.banned.pwd,
     })
 
   t.is(res.status, 403)
@@ -32,7 +32,7 @@ test('Wrong password login', async (t) => {
   const res = await request
     .post('/api/session')
     .send({
-      uid: users.data.admin.uid,
+      uid: userSeeds.admin.uid,
       pwd: 'wrong-password',
     })
 

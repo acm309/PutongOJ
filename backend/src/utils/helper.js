@@ -1,13 +1,9 @@
-const crypto = require('node:crypto')
 const pickBy = require('lodash/pickBy')
 const config = require('../config')
+const { generatePwd } = require('./index')
 
 function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
-}
-
-function generatePwd (pwd) {
-  return crypto.createHash('md5').update(pwd).digest('hex') + crypto.createHash('sha1').update(pwd).digest('hex')
 }
 
 function isComplexPwd (pwd) {
@@ -45,6 +41,7 @@ function isUndefined (item) {
 
 module.exports = {
   purify,
+  /** @deprecated Import from utils */
   generatePwd,
   isComplexPwd,
   isLogined,

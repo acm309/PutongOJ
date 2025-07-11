@@ -1,4 +1,5 @@
 import type { PaginateOption } from '../types'
+import crypto from 'node:crypto'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -19,4 +20,9 @@ export function parsePaginateOption (
   }
 
   return { page, pageSize }
+}
+
+export function generatePwd (pwd: string): string {
+  return crypto.createHash('md5').update(pwd).digest('hex')
+    + crypto.createHash('sha1').update(pwd).digest('hex')
 }

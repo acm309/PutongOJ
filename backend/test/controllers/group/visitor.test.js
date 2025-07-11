@@ -1,7 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const meta = require('../../meta')
+const { groupSeeds } = require('../../seeds/group')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -20,7 +20,7 @@ test('Find Group 1', async (t) => {
     .get('/api/group/1')
 
   t.is(res.status, 200)
-  for (const [ key, value ] of Object.entries(meta.groups[0])) {
+  for (const [ key, value ] of Object.entries(groupSeeds[0])) {
     t.deepEqual(res.body.group[key], value)
   }
 })

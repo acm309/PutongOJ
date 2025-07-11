@@ -1,7 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -37,7 +37,7 @@ test('Fetch entire user list', async (t) => {
 test('Create user already exists', async (t) => {
   const r = await request
     .post('/api/user')
-    .send({ uid: users.data.admin.uid, pwd })
+    .send({ uid: userSeeds.admin.uid, pwd })
   t.is(r.status, 400)
 })
 
