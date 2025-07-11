@@ -1,31 +1,16 @@
-import type { Document, Model, Schema } from 'mongoose'
+import type { Document, PaginateModel, Schema } from 'mongoose'
+import type { UserEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import { privilege } from '../utils/constants'
 
-export interface UserDocument extends Document {
-  uid: string
-  pwd: string
-  privilege: number
-  nick: string
-  motto: string
-  mail: string
-  school: string
-  create: number
-  gid: number[]
-  submit: number
-  solve: number
-}
-
-export interface UserVirtuals {
+export interface UserDocument extends Document, UserEntity {
   isBanned: boolean
   isAdmin: boolean
   isRoot: boolean
 }
 
-export type UserEntity = UserDocument & UserVirtuals
-
-type UserModel = Model<UserDocument, object, UserVirtuals>
+type UserModel = PaginateModel<UserDocument>
 
 const userSchema: Schema = new mongoose.Schema({
   uid: {
@@ -97,11 +82,6 @@ const userSchema: Schema = new mongoose.Schema({
         'School name is too long. It should be less than 30 characters long',
     },
   },
-  create: {
-    type: Number,
-    default: Date.now,
-    immutable: true,
-  },
   gid: {
     type: [ Number ],
     default: [],
@@ -117,6 +97,7 @@ const userSchema: Schema = new mongoose.Schema({
   },
 }, {
   collection: 'User',
+  timestamps: true,
 })
 
 userSchema.plugin(mongoosePaginate)
@@ -131,5 +112,9 @@ userSchema.virtual('isRoot').get(function (this: UserDocument): boolean {
   return this.privilege >= privilege.Root
 })
 
-export default module.exports
- = mongoose.model<UserDocument, UserModel>('User', userSchema)
+const User: UserModel
+  = mongoose.model<UserDocument, UserModel>(
+    'User', userSchema,
+  )
+
+export default module.exports = User

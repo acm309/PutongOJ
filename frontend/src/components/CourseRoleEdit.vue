@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import type { CourseRole, User } from '@/types'
+import type { CourseRole } from '@backend/types'
 import type { Message } from 'view-ui-plus'
-import api from '@/api'
-import { courseRoleFields, privilege } from '@/util/constant'
+import type { User } from '@/types'
 import debounce from 'lodash.debounce'
 import { Alert, Checkbox, Form, FormItem, Modal, Option, Select, Spin } from 'view-ui-plus'
 import { computed, inject, onBeforeMount, ref, watch } from 'vue'
+import api from '@/api'
+import { courseRoleFields, privilege } from '@/util/constant'
 
 const props = defineProps({
   modelValue: {
@@ -74,7 +75,7 @@ function rippleRoles () {
   })
 }
 
-function userToSelection (user: User) {
+function userToSelection (user: Pick<User, 'uid' | 'nick'>): { value: string, label: string } {
   return {
     value: user.uid,
     label: user.uid + (user.nick ? ` (${user.nick})` : ''),

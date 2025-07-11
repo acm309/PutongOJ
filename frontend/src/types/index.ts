@@ -56,30 +56,6 @@ export interface ProblemDetail extends Problem {
   output: string
 }
 
-export interface CourseRole {
-  basic: boolean
-  manageContest: boolean
-  manageCourse: boolean
-  manageProblem: boolean
-  viewSolution: boolean
-  viewTestcase: boolean
-}
-
-export interface Course {
-  id: number
-  name: string
-  description: string
-  encrypt: number
-  create?: number
-  role?: CourseRole
-}
-
-export interface CourseMember {
-  user: User
-  role: CourseRole
-  update?: number
-}
-
 export interface Solution {
   language: number | null
   code: string

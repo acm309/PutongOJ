@@ -9,10 +9,10 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   resolve: {
-    alias: [
-      { find: /^~/, replacement: '' },
-      { find: '@', replacement: path.resolve(__dirname, 'src') },
-    ],
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@backend': path.resolve(__dirname, '../backend/src'),
+    },
     extensions: [ '.mjs', '.js', '.ts', '.json', '.vue' ],
   },
   plugins: [

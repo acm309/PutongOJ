@@ -47,7 +47,7 @@ function submit () {
   courseFormRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const id = await createCourse(courseForm)
+        const id = await createCourse(courseForm as any)
         message.success('Course created successfully.')
         router.push({ name: 'course', params: { id } })
       } catch (e: any) {

@@ -1,10 +1,19 @@
+import type { Document, PaginateModel } from 'mongoose'
+import type { CourseEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import config from '../config'
+import { encrypt } from '../utils/constants'
 import ID from './ID'
 
+export interface CourseDocument extends Document, CourseEntity {
+  isPublic: boolean
+  isPrivate: boolean
+}
+
+type CourseModel = PaginateModel<CourseDocument>
+
 const courseSchema = new mongoose.Schema({
-  id: {
+  courseId: {
     type: Number,
     index: {
       unique: true,
@@ -35,25 +44,33 @@ const courseSchema = new mongoose.Schema({
   },
   encrypt: {
     type: Number,
-    enum: [ config.encrypt.Public, config.encrypt.Private ],
-    default: config.encrypt.Public,
-  },
-  create: {
-    type: Number,
-    default: Date.now,
-    immutable: true,
+    enum: [ encrypt.Public, encrypt.Private ],
+    default: encrypt.Public,
   },
 }, {
   collection: 'Course',
+  timestamps: true,
 })
 
 courseSchema.plugin(mongoosePaginate)
 
-courseSchema.pre('save', async function (next) {
-  if (this.id === -1) {
-    this.id = await ID.generateId('Course')
+courseSchema.virtual('isPublic').get(function (this: CourseDocument) {
+  return this.encrypt === encrypt.Public
+})
+courseSchema.virtual('isPrivate').get(function (this: CourseDocument) {
+  return this.encrypt === encrypt.Private
+})
+
+courseSchema.pre('save', async function (this: CourseDocument, next) {
+  if (this.courseId === -1) {
+    this.courseId = await ID.generateId('Course')
   }
   next()
 })
 
-module.exports = mongoose.model('Course', courseSchema)
+const Course
+  = mongoose.model<CourseDocument, CourseModel>(
+    'Course', courseSchema,
+  )
+
+export default module.exports = Course

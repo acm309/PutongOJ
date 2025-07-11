@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import type { CourseMemberEntity } from '@backend/types/entity'
 import type { Message, Modal } from 'view-ui-plus'
-import type { CourseMember, UserPrivilege } from '@/types'
+import type { UserPrivilege } from '@/types'
 import { storeToRefs } from 'pinia'
 import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
 import { inject, onBeforeMount, watch } from 'vue'
@@ -32,7 +33,7 @@ const pageSize = $computed<number>(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-let docs: CourseMember[] = $ref([])
+let docs: CourseMemberEntity[] = $ref([])
 let total: number = $ref(0)
 let loading: boolean = $ref(false)
 let openEdit: boolean = $ref(false)
@@ -165,7 +166,7 @@ onRouteQueryUpdate(fetch)
               <span v-if="doc.user.nick?.trim()">{{ doc.user.nick }}</span>
             </td>
             <td
-              v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege)"
+              v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege as UserPrivilege)"
               colspan="6"
             >
               <Tooltip placement="top">
@@ -187,7 +188,7 @@ onRouteQueryUpdate(fetch)
               </td>
             </template>
             <td class="member-update">
-              {{ timePretty(doc.update) }}
+              {{ timePretty(doc.updatedAt) }}
             </td>
             <td class="member-action">
               <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>

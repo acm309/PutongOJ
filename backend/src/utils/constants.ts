@@ -31,7 +31,7 @@ const status = Object.freeze({
   Available: 2,
 })
 
-const encrypt = Object.freeze({
+export const encrypt = Object.freeze({
   Public: 1,
   Private: 2,
   Password: 3,
@@ -43,25 +43,11 @@ const problemType = Object.freeze({
   SpecialJudge: 3,
 })
 
-const coursePermission = Object.freeze({
-  None: 0,
-  Basic: 1 << 0,
-  ViewTestcase: 1 << 1,
-  ViewSolution: 1 << 2,
-  CreateProblem: 1 << 3,
-  CreateContest: 1 << 4,
-  ManageProblem: 1 << 5,
-  ManageContest: 1 << 6,
-  ManageCourse: 1 << 7,
-  Entire: (1 << 8) - 1,
-})
-
 const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 
 export default Object.freeze({
-  coursePermission,
   deploy,
   encrypt,
   judge,

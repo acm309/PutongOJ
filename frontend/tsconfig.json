@@ -12,6 +12,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@backend/*": [
+        "../backend/src/*"
       ]
     },
     "resolveJsonModule": true,

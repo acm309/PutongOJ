@@ -42,7 +42,6 @@
     "ioredis": "^5.6.1",
     "koa": "^2.16.1",
     "koa-body": "^2.6.0",
-    "koa-compose": "^4.1.0",
     "koa-logger": "^3.2.1",
     "koa-router": "^13.1.1",
     "koa-send": "^5.0.1",

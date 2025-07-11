@@ -1,30 +1,6 @@
 const { env } = require('node:process')
 const { RateLimit } = require('koa2-ratelimit')
-const authn = require('../services/authn')
-
-const login = async (ctx, next) => {
-  const isLogin = await authn.isLogin(ctx)
-  if (!isLogin) {
-    ctx.throw(401, 'Login required')
-  }
-  await next()
-}
-
-const admin = async (ctx, next) => {
-  const isAdmin = await authn.isAdmin(ctx)
-  if (!isAdmin) {
-    ctx.throw(403, 'Permission denied')
-  }
-  await next()
-}
-
-const root = async (ctx, next) => {
-  const isRoot = await authn.isRoot(ctx)
-  if (!isRoot) {
-    ctx.throw(403, 'Permission denied')
-  }
-  await next()
-}
+const auth = require('./authn')
 
 const handler = async function (ctx) {
   ctx.status = 429
@@ -79,9 +55,5 @@ module.exports = {
   solutionCreateRateLimit,
   userCreateRateLimit,
   commentCreateRateLimit,
-  auth: {
-    login,
-    admin,
-    root,
-  },
+  auth,
 }

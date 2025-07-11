@@ -1,10 +1,10 @@
 const Router = require('koa-router')
 
-const {
-  courseAware,
-  coursePreload,
-  courseRoleRequire,
-} = require('../controllers/course')
+// const {
+//   courseAware,
+//   coursePreload,
+//   courseRoleRequire,
+// } = require('../controllers/course')
 const {
   problemPreload,
   findProblems,
@@ -22,11 +22,11 @@ const problemRouter = new Router({ prefix: '/problem' })
 
 // Problems
 problemRouter.get('/',
-  courseAware([
-    loginRequire,
-    coursePreload,
-    courseRoleRequire('basic'),
-  ]),
+  // courseAware([
+  //   loginRequire,
+  //   coursePreload,
+  //   courseRoleRequire('basic'),
+  // ]),
   findProblems,
 )
 problemRouter.post('/',
