@@ -1,11 +1,11 @@
 <script setup>
-import { storeToRefs } from 'pinia'
 import only from 'only'
+import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useUserStore } from '@/store/modules/user'
+import { onBeforeRouteLeave } from 'vue-router'
 import { useGroupStore } from '@/store/modules/group'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n()
 const userStore = useUserStore()

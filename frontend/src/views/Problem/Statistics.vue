@@ -1,22 +1,22 @@
 <script setup>
+import { PieChart } from 'echarts/charts'
+import { LegendComponent, TooltipComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+
+import { SVGRenderer } from 'echarts/renderers'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Badge, Icon, Page, Spin } from 'view-ui-plus'
+import Chart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useRootStore } from '@/store'
+
 import { useSessionStore } from '@/store/modules/session'
 import { useStatisticsStore } from '@/store/modules/statistics'
 import { language } from '@/util/constant'
 import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
-
-import { Badge, Icon, Page, Spin } from 'view-ui-plus'
-
-import Chart from 'vue-echarts'
-import { PieChart } from 'echarts/charts'
-import { LegendComponent, TooltipComponent } from 'echarts/components'
-import { use } from 'echarts/core'
-import { SVGRenderer } from 'echarts/renderers'
 
 use([
   LegendComponent,
@@ -51,33 +51,33 @@ const pieOption = $computed(() => {
       top: '5%',
       left: 'center',
       inactiveBorderColor: '#fff',
-      inactiveBorderWidth: 2
+      inactiveBorderWidth: 2,
     },
     series: [
       {
         name: `Statistics of Problem ${pid}`,
         type: 'pie',
-        radius: ['45%', '70%'],
-        center: ['50%', '55%'],
+        radius: [ '45%', '70%' ],
+        center: [ '50%', '55%' ],
         itemStyle: {
           borderRadius: 5,
           borderColor: '#fff',
-          borderWidth: 2
+          borderWidth: 2,
         },
         label: {
           show: false,
-          position: 'center'
+          position: 'center',
         },
         minAngle: 5,
         emphasis: {
           label: {
             show: true,
             fontSize: 40,
-            fontWeight: 'bold'
+            fontWeight: 'bold',
           },
         },
         labelLine: {
-          show: false
+          show: false,
         },
         data: [
           { value: countList[0] || 0, name: 'CE' },
@@ -97,7 +97,7 @@ const pieOption = $computed(() => {
 
 let loading = $ref(false)
 
-async function getStatistics() {
+async function getStatistics () {
   loading = true
   const opt = {
     page: route.query.page || 1,
@@ -108,7 +108,7 @@ async function getStatistics() {
   loading = false
 }
 
-function handleCurrentChange(val) {
+function handleCurrentChange (val) {
   router.push({
     name: 'problemStatistics',
     params: { pid: route.params.pid },
@@ -134,16 +134,32 @@ onRouteQueryUpdate(getStatistics)
       <table class="statis-table">
         <thead>
           <tr>
-            <th class="statis-sid">SID</th>
-            <th class="statis-username">Username</th>
+            <th class="statis-sid">
+              SID
+            </th>
+            <th class="statis-username">
+              Username
+            </th>
             <th class="statis-time">
-              <Badge>Time<template #count><span class="statis-badge">(ms)</span></template></Badge>
+              <Badge>
+                Time<template #count>
+                  <span class="statis-badge">(ms)</span>
+                </template>
+              </Badge>
             </th>
             <th class="statis-memory">
-              <Badge>Memory<template #count><span class="statis-badge">(KB)</span></template></Badge>
+              <Badge>
+                Memory<template #count>
+                  <span class="statis-badge">(KB)</span>
+                </template>
+              </Badge>
             </th>
-            <th class="statis-language">Language</th>
-            <th class="statis-submit-time">Submit Time</th>
+            <th class="statis-language">
+              Language
+            </th>
+            <th class="statis-submit-time">
+              Submit Time
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -154,30 +170,44 @@ onRouteQueryUpdate(getStatistics)
             </td>
           </tr>
           <tr v-for="item in list" :key="item.sid">
-            <td class="statis-sid" v-if="isAdmin || (profile && profile.uid === item.uid)">
+            <td v-if="isAdmin || (profile && profile.uid === item.uid)" class="statis-sid">
               <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
                 {{ item.sid }}
               </router-link>
             </td>
-            <td class="statis-sid" v-else>{{ item.sid }}</td>
+            <td v-else class="statis-sid">
+              {{ item.sid }}
+            </td>
             <td class="statis-username">
               <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>
-            <td class="statis-time">{{ item.time }}</td>
-            <td class="statis-memory">{{ item.memory }}</td>
-            <td class="statis-language">{{ language[item.language] }}</td>
-            <td class="statis-submit-time">{{ timePretty(item.create) }}</td>
+            <td class="statis-time">
+              {{ item.time }}
+            </td>
+            <td class="statis-memory">
+              {{ item.memory }}
+            </td>
+            <td class="statis-language">
+              {{ language[item.language] }}
+            </td>
+            <td class="statis-submit-time">
+              {{ timePretty(item.create) }}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="statis-footer">
-      <Page class="statis-page-table" :model-value="currentPage" :total="sumStatis" :page-size="pageSize" show-elevator
-        show-total @on-change="handleCurrentChange" />
-      <Page class="statis-page-mobile" size="small" :model-value="currentPage" :total="sumStatis" :page-size="pageSize"
-        show-elevator show-total @on-change="handleCurrentChange" />
+      <Page
+        class="statis-page-table" :model-value="currentPage" :total="sumStatis" :page-size="pageSize" show-elevator
+        show-total @on-change="handleCurrentChange"
+      />
+      <Page
+        class="statis-page-mobile" size="small" :model-value="currentPage" :total="sumStatis" :page-size="pageSize"
+        show-elevator show-total @on-change="handleCurrentChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>

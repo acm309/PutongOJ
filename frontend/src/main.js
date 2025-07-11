@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import {
   Button,
   Card,
@@ -35,15 +35,15 @@ import {
   Tooltip,
   Transfer,
 } from 'view-ui-plus'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
+import en from '@/locales/en'
+import zh from '@/locales/zh'
+import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
 import App from './App'
 import router from './router'
 import '@/theme/index.less'
-import zh from '@/locales/zh'
-import en from '@/locales/en'
-import { useSessionStore } from '@/store/modules/session'
-import { useRootStore } from '@/store'
 
 const pinia = createPinia()
 const app = createApp(App)

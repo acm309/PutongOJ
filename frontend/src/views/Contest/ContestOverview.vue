@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
 import { formate, timePretty } from '@/util/formate'
 
@@ -24,10 +24,18 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
       <table class="problem-table">
         <thead>
           <tr>
-            <th class="problem-status">#</th>
-            <th class="problem-pid">ID</th>
-            <th class="problem-title">Title</th>
-            <th class="problem-ratio">Ratio</th>
+            <th class="problem-status">
+              #
+            </th>
+            <th class="problem-pid">
+              ID
+            </th>
+            <th class="problem-title">
+              Title
+            </th>
+            <th class="problem-ratio">
+              Ratio
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -41,10 +49,14 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
             <td class="problem-status">
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
             </td>
-            <td class="problem-pid">{{ index + 1 }}</td>
+            <td class="problem-pid">
+              {{ index + 1 }}
+            </td>
             <td class="problem-title">
               <router-link v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
-                <Button type="text" class="table-button">{{ item.title }}</Button>
+                <Button type="text" class="table-button">
+                  {{ item.title }}
+                </Button>
               </router-link>
               <span v-else>Problem is invalid</span>
             </td>
@@ -106,7 +118,7 @@ h4
   min-width 768px
   table-layout fixed
   th, td
-    padding 0 16px 
+    padding 0 16px
   tbody tr
     transition background-color 0.2s ease
     &:hover

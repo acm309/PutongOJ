@@ -1,6 +1,6 @@
 <script setup>
-import { useI18n } from 'vue-i18n'
 import { Input, Radio, RadioGroup } from 'view-ui-plus'
+import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import { problemType } from '@/util/constant'
 

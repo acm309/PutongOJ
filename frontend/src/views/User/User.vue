@@ -1,15 +1,15 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { Spin, TabPane, Tabs } from 'view-ui-plus'
 import { inject, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 
+import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
-import { onProfileUpdate, onRouteParamUpdate } from '@/util/helper'
 
-import { Spin, Tabs, TabPane } from 'view-ui-plus'
+import { onProfileUpdate, onRouteParamUpdate } from '@/util/helper'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -30,14 +30,14 @@ const currentTab = $computed(() => route.name || 'userProfile')
 const isSelf = $computed(() => profile?.uid === user.uid)
 const editable = $computed(() => isSelf || (user.privilege === privilege.Root ? isRoot : isAdmin))
 
-const change = (name) => {
+function change (name) {
   router.push({
     name,
     params: { uid: route.params.uid },
   })
 }
 
-const init = async () => {
+async function init () {
   loading = true
   await userStore.findOne(route.params)
   rootStore.changeDomTitle({ title: user.uid })
@@ -56,8 +56,8 @@ onRouteParamUpdate((to, from) => {
 </script>
 
 <template>
-  <div :class="{ 'user-wrap': true, 'user-wrap-edit': $route.name === 'userEdit' }">
-    <Tabs class="user-tabs" v-if="editable" :model-value="currentTab" @on-click="change">
+  <div class="user-wrap" :class="{ 'user-wrap-edit': $route.name === 'userEdit' }">
+    <Tabs v-if="editable" class="user-tabs" :model-value="currentTab" @on-click="change">
       <TabPane :label="t('oj.overview')" name="userProfile" />
       <TabPane :label="t('oj.edit')" name="userEdit" />
     </Tabs>

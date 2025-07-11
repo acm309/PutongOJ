@@ -1,17 +1,17 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { Badge, Icon, Page } from 'view-ui-plus'
 import { inject, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 
+import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import { result, language, color } from '@/util/constant'
+import { color, language, result } from '@/util/constant'
 import { timePretty } from '@/util/formate'
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 
-import { Badge, Icon, Page } from 'view-ui-plus'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -34,7 +34,7 @@ const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
 const query = $computed(() => purify({ pid: route.params.pid, uid: profile.uid, page, pageSize }))
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   return router.push({
     name: 'mySubmission',
     query: purify(Object.assign({ page, pageSize }, payload)),
@@ -43,14 +43,14 @@ function reload(payload = {}) {
 
 const pageChange = val => reload({ page: val })
 
-async function refresh() {
+async function refresh () {
   refreshing = loading = true
   await find(query)
   loading = false
   setTimeout(() => refreshing = false, 500)
 }
 
-function init() {
+function init () {
   loading = true
   changeDomTitle({ title: `Problem ${route.params.pid} - My Submission` })
   if (!isLogined) {
@@ -68,28 +68,50 @@ onRouteQueryUpdate(init)
 <template>
   <div class="status-wrap">
     <div class="status-header">
-      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
-      <Page class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
+      <Page
+        class="status-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
       <div class="status-action">
-        <Button type="primary" icon="md-refresh" :loading="refreshing" @click="refresh">{{ t('oj.refresh') }}</Button>
+        <Button type="primary" icon="md-refresh" :loading="refreshing" @click="refresh">
+          {{ t('oj.refresh') }}
+        </Button>
       </div>
     </div>
     <div class="status-table-container">
       <table class="status-table">
         <thead>
           <tr>
-            <th class="status-sid">SID</th>
-            <th class="status-judge">Judge</th>
+            <th class="status-sid">
+              SID
+            </th>
+            <th class="status-judge">
+              Judge
+            </th>
             <th class="status-time">
-              <Badge>Time<template #count><span class="status-badge">(ms)</span></template></Badge>
+              <Badge>
+                Time<template #count>
+                  <span class="status-badge">(ms)</span>
+                </template>
+              </Badge>
             </th>
             <th class="status-memory">
-              <Badge>Memory<template #count><span class="status-badge">(KB)</span></template></Badge>
+              <Badge>
+                Memory<template #count>
+                  <span class="status-badge">(KB)</span>
+                </template>
+              </Badge>
             </th>
-            <th class="status-language">Language</th>
-            <th class="status-submit-time">Submit Time</th>
+            <th class="status-language">
+              Language
+            </th>
+            <th class="status-submit-time">
+              Submit Time
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -108,19 +130,31 @@ onRouteQueryUpdate(init)
             <td class="status-judge">
               <span :class="color[item.judge]">{{ result[item.judge] }}</span>
             </td>
-            <td class="status-time">{{ item.time }}</td>
-            <td class="status-memory">{{ item.memory }}</td>
-            <td class="status-language">{{ language[item.language] }}</td>
-            <td class="status-submit-time">{{ timePretty(item.create) }}</td>
+            <td class="status-time">
+              {{ item.time }}
+            </td>
+            <td class="status-memory">
+              {{ item.memory }}
+            </td>
+            <td class="status-language">
+              {{ language[item.language] }}
+            </td>
+            <td class="status-submit-time">
+              {{ timePretty(item.create) }}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="status-footer">
-      <Page class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        show-total @on-change="pageChange" />
+      <Page
+        class="status-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="status-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>

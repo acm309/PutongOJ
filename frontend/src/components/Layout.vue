@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { Footer, Icon, Layout, Poptip, Radio, RadioGroup, Space } from 'view-ui-plus'
+import { useI18n } from 'vue-i18n'
 import Header from '@/components/Header.vue'
 import Dialog from '@/components/LoginAndRegister.vue'
 import { useRootStore } from '@/store'
 import { timeDiffPretty, timePretty } from '@/util/formate'
 import { useHumanLanguage } from '@/util/helper'
-import { storeToRefs } from 'pinia'
-import { Footer, Icon, Layout, Poptip, Radio, RadioGroup, Space } from 'view-ui-plus'
-import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()
 const rootStore = useRootStore()

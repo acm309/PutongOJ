@@ -6,9 +6,9 @@ import { useRoute, useRouter } from 'vue-router'
 
 import Submit from '@/components/Submit'
 import { useRootStore } from '@/store'
+import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import { useProblemStore } from '@/store/modules/problem'
 
 const { t } = useI18n()
 const route = useRoute()

@@ -1,13 +1,13 @@
 <script setup>
 import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
+import { Button, Divider, Icon, Space } from 'view-ui-plus'
 
+import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
 import { useUserStore } from '@/store/modules/user'
-import { timePretty } from '@/util/formate'
 
-import { Button, Divider, Icon, Space } from 'view-ui-plus'
+import { timePretty } from '@/util/formate'
 
 const { t } = useI18n()
 
@@ -24,13 +24,19 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
 <template>
   <div class="user-overwiew">
     <div class="user-infobar">
-      <img class="user-avatar" v-if="user.avatar" :src="user.avatar" :alt="`${nickname}'s Avatar`" />
-      <img class="user-avatar" v-else src="@/assets/logo.jpg" alt="Default Avatar" />
+      <img v-if="user.avatar" class="user-avatar" :src="user.avatar" :alt="`${nickname}'s Avatar`">
+      <img v-else class="user-avatar" src="@/assets/logo.jpg" alt="Default Avatar">
       <div class="user-name">
-        <div class="user-nickname">{{ nickname }}</div>
-        <div class="user-username" v-if="username">{{ username }}</div>
+        <div class="user-nickname">
+          {{ nickname }}
+        </div>
+        <div v-if="username" class="user-username">
+          {{ username }}
+        </div>
       </div>
-      <div class="user-motto" v-if="user.motto">{{ pangu.spacing(user.motto).trim() }}</div>
+      <div v-if="user.motto" class="user-motto">
+        {{ pangu.spacing(user.motto).trim() }}
+      </div>
       <div class="user-info">
         <div v-if="user.mail" class="user-mail">
           <Icon class="icon" type="md-mail" />{{ user.mail }}
@@ -42,24 +48,34 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
           <Icon class="icon" type="md-calendar" />{{ timePretty(user.create, 'yyyy-MM-dd') }}
         </div>
       </div>
-      <div class="user-groups" v-if="user.groups?.length > 0 || user.privilege > privilege.User">
-        <Divider plain>{{ t('oj.group') }}</Divider>
+      <div v-if="user.groups?.length > 0 || user.privilege > privilege.User" class="user-groups">
+        <Divider plain>
+          {{ t('oj.group') }}
+        </Divider>
         <Space :size="8" class="user-group-container" wrap>
-          <Tag v-if="user.privilege > privilege.User" class="user-admin" size="medium"
-            :color="user.privilege === privilege.Root ? 'gold' : 'cyan'">
+          <Tag
+            v-if="user.privilege > privilege.User" class="user-admin" size="medium"
+            :color="user.privilege === privilege.Root ? 'gold' : 'cyan'"
+          >
             {{ t('oj.admin') }}
           </Tag>
-          <router-link v-for="group in user.groups" :key="group.gid"
-            :to="{ name: 'ranklist', query: { gid: group.gid } }">
+          <router-link
+            v-for="group in user.groups" :key="group.gid"
+            :to="{ name: 'ranklist', query: { gid: group.gid } }"
+          >
             <span class="user-group">{{ group.title }}</span>
           </router-link>
         </Space>
       </div>
       <div class="user-statistic">
-        <Divider plain>{{ t('oj.statistics') }}</Divider>
+        <Divider plain>
+          {{ t('oj.statistics') }}
+        </Divider>
         <div class="user-statistic-container">
-          <router-link class="user-statistic-item"
-            :to="{ name: 'status', query: { uid: user.uid, judge: judge.Accepted } }">
+          <router-link
+            class="user-statistic-item"
+            :to="{ name: 'status', query: { uid: user.uid, judge: judge.Accepted } }"
+          >
             <h1>{{ solved.length }}</h1>
             <h4>{{ t('oj.solved') }}</h4>
           </router-link>
@@ -73,26 +89,34 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
     </div>
     <div class="user-content">
       <div class="user-status">
-        <div class="user-status-name">{{ t('oj.solved') }}</div>
+        <div class="user-status-name">
+          {{ t('oj.solved') }}
+        </div>
         <div v-if="solved.length === 0" class="status-empty">
           <Icon type="ios-planet-outline" class="empty-icon" />
           <span class="empty-text">{{ t('oj.empty_content') }}</span>
         </div>
         <Space v-else class="user-status-items" :size="[2, 8]" wrap>
           <router-link v-for="item in solved" :key="item" :to="{ name: 'problemInfo', params: { pid: item } }">
-            <Button class="user-status-item" type="text" size="small">{{ item }}</Button>
+            <Button class="user-status-item" type="text" size="small">
+              {{ item }}
+            </Button>
           </router-link>
         </Space>
       </div>
       <div class="user-status">
-        <div class="user-status-name">{{ t('oj.unsolved') }}</div>
+        <div class="user-status-name">
+          {{ t('oj.unsolved') }}
+        </div>
         <div v-if="unsolved.length === 0" class="status-empty">
           <Icon type="ios-planet-outline" class="empty-icon" />
           <span class="empty-text">{{ t('oj.empty_content') }}</span>
         </div>
         <Space v-else class="user-status-items" :size="[2, 8]" wrap>
           <router-link v-for="item in unsolved" :key="item" :to="{ name: 'problemInfo', params: { pid: item } }">
-            <Button class="user-status-item" type="text" size="small">{{ item }}</Button>
+            <Button class="user-status-item" type="text" size="small">
+              {{ item }}
+            </Button>
           </router-link>
         </Space>
       </div>

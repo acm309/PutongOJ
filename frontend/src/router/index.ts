@@ -1,7 +1,7 @@
 import { LoadingBar } from 'view-ui-plus'
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './routes'
 import { useSessionStore } from '@/store/modules/session'
+import routes from './routes'
 
 const router = createRouter({
   history: createWebHistory(),

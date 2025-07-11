@@ -1,9 +1,4 @@
 <script setup>
-import api from '@/api'
-import { useRootStore } from '@/store'
-import { useGroupStore } from '@/store/modules/group'
-import { useProblemStore } from '@/store/modules/problem'
-import { contestType } from '@/util/constant'
 import { escape } from 'html-escaper'
 import only from 'only'
 import { storeToRefs } from 'pinia'
@@ -12,6 +7,11 @@ import { inject, onBeforeMount, toRefs, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import Draggable from 'vuedraggable'
+import api from '@/api'
+import { useRootStore } from '@/store'
+import { useGroupStore } from '@/store/modules/group'
+import { useProblemStore } from '@/store/modules/problem'
+import { contestType } from '@/util/constant'
 import SearchableTransfer from './SearchableTransfer.vue'
 
 const props = defineProps([ 'contest', 'overview' ])

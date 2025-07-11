@@ -1,9 +1,9 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
 import { inject } from 'vue'
-import { purify } from '@/util/helper'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/store/modules/user'
+import { purify } from '@/util/helper'
 
 const { t } = useI18n()
 const userStore = useUserStore()

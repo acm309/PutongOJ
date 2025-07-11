@@ -1,10 +1,10 @@
 <script>
-import { useRoute } from 'vue-router'
 import { inject, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { setErrorHandler } from './api'
+import { useRoute } from 'vue-router'
 import OjLayout from '@/components/Layout'
 import { useRootStore } from '@/store'
+import { setErrorHandler } from './api'
 
 // https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md#declaring-additional-options
 export default {

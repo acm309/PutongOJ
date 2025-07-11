@@ -1,8 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { onBeforeRouteLeave } from 'vue-router'
 import { useProblemStore } from '@/store/modules/problem'
 import { useTagStore } from '@/store/modules/tag'
 

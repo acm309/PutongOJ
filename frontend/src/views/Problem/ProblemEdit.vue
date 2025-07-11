@@ -1,8 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import OjProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
 

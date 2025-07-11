@@ -1,8 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { inject, onBeforeUnmount, reactive } from 'vue'
-import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import OjContestEdit from '@/components/ContestEdit'
 import { useContestStore } from '@/store/modules/contest'
 

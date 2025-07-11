@@ -1,10 +1,10 @@
 <script setup>
+import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
+import MarkdownPreview from '@/components/MarkdownPreview'
+
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/util/formate'
-
-import MarkdownPreview from '@/components/MarkdownPreview'
-import pangu from 'pangu'
 
 const { news } = $(storeToRefs(useNewsStore()))
 </script>
@@ -17,7 +17,7 @@ const { news } = $(storeToRefs(useNewsStore()))
         <h4>{{ timePretty(news.create, 'yyyy-MM-dd HH:mm') }}</h4>
       </div>
     </div>
-    <MarkdownPreview class="news-content" v-model="news.content" />
+    <MarkdownPreview v-model="news.content" class="news-content" />
   </div>
 </template>
 

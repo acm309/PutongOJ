@@ -1,16 +1,16 @@
 <script setup>
+import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { Button, Option, Page, Select, Text } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
-import { useRanklistStore } from '@/store/modules/ranklist'
 import { useGroupStore } from '@/store/modules/group'
+import { useRanklistStore } from '@/store/modules/ranklist'
+
 import { formate } from '@/util/formate'
 
-import pangu from 'pangu'
-
-import { Text, Button, Page, Select, Option } from 'view-ui-plus'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +21,9 @@ const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
 
 const query = $computed(() => purify({
-  page, pageSize, gid: group
+  page,
+  pageSize,
+  gid: group,
 }))
 
 const rootStore = useRootStore()
@@ -34,16 +36,16 @@ const { list, sum } = $(storeToRefs(ranklistStore))
 
 let loading = $ref(false)
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   const routeQuery = Object.assign({}, query, payload)
   router.push({ name: 'ranklist', query: routeQuery })
 }
 
-async function fetch() {
+async function fetch () {
   loading = true
   await Promise.all([
     ranklistStore.find(query),
-    groupStore.find({ lean: 1 })
+    groupStore.find({ lean: 1 }),
   ])
   loading = false
 }
@@ -59,10 +61,14 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="ranklist-wrap">
     <div class="ranklist-header">
-      <Page class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
-      <Page class="ranklist-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
+      <Page
+        class="ranklist-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
       <div class="ranklist-filter">
         <Select v-model="group" class="ranklist-filter-select" filterable clearable :placeholder="t('oj.group')">
           <Option v-for="item in groups" :key="item.gid" :value="item.gid">
@@ -78,13 +84,27 @@ onRouteQueryUpdate(fetch)
       <table class="ranklist-table">
         <thead>
           <tr>
-            <th class="ranklist-rank">Rank</th>
-            <th class="ranklist-username">{{ t('oj.username') }}</th>
-            <th class="ranklist-nick">{{ t('oj.nick') }}</th>
-            <th class="ranklist-motto">{{ t('oj.motto') }}</th>
-            <th class="ranklist-solved">{{ t('oj.solved') }}</th>
-            <th class="ranklist-submit">{{ t('oj.submit') }}</th>
-            <th class="ranklist-ratio">Ratio</th>
+            <th class="ranklist-rank">
+              Rank
+            </th>
+            <th class="ranklist-username">
+              {{ t('oj.username') }}
+            </th>
+            <th class="ranklist-nick">
+              {{ t('oj.nick') }}
+            </th>
+            <th class="ranklist-motto">
+              {{ t('oj.motto') }}
+            </th>
+            <th class="ranklist-solved">
+              {{ t('oj.solved') }}
+            </th>
+            <th class="ranklist-submit">
+              {{ t('oj.submit') }}
+            </th>
+            <th class="ranklist-ratio">
+              Ratio
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -95,13 +115,17 @@ onRouteQueryUpdate(fetch)
             </td>
           </tr>
           <tr v-for="(item, index) in list" :key="item.uid">
-            <td class="ranklist-rank">{{ index + 1 + (page - 1) * pageSize }}</td>
+            <td class="ranklist-rank">
+              {{ index + 1 + (page - 1) * pageSize }}
+            </td>
             <td class="ranklist-username">
               <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>
-            <td class="ranklist-nick">{{ item.nick }}</td>
+            <td class="ranklist-nick">
+              {{ item.nick }}
+            </td>
             <td class="ranklist-motto">
               <Text class="ranklist-motto-text" :ellipsis="true" :ellipsis-config="{ tooltip: true }">
                 {{ pangu.spacing(item.motto || '').trim() }}
@@ -125,10 +149,14 @@ onRouteQueryUpdate(fetch)
       </table>
     </div>
     <div class="ranklist-footer">
-      <Page class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="ranklist-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
-        show-elevator show-total @on-change="pageChange" />
+      <Page
+        class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="ranklist-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+        show-elevator show-total @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
@@ -171,7 +199,7 @@ onRouteQueryUpdate(fetch)
   .ranklist-footer
     padding 0 20px
     margin-top 20px !important
-  
+
 @media screen and (max-width: 768px)
   .ranklist-page-table, .ranklist-page-simple
     display none !important
@@ -218,7 +246,7 @@ onRouteQueryUpdate(fetch)
   width 100px
   text-align center
 .ranklist-submit
-  width 80px  
+  width 80px
   text-align center
 .ranklist-ratio
   width 120px

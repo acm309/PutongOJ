@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { Message } from 'view-ui-plus'
-import MarkdownPreview from '@/components/MarkdownPreview.vue'
 import { useClipboard } from '@vueuse/core'
 import { Space } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+import MarkdownPreview from '@/components/MarkdownPreview.vue'
 
 const props = defineProps([ 'modelValue' ])
 const { t } = useI18n()

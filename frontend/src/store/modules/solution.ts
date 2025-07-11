@@ -1,6 +1,6 @@
+import type { Solution } from '@/types'
 import { defineStore } from 'pinia'
 import api from '@/api'
-import type { Solution } from '@/types'
 
 export const useSolutionStore = defineStore('solution', {
   state: () => ({

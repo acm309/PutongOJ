@@ -1,5 +1,6 @@
 const { existsSync, mkdirSync, cpSync, rmSync } = require('node:fs')
 const { resolve } = require('node:path')
+const process = require('node:process')
 
 const vditorPath = resolve(__dirname, '../node_modules/vditor')
 
@@ -22,11 +23,19 @@ mkdirSync(staticPath, { recursive: true })
 cpSync(sourcePath, targetPath, { recursive: true, force: true })
 
 const ignoreFiles = [
-  'images', 'ts', 'types',
-  'index.d.ts', 'index.js', 'index.min.js', 'method.d.ts', 'method.js',]
+  'images',
+  'ts',
+  'types',
+  'index.d.ts',
+  'index.js',
+  'index.min.js',
+  'method.d.ts',
+  'method.js',
+]
 
 ignoreFiles.forEach((file) => {
   rmSync(resolve(targetPath, file), { recursive: true, force: true })
 })
 
+/* eslint-disable-next-line no-console */
 console.log(`Vditor ${version} has been successfully copied to public directory`)

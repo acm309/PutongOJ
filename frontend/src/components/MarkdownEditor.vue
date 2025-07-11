@@ -1,10 +1,10 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import Vditor from 'vditor'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Vditor from 'vditor'
-import 'vditor/dist/index.css'
 import { useRootStore } from '@/store'
+import 'vditor/dist/index.css'
 
 const props = defineProps({
   modelValue: String,
