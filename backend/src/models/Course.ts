@@ -24,7 +24,7 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length >= 3 && v.length <= 30
       },
       message:
@@ -35,7 +35,7 @@ const courseSchema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length <= 100
       },
       message:

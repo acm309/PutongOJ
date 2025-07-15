@@ -109,6 +109,7 @@ const solutionSchema = mongoose.Schema({
   },
 }, {
   collection: 'Solution',
+  timestamps: true,
 })
 
 solutionSchema.plugin(mongoosePaginate)

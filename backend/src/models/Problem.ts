@@ -1,9 +1,15 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const config = require('../config')
-const ID = require('./ID')
+import type { Document, PaginateModel } from 'mongoose'
+import type { ProblemEntity } from 'src/types/entity'
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import config from '../config'
+import ID from './ID'
 
-const problemSchema = mongoose.Schema({
+export interface ProblemDocument extends Document, ProblemEntity {}
+
+type CourseModel = PaginateModel<ProblemDocument>
+
+const problemSchema = new mongoose.Schema({
   pid: {
     type: Number,
     default: -1,
@@ -16,7 +22,7 @@ const problemSchema = mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator (v) {
+      validator (v: any) {
         return v.length <= 80
       },
       message:
@@ -82,16 +88,11 @@ const problemSchema = mongoose.Schema({
     ref: 'Course',
     default: null,
     validate: {
-      validator (v) {
+      validator (v: any) {
         return v === null || mongoose.Types.ObjectId.isValid(v)
       },
       message: 'Invalid course ID',
     },
-  },
-  create: {
-    type: Number,
-    default: Date.now,
-    immutable: true,
   },
   submit: {
     type: Number,
@@ -103,15 +104,21 @@ const problemSchema = mongoose.Schema({
   },
 }, {
   collection: 'Problem',
+  timestamps: true,
 })
 
 problemSchema.plugin(mongoosePaginate)
 
-problemSchema.pre('save', async function (next) {
+problemSchema.pre('save', async function (this: ProblemDocument, next) {
   if (this.pid === -1) {
     this.pid = await ID.generateId('Problem')
   }
   next()
 })
 
-module.exports = mongoose.model('Problem', problemSchema)
+const Problem
+  = mongoose.model<ProblemDocument, CourseModel>(
+    'Problem', problemSchema,
+  )
+
+export default module.exports = Problem

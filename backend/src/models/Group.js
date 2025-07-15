@@ -24,6 +24,7 @@ const groupSchema = mongoose.Schema({
   },
 }, {
   collection: 'Group',
+  timestamps: true,
 })
 
 groupSchema.plugin(mongoosePaginate)

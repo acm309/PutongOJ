@@ -17,7 +17,7 @@ const userSchema: Schema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return /^[\w-]{3,20}$/.test(v)
       },
       message:
@@ -42,7 +42,7 @@ const userSchema: Schema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length <= 30
       },
       message:
@@ -53,7 +53,7 @@ const userSchema: Schema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length <= 300
       },
       message:
@@ -64,7 +64,7 @@ const userSchema: Schema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length === 0 || (v.length <= 254
           && /^[\w.%+-]{1,64}@[a-z0-9.-]{1,255}\.[a-z]{2,}$/i.test(v))
       },
@@ -75,7 +75,7 @@ const userSchema: Schema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: string) {
+      validator (v: any) {
         return v.length <= 30
       },
       message:

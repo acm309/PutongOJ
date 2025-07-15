@@ -18,6 +18,7 @@ const tagSchema = mongoose.Schema({
   },
 }, {
   collection: 'Tag',
+  timestamps: true,
 })
 
 tagSchema.plugin(mongoosePaginate)

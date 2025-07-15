@@ -45,6 +45,7 @@ const discussSchema = mongoose.Schema({
   },
 }, {
   collection: 'Discuss',
+  timestamps: true,
 })
 
 discussSchema.pre('validate', function (next) {
