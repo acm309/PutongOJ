@@ -8,7 +8,7 @@ import CoursePerm from '../models/CoursePerm'
 import User from '../models/User'
 import { encrypt } from '../utils/constants'
 
-const courseRoleNone = Object.freeze({
+export const courseRoleNone = Object.freeze({
   basic: false,
   viewTestcase: false,
   viewSolution: false,
@@ -17,7 +17,7 @@ const courseRoleNone = Object.freeze({
   manageCourse: false,
 } as CourseRole)
 
-const courseRoleEntire = Object.freeze({
+export const courseRoleEntire = Object.freeze({
   basic: true,
   viewTestcase: true,
   viewSolution: true,
@@ -94,6 +94,7 @@ export async function getCourseMember (
   }
   const member = await CoursePerm
     .findOne({ course, user: user.id })
+    .lean()
   return {
     user: {
       uid: user.uid,
@@ -164,10 +165,12 @@ export async function getUserRole (
     if (profile.isAdmin) {
       role = Object.assign(role, courseRoleEntire)
     } else {
-      const userPerm = await CoursePerm.findOne({
-        user: profile.id,
-        course: course.id,
-      })
+      const userPerm = await CoursePerm
+        .findOne({
+          user: profile.id,
+          course: course.id,
+        })
+        .lean()
       if (userPerm) {
         role = Object.assign(role, userPerm.role)
       }
@@ -180,7 +183,9 @@ export async function getUserRole (
   return role
 }
 
-export default {
+const courseServices = {
+  courseRoleNone,
+  courseRoleEntire,
   findCourses,
   getCourse,
   createCourse,
@@ -191,3 +196,5 @@ export default {
   removeCourseMember,
   getUserRole,
 }
+
+export default courseServices

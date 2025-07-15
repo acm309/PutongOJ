@@ -53,6 +53,11 @@ const userSeeds: Record<string, Partial<UserDocument>> = {
     pwd: 'Mauthn5oot',
     privilege: privilege.Root,
   },
+  ScourseCstu: {
+    uid: 'ScourseCstu',
+    pwd: '5courseCstu',
+    privilege: privilege.User,
+  },
 }
 
 export { userSeeds }
