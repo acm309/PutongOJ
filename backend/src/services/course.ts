@@ -72,8 +72,16 @@ export async function findCourseMembers (
 ): Promise<Paginated<CourseMemberEntity>> {
   const { page, pageSize } = opt
   const filter = { course }
+  const sort = {
+    'role.manageCourse': -1,
+    'role.manageContest': -1,
+    'role.manageProblem': -1,
+    'role.viewSolution': -1,
+    'role.viewTestcase': -1,
+    'createdAt': -1,
+  }
   const result = await CoursePerm.paginate(filter, {
-    sort: { role: -1 },
+    sort,
     page,
     populate: { path: 'user', select: '-_id uid nick privilege' },
     limit: pageSize,
