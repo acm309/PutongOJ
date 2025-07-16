@@ -38,7 +38,7 @@ test('Problem should fail to find one', async (t) => {
   const res = await request
     .get('/api/problem/10000')
 
-  t.is(res.status, 400)
+  t.is(res.status, 404)
   t.is(res.type, 'application/json')
 
   t.truthy(res.body.error)

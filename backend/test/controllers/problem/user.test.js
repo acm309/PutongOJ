@@ -19,12 +19,12 @@ test.before('Login', async (t) => {
   t.is(login.status, 200)
 })
 
-// 1005: reserved
+// 1004: reserved
 test('Normal user can not visit reserved problem', async (t) => {
   const res = await request
-    .get('/api/problem/1005')
+    .get('/api/problem/1004')
 
-  t.is(res.status, 400)
+  t.is(res.status, 403)
 })
 
 test('Query problem list', async (t) => {

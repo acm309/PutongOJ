@@ -6,7 +6,7 @@ import courseServices from '../services/course'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 
-async function preloadCourse (
+export async function loadCourse (
   ctx: Context,
   inputId?: string | number,
 ): Promise<{ course: CourseDocument, role: CourseRole }> {
@@ -44,7 +44,7 @@ const findCourses = async (ctx: Context) => {
 }
 
 const getCourse = async (ctx: Context) => {
-  const { course, role } = await preloadCourse(ctx)
+  const { course, role } = await loadCourse(ctx)
   const { courseId, name, description, encrypt } = course
 
   const response: CourseEntityLimited & { role: CourseRole }
@@ -73,7 +73,7 @@ const createCourse = async (ctx: Context) => {
 }
 
 const findCourseMembers = async (ctx: Context) => {
-  const { course, role } = await preloadCourse(ctx)
+  const { course, role } = await loadCourse(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -87,7 +87,7 @@ const findCourseMembers = async (ctx: Context) => {
 }
 
 const getCourseMember = async (ctx: Context) => {
-  const { course, role } = await preloadCourse(ctx)
+  const { course, role } = await loadCourse(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -107,7 +107,7 @@ const getCourseMember = async (ctx: Context) => {
 }
 
 const updateCourseMember = async (ctx: Context) => {
-  const { course, role } = await preloadCourse(ctx)
+  const { course, role } = await loadCourse(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -145,7 +145,7 @@ const updateCourseMember = async (ctx: Context) => {
 }
 
 const removeCourseMember = async (ctx: Context) => {
-  const { course, role } = await preloadCourse(ctx)
+  const { course, role } = await loadCourse(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -162,6 +162,7 @@ const removeCourseMember = async (ctx: Context) => {
 }
 
 const courseController = {
+  loadCourse,
   findCourses,
   getCourse,
   createCourse,

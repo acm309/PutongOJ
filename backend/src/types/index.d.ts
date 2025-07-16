@@ -12,6 +12,7 @@ export interface SessionProfile {
   nick: string
   privilege: number
   pwd: string
+  verifyContest?: number[]
 }
 
 export interface PaginateOption {

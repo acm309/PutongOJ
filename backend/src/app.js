@@ -13,6 +13,7 @@ const staticServe = require('koa-static')
 require('./config/db')
 const config = require('./config')
 const setup = require('./config/setup')
+const authnMiddleware = require('./middlewares/authn')
 const router = require('./routes')
 const logger = require('./utils/logger')
 
@@ -49,6 +50,7 @@ app.use(staticServe(path.join(__dirname, '..', 'public'), {
 
 app.use(async (ctx, next) => {
   ctx.state.requestId = ctx.get('X-Request-ID') || 'unknown'
+  await authnMiddleware.checkSession(ctx)
   await next()
 })
 

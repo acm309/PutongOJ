@@ -2,7 +2,7 @@ import constants from '../../src/utils/constants'
 
 const { status } = constants
 
-// 1005: reversed
+// 1004: reversed
 const problemSeeds = [
   {
     title: 'A + B',

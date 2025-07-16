@@ -1,3 +1,4 @@
+import type { ProblemDocument } from 'src/models/Problem'
 import type { CourseRole, SessionProfile } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
@@ -9,6 +10,7 @@ declare module 'koa' {
     profile?: UserDocument
     course?: CourseDocument
     courseRole?: CourseRole
+    problem?: ProblemDocument
   }
 
   interface DefaultContext {

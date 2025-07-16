@@ -4,7 +4,9 @@ import type { SessionProfile } from '../types'
 import User from '../models/User'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/error'
 
-async function checkSession (ctx: Context): Promise<UserDocument | undefined> {
+export async function checkSession (
+  ctx: Context,
+): Promise<UserDocument | undefined> {
   if (ctx.state.authnChecked) {
     return ctx.state.profile
   }
@@ -28,31 +30,32 @@ async function checkSession (ctx: Context): Promise<UserDocument | undefined> {
   return user
 }
 
-const loginRequire: Middleware = async (ctx, next) => {
-  const user = await checkSession(ctx)
-  if (!user) {
+export async function loadProfile (
+  ctx: Context,
+): Promise<{ profile: UserDocument }> {
+  const profile = await checkSession(ctx)
+  if (!profile) {
     return ctx.throw(...ERR_LOGIN_REQUIRE)
   }
+  return { profile }
+}
+
+const loginRequire: Middleware = async (ctx, next) => {
+  await loadProfile(ctx)
   await next()
 }
 
 const adminRequire: Middleware = async (ctx, next) => {
-  const user = await checkSession(ctx)
-  if (!user) {
-    return ctx.throw(...ERR_LOGIN_REQUIRE)
-  }
-  if (!user.isAdmin) {
+  const { profile } = await loadProfile(ctx)
+  if (!profile.isAdmin) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
   await next()
 }
 
 const rootRequire: Middleware = async (ctx, next) => {
-  const user = await checkSession(ctx)
-  if (!user) {
-    return ctx.throw(...ERR_LOGIN_REQUIRE)
-  }
-  if (!user.isRoot) {
+  const { profile } = await loadProfile(ctx)
+  if (!profile.isRoot) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
   await next()
@@ -60,6 +63,7 @@ const rootRequire: Middleware = async (ctx, next) => {
 
 const authnMiddleware = {
   checkSession,
+  loadProfile,
   loginRequire,
   adminRequire,
   rootRequire,
