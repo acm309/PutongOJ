@@ -1,3 +1,4 @@
+import type { ContestDocument } from 'src/models/Contest'
 import type { ProblemDocument } from 'src/models/Problem'
 import type { CourseRole, SessionProfile } from '.'
 import type { CourseDocument } from '../models/Course'
@@ -7,10 +8,11 @@ import 'koa'
 declare module 'koa' {
   interface DefaultState {
     authnChecked?: boolean
-    profile?: UserDocument
+    contest?: ContestDocument
     course?: CourseDocument
     courseRole?: CourseRole
     problem?: ProblemDocument
+    profile?: UserDocument
   }
 
   interface DefaultContext {
