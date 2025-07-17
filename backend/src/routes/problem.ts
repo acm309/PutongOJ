@@ -1,5 +1,5 @@
 import type { DefaultContext, DefaultState } from 'koa'
-import Router from 'koa-router'
+import Router from '@koa/router'
 import problemController from '../controllers/problem'
 import authnMiddleware from '../middlewares/authn'
 

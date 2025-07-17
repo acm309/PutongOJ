@@ -1,4 +1,4 @@
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const utils = require('../controllers/utils')
 const { auth } = require('../middlewares')
 

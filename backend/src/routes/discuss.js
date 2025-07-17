@@ -1,4 +1,4 @@
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const discuss = require('../controllers/discuss')
 const { auth, commentCreateRateLimit } = require('../middlewares')
 
