@@ -3,7 +3,7 @@ import type { CourseEntityEditable } from '../../src/types/entity'
 import test from 'ava'
 import User from '../../src/models/User'
 
-import courseServices from '../../src/services/course'
+import courseService from '../../src/services/course'
 import { userSeeds } from '../seeds/user'
 
 /* eslint-disable-next-line ts/no-require-imports */
@@ -22,14 +22,14 @@ const testContext = {
   course: undefined as CourseDocument | undefined,
 }
 
-const { courseRoleNone, courseRoleEntire } = courseServices
+const { courseRoleNone, courseRoleEntire } = courseService
 const courseRoleBasic = Object.freeze({
   ...courseRoleNone,
   basic: true,
 })
 
 test('findCourses', async (t) => {
-  const result = await courseServices.findCourses({
+  const result = await courseService.findCourses({
     page: 1,
     pageSize: 1,
   })
@@ -48,21 +48,21 @@ test('findCourses', async (t) => {
 
 test('createCourse (name too short)', async (t) => {
   const course = { ...testCourse, name: 'CP' }
-  await t.throwsAsync(courseServices.createCourse(course))
+  await t.throwsAsync(courseService.createCourse(course))
 })
 
 test('createCourse (name too long)', async (t) => {
   const course = { ...testCourse, name: 'C'.repeat(31) }
-  await t.throwsAsync(courseServices.createCourse(course))
+  await t.throwsAsync(courseService.createCourse(course))
 })
 
 test('createCourse (description too long)', async (t) => {
   const course = { ...testCourse, description: 'A'.repeat(101) }
-  await t.throwsAsync(courseServices.createCourse(course))
+  await t.throwsAsync(courseService.createCourse(course))
 })
 
 test.serial('createCourse (serial)', async (t) => {
-  const course = await courseServices.createCourse(testCourse)
+  const course = await courseService.createCourse(testCourse)
 
   t.truthy(course)
   t.is(typeof course.courseId, 'number')
@@ -74,7 +74,7 @@ test.serial('createCourse (serial)', async (t) => {
 })
 
 test('getCourse (non-existent course)', async (t) => {
-  const course = await courseServices.getCourse(0)
+  const course = await courseService.getCourse(0)
   t.is(course, undefined)
 })
 
@@ -83,7 +83,7 @@ test.serial('getCourse (serial)', async (t) => {
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const course = await courseServices.getCourse(courseId)
+  const course = await courseService.getCourse(courseId)
 
   t.truthy(course)
   t.is(course?.courseId, courseId)
@@ -95,7 +95,7 @@ test.serial('getCourse (serial)', async (t) => {
 })
 
 test('updateCourse (non-existent course)', async (t) => {
-  const result = await courseServices.updateCourse(0, {})
+  const result = await courseService.updateCourse(0, {})
   t.is(result, undefined)
 })
 
@@ -104,7 +104,7 @@ test.serial('updateCourse (serial)', async (t) => {
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const updatedCourse = await courseServices.updateCourse(
+  const updatedCourse = await courseService.updateCourse(
     courseId,
     {
       name: 'Advanced C Programming',
@@ -122,7 +122,7 @@ test.serial('updateCourseMember (non-existent user)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.updateCourseMember(
+  const result = await courseService.updateCourseMember(
     courseObjectId,
     'ScourseNonExist',
     courseRoleEntire,
@@ -136,7 +136,7 @@ test.serial('updateCourseMember (serial)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.updateCourseMember(
+  const result = await courseService.updateCourseMember(
     courseObjectId,
     testUser.uid,
     courseRoleEntire,
@@ -150,7 +150,7 @@ test.serial('getCourseMember (non-existent user)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.getCourseMember(
+  const result = await courseService.getCourseMember(
     courseObjectId,
     'ScourseNonExist',
   )
@@ -163,7 +163,7 @@ test.serial('getCourseMember (serial)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.getCourseMember(
+  const result = await courseService.getCourseMember(
     courseObjectId,
     testUser.uid as string,
   )
@@ -181,7 +181,7 @@ test.serial('getCourseMember (non-member user)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.getCourseMember(
+  const result = await courseService.getCourseMember(
     courseObjectId,
     adminUser.uid,
   )
@@ -199,7 +199,7 @@ test.serial('findCourseMembers (serial)', async (t) => {
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const members = await courseServices.findCourseMembers(courseId, {
+  const members = await courseService.findCourseMembers(courseId, {
     page: 1,
     pageSize: 1,
   })
@@ -221,7 +221,7 @@ test.serial('removeCourseMember (non-existent user)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.removeCourseMember(
+  const result = await courseService.removeCourseMember(
     courseObjectId,
     'ScourseNonExist',
   )
@@ -237,7 +237,7 @@ test.serial('getUserRole (entire)', async (t) => {
   if (!testContext.course) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const role = await courseServices.getUserRole(user, testContext.course)
+  const role = await courseService.getUserRole(user, testContext.course)
 
   t.deepEqual(role, courseRoleEntire)
 })
@@ -247,7 +247,7 @@ test.serial('removeCourseMember (serial)', async (t) => {
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const result = await courseServices.removeCourseMember(
+  const result = await courseService.removeCourseMember(
     courseObjectId,
     testUser.uid,
   )
@@ -263,7 +263,7 @@ test.serial('getUserRole (basic)', async (t) => {
   if (!testContext.course) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const role = await courseServices.getUserRole(user, testContext.course)
+  const role = await courseService.getUserRole(user, testContext.course)
 
   t.deepEqual(role, courseRoleBasic)
 })
@@ -276,7 +276,7 @@ test.serial('getUserRole (admin has entire)', async (t) => {
   if (!testContext.course) {
     return t.fail('Previous test did not create a course successfully')
   }
-  const role = await courseServices.getUserRole(user, testContext.course)
+  const role = await courseService.getUserRole(user, testContext.course)
 
   t.deepEqual(role, courseRoleEntire)
 })

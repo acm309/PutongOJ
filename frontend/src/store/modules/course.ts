@@ -1,13 +1,13 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityLimited } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityPreview, CourseEntityView } from '@backend/types/entity'
 import type { PaginateParams } from '@/types/api'
 import { defineStore } from 'pinia'
 import api from '@/api'
 
 export const useCourseStore = defineStore('course', {
   state: () => ({
-    course: {} as CourseEntityLimited & { role: CourseRole },
-    courses: {} as Paginated<CourseEntityLimited>,
+    course: {} as CourseEntityView & { role: CourseRole },
+    courses: {} as Paginated<CourseEntityPreview>,
   }),
   actions: {
     async createCourse (course: CourseEntityEditable): Promise<number> {

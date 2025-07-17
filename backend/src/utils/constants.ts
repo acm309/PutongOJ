@@ -5,7 +5,7 @@ export const privilege = Object.freeze({
   Root: 3,
 })
 
-const judge = Object.freeze({
+export const judge = Object.freeze({
   Pending: 0,
   Running: 1,
   CompileError: 2,
@@ -21,12 +21,12 @@ const judge = Object.freeze({
   Skipped: 12,
 })
 
-const limitation = Object.freeze({
+export const limitation = Object.freeze({
   time: 10 * 1000,
   memory: 256 * 1024,
 })
 
-const status = Object.freeze({
+export const status = Object.freeze({
   Reserve: 0,
   Available: 2,
 })
@@ -37,13 +37,13 @@ export const encrypt = Object.freeze({
   Password: 3,
 })
 
-const problemType = Object.freeze({
+export const problemType = Object.freeze({
   Traditional: 1,
   Interaction: 2,
   SpecialJudge: 3,
 })
 
-const deploy = Object.freeze({
+export const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 

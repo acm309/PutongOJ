@@ -1,8 +1,8 @@
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
-import type { CourseEntity, CourseEntityLimited, CourseMemberEntity } from '../types/entity'
-import courseServices from '../services/course'
+import type { CourseEntity, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '../types/entity'
+import courseService from '../services/course'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 
@@ -20,13 +20,13 @@ export async function loadCourse (
     return { course: ctx.state.course, role: ctx.state.courseRole }
   }
 
-  const course = await courseServices.getCourse(courseId)
+  const course = await courseService.getCourse(courseId)
   if (!course) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
   const { profile } = ctx.state
-  const role = await courseServices.getUserRole(profile, course)
+  const role = await courseService.getUserRole(profile, course)
 
   ctx.state.course = course
   ctx.state.courseRole = role
@@ -38,8 +38,8 @@ const findCourses = async (ctx: Context) => {
   const opt = ctx.request.query
   const { page, pageSize } = parsePaginateOption(opt, 5, 100)
 
-  const response: Paginated<CourseEntityLimited>
-    = await courseServices.findCourses({ page, pageSize })
+  const response: Paginated<CourseEntityPreview>
+    = await courseService.findCourses({ page, pageSize })
   ctx.body = response
 }
 
@@ -47,7 +47,7 @@ const getCourse = async (ctx: Context) => {
   const { course, role } = await loadCourse(ctx)
   const { courseId, name, description, encrypt } = course
 
-  const response: CourseEntityLimited & { role: CourseRole }
+  const response: CourseEntityView & { role: CourseRole }
     = { courseId, name, description, encrypt, role }
   ctx.body = response
 }
@@ -57,9 +57,8 @@ const createCourse = async (ctx: Context) => {
   const { name, description, encrypt } = opt
 
   try {
-    const course = await courseServices.createCourse({
-      name, description, encrypt,
-    })
+    const course = await courseService.createCourse({
+      name, description, encrypt })
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
     ctx.body = response
@@ -82,7 +81,7 @@ const findCourseMembers = async (ctx: Context) => {
   const { page, pageSize } = parsePaginateOption(opt, 30, 200)
 
   const response: Paginated<CourseMemberEntity>
-    = await courseServices.findCourseMembers(course.id, { page, pageSize })
+    = await courseService.findCourseMembers(course.id, { page, pageSize })
   ctx.body = response
 }
 
@@ -97,7 +96,7 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Missing uid')
   }
 
-  const member = await courseServices.getCourseMember(course.id, userId)
+  const member = await courseService.getCourseMember(course.id, userId)
   if (!member) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -134,12 +133,11 @@ const updateCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Basic permission is required, remove member if not needed')
   }
 
-  const result = await courseServices.updateCourseMember(
+  const result = await courseService.updateCourseMember(
     course.id,
     userId,
     newRole as CourseRole,
   )
-
   const response: { success: boolean } = { success: result }
   ctx.body = response
 }
@@ -155,8 +153,7 @@ const removeCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Missing uid')
   }
 
-  const result = await courseServices.removeCourseMember(course.id, userId)
-
+  const result = await courseService.removeCourseMember(course.id, userId)
   const response: { success: boolean } = { success: result }
   ctx.body = response
 }

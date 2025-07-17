@@ -32,12 +32,12 @@ export async function checkSession (
 
 export async function loadProfile (
   ctx: Context,
-): Promise<{ profile: UserDocument }> {
+): Promise<UserDocument> {
   const profile = await checkSession(ctx)
   if (!profile) {
     return ctx.throw(...ERR_LOGIN_REQUIRE)
   }
-  return { profile }
+  return profile
 }
 
 const loginRequire: Middleware = async (ctx, next) => {
@@ -46,7 +46,7 @@ const loginRequire: Middleware = async (ctx, next) => {
 }
 
 const adminRequire: Middleware = async (ctx, next) => {
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
   if (!profile.isAdmin) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -54,7 +54,7 @@ const adminRequire: Middleware = async (ctx, next) => {
 }
 
 const rootRequire: Middleware = async (ctx, next) => {
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
   if (!profile.isRoot) {
     return ctx.throw(...ERR_PERM_DENIED)
   }

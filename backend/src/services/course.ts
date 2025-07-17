@@ -2,7 +2,7 @@ import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityLimited, CourseMemberEntity } from '../types/entity'
+import type { CourseEntityEditable, CourseEntityPreview, CourseMemberEntity } from '../types/entity'
 import Course from '../models/Course'
 import CoursePerm from '../models/CoursePerm'
 import User from '../models/User'
@@ -28,7 +28,7 @@ export const courseRoleEntire = Object.freeze({
 
 export async function findCourses (
   opt: PaginateOption & {},
-): Promise<Paginated<CourseEntityLimited>> {
+): Promise<Paginated<CourseEntityPreview>> {
   const { page, pageSize } = opt
   const query: Record<string, unknown> = {}
   const result = await Course.paginate(query, {
@@ -191,7 +191,7 @@ export async function getUserRole (
   return role
 }
 
-const courseServices = {
+const courseService = {
   courseRoleNone,
   courseRoleEntire,
   findCourses,
@@ -205,4 +205,4 @@ const courseServices = {
   getUserRole,
 }
 
-export default courseServices
+export default courseService

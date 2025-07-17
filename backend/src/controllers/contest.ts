@@ -19,7 +19,7 @@ const { encrypt, status, judge } = constants
 export async function loadContest (
   ctx: Context,
   inputId?: string | number,
-): Promise<{ contest: ContestDocument }> {
+): Promise<ContestDocument> {
   const contestId = Number(
     inputId || ctx.params.cid || ctx.request.query.cid,
   )
@@ -27,7 +27,7 @@ export async function loadContest (
     return ctx.throw(...ERR_INVALID_ID)
   }
   if (ctx.state.contest?.cid === contestId) {
-    return { contest: ctx.state.contest }
+    return ctx.state.contest
   }
 
   const contest = await Contest.findOne({ cid: contestId })
@@ -35,10 +35,10 @@ export async function loadContest (
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
   if (profile.isAdmin) {
     ctx.state.contest = contest
-    return { contest }
+    return contest
   }
   if (contest.start > Date.now()) {
     return ctx.throw(400, 'This contest has not started yet')
@@ -50,14 +50,14 @@ export async function loadContest (
   }
   if (session.verifyContest.includes(contest.cid)) {
     ctx.state.contest = contest
-    return { contest }
+    return contest
   }
 
   if (contest.encrypt === encrypt.Public) {
     session.verifyContest.push(contest.cid)
     logger.info(`User <${profile.uid}> enter contest <${contest.cid}>`)
     ctx.state.contest = contest
-    return { contest }
+    return contest
   }
 
   return ctx.throw(...ERR_PERM_DENIED)
@@ -90,8 +90,8 @@ const findContests = async (ctx: Context) => {
 }
 
 const getContest = async (ctx: Context) => {
-  const { profile } = await loadProfile(ctx)
-  const { contest } = await loadContest(ctx)
+  const profile = await loadProfile(ctx)
+  const contest = await loadContest(ctx)
   const cid = contest.cid
   const problemList = contest.list
   const totalProblems = problemList.length
@@ -141,8 +141,8 @@ const getContest = async (ctx: Context) => {
 }
 
 const getRanklist = async (ctx: Context) => {
-  const { profile } = await loadProfile(ctx)
-  const { contest } = await loadContest(ctx)
+  const profile = await loadProfile(ctx)
+  const contest = await loadContest(ctx)
 
   // 封榜时长：20% 的比赛时间（最小 10 分钟）
   const FREEZE_DURATION_RATE = 0.2
@@ -237,7 +237,7 @@ const getRanklist = async (ctx: Context) => {
 
 const createContest = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
 
   const contest = new Contest({
     title: opt.title,
@@ -262,8 +262,8 @@ const createContest = async (ctx: Context) => {
 
 const updateContest = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { profile } = await loadProfile(ctx)
-  const { contest } = await loadContest(ctx)
+  const profile = await loadProfile(ctx)
+  const contest = await loadContest(ctx)
 
   if (opt.title) { contest.title = opt.title }
   if (opt.encrypt) { contest.encrypt = opt.encrypt }
@@ -287,7 +287,7 @@ const updateContest = async (ctx: Context) => {
 
 const deleteContest = async (ctx: Context) => {
   const cid = ctx.params.cid
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
 
   try {
     await Contest.deleteOne({ cid }).exec()
@@ -306,7 +306,7 @@ const verifyParticipant = async (ctx: Context) => {
     return ctx.throw(400, 'Invalid contest ID')
   }
   const session = ctx.session.profile as SessionProfile
-  const { profile } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
   const contest = await Contest.findOne({ cid })
   if (!contest) {
     return ctx.throw(...ERR_NOT_FOUND)

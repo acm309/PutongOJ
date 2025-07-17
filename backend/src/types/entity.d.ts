@@ -58,6 +58,24 @@ export interface ProblemEntity extends Entity {
   solve: number
 }
 
+export type ProblemEntityEditable = Pick<ProblemEntity,
+  'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
+  | 'out' | 'hint' | 'status' | 'type' | 'code'
+>
+
+export type ProblemEntityItem = Pick<ProblemEntity,
+  'pid' | 'title'
+>
+
+export type ProblemEntityPreview = Pick<ProblemEntity,
+  'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
+>
+
+export type ProblemEntityView = Pick<ProblemEntity,
+  'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
+  | 'input' | 'output' | 'in' | 'out' | 'hint'
+> & Partial<Pick<ProblemEntity, 'type' | 'code'>>
+
 // Contest
 
 export interface ContestEntity extends Entity {
@@ -85,9 +103,11 @@ export type CourseEntityEditable = Pick<CourseEntity,
   'name' | 'description' | 'encrypt'
 >
 
-export type CourseEntityLimited = Pick<CourseEntity,
+export type CourseEntityView = Pick<CourseEntity,
   'courseId' | 'name' | 'description' | 'encrypt'
 >
+
+export type CourseEntityPreview = CourseEntityView
 
 // Course Permission
 
