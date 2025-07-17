@@ -1,14 +1,14 @@
-const { judge } = require('../../config')
-const Problem = require('../../models/Problem')
-const Solution = require('../../models/Solution')
-const User = require('../../models/User')
-const logger = require('../../utils/logger')
+import Problem from '../../models/Problem'
+import Solution from '../../models/Solution'
+import User from '../../models/User'
+import { judge } from '../../utils/constants'
+import logger from '../../utils/logger'
 
 /**
  * 更新用户的统计信息
- * @param {string} uid 用户 ID
+ * @param uid 用户 ID
  */
-async function updateUserStatistic (uid) {
+async function updateUserStatistic (uid: string) {
   uid = uid.trim()
 
   const [ submitProblems, solveProblems ] = await Promise.all([
@@ -30,10 +30,12 @@ async function updateUserStatistic (uid) {
 
 /**
  * 更新题目的统计信息
- * @param {number} pid 题目 ID
+ * @param pid 题目 ID
  */
-async function updateProblemStatistic (pid) {
-  pid = Number.parseInt(pid, 10)
+async function updateProblemStatistic (pid: number | string) {
+  if (typeof pid === 'string') {
+    pid = Number.parseInt(pid, 10)
+  }
 
   const [ submitUsers, acceptedUsers ] = await Promise.all([
     Solution.distinct('uid', { pid }),
@@ -54,9 +56,9 @@ async function updateProblemStatistic (pid) {
 
 /**
  * 更新统计信息
- * @param {string} item 任务项，格式为 `type:id`
+ * @param item 任务项，格式为 `type:id`
  */
-async function updateStatistic (item) {
+async function updateStatistic (item: string) {
   const type = item.slice(0, item.indexOf(':'))
   const id = item.slice(item.indexOf(':') + 1)
 
@@ -72,4 +74,4 @@ async function updateStatistic (item) {
   }
 }
 
-module.exports = updateStatistic
+export default module.exports = updateStatistic

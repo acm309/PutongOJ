@@ -1,9 +1,9 @@
-const levenshtein = require('fast-levenshtein')
-const { judge } = require('../../config')
-const Solution = require('../../models/Solution')
-const logger = require('../../utils/logger')
+import levenshtein from 'fast-levenshtein'
+import Solution from '../../models/Solution'
+import { judge } from '../../utils/constants'
+import logger from '../../utils/logger'
 
-function codeNormalize (code) {
+function codeNormalize (code: string): string {
   return code
     .replace(/\/\/.*|\/\*[\s\S]*?\*\//g, '')
     .replace(/[a-z_]\w*/gi, 'VAR')
@@ -11,11 +11,11 @@ function codeNormalize (code) {
     .trim()
 }
 
-function similarity (a, b) {
+function similarity (a: string, b: string): number {
   return 1 - (levenshtein.get(a, b) / Math.max(a.length, b.length))
 }
 
-async function checkSimilarity (item) {
+async function checkSimilarity (item: string) {
   const sid = Number.parseInt(item, 10)
   const solution = await Solution.findOne({ sid }).exec()
   if (!solution) {
@@ -57,4 +57,4 @@ async function checkSimilarity (item) {
   await solution.save()
 }
 
-module.exports = checkSimilarity
+export default module.exports = checkSimilarity

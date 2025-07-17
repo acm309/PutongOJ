@@ -1,7 +1,7 @@
-const process = require('node:process')
-const Redis = require('ioredis')
-const logger = require('../utils/logger')
-const config = require('./')
+import process from 'node:process'
+import Redis from 'ioredis'
+import logger from '../utils/logger'
+import config from './'
 
 const redis = new Redis(config.redisURL)
 
@@ -15,4 +15,4 @@ redis.on('error', (err) => {
   process.exit(-1)
 })
 
-module.exports = redis
+export default module.exports = redis

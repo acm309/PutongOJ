@@ -1,10 +1,10 @@
-const path = require('node:path')
-const fse = require('fs-extra')
-const config = require('.')
-const ID = require('../models/ID')
-const Problem = require('../models/Problem')
-const User = require('../models/User')
-const { generatePwd } = require('../utils/helper')
+import path from 'node:path'
+import fse from 'fs-extra'
+import config from '.'
+import ID from '../models/ID'
+import Problem from '../models/Problem'
+import User from '../models/User'
+import { generatePwd } from '../utils'
 
 async function databaseSetup () {
   const models = {
@@ -17,11 +17,12 @@ async function databaseSetup () {
     Solution: 0,
   }
 
-  const ps = Object.entries(models).map(async ([ model, id ]) => {
-    const item = await ID.findOne({ name: model }).exec()
-    if (item != null && item.id >= id) { return }
-    return new ID({ name: model, id }).save()
-  })
+  const ps: Promise<any>[]
+   = Object.entries(models).map(async ([ model, id ]) => {
+     const item = await ID.findOne({ name: model }).exec()
+     if (item != null && item.id >= id) { return }
+     return new ID({ name: model, id }).save()
+   })
 
   const admin = await User.findOne({ uid: 'admin' }).exec()
   if (admin == null) {
@@ -39,11 +40,11 @@ async function databaseSetup () {
       title: 'A + B',
       description: 'This is a test problem without any test data. Go to Edit tab to complete the description and other fields. Go to Test Data to upload new test data',
     }).save())
-    ps.push(fse.outputJsonSync(path.resolve(__dirname, '../../data/1000/', 'meta.json'), {
+    ps.push(fse.outputJson(path.resolve(__dirname, '../../data/1000/', 'meta.json'), {
       testcases: [],
     }, { spaces: 2 })) // 缩进2个空格
   }
   return Promise.all(ps)
 }
 
-module.exports = databaseSetup
+export default module.exports = databaseSetup
