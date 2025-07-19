@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProblemEntityPreview } from '@backend/types/entity'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
 import { Button, Icon, Input, Option, Page, Select, Spin } from 'view-ui-plus'
@@ -19,9 +20,9 @@ const problemStore = useProblemStore()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const { problems, solved } = $(storeToRefs(problemStore))
-const { judge } = $(storeToRefs(rootStore))
+const { status, judge } = $(storeToRefs(rootStore))
 const { isAdmin } = $(storeToRefs(sessionStore))
-const { findProblems } = problemStore
+const { findProblems, update } = problemStore
 
 const problemStatus = constant.status
 const searchOptions = Object.freeze([
@@ -71,6 +72,16 @@ async function fetch () {
 
 const search = () => reload({ page: 1, type, content })
 const pageChange = (val: number) => reload({ page: val })
+
+async function switchStatus (problem: ProblemEntityPreview) {
+  loading = true
+  const newStatus = problem.status === status.Reserve
+    ? status.Available
+    : status.Reserve
+  await update({ pid: problem.pid, status: newStatus })
+  loading = false
+  await fetch()
+}
 
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
@@ -166,7 +177,7 @@ onRouteQueryUpdate(fetch)
             </td>
             <td v-if="isAdmin" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
-                <a>{{ problemStatus[item.status] }}</a>
+                <a @click="switchStatus(item)">{{ problemStatus[item.status] }}</a>
               </Tooltip>
             </td>
           </tr>

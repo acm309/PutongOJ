@@ -1,4 +1,5 @@
-import type { privilege, status } from '@/util/constant'
+import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { privilege } from '@/util/constant'
 
 export interface TimeResp {
   serverTime: number
@@ -43,12 +44,7 @@ export interface Problem {
   title: string
 }
 
-export interface ProblemBrief extends Problem {
-  solve: number
-  submit: number
-  status: keyof typeof status
-  tags: string[]
-}
+export type ProblemBrief = ProblemEntityPreview
 
 export interface ProblemDetail extends Problem {
   description: string

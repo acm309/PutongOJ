@@ -1,32 +1,56 @@
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
-import type { CourseEntity, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '../types/entity'
+import type { CourseEntity, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntity } from '../types/entity'
+import { Document } from 'mongoose'
 import courseService from '../services/course'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 
 export async function loadCourse (
   ctx: Context,
-  inputId?: string | number,
+  input?: CourseDocument | string | number,
 ): Promise<{ course: CourseDocument, role: CourseRole }> {
-  const courseId = Number(
-    inputId || ctx.params.courseId || ctx.request.query.course,
-  )
-  if (!Number.isInteger(courseId) || courseId <= 0) {
-    return ctx.throw(...ERR_INVALID_ID)
-  }
-  if (ctx.state.course?.courseId === courseId && ctx.state.courseRole) {
-    return { course: ctx.state.course, role: ctx.state.courseRole }
+  //
+  const resolveCourse = async (): Promise<CourseDocument> => {
+    if (input instanceof Document && (input as CourseDocument).courseId) {
+      if (!ctx.state.course || ctx.state.course.courseId !== input.courseId) {
+        ctx.state.courseRole = undefined
+      }
+      return input as CourseDocument
+    }
+
+    const courseId = Number(
+      input ?? ctx.params.courseId ?? ctx.request.query.course,
+    )
+    if (!Number.isInteger(courseId) || courseId <= 0) {
+      return ctx.throw(...ERR_INVALID_ID)
+    }
+    if (!ctx.state.course || ctx.state.course.courseId !== courseId) {
+      ctx.state.courseRole = undefined
+    }
+    if (ctx.state.course?.courseId === courseId) {
+      return ctx.state.course
+    }
+
+    const course = await courseService.getCourse(courseId)
+    if (!course) {
+      return ctx.throw(...ERR_NOT_FOUND)
+    }
+    return course
   }
 
-  const course = await courseService.getCourse(courseId)
-  if (!course) {
-    return ctx.throw(...ERR_NOT_FOUND)
+  const resolveRole = async (course: CourseDocument): Promise<CourseRole> => {
+    if (ctx.state.courseRole) {
+      return ctx.state.courseRole
+    }
+
+    const { profile } = ctx.state
+    return courseService.getUserRole(profile, course)
   }
 
-  const { profile } = ctx.state
-  const role = await courseService.getUserRole(profile, course)
+  const course = await resolveCourse()
+  const role = await resolveRole(course)
 
   ctx.state.course = course
   ctx.state.courseRole = role
@@ -47,7 +71,7 @@ const getCourse = async (ctx: Context) => {
   const { course, role } = await loadCourse(ctx)
   const { courseId, name, description, encrypt } = course
 
-  const response: CourseEntityView & { role: CourseRole }
+  const response: CourseEntityViewWithRole
     = { courseId, name, description, encrypt, role }
   ctx.body = response
 }
@@ -58,7 +82,8 @@ const createCourse = async (ctx: Context) => {
 
   try {
     const course = await courseService.createCourse({
-      name, description, encrypt })
+      name, description, encrypt,
+    })
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
     ctx.body = response

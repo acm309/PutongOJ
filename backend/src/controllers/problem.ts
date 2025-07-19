@@ -1,7 +1,8 @@
 import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
-import type { ProblemEntity, ProblemEntityView } from '../types/entity'
+import type { CourseEntityViewWithRole, ProblemEntity, ProblemEntityView } from '../types/entity'
+import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
 import problemService from '../services/problem'
@@ -43,6 +44,14 @@ export async function loadProblem (
   if (Number.isInteger(contestId) && contestId > 0) {
     const contest = await loadContest(ctx, contestId)
     if (contest.list.includes(problemId)) {
+      ctx.state.problem = problem
+      return problem
+    }
+  }
+
+  if (problem.course) {
+    const { role } = await loadCourse(ctx, problem.course)
+    if (role.basic) {
       ctx.state.problem = problem
       return problem
     }
@@ -97,30 +106,54 @@ const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
   const profile = ctx.state.profile
   const isAdmin: boolean = !!profile?.isAdmin
-  const { pid, title, time, memory, status, tags, description, input, output,
-    in: exampleIn, out: exampleOut, hint, type, code } = problem
-  const response: { problem: ProblemEntityView } = {
-    problem: {
-      pid, title, time, memory, status, tags, description, input, output,
-      in: exampleIn, out: exampleOut, hint,
-      type: isAdmin ? type : undefined,
-      code: isAdmin ? code : undefined,
-    },
+
+  let course: CourseEntityViewWithRole | null = null
+  if (problem.course) {
+    const { course: courseDoc, role } = await loadCourse(ctx, problem.course)
+    course = {
+      ...pick(courseDoc, [ 'courseId', 'name', 'description', 'encrypt' ]),
+      role,
+    }
+  }
+  const response: ProblemEntityView = {
+    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
+      'description', 'input', 'output', 'in', 'out', 'hint' ]),
+    type: isAdmin ? problem.type : undefined,
+    code: isAdmin ? problem.code : undefined,
+    course,
   }
   ctx.body = response
 }
 
 const createProblem = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { uid } = await loadProfile(ctx)
-  const { title, time, memory, status, description, input, output,
-    in: exampleIn, out: exampleOut, hint, type, code } = opt
+  const profile = await loadProfile(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (opt.course) {
+      const { role } = await loadCourse(ctx, opt.course)
+      return role.manageProblem
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  let courseDocId: ObjectId | undefined
+  if (opt.course) {
+    const { course } = await loadCourse(ctx, opt.course)
+    courseDocId = course.id
+  }
 
   try {
     const problem = await problemService.createProblem({
-      title, time, memory, status, description, input, output,
-      in: exampleIn, out: exampleOut, hint, type, code })
-    logger.info(`Problem <${problem.pid}> is created by user <${uid}>`)
+      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
+      course: courseDocId })
+    logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
       = { pid: problem.pid }
     ctx.body = response
@@ -135,18 +168,38 @@ const createProblem = async (ctx: Context) => {
 
 const updateProblem = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { pid } = await loadProblem(ctx)
-  const { uid } = await loadProfile(ctx)
-  const { title, time, memory, status, description, input, output,
-    in: exampleIn, out: exampleOut, hint, type, code } = opt
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (problem.course) {
+      const { role } = await loadCourse(ctx, problem.course)
+      return role.manageProblem
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
 
+  let courseDocId: ObjectId | undefined
+  if (opt.course) {
+    const { course } = await loadCourse(ctx, opt.course)
+    courseDocId = course.id
+  }
+
+  const pid = problem.pid
+  const uid = profile.uid
   try {
     const problem = await problemService.updateProblem(pid, {
-      title, time, memory, status, description, input, output,
-      in: exampleIn, out: exampleOut, hint, type, code })
+      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
+      course: courseDocId })
     logger.info(`Problem <${pid}> is updated by user <${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }
-     = { pid: problem?.pid ?? -1, success: !!problem }
+      = { pid: problem?.pid ?? -1, success: !!problem }
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -167,7 +220,6 @@ const removeProblem = async (ctx: Context) => {
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
-
   ctx.body = {}
 }
 

@@ -57,7 +57,7 @@ test.serial('create a new tag', async (t) => {
   return Promise.all(
     newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.true(res.body.problem.tags.includes(newTag.tid))
+      t.true(res.body.tags.includes(newTag.tid))
     }),
   )
 })
@@ -78,11 +78,11 @@ test.serial('Update a tag', async (t) => {
   return Promise.all(
     newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.false(res.body.problem.tags.includes(newTag.tid))
+      t.false(res.body.tags.includes(newTag.tid))
     }),
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.true(res.body.problem.tags.includes(newTag.tid))
+      t.true(res.body.tags.includes(newTag.tid))
     }),
   )
 })
@@ -101,7 +101,7 @@ test.serial('Delete a tag', async (t) => {
   return Promise.all(
     newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
-      t.false(res.body.problem.tags.includes(newTag.tid))
+      t.false(res.body.tags.includes(newTag.tid))
     }),
   )
 })

@@ -20,10 +20,9 @@ export const useProblemStore = defineStore('problem', {
       this.solved = data.solved
     },
     async findOne (payload: { [key: string]: any }) {
-      return api.problem.findOne(payload).then(({ data }) => {
-        this.problem = data.problem
-        return data
-      })
+      const { data } = await api.problem.findOne(payload)
+      this.problem = data
+      return { problem: data }
     },
     /** @deprecated */
     async find (payload: { [key: string]: any }) {

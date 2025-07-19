@@ -1,6 +1,7 @@
 import type { ObjectId } from 'mongoose'
 import type { CourseRole } from '.'
-import type { encrypt } from '../utils/constants'
+import type { CourseDocument } from '../models/Course'
+import type { encrypt, problemType, status } from '../utils/constants'
 
 // Common
 
@@ -28,68 +29,6 @@ export interface UserEntity extends Entity {
   solve: number
 }
 
-// Problem
-
-export interface ProblemEntity extends Entity {
-  pid: number
-  title: string
-  /** Time limit in milliseconds */
-  time: number
-  /** Memory limit in kilobytes */
-  memory: number
-  description: string
-  /** Input format description */
-  input: string
-  /** Output format description */
-  output: string
-  /** Input example */
-  in: string
-  /** Output example */
-  out: string
-  hint: string
-  status: number
-  /** Judge type */
-  type: number
-  /** Judger code */
-  code: string
-  tags: string[]
-  course: ObjectId | null
-  submit: number
-  solve: number
-}
-
-export type ProblemEntityEditable = Pick<ProblemEntity,
-  'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
-  | 'out' | 'hint' | 'status' | 'type' | 'code'
->
-
-export type ProblemEntityItem = Pick<ProblemEntity,
-  'pid' | 'title'
->
-
-export type ProblemEntityPreview = Pick<ProblemEntity,
-  'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
->
-
-export type ProblemEntityView = Pick<ProblemEntity,
-  'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
-  | 'input' | 'output' | 'in' | 'out' | 'hint'
-> & Partial<Pick<ProblemEntity, 'type' | 'code'>>
-
-// Contest
-
-export interface ContestEntity extends Entity {
-  cid: number
-  title: string
-  start: number
-  end: number
-  list: number[]
-  status: number
-  encrypt: number
-  argument: string
-  course: ObjectId | null
-}
-
 // Course
 
 export interface CourseEntity extends Entity {
@@ -109,6 +48,10 @@ export type CourseEntityView = Pick<CourseEntity,
 
 export type CourseEntityPreview = CourseEntityView
 
+export interface CourseEntityViewWithRole extends CourseEntityView {
+  role: CourseRole
+}
+
 // Course Permission
 
 export interface CoursePermEntity extends Entity {
@@ -119,6 +62,70 @@ export interface CoursePermEntity extends Entity {
 
 export interface CourseMemberEntity extends Omit<CoursePermEntity, 'course'> {
   user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
+}
+
+// Problem
+
+export interface ProblemEntity extends Entity {
+  pid: number
+  title: string
+  /** Time limit in milliseconds */
+  time: number
+  /** Memory limit in kilobytes */
+  memory: number
+  description: string
+  /** Input format description */
+  input: string
+  /** Output format description */
+  output: string
+  /** Input example */
+  in: string
+  /** Output example */
+  out: string
+  hint: string
+  status: typeof status[keyof typeof status]
+  /** Judge type */
+  type: typeof problemType[keyof typeof problemType]
+  /** Judger code */
+  code: string
+  tags: string[]
+  course: CourseDocument | null
+  submit: number
+  solve: number
+}
+
+export type ProblemEntityEditable = Pick<ProblemEntity,
+  'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
+  | 'out' | 'hint' | 'status' | 'type' | 'code'
+> & { course?: ObjectId | null }
+
+export type ProblemEntityItem = Pick<ProblemEntity,
+  'pid' | 'title'
+>
+
+export type ProblemEntityPreview = Pick<ProblemEntity,
+  'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
+>
+
+export type ProblemEntityView = Pick<ProblemEntity,
+  'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
+  | 'input' | 'output' | 'in' | 'out' | 'hint'
+> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
+  course: CourseEntityViewWithRole | null
+}
+
+// Contest
+
+export interface ContestEntity extends Entity {
+  cid: number
+  title: string
+  start: number
+  end: number
+  list: number[]
+  status: number
+  encrypt: number
+  argument: string
+  course: ObjectId | null
 }
 
 // News

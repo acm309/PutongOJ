@@ -67,6 +67,7 @@ const problemSchema = new mongoose.Schema({
   },
   status: {
     type: Number,
+    enum: Object.values(config.status),
     default: config.status.Reserve,
   },
   type: {

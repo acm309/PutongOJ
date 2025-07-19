@@ -4,7 +4,7 @@ import type { Paginated, PaginateOption } from '../types'
 import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
 import path from 'node:path'
 import fse from 'fs-extra'
-import escapeRegExp from 'lodash/escapeRegExp'
+import { escapeRegExp } from 'lodash'
 import Problem from '../models/Problem'
 import { status } from '../utils/constants'
 
@@ -72,7 +72,7 @@ export async function getAllProblems (): Promise<ProblemEntityItem[]> {
 export async function getProblem (
   pid: number,
 ): Promise<ProblemDocument | undefined> {
-  const problem = await Problem.findOne({ pid })
+  const problem = await Problem.findOne({ pid }).populate('course')
   return problem ?? undefined
 }
 

@@ -135,7 +135,7 @@ onRouteQueryUpdate(fetch)
   justify-content space-between
   align-items end
   .courses-title
-    margin -8px 0
+    margin 0 0 -8px
     font-size 28px
   .courses-actions
     flex none

@@ -77,8 +77,8 @@ const solution = {
 }
 
 const problem = {
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/problem/${data.pid}`, { params: data }),
+  findOne: (data: { pid: number, [key: string]: any }) =>
+    instance.get(`/problem/${data.pid}`),
   /** @deprecated */
   find: (data: { [key: string]: any }) =>
     instance.get('/problem', { params: data }),

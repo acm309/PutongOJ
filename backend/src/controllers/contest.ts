@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { ContestDocument } from '../models/Contest'
 import type { SessionProfile } from '../types'
-import escapeRegExp from 'lodash/escapeRegExp'
+import { escapeRegExp } from 'lodash'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'

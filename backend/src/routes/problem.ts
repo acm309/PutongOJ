@@ -11,14 +11,14 @@ problemRouter.get('/',
   problemController.findProblems,
 )
 problemRouter.post('/',
-  authnMiddleware.adminRequire,
+  authnMiddleware.loginRequire,
   problemController.createProblem,
 )
 problemRouter.get('/:pid',
   problemController.getProblem,
 )
 problemRouter.put('/:pid',
-  authnMiddleware.adminRequire,
+  authnMiddleware.loginRequire,
   problemController.updateProblem,
 )
 problemRouter.del('/:pid',

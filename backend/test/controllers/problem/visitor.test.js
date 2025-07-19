@@ -27,10 +27,10 @@ test('Problem find one', async (t) => {
 
   t.is(res.status, 200)
 
-  const n = problemSeeds.find(item => item.title === res.body.problem.title)
+  const n = problemSeeds.find(item => item.title === res.body.title)
 
   for (const [ key, value ] of Object.entries(n)) {
-    t.deepEqual(res.body.problem[key], value)
+    t.deepEqual(res.body[key], value)
   }
 })
 

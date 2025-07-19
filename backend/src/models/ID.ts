@@ -1,5 +1,5 @@
 import type { Document, Model, Schema } from 'mongoose'
-import capitalize from 'lodash/capitalize'
+import { capitalize } from 'lodash'
 import mongoose from 'mongoose'
 
 const idFields = [
