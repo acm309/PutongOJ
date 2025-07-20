@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -171,6 +171,8 @@ const session = {
 const course = {
   findCourses: (params: PaginateParams) =>
     instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
+  findCourseItems: (keyword: string) =>
+    instance.get<CourseEntityItem[]>('/course/items', { params: { keyword } }),
   getCourse: (courseId: number) =>
     instance.get<CourseEntityView & { role: CourseRole }>(`/course/${courseId}`),
   createCourse: (course: CourseEntityEditable) =>

@@ -184,10 +184,14 @@ const updateProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  let courseDocId: ObjectId | undefined
-  if (opt.course) {
-    const { course } = await loadCourse(ctx, opt.course)
-    courseDocId = course.id
+  let courseDocId: ObjectId | undefined | null
+  if (opt.course && Number.isInteger(Number(opt.course))) {
+    if (Number(opt.course) === -1) {
+      courseDocId = null
+    } else {
+      const { course } = await loadCourse(ctx, opt.course)
+      courseDocId = course.id
+    }
   }
 
   const pid = problem.pid

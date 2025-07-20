@@ -1,3 +1,4 @@
+import type { ProblemEntityView } from '@backend/types/entity'
 import type { Paginated, ProblemBrief } from '@/types'
 import type { FindProblemsParams } from '@/types/api'
 import { defineStore } from 'pinia'
@@ -7,7 +8,7 @@ export const useProblemStore = defineStore('problem', {
   state: () => ({
     /** @deprecated */
     list: [] as ProblemBrief[],
-    problem: {},
+    problem: {} as ProblemEntityView,
     /** @deprecated */
     sum: 0,
     solved: [] as number[],
@@ -19,7 +20,7 @@ export const useProblemStore = defineStore('problem', {
       this.problems = data.list
       this.solved = data.solved
     },
-    async findOne (payload: { [key: string]: any }) {
+    async findOne (payload: { pid: number, [key: string]: any }) {
       const { data } = await api.problem.findOne(payload)
       this.problem = data
       return { problem: data }

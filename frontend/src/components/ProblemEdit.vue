@@ -1,5 +1,5 @@
 <script setup>
-import { Input, Radio, RadioGroup } from 'view-ui-plus'
+import { Col, Form, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import { problemType } from '@/util/constant'
@@ -17,109 +17,99 @@ const { t } = useI18n()
 
 <template>
   <!-- eslint-disable vue/no-mutating-props -->
-  <div v-if="typeof problem.description === 'string'" class="proadd-wrap">
-    <div class="form-item">
+  <Form v-if="typeof problem.description === 'string'" class="problem-edit-wrap" label-position="top">
+    <FormItem>
       <Input v-model="problem.title">
         <template #prepend>
           {{ t('oj.title') }}
         </template>
       </Input>
-    </div>
-    <div class="form-row">
-      <Input v-model="problem.time" class="form-item" type="number">
-        <template #prepend>
-          Time
-        </template>
-        <template #append>
-          ms
-        </template>
-      </Input>
-      <Input v-model="problem.memory" class="form-item" type="number">
-        <template #prepend>
-          Memory
-        </template>
-        <template #append>
-          KB
-        </template>
-      </Input>
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.description') }}
-      </div>
+    </FormItem>
+    <FormItem>
+      <Row :gutter="24">
+        <Col :span="12">
+          <Input v-model="problem.time" class="form-item" type="number">
+            <template #prepend>
+              Time
+            </template>
+            <template #append>
+              ms
+            </template>
+          </Input>
+        </Col>
+        <Col :span="12">
+          <Input v-model="problem.memory" class="form-item" type="number">
+            <template #prepend>
+              Memory
+            </template>
+            <template #append>
+              KB
+            </template>
+          </Input>
+        </Col>
+      </Row>
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.description') }}</span>
+      </template>
       <MarkdownEditor v-model="problem.description" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.input') }}
-      </div>
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.input') }}</span>
+      </template>
       <MarkdownEditor v-model="problem.input" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.output') }}
-      </div>
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.output') }}</span>
+      </template>
       <MarkdownEditor v-model="problem.output" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.sample_input') }}
-      </div>
-      <Input v-model="problem.in" type="textarea" :rows="8" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.sample_output') }}
-      </div>
-      <Input v-model="problem.out" type="textarea" :rows="8" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        {{ t('oj.hint') }}
-      </div>
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.sample_input') }}</span>
+      </template>
+      <Input v-model="problem.in" class="code-input" type="textarea" :rows="8" />
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.sample_output') }}</span>
+      </template>
+      <Input v-model="problem.out" class="code-input" type="textarea" :rows="8" />
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">{{ t('oj.hint') }}</span>
+      </template>
       <MarkdownEditor v-model="problem.hint" />
-    </div>
-    <div class="form-item">
-      <div class="label">
-        Problem Type
-      </div>
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">Problem Type</span>
+      </template>
       <RadioGroup v-model="problem.type">
         <Radio v-for="item in problemTypeOptions" :key="item.value" :label="item.value" border>
           {{ item.label }}
         </Radio>
       </RadioGroup>
-    </div>
-    <div v-if="[2, 3].includes(problem.type)" class="form-item">
-      <div class="label">
-        Code of {{ { 2: "Interactor", 3: "Checker" }[problem.type] }}
-      </div>
+    </FormItem>
+    <FormItem v-if="[2, 3].includes(problem.type)">
+      <template #label>
+        <span class="form-label">Code of {{ problemType[problem.type] }}</span>
+      </template>
       <Input v-model="problem.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }" />
-    </div>
-  </div>
+    </FormItem>
+  </Form>
 </template>
 
 <style lang="stylus" scoped>
-.proadd-wrap
+.problem-edit-wrap
   margin-bottom: 20px
-
-  .form-item
-    margin-bottom: 20px
-
-    .label
-      text-align: left
-      margin-bottom: 10px
-      font-size: 16px
-      font-weight: bold
-
-  .form-row
-    display: flex
-    gap: 20px
-    margin-bottom: 20px
-
-    .form-item
-      flex: 1
-      margin: 0
-
+  .form-label
+    font-size: 16px
+    font-weight: bold
   .code-input
     font-family var(--font-code)
 </style>
