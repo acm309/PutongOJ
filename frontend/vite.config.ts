@@ -1,6 +1,5 @@
 // https://vitejs.dev/config/
 import path from 'node:path'
-
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
