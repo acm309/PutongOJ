@@ -13,13 +13,13 @@ export async function findProblems (
     type?: string
     content?: string
   },
-  isAdmin: boolean = false,
+  showAll: boolean = false,
   course?: ObjectId | null,
 ): Promise<Paginated<ProblemEntityPreview>> {
   const { page, pageSize, content, type } = opt
   const filters: Record<string, any>[] = []
 
-  if (!isAdmin) {
+  if (!showAll) {
     filters.push({ status: status.Available })
   }
   if (content) {
@@ -44,7 +44,7 @@ export async function findProblems (
   }
   if (course) {
     filters.push({ course })
-  } else if (!isAdmin) {
+  } else if (!showAll) {
     filters.push({ $or: [
       { course: { $exists: false } },
       { course: null } ],

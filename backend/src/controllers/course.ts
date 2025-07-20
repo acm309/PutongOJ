@@ -3,6 +3,7 @@ import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntity } from '../types/entity'
 import { Document } from 'mongoose'
+import { loadProfile } from '../middlewares/authn'
 import courseService from '../services/course'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
@@ -148,6 +149,10 @@ const updateCourseMember = async (ctx: Context) => {
   if (!userId || !newRole) {
     return ctx.throw(400, 'Missing uid or role')
   }
+  const profile = await loadProfile(ctx)
+  if (profile.uid === userId) {
+    return ctx.throw(400, 'Cannot change your own role')
+  }
 
   const roleFields: Array<keyof CourseRole> = [
     'basic',
@@ -183,6 +188,10 @@ const removeCourseMember = async (ctx: Context) => {
   const { userId } = ctx.params
   if (!userId) {
     return ctx.throw(400, 'Missing uid')
+  }
+  const profile = await loadProfile(ctx)
+  if (profile.uid === userId) {
+    return ctx.throw(400, 'Cannot remove yourself from the course')
   }
 
   const result = await courseService.removeCourseMember(course.id, userId)

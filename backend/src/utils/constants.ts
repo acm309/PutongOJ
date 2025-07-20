@@ -1,3 +1,5 @@
+import type { CourseRole } from '../types'
+
 export const privilege = Object.freeze({
   Banned: 0,
   User: 1,
@@ -47,6 +49,24 @@ export const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 
+export const courseRoleNone = Object.freeze({
+  basic: false,
+  viewTestcase: false,
+  viewSolution: false,
+  manageProblem: false,
+  manageContest: false,
+  manageCourse: false,
+} as CourseRole)
+
+export const courseRoleEntire = Object.freeze({
+  basic: true,
+  viewTestcase: true,
+  viewSolution: true,
+  manageProblem: true,
+  manageContest: true,
+  manageCourse: true,
+} as CourseRole)
+
 export default Object.freeze({
   deploy,
   encrypt,
@@ -55,4 +75,6 @@ export default Object.freeze({
   privilege,
   problemType,
   status,
+  courseRoleNone,
+  courseRoleEntire,
 })

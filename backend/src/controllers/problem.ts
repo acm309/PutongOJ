@@ -34,8 +34,13 @@ export async function loadProblem (
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
+  if (!problem.course && problem.status === status.Available) {
+    ctx.state.problem = problem
+    return problem
+  }
+
   const { profile } = ctx.state
-  if (problem.status === status.Available || profile?.isAdmin) {
+  if (profile?.isAdmin) {
     ctx.state.problem = problem
     return problem
   }
@@ -51,7 +56,10 @@ export async function loadProblem (
 
   if (problem.course) {
     const { role } = await loadCourse(ctx, problem.course)
-    if (role.basic) {
+    if (
+      (problem.status === status.Available && role.basic)
+      || (problem.status === status.Reserve && role.manageProblem)
+    ) {
       ctx.state.problem = problem
       return problem
     }
@@ -63,10 +71,10 @@ export async function loadProblem (
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = ctx.state.profile
-  const isAdmin: boolean = !!profile?.isAdmin
+  let showAll: boolean = !!profile?.isAdmin
 
   /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
-  if (Number(opt.page) === -1 && isAdmin) {
+  if (Number(opt.page) === -1 && profile?.isAdmin) {
     const docs = await problemService.getAllProblems()
     ctx.body = { list: { docs, total: docs.length }, solved: [] }
     return
@@ -78,6 +86,9 @@ const findProblems = async (ctx: Context) => {
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
+    if (role.manageProblem) {
+      showAll = true
+    }
     courseDocId = course.id
   }
   const paginateOption = parsePaginateOption(opt, 30, 100)
@@ -85,7 +96,7 @@ const findProblems = async (ctx: Context) => {
   const content = typeof opt.content === 'string' ? opt.content : undefined
   const list = await problemService.findProblems({
     ...paginateOption, type, content,
-  }, isAdmin, courseDocId)
+  }, showAll, courseDocId)
 
   let solved = []
   if (profile && list.total > 0) {

@@ -7,25 +7,7 @@ import { escapeRegExp } from 'lodash'
 import Course from '../models/Course'
 import CoursePerm from '../models/CoursePerm'
 import User from '../models/User'
-import { encrypt } from '../utils/constants'
-
-export const courseRoleNone = Object.freeze({
-  basic: false,
-  viewTestcase: false,
-  viewSolution: false,
-  manageProblem: false,
-  manageContest: false,
-  manageCourse: false,
-} as CourseRole)
-
-export const courseRoleEntire = Object.freeze({
-  basic: true,
-  viewTestcase: true,
-  viewSolution: true,
-  manageProblem: true,
-  manageContest: true,
-  manageCourse: true,
-} as CourseRole)
+import { courseRoleEntire, courseRoleNone, encrypt } from '../utils/constants'
 
 export async function findCourses (
   opt: PaginateOption & {},

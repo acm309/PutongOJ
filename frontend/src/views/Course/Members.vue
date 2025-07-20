@@ -10,6 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
 import { courseRoleFields } from '@/util/constant'
 import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
@@ -19,7 +20,9 @@ const router = useRouter()
 const { t } = useI18n()
 const { course } = api
 const rootStore = useRootStore()
+const sessionStore = useSessionStore()
 const { privilege } = $(storeToRefs(rootStore))
+const { profile } = $(storeToRefs(sessionStore))
 const modal = inject('$Modal') as typeof Modal
 const message = inject('$Message') as typeof Message
 
@@ -191,8 +194,10 @@ onRouteQueryUpdate(fetch)
               {{ timePretty(doc.updatedAt) }}
             </td>
             <td class="member-action">
-              <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>
-              <span class="role-action" @click="() => removeMember(doc.user.uid)">{{ t('oj.delete') }}</span>
+              <template v-if="doc.user.uid !== profile?.uid">
+                <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>
+                <span class="role-action" @click="() => removeMember(doc.user.uid)">{{ t('oj.delete') }}</span>
+              </template>
             </td>
           </tr>
         </tbody>

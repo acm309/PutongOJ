@@ -51,6 +51,7 @@ function getMenuItems () {
   ]
 
   if (isAdmin) {
+    menuItems.splice(1, 0, { name: 'courses', icon: 'ios-book', label: 'Course' })
     menuItems.push({
       name: 'admin',
       icon: 'md-paper-plane',

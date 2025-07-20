@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { courseRoleNone } from '@backend/utils/constants'
 import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
 import { Auth, Divider, Exception, Spin, TabPane, Tabs } from 'view-ui-plus'
-import { onBeforeMount } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useCourseStore } from '@/store/modules/course'
@@ -13,21 +14,33 @@ const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
 const { findCourse } = courseStore
-const { course } = $(storeToRefs(courseStore))
+const { course } = storeToRefs(courseStore)
 
-let loading = $ref(false)
-const display = $computed(() => route.name)
+const loading = ref(false)
+const displayTab = computed(() => route.name as string || 'courseProblems')
+const courseId = computed(() => Number.parseInt(route.params.id as string))
+const role = computed(() => {
+  if (course.value?.courseId !== courseId.value) {
+    return courseRoleNone
+  }
+  return course.value?.role ?? courseRoleNone
+})
 
 function handleClick (name: string) {
-  if (name !== display)
-    router.push({ name, params: { id: route.params.id } })
+  if (name !== displayTab.value)
+    router.push({ name, params: { id: courseId.value } })
 }
 
 async function fetch () {
-  const id = Number.parseInt(route.params.id as string)
-  loading = true
-  await findCourse(id)
-  loading = false
+  loading.value = true
+  await findCourse(courseId.value)
+  if (
+    !role.value.manageCourse
+    && [ 'courseMembers', 'courseSettings' ].includes(displayTab.value)
+  ) {
+    router.push({ name: 'courseProblems', params: { id: courseId.value } })
+  }
+  loading.value = false
 }
 
 const home = () => router.push({ name: 'home' })
@@ -50,12 +63,12 @@ onProfileUpdate(fetch)
         <i>No description found yet...</i>
       </p>
     </div>
-    <Auth :authority="!!course.role?.basic">
-      <Tabs class="course-tabs" :model-value="display" @on-click="handleClick">
+    <Auth :authority="role.basic">
+      <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleClick">
         <TabPane label="Problem" name="courseProblems" />
         <TabPane label="Contest" name="courseContests" />
-        <TabPane label="Member" name="courseMembers" />
-        <TabPane label="Setting" name="courseSettings" />
+        <TabPane v-if="role.manageCourse" label="Member" name="courseMembers" />
+        <TabPane v-if="role.manageCourse" label="Setting" name="courseSettings" />
       </Tabs>
       <router-view class="course-children" />
       <template #noMatch>
