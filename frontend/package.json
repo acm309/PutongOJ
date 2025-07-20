@@ -28,8 +28,8 @@
     "zip": "node build/zip.js"
   },
   "dependencies": {
-    "@vitejs/plugin-legacy": "^6.1.1",
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-legacy": "^7.0.1",
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vueuse/core": "^13.5.0",
     "axios": "^1.10.0",
     "crypto-js": "^4.2.0",
@@ -38,7 +38,7 @@
     "exceljs": "^4.4.0",
     "highlight.js": "^11.11.1",
     "html-escaper": "^3.0.3",
-    "less": "4.3.0",
+    "less": "4.4.0",
     "lodash.debounce": "^4.0.8",
     "only": "^0.0.2",
     "pangu": "^4.0.7",
@@ -56,11 +56,11 @@
     "@antfu/eslint-config": "^4.17.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/pangu": "^4.0.2",
-    "@vue-macros/reactivity-transform": "3.0.0-beta.16",
+    "@vue-macros/reactivity-transform": "3.0.0-beta.17",
     "eslint": "^9.31.0",
     "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.8.3",
-    "vite": "6.3.5",
+    "vite": "7.0.5",
     "zip-a-folder": "^3.1.9"
   },
   "browserslist": [
