@@ -2,7 +2,8 @@ import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityPreview, CourseMemberEntity } from '../types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity } from '../types/entity'
+import { escapeRegExp } from 'lodash'
 import Course from '../models/Course'
 import CoursePerm from '../models/CoursePerm'
 import User from '../models/User'
@@ -39,6 +40,26 @@ export async function findCourses (
     leanWithId: false,
     select: '-_id courseId name description encrypt',
   }) as any
+  return result
+}
+
+export async function findCourseItems (
+  keyword: string,
+): Promise<CourseEntityItem[]> {
+  const query: Record<string, any>[] = [
+    { name: { $regex: new RegExp(escapeRegExp(keyword), 'i') } },
+  ]
+  if (Number.isInteger(Number(keyword))) {
+    query.push({ $expr: { $regexMatch: {
+      input: { $toString: '$courseId' },
+      regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
+    } } })
+  }
+  const result = await Course.find(
+    { $or: query },
+    '-_id courseId name',
+    { sort: { courseId: -1 }, limit: 10 },
+  ).lean()
   return result
 }
 
@@ -195,6 +216,7 @@ const courseService = {
   courseRoleNone,
   courseRoleEntire,
   findCourses,
+  findCourseItems,
   getCourse,
   createCourse,
   updateCourse,

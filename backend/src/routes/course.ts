@@ -14,6 +14,10 @@ courseRouter.post('/',
   authnMiddleware.rootRequire,
   courseController.createCourse,
 )
+courseRouter.get('/items',
+  authnMiddleware.loginRequire,
+  courseController.findCourseItems,
+)
 courseRouter.get('/:courseId',
   authnMiddleware.loginRequire,
   courseController.getCourse,

@@ -42,6 +42,10 @@ export type CourseEntityEditable = Pick<CourseEntity,
   'name' | 'description' | 'encrypt'
 >
 
+export type CourseEntityItem = Pick<CourseEntity,
+  'courseId' | 'name'
+>
+
 export type CourseEntityView = Pick<CourseEntity,
   'courseId' | 'name' | 'description' | 'encrypt'
 >

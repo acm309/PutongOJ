@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
-import type { CourseEntity, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntity } from '../types/entity'
+import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntity } from '../types/entity'
 import { Document } from 'mongoose'
 import courseService from '../services/course'
 import { parsePaginateOption } from '../utils'
@@ -64,6 +64,13 @@ const findCourses = async (ctx: Context) => {
 
   const response: Paginated<CourseEntityPreview>
     = await courseService.findCourses({ page, pageSize })
+  ctx.body = response
+}
+
+const findCourseItems = async (ctx: Context) => {
+  const keyword = String(ctx.request.query.keyword ?? '').trim()
+  const response: CourseEntityItem[]
+    = await courseService.findCourseItems(keyword)
   ctx.body = response
 }
 
@@ -186,6 +193,7 @@ const removeCourseMember = async (ctx: Context) => {
 const courseController = {
   loadCourse,
   findCourses,
+  findCourseItems,
   getCourse,
   createCourse,
   findCourseMembers,
