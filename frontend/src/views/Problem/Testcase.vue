@@ -108,7 +108,7 @@ async function readFile (type) {
   return new Promise((resolve, reject) => {
     reader.onload = () => {
       const content = reader.result.replace(/\r\n/g, '\n')
-      if (/^[\x00-\x7F]*$/.test(content)) {
+      if (/^[\s\x21-\x7E]*$/.test(content)) {
         resolve(content)
       } else {
         reject(new Error(t('oj.testcase.error_encoding')))

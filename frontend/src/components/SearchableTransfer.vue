@@ -33,6 +33,7 @@ function handleChange (newTargetKeys, direction, moveKeys) {
 <template>
   <Row type="flex" class="ivu-mb-8">
     <Input v-model="searchVal" type="text" style="width: 20rem" />
+    <!-- eslint-disable-next-line vue/custom-event-name-casing -->
     <Button class="ivu-ml-8" type="primary" @click="(v) => emit('on-search', searchVal)">
       {{ t('oj.search') }}
     </Button>
