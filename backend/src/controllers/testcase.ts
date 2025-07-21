@@ -80,7 +80,7 @@ const fetchTestcase = async (ctx: Context) => {
 
   const { pid } = await loadProblem(ctx)
   const uuid = String(ctx.params.uuid || '').trim()
-  if (!validate(uuid)) {
+  if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
   const type = ctx.query.type
