@@ -1,47 +1,43 @@
-const path = require('node:path')
-const fse = require('fs-extra')
-const send = require('koa-send')
-const remove = require('lodash/remove')
-const { v4: uuid } = require('uuid')
-const logger = require('../utils/logger')
+import type { Context } from 'koa'
+import path from 'node:path'
+import fse from 'fs-extra'
+import send from 'koa-send'
+import remove from 'lodash/remove'
+import { v4 as uuid, validate } from 'uuid'
+import { loadProfile } from '../middlewares/authn'
+import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
+import logger from '../utils/logger'
+import { hasProblemPerm, loadProblem } from './problem'
 
-const loadPID = (ctx) => {
-  const pid = Number(ctx.params.pid)
-  if (!Number.isInteger(pid) || pid <= 0) {
-    ctx.throw(400, 'Invalid problem ID')
+const createTestcase = async (ctx: Context) => {
+  if (!await hasProblemPerm(ctx)) {
+    ctx.throw(...ERR_PERM_DENIED)
   }
-  return pid
-}
 
-const loadUUID = (ctx) => {
-  const uuid = ctx.params.uuid
-  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(uuid)) {
-    ctx.throw(400, 'Invalid UUID')
-  }
-  return uuid
-}
+  const { pid } = await loadProblem(ctx)
+  const { uid } = await loadProfile(ctx)
 
-/**
- * 拿到输入输出的测试文件，然后将它移动到专门放测试数据的地方
- * 记得中间要修改对应的 meta.json
- */
-const create = async (ctx) => {
-  const pid = loadPID(ctx)
   const testin = ctx.request.body.in || ''
   const testout = ctx.request.body.out || ''
-  const { profile: { uid } } = ctx.state
 
   if (!testin && !testout) {
     ctx.throw(400, 'Cannot create testcase without both input and output')
   }
 
+  /**
+   * 拿到输入输出的测试文件，然后将它移动到专门放测试数据的地方
+   * 记得中间要修改对应的 meta.json
+   */
+
   const testDir = path.resolve(__dirname, `../../data/${pid}`)
   const id = uuid() // 快速生成RFC4122 UUID
+
   // 将文件读取到meta对象
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
   meta.testcases.push({
     uuid: id,
   })
+
   await Promise.all([
     // 将test.in等文件写入本地文件，如果父级目录不存在(即testDir)，创建它
     fse.outputFile(path.resolve(testDir, `${id}.in`), testin),
@@ -53,29 +49,40 @@ const create = async (ctx) => {
   ctx.body = meta // 结构就是: {testcases: [{ uuid: 'axxx' }, { uuid: 'yyyy' }]}
 }
 
-/**
- * 只移除 meta.json 中的对应元素，但并不删除测试数据的文件！
- * 保留测试数据的文件，原因是为了能够继续查看测试样例, 比如 一个提交的测试数据用的是 id 为 1 的测试数据，即时管理员不再用这个数据了，我们仍然能够看到当时这个提交用的测试数据
- */
-const del = async (ctx) => {
-  const pid = loadPID(ctx)
-  const uuid = loadUUID(ctx)
-  const { profile: { uid } } = ctx.state
+const removeTestcase = async (ctx: Context) => {
+  if (!await hasProblemPerm(ctx)) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = await loadProblem(ctx)
+  const { uid } = await loadProfile(ctx)
+
+  /**
+   * 只移除 meta.json 中的对应元素，但并不删除测试数据的文件！
+   * 保留测试数据的文件，原因是为了能够继续查看测试样例, 比如：
+   * 一个提交的测试数据用的是 id 为 1 的测试数据，即时管理员不再用这个数据了，我们仍然能够看到当时这个提交用的测试数据
+   */
 
   const testDir = path.resolve(__dirname, `../../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
+
   remove(meta.testcases, item => item.uuid === uuid)
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
   logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
+
   ctx.body = meta
 }
 
-/**
- * 这里是将文件返回
- */
-const fetch = async (ctx) => {
-  const pid = loadPID(ctx)
-  const uuid = loadUUID(ctx)
+const fetchTestcase = async (ctx: Context) => {
+  if (!await hasProblemPerm(ctx, 'viewTestcase')) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = await loadProblem(ctx)
+  const uuid = String(ctx.params.uuid || '').trim()
+  if (!validate(uuid)) {
+    ctx.throw(...ERR_INVALID_ID)
+  }
   const type = ctx.query.type
   if (type !== 'in' && type !== 'out') {
     ctx.throw(400, 'Invalid type')
@@ -89,10 +96,12 @@ const fetch = async (ctx) => {
   await send(ctx, `${uuid}.${type}`, { root: testDir })
 }
 
-// 返回该题拥有的测试数据
-const find = async (ctx) => {
-  const pid = loadPID(ctx)
+const findTestcases = async (ctx: Context) => {
+  if (!await hasProblemPerm(ctx)) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
 
+  const { pid } = await loadProblem(ctx)
   let meta = { testcases: [] }
   const dir = path.resolve(__dirname, `../../data/${pid}`)
   const file = path.resolve(dir, 'meta.json')
@@ -106,9 +115,11 @@ const find = async (ctx) => {
   ctx.body = meta
 }
 
-module.exports = {
-  create,
-  del,
-  fetch,
-  find,
+const testcaseController = {
+  findTestcases,
+  createTestcase,
+  fetchTestcase,
+  removeTestcase,
 }
+
+export default module.exports = testcaseController

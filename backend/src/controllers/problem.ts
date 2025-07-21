@@ -68,6 +68,25 @@ export async function loadProblem (
   return ctx.throw(...ERR_PERM_DENIED)
 }
 
+export async function hasProblemPerm (
+  ctx: Context,
+  perm: 'manageProblem' | 'viewTestcase' = 'manageProblem',
+): Promise<boolean> {
+  const profile = ctx.state.profile
+  if (!profile) {
+    return false
+  }
+  if (profile.isAdmin) {
+    return true
+  }
+  const problem = await loadProblem(ctx)
+  if (!problem.course) {
+    return false
+  }
+  const { role } = await loadCourse(ctx, problem.course)
+  return role[perm] || false
+}
+
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = ctx.state.profile
@@ -115,17 +134,7 @@ const findProblems = async (ctx: Context) => {
 
 const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
-  const profile = ctx.state.profile
-  const canViewMore = await (async (): Promise<boolean> => {
-    if (profile?.isAdmin) {
-      return true
-    }
-    if (problem.course) {
-      const { role } = await loadCourse(ctx, problem.course)
-      return role.manageProblem
-    }
-    return false
-  })()
+  const canManage = await hasProblemPerm(ctx)
 
   let course: CourseEntityViewWithRole | null = null
   if (problem.course) {
@@ -138,8 +147,8 @@ const getProblem = async (ctx: Context) => {
   const response: ProblemEntityView = {
     ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
       'description', 'input', 'output', 'in', 'out', 'hint' ]),
-    type: canViewMore ? problem.type : undefined,
-    code: canViewMore ? problem.code : undefined,
+    type: canManage ? problem.type : undefined,
+    code: canManage ? problem.code : undefined,
     course,
   }
   ctx.body = response
@@ -148,17 +157,7 @@ const getProblem = async (ctx: Context) => {
 const createProblem = async (ctx: Context) => {
   const opt = ctx.request.body
   const profile = await loadProfile(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (opt.course) {
-      const { role } = await loadCourse(ctx, opt.course)
-      return role.manageProblem
-    }
-    return false
-  }
-  if (!await hasPermission()) {
+  if (!await hasProblemPerm(ctx)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -190,17 +189,7 @@ const updateProblem = async (ctx: Context) => {
   const opt = ctx.request.body
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (problem.course) {
-      const { role } = await loadCourse(ctx, problem.course)
-      return role.manageProblem
-    }
-    return false
-  }
-  if (!await hasPermission()) {
+  if (!await hasProblemPerm(ctx)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -249,6 +238,7 @@ const removeProblem = async (ctx: Context) => {
 
 const problemController = {
   loadProblem,
+  hasProblemPerm,
   findProblems,
   getProblem,
   createProblem,

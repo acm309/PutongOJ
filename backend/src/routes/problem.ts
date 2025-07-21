@@ -22,7 +22,7 @@ problemRouter.put('/:pid',
   problemController.updateProblem,
 )
 problemRouter.del('/:pid',
-  authnMiddleware.adminRequire,
+  authnMiddleware.rootRequire,
   problemController.removeProblem,
 )
 

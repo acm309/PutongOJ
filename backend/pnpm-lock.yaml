@@ -11,6 +11,9 @@ importers:
       '@koa/router':
         specifier: ^13.1.1
         version: 13.1.1
+      '@types/koa-send':
+        specifier: ^4.1.6
+        version: 4.1.6
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -1126,6 +1129,9 @@ packages:
 
   '@types/koa-compose@3.2.8':
     resolution: {integrity: sha512-4Olc63RY+MKvxMwVknCUDhRQX1pFQoBZ/lXcRLP69PQkEpze/0cr8LNqJQe5NFb/b19DWi2a5bTi2VAlQzhJuA==}
+
+  '@types/koa-send@4.1.6':
+    resolution: {integrity: sha512-vgnNGoOJkx7FrF0Jl6rbK1f8bBecqAchKpXtKuXzqIEdXTDO6dsSTjr+eZ5m7ltSjH4K/E7auNJEQCAd0McUPA==}
 
   '@types/koa@2.15.0':
     resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
@@ -6044,6 +6050,10 @@ snapshots:
   '@types/keygrip@1.0.6': {}
 
   '@types/koa-compose@3.2.8':
+    dependencies:
+      '@types/koa': 2.15.0
+
+  '@types/koa-send@4.1.6':
     dependencies:
       '@types/koa': 2.15.0
 
