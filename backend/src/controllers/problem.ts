@@ -116,7 +116,16 @@ const findProblems = async (ctx: Context) => {
 const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
   const profile = ctx.state.profile
-  const isAdmin: boolean = !!profile?.isAdmin
+  const canViewMore = await (async (): Promise<boolean> => {
+    if (profile?.isAdmin) {
+      return true
+    }
+    if (problem.course) {
+      const { role } = await loadCourse(ctx, problem.course)
+      return role.manageProblem
+    }
+    return false
+  })()
 
   let course: CourseEntityViewWithRole | null = null
   if (problem.course) {
@@ -129,8 +138,8 @@ const getProblem = async (ctx: Context) => {
   const response: ProblemEntityView = {
     ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
       'description', 'input', 'output', 'in', 'out', 'hint' ]),
-    type: isAdmin ? problem.type : undefined,
-    code: isAdmin ? problem.code : undefined,
+    type: canViewMore ? problem.type : undefined,
+    code: canViewMore ? problem.code : undefined,
     course,
   }
   ctx.body = response

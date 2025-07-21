@@ -1,17 +1,30 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { TabPane, Tabs } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-
+import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()
-const { isAdmin, isLogined } = $(storeToRefs(sessionStore))
+const problemStore = useProblemStore()
+
+const { isAdmin, isLogined } = storeToRefs(sessionStore)
+const { problem } = storeToRefs(problemStore)
 const route = useRoute()
 const router = useRouter()
 const display = $computed(() => route.name)
+const isEditable = computed(() => {
+  if (problem.value?.pid !== Number(route.params.pid)) {
+    return false
+  }
+  if (isAdmin.value || problem.value?.course?.role.manageProblem) {
+    return true
+  }
+  return false
+})
 
 function handleClick (name) {
   if (name !== display)
@@ -26,8 +39,8 @@ function handleClick (name) {
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
       <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="mySubmission" />
       <TabPane :label="t('oj.statistics')" name="problemStatistics" />
-      <TabPane v-if="isAdmin" :label="t('oj.edit')" name="problemEdit" />
-      <TabPane v-if="isAdmin" :label="t('oj.test_data')" name="testcase" />
+      <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
+      <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />
     </Tabs>
     <router-view class="problem-children" />
   </div>
