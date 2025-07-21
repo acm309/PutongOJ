@@ -5,11 +5,7 @@ import { generatePwd } from '../../src/utils'
 import constants from '../../src/utils/constants'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/error'
 import { userSeeds } from '../seeds/user'
-
-/* eslint-disable-next-line ts/no-require-imports */
-require('dotenv-flow').config()
-/* eslint-disable-next-line ts/no-require-imports */
-require('../../src/config/db')
+import '../../src/config/db'
 
 const { privilege } = constants
 

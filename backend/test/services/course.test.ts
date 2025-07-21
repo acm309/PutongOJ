@@ -2,14 +2,9 @@ import type { CourseDocument } from '../../src/models/Course'
 import type { CourseEntityEditable } from '../../src/types/entity'
 import test from 'ava'
 import User from '../../src/models/User'
-
 import courseService from '../../src/services/course'
 import { userSeeds } from '../seeds/user'
-
-/* eslint-disable-next-line ts/no-require-imports */
-require('dotenv-flow').config()
-/* eslint-disable-next-line ts/no-require-imports */
-require('../../src/config/db')
+import '../../src/config/db'
 
 const testCourse: CourseEntityEditable = {
   name: 'C Programming',
