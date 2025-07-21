@@ -33,7 +33,7 @@ const courseRules = $computed(() => ({
     { required: true, message: 'Name is required', trigger: 'change' },
     { min: 3, message: 'Name length should be at least 3', trigger: 'change' },
   ],
-  description: [],
+  description: [ { max: 100, message: 'Description should not exceed 100 characters', trigger: 'change' } ],
   encrypt: [ { type: 'number', required: true, trigger: 'change' } ],
 }))
 const courseForm = $ref({

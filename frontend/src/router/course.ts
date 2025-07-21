@@ -31,6 +31,12 @@ const courseRoutes: Array<RouteRecordRaw> = [
         component: Members,
         meta: { title: 'Course Members', requiresLogin: true },
       },
+      {
+        path: 'settings',
+        name: 'courseSettings',
+        component: () => import('@/views/Course/Settings.vue'),
+        meta: { title: 'Course Settings', requiresLogin: true },
+      },
     ],
   },
 ]

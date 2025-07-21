@@ -2,6 +2,7 @@ import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntity } from '../types/entity'
+import { pick } from 'lodash'
 import { Document } from 'mongoose'
 import { loadProfile } from '../middlewares/authn'
 import courseService from '../services/course'
@@ -86,14 +87,33 @@ const getCourse = async (ctx: Context) => {
 
 const createCourse = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { name, description, encrypt } = opt
-
   try {
-    const course = await courseService.createCourse({
-      name, description, encrypt,
-    })
+    const course = await courseService.createCourse(
+      pick(opt, [ 'name', 'description', 'encrypt' ]))
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
+    ctx.body = response
+  } catch (err: any) {
+    if (err.name === 'ValidationError') {
+      return ctx.throw(400, err.message)
+    } else {
+      throw err
+    }
+  }
+}
+
+const updateCourse = async (ctx: Context) => {
+  const { course, role } = await loadCourse(ctx)
+  if (!role.manageCourse) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const opt = ctx.request.body
+  const { courseId } = course
+  try {
+    const course = await courseService.updateCourse(courseId,
+      pick(opt, [ 'name', 'description', 'encrypt' ]))
+    const response: { success: boolean } = { success: !!course }
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -205,6 +225,7 @@ const courseController = {
   findCourseItems,
   getCourse,
   createCourse,
+  updateCourse,
   findCourseMembers,
   getCourseMember,
   updateCourseMember,

@@ -22,7 +22,7 @@ const { course } = api
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const { privilege } = $(storeToRefs(rootStore))
-const { profile } = $(storeToRefs(sessionStore))
+const { isAdmin, profile } = $(storeToRefs(sessionStore))
 const modal = inject('$Modal') as typeof Modal
 const message = inject('$Message') as typeof Message
 
@@ -194,7 +194,7 @@ onRouteQueryUpdate(fetch)
               {{ timePretty(doc.updatedAt) }}
             </td>
             <td class="member-action">
-              <template v-if="doc.user.uid !== profile?.uid">
+              <template v-if="isAdmin || doc.user.uid !== profile?.uid">
                 <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>
                 <span class="role-action" @click="() => removeMember(doc.user.uid)">{{ t('oj.delete') }}</span>
               </template>

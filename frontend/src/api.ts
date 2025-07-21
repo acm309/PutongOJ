@@ -177,6 +177,8 @@ const course = {
     instance.get<CourseEntityView & { role: CourseRole }>(`/course/${courseId}`),
   createCourse: (course: CourseEntityEditable) =>
     instance.post<{ courseId: number }>('/course', course),
+  updateCourse: (courseId: number, course: CourseEntityEditable) =>
+    instance.put(`/course/${courseId}`, course),
   findMembers: (courseId: number, params: PaginateParams) =>
     instance.get<Paginated<CourseMemberEntity>>(`/course/${courseId}/member`, { params }),
   getMember: (courseId: number, userId: string) =>

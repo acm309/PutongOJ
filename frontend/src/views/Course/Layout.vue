@@ -51,7 +51,7 @@ onProfileUpdate(fetch)
 </script>
 
 <template>
-  <div class="course-wrap">
+  <div class="course-wrap" :class="{ 'course-wrap-edit': displayTab === 'courseSettings' }">
     <div class="course-header">
       <h1 class="course-name">
         {{ spacing(course.name) }}
@@ -109,6 +109,8 @@ onProfileUpdate(fetch)
 <style lang="stylus" scoped>
 .course-wrap
   padding 0
+.course-wrap-edit
+  max-width 768px
 .course-tabs
   padding-top 24px
   margin-bottom 24px

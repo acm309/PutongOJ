@@ -10,13 +10,17 @@ const courseRouter = new Router<DefaultState, DefaultContext>({
 courseRouter.get('/',
   courseController.findCourses,
 )
+courseRouter.get('/items',
+  authnMiddleware.loginRequire,
+  courseController.findCourseItems,
+)
 courseRouter.post('/',
   authnMiddleware.rootRequire,
   courseController.createCourse,
 )
-courseRouter.get('/items',
+courseRouter.put('/:courseId',
   authnMiddleware.loginRequire,
-  courseController.findCourseItems,
+  courseController.updateCourse,
 )
 courseRouter.get('/:courseId',
   authnMiddleware.loginRequire,
