@@ -20,8 +20,8 @@
   },
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.js",
-    "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.js",
-    "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.js",
+    "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.ts",
+    "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.ts",
     "build": "tsc",
     "start": "cross-env NODE_ENV=production node dist/app.js",
     "deploy:init": "cross-env NODE_ENV=production node setup.js",

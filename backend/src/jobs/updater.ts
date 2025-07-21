@@ -1,10 +1,8 @@
-require('dotenv-flow').config()
-require('../config/db')
-
-const { judge } = require('../config')
-const redis = require('../config/redis')
-const Solution = require('../models/Solution')
-const logger = require('../utils/logger')
+import redis from '../config/redis'
+import Solution from '../models/Solution'
+import { judge } from '../utils/constants'
+import logger from '../utils/logger'
+import '../config/db'
 
 /**
  * @NOTE
@@ -19,7 +17,7 @@ const logger = require('../utils/logger')
  * @param {string} task 任务名称
  * @param {any} id 项目 ID
  */
-async function distributeWork (task, id) {
+async function distributeWork (task: string, id: string | number) {
   const taskList = `worker:${task}`
   const taskSet = `worker:${task}:set`
 
@@ -35,7 +33,7 @@ async function distributeWork (task, id) {
   logger.debug(`Task <${task}> for <${id}> added`)
 }
 
-async function updateResult (result) {
+async function updateResult (result: any) {
   const { sid } = result
   const solution = await Solution.findOne({ sid }).exec()
   if (solution == null) {
@@ -46,7 +44,7 @@ async function updateResult (result) {
   const fields = [ 'time', 'memory', 'testcases', 'judge', 'error' ]
   fields.forEach((field) => {
     if (result[field] !== undefined) {
-      solution[field] = result[field]
+      (solution as any)[field] = result[field]
     }
   })
 
@@ -69,7 +67,11 @@ async function main () {
   logger.info('Updater is running...')
   while (true) {
     try {
-      const [ , item ] = await redis.blpop('judger:result', 0)
+      const blpopResult = await redis.blpop('judger:result', 0)
+      if (!blpopResult) {
+        continue
+      }
+      const [ , item ] = blpopResult
       const result = JSON.parse(item)
       await updateResult(result)
     } catch (e) {

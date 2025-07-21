@@ -1,22 +1,24 @@
-require('dotenv-flow').config()
-require('../config/db')
-
-const redis = require('../config/redis')
-const logger = require('../utils/logger')
-
-const checkSimilarity = require('./tasks/checkSimilarity')
-const updateStatistic = require('./tasks/updateStatistic')
+import redis from '../config/redis'
+import logger from '../utils/logger'
+import checkSimilarity from './tasks/checkSimilarity'
+import updateStatistic from './tasks/updateStatistic'
+import '../config/db'
 
 async function main () {
   logger.info('Worker is running...')
   while (true) {
     try {
-      const [ list, item ] = await redis.blpop(
+      const blpopResult = await redis.blpop(
         'worker:updateStatistic',
         'worker:checkSimilarity',
         0)
+      if (!blpopResult) {
+        continue
+      }
+
+      const [ list, item ] = blpopResult
       const job = list.slice(list.indexOf(':') + 1)
-      const task = [ redis.srem(`worker:${job}:set`, item) ]
+      const task: Promise<any>[] = [ redis.srem(`worker:${job}:set`, item) ]
 
       switch (job) {
         case 'checkSimilarity':
