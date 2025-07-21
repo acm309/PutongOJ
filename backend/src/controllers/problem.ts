@@ -117,7 +117,7 @@ const findProblems = async (ctx: Context) => {
     ...paginateOption, type, content,
   }, showAll, courseDocId)
 
-  let solved = []
+  let solved: number[] = []
   if (profile && list.total > 0) {
     solved = await Solution
       .find({

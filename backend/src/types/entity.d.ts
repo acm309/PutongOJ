@@ -132,6 +132,33 @@ export interface ContestEntity extends Entity {
   course: ObjectId | null
 }
 
+// Solution
+
+export interface SolutionEntity extends Entity {
+  sid: number
+  pid: number
+  uid: string
+  mid: number
+  course: CourseDocument | null
+  code: string
+  length: number
+  language: number
+  create: number
+  status: number
+  judge: number
+  time: number
+  memory: number
+  error: string
+  sim: number
+  sim_s_id: number
+  testcases: {
+    uuid: string
+    judge: number
+    time: number
+    memory: number
+  }[]
+}
+
 // News
 
 export interface NewsEntity extends Entity {
@@ -141,4 +168,36 @@ export interface NewsEntity extends Entity {
   status: number
   /** @deprecated Use `createdAt` instead */
   create: number
+}
+
+// Tag
+
+export interface TagEntity extends Entity {
+  tid: string
+  list: number[]
+  create: number
+}
+
+// Group
+
+export interface GroupEntity extends Entity {
+  gid: number
+  title: string
+  list: string[]
+  create: number
+}
+
+// Discuss
+
+export interface DiscussEntity extends Entity {
+  did: number
+  title: string
+  uid: string
+  comments: {
+    uid: string
+    content: string
+    create: number
+  }[]
+  create: number
+  update: number
 }

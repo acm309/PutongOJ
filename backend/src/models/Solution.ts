@@ -1,9 +1,18 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
-const config = require('../config')
-const ids = require('./ID')
+import type { Document, PaginateModel } from 'mongoose'
+import type { SolutionEntity } from '../types/entity'
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate-v2'
+import { judge, status } from '../utils/constants'
+import ID from './ID'
 
-const solutionSchema = mongoose.Schema({
+export interface SolutionDocument extends Document, SolutionEntity {
+  isAccepted: boolean
+  isPending: boolean
+}
+
+type SolutionModel = PaginateModel<SolutionDocument>
+
+const solutionSchema = new mongoose.Schema({
   sid: {
     type: Number,
     default: -1,
@@ -30,12 +39,23 @@ const solutionSchema = mongoose.Schema({
     immutable: true,
     index: true,
   },
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course',
+    default: null,
+    validate: {
+      validator (v: any) {
+        return v === null || mongoose.Types.ObjectId.isValid(v)
+      },
+      message: 'Invalid course ID',
+    },
+  },
   code: {
     type: String,
     immutable: true,
     required: true,
     validate: {
-      validator (v) {
+      validator (v: any) {
         return v.length >= 8 && v.length <= 16384
       },
       message:
@@ -60,27 +80,13 @@ const solutionSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: config.status.Available,
-    validate: {
-      validator (v) {
-        return Object.values(config.status).includes(v)
-      },
-      message:
-        `Invalid status. Valid values are `
-        + `[${Object.values(config.status).join(', ')}]`,
-    },
+    enum: Object.values(status),
+    default: status.Available,
   },
   judge: {
     type: Number,
-    default: config.judge.Pending,
-    validate: {
-      validator (v) {
-        return Object.values(config.judge).includes(v)
-      },
-      message:
-        `Invalid judge. Valid values are `
-        + `[${Object.values(config.judge).join(', ')}]`,
-    },
+    enum: Object.values(judge),
+    default: judge.Pending,
     index: true,
   },
   time: {
@@ -104,7 +110,24 @@ const solutionSchema = mongoose.Schema({
     default: 0,
   },
   testcases: {
-    type: mongoose.Schema.Types.Mixed,
+    type: [ {
+      uuid: {
+        type: String,
+        required: true,
+      },
+      judge: {
+        type: Number,
+        required: true,
+      },
+      time: {
+        type: Number,
+        required: true,
+      },
+      memory: {
+        type: Number,
+        required: true,
+      },
+    } ],
     default: [],
   },
 }, {
@@ -115,17 +138,22 @@ const solutionSchema = mongoose.Schema({
 solutionSchema.plugin(mongoosePaginate)
 
 solutionSchema.virtual('isAccepted').get(function () {
-  return this.judge === config.judge.Accepted
+  return this.judge === judge.Accepted
 })
 solutionSchema.virtual('isPending').get(function () {
-  return this.judge === config.judge.Pending
+  return this.judge === judge.Pending
 })
 
 solutionSchema.pre('save', async function (next) {
   if (this.sid === -1) {
-    this.sid = await ids.generateId('Solution')
+    this.sid = await ID.generateId('Solution')
   }
   next()
 })
 
-module.exports = mongoose.model('Solution', solutionSchema)
+const Solution
+  = mongoose.model<SolutionDocument, SolutionModel>(
+    'Solution', solutionSchema,
+  )
+
+export default module.exports = Solution
