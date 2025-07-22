@@ -78,4 +78,7 @@ function updateCourse () {
 <style lang="stylus" scoped>
 .course-settings
     padding 0 40px 40px
+@media screen and (max-width: 1024px)
+  .course-settings
+    padding 0 20px 20px
 </style>
