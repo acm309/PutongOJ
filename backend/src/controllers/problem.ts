@@ -157,7 +157,17 @@ const getProblem = async (ctx: Context) => {
 const createProblem = async (ctx: Context) => {
   const opt = ctx.request.body
   const profile = await loadProfile(ctx)
-  if (!await hasProblemPerm(ctx)) {
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (opt.course) {
+      const { role } = await loadCourse(ctx, opt.course)
+      return role.manageProblem
+    }
+    return false
+  }
+  if (!await hasPermission()) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
