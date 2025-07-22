@@ -2,7 +2,7 @@
 import { courseRoleNone } from '@backend/utils/constants'
 import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
-import { Auth, Divider, Exception, Spin, TabPane, Tabs } from 'view-ui-plus'
+import { Auth, Button, ButtonGroup, Col, Divider, Exception, Row, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -43,6 +43,10 @@ async function fetch () {
   loading.value = false
 }
 
+function createProblem () {
+  router.push({ name: 'problemCreate', query: { course: courseId.value } })
+}
+
 const home = () => router.push({ name: 'home' })
 const back = () => router.go(-1)
 
@@ -52,17 +56,31 @@ onProfileUpdate(fetch)
 
 <template>
   <div class="course-wrap" :class="{ 'course-wrap-edit': displayTab === 'courseSettings' }">
-    <div class="course-header">
-      <h1 class="course-name">
-        {{ spacing(course.name) }}
-      </h1>
-      <p v-if="course.description?.trim()" class="course-description">
-        {{ spacing(course.description) }}
-      </p>
-      <p v-else class="course-description">
-        <i>No description found yet...</i>
-      </p>
-    </div>
+    <Row class="course-header">
+      <Col flex="auto" class="course-header-col">
+        <h1 class="course-name">
+          {{ spacing(course.name) }}
+        </h1>
+        <p v-if="course.description?.trim()" class="course-description">
+          {{ spacing(course.description) }}
+        </p>
+        <p v-else class="course-description">
+          <i>No description found yet...</i>
+        </p>
+      </Col>
+      <Col flex="none" class="course-header-col">
+        <ButtonGroup>
+          <Button v-if="role.manageProblem" @click="createProblem">
+            <Icon type="md-add" />
+            Create Problem
+          </Button>
+          <Button v-if="role.manageContest">
+            <Icon type="md-add" />
+            Create Contest
+          </Button>
+        </ButtonGroup>
+      </Col>
+    </Row>
     <Auth :authority="role.basic">
       <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleClick">
         <TabPane label="Problem" name="courseProblems" />
@@ -95,7 +113,7 @@ onProfileUpdate(fetch)
 <style lang="stylus">
 .course-tabs
   .ivu-tabs-nav-scroll
-    padding 0 40px
+    padding 0 25px
   .ivu-tabs-nav-scrollable
     .ivu-tabs-nav-scroll
       padding 0 !important
@@ -103,7 +121,7 @@ onProfileUpdate(fetch)
 @media screen and (max-width: 1024px)
   .course-tabs
     .ivu-tabs-nav-scroll
-      padding 0 20px
+      padding 0 5px
 </style>
 
 <style lang="stylus" scoped>
@@ -120,6 +138,9 @@ onProfileUpdate(fetch)
 
 .course-header
   padding 40px 40px 0
+  margin 0 -20px -20px 0
+  .course-header-col
+    margin 0 20px 20px 0
   .course-name
     font-size 28px
     font-weight 600

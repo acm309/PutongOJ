@@ -7,8 +7,8 @@ import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
+import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
-import { useSessionStore } from '@/store/modules/session'
 import constant from '@/util/constant'
 import { formate } from '@/util/formate'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -16,12 +16,12 @@ import { onRouteQueryUpdate, purify } from '@/util/helper'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const problemStore = useProblemStore()
 const rootStore = useRootStore()
-const sessionStore = useSessionStore()
-const { problems, solved } = $(storeToRefs(problemStore))
+const problemStore = useProblemStore()
+const courseStore = useCourseStore()
 const { status, judge } = $(storeToRefs(rootStore))
-const { isAdmin } = $(storeToRefs(sessionStore))
+const { problems, solved } = $(storeToRefs(problemStore))
+const { course } = storeToRefs(courseStore)
 const { findProblems, update } = problemStore
 
 const problemStatus = constant.status
@@ -131,7 +131,7 @@ onRouteQueryUpdate(fetch)
             <th class="problem-ratio">
               Ratio
             </th>
-            <th v-if="isAdmin" class="problem-visible">
+            <th v-if="course.role.manageProblem" class="problem-visible">
               Visible
             </th>
           </tr>
@@ -175,7 +175,7 @@ onRouteQueryUpdate(fetch)
               </router-link>
               )
             </td>
-            <td v-if="isAdmin" class="problem-visible">
+            <td v-if="course.role.manageProblem" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
                 <a @click="switchStatus(item)">{{ problemStatus[item.status] }}</a>
               </Tooltip>
