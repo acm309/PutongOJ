@@ -129,7 +129,7 @@ export interface ContestEntity extends Entity {
   status: number
   encrypt: number
   argument: string
-  course: ObjectId | null
+  course: CourseDocument | null
 }
 
 // Solution

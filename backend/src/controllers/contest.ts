@@ -1,7 +1,8 @@
 import type { Context } from 'koa'
+import type { ObjectId } from 'mongoose'
 import type { ContestDocument } from '../models/Contest'
 import type { SessionProfile } from '../types'
-import { escapeRegExp } from 'lodash'
+import { escapeRegExp, pick } from 'lodash'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
@@ -13,6 +14,7 @@ import { parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
+import { loadCourse } from './course'
 
 const { encrypt, status, judge } = constants
 
@@ -30,7 +32,7 @@ export async function loadContest (
     return ctx.state.contest
   }
 
-  const contest = await Contest.findOne({ cid: contestId })
+  const contest = await Contest.findOne({ cid: contestId }).populate('course')
   if (!contest) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -39,6 +41,16 @@ export async function loadContest (
   if (profile.isAdmin) {
     ctx.state.contest = contest
     return contest
+  }
+  if (contest.course) {
+    const { role } = await loadCourse(ctx, contest.course)
+    if (!role.basic) {
+      return ctx.throw(...ERR_PERM_DENIED)
+    }
+    if (role.manageContest) {
+      ctx.state.contest = contest
+      return contest
+    }
   }
   if (contest.start > Date.now()) {
     return ctx.throw(400, 'This contest has not started yet')
@@ -65,19 +77,41 @@ export async function loadContest (
 
 const findContests = async (ctx: Context) => {
   const opt = ctx.request.query
-  const { profile } = ctx.state
-  const { page, pageSize } = parsePaginateOption(opt, 20)
-  const filterType = String(opt.type || '')
-  const filterContent = String(opt.content || '')
+  const profile = ctx.state.profile
+  let showAll: boolean = !!profile?.isAdmin
 
-  const filter: any = {}
-  if (!profile?.isAdmin) {
-    filter.status = status.Available
+  let courseDocId: ObjectId | undefined
+  if (typeof opt.course === 'string') {
+    const { course, role } = await loadCourse(ctx, opt.course)
+    if (!role.basic) {
+      return ctx.throw(...ERR_PERM_DENIED)
+    }
+    if (role.manageContest) {
+      showAll = true
+    }
+    courseDocId = course.id
   }
-  if (filterType === 'title') {
-    filter.title = { $regex: new RegExp(escapeRegExp(filterContent), 'i') }
+  const { page, pageSize } = parsePaginateOption(opt, 20)
+  const filters: Record<string, any>[] = []
+  if (!showAll) {
+    filters.push({ status: status.Available })
   }
-  const list = await Contest.paginate(filter, {
+  if (courseDocId) {
+    filters.push({ course: courseDocId })
+  } else if (!showAll) {
+    filters.push({
+      $or: [
+        { course: { $exists: false } },
+        { course: null } ],
+    })
+  }
+  if (opt.type === 'title' && typeof opt.content === 'string') {
+    filters.push({
+      title: { $regex: new RegExp(escapeRegExp(opt.content), 'i') },
+    })
+  }
+
+  const list = await Contest.paginate({ $and: filters }, {
     sort: { cid: -1 },
     page,
     limit: pageSize,
@@ -85,13 +119,23 @@ const findContests = async (ctx: Context) => {
     leanWithId: false,
     select: '-_id cid title start end encrypt status',
   })
-
   ctx.body = { list }
 }
 
 const getContest = async (ctx: Context) => {
   const profile = await loadProfile(ctx)
   const contest = await loadContest(ctx)
+  const canViewMore = await (async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      return role.manageContest
+    }
+    return false
+  })()
+
   const cid = contest.cid
   const problemList = contest.list
   const totalProblems = problemList.length
@@ -119,21 +163,23 @@ const getContest = async (ctx: Context) => {
         .exec()
     : []
 
-  const contestData = {
-    cid: contest.cid,
-    title: contest.title,
-    start: contest.start,
-    end: contest.end,
-    encrypt: contest.encrypt,
-    status: contest.status,
-    list: problemList,
-  } as any
-  if (profile.isAdmin) {
-    contestData.argument = contest.argument
+  let course = null
+  if (contest.course) {
+    const { role } = await loadCourse(ctx, contest.course)
+    course = {
+      ...pick(contest.course, [ 'courseId', 'name', 'description', 'encrypt' ]),
+      role,
+    }
   }
-
+  const contestData = pick(contest, [
+    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list' ])
+  const argument = canViewMore ? contest.argument : undefined
   ctx.body = {
-    contest: contestData,
+    contest: {
+      ...contestData,
+      course,
+      argument,
+    },
     overview,
     totalProblems,
     solved,
@@ -143,6 +189,16 @@ const getContest = async (ctx: Context) => {
 const getRanklist = async (ctx: Context) => {
   const profile = await loadProfile(ctx)
   const contest = await loadContest(ctx)
+  const canViewMore = await (async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      return role.manageContest
+    }
+    return false
+  })()
 
   // 封榜时长：20% 的比赛时间（最小 10 分钟）
   const FREEZE_DURATION_RATE = 0.2
@@ -153,7 +209,7 @@ const getRanklist = async (ctx: Context) => {
     MIN_FREEZE_DURATION))
   const freezeTime = contest.end - freezeDuration
   const isEnded = Date.now() > contest.end
-  const isFrozen = !isEnded && Date.now() > freezeTime && !profile.isAdmin
+  const isFrozen = !isEnded && Date.now() > freezeTime && !canViewMore
   const info = { freezeTime, isFrozen, isEnded, isCache: false }
 
   const cacheKey = `ranklist:${contest.cid}${isFrozen ? ':frozen' : ''}`
@@ -238,6 +294,25 @@ const getRanklist = async (ctx: Context) => {
 const createContest = async (ctx: Context) => {
   const opt = ctx.request.body
   const profile = await loadProfile(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (opt.course) {
+      const { role } = await loadCourse(ctx, opt.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  let courseDocId: ObjectId | undefined
+  if (opt.course) {
+    const { course } = await loadCourse(ctx, opt.course)
+    courseDocId = course.id
+  }
 
   const contest = new Contest({
     title: opt.title,
@@ -246,6 +321,7 @@ const createContest = async (ctx: Context) => {
     argument: opt.argument,
     start: new Date(opt.start).getTime(),
     end: new Date(opt.end).getTime(),
+    course: courseDocId,
   })
 
   try {
@@ -264,6 +340,19 @@ const updateContest = async (ctx: Context) => {
   const opt = ctx.request.body
   const profile = await loadProfile(ctx)
   const contest = await loadContest(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
 
   if (opt.title) { contest.title = opt.title }
   if (opt.encrypt) { contest.encrypt = opt.encrypt }
@@ -272,6 +361,14 @@ const updateContest = async (ctx: Context) => {
   if (opt.start) { contest.start = new Date(opt.start).getTime() }
   if (opt.end) { contest.end = new Date(opt.end).getTime() }
   if (opt.status) { contest.status = opt.status }
+  if (opt.course && Number.isInteger(Number(opt.course))) {
+    if (Number(opt.course) === -1) {
+      contest.course = null
+    } else {
+      const { course } = await loadCourse(ctx, opt.course)
+      contest.course = course.id
+    }
+  }
 
   try {
     await contest.save()
@@ -310,6 +407,12 @@ const verifyParticipant = async (ctx: Context) => {
   const contest = await Contest.findOne({ cid })
   if (!contest) {
     return ctx.throw(...ERR_NOT_FOUND)
+  }
+  if (contest.course) {
+    const { role } = await loadCourse(ctx, contest.course)
+    if (!role.basic) {
+      return ctx.throw(...ERR_PERM_DENIED)
+    }
   }
 
   const enc = contest.encrypt

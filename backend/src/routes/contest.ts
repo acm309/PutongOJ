@@ -19,15 +19,15 @@ contestRouter.get('/:cid/ranklist',
   contestController.getRanklist,
 )
 contestRouter.post('/',
-  authnMiddleware.adminRequire,
+  authnMiddleware.loginRequire,
   contestController.createContest,
 )
 contestRouter.put('/:cid',
-  authnMiddleware.adminRequire,
+  authnMiddleware.loginRequire,
   contestController.updateContest,
 )
 contestRouter.del('/:cid',
-  authnMiddleware.adminRequire,
+  authnMiddleware.rootRequire,
   contestController.deleteContest,
 )
 contestRouter.post('/:cid/verify',
