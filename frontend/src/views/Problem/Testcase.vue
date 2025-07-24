@@ -1,13 +1,13 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { Button, Divider, Icon, Input, Poptip, Space, Tag, Upload } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+
 import { useRoute } from 'vue-router'
-
 import { useTestcaseStore } from '@/store/modules/testcase'
-import { testcaseUrl } from '@/util/helper'
 
-import { Button, Divider, Icon, Input, Poptip, Space, Tag, Upload } from 'view-ui-plus'
+import { testcaseUrl } from '@/util/helper'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -26,11 +26,19 @@ const test = $ref({
 
 let loading = $ref(false)
 
-async function fetch() {
+async function fetch () {
   loading = true
   await testcaseStore.find(route.params)
   loading = false
 }
+
+const testcaseFile = $ref({ in: null, out: null })
+const fileInput = $computed(() => {
+  return {
+    in: testcaseFile.in !== null,
+    out: testcaseFile.out !== null,
+  }
+})
 
 // function search(item) {
 //   return testcaseStore.findOne({
@@ -40,7 +48,7 @@ async function fetch() {
 //   })
 // }
 
-function del(item) {
+function del (item) {
   const sort_uuid = item.uuid.slice(0, 8)
   modal.confirm({
     title: t('oj.alert'),
@@ -59,7 +67,7 @@ function del(item) {
   })
 }
 
-async function create(testcase) {
+async function create (testcase) {
   await testcaseStore.create(testcase)
   message.success(t('oj.testcase.create_success'))
   fetch()
@@ -67,10 +75,10 @@ async function create(testcase) {
   testcaseFile.in = testcaseFile.out = null
 }
 
-async function createCheck() {
+async function createCheck () {
   const testcase = { pid: test.pid, in: test.in, out: test.out }
 
-  for (let key in testcaseFile) {
+  for (const key in testcaseFile) {
     if (testcaseFile[key]) {
       try {
         testcase[key] = await readFile(key)
@@ -89,25 +97,18 @@ async function createCheck() {
       onOk: () => create(testcase),
       onCancel: () => message.info(t('oj.testcase.create_cancel')),
     })
-  } else
+  } else {
     create(testcase)
+  }
 }
 
-const testcaseFile = $ref({ in: null, out: null })
-const fileInput = $computed(() => {
-  return {
-    in: testcaseFile.in !== null,
-    out: testcaseFile.out !== null,
-  }
-})
-
-async function readFile(type) {
+async function readFile (type) {
   const file = testcaseFile[type]
   const reader = new FileReader()
   return new Promise((resolve, reject) => {
     reader.onload = () => {
       const content = reader.result.replace(/\r\n/g, '\n')
-      if (/^[\x00-\x7F]*$/.test(content)) {
+      if (/^[\s\x21-\x7E]*$/.test(content)) {
         resolve(content)
       } else {
         reject(new Error(t('oj.testcase.error_encoding')))
@@ -118,19 +119,19 @@ async function readFile(type) {
   })
 }
 
-function fileSelect(type, file) {
+function fileSelect (type, file) {
   testcaseFile[type] = file
   return false
 }
 
-function removeFile(type) {
+function removeFile (type) {
   testcaseFile[type] = null
 }
 
-function filename(type) {
-  let name = testcaseFile[type].name
-  let ext = name.slice(name.lastIndexOf('.') + 1)
-  return name.length > 10 ? name.slice(0, 10) + `...${ext}` : name
+function filename (type) {
+  const name = testcaseFile[type].name
+  const ext = name.slice(name.lastIndexOf('.') + 1)
+  return name.length > 10 ? `${name.slice(0, 10)}...${ext}` : name
 }
 
 fetch()
@@ -141,9 +142,15 @@ fetch()
     <table class="testcase-table">
       <thead>
         <tr>
-          <th class="testcase-uuid">UUID</th>
-          <th class="testcase-files">{{ t('oj.files') }}</th>
-          <th class="testcase-action">{{ t('oj.action') }}</th>
+          <th class="testcase-uuid">
+            UUID
+          </th>
+          <th class="testcase-files">
+            {{ t('oj.files') }}
+          </th>
+          <th class="testcase-action">
+            {{ t('oj.action') }}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -185,12 +192,16 @@ fetch()
           </Button>
         </Upload>
       </div>
-      <Input class="testcase-textarea" v-if="!fileInput.in" v-model="test.in" type="textarea"
-        :autosize="{ minRows: 5, maxRows: 15 }" />
+      <Input
+        v-if="!fileInput.in" v-model="test.in" class="testcase-textarea" type="textarea"
+        :autosize="{ minRows: 5, maxRows: 15 }"
+      />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
         <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
-        <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">{{ filename('in') }}</Tag>
+        <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">
+          {{ filename('in') }}
+        </Tag>
       </div>
       <div class="testcase-flex">
         <span class="testcase-title">{{ t('oj.output') }}</span>
@@ -200,12 +211,16 @@ fetch()
           </Button>
         </Upload>
       </div>
-      <Input class="testcase-textarea" v-if="!fileInput.out" v-model="test.out" type="textarea"
-        :autosize="{ minRows: 5, maxRows: 15 }" />
+      <Input
+        v-if="!fileInput.out" v-model="test.out" class="testcase-textarea" type="textarea"
+        :autosize="{ minRows: 5, maxRows: 15 }"
+      />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
         <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
-        <Tag class="file-name" type="dot" closable @on-close="removeFile('out')">{{ filename('out') }}</Tag>
+        <Tag class="file-name" type="dot" closable @on-close="removeFile('out')">
+          {{ filename('out') }}
+        </Tag>
       </div>
       <Button class="testcase-submit" size="large" type="primary" @click="createCheck">
         {{ t('oj.submit') }}
@@ -232,7 +247,7 @@ fetch()
       background-color #f7f7f7
 
 .testcase-uuid
-  padding-left 40px !important 
+  padding-left 40px !important
   text-align left
 .testcase-action
   padding-right 40px !important

@@ -35,7 +35,7 @@ const find = async (ctx) => {
 const findOne = async (ctx) => {
   const opt = Number.parseInt(ctx.params.sid)
   // 使用lean solution 就是一个 js 对象，没有 save 等方法
-  const solution = await Solution.findOne({ sid: opt }).lean().exec()
+  const solution = await Solution.findOne({ sid: opt }).populate('course')
 
   if (solution == null) { ctx.throw(400, 'No such a solution') }
   if (!isAdmin(ctx.session.profile) && solution.uid !== ctx.session.profile.uid) { ctx.throw(403, 'Permission denied') }
@@ -76,9 +76,11 @@ const create = async (ctx) => {
   if (code.length < 8 || code.length > 16384) {
     ctx.throw(400, 'Code length should between 8 and 16384')
   }
+
+  let course = null
   if (mid > 0) {
     const mid = Number.parseInt(opt.mid)
-    const contest = await Contest.findOne({ cid: mid }).lean().exec()
+    const contest = await Contest.findOne({ cid: mid }).populate('course')
     if (!contest) {
       ctx.throw(400, 'No such a contest')
     }
@@ -88,10 +90,16 @@ const create = async (ctx) => {
     if (!contest.list.includes(pid)) {
       ctx.throw(400, 'No such a problem in the contest')
     }
+    if (contest.course) {
+      course = contest.course.id
+    }
   }
-  const problem = await Problem.findOne({ pid }).lean().exec()
+  const problem = await Problem.findOne({ pid }).populate('course')
   if (!problem) {
     ctx.throw(400, 'No such a problem')
+  }
+  if (problem.course && !course) {
+    course = problem.course.id
   }
 
   try {
@@ -115,7 +123,7 @@ const create = async (ctx) => {
     })
 
     const solution = new Solution({
-      pid, mid, uid, code, language,
+      pid, mid, uid, code, language, course,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 

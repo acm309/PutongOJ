@@ -1,19 +1,32 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { TabPane, Tabs } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-
-import { Tabs, TabPane } from 'view-ui-plus'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()
-const { isAdmin, isLogined } = $(storeToRefs(sessionStore))
+const problemStore = useProblemStore()
+
+const { isAdmin, isLogined } = storeToRefs(sessionStore)
+const { problem } = storeToRefs(problemStore)
 const route = useRoute()
 const router = useRouter()
 const display = $computed(() => route.name)
+const isEditable = computed(() => {
+  if (problem.value?.pid !== Number(route.params.pid)) {
+    return false
+  }
+  if (isAdmin.value || problem.value?.course?.role.manageProblem) {
+    return true
+  }
+  return false
+})
 
-function handleClick(name) {
+function handleClick (name) {
   if (name !== display)
     router.push({ name, params: { pid: route.params.pid } })
 }
@@ -24,10 +37,10 @@ function handleClick(name) {
     <Tabs class="problem-tabs" :model-value="display" @on-click="handleClick">
       <TabPane :label="t('oj.description')" name="problemInfo" />
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
-      <TabPane :label="t('oj.my_submissions')" name="mySubmission" v-if="isLogined" />
+      <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="mySubmission" />
       <TabPane :label="t('oj.statistics')" name="problemStatistics" />
-      <TabPane :label="t('oj.edit')" name="problemEdit" v-if="isAdmin" />
-      <TabPane :label="t('oj.test_data')" name="testcase" v-if="isAdmin" />
+      <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
+      <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />
     </Tabs>
     <router-view class="problem-children" />
   </div>
@@ -45,7 +58,6 @@ function handleClick(name) {
   .problem-tabs
     .ivu-tabs-nav-scroll
       padding 0 20px
-  
 </style>
 
 <style lang="stylus" scoped>

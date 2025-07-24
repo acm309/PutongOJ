@@ -1,4 +1,4 @@
-import type { CourseRole } from '@/types'
+import type { CourseRole } from '@backend/types'
 
 export const result = {
   0: 'Pending',

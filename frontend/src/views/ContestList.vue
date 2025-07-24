@@ -1,16 +1,16 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
+import { Button, Input, Page, Poptip, Spin } from 'view-ui-plus'
 import { inject } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Input, Button, Page, Poptip, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { onRouteQueryUpdate, purify } from '../util/helper'
-import constant from '../util/constant'
-import { useSessionStore } from '@/store/modules/session'
-import { useContestStore } from '@/store/modules/contest'
+import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
+import { useContestStore } from '@/store/modules/contest'
+import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/util/formate'
+import constant from '../util/constant'
+import { onRouteQueryUpdate, purify } from '../util/helper'
 
 const { t } = useI18n()
 const { 'contestType': type, 'status': contestVisible } = constant
@@ -35,13 +35,13 @@ let loading = $ref(false)
 
 const { find, verify, update, 'delete': remove } = contestStore
 
-async function fetch() {
+async function fetch () {
   loading = true
   await find(query)
   loading = false
 }
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   router.push({
     name: 'contestList',
     query: Object.assign({}, query, payload),
@@ -50,7 +50,7 @@ function reload(payload = {}) {
 
 const pageChange = val => reload({ page: val })
 
-async function enter(item) {
+async function enter (item) {
   const opt = Object.assign(
     only(item, 'cid'),
     { pwd: enterPwd },
@@ -62,7 +62,7 @@ async function enter(item) {
     $Message.error('Wrong password!')
 }
 
-async function visit(item) {
+async function visit (item) {
   if (!isLogined) {
     sessionStore.toggleLoginState()
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
@@ -96,7 +96,7 @@ async function visit(item) {
   }
 }
 
-async function change(contest) {
+async function change (contest) {
   loading = true
   contest.status = contest.status === status.Reserve
     ? status.Available
@@ -106,7 +106,7 @@ async function change(contest) {
   loading = false
 }
 
-function del(cid) {
+function del (cid) {
   $Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该文件, 是否继续?</p>',
@@ -120,7 +120,7 @@ function del(cid) {
   })
 }
 
-async function search() {
+async function search () {
   loading = true
   await find(Object.assign({}, query, {
     type: 'title',
@@ -136,10 +136,14 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="contest-wrap">
     <div class="contest-header">
-      <Page class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
-      <Page class="contest-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
+      <Page
+        class="contest-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
       <div class="contest-filter">
         <Input v-model="contestTitle" :placeholder="t('oj.title')" class="search-input" clearable />
         <Button type="primary" class="contest-filter-button" @click="search">
@@ -151,13 +155,27 @@ onRouteQueryUpdate(fetch)
       <table class="contest-table">
         <thead>
           <tr>
-            <th class="contest-cid">CID</th>
-            <th class="contest-title">Title</th>
-            <th class="contest-status">Status</th>
-            <th class="contest-type">Type</th>
-            <th class="contest-start-time">Start Time</th>
-            <th v-if="isAdmin" class="contest-visible">Visible</th>
-            <th v-if="isRoot" class="contest-delete">Delete</th>
+            <th class="contest-cid">
+              CID
+            </th>
+            <th class="contest-title">
+              Title
+            </th>
+            <th class="contest-status">
+              Status
+            </th>
+            <th class="contest-type">
+              Type
+            </th>
+            <th class="contest-start-time">
+              Start Time
+            </th>
+            <th v-if="isAdmin" class="contest-visible">
+              Visible
+            </th>
+            <th v-if="isRoot" class="contest-delete">
+              Delete
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -168,13 +186,19 @@ onRouteQueryUpdate(fetch)
             </td>
           </tr>
           <tr v-for="(item, index) in list" :key="index">
-            <td class="contest-cid">{{ item.cid }}</td>
+            <td class="contest-cid">
+              {{ item.cid }}
+            </td>
             <td class="contest-title">
               <Button type="text" class="table-button" @click="visit(item)">
                 <span class="button-text">{{ item.title }}</span>
-                <Poptip trigger="hover" v-show="item.status === status.Reserve"
-                  content="This item is reserved, no one could see this, except admin" placement="top">
-                  <Tag class="contest-mark">Reserved</Tag>
+                <Poptip
+                  v-show="item.status === status.Reserve" trigger="hover"
+                  content="This item is reserved, no one could see this, except admin" placement="top"
+                >
+                  <Tag class="contest-mark">
+                    Reserved
+                  </Tag>
                 </Poptip>
               </Button>
             </td>
@@ -184,15 +208,19 @@ onRouteQueryUpdate(fetch)
               <span v-if="item.end < currentTime" class="contest-status-end">Ended</span>
             </td>
             <td class="contest-type">
-              <span :class="{
-                'contest-type-password': +item.encrypt === encrypt.Password,
-                'contest-type-private': +item.encrypt === encrypt.Private,
-                'contest-type-public': +item.encrypt === encrypt.Public,
-              }">
+              <span
+                :class="{
+                  'contest-type-password': +item.encrypt === encrypt.Password,
+                  'contest-type-private': +item.encrypt === encrypt.Private,
+                  'contest-type-public': +item.encrypt === encrypt.Public,
+                }"
+              >
                 {{ type[item.encrypt] }}
               </span>
             </td>
-            <td class="contest-start-time">{{ timePretty(item.start) }}</td>
+            <td class="contest-start-time">
+              {{ timePretty(item.start) }}
+            </td>
             <td v-if="isAdmin" class="contest-visible">
               <Poptip trigger="hover" content="Click to change status" placement="right">
                 <a @click="change(item)">{{ contestVisible[item.status] }}</a>
@@ -206,10 +234,14 @@ onRouteQueryUpdate(fetch)
       </table>
     </div>
     <div class="contest-footer">
-      <Page class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="contest-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
-        show-elevator show-total @on-change="pageChange" />
+      <Page
+        class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="contest-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
+        show-elevator show-total @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>

@@ -2,7 +2,7 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -52,7 +52,7 @@ test.serial('Update Group 2', async (t) => {
 })
 
 test.serial('Update Group 2 -- update members', async (t) => {
-  const user = users.data.primaryuser
+  const user = userSeeds.primaryuser
   const update = await request
     .put('/api/group/2')
     .send({

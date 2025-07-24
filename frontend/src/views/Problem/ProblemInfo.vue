@@ -21,14 +21,14 @@ const { problem } = $(storeToRefs(problemStore))
 
 let loading = $ref(false)
 
-function submit() {
+function submit () {
   return router.push({
     name: 'problemSubmit',
     params: router.params,
   })
 }
 
-async function init() {
+async function init () {
   loading = true
   await findOne(route.params)
   changeDomTitle({ title: problem.title })

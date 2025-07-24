@@ -1,12 +1,11 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const users = require('../../seed/users')
-// const config = require('../../../src/config')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
-const user = users.data.primaryuser
+const user = userSeeds.primaryuser
 
 test.before('Login', async (t) => {
   const login = await request

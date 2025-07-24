@@ -1,4 +1,4 @@
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const ranklist = require('../controllers/ranklist')
 
 const router = new Router({

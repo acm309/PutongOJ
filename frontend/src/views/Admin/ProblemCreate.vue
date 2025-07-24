@@ -1,13 +1,13 @@
 <script setup>
-import { inject } from 'vue'
+import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import OJProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
 import { useTestcaseStore } from '@/store/modules/testcase'
 
 const { t } = useI18n()
-
+const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
 const testcaseStore = useTestcaseStore()
@@ -23,6 +23,7 @@ const problem = $ref({
   out: '',
   type: 1,
   code: '',
+  course: null,
 })
 
 const $Message = inject('$Message')
@@ -67,6 +68,12 @@ async function submitCheck () {
     }
   }
 }
+
+onMounted(() => {
+  if (route.query.course) {
+    problem.course = Number.parseInt(route.query.course)
+  }
+})
 </script>
 
 <template>

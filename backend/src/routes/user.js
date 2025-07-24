@@ -1,4 +1,4 @@
-const Router = require('koa-router')
+const Router = require('@koa/router')
 const user = require('../controllers/user')
 const { auth, userCreateRateLimit } = require('../middlewares')
 

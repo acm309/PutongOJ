@@ -1,7 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -13,7 +13,7 @@ test.before(async (t) => {
     .post('/api/session')
     .send({
       uid: 'primaryuser',
-      pwd: users.data.primaryuser.pwd,
+      pwd: userSeeds.primaryuser.pwd,
     })
   t.is(res.status, 200)
 })

@@ -48,7 +48,7 @@ test('Create a news', async (t) => {
     .post('/api/news')
     .send({
       title: 'abcdefg',
-      content: 'xx',
+      content: 'xxx',
     })
 
   t.is(res.status, 200)
@@ -60,7 +60,7 @@ test('Create a news', async (t) => {
   t.is(res.status, 200)
   t.is(find.body.news.nid, nid)
   t.is(find.body.news.title, 'abcdefg')
-  t.is(find.body.news.content, 'xx')
+  t.is(find.body.news.content, 'xxx')
 })
 
 test('Update a news', async (t) => {

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { courseRoleNone } from '@backend/utils/constants'
 import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
-import { Auth, Divider, Exception, Spin, TabPane, Tabs } from 'view-ui-plus'
-import { onBeforeMount } from 'vue'
+import { Auth, Button, ButtonGroup, Col, Divider, Exception, Row, Spin, TabPane, Tabs } from 'view-ui-plus'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useCourseStore } from '@/store/modules/course'
@@ -13,21 +14,40 @@ const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
 const { findCourse } = courseStore
-const { course } = $(storeToRefs(courseStore))
+const { course } = storeToRefs(courseStore)
 
-let loading = $ref(false)
-const display = $computed(() => route.name)
+const loading = ref(false)
+const displayTab = computed(() => route.name as string || 'courseProblems')
+const courseId = computed(() => Number.parseInt(route.params.id as string))
+const role = computed(() => {
+  if (course.value?.courseId !== courseId.value) {
+    return courseRoleNone
+  }
+  return course.value?.role ?? courseRoleNone
+})
 
 function handleClick (name: string) {
-  if (name !== display)
-    router.push({ name, params: { id: route.params.id } })
+  if (name !== displayTab.value)
+    router.push({ name, params: { id: courseId.value } })
 }
 
 async function fetch () {
-  const id = Number.parseInt(route.params.id as string)
-  loading = true
-  await findCourse(id)
-  loading = false
+  loading.value = true
+  await findCourse(courseId.value)
+  if (
+    !role.value.manageCourse
+    && [ 'courseMembers', 'courseSettings' ].includes(displayTab.value)
+  ) {
+    router.push({ name: 'courseProblems', params: { id: courseId.value } })
+  }
+  loading.value = false
+}
+
+function createProblem () {
+  router.push({ name: 'problemCreate', query: { course: courseId.value } })
+}
+function createContest () {
+  router.push({ name: 'contestCreate', query: { course: courseId.value } })
 }
 
 const home = () => router.push({ name: 'home' })
@@ -38,24 +58,38 @@ onProfileUpdate(fetch)
 </script>
 
 <template>
-  <div class="course-wrap">
-    <div class="course-header">
-      <h1 class="course-name">
-        {{ spacing(course.name) }}
-      </h1>
-      <p v-if="course.description?.trim()" class="course-description">
-        {{ spacing(course.description) }}
-      </p>
-      <p v-else class="course-description">
-        <i>No description found yet...</i>
-      </p>
-    </div>
-    <Auth :authority="!!course.role?.basic">
-      <Tabs class="course-tabs" :model-value="display" @on-click="handleClick">
+  <div class="course-wrap" :class="{ 'course-wrap-edit': displayTab === 'courseSettings' }">
+    <Row class="course-header">
+      <Col flex="auto" class="course-header-col">
+        <h1 class="course-name">
+          {{ spacing(course.name) }}
+        </h1>
+        <p v-if="course.description?.trim()" class="course-description">
+          {{ spacing(course.description) }}
+        </p>
+        <p v-else class="course-description">
+          <i>No description found yet...</i>
+        </p>
+      </Col>
+      <Col flex="none" class="course-header-col">
+        <ButtonGroup>
+          <Button v-if="role.manageProblem" @click="createProblem">
+            <Icon type="md-add" />
+            Create Problem
+          </Button>
+          <Button v-if="role.manageContest" @click="createContest">
+            <Icon type="md-add" />
+            Create Contest
+          </Button>
+        </ButtonGroup>
+      </Col>
+    </Row>
+    <Auth :authority="role.basic">
+      <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleClick">
         <TabPane label="Problem" name="courseProblems" />
         <TabPane label="Contest" name="courseContests" />
-        <TabPane label="Member" name="courseMembers" />
-        <TabPane label="Setting" name="courseSettings" />
+        <TabPane v-if="role.manageCourse" label="Member" name="courseMembers" />
+        <TabPane v-if="role.manageCourse" label="Setting" name="courseSettings" />
       </Tabs>
       <router-view class="course-children" />
       <template #noMatch>
@@ -82,7 +116,7 @@ onProfileUpdate(fetch)
 <style lang="stylus">
 .course-tabs
   .ivu-tabs-nav-scroll
-    padding 0 40px
+    padding 0 25px
   .ivu-tabs-nav-scrollable
     .ivu-tabs-nav-scroll
       padding 0 !important
@@ -90,12 +124,14 @@ onProfileUpdate(fetch)
 @media screen and (max-width: 1024px)
   .course-tabs
     .ivu-tabs-nav-scroll
-      padding 0 20px
+      padding 0 5px
 </style>
 
 <style lang="stylus" scoped>
 .course-wrap
   padding 0
+.course-wrap-edit
+  max-width 768px
 .course-tabs
   padding-top 24px
   margin-bottom 24px
@@ -105,6 +141,9 @@ onProfileUpdate(fetch)
 
 .course-header
   padding 40px 40px 0
+  margin 0 -20px -20px 0
+  .course-header-col
+    margin 0 20px 20px 0
   .course-name
     font-size 28px
     font-weight 600

@@ -4,8 +4,10 @@ const stylistic = require('@stylistic/eslint-plugin')
 module.exports = antfu(
   {
     ignores: [
-      '/dist/',
-      '/public/static/',
+      'dist',
+      'node_modules',
+      'public/static',
+      'stats.html',
     ],
   },
   {

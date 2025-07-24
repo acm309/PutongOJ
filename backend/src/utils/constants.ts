@@ -1,3 +1,5 @@
+import type { CourseRole } from '../types'
+
 export const privilege = Object.freeze({
   Banned: 0,
   User: 1,
@@ -5,7 +7,7 @@ export const privilege = Object.freeze({
   Root: 3,
 })
 
-const judge = Object.freeze({
+export const judge = Object.freeze({
   Pending: 0,
   Running: 1,
   CompileError: 2,
@@ -21,47 +23,51 @@ const judge = Object.freeze({
   Skipped: 12,
 })
 
-const limitation = Object.freeze({
+export const limitation = Object.freeze({
   time: 10 * 1000,
   memory: 256 * 1024,
 })
 
-const status = Object.freeze({
+export const status = Object.freeze({
   Reserve: 0,
   Available: 2,
 })
 
-const encrypt = Object.freeze({
+export const encrypt = Object.freeze({
   Public: 1,
   Private: 2,
   Password: 3,
 })
 
-const problemType = Object.freeze({
+export const problemType = Object.freeze({
   Traditional: 1,
   Interaction: 2,
   SpecialJudge: 3,
 })
 
-const coursePermission = Object.freeze({
-  None: 0,
-  Basic: 1 << 0,
-  ViewTestcase: 1 << 1,
-  ViewSolution: 1 << 2,
-  CreateProblem: 1 << 3,
-  CreateContest: 1 << 4,
-  ManageProblem: 1 << 5,
-  ManageContest: 1 << 6,
-  ManageCourse: 1 << 7,
-  Entire: (1 << 8) - 1,
-})
-
-const deploy = Object.freeze({
+export const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 
+export const courseRoleNone = Object.freeze({
+  basic: false,
+  viewTestcase: false,
+  viewSolution: false,
+  manageProblem: false,
+  manageContest: false,
+  manageCourse: false,
+} as CourseRole)
+
+export const courseRoleEntire = Object.freeze({
+  basic: true,
+  viewTestcase: true,
+  viewSolution: true,
+  manageProblem: true,
+  manageContest: true,
+  manageCourse: true,
+} as CourseRole)
+
 export default Object.freeze({
-  coursePermission,
   deploy,
   encrypt,
   judge,
@@ -69,4 +75,6 @@ export default Object.freeze({
   privilege,
   problemType,
   status,
+  courseRoleNone,
+  courseRoleEntire,
 })

@@ -77,8 +77,8 @@ onRouteQueryUpdate(fetch)
     </div>
     <div v-if="courses.total > 0">
       <Card
-        v-for="item in courses.docs" :key="item.id" class="courses-card"
-        dis-hover @click="visit(item.id)"
+        v-for="item in courses.docs" :key="item.courseId" class="courses-card"
+        dis-hover @click="visit(item.courseId)"
       >
         <Row type="flex" :gutter="16" :wrap="false">
           <Col flex="68px" class="courses-icon">
@@ -135,7 +135,7 @@ onRouteQueryUpdate(fetch)
   justify-content space-between
   align-items end
   .courses-title
-    margin -8px 0
+    margin 0 0 -8px
     font-size 28px
   .courses-actions
     flex none

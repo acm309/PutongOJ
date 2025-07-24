@@ -1,18 +1,10 @@
-import type { Context as KoaContext } from 'koa'
-import type { UserEntity } from '../models/User'
-
-export interface AppSession {
-  profile?: SessionProfile
-}
-
-export interface AppState {
-  authnChecked?: boolean
-  profile?: UserEntity
-}
-
-export interface AppContext extends KoaContext {
-  session: AppSession
-  state: AppState
+export interface CourseRole {
+  basic: boolean
+  viewTestcase: boolean
+  viewSolution: boolean
+  manageProblem: boolean
+  manageContest: boolean
+  manageCourse: boolean
 }
 
 export interface SessionProfile {
@@ -20,4 +12,18 @@ export interface SessionProfile {
   nick: string
   privilege: number
   pwd: string
+  verifyContest?: number[]
+}
+
+export interface PaginateOption {
+  page: number
+  pageSize: number
+}
+
+export interface Paginated<T> {
+  docs: T[]
+  limit: number
+  page: number
+  pages: number
+  total: number
 }

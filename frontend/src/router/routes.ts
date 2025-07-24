@@ -1,18 +1,18 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import newsRoutes from './news'
-import problemRoutes from './problem'
-import statusRoutes from './status'
-import ranklistRoutes from './ranklist'
-import contestRoutes from './contest'
-import discussRoutes from './discuss'
-import userRoutes from './user'
-import courseRoutes from './course'
-import adminRoutes from './admin'
-
 import NotFound from '@/views/404.vue'
 import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
+import adminRoutes from './admin'
+import contestRoutes from './contest'
+import courseRoutes from './course'
+import discussRoutes from './discuss'
+import newsRoutes from './news'
+import problemRoutes from './problem'
+
+import ranklistRoutes from './ranklist'
+import statusRoutes from './status'
+import userRoutes from './user'
 
 const routes: Array<RouteRecordRaw> = [
   {

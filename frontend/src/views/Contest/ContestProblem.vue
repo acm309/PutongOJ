@@ -1,13 +1,13 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Button, Space, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem'
-import { useProblemStore } from '@/store/modules/problem'
 import { useContestStore } from '@/store/modules/contest'
-import { onRouteParamUpdate } from '@/util/helper'
+import { useProblemStore } from '@/store/modules/problem'
 
-import { Space, Button, Spin } from 'view-ui-plus'
+import { onRouteParamUpdate } from '@/util/helper'
 
 const { t } = useI18n()
 const problemStore = useProblemStore()
@@ -23,13 +23,13 @@ const proIndex = $computed(() => Number.parseInt(route.params.id || 1))
 
 let loading = $ref(false)
 
-async function fetch() {
+async function fetch () {
   loading = true
   await findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
   loading = false
 }
 
-const pageChange = val => {
+function pageChange (val) {
   if (overview[val - 1].invalid) return
   router.push({ name: 'contestProblem', params: { cid: contest.cid, id: val } })
 }
@@ -42,8 +42,10 @@ onRouteParamUpdate(fetch)
 <template>
   <div class="contest-children">
     <Space class="problem-nav" wrap :size="[8, 8]">
-      <Button class="problem-nav-item" v-for="i in totalProblems" :key="i" @click="pageChange(i)"
-        :type="i === proIndex ? 'primary' : 'default'" :disabled="overview[i - 1].invalid">
+      <Button
+        v-for="i in totalProblems" :key="i" class="problem-nav-item" :type="i === proIndex ? 'primary' : 'default'"
+        :disabled="overview[i - 1].invalid" @click="pageChange(i)"
+      >
         {{ i }}
       </Button>
     </Space>

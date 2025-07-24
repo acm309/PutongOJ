@@ -1,7 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const problems = require('../../seed/problems')
+const { problemSeeds } = require('../../seeds/problem')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -27,10 +27,10 @@ test('Problem find one', async (t) => {
 
   t.is(res.status, 200)
 
-  const n = problems.data.find(item => item.title === res.body.problem.title)
+  const n = problemSeeds.find(item => item.title === res.body.title)
 
   for (const [ key, value ] of Object.entries(n)) {
-    t.deepEqual(res.body.problem[key], value)
+    t.deepEqual(res.body[key], value)
   }
 })
 
@@ -38,7 +38,7 @@ test('Problem should fail to find one', async (t) => {
   const res = await request
     .get('/api/problem/10000')
 
-  t.is(res.status, 400)
+  t.is(res.status, 404)
   t.is(res.type, 'application/json')
 
   t.truthy(res.body.error)

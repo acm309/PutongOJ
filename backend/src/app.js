@@ -3,7 +3,7 @@ require('dotenv-flow').config()
 const path = require('node:path')
 const process = require('node:process')
 const Koa = require('koa')
-const koaBody = require('koa-body')
+const { koaBody } = require('koa-body')
 const koaLogger = require('koa-logger')
 const send = require('koa-send')
 const { createSession: session } = require('koa-session')
@@ -13,6 +13,7 @@ const staticServe = require('koa-static')
 require('./config/db')
 const config = require('./config')
 const setup = require('./config/setup')
+const authnMiddleware = require('./middlewares/authn')
 const router = require('./routes')
 const logger = require('./utils/logger')
 
@@ -49,6 +50,7 @@ app.use(staticServe(path.join(__dirname, '..', 'public'), {
 
 app.use(async (ctx, next) => {
   ctx.state.requestId = ctx.get('X-Request-ID') || 'unknown'
+  await authnMiddleware.checkSession(ctx)
   await next()
 })
 

@@ -1,9 +1,9 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { Button, Space } from 'view-ui-plus'
+import { inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import Submit from '@/components/Submit'
 import { useContestStore } from '@/store/modules/contest'

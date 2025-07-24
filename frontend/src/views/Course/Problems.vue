@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProblemEntityPreview } from '@backend/types/entity'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
 import { Button, Icon, Input, Option, Page, Select, Spin } from 'view-ui-plus'
@@ -6,8 +7,8 @@ import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
+import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
-import { useSessionStore } from '@/store/modules/session'
 import constant from '@/util/constant'
 import { formate } from '@/util/formate'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -15,13 +16,13 @@ import { onRouteQueryUpdate, purify } from '@/util/helper'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const problemStore = useProblemStore()
 const rootStore = useRootStore()
-const sessionStore = useSessionStore()
+const problemStore = useProblemStore()
+const courseStore = useCourseStore()
+const { status, judge } = $(storeToRefs(rootStore))
 const { problems, solved } = $(storeToRefs(problemStore))
-const { judge } = $(storeToRefs(rootStore))
-const { isAdmin } = $(storeToRefs(sessionStore))
-const { findProblems } = problemStore
+const { course } = storeToRefs(courseStore)
+const { findProblems, update } = problemStore
 
 const problemStatus = constant.status
 const searchOptions = Object.freeze([
@@ -72,6 +73,16 @@ async function fetch () {
 const search = () => reload({ page: 1, type, content })
 const pageChange = (val: number) => reload({ page: val })
 
+async function switchStatus (problem: ProblemEntityPreview) {
+  loading = true
+  const newStatus = problem.status === status.Reserve
+    ? status.Available
+    : status.Reserve
+  await update({ pid: problem.pid, status: newStatus })
+  loading = false
+  await fetch()
+}
+
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
 </script>
@@ -120,7 +131,7 @@ onRouteQueryUpdate(fetch)
             <th class="problem-ratio">
               Ratio
             </th>
-            <th v-if="isAdmin" class="problem-visible">
+            <th v-if="course.role.manageProblem" class="problem-visible">
               Visible
             </th>
           </tr>
@@ -164,9 +175,9 @@ onRouteQueryUpdate(fetch)
               </router-link>
               )
             </td>
-            <td v-if="isAdmin" class="problem-visible">
+            <td v-if="course.role.manageProblem" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
-                <a>{{ problemStatus[item.status] }}</a>
+                <a @click="switchStatus(item)">{{ problemStatus[item.status] }}</a>
               </Tooltip>
             </td>
           </tr>

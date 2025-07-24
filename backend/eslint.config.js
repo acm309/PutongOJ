@@ -3,10 +3,12 @@ const antfu = require('@antfu/eslint-config').default
 module.exports = antfu(
   {
     ignores: [
-      '/coverage/',
-      '/dist/',
-      '/public/',
-      '/node_modules/',
+      '.nyc_output',
+      'coverage',
+      'data',
+      'dist',
+      'node_modules',
+      'public',
     ],
   },
   {

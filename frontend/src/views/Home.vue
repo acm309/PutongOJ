@@ -1,14 +1,14 @@
 <script setup>
+import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
+import { Card, Col, Icon, Page, Row, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { useRoute, useRouter } from 'vue-router'
 import { useNewsStore } from '@/store/modules/news'
+
 import { timePretty } from '@/util/formate'
 
-import pangu from 'pangu'
-
-import { Card, Row, Col, Icon, Page, Spin } from 'view-ui-plus'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 
 const { locale, t } = useI18n()
 const isZH = $computed(() => locale.value === 'zh-CN')
@@ -22,20 +22,20 @@ const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 5)
 const query = $computed(() => {
   return purify({
-    page: page,
-    pageSize: pageSize,
+    page,
+    pageSize,
   })
 })
 
 let loading = $ref(false)
 
-async function fetch() {
+async function fetch () {
   loading = true
   await find(query)
   loading = false
 }
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   router.push({
     name: 'home',
     query: Object.assign(query, purify(payload)),
@@ -57,23 +57,29 @@ onRouteQueryUpdate(fetch)
       <span v-else class="welcome-text">
         Welcome to CJLU Online Judge
       </span>
-      <br />
+      <br>
       {{ t('oj.news_list') }}
     </div>
-    <router-link v-if="list.length > 0" v-for="item in list" :key="item.nid"
-      :to="{ name: 'newsInfo', params: { nid: item.nid } }" class="news-link">
-      <Card dis-hover :class="{ 'news-card': true, 'news-hidden': item.status === 0 }">
-        <Row type="flex" :gutter="16">
-          <Col flex="68px" class="news-icon">
-          <Icon type="md-paper" class="icon-paper" />
-          </Col>
-          <Col flex="auto" class="news-content">
-          <span class="news-title">{{ pangu.spacing(item.title) }}</span>
-          <p class="news-date">{{ timePretty(item.create, 'yyyy-MM-dd HH:mm') }}</p>
-          </Col>
-        </Row>
-      </Card>
-    </router-link>
+    <div v-if="list.length > 0">
+      <router-link
+        v-for="item in list" :key="item.nid"
+        :to="{ name: 'newsInfo', params: { nid: item.nid } }" class="news-link"
+      >
+        <Card dis-hover class="news-card" :class="{ 'news-hidden': item.status === 0 }">
+          <Row type="flex" :gutter="16">
+            <Col flex="68px" class="news-icon">
+              <Icon type="md-paper" class="icon-paper" />
+            </Col>
+            <Col flex="auto" class="news-content">
+              <span class="news-title">{{ pangu.spacing(item.title) }}</span>
+              <p class="news-date">
+                {{ timePretty(item.create, 'yyyy-MM-dd HH:mm') }}
+              </p>
+            </Col>
+          </Row>
+        </Card>
+      </router-link>
+    </div>
     <div v-else class="news-empty">
       <Icon type="ios-planet-outline" class="empty-icon" />
       <span class="empty-text">{{ t('oj.empty_content') }}</span>

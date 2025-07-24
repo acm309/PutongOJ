@@ -1,13 +1,13 @@
 <script setup>
-import { useRootStore } from '@/store'
-import { useSessionStore } from '@/store/modules/session'
-import { useUserStore } from '@/store/modules/user'
 import only from 'only'
-
 import { storeToRefs } from 'pinia'
 import { Button, Divider, Form, FormItem, Input, Radio, RadioGroup, Spin } from 'view-ui-plus'
 import { inject } from 'vue'
+
 import { useI18n } from 'vue-i18n'
+import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
+import { useUserStore } from '@/store/modules/user'
 
 const { t, locale } = useI18n()
 const isZH = $computed(() => locale.value === 'zh-CN')

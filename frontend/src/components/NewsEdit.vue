@@ -1,10 +1,10 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useI18n } from 'vue-i18n'
-import { useNewsStore } from '@/store/modules/news'
 import { Input } from 'view-ui-plus'
-
+import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
+
+import { useNewsStore } from '@/store/modules/news'
 
 const newsStore = useNewsStore()
 
@@ -14,7 +14,7 @@ const { news } = storeToRefs(newsStore)
 
 <template>
   <div v-if="typeof news.content === 'string'">
-    <Input class="news-title" size="large" v-model="news.title" :placeholder="t('oj.title')" />
+    <Input v-model="news.title" class="news-title" size="large" :placeholder="t('oj.title')" />
     <MarkdownEditor v-model="news.content" :height="768" />
   </div>
 </template>

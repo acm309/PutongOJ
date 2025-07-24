@@ -1,6 +1,9 @@
 require('dotenv-flow').config()
+require('../src/config/db')
 const process = require('node:process')
+
 const Contest = require('../src/models/Contest')
+const Course = require('../src/models/Course')
 const Discuss = require('../src/models/Discuss')
 const Group = require('../src/models/Group')
 const ID = require('../src/models/ID')
@@ -9,106 +12,84 @@ const Problem = require('../src/models/Problem')
 const Solution = require('../src/models/Solution')
 const Tag = require('../src/models/Tag')
 const User = require('../src/models/User')
-const { generatePwd } = require('../src/utils/helper')
-const { removeall } = require('./helper')
-const meta = require('./meta')
-require('../src/config/db')
 
-const ContestSeed = require('./seed/contest')
-const discussSeeds = require('./seed/discuss')
-const newsSeeds = require('./seed/news')
-const problemSeeds = require('./seed/problems')
-const solutionSeed = require('./seed/solutions')
-const tagSeeds = require('./seed/tags')
-const userSeeds = require('./seed/users')
+const { generatePwd } = require('../src/utils')
+const { removeall } = require('./helper')
+
+const { contestSeeds } = require('./seeds/contest')
+const { courseSeeds } = require('./seeds/course')
+const { discussSeeds } = require('./seeds/discuss')
+const { groupSeeds } = require('./seeds/group')
+const { newsSeeds } = require('./seeds/news')
+const { problemSeeds } = require('./seeds/problem')
+const { solutionSeeds } = require('./seeds/solution')
+const { tagSeeds } = require('./seeds/tag')
+const { userSeeds } = require('./seeds/user')
 
 async function main () {
   await removeall()
   await Promise.all([
-    new ID({
-      id: 999,
-      name: 'Problem',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'Solution',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'Group',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'News',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'Discuss',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'Contest',
-    }).save(),
-    new ID({
-      id: 0,
-      name: 'Course',
-    }).save(),
+    new ID({ name: 'Contest', id: 0 }).save(),
+    new ID({ name: 'Course', id: 2 }).save(),
+    new ID({ name: 'Discuss', id: 0 }).save(),
+    new ID({ name: 'Group', id: 0 }).save(),
+    new ID({ name: 'News', id: 0 }).save(),
+    new ID({ name: 'Problem', id: 999 }).save(),
+    new ID({ name: 'Solution', id: 0 }).save(),
   ])
 
-  const groups = Promise.all(
-    meta.groups.map(item => new Group(item).save()))
-
-  const news = Promise.all(
-    newsSeeds.data.map(item => new News(item).save()),
+  const contestInsert = (async () => {
+    for (const contest of contestSeeds) {
+      await new Contest(contest).save()
+    }
+  })()
+  const courseInsert = Promise.all(
+    courseSeeds.map(item => new Course(item).save()),
   )
-
-  const users = Promise.all(
-    Object.values(userSeeds.data).map((user) => {
-      return new User(Object.assign(user, {
-        pwd: generatePwd(user.pwd),
-      })).save()
-    }))
-
-  const tags = Promise.all(
-    Object.values(tagSeeds.data).map((tag) => {
+  const discussInsert = (async () => {
+    for (const discuss of discussSeeds) {
+      await new Discuss(discuss).save()
+    }
+  })()
+  const groupInsert = Promise.all(
+    groupSeeds.map(item => new Group(item).save()),
+  )
+  const newsInsert = Promise.all(
+    newsSeeds.map(item => new News(item).save()),
+  )
+  const problemInsert = (async () => {
+    for (const problem of problemSeeds) {
+      await new Problem(problem).save()
+    }
+  })()
+  const solutionInsert = (async () => {
+    for (const solution of solutionSeeds) {
+      await new Solution(solution).save()
+    }
+  })()
+  const tagInsert = Promise.all(
+    Object.values(tagSeeds).map((tag) => {
       return new Tag(tag).save()
     }),
   )
-
-  // NOTE: run this in sequence
-  const problems = Promise.resolve().then(async () => {
-    for (const problem of problemSeeds.data) {
-      await new Problem(problem).save()
-    }
-  })
-
-  const discuss = Promise.resolve().then(async () => {
-    for (const dis of discussSeeds.data) {
-      await new Discuss(dis).save()
-    }
-  })
-
-  const solutions = Promise.resolve().then(async () => {
-    for (const s of solutionSeed.data) {
-      await new Solution(s).save()
-    }
-  })
-
-  const contests = Promise.resolve().then(async () => {
-    for (const con of ContestSeed.data) {
-      await new Contest(con).save()
-    }
-  })
+  const userInsert = Promise.all(
+    Object.values(userSeeds).map((user) => {
+      return new User(Object.assign(user, {
+        pwd: generatePwd(user.pwd),
+      })).save()
+    }),
+  )
 
   return Promise.all([
-    users,
-    tags,
-    news,
-    problems,
-    discuss,
-    solutions,
-    contests,
-    groups,
+    contestInsert,
+    courseInsert,
+    discussInsert,
+    groupInsert,
+    newsInsert,
+    problemInsert,
+    solutionInsert,
+    tagInsert,
+    userInsert,
   ])
 }
 

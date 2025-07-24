@@ -49,8 +49,8 @@ test.serial('Update a problem', async (t) => {
     .get(`/api/problem/${createPid}`)
 
   t.is(find.status, 200)
-  t.is(find.body.problem.title, '更新新建题目')
-  t.is(find.body.problem.description, '应该可以更新成功吧')
+  t.is(find.body.title, '更新新建题目')
+  t.is(find.body.description, '应该可以更新成功吧')
 })
 
 test.serial('Delete a Problem', async (t) => {
@@ -61,7 +61,7 @@ test.serial('Delete a Problem', async (t) => {
   const find = await request
     .get(`/api/problem/${createPid}`)
 
-  t.is(find.status, 400)
+  t.is(find.status, 404)
 })
 
 test.after.always('close server', () => {

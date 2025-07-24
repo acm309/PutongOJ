@@ -3,7 +3,7 @@ const only = require('only')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
-const discuss = require('../../seed/discuss')
+const { discussSeeds } = require('../../seeds/discuss')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -40,7 +40,7 @@ test('Find Discuss 1', async (t) => {
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
 
-  const select = discuss.data.find(item => item.title === res.body.discuss.title)
+  const select = discussSeeds.find(item => item.title === res.body.discuss.title)
   const com = res.body.discuss.comments
 
   t.deepEqual(only(res.body.discuss, 'title uid'), only(select, 'title uid'))

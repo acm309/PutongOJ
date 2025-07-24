@@ -1,9 +1,9 @@
+import type { Solution } from '@/types'
+import { useSessionStorage, useStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { watch } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
-import { useSessionStorage, useStorage } from '@vueuse/core'
 import { useSessionStore } from '@/store/modules/session'
-import type { Solution } from '@/types'
 
 export function purify (obj: Record<string, any>) {
   return Object.fromEntries(

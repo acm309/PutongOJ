@@ -1,11 +1,11 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const request = supertest.agent(server)
-const user = users.data.primaryuser
+const user = userSeeds.primaryuser
 const newDiscuss = {
   title: '一楼',
   content: '我是一楼，欧耶',

@@ -1,10 +1,10 @@
 <script setup>
-import { storeToRefs } from 'pinia'
 import only from 'only'
-import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
-import { useUserStore } from '@/store/modules/user'
+import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n()
 const userStore = useUserStore()

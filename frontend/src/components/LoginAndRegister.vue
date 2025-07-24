@@ -40,7 +40,7 @@ const registerRules = $computed(() => ({
   uid: [
     ...basicRules.uid,
     { min: 3, max: 20, message: t('oj.username_length_requirement'), trigger: 'change' },
-    { required: true, type: 'string', pattern: /^[a-z0-9_-]+$/i, message: t('oj.username_char_requirement'), trigger: 'change' },
+    { required: true, type: 'string', pattern: /^[\w-]+$/, message: t('oj.username_char_requirement'), trigger: 'change' },
   ],
   pwd: [
     { required: true, message: t('oj.password_missing'), trigger: 'change' },

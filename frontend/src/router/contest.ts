@@ -1,12 +1,12 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import ContestList from '@/views/ContestList.vue'
 import Contest from '@/views/Contest/Contest.vue'
 import ContestOverview from '@/views/Contest/ContestOverview.vue'
 import ContestProblem from '@/views/Contest/ContestProblem.vue'
 import ContestRanklist from '@/views/Contest/ContestRanklist.vue'
 import ContestStatus from '@/views/Contest/ContestStatus.vue'
 import ContestSubmit from '@/views/Contest/ContestSubmit.vue'
+import ContestList from '@/views/ContestList.vue'
 
 const ContestCreate = () => import('@/views/Admin/ContestCreate.vue')
 const ContestEdit = () => import('@/views/Contest/ContestEdit.vue')
@@ -22,7 +22,7 @@ const contestRoutes: Array<RouteRecordRaw> = [
     path: '/contest/create',
     name: 'contestCreate',
     component: ContestCreate,
-    meta: { title: 'Admin', requiresAdmin: true },
+    meta: { title: 'Admin', requiresLogin: true },
   },
   {
     path: '/contests/:cid',
@@ -62,7 +62,7 @@ const contestRoutes: Array<RouteRecordRaw> = [
       {
         path: 'edit',
         name: 'contestEdit',
-        meta: { title: 'Admin', requiresAdmin: true },
+        meta: { title: 'Admin', requiresLogin: true },
         component: ContestEdit,
       },
     ],

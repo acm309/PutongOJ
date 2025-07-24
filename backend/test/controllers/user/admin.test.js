@@ -2,15 +2,15 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
-const users = require('../../seed/users')
+const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
 const requestRoot = supertest.agent(server)
 const requestAdmin = supertest.agent(server)
 
-const userRoot = users.data.admin
-const userAdmin = users.data.toelevate
-const userPrimary = users.data.primaryuser
+const userRoot = userSeeds.admin
+const userAdmin = userSeeds.toelevate
+const userPrimary = userSeeds.primaryuser
 
 test.before('Login as admin', async (t) => {
   let r = await requestRoot
@@ -39,12 +39,12 @@ test('Fetch user list filter by privilege', async (t) => {
 
 test('Fetch user list filter by uid', async (t) => {
   const r = await requestRoot
-    .get(`/api/user/list?type=uid&content=${userRoot.uid}`)
+    .get(`/api/user/list?type=uid&content=${userPrimary.uid}`)
   t.is(r.status, 200)
   t.true(Array.isArray(r.body.docs))
   t.is(r.body.docs.length, 1)
   const u = r.body.docs[0]
-  t.is(u.uid, userRoot.uid)
+  t.is(u.uid, userPrimary.uid)
 })
 
 test('Update admin self\'s privilege', async (t) => {

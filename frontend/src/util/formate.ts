@@ -8,10 +8,13 @@ export function formate (value: number) {
 }
 
 export function timePretty (
-  time: number | string = 0,
+  time: Date | number | string = 0,
   formatStr: string = 'yyyy-MM-dd HH:mm:ss',
 ) {
-  return format(toDate(Number(time)), formatStr)
+  if (typeof time === 'string' && /^\d+$/.test(time)) {
+    time = Number(time)
+  }
+  return format(toDate(time), formatStr)
 }
 
 export function timeagoPretty (time: number | string) {

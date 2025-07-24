@@ -1,13 +1,13 @@
 <script setup>
-import { useRouter } from 'vue-router'
-import { inject } from 'vue'
 import { storeToRefs } from 'pinia'
+import { Button, Space } from 'view-ui-plus'
+import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
-import { useSessionStore } from '@/store/modules/session'
 
-import { Button, Space } from 'view-ui-plus'
+import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
 const newsStore = useNewsStore()
@@ -18,7 +18,7 @@ const { news } = $(storeToRefs(newsStore))
 const { isRoot } = $(storeToRefs(sessionStore))
 const $Modal = inject('$Modal')
 
-async function submit() {
+async function submit () {
   if (news.title.length === 0) {
     $Message.error(t('oj.title_is_required'))
     return
@@ -33,7 +33,7 @@ async function submit() {
   }
 }
 
-function del(nid) {
+function del (nid) {
   return $Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该消息, 是否继续?</p>',
@@ -48,7 +48,7 @@ function del(nid) {
   })
 }
 
-function switchVisible() {
+function switchVisible () {
   if (news.status === 2) {
     news.status = 0
   } else {

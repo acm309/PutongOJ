@@ -1,11 +1,11 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { Button, Option, Page, Select } from 'view-ui-plus'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
 import { timePretty } from '@/util/formate'
+import { onRouteQueryUpdate, purify } from '@/util/helper'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,12 +23,12 @@ const { list, sum } = $(storeToRefs(userStore))
 
 let loading = $ref(false)
 
-function reload(payload = {}) {
+function reload (payload = {}) {
   const routeQuery = Object.assign({}, query, payload)
   router.push({ name: 'userManager', query: routeQuery })
 }
 
-async function fetch() {
+async function fetch () {
   loading = true
   await userStore.find(query)
   loading = false
@@ -44,10 +44,14 @@ onRouteQueryUpdate(fetch)
 <template>
   <div class="users-wrap">
     <div class="users-header">
-      <Page class="users-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
-      <Page class="users-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange" />
+      <Page
+        class="users-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
+      <Page
+        class="users-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        @on-change="pageChange"
+      />
       <div class="users-filter">
         <Select v-model="adminFilter" class="filter-select" filterable clearable :placeholder="t('oj.privilege')">
           <Option :key="0" value="">
@@ -57,8 +61,10 @@ onRouteQueryUpdate(fetch)
             {{ t('oj.admin') }}
           </Option>
         </Select>
-        <Input v-model="content" class="search-input" clearable placeholder="Search by username"
-          @keyup.enter="search" />
+        <Input
+          v-model="content" class="search-input" clearable placeholder="Search by username"
+          @keyup.enter="search"
+        />
         <Button type="primary" class="filter-button" @click="search">
           {{ t('oj.search') }}
         </Button>
@@ -102,16 +108,16 @@ onRouteQueryUpdate(fetch)
               {{ item.nick }}
             </td>
             <td class="users-privilege">
-              <Tag v-if="item.privilege == 0" class="privilege-tag" type="red">
+              <Tag v-if="item.privilege === 0" class="privilege-tag" type="red">
                 Banned
               </Tag>
-              <Tag v-else-if="item.privilege == 1" class="privilege-tag" type="default">
+              <Tag v-else-if="item.privilege === 1" class="privilege-tag" type="default">
                 User
               </Tag>
-              <Tag v-else-if="item.privilege == 2" class="privilege-tag" type="cyan">
+              <Tag v-else-if="item.privilege === 2" class="privilege-tag" type="cyan">
                 Admin
               </Tag>
-              <Tag v-else-if="item.privilege == 3" class="privilege-tag" type="gold">
+              <Tag v-else-if="item.privilege === 3" class="privilege-tag" type="gold">
                 Root
               </Tag>
             </td>
@@ -128,10 +134,14 @@ onRouteQueryUpdate(fetch)
       </table>
     </div>
     <div class="users-footer">
-      <Page class="users-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange" />
-      <Page class="users-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        show-total @on-change="pageChange" />
+      <Page
+        class="users-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
+        @on-change="pageChange"
+      />
+      <Page
+        class="users-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
+        show-total @on-change="pageChange"
+      />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>

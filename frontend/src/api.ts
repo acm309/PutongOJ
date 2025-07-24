@@ -1,5 +1,7 @@
-import type { Course, CourseMember, CourseRole, LoginParam, Paginated, Profile, TimeResp, User, WebsiteConfigResp } from './types'
+import type { CourseRole, Paginated } from '@backend/types'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
+import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
 
@@ -75,8 +77,8 @@ const solution = {
 }
 
 const problem = {
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/problem/${data.pid}`, { params: data }),
+  findOne: (data: { pid: number, [key: string]: any }) =>
+    instance.get(`/problem/${data.pid}`),
   /** @deprecated */
   find: (data: { [key: string]: any }) =>
     instance.get('/problem', { params: data }),
@@ -168,15 +170,19 @@ const session = {
 
 const course = {
   findCourses: (params: PaginateParams) =>
-    instance.get<Paginated<Course>>('/course', { params }),
-  createCourse: (course: Partial<Course>) =>
-    instance.post<{ id: number }>('/course', course),
+    instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
+  findCourseItems: (keyword: string) =>
+    instance.get<CourseEntityItem[]>('/course/items', { params: { keyword } }),
   getCourse: (courseId: number) =>
-    instance.get<Course>(`/course/${courseId}`),
+    instance.get<CourseEntityView & { role: CourseRole }>(`/course/${courseId}`),
+  createCourse: (course: CourseEntityEditable) =>
+    instance.post<{ courseId: number }>('/course', course),
+  updateCourse: (courseId: number, course: CourseEntityEditable) =>
+    instance.put(`/course/${courseId}`, course),
   findMembers: (courseId: number, params: PaginateParams) =>
-    instance.get<Paginated<CourseMember>>(`/course/${courseId}/member`, { params }),
+    instance.get<Paginated<CourseMemberEntity>>(`/course/${courseId}/member`, { params }),
   getMember: (courseId: number, userId: string) =>
-    instance.get<CourseMember>(`/course/${courseId}/member/${userId}`),
+    instance.get<CourseMemberEntity>(`/course/${courseId}/member/${userId}`),
   updateMember: (courseId: number, userId: string, role: CourseRole) =>
     instance.post<{ success: boolean }>(`/course/${courseId}/member/${userId}`, { role }),
   removeMember: (courseId: number, userId: string) =>
