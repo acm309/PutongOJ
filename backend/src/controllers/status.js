@@ -1,6 +1,7 @@
 const Buffer = require('node:buffer').Buffer
 const path = require('node:path')
 const fse = require('fs-extra')
+const { pick } = require('lodash')
 const only = require('only')
 const config = require('../config')
 const redis = require('../config/redis')
@@ -41,13 +42,19 @@ const findOne = async (ctx) => {
   if (!isAdmin(ctx.session.profile) && solution.uid !== ctx.session.profile.uid) { ctx.throw(403, 'Permission denied') }
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
+  let simSolution
   if (isAdmin(ctx.session.profile) && solution.sim) {
-    const simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
-    solution.simSolution = simSolution
+    simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
   }
 
   ctx.body = {
-    solution,
+    solution: {
+      ...pick(solution, [ 'sid', 'pid', 'uid', 'mid', 'course', 'code', 'language',
+        'create', 'status', 'judge', 'time', 'memory', 'error', 'sim', 'sim_s_id', 'testcases' ]),
+      simSolution: simSolution
+        ? pick(simSolution, [ 'sid', 'uid', 'code', 'create' ])
+        : undefined,
+    },
   }
 }
 
