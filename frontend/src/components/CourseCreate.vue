@@ -49,7 +49,7 @@ function submit () {
       try {
         const id = await createCourse(courseForm as any)
         message.success('Course created successfully.')
-        router.push({ name: 'course', params: { id } })
+        router.push({ name: 'courseProblems', params: { id } })
       } catch (e: any) {
         message.error(`Failed to create course: ${e.message}`)
       }

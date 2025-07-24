@@ -46,6 +46,9 @@ async function fetch () {
 function createProblem () {
   router.push({ name: 'problemCreate', query: { course: courseId.value } })
 }
+function createContest () {
+  router.push({ name: 'contestCreate', query: { course: courseId.value } })
+}
 
 const home = () => router.push({ name: 'home' })
 const back = () => router.go(-1)
@@ -74,7 +77,7 @@ onProfileUpdate(fetch)
             <Icon type="md-add" />
             Create Problem
           </Button>
-          <Button v-if="role.manageContest">
+          <Button v-if="role.manageContest" @click="createContest">
             <Icon type="md-add" />
             Create Contest
           </Button>

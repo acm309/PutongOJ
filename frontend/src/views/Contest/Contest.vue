@@ -27,6 +27,15 @@ const display = $computed(() => route.name || 'contest')
 
 let loading = $ref(false)
 
+const isEditable = $computed(() => {
+  if (contest.cid !== Number(route.params.cid)) {
+    return false
+  }
+  if (isAdmin || contest.course?.role.manageContest) {
+    return true
+  }
+  return false
+})
 const timePercentage = $computed(() => {
   if (currentTime < contest.start) return 0
   if (currentTime >= contest.end) return 100
@@ -101,7 +110,7 @@ onProfileUpdate(fetch)
       <TabPane :label="t('oj.submit')" name="contestSubmit" />
       <TabPane :label="t('oj.status')" name="contestStatus" />
       <TabPane :label="t('oj.ranklist')" name="contestRanklist" />
-      <TabPane v-if="isAdmin" :label="t('oj.edit')" name="contestEdit" />
+      <TabPane v-if="isEditable" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
     <!-- 此处 if：为了确保之后的 children 能拿到 contest -->
     <router-view v-if="contest && contest.cid" class="contest-children" />

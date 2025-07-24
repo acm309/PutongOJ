@@ -4,6 +4,7 @@ import Courses from '@/views/Courses.vue'
 
 const Layout = () => import('@/views/Course/Layout.vue')
 const Problems = () => import('@/views/Course/Problems.vue')
+const Contests = () => import('@/views/Course/Contests.vue')
 const Members = () => import('@/views/Course/Members.vue')
 
 const courseRoutes: Array<RouteRecordRaw> = [
@@ -24,6 +25,12 @@ const courseRoutes: Array<RouteRecordRaw> = [
         name: 'courseProblems',
         component: Problems,
         meta: { title: 'Course Problems', requiresLogin: true },
+      },
+      {
+        path: 'contests',
+        name: 'courseContests',
+        component: Contests,
+        meta: { title: 'Course Contests', requiresLogin: true },
       },
       {
         path: 'members',

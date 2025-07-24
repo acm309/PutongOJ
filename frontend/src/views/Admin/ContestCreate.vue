@@ -1,20 +1,21 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
+import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import OJContestEdit from '@/components/ContestEdit'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const rootStore = useRootStore()
 const contestStore = useContestStore()
 
 const { encrypt } = $(storeToRefs(rootStore))
 const { create } = contestStore
 const Message = inject('$Message')
-const router = useRouter()
 
 function now () {
   const timestamp = new Date().getTime()
@@ -28,6 +29,7 @@ const contest = $ref({
   list: [],
   encrypt: encrypt.Public,
   argument: '',
+  course: null,
 })
 
 async function submit () {
@@ -41,6 +43,12 @@ async function submit () {
     router.push({ name: 'contestOverview', params: { cid } })
   }
 }
+
+onMounted(() => {
+  if (route.query.course) {
+    contest.course = Number.parseInt(route.query.course)
+  }
+})
 </script>
 
 <template>

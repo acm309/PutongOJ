@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { CourseEntityItem } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
-import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
 import { Divider, Form, FormItem, Input, Spin } from 'view-ui-plus'
 import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import CourseSelect from '@/components/CourseSelect.vue'
 import OjProblemEdit from '@/components/ProblemEdit.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -26,37 +25,9 @@ const { findOne, update: updateProblem } = problemStore
 const { isRoot } = $(storeToRefs(sessionStore))
 const paramPid = computed(() => Number.parseInt(route.params.pid as string))
 
-const loadingCourses = ref(false)
 const loadingProblem = ref(false)
 const transferring = ref(false)
-
 const transferTo = ref('')
-const courseOptions = ref<{ value: number, label: string }[]>([])
-
-const findCourseOptions = debounce(async (query: string) => {
-  if (query === 'Unrelated to any course') {
-    return
-  }
-  loadingCourses.value = true
-  try {
-    const { data } = await api.course.findCourseItems(query)
-    courseOptions.value.length = 0
-    data.forEach((item: CourseEntityItem) => {
-      courseOptions.value.push({
-        value: item.courseId,
-        label: item.name,
-      })
-    })
-    courseOptions.value.push({
-      value: -1,
-      label: 'Unrelated to any course',
-    })
-  } catch (error: any) {
-    message.error(error.message || 'Failed to fetch courses')
-  } finally {
-    loadingCourses.value = false
-  }
-}, 500)
 
 async function loadProblem () {
   loadingProblem.value = true
@@ -95,7 +66,6 @@ onMounted(() => {
   if (problem?.pid !== paramPid.value) {
     loadProblem()
   }
-  findCourseOptions('')
 })
 </script>
 
@@ -118,18 +88,10 @@ onMounted(() => {
           </Input>
         </FormItem>
         <FormItem label="Target Course">
-          <Select
-            v-model="transferTo" class="course-select" filterable clearable :remote-method="findCourseOptions"
-            :loading="loadingCourses" :disabled="transferring" placeholder="Select a course to transfer"
-          >
-            <Option
-              v-for="(option, index) in courseOptions" :key="index" :value="option.value" :label="option.label"
-              :disabled="option.value === (problem.course?.courseId ?? -1)"
-            >
-              <span>{{ option.label }}</span>
-              <span v-if="option.value > 0" class="course-tips">{{ option.value }}</span>
-            </Option>
-          </Select>
+          <CourseSelect
+            v-model="transferTo" :current="problem.course?.courseId ?? -1"
+            placeholder="Select a course to transfer" :disabled="transferring" class="course-select"
+          />
         </FormItem>
         <FormItem>
           <Button type="primary" size="large" :disabled="!transferTo" :loading="transferring" @click="transferProblem">
@@ -147,7 +109,4 @@ onMounted(() => {
   margin 40px 0
 .course-select
   max-width: 384px
-  span.course-tips
-    float: right
-    color: #c5c8ce
 </style>

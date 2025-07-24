@@ -22,7 +22,7 @@ const contestRoutes: Array<RouteRecordRaw> = [
     path: '/contest/create',
     name: 'contestCreate',
     component: ContestCreate,
-    meta: { title: 'Admin', requiresAdmin: true },
+    meta: { title: 'Admin', requiresLogin: true },
   },
   {
     path: '/contests/:cid',
@@ -62,7 +62,7 @@ const contestRoutes: Array<RouteRecordRaw> = [
       {
         path: 'edit',
         name: 'contestEdit',
-        meta: { title: 'Admin', requiresAdmin: true },
+        meta: { title: 'Admin', requiresLogin: true },
         component: ContestEdit,
       },
     ],
