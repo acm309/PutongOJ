@@ -232,7 +232,7 @@ const getRanklist = async (ctx: Context) => {
   const uidSet = new Set()
   const ranklist = {} as any
   submissions.forEach((submission: any) => {
-    const { pid, uid, judge, create } = submission
+    const { pid, uid, judge: judgeResult, create } = submission
 
     if (!ranklist[uid]) {
       ranklist[uid] = {}
@@ -256,12 +256,12 @@ const getRanklist = async (ctx: Context) => {
       item.pending += 1
       return
     }
-    if (judge === judge.Pending || judge === judge.Running) {
+    if (judgeResult === judge.Pending || judgeResult === judge.Running) {
       // 如果是 Pending / Running 视为无结果
       item.pending += 1
       return
     }
-    if (judge === judge.Accepted) {
+    if (judgeResult === judge.Accepted) {
       // 如果是 Accepted 视为正确提交
       item.accepted = create
     } else {
