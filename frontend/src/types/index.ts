@@ -76,10 +76,10 @@ export interface RawRanklist {
   [uid: string]: {
     nick: string
     [pid: number]: {
-      accepted: number
+      acceptedAt?: number
       failed: number
       pending: number
-    } | null
+    }
   }
 }
 
@@ -96,11 +96,11 @@ export interface RanklistRow {
   solved: number
   penalty: number
   [pid: number]: {
-    accepted: number
+    acceptedAt?: number
     failed: number
     pending: number
     isPrime?: boolean
-  } | null
+  }
 }
 
 export type Ranklist = RanklistRow[]

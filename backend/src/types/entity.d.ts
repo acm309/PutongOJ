@@ -132,6 +132,33 @@ export interface ContestEntity extends Entity {
   course: CourseDocument | null
 }
 
+export type ContestEntityEditable = Pick<ContestEntity,
+  'title' | 'start' | 'end' | 'list' | 'status' | 'encrypt' | 'argument'
+> & { course?: ObjectId | null }
+
+export type ContestEntityPreview = Pick<ContestEntity,
+  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt'
+>
+
+export type ContestEntityView = Pick<ContestEntity,
+  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt' | 'list'
+> & Partial<Pick<ContestEntity, 'argument'>> & {
+  course: CourseEntityViewWithRole | null
+}
+
+// Contest Ranklist
+
+export interface ContestRanklist {
+  [uid: string]: {
+    nick: string
+    [pid: number]: {
+      acceptedAt?: number
+      failed: number
+      pending: number
+    }
+  }
+}
+
 // Solution
 
 export interface SolutionEntity extends Entity {

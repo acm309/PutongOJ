@@ -141,14 +141,16 @@ onBeforeUnmount(clearAutoRefresh)
             <template v-for="(pid, pindex) in contest.list">
               <td v-if="!item[pid]" :key="`${pid} ${1}`" class="table-problem" />
               <td
-                v-else-if="item[pid].accepted > -1" :key="`${pid} ${2}`" class="table-problem"
+                v-else-if="item[pid].acceptedAt" :key="`${pid} ${2}`" class="table-problem"
                 :class="[item[pid].isPrime ? 'prime' : 'normal']"
               >
                 <router-link
                   :to="{ name: 'contestStatus', params: { cid }, query: { uid: item.uid, pid: pindex + 1 } }"
                 >
                   <span class="cell-accept">{{ item[pid].failed > 0 ? `+${item[pid].failed}` : '+' }}</span>
-                  <span class="cell-time">{{ timeContest(item[pid].accepted - contest.start) }}</span>
+                  <span class="cell-time">
+                    {{ timeContest(item[pid].acceptedAt) }}
+                  </span>
                 </router-link>
               </td>
               <td v-else :key="`${pid} ${3}`" class="table-problem">

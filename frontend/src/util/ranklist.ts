@@ -1,7 +1,7 @@
 import type { Cell } from 'exceljs'
 import type { ContestDetail, Ranklist, RawRanklist } from '@/types'
 
-const PENALTY = 20 * 60 * 1000 // 失败提交罚时 20 分钟
+const PENALTY = 20 * 60 // 失败提交罚时 20 分钟
 
 export function normalize (ranklist: RawRanklist, contest: ContestDetail): Ranklist {
   const list: Ranklist = [] // 结果
@@ -13,9 +13,9 @@ export function normalize (ranklist: RawRanklist, contest: ContestDetail): Rankl
     for (const pid of contest.list) {
       if (row[pid] == null) continue // 这道题没有交过
       const submission = row[pid]
-      if (submission.accepted > -1) { // ac 了
+      if (submission.acceptedAt) { // ac 了
         solved++
-        penalty += submission.accepted - contest.start + submission.failed * PENALTY
+        penalty += submission.acceptedAt + submission.failed * PENALTY
       }
     }
     list.push({
@@ -40,15 +40,19 @@ export function normalize (ranklist: RawRanklist, contest: ContestDetail): Rankl
 
   list.forEach((row) => {
     for (const pid of contest.list) {
-      if (row[pid] != null && row[pid].accepted > -1)
-        quickest[pid] = Math.min(quickest[pid], row[pid].accepted)
+      if (row[pid]?.acceptedAt) {
+        quickest[pid] = Math.min(
+          quickest[pid],
+          row[pid].acceptedAt,
+        )
+      }
     }
   })
 
   list.forEach((row) => {
     for (const pid of contest.list) {
-      if (row[pid] == null || row[pid].accepted === -1) continue
-      if (quickest[pid] === row[pid].accepted) { // 这就是最早提交的那个
+      if (!row[pid]?.acceptedAt) continue
+      if (quickest[pid] === row[pid].acceptedAt) { // 这就是最早提交的那个
         row[pid].isPrime = true // 打上标记
       }
     }
@@ -125,12 +129,12 @@ export async function exportSheet (
       row.uid,
       row.nick || '',
       row.solved,
-      Math.floor(row.penalty / 60 / 1000),
+      Math.floor(row.penalty / 60),
       ...contest.list.map((pid) => {
         const status = row[pid]
         if (!status) return '-'
-        if (status.accepted === -1) return `-${status.failed}`
-        const time = Math.floor((status.accepted - contest.start) / 60 / 1000)
+        if (!status.acceptedAt) return `-${status.failed}`
+        const time = Math.floor(status.acceptedAt / 60)
         return `+${status.failed > 0 ? status.failed : ''} (${time})`
       }),
     ])
@@ -140,7 +144,7 @@ export async function exportSheet (
       const status = row[pid]
 
       if (!status) return
-      if (status.accepted !== -1) {
+      if (status.acceptedAt) {
         applyStyle(cell, {
           bold: true,
           color: status.isPrime ? '0000FF' : '008000',

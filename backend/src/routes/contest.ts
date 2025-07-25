@@ -28,7 +28,7 @@ contestRouter.put('/:cid',
 )
 contestRouter.del('/:cid',
   authnMiddleware.rootRequire,
-  contestController.deleteContest,
+  contestController.removeContest,
 )
 contestRouter.post('/:cid/verify',
   authnMiddleware.loginRequire,
