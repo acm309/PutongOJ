@@ -7,6 +7,30 @@ export interface DiscussDocument extends Document, DiscussEntity {}
 
 type DiscussModel = PaginateModel<DiscussDocument>
 
+const commentSchema = new mongoose.Schema({
+  uid: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  content: {
+    type: String,
+    default: '',
+    validate: {
+      validator: (v: string) => v.length > 0,
+      message: 'The content of the comment should not be empty',
+    },
+  },
+  create: {
+    type: Number,
+    default: Date.now,
+    immutable: true,
+  },
+}, {
+  timestamps: true,
+  _id: false,
+})
+
 const discussSchema = new mongoose.Schema({
   did: {
     type: Number,
@@ -28,26 +52,10 @@ const discussSchema = new mongoose.Schema({
     required: true,
     immutable: true,
   },
-  comments: [ {
-    uid: {
-      type: String,
-      required: true,
-      immutable: true,
-    },
-    content: {
-      type: String,
-      default: '',
-      validate: {
-        validator: (v: string) => v.length > 0,
-        message: 'The content of the comment should not be empty',
-      },
-    },
-    create: {
-      type: Number,
-      default: Date.now,
-      immutable: true,
-    },
-  } ],
+  comments: {
+    type: [ commentSchema ],
+    required: true,
+  },
   create: {
     type: Number,
     default: Date.now,

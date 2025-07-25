@@ -12,6 +12,27 @@ export interface SolutionDocument extends Document, SolutionEntity {
 
 type SolutionModel = PaginateModel<SolutionDocument>
 
+const testcaseResultSchema = new mongoose.Schema({
+  uuid: {
+    type: String,
+    required: true,
+  },
+  judge: {
+    type: Number,
+    required: true,
+  },
+  time: {
+    type: Number,
+    required: true,
+  },
+  memory: {
+    type: Number,
+    required: true,
+  },
+}, {
+  _id: false,
+})
+
 const solutionSchema = new mongoose.Schema({
   sid: {
     type: Number,
@@ -110,24 +131,7 @@ const solutionSchema = new mongoose.Schema({
     default: 0,
   },
   testcases: {
-    type: [ {
-      uuid: {
-        type: String,
-        required: true,
-      },
-      judge: {
-        type: Number,
-        required: true,
-      },
-      time: {
-        type: Number,
-        required: true,
-      },
-      memory: {
-        type: Number,
-        required: true,
-      },
-    } ],
+    type: [ testcaseResultSchema ],
     default: [],
   },
 }, {

@@ -7,6 +7,35 @@ export interface CoursePermDocument extends Document, CoursePermEntity {}
 
 type CoursePermModel = PaginateModel<CoursePermDocument>
 
+const courseRoleSchema = new mongoose.Schema({
+  basic: {
+    type: Boolean,
+    default: false,
+  },
+  viewTestcase: {
+    type: Boolean,
+    default: false,
+  },
+  viewSolution: {
+    type: Boolean,
+    default: false,
+  },
+  manageProblem: {
+    type: Boolean,
+    default: false,
+  },
+  manageContest: {
+    type: Boolean,
+    default: false,
+  },
+  manageCourse: {
+    type: Boolean,
+    default: false,
+  },
+}, {
+  _id: false,
+})
+
 const coursePermSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -21,30 +50,7 @@ const coursePermSchema = new mongoose.Schema({
     immutable: true,
   },
   role: {
-    basic: {
-      type: Boolean,
-      default: false,
-    },
-    viewTestcase: {
-      type: Boolean,
-      default: false,
-    },
-    viewSolution: {
-      type: Boolean,
-      default: false,
-    },
-    manageProblem: {
-      type: Boolean,
-      default: false,
-    },
-    manageContest: {
-      type: Boolean,
-      default: false,
-    },
-    manageCourse: {
-      type: Boolean,
-      default: false,
-    },
+    type: courseRoleSchema,
   },
 }, {
   collection: 'CoursePerm',
