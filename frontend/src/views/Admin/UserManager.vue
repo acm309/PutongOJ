@@ -122,7 +122,7 @@ onRouteQueryUpdate(fetch)
               </Tag>
             </td>
             <td class="users-create">
-              {{ timePretty(item.create) }}
+              {{ timePretty(item.createdAt) }}
             </td>
             <td class="users-action">
               <router-link :to="{ name: 'userEdit', params: { uid: item.uid } }">

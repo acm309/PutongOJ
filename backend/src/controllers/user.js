@@ -52,7 +52,7 @@ const find = async (ctx) => {
       limit: pageSize,
       lean: true,
       leanWithId: false,
-      select: '-_id uid nick privilege create',
+      select: '-_id uid nick privilege createdAt',
     })
   } else {
     const docs = await User.find(filter, { uid: 1, nick: 1, _id: 0 }).lean().exec()
@@ -89,7 +89,7 @@ const findOne = async (ctx) => {
 
   ctx.body = {
     user: {
-      ...only(user, 'uid nick motto mail school privilege create'),
+      ...only(user, 'uid nick motto mail school privilege createdAt'),
       groups,
     },
     solved,

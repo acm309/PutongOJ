@@ -45,7 +45,7 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
           <Icon class="icon" type="md-school" />{{ user.school }}
         </div>
         <div class="user-create">
-          <Icon class="icon" type="md-calendar" />{{ timePretty(user.create, 'yyyy-MM-dd') }}
+          <Icon class="icon" type="md-calendar" />{{ timePretty(user.createdAt, 'yyyy-MM-dd') }}
         </div>
       </div>
       <div v-if="user.groups?.length > 0 || user.privilege > privilege.User" class="user-groups">
