@@ -6,23 +6,22 @@ import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import ContestBasicEdit from '@/components/ContestBasicEdit.vue'
 import OjContestEdit from '@/components/ContestEdit.vue'
 import CourseSelect from '@/components/CourseSelect.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
-
-const contestStore = useContestStore()
-const sessionStore = useSessionStore()
-
 const route = useRoute()
 const router = useRouter()
+const contestStore = useContestStore()
+const sessionStore = useSessionStore()
 const message = inject('$Message') as typeof Message
 
 const { overview, contest } = storeToRefs(contestStore)
 const { update: updateContest, findOne } = contestStore
-const { isRoot } = $(storeToRefs(sessionStore))
+const { isRoot } = storeToRefs(sessionStore)
 const paramCid = computed(() => Number.parseInt(route.params.cid as string))
 
 const loadingContest = ref(false)
@@ -38,7 +37,7 @@ async function loadContest () {
 async function submitForm () {
   const cid = await updateContest(contest.value)
   message.success(`update contest ${cid} success!`)
-  router.push({ name: 'contestOverview', params: cid })
+  router.push({ name: 'contestOverview', params: { cid } })
   await loadContest()
 }
 
@@ -50,7 +49,7 @@ async function transferContest () {
   transferring.value = true
   try {
     await api.contest.update({
-      cid: (contest.value as any).cid,
+      cid: contest.value.cid,
       course: transferTo.value,
     })
     message.success('Contest transferred successfully')
@@ -64,7 +63,7 @@ async function transferContest () {
 }
 
 onMounted(() => {
-  if ((contest.value as any)?.cid !== paramCid.value) {
+  if (contest.value?.cid !== paramCid.value) {
     loadContest()
   }
 })
@@ -72,10 +71,25 @@ onMounted(() => {
 
 <template>
   <div v-if="contest" class="conadd-wrap">
+    <ContestBasicEdit :contest-id="contest.cid" />
+    <Form :label-width="120">
+      <FormItem>
+        <Button type="primary" size="large" @click="submitForm">
+          {{ t('oj.submit') }}
+        </Button>
+      </FormItem>
+    </Form>
+    <Divider simple class="divider">
+      Contest Problems
+    </Divider>
     <OjContestEdit :contest="contest" :overview="overview" />
-    <Button type="primary" @click="submitForm">
-      {{ t('oj.submit') }}
-    </Button>
+    <Form :label-width="120">
+      <FormItem>
+        <Button type="primary" size="large" @click="submitForm">
+          {{ t('oj.submit') }}
+        </Button>
+      </FormItem>
+    </Form>
     <template v-if="isRoot">
       <Divider simple class="divider">
         Course Transfer
@@ -106,8 +120,11 @@ onMounted(() => {
 </template>
 
 <style lang="stylus" scoped>
+.conadd-wrap
+  padding-top 20px
 .divider
   margin 40px 0
 .course-select
+  width 100%
   max-width: 384px
 </style>
