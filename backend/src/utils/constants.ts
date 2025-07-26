@@ -67,6 +67,11 @@ export const courseRoleEntire = Object.freeze({
   manageCourse: true,
 } as CourseRole)
 
+export const contestLabelingStyle = Object.freeze({
+  numeric: 1,
+  alphabetic: 2,
+})
+
 export default Object.freeze({
   deploy,
   encrypt,
@@ -77,4 +82,5 @@ export default Object.freeze({
   status,
   courseRoleNone,
   courseRoleEntire,
+  contestLabelingStyle,
 })

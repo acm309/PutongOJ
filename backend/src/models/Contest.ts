@@ -2,12 +2,22 @@ import type { Document, PaginateModel } from 'mongoose'
 import type { ContestEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import config from '../config'
+import constants from '../utils/constants'
 import ID from './ID'
 
 export interface ContestDocument extends Document, ContestEntity {}
 
 type ContestModel = PaginateModel<ContestDocument>
+
+const contestOptionSchema = new mongoose.Schema({
+  labelingStyle: {
+    type: Number,
+    enum: Object.values(constants.contestLabelingStyle),
+    default: constants.contestLabelingStyle.numeric,
+  },
+}, {
+  _id: false,
+})
 
 const contestSchema = new mongoose.Schema({
   cid: {
@@ -59,17 +69,21 @@ const contestSchema = new mongoose.Schema({
   },
   status: {
     type: Number,
-    enum: Object.values(config.status),
-    default: config.status.Available,
+    enum: Object.values(constants.status),
+    default: constants.status.Available,
   },
   encrypt: {
     type: Number,
-    enum: Object.values(config.encrypt),
-    default: config.encrypt.Public,
+    enum: Object.values(constants.encrypt),
+    default: constants.encrypt.Public,
   },
   argument: {
     type: String,
     default: '',
+  },
+  option: {
+    type: contestOptionSchema,
+    default: () => ({}),
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,

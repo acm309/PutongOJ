@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
-import { formate, timePretty } from '@/util/formate'
+import { contestLabeling, formate, timePretty } from '@/util/formate'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
@@ -50,7 +50,7 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
             </td>
             <td class="problem-pid">
-              {{ index + 1 }}
+              {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
             </td>
             <td class="problem-title">
               <router-link v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">

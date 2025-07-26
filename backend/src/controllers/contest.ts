@@ -2,21 +2,21 @@ import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { ContestDocument } from '../models/Contest'
 import type { SessionProfile } from '../types'
-import { escapeRegExp, pick } from 'lodash'
+import { pick } from 'lodash'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
-import User from '../models/User'
+import contestService from '../services/contest'
 import { parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadCourse } from './course'
 
-const { encrypt, status, judge } = constants
+const { encrypt, judge } = constants
 
 export async function loadContest (
   ctx: Context,
@@ -32,7 +32,7 @@ export async function loadContest (
     return ctx.state.contest
   }
 
-  const contest = await Contest.findOne({ cid: contestId }).populate('course')
+  const contest = await contestService.getContest(contestId)
   if (!contest) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -91,34 +91,14 @@ const findContests = async (ctx: Context) => {
     }
     courseDocId = course.id
   }
-  const { page, pageSize } = parsePaginateOption(opt, 20)
-  const filters: Record<string, any>[] = []
-  if (!showAll) {
-    filters.push({ status: status.Available })
-  }
-  if (courseDocId) {
-    filters.push({ course: courseDocId })
-  } else if (!showAll) {
-    filters.push({
-      $or: [
-        { course: { $exists: false } },
-        { course: null } ],
-    })
-  }
-  if (opt.type === 'title' && typeof opt.content === 'string') {
-    filters.push({
-      title: { $regex: new RegExp(escapeRegExp(opt.content), 'i') },
-    })
-  }
 
-  const list = await Contest.paginate({ $and: filters }, {
-    sort: { cid: -1 },
-    page,
-    limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id cid title start end encrypt status',
-  })
+  const paginateOption = parsePaginateOption(opt, 20)
+  const type = typeof opt.type === 'string' ? opt.type : undefined
+  const content = typeof opt.content === 'string' ? opt.content : undefined
+  const list = await contestService.findContests({
+    ...paginateOption, type, content,
+  }, showAll, courseDocId)
+
   ctx.body = { list }
 }
 
@@ -172,7 +152,7 @@ const getContest = async (ctx: Context) => {
     }
   }
   const contestData = pick(contest, [
-    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list' ])
+    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list', 'option' ])
   const argument = canViewMore ? contest.argument : undefined
   ctx.body = {
     contest: {
@@ -184,6 +164,100 @@ const getContest = async (ctx: Context) => {
     totalProblems,
     solved,
   }
+}
+
+const createContest = async (ctx: Context) => {
+  const opt = ctx.request.body
+  const profile = await loadProfile(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (opt.course) {
+      const { role } = await loadCourse(ctx, opt.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  let courseDocId: ObjectId | undefined
+  if (opt.course) {
+    const { course } = await loadCourse(ctx, opt.course)
+    courseDocId = course.id
+  }
+
+  try {
+    const contest = await contestService
+      .createContest(Object.assign({}, opt, {
+        start: new Date(opt.start).getTime(),
+        end: new Date(opt.end).getTime(),
+        course: courseDocId,
+      }))
+    logger.info(`Contest <${contest.cid}> is created by user <${profile.uid}>`)
+    ctx.body = { cid: contest.cid }
+  } catch (e: any) {
+    ctx.throw(400, e.message)
+  }
+}
+
+const updateContest = async (ctx: Context) => {
+  const opt = ctx.request.body
+  const profile = await loadProfile(ctx)
+  const contest = await loadContest(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  let courseDocId: ObjectId | undefined | null
+  if (opt.course && Number.isInteger(Number(opt.course))) {
+    if (Number(opt.course) === -1) {
+      courseDocId = null
+    } else {
+      const { course } = await loadCourse(ctx, opt.course)
+      courseDocId = course.id
+    }
+  }
+
+  const cid = contest.cid
+  try {
+    await contestService.updateContest(cid,
+      Object.assign({}, opt, {
+        start: opt.start ? new Date(opt.start).getTime() : undefined,
+        end: opt.end ? new Date(opt.end).getTime() : undefined,
+        course: courseDocId,
+      }))
+    logger.info(`Contest <${cid}> is updated by user <${profile.uid}>`)
+    ctx.body = { cid }
+  } catch (e: any) {
+    ctx.throw(400, e.message)
+  }
+}
+
+const removeContest = async (ctx: Context) => {
+  const cid = ctx.params.cid
+  const profile = await loadProfile(ctx)
+
+  try {
+    await contestService.removeContest(Number(cid))
+    logger.info(`Contest <${cid}> is deleted by user <${profile.uid}>`)
+  } catch (e: any) {
+    ctx.throw(400, e.message)
+  }
+
+  ctx.body = {}
 }
 
 const getRanklist = async (ctx: Context) => {
@@ -220,68 +294,8 @@ const getRanklist = async (ctx: Context) => {
     return
   }
 
-  const submissions = await Solution
-    .find(
-      { mid: contest.cid },
-      { _id: 0, pid: 1, uid: 1, judge: 1, create: 1 },
-    )
-    .sort({ create: 1 })
-    .lean()
-    .exec()
-
-  const uidSet = new Set()
-  const ranklist = {} as any
-  submissions.forEach((submission: any) => {
-    const { pid, uid, judge: judgeResult, create } = submission
-
-    if (!ranklist[uid]) {
-      ranklist[uid] = {}
-      uidSet.add(uid)
-    }
-    if (!ranklist[uid][pid]) {
-      ranklist[uid][pid] = {
-        accepted: -1, // 第一个正确提交的时间（若无则为 -1）
-        failed: 0, // 错误提交的计数
-        pending: 0, // 无结果的提交计数
-      }
-    }
-    const item = ranklist[uid][pid]
-
-    if (item.accepted > 0) {
-      // 已经有正确提交了则不需要再更新了
-      return
-    }
-    if (isFrozen && create >= freezeTime) {
-      // 封榜时间内的提交视为无结果
-      item.pending += 1
-      return
-    }
-    if (judgeResult === judge.Pending || judgeResult === judge.Running) {
-      // 如果是 Pending / Running 视为无结果
-      item.pending += 1
-      return
-    }
-    if (judgeResult === judge.Accepted) {
-      // 如果是 Accepted 视为正确提交
-      item.accepted = create
-    } else {
-      // 否则视为错误提交
-      item.failed += 1
-    }
-  })
-
-  const users = await User
-    .find(
-      { uid: { $in: Array.from(uidSet) } },
-      { _id: 0, uid: 1, nick: 1 },
-    )
-    .lean()
-    .exec()
-  const nickMap = Object.fromEntries(users.map(user => [ user.uid, user.nick ]))
-  Object.keys(ranklist).forEach((uid) => {
-    ranklist[uid].nick = nickMap[uid]
-  })
-
+  const ranklist = await contestService.getRanklist(
+    contest.cid, isFrozen, contest.start, freezeTime)
   const cacheTime = isEnded ? 30 : 9
   await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
   logger.info(
@@ -289,111 +303,6 @@ const getRanklist = async (ctx: Context) => {
     + `${isFrozen ? 'frozen ' : ''}ranklist and `
     + `cached for ${cacheTime} seconds`)
   ctx.body = { ranklist, info }
-}
-
-const createContest = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const profile = await loadProfile(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (opt.course) {
-      const { role } = await loadCourse(ctx, opt.course)
-      return role.manageContest
-    }
-    return false
-  }
-  if (!await hasPermission()) {
-    return ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  let courseDocId: ObjectId | undefined
-  if (opt.course) {
-    const { course } = await loadCourse(ctx, opt.course)
-    courseDocId = course.id
-  }
-
-  const contest = new Contest({
-    title: opt.title,
-    encrypt: opt.encrypt,
-    list: opt.list,
-    argument: opt.argument,
-    start: new Date(opt.start).getTime(),
-    end: new Date(opt.end).getTime(),
-    course: courseDocId,
-  })
-
-  try {
-    await contest.save()
-    logger.info(`Contest <${contest.cid}> is created by user <${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-
-  ctx.body = {
-    cid: contest.cid,
-  }
-}
-
-const updateContest = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const profile = await loadProfile(ctx)
-  const contest = await loadContest(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      return role.manageContest
-    }
-    return false
-  }
-  if (!await hasPermission()) {
-    return ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  if (opt.title) { contest.title = opt.title }
-  if (opt.encrypt) { contest.encrypt = opt.encrypt }
-  if (opt.list) { contest.list = opt.list }
-  if (opt.argument) { contest.argument = opt.argument }
-  if (opt.start) { contest.start = new Date(opt.start).getTime() }
-  if (opt.end) { contest.end = new Date(opt.end).getTime() }
-  if (opt.status) { contest.status = opt.status }
-  if (opt.course && Number.isInteger(Number(opt.course))) {
-    if (Number(opt.course) === -1) {
-      contest.course = null
-    } else {
-      const { course } = await loadCourse(ctx, opt.course)
-      contest.course = course.id
-    }
-  }
-
-  try {
-    await contest.save()
-    logger.info(`Contest <${contest.cid}> is updated by user <${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-
-  ctx.body = {
-    cid: contest.cid,
-  }
-}
-
-const deleteContest = async (ctx: Context) => {
-  const cid = ctx.params.cid
-  const profile = await loadProfile(ctx)
-
-  try {
-    await Contest.deleteOne({ cid }).exec()
-    logger.info(`Contest <${cid}> is deleted by user <${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-
-  ctx.body = {}
 }
 
 const verifyParticipant = async (ctx: Context) => {
@@ -467,7 +376,7 @@ const contestController = {
   getRanklist,
   createContest,
   updateContest,
-  deleteContest,
+  removeContest,
   verifyParticipant,
 }
 

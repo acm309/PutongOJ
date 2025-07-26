@@ -4,10 +4,10 @@ import { Button, Space } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-
 import Submit from '@/components/Submit'
 import { useContestStore } from '@/store/modules/contest'
 import { useSolutionStore } from '@/store/modules/solution'
+import { contestLabeling } from '@/util/formate'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
@@ -44,14 +44,11 @@ async function submit () {
   <div class="contest-children">
     <Space class="problem-nav" wrap :size="[8, 8]">
       <Button
-        v-for="i in totalProblems"
-        :key="i"
-        class="problem-nav-item"
-        :type="i === currentProblemId ? 'primary' : 'default'"
-        :disabled="overview[i - 1]?.invalid"
+        v-for="i in totalProblems" :key="i" class="problem-nav-item"
+        :type="i === currentProblemId ? 'primary' : 'default'" :disabled="overview[i - 1]?.invalid"
         @click="pageChange(i)"
       >
-        {{ i }}
+        {{ contestLabeling(i, contest.option?.labelingStyle) }}
       </Button>
     </Space>
     <div class="problem-content">

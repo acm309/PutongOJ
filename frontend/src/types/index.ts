@@ -1,4 +1,4 @@
-import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { ContestEntityView, ProblemEntityPreview } from '@backend/types/entity'
 import type { privilege } from '@/util/constant'
 
 export interface TimeResp {
@@ -66,20 +66,17 @@ export interface Contest {
   status: number
 }
 
-export type ContestDetail = Contest & {
-  list: number[]
-  argument: string
-  create: number
-}
+/** @deprecated */
+export type ContestDetail = ContestEntityView
 
 export interface RawRanklist {
   [uid: string]: {
     nick: string
     [pid: number]: {
-      accepted: number
+      acceptedAt?: number
       failed: number
       pending: number
-    } | null
+    }
   }
 }
 
@@ -96,11 +93,11 @@ export interface RanklistRow {
   solved: number
   penalty: number
   [pid: number]: {
-    accepted: number
+    acceptedAt?: number
     failed: number
     pending: number
     isPrime?: boolean
-  } | null
+  }
 }
 
 export type Ranklist = RanklistRow[]
