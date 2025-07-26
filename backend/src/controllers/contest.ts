@@ -152,7 +152,7 @@ const getContest = async (ctx: Context) => {
     }
   }
   const contestData = pick(contest, [
-    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list' ])
+    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list', 'option' ])
   const argument = canViewMore ? contest.argument : undefined
   ctx.body = {
     contest: {

@@ -1,5 +1,5 @@
 import type { ObjectId } from 'mongoose'
-import type { CourseRole } from '.'
+import type { ContestOption, CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { encrypt, problemType, status } from '../utils/constants'
 
@@ -129,11 +129,12 @@ export interface ContestEntity extends Entity {
   status: number
   encrypt: number
   argument: string
+  option: ContestOption
   course: CourseDocument | null
 }
 
 export type ContestEntityEditable = Pick<ContestEntity,
-  'title' | 'start' | 'end' | 'list' | 'status' | 'encrypt' | 'argument'
+  'title' | 'start' | 'end' | 'list' | 'status' | 'encrypt' | 'argument' | 'option'
 > & { course?: ObjectId | null }
 
 export type ContestEntityPreview = Pick<ContestEntity,
@@ -141,7 +142,7 @@ export type ContestEntityPreview = Pick<ContestEntity,
 >
 
 export type ContestEntityView = Pick<ContestEntity,
-  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt' | 'list'
+  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt' | 'list' | 'option'
 > & Partial<Pick<ContestEntity, 'argument'>> & {
   course: CourseEntityViewWithRole | null
 }

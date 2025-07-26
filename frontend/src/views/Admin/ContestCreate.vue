@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ContestEntityView } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import { encrypt, status } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
@@ -32,8 +33,7 @@ async function init (): Promise<void> {
     encrypt: encrypt.Public,
     status: status.Reserve,
     argument: '',
-    course: null,
-  }
+  } as any as ContestEntityView
   initialized.value = true
 }
 

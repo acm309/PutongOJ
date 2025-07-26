@@ -1,5 +1,6 @@
 import type { Cell } from 'exceljs'
 import type { ContestDetail, Ranklist, RawRanklist } from '@/types'
+import { contestLabeling } from './formate'
 
 const PENALTY = 20 * 60 // 失败提交罚时 20 分钟
 
@@ -75,7 +76,7 @@ export async function exportSheet (
     { header: 'Solved', width: 8 },
     { header: 'Penalty', width: 8 },
     ...contest.list.map((_, i) => ({
-      header: `${i + 1}`,
+      header: contestLabeling(i + 1, contest.option?.labelingStyle),
       width: 10,
     })),
   ]

@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem'
 import { useContestStore } from '@/store/modules/contest'
 import { useProblemStore } from '@/store/modules/problem'
-
+import { contestLabeling } from '@/util/formate'
 import { onRouteParamUpdate } from '@/util/helper'
 
 const { t } = useI18n()
@@ -43,10 +43,10 @@ onRouteParamUpdate(fetch)
   <div class="contest-children">
     <Space class="problem-nav" wrap :size="[8, 8]">
       <Button
-        v-for="i in totalProblems" :key="i" class="problem-nav-item" :type="i === proIndex ? 'primary' : 'default'"
-        :disabled="overview[i - 1].invalid" @click="pageChange(i)"
+        v-for="i in totalProblems" :key="i" class="problem-nav-item"
+        :type="i === proIndex ? 'primary' : 'default'" :disabled="overview[i - 1].invalid" @click="pageChange(i)"
       >
-        {{ i }}
+        {{ contestLabeling(i, contest.option?.labelingStyle) }}
       </Button>
     </Space>
     <div class="problem-content">

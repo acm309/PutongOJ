@@ -1,4 +1,4 @@
-import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { ContestEntityView, ProblemEntityPreview } from '@backend/types/entity'
 import type { privilege } from '@/util/constant'
 
 export interface TimeResp {
@@ -66,11 +66,8 @@ export interface Contest {
   status: number
 }
 
-export type ContestDetail = Contest & {
-  list: number[]
-  argument: string
-  create: number
-}
+/** @deprecated */
+export type ContestDetail = ContestEntityView
 
 export interface RawRanklist {
   [uid: string]: {

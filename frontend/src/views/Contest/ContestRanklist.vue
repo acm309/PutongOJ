@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Message } from 'view-ui-plus'
-import type { Ref } from 'vue'
-import type { ContestDetail, Ranklist, RanklistInfo } from '@/types'
+import type { Ranklist, RanklistInfo } from '@/types'
 import { storeToRefs } from 'pinia'
 import { Alert, BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
 import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue'
@@ -10,7 +9,7 @@ import { useRoute } from 'vue-router'
 import api from '@/api'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import { timeContest, timePretty } from '@/util/formate'
+import { contestLabeling, timeContest, timePretty } from '@/util/formate'
 import { exportSheet, normalize } from '@/util/ranklist'
 
 const { t } = useI18n()
@@ -21,8 +20,7 @@ const { isRoot } = $(storeToRefs(sessionStore))
 const message = inject('$Message') as typeof Message
 
 const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
-const contest = storeToRefs(contestStore).contest as Ref<ContestDetail>
-const overview = storeToRefs(contestStore).overview as Ref<{ title: string, solve: number }[]>
+const { contest, overview } = storeToRefs(contestStore)
 
 const ranklist = ref({} as Ranklist)
 const ranklistInfo = ref({} as RanklistInfo)
@@ -109,7 +107,7 @@ onBeforeUnmount(clearAutoRefresh)
             <th v-for="(item, index) in overview" :key="index" class="table-problem">
               <Poptip trigger="hover" placement="bottom">
                 <router-link :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
-                  <span class="cell-pid">{{ index + 1 }}</span>
+                  <span class="cell-pid">{{ contestLabeling(index + 1, contest.option?.labelingStyle) }}</span>
                   <span class="cell-solve">{{ item.solve }}</span>
                 </router-link>
                 <template #content>

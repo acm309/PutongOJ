@@ -10,15 +10,14 @@ import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import constant from '@/util/constant'
-import { similarityColor, timePretty } from '@/util/formate'
-
+import { contestLabeling, similarityColor, timePretty } from '@/util/formate'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()
 const solutionStore = useSolutionStore()
 const contestStore = useContestStore()
-const { problems } = $(storeToRefs(contestStore))
+const { contest, problems } = $(storeToRefs(contestStore))
 const { profile, isAdmin } = $(storeToRefs(sessionStore))
 const { list, sum } = $(storeToRefs(solutionStore))
 const { find: findSolutions } = solutionStore
@@ -189,7 +188,7 @@ onRouteQueryUpdate(fetch)
             </td>
             <td class="status-pid">
               <router-link :to="{ name: 'contestProblem', params: { cid: mid, id: getId(item.pid) } }">
-                {{ getId(item.pid) }}
+                {{ contestLabeling(getId(item.pid), contest.option?.labelingStyle) }}
               </router-link>
             </td>
             <td class="status-username">

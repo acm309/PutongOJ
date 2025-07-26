@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Message } from 'view-ui-plus'
+import { contestLabelingStyle } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Divider, Form, FormItem, Input, Spin } from 'view-ui-plus'
+import { Divider, Form, FormItem, Input, Option, Select, Spin } from 'view-ui-plus'
 import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -62,9 +63,17 @@ async function transferContest () {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (contest.value?.cid !== paramCid.value) {
-    loadContest()
+    await loadContest()
+  }
+  if (!contest.value.option) {
+    contest.value.option = {
+      labelingStyle: contestLabelingStyle.numeric,
+    }
+  }
+  if (!contest.value.option.labelingStyle) {
+    contest.value.option.labelingStyle = contestLabelingStyle.numeric
   }
 })
 </script>
@@ -73,6 +82,16 @@ onMounted(() => {
   <div v-if="contest" class="conadd-wrap">
     <ContestBasicEdit :contest-id="contest.cid" />
     <Form :label-width="120">
+      <FormItem label="Labeling Style">
+        <Select v-model="contest.option.labelingStyle" class="contest-form-item">
+          <Option :value="contestLabelingStyle.numeric">
+            Numeric
+          </Option>
+          <Option :value="contestLabelingStyle.alphabetic">
+            Alphabetic
+          </Option>
+        </Select>
+      </FormItem>
       <FormItem>
         <Button type="primary" size="large" @click="submitForm">
           {{ t('oj.submit') }}
@@ -96,7 +115,10 @@ onMounted(() => {
       </Divider>
       <Form label-position="right" :label-width="120">
         <FormItem label="Current Course">
-          <Input :placeholder="(contest as any).course?.name ?? 'Not related to any course'" class="course-select" disabled>
+          <Input
+            :placeholder="(contest as any).course?.name ?? 'Not related to any course'" class="contest-form-item"
+            disabled
+          >
             <template v-if="(contest as any).course" #prepend>
               <span class="course-tips">{{ (contest as any).course?.courseId }}</span>
             </template>
@@ -105,7 +127,7 @@ onMounted(() => {
         <FormItem label="Target Course">
           <CourseSelect
             v-model="transferTo" :current="(contest as any).course?.courseId ?? -1"
-            placeholder="Select a course to transfer" :disabled="transferring" class="course-select"
+            placeholder="Select a course to transfer" :disabled="transferring" class="contest-form-item"
           />
         </FormItem>
         <FormItem>
@@ -124,7 +146,7 @@ onMounted(() => {
   padding-top 20px
 .divider
   margin 40px 0
-.course-select
+.contest-form-item
   width 100%
   max-width: 384px
 </style>

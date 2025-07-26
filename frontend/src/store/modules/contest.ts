@@ -7,7 +7,7 @@ export const useContestStore = defineStore('contest', {
     list: [] as ContestEntityPreview[],
     sum: 0,
     contest: {} as ContestEntityView,
-    overview: [] as any[],
+    overview: [] as { title: string, solve: number }[],
     totalProblems: 0,
     solved: [] as any[],
   }),
