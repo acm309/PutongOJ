@@ -22,14 +22,14 @@ instance.interceptors.response.use((resp) => {
   const data: { profile: Profile | null } = resp.data
   if (data.profile)
     useSessionStore().setLoginProfile(data.profile)
-
   return resp
 }, (err) => {
   if (errHandler) {
     errHandler(err)
   } else {
     // eslint-disable-next-line no-alert
-    window.alert('故障')
+    window.alert('Cannot connect to server, '
+      + 'please check your network connection or try again later.')
   }
   return err
 })

@@ -35,6 +35,7 @@ function profileAction (name) {
 function getMenuItems () {
   const menuItems = [
     { name: 'home', icon: 'ios-home', label: t('oj.home') },
+    { name: 'courses', icon: 'ios-book', label: 'Course' },
     { name: 'problems', icon: 'ios-keypad', label: t('oj.problem_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
@@ -51,7 +52,6 @@ function getMenuItems () {
   ]
 
   if (isAdmin) {
-    menuItems.splice(1, 0, { name: 'courses', icon: 'ios-book', label: 'Course' })
     menuItems.push({
       name: 'admin',
       icon: 'md-paper-plane',
