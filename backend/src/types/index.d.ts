@@ -1,4 +1,4 @@
-import type { contestLabelingStyle } from "../utils/constants"
+import type { contestLabelingStyle } from '../utils/constants'
 
 export interface CourseRole {
   basic: boolean

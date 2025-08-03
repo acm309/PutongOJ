@@ -58,13 +58,13 @@ export interface CourseEntityViewWithRole extends CourseEntityView {
 
 // Course Permission
 
-export interface CoursePermEntity extends Entity {
+export interface CourseMemberEntity extends Entity {
   user: ObjectId
   course: ObjectId
   role: CourseRole
 }
 
-export interface CourseMemberEntity extends Omit<CoursePermEntity, 'course'> {
+export interface CourseMemberEntityView extends Omit<CourseMemberEntity, 'course'> {
   user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
 }
 

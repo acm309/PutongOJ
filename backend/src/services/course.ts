@@ -2,10 +2,10 @@ import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity } from '../types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntityView } from '../types/entity'
 import { escapeRegExp } from 'lodash'
 import Course from '../models/Course'
-import CoursePerm from '../models/CoursePerm'
+import CourseMember from '../models/CourseMember'
 import User from '../models/User'
 import { courseRoleEntire, courseRoleNone, encrypt } from '../utils/constants'
 
@@ -72,7 +72,7 @@ export async function updateCourse (
 export async function findCourseMembers (
   course: ObjectId | string,
   opt: PaginateOption & {},
-): Promise<Paginated<CourseMemberEntity>> {
+): Promise<Paginated<CourseMemberEntityView>> {
   const { page, pageSize } = opt
   const filter = { course }
   const sort = {
@@ -83,7 +83,7 @@ export async function findCourseMembers (
     'role.viewTestcase': -1,
     'createdAt': -1,
   }
-  const result = await CoursePerm.paginate(filter, {
+  const result = await CourseMember.paginate(filter, {
     sort,
     page,
     populate: { path: 'user', select: '-_id uid nick privilege' },
@@ -98,12 +98,12 @@ export async function findCourseMembers (
 export async function getCourseMember (
   course: ObjectId | string,
   userId: string,
-): Promise<CourseMemberEntity | undefined> {
+): Promise<CourseMemberEntityView | undefined> {
   const user = await User.findOne({ uid: userId })
   if (!user) {
     return undefined
   }
-  const member = await CoursePerm
+  const member = await CourseMember
     .findOne({ course, user: user.id })
     .lean()
   return {
@@ -140,13 +140,13 @@ export async function updateCourseMember (
     return { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse }
   })(role))
 
-  const coursePerm = await CoursePerm.findOneAndUpdate(
+  const courseMember = await CourseMember.findOneAndUpdate(
     { user: user.id, course },
     { user: user.id, course, role: parsedRole },
     { upsert: true, new: true },
   )
 
-  return !!coursePerm
+  return !!courseMember
 }
 
 export async function removeCourseMember (
@@ -158,12 +158,12 @@ export async function removeCourseMember (
     return false
   }
 
-  const coursePerm = await CoursePerm.findOneAndDelete({
+  const courseMember = await CourseMember.findOneAndDelete({
     user: user.id,
     course,
   })
 
-  return !!coursePerm
+  return !!courseMember
 }
 
 export async function getUserRole (
@@ -176,7 +176,7 @@ export async function getUserRole (
     if (profile.isAdmin) {
       role = Object.assign(role, courseRoleEntire)
     } else {
-      const userPerm = await CoursePerm
+      const userPerm = await CourseMember
         .findOne({
           user: profile.id,
           course: course.id,

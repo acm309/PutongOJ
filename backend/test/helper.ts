@@ -1,6 +1,6 @@
 import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
-import CoursePerm from '../src/models/CoursePerm'
+import CourseMember from '../src/models/CourseMember'
 import Discuss from '../src/models/Discuss'
 import Group from '../src/models/Group'
 import ID from '../src/models/ID'
@@ -14,7 +14,7 @@ function removeall () {
   return Promise.all([
     Contest.deleteMany({}),
     Course.deleteMany({}),
-    CoursePerm.deleteMany({}),
+    CourseMember.deleteMany({}),
     Discuss.deleteMany({}),
     Group.deleteMany({}),
     ID.deleteMany({}),

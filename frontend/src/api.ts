@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityView, CourseMemberEntity } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityView, CourseMemberEntityView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -180,9 +180,9 @@ const course = {
   updateCourse: (courseId: number, course: CourseEntityEditable) =>
     instance.put(`/course/${courseId}`, course),
   findMembers: (courseId: number, params: PaginateParams) =>
-    instance.get<Paginated<CourseMemberEntity>>(`/course/${courseId}/member`, { params }),
+    instance.get<Paginated<CourseMemberEntityView>>(`/course/${courseId}/member`, { params }),
   getMember: (courseId: number, userId: string) =>
-    instance.get<CourseMemberEntity>(`/course/${courseId}/member/${userId}`),
+    instance.get<CourseMemberEntityView>(`/course/${courseId}/member/${userId}`),
   updateMember: (courseId: number, userId: string, role: CourseRole) =>
     instance.post<{ success: boolean }>(`/course/${courseId}/member/${userId}`, { role }),
   removeMember: (courseId: number, userId: string) =>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseMemberEntity } from '@backend/types/entity'
+import type { CourseMemberEntityView } from '@backend/types/entity'
 import type { Message, Modal } from 'view-ui-plus'
 import type { UserPrivilege } from '@/types'
 import { storeToRefs } from 'pinia'
@@ -36,7 +36,7 @@ const pageSize = $computed<number>(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-let docs: CourseMemberEntity[] = $ref([])
+let docs: CourseMemberEntityView[] = $ref([])
 let total: number = $ref(0)
 let loading: boolean = $ref(false)
 let openEdit: boolean = $ref(false)

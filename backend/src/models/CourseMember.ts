@@ -1,11 +1,11 @@
 import type { Document, PaginateModel } from 'mongoose'
-import type { CoursePermEntity } from '../types/entity'
+import type { CourseMemberEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 
-export interface CoursePermDocument extends Document, CoursePermEntity {}
+export interface CourseMemberDocument extends Document, CourseMemberEntity {}
 
-type CoursePermModel = PaginateModel<CoursePermDocument>
+type CourseMemberModel = PaginateModel<CourseMemberDocument>
 
 const courseRoleSchema = new mongoose.Schema({
   basic: {
@@ -36,7 +36,7 @@ const courseRoleSchema = new mongoose.Schema({
   _id: false,
 })
 
-const coursePermSchema = new mongoose.Schema({
+const courseMemberSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -53,26 +53,26 @@ const coursePermSchema = new mongoose.Schema({
     type: courseRoleSchema,
   },
 }, {
-  collection: 'CoursePerm',
+  collection: 'CourseMember',
   timestamps: true,
 })
 
-coursePermSchema.plugin(mongoosePaginate)
+courseMemberSchema.plugin(mongoosePaginate)
 
-coursePermSchema.index({
+courseMemberSchema.index({
   course: 1,
   user: 1,
 }, { unique: true })
-coursePermSchema.index({
+courseMemberSchema.index({
   course: 1,
 })
-coursePermSchema.index({
+courseMemberSchema.index({
   user: 1,
 })
 
-const CoursePerm
-  = mongoose.model<CoursePermDocument, CoursePermModel>(
-    'CoursePerm', coursePermSchema,
+const CourseMember
+  = mongoose.model<CourseMemberDocument, CourseMemberModel>(
+    'CourseMember', courseMemberSchema,
   )
 
-export default module.exports = CoursePerm
+export default module.exports = CourseMember
