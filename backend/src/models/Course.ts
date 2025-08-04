@@ -52,7 +52,7 @@ const courseSchema = new mongoose.Schema({
     type: String,
     default: '',
     validate: {
-      validator (v: any) {
+      validator (v: string) {
         return v.length === 0 || (v.length >= 6 && v.length <= 20)
       },
       message:

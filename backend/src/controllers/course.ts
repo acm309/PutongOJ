@@ -97,14 +97,14 @@ const joinCourse = async (ctx: Context) => {
   if (!joinCode) {
     return ctx.throw(400, 'Missing join code')
   }
-  if (course.joinCode !== joinCode) {
+  if (course.joinCode.trim() !== joinCode) {
     return ctx.throw(403, 'Invalid join code')
   }
 
   const profile = await loadProfile(ctx)
   const result = await courseService.updateCourseMember(
     course.id, profile.id,
-    Object.assign({}, role, { basic: true }),
+    { ...role, basic: true },
   )
 
   const response: { success: boolean } = { success: result }
