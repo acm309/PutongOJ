@@ -2,8 +2,8 @@ import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntityView } from '../types/entity'
-import { escapeRegExp } from 'lodash'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, UserEntity } from '../types/entity'
+import { escapeRegExp, omit } from 'lodash'
 import Course from '../models/Course'
 import CourseMember from '../models/CourseMember'
 import User from '../models/User'
@@ -32,10 +32,14 @@ export async function findCourseItems (
     { name: { $regex: new RegExp(escapeRegExp(keyword), 'i') } },
   ]
   if (Number.isInteger(Number(keyword))) {
-    query.push({ $expr: { $regexMatch: {
-      input: { $toString: '$courseId' },
-      regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
-    } } })
+    query.push({
+      $expr: {
+        $regexMatch: {
+          input: { $toString: '$courseId' },
+          regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
+        },
+      },
+    })
   }
   const result = await Course.find(
     { $or: query },
@@ -47,9 +51,9 @@ export async function findCourseItems (
 
 export async function getCourse (
   courseId: number,
-): Promise<CourseDocument | undefined> {
+): Promise<CourseDocument | null> {
   const course = await Course.findOne({ courseId })
-  return course ?? undefined
+  return course ?? null
 }
 
 export async function createCourse (
@@ -63,16 +67,16 @@ export async function createCourse (
 export async function updateCourse (
   courseId: number,
   opt: Partial<CourseEntityEditable>,
-): Promise<CourseDocument | undefined> {
+): Promise<CourseDocument | null> {
   const course = await Course
     .findOneAndUpdate({ courseId }, opt, { new: true })
-  return course ?? undefined
+  return course ?? null
 }
 
 export async function findCourseMembers (
   course: ObjectId | string,
   opt: PaginateOption & {},
-): Promise<Paginated<CourseMemberEntityView>> {
+): Promise<Paginated<CourseMemberView>> {
   const { page, pageSize } = opt
   const filter = { course }
   const sort = {
@@ -83,6 +87,12 @@ export async function findCourseMembers (
     'role.viewTestcase': -1,
     'createdAt': -1,
   }
+
+  type QueryItem
+    = Partial<Pick<CourseMemberEntity, 'role' | 'createdAt' | 'updatedAt'>>
+      & {
+        user: Partial<Pick<UserEntity, 'uid' | 'nick' | 'privilege'>> | null
+      }
   const result = await CourseMember.paginate(filter, {
     sort,
     page,
@@ -91,31 +101,28 @@ export async function findCourseMembers (
     lean: true,
     leanWithId: false,
     select: '-_id user role createdAt updatedAt',
-  }) as any
-  return result
+  }) as unknown as Paginated<QueryItem>
+
+  return {
+    ...result,
+    docs: result.docs.map((doc: QueryItem) => CourseMember.toView(
+      omit(doc, [ 'user' ]), doc.user,
+    )),
+  } as Paginated<CourseMemberView>
 }
 
 export async function getCourseMember (
   course: ObjectId | string,
   userId: string,
-): Promise<CourseMemberEntityView | undefined> {
+): Promise<CourseMemberView | null> {
   const user = await User.findOne({ uid: userId })
   if (!user) {
-    return undefined
+    return null
   }
   const member = await CourseMember
     .findOne({ course, user: user.id })
     .lean()
-  return {
-    user: {
-      uid: user.uid,
-      nick: user.nick,
-      privilege: user.privilege,
-    },
-    role: member?.role ?? courseRoleNone,
-    createdAt: member?.createdAt ?? new Date(),
-    updatedAt: member?.updatedAt ?? new Date(),
-  }
+  return CourseMember.toView(member, user)
 }
 
 export async function updateCourseMember (
@@ -129,7 +136,10 @@ export async function updateCourseMember (
   }
 
   const parsedRole: CourseRole = Object.assign({}, ((role) => {
-    let { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse } = role
+    let {
+      basic, viewTestcase, viewSolution,
+      manageProblem, manageContest, manageCourse,
+    } = role
 
     basic = true
     manageContest ||= manageCourse
@@ -137,7 +147,10 @@ export async function updateCourseMember (
     viewSolution ||= manageCourse
     viewTestcase ||= manageProblem || manageCourse
 
-    return { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse }
+    return {
+      basic, viewTestcase, viewSolution,
+      manageProblem, manageContest, manageCourse,
+    }
   })(role))
 
   const courseMember = await CourseMember.findOneAndUpdate(

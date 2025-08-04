@@ -12,6 +12,13 @@ interface EntityTimestamps {
 
 interface Entity extends EntityTimestamps { }
 
+interface ViewTimestamps {
+  createdAt: number
+  updatedAt: number
+}
+
+interface View extends ViewTimestamps { }
+
 // User
 
 export interface UserEntity extends Entity {
@@ -64,7 +71,7 @@ export interface CourseMemberEntity extends Entity {
   role: CourseRole
 }
 
-export interface CourseMemberEntityView extends Omit<CourseMemberEntity, 'course'> {
+export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View {
   user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
 }
 

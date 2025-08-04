@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
-import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntityView } from '../types/entity'
+import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
 import { pick } from 'lodash'
 import { Document } from 'mongoose'
 import { loadProfile } from '../middlewares/authn'
@@ -133,7 +133,7 @@ const findCourseMembers = async (ctx: Context) => {
   const opt = ctx.request.query
   const { page, pageSize } = parsePaginateOption(opt, 30, 200)
 
-  const response: Paginated<CourseMemberEntityView>
+  const response: Paginated<CourseMemberView>
     = await courseService.findCourseMembers(course.id, { page, pageSize })
   ctx.body = response
 }
@@ -154,7 +154,7 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
-  const response: CourseMemberEntityView = member
+  const response: CourseMemberView = member
   ctx.body = response
 }
 
