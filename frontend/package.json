@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^7.1.0",
-    "@vitejs/plugin-vue": "^6.0.0",
-    "@vueuse/core": "^13.5.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vueuse/core": "^13.6.0",
     "axios": "^1.11.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
@@ -53,11 +53,11 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.19.0",
+    "@antfu/eslint-config": "^5.1.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/pangu": "^4.0.2",
-    "@vue-macros/reactivity-transform": "3.0.0-beta.17",
-    "eslint": "^9.31.0",
+    "@vue-macros/reactivity-transform": "3.0.0-beta.20",
+    "eslint": "^9.32.0",
     "rollup-plugin-visualizer": "^6.0.3",
     "typescript": "^5.8.3",
     "vite": "7.0.6",
