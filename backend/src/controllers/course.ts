@@ -1,10 +1,11 @@
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import type { CourseRole, Paginated } from '../types'
-import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberEntityView } from '../types/entity'
+import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
 import { pick } from 'lodash'
 import { Document } from 'mongoose'
 import { loadProfile } from '../middlewares/authn'
+import User from '../models/User'
 import courseService from '../services/course'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
@@ -78,10 +79,35 @@ const findCourseItems = async (ctx: Context) => {
 
 const getCourse = async (ctx: Context) => {
   const { course, role } = await loadCourse(ctx)
-  const { courseId, name, description, encrypt } = course
+  const response: CourseEntityViewWithRole = {
+    ...pick(course, [
+      'courseId', 'name', 'description', 'encrypt', 'canJoin',
+    ]),
+    joinCode: role.manageCourse ? course.joinCode : undefined,
+    role,
+  }
 
-  const response: CourseEntityViewWithRole
-    = { courseId, name, description, encrypt, role }
+  ctx.body = response
+}
+
+const joinCourse = async (ctx: Context) => {
+  const opt = ctx.request.body
+  const { course, role } = await loadCourse(ctx)
+  const joinCode = String(opt.joinCode ?? '').trim()
+  if (!joinCode) {
+    return ctx.throw(400, 'Missing join code')
+  }
+  if (course.joinCode.trim() !== joinCode) {
+    return ctx.throw(403, 'Invalid join code')
+  }
+
+  const profile = await loadProfile(ctx)
+  const result = await courseService.updateCourseMember(
+    course.id, profile.id,
+    { ...role, basic: true },
+  )
+
+  const response: { success: boolean } = { success: result }
   ctx.body = response
 }
 
@@ -112,7 +138,7 @@ const updateCourse = async (ctx: Context) => {
   const { courseId } = course
   try {
     const course = await courseService.updateCourse(courseId,
-      pick(opt, [ 'name', 'description', 'encrypt' ]))
+      pick(opt, [ 'name', 'description', 'encrypt', 'joinCode' ]))
     const response: { success: boolean } = { success: !!course }
     ctx.body = response
   } catch (err: any) {
@@ -133,7 +159,7 @@ const findCourseMembers = async (ctx: Context) => {
   const opt = ctx.request.query
   const { page, pageSize } = parsePaginateOption(opt, 30, 200)
 
-  const response: Paginated<CourseMemberEntityView>
+  const response: Paginated<CourseMemberView>
     = await courseService.findCourseMembers(course.id, { page, pageSize })
   ctx.body = response
 }
@@ -154,7 +180,7 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
-  const response: CourseMemberEntityView = member
+  const response: CourseMemberView = member
   ctx.body = response
 }
 
@@ -168,6 +194,10 @@ const updateCourseMember = async (ctx: Context) => {
   const { role: newRole } = ctx.request.body
   if (!userId || !newRole) {
     return ctx.throw(400, 'Missing uid or role')
+  }
+  const user = await User.findOne({ uid: userId })
+  if (!user) {
+    return ctx.throw(404, 'User not found')
   }
   const profile = await loadProfile(ctx)
   if (profile.uid === userId) {
@@ -192,7 +222,7 @@ const updateCourseMember = async (ctx: Context) => {
 
   const result = await courseService.updateCourseMember(
     course.id,
-    userId,
+    user.id,
     newRole as CourseRole,
   )
   const response: { success: boolean } = { success: result }
@@ -224,6 +254,7 @@ const courseController = {
   findCourses,
   findCourseItems,
   getCourse,
+  joinCourse,
   createCourse,
   updateCourse,
   findCourseMembers,

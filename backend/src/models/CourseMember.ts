@@ -1,11 +1,17 @@
 import type { Document, PaginateModel } from 'mongoose'
-import type { CourseMemberEntity } from '../types/entity'
+import type { CourseMemberEntity, CourseMemberView, UserEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
+import { courseRoleNone } from '../utils/constants'
 
-export interface CourseMemberDocument extends Document, CourseMemberEntity {}
+export interface CourseMemberDocument extends Document, CourseMemberEntity { }
 
-type CourseMemberModel = PaginateModel<CourseMemberDocument>
+interface CourseMemberModel extends PaginateModel<CourseMemberDocument> {
+  toView: (
+    courseMember: Partial<CourseMemberEntity> | null,
+    user: Partial<Pick<UserEntity, 'uid' | 'nick' | 'privilege'>> | null,
+  ) => CourseMemberView
+}
 
 const courseRoleSchema = new mongoose.Schema({
   basic: {
@@ -69,6 +75,22 @@ courseMemberSchema.index({
 courseMemberSchema.index({
   user: 1,
 })
+
+courseMemberSchema.statics.toView = function (
+  courseMember: Partial<CourseMemberEntity> | null,
+  user: Partial<Pick<UserEntity, 'uid' | 'nick' | 'privilege'>> | null,
+): CourseMemberView {
+  return {
+    user: {
+      uid: user?.uid ?? 'ghost',
+      nick: user?.nick ?? '',
+      privilege: user?.privilege ?? 0,
+    },
+    role: courseMember?.role ?? courseRoleNone,
+    createdAt: new Date(courseMember?.createdAt ?? Date.now()).getTime(),
+    updatedAt: new Date(courseMember?.updatedAt ?? Date.now()).getTime(),
+  }
+}
 
 const CourseMember
   = mongoose.model<CourseMemberDocument, CourseMemberModel>(

@@ -12,6 +12,13 @@ interface EntityTimestamps {
 
 interface Entity extends EntityTimestamps { }
 
+interface ViewTimestamps {
+  createdAt: number
+  updatedAt: number
+}
+
+interface View extends ViewTimestamps { }
+
 // User
 
 export interface UserEntity extends Entity {
@@ -36,23 +43,32 @@ export interface CourseEntity extends Entity {
   name: string
   description: string
   encrypt: typeof encrypt.Public | typeof encrypt.Private
+  joinCode: string
 }
 
 export type CourseEntityEditable = Pick<CourseEntity,
-  'name' | 'description' | 'encrypt'
+  'name' | 'description' | 'encrypt' | 'joinCode'
 >
 
 export type CourseEntityItem = Pick<CourseEntity,
   'courseId' | 'name'
 >
 
-export type CourseEntityView = Pick<CourseEntity,
+export interface CourseEntityView extends
+  Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>,
+  Partial<Pick<CourseEntity, 'joinCode'>> {
+  canJoin: boolean
+}
+
+export interface CourseEntityViewWithRole extends CourseEntityView {
+  role: CourseRole
+}
+
+export type CourseEntityPreview = Pick<CourseEntity,
   'courseId' | 'name' | 'description' | 'encrypt'
 >
 
-export type CourseEntityPreview = CourseEntityView
-
-export interface CourseEntityViewWithRole extends CourseEntityView {
+export interface CourseEntityPreviewWithRole extends CourseEntityPreview {
   role: CourseRole
 }
 
@@ -64,7 +80,7 @@ export interface CourseMemberEntity extends Entity {
   role: CourseRole
 }
 
-export interface CourseMemberEntityView extends Omit<CourseMemberEntity, 'course'> {
+export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View {
   user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
 }
 
@@ -115,7 +131,7 @@ export type ProblemEntityView = Pick<ProblemEntity,
   'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
   | 'input' | 'output' | 'in' | 'out' | 'hint'
 > & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
-  course: CourseEntityViewWithRole | null
+  course: CourseEntityPreviewWithRole | null
 }
 
 // Contest
@@ -144,7 +160,7 @@ export type ContestEntityPreview = Pick<ContestEntity,
 export type ContestEntityView = Pick<ContestEntity,
   'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt' | 'list' | 'option'
 > & Partial<Pick<ContestEntity, 'argument'>> & {
-  course: CourseEntityViewWithRole | null
+  course: CourseEntityPreviewWithRole | null
 }
 
 // Contest Ranklist

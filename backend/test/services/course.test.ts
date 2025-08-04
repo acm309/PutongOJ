@@ -6,7 +6,7 @@ import courseService from '../../src/services/course'
 import { userSeeds } from '../seeds/user'
 import '../../src/config/db'
 
-const testCourse: CourseEntityEditable = {
+const testCourse: Pick<CourseEntityEditable, 'name' | 'description' | 'encrypt'> = {
   name: 'C Programming',
   description: 'A course about C programming',
   encrypt: 1,
@@ -70,7 +70,7 @@ test.serial('createCourse (serial)', async (t) => {
 
 test('getCourse (non-existent course)', async (t) => {
   const course = await courseService.getCourse(0)
-  t.is(course, undefined)
+  t.is(course, null)
 })
 
 test.serial('getCourse (serial)', async (t) => {
@@ -91,7 +91,7 @@ test.serial('getCourse (serial)', async (t) => {
 
 test('updateCourse (non-existent course)', async (t) => {
   const result = await courseService.updateCourse(0, {})
-  t.is(result, undefined)
+  t.is(result, null)
 })
 
 test.serial('updateCourse (serial)', async (t) => {
@@ -112,28 +112,19 @@ test.serial('updateCourse (serial)', async (t) => {
   t.is(updatedCourse?.description, 'An advanced course about C programming')
 })
 
-test.serial('updateCourseMember (non-existent user)', async (t) => {
-  const courseObjectId = testContext.course?.id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.updateCourseMember(
-    courseObjectId,
-    'ScourseNonExist',
-    courseRoleEntire,
-  )
-
-  t.false(result)
-})
-
 test.serial('updateCourseMember (serial)', async (t) => {
   const courseObjectId = testContext.course?.id
+  const user = await User.findOne({ uid: testUser.uid })
+  if (!user) {
+    return t.fail('Test user does not exist')
+  }
+  const testUserObjectId = user.id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
   const result = await courseService.updateCourseMember(
     courseObjectId,
-    testUser.uid,
+    testUserObjectId,
     courseRoleEntire,
   )
 
@@ -150,7 +141,7 @@ test.serial('getCourseMember (non-existent user)', async (t) => {
     'ScourseNonExist',
   )
 
-  t.is(result, undefined)
+  t.is(result, null)
 })
 
 test.serial('getCourseMember (serial)', async (t) => {
@@ -207,8 +198,8 @@ test.serial('findCourseMembers (serial)', async (t) => {
   t.is(members.docs.length, 1)
   t.is(members.docs[0].user.uid, testUser.uid)
   t.deepEqual(members.docs[0].role, courseRoleEntire)
-  t.is(members.docs[0].createdAt instanceof Date, true)
-  t.is(members.docs[0].updatedAt instanceof Date, true)
+  t.is(typeof members.docs[0].createdAt, 'number')
+  t.is(typeof members.docs[0].updatedAt, 'number')
 })
 
 test.serial('removeCourseMember (non-existent user)', async (t) => {

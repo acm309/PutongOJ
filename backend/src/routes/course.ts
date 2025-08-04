@@ -18,13 +18,17 @@ courseRouter.post('/',
   authnMiddleware.rootRequire,
   courseController.createCourse,
 )
-courseRouter.put('/:courseId',
-  authnMiddleware.loginRequire,
-  courseController.updateCourse,
-)
 courseRouter.get('/:courseId',
   authnMiddleware.loginRequire,
   courseController.getCourse,
+)
+courseRouter.post('/:courseId',
+  authnMiddleware.loginRequire,
+  courseController.joinCourse,
+)
+courseRouter.put('/:courseId',
+  authnMiddleware.loginRequire,
+  courseController.updateCourse,
 )
 courseRouter.get('/:courseId/member',
   authnMiddleware.loginRequire,

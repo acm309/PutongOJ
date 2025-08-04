@@ -18,6 +18,7 @@ const courseRules = {
   ],
   description: [ { max: 100, message: 'Description should not exceed 100 characters', trigger: 'change' } ],
   encrypt: [ { type: 'number', required: true, trigger: 'change' } ],
+  joinCode: [ { min: 6, max: 20, message: 'Join code must be between 6 and 20 characters', trigger: 'change' } ],
 }
 const courseFormRef = ref<any>(null)
 
@@ -30,6 +31,7 @@ function updateCourse () {
           name: course.value.name,
           description: course.value.description,
           encrypt: course.value.encrypt,
+          joinCode: course.value.joinCode || '',
         })
         message.success('Course updated successfully.')
       } catch (e: any) {
@@ -65,6 +67,12 @@ function updateCourse () {
             Private
           </Radio>
         </RadioGroup>
+      </FormItem>
+      <FormItem label="Join Code" prop="joinCode">
+        <Input
+          v-model="course.joinCode" :maxlength="20" show-word-limit placeholder="Enter join code (optional)"
+          clearable
+        />
       </FormItem>
       <FormItem>
         <Button type="primary" size="large" :loading="submiting" @click="updateCourse">
