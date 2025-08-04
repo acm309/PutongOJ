@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityView, CourseMemberView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -174,10 +174,12 @@ const course = {
   findCourseItems: (keyword: string) =>
     instance.get<CourseEntityItem[]>('/course/items', { params: { keyword } }),
   getCourse: (courseId: number) =>
-    instance.get<CourseEntityView & { role: CourseRole }>(`/course/${courseId}`),
+    instance.get<CourseEntityViewWithRole>(`/course/${courseId}`),
+  joinCourse: (courseId: number, joinCode: string) =>
+    instance.post<{ success: boolean }>(`/course/${courseId}`, { joinCode }),
   createCourse: (course: CourseEntityEditable) =>
     instance.post<{ courseId: number }>('/course', course),
-  updateCourse: (courseId: number, course: CourseEntityEditable) =>
+  updateCourse: (courseId: number, course: Partial<CourseEntityEditable>) =>
     instance.put(`/course/${courseId}`, course),
   findMembers: (courseId: number, params: PaginateParams) =>
     instance.get<Paginated<CourseMemberView>>(`/course/${courseId}/member`, { params }),

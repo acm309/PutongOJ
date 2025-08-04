@@ -8,6 +8,7 @@ import ID from './ID'
 export interface CourseDocument extends Document, CourseEntity {
   isPublic: boolean
   isPrivate: boolean
+  canJoin: boolean
 }
 
 type CourseModel = PaginateModel<CourseDocument>
@@ -47,6 +48,17 @@ const courseSchema = new mongoose.Schema({
     enum: [ encrypt.Public, encrypt.Private ],
     default: encrypt.Public,
   },
+  joinCode: {
+    type: String,
+    default: '',
+    validate: {
+      validator (v: any) {
+        return v.length === 0 || (v.length >= 6 && v.length <= 20)
+      },
+      message:
+        'Join code is too short or too long. It should be 6-20 characters long',
+    },
+  },
 }, {
   collection: 'Course',
   timestamps: true,
@@ -54,11 +66,14 @@ const courseSchema = new mongoose.Schema({
 
 courseSchema.plugin(mongoosePaginate)
 
-courseSchema.virtual('isPublic').get(function (this: CourseDocument) {
+courseSchema.virtual('isPublic').get(function (this: CourseDocument): boolean {
   return this.encrypt === encrypt.Public
 })
-courseSchema.virtual('isPrivate').get(function (this: CourseDocument) {
+courseSchema.virtual('isPrivate').get(function (this: CourseDocument): boolean {
   return this.encrypt === encrypt.Private
+})
+courseSchema.virtual('canJoin').get(function (this: CourseDocument): boolean {
+  return (this.joinCode?.length ?? 0) > 0
 })
 
 courseSchema.pre('save', async function (this: CourseDocument, next) {

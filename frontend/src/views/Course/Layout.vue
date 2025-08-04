@@ -1,22 +1,23 @@
 <script setup lang="ts">
+import type { Message } from 'view-ui-plus'
 import { courseRoleNone } from '@backend/utils/constants'
+import { AxiosError } from 'axios'
 import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
-import { Auth, Button, ButtonGroup, Col, Divider, Exception, Row, Spin, TabPane, Tabs } from 'view-ui-plus'
-import { computed, onBeforeMount, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Input, Modal, Row, Spin, TabPane, Tabs } from 'view-ui-plus'
+import { computed, inject, onBeforeMount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import api from '@/api'
 import { useCourseStore } from '@/store/modules/course'
 import { onProfileUpdate } from '@/util/helper'
 
-const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
 const { findCourse } = courseStore
 const { course } = storeToRefs(courseStore)
+const message = inject('$Message') as typeof Message
 
-const loading = ref(false)
 const displayTab = computed(() => route.name as string || 'courseProblems')
 const courseId = computed(() => Number.parseInt(route.params.id as string))
 const role = computed(() => {
@@ -25,11 +26,18 @@ const role = computed(() => {
   }
   return course.value?.role ?? courseRoleNone
 })
-
-function handleClick (name: string) {
-  if (name !== displayTab.value)
-    router.push({ name, params: { id: courseId.value } })
-}
+const loading = ref(false)
+const joinModal = ref(false)
+const joinFormRef = ref<any>(null)
+const joinForm = $ref({
+  joinCode: '',
+})
+const joinFormRules = $computed(() => ({
+  joinCode: [
+    { required: true, message: 'Join code is required', trigger: 'change' },
+  ],
+}))
+const joining = ref(false)
 
 async function fetch () {
   loading.value = true
@@ -43,6 +51,12 @@ async function fetch () {
   loading.value = false
 }
 
+function handleTabClick (name: string) {
+  if (name === displayTab.value) {
+    return
+  }
+  router.push({ name, params: { id: courseId.value } })
+}
 function createProblem () {
   router.push({ name: 'problemCreate', query: { course: courseId.value } })
 }
@@ -50,8 +64,31 @@ function createContest () {
   router.push({ name: 'contestCreate', query: { course: courseId.value } })
 }
 
-const home = () => router.push({ name: 'home' })
-const back = () => router.go(-1)
+async function joinCourse () {
+  joinFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      message.warning('Form is not valid, please check your input.')
+      return
+    }
+    joining.value = true
+    try {
+      const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
+      if (result.data?.success === true) {
+        message.success('Successfully joined the course.')
+        fetch()
+      } else if (result instanceof AxiosError) {
+        message.error(`Failed to join course: ${result.response?.data?.error || result.message}`)
+      } else {
+        message.error('Failed to join course, unknown error occurred.')
+      }
+      joinModal.value = false
+    } catch (e: any) {
+      message.error(`Failed to join course: ${e.message}`)
+    } finally {
+      joining.value = false
+    }
+  })
+}
 
 onBeforeMount(fetch)
 onProfileUpdate(fetch)
@@ -71,7 +108,7 @@ onProfileUpdate(fetch)
           <i>No description found yet...</i>
         </p>
       </Col>
-      <Col flex="none" class="course-header-col">
+      <Col v-if="role.manageProblem || role.manageContest" flex="none" class="course-header-col">
         <ButtonGroup>
           <Button v-if="role.manageProblem" @click="createProblem">
             <Icon type="md-add" />
@@ -85,7 +122,7 @@ onProfileUpdate(fetch)
       </Col>
     </Row>
     <Auth :authority="role.basic">
-      <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleClick">
+      <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleTabClick">
         <TabPane label="Problem" name="courseProblems" />
         <TabPane label="Contest" name="courseContests" />
         <TabPane v-if="role.manageCourse" label="Member" name="courseMembers" />
@@ -95,20 +132,31 @@ onProfileUpdate(fetch)
       <template #noMatch>
         <Divider class="exception-divider" />
         <Exception
-          class="exception-box"
-          type="403" desc="You have no permission to access this course."
+          class="exception-box" type="403"
+          desc="This is a private course. To view it, please join the course or contact the instructor for access."
         >
           <template #actions>
-            <Button type="primary" size="large" @click="home">
-              {{ t('oj.go_home') }}
+            <Button type="primary" :disabled="!course.canJoin" size="large" @click="joinModal = true">
+              <Icon type="md-person-add" />
+              Join Course
             </Button>
-            <Button type="primary" size="large" @click="back">
-              {{ t('oj.go_back') }}
+            <Button size="large" @click="() => router.go(-1)">
+              Go Back
             </Button>
           </template>
         </Exception>
       </template>
     </Auth>
+    <Modal
+      v-if="course.canJoin" v-model="joinModal" :loading="joining" title="Join Course" :closable="false"
+      @on-cancel="joinModal = false" @on-ok="joinCourse"
+    >
+      <Form ref="joinFormRef" :model="joinForm" :rules="joinFormRules">
+        <FormItem label="Join Code" prop="joinCode">
+          <Input v-model="joinForm.joinCode" placeholder="Enter join code to join the course" />
+        </FormItem>
+      </Form>
+    </Modal>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>

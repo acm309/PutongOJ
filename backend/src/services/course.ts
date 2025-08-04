@@ -57,7 +57,7 @@ export async function getCourse (
 }
 
 export async function createCourse (
-  opt: CourseEntityEditable,
+  opt: Partial<CourseEntityEditable>,
 ): Promise<CourseDocument> {
   const course = new Course(opt)
   await course.save()
@@ -127,14 +127,9 @@ export async function getCourseMember (
 
 export async function updateCourseMember (
   course: ObjectId | string,
-  userId: string,
+  user: ObjectId | string,
   role: CourseRole,
 ): Promise<boolean> {
-  const user = await User.findOne({ uid: userId })
-  if (!user) {
-    return false
-  }
-
   const parsedRole: CourseRole = Object.assign({}, ((role) => {
     let {
       basic, viewTestcase, viewSolution,
@@ -154,8 +149,8 @@ export async function updateCourseMember (
   })(role))
 
   const courseMember = await CourseMember.findOneAndUpdate(
-    { user: user.id, course },
-    { user: user.id, course, role: parsedRole },
+    { user, course },
+    { user, course, role: parsedRole },
     { upsert: true, new: true },
   )
 

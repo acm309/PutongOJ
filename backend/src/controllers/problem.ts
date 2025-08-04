@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
-import type { CourseEntityViewWithRole, ProblemEntity, ProblemEntityView } from '../types/entity'
+import type { CourseEntityPreviewWithRole, ProblemEntity, ProblemEntityView } from '../types/entity'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
@@ -136,7 +136,7 @@ const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
   const canManage = await hasProblemPerm(ctx)
 
-  let course: CourseEntityViewWithRole | null = null
+  let course: CourseEntityPreviewWithRole | null = null
   if (problem.course) {
     const { course: courseDoc, role } = await loadCourse(ctx, problem.course)
     course = {
