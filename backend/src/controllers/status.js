@@ -101,13 +101,16 @@ const create = async (ctx) => {
       course = contest.course.id
     }
   }
-  const problem = await Problem.findOne({ pid }).populate('course')
+  const problem = await Problem.findOne({ pid })
   if (!problem) {
     ctx.throw(400, 'No such a problem')
   }
-  if (problem.course && !course) {
-    course = problem.course.id
-  }
+  /**
+   * @TODO
+   */
+  // if (problem.course && !course) {
+  //   course = problem.course.id
+  // }
 
   try {
     const timeLimit = problem.time

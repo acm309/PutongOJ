@@ -1,11 +1,10 @@
-import type { Document, PaginateModel } from 'mongoose'
+import type { Document, Model } from 'mongoose'
 import type { CourseProblemEntity } from '../types/entity'
 import mongoose from 'mongoose'
-import mongoosePaginate from 'mongoose-paginate-v2'
 
 export interface CourseProblemDocument extends Document, CourseProblemEntity { }
 
-interface CourseProblemModel extends PaginateModel<CourseProblemDocument> {}
+interface CourseProblemModel extends Model<CourseProblemDocument> {}
 
 const courseProblemSchema = new mongoose.Schema({
   course: {
@@ -24,8 +23,6 @@ const courseProblemSchema = new mongoose.Schema({
   collection: 'CourseProblem',
   timestamps: true,
 })
-
-courseProblemSchema.plugin(mongoosePaginate)
 
 courseProblemSchema.index({
   course: 1,

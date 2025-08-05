@@ -1,4 +1,3 @@
-import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
 import type { Paginated, PaginateOption } from '../types'
 import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
@@ -14,7 +13,6 @@ export async function findProblems (
     content?: string
   },
   showAll: boolean = false,
-  course?: ObjectId | null,
 ): Promise<Paginated<ProblemEntityPreview>> {
   const { page, pageSize, content, type } = opt
   const filters: Record<string, any>[] = []
@@ -41,14 +39,6 @@ export async function findProblems (
         } })
         break
     }
-  }
-  if (course) {
-    filters.push({ course })
-  } else if (!showAll) {
-    filters.push({ $or: [
-      { course: { $exists: false } },
-      { course: null } ],
-    })
   }
 
   const result = await Problem.paginate({ $and: filters }, {

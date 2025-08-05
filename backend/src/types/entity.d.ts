@@ -123,8 +123,8 @@ export interface ProblemEntity extends Entity {
 
 export type ProblemEntityEditable = Pick<ProblemEntity,
   'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
-  | 'out' | 'hint' | 'status' | 'type' | 'code'
-> & { course?: ObjectId | null }
+  | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'
+>
 
 export type ProblemEntityItem = Pick<ProblemEntity,
   'pid' | 'title'
@@ -134,10 +134,12 @@ export type ProblemEntityPreview = Pick<ProblemEntity,
   'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
 >
 
-export type ProblemEntityView = Pick<ProblemEntity,
+export interface ProblemEntityView extends Pick<ProblemEntity,
   'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
   | 'input' | 'output' | 'in' | 'out' | 'hint'
-> & Partial<Pick<ProblemEntity, 'type' | 'code'>>
+>, Partial<Pick<ProblemEntity, 'type' | 'code'>> {
+  isOwner: boolean
+}
 
 // Contest
 
