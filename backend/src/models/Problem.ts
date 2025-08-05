@@ -84,15 +84,15 @@ const problemSchema = new mongoose.Schema({
     default: [],
     index: true,
   },
-  course: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+    ref: 'User',
     default: null,
     validate: {
       validator (v: any) {
         return v === null || mongoose.Types.ObjectId.isValid(v)
       },
-      message: 'Invalid course ID',
+      message: 'Invalid owner ID',
     },
   },
   submit: {

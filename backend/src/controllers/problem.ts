@@ -1,10 +1,11 @@
 import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
-import type { CourseEntityPreviewWithRole, ProblemEntity, ProblemEntityView } from '../types/entity'
+import type { ProblemEntity, ProblemEntityView } from '../types/entity'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
+import User from '../models/User'
 import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
@@ -34,7 +35,7 @@ export async function loadProblem (
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
-  if (!problem.course && problem.status === status.Available) {
+  if (problem.status === status.Available) {
     ctx.state.problem = problem
     return problem
   }
@@ -54,12 +55,9 @@ export async function loadProblem (
     }
   }
 
-  if (problem.course) {
-    const { role } = await loadCourse(ctx, problem.course)
-    if (
-      (problem.status === status.Available && role.basic)
-      || (problem.status === status.Reserve && role.manageProblem)
-    ) {
+  if (problem.owner) {
+    const owner = await User.findById(problem.owner).lean()
+    if (owner && owner.uid === profile?.uid) {
       ctx.state.problem = problem
       return problem
     }
@@ -68,29 +66,10 @@ export async function loadProblem (
   return ctx.throw(...ERR_PERM_DENIED)
 }
 
-export async function hasProblemPerm (
-  ctx: Context,
-  perm: 'manageProblem' | 'viewTestcase' = 'manageProblem',
-): Promise<boolean> {
-  const profile = ctx.state.profile
-  if (!profile) {
-    return false
-  }
-  if (profile.isAdmin) {
-    return true
-  }
-  const problem = await loadProblem(ctx)
-  if (!problem.course) {
-    return false
-  }
-  const { role } = await loadCourse(ctx, problem.course)
-  return role[perm] || false
-}
-
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = ctx.state.profile
-  let showAll: boolean = !!profile?.isAdmin
+  const showAll: boolean = !!profile?.isAdmin
 
   /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
   if (Number(opt.page) === -1 && profile?.isAdmin) {
@@ -100,16 +79,19 @@ const findProblems = async (ctx: Context) => {
   }
 
   let courseDocId: ObjectId | undefined
-  if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourse(ctx, opt.course)
-    if (!role.basic) {
-      return ctx.throw(...ERR_PERM_DENIED)
-    }
-    if (role.manageProblem) {
-      showAll = true
-    }
-    courseDocId = course.id
-  }
+  /**
+   * @TODO Find course problems
+   */
+  // if (typeof opt.course === 'string') {
+  //   const { course, role } = await loadCourse(ctx, opt.course)
+  //   if (!role.basic) {
+  //     return ctx.throw(...ERR_PERM_DENIED)
+  //   }
+  //   if (role.manageProblem) {
+  //     showAll = true
+  //   }
+  //   courseDocId = course.id
+  // }
   const paginateOption = parsePaginateOption(opt, 30, 100)
   const type = typeof opt.type === 'string' ? opt.type : undefined
   const content = typeof opt.content === 'string' ? opt.content : undefined
@@ -134,22 +116,20 @@ const findProblems = async (ctx: Context) => {
 
 const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
-  const canManage = await hasProblemPerm(ctx)
-
-  let course: CourseEntityPreviewWithRole | null = null
-  if (problem.course) {
-    const { course: courseDoc, role } = await loadCourse(ctx, problem.course)
-    course = {
-      ...pick(courseDoc, [ 'courseId', 'name', 'description', 'encrypt' ]),
-      role,
+  const profile = ctx.state.profile
+  let canManage = profile?.isAdmin ?? false
+  if (profile && !canManage && problem.owner) {
+    const owner = await User.findById(problem.owner).lean()
+    if (owner && owner.uid === profile.uid) {
+      canManage = true
     }
   }
+
   const response: ProblemEntityView = {
     ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
       'description', 'input', 'output', 'in', 'out', 'hint' ]),
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
-    course,
   }
   ctx.body = response
 }
@@ -176,12 +156,14 @@ const createProblem = async (ctx: Context) => {
     const { course } = await loadCourse(ctx, opt.course)
     courseDocId = course.id
   }
+  /**
+   * @TODO Add problem into course, also update owner field
+   */
 
   try {
-    const problem = await problemService.createProblem({
-      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
-        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
-      course: courseDocId })
+    const problem = await problemService.createProblem(
+      pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]))
     logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
       = { pid: problem.pid }
@@ -199,7 +181,14 @@ const updateProblem = async (ctx: Context) => {
   const opt = ctx.request.body
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
-  if (!await hasProblemPerm(ctx)) {
+  let canManage = profile?.isAdmin ?? false
+  if (profile && !canManage && problem.owner) {
+    const owner = await User.findById(problem.owner).lean()
+    if (owner && owner.uid === profile.uid) {
+      canManage = true
+    }
+  }
+  if (!canManage) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -248,7 +237,6 @@ const removeProblem = async (ctx: Context) => {
 
 const problemController = {
   loadProblem,
-  hasProblemPerm,
   findProblems,
   getProblem,
   createProblem,

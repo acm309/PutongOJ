@@ -72,7 +72,7 @@ export async function getAllProblems (): Promise<ProblemEntityItem[]> {
 export async function getProblem (
   pid: number,
 ): Promise<ProblemDocument | undefined> {
-  const problem = await Problem.findOne({ pid }).populate('course')
+  const problem = await Problem.findOne({ pid })
   return problem ?? undefined
 }
 

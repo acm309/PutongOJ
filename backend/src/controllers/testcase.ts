@@ -5,14 +5,17 @@ import send from 'koa-send'
 import remove from 'lodash/remove'
 import { v4 as uuid, validate } from 'uuid'
 import { loadProfile } from '../middlewares/authn'
-import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
+import { ERR_INVALID_ID } from '../utils/error'
 import logger from '../utils/logger'
-import { hasProblemPerm, loadProblem } from './problem'
+import { loadProblem } from './problem'
 
 const createTestcase = async (ctx: Context) => {
-  if (!await hasProblemPerm(ctx)) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
+  /**
+   * @TODO Permission check
+   */
+  // if (!await hasProblemPerm(ctx)) {
+  //   ctx.throw(...ERR_PERM_DENIED)
+  // }
 
   const { pid } = await loadProblem(ctx)
   const { uid } = await loadProfile(ctx)
@@ -50,9 +53,12 @@ const createTestcase = async (ctx: Context) => {
 }
 
 const removeTestcase = async (ctx: Context) => {
-  if (!await hasProblemPerm(ctx)) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
+  /**
+   * @TODO Permission check
+   */
+  // if (!await hasProblemPerm(ctx)) {
+  //   ctx.throw(...ERR_PERM_DENIED)
+  // }
 
   const { pid } = await loadProblem(ctx)
   const { uid } = await loadProfile(ctx)
@@ -74,9 +80,12 @@ const removeTestcase = async (ctx: Context) => {
 }
 
 const fetchTestcase = async (ctx: Context) => {
-  if (!await hasProblemPerm(ctx, 'viewTestcase')) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
+  /**
+   * @TODO Permission check
+   */
+  // if (!await hasProblemPerm(ctx, 'viewTestcase')) {
+  //   ctx.throw(...ERR_PERM_DENIED)
+  // }
 
   const { pid } = await loadProblem(ctx)
   const uuid = String(ctx.params.uuid || '').trim()
@@ -97,9 +106,12 @@ const fetchTestcase = async (ctx: Context) => {
 }
 
 const findTestcases = async (ctx: Context) => {
-  if (!await hasProblemPerm(ctx)) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
+  /**
+   * @TODO Permission check
+   */
+  // if (!await hasProblemPerm(ctx)) {
+  //   ctx.throw(...ERR_PERM_DENIED)
+  // }
 
   const { pid } = await loadProblem(ctx)
   let meta = { testcases: [] }
