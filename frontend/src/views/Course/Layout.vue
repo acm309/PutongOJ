@@ -95,6 +95,14 @@ async function joinCourse () {
   })
 }
 
+function refresh () {
+  router.push({
+    name: displayTab.value,
+    params: { id: courseId.value },
+    query: { refresh: Date.now() % 998244353 },
+  })
+}
+
 onBeforeMount(fetch)
 onProfileUpdate(fetch)
 </script>
@@ -170,9 +178,8 @@ onProfileUpdate(fetch)
     </Modal>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
     <CourseProblemAdd
-      v-if="isAdmin"
-      v-model="problemAddModal" :course-id="course.courseId"
-      @close="(added: number) => added > 0 ? fetch() : null"
+      v-if="isAdmin" v-model="problemAddModal" :course-id="course.courseId"
+      @close="(added: number) => added > 0 ? refresh() : null"
     />
   </div>
 </template>
