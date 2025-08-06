@@ -3,7 +3,7 @@ import type { ObjectId } from 'mongoose'
 import type { Paginated } from 'src/types'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocument } from '../models/Problem'
-import type { ProblemEntity, ProblemEntityPreview, ProblemEntityView } from '../types/entity'
+import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView } from '../types/entity'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
@@ -76,7 +76,7 @@ const findProblems = async (ctx: Context) => {
 
   /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
   if (Number(opt.page) === -1 && profile?.isAdmin) {
-    const docs = await problemService.getAllProblems()
+    const docs = await problemService.getProblemItems()
     ctx.body = { list: { docs, total: docs.length }, solved: [] }
     return
   }
@@ -124,6 +124,13 @@ const findProblems = async (ctx: Context) => {
   }
 
   ctx.body = { list, solved }
+}
+
+const findProblemItems = async (ctx: Context) => {
+  const keyword = String(ctx.request.query.keyword ?? '').trim()
+  const response: ProblemEntityItem[]
+    = await problemService.findProblemItems(keyword)
+  ctx.body = response
 }
 
 const getProblem = async (ctx: Context) => {
@@ -241,6 +248,7 @@ const removeProblem = async (ctx: Context) => {
 const problemController = {
   loadProblem,
   findProblems,
+  findProblemItems,
   getProblem,
   createProblem,
   updateProblem,

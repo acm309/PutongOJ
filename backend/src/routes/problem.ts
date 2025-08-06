@@ -10,6 +10,10 @@ const problemRouter = new Router<DefaultState, DefaultContext>({
 problemRouter.get('/',
   problemController.findProblems,
 )
+problemRouter.get('/items',
+  authnMiddleware.adminRequire,
+  problemController.findProblemItems,
+)
 problemRouter.post('/',
   authnMiddleware.loginRequire,
   problemController.createProblem,

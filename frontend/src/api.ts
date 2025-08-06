@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -84,6 +84,8 @@ const problem = {
     instance.get('/problem', { params: data }),
   findProblems: (params: FindProblemsParams) =>
     instance.get<FindProblemsResponse>('/problem', { params }),
+  findProblemItems: (keyword: string) =>
+    instance.get<ProblemEntityItem[]>('/problem/items', { params: { keyword } }),
   create: (data: { [key: string]: any }) =>
     instance.post('/problem/', data),
   update: (data: { [key: string]: any }) =>

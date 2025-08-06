@@ -33,10 +33,14 @@ export async function findProblems (
         })
         break
       case 'pid':
-        filters.push({ $expr: { $regexMatch: {
-          input: { $toString: '$pid' },
-          regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i') },
-        } })
+        filters.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: '$pid' },
+              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
+            },
+          },
+        })
         break
     }
   }
@@ -52,7 +56,40 @@ export async function findProblems (
   return result
 }
 
-export async function getAllProblems (): Promise<ProblemEntityItem[]> {
+export async function findProblemItems (
+  keyword: string,
+): Promise<ProblemEntityItem[]> {
+  const result: ProblemEntityItem[] = []
+  if (Number.isInteger(Number(keyword))) {
+    result.push(...await Problem.find(
+      {
+        $expr: {
+          $regexMatch: {
+            input: { $toString: '$pid' },
+            regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
+          },
+        },
+      },
+      { _id: 0, pid: 1, title: 1 },
+      { sort: { pid: 1 }, limit: 10 },
+    ).lean(),
+    )
+  }
+  if (result.length < 10) {
+    result.push(...await Problem.find(
+      {
+        pid: { $nin: result.map(p => p.pid) },
+        title: { $regex: new RegExp(escapeRegExp(keyword), 'i') },
+      },
+      { _id: 0, pid: 1, title: 1 },
+      { sort: { updatedAt: -1 }, limit: 10 - result.length },
+    ).lean(),
+    )
+  }
+  return result
+}
+
+export async function getProblemItems (): Promise<ProblemEntityItem[]> {
   const result = await Problem
     .find({}, { _id: 0, title: 1, pid: 1 })
     .lean()
@@ -98,7 +135,8 @@ export async function removeProblem (pid: number): Promise<boolean> {
 
 const problemService = {
   findProblems,
-  getAllProblems,
+  findProblemItems,
+  getProblemItems,
   getProblem,
   createProblem,
   updateProblem,
