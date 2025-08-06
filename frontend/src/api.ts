@@ -189,6 +189,8 @@ const course = {
     instance.post<{ success: boolean }>(`/course/${courseId}/member/${userId}`, { role }),
   removeMember: (courseId: number, userId: string) =>
     instance.delete<{ success: boolean }>(`/course/${courseId}/member/${userId}`),
+  addProblems: (courseId: number, problemIds: number[]) =>
+    instance.post<{ success: boolean, added: number }>(`/course/${courseId}/problem`, { problemIds }),
 }
 
 export default {

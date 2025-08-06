@@ -46,5 +46,9 @@ courseRouter.delete('/:courseId/member/:userId',
   authnMiddleware.loginRequire,
   courseController.removeCourseMember,
 )
+courseRouter.post('/:courseId/problem',
+  authnMiddleware.adminRequire,
+  courseController.addCourseProblems,
+)
 
 export default module.exports = courseRouter
