@@ -4,18 +4,22 @@ import { courseRoleNone } from '@backend/utils/constants'
 import { AxiosError } from 'axios'
 import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
-import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Input, Modal, Row, Spin, TabPane, Tabs } from 'view-ui-plus'
+import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Input, Modal, Row, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { computed, inject, onBeforeMount, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import CourseProblemAdd from '@/components/CourseProblemAdd.vue'
 import { useCourseStore } from '@/store/modules/course'
+import { useSessionStore } from '@/store/modules/session'
 import { onProfileUpdate } from '@/util/helper'
 
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
+const sessionStore = useSessionStore()
 const { findCourse } = courseStore
 const { course } = storeToRefs(courseStore)
+const { isAdmin } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
 const displayTab = computed(() => route.name as string || 'courseProblems')
@@ -38,6 +42,7 @@ const joinFormRules = $computed(() => ({
   ],
 }))
 const joining = ref(false)
+const problemAddModal = ref(false)
 
 async function fetch () {
   loading.value = true
@@ -96,7 +101,7 @@ onProfileUpdate(fetch)
 
 <template>
   <div class="course-wrap" :class="{ 'course-wrap-edit': displayTab === 'courseSettings' }">
-    <Row class="course-header">
+    <Row class="course-header" justify="end">
       <Col flex="auto" class="course-header-col">
         <h1 class="course-name">
           {{ spacing(course.name) }}
@@ -108,17 +113,23 @@ onProfileUpdate(fetch)
           <i>No description found yet...</i>
         </p>
       </Col>
-      <Col v-if="role.manageProblem || role.manageContest" flex="none" class="course-header-col">
-        <ButtonGroup>
-          <Button v-if="role.manageProblem" @click="createProblem">
+      <Col v-if="isAdmin || role.manageProblem || role.manageContest" flex="none" class="course-header-col">
+        <Space direction="vertical">
+          <ButtonGroup v-if="role.manageProblem || role.manageContest">
+            <Button v-if="role.manageProblem" @click="createProblem">
+              <Icon type="md-add" />
+              Create Problem
+            </Button>
+            <Button v-if="role.manageContest" @click="createContest">
+              <Icon type="md-add" />
+              Create Contest
+            </Button>
+          </ButtonGroup>
+          <Button v-if="isAdmin" type="primary" style="float: right;" @click="problemAddModal = true">
             <Icon type="md-add" />
-            Create Problem
+            Add Problem to Course
           </Button>
-          <Button v-if="role.manageContest" @click="createContest">
-            <Icon type="md-add" />
-            Create Contest
-          </Button>
-        </ButtonGroup>
+        </Space>
       </Col>
     </Row>
     <Auth :authority="role.basic">
@@ -158,6 +169,11 @@ onProfileUpdate(fetch)
       </Form>
     </Modal>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
+    <CourseProblemAdd
+      v-if="isAdmin"
+      v-model="problemAddModal" :course-id="course.courseId"
+      @close="(added: number) => added > 0 ? fetch() : null"
+    />
   </div>
 </template>
 
