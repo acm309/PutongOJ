@@ -325,7 +325,7 @@ export async function addCourseProblem (
     { course, problem },
     { upsert: true },
   )
-  return result.acknowledged && result.modifiedCount > 0
+  return result.upsertedCount > 0
 }
 
 const courseService = {
