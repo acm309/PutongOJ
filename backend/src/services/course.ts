@@ -4,12 +4,12 @@ import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, ProblemEntityPreview, UserEntity } from '../types/entity'
 import { escapeRegExp, omit } from 'lodash'
+import mongoose from 'mongoose'
 import Course from '../models/Course'
 import CourseMember from '../models/CourseMember'
 import CourseProblem from '../models/CourseProblem'
 import User from '../models/User'
 import { courseRoleEntire, courseRoleNone, encrypt, status } from '../utils/constants'
-import mongoose from 'mongoose'
 
 export async function findCourses (
   opt: PaginateOption & {},
@@ -211,7 +211,7 @@ export async function findCourseProblems (
     content?: string
     showReserved?: boolean
   },
-): Promise<Paginated<ProblemEntityPreview & {owner: ObjectId | null}>> {
+): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
   const { page, pageSize, type, content, showReserved } = opt
 
   const filters: Record<string, any>[] = []
@@ -251,8 +251,8 @@ export async function findCourseProblems (
 
   const aggregationPipeline = [
     {
-      $match: { 
-        course: new mongoose.Types.ObjectId(course.toString()) 
+      $match: {
+        course: new mongoose.Types.ObjectId(course.toString()),
       },
     },
     {
@@ -317,7 +317,7 @@ export async function findCourseProblems (
   ] as PipelineStage[]
 
   const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result[0] as Paginated<ProblemEntityPreview & {owner: ObjectId | null}>
+  return result[0] as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
 }
 
 export async function addCourseProblem (
@@ -330,6 +330,47 @@ export async function addCourseProblem (
     { upsert: true },
   )
   return result.upsertedCount > 0
+}
+
+export async function hasProblemRole (
+  user: ObjectId | string,
+  problem: ObjectId | string,
+  role: keyof CourseRole,
+): Promise<boolean> {
+  const aggregationPipeline = [
+    {
+      $match: { problem: new mongoose.Types.ObjectId(problem.toString()) },
+    },
+    {
+      $lookup: {
+        from: 'CourseMember',
+        let: { courseId: '$course' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: [ '$user', new mongoose.Types.ObjectId(user.toString()) ] },
+                  { $eq: [ '$course', '$$courseId' ] },
+                  { $eq: [ `$role.${role}`, true ] },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'memberships',
+      },
+    },
+    {
+      $match: {
+        'memberships.0': { $exists: true },
+      },
+    },
+    { $limit: 1 },
+  ] as PipelineStage[]
+
+  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
+  return result.length > 0
 }
 
 const courseService = {
@@ -347,6 +388,7 @@ const courseService = {
   getUserRole,
   findCourseProblems,
   addCourseProblem,
+  hasProblemRole,
 }
 
 export default courseService

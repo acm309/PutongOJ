@@ -19,7 +19,7 @@ import { loadCourse } from './course'
 
 const { status, judge } = constants
 
-export async function loadProblem(
+export async function loadProblem (
   ctx: Context,
   inputId?: string | number,
 ): Promise<ProblemDocument> {
@@ -66,6 +66,13 @@ export async function loadProblem(
     }
   }
 
+  if (profile && await courseService.hasProblemRole(
+    profile.id, problem.id, 'basic',
+  )) {
+    ctx.state.problem = problem
+    return problem
+  }
+
   return ctx.throw(...ERR_PERM_DENIED)
 }
 
@@ -106,7 +113,7 @@ const findProblems = async (ctx: Context) => {
       {
         ...paginateOption,
         ...filterOption,
-        showReserved
+        showReserved: true,
       },
     )
   } else {
@@ -115,16 +122,16 @@ const findProblems = async (ctx: Context) => {
         ...paginateOption,
         ...filterOption,
         showReserved,
-        includeOwner: profile?.id ?? null
+        includeOwner: profile?.id ?? null,
       },
     )
   }
-  list.docs = list.docs.map((doc) => ({
+  list.docs = list.docs.map(doc => ({
     ...doc,
     isOwner: profile?.id && doc.owner
       ? doc.owner.toString() === profile.id.toString()
       : false,
-    owner: undefined
+    owner: undefined,
   }))
 
   let solved: number[] = []
@@ -140,7 +147,7 @@ const findProblems = async (ctx: Context) => {
   }
 
   ctx.body = { list, solved } as {
-    list: Paginated<ProblemEntityPreview>,
+    list: Paginated<ProblemEntityPreview>
     solved: number[]
   }
 }
@@ -162,8 +169,8 @@ const getProblem = async (ctx: Context) => {
   const canManage = profile?.isAdmin ?? isOwner
 
   const response: ProblemEntityView = {
-    ...pick(problem, ['pid', 'title', 'time', 'memory', 'status', 'tags',
-      'description', 'input', 'output', 'in', 'out', 'hint']),
+    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
+      'description', 'input', 'output', 'in', 'out', 'hint' ]),
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
     isOwner,
@@ -196,8 +203,8 @@ const createProblem = async (ctx: Context) => {
 
   try {
     const problem = await problemService.createProblem({
-      ...pick(opt, ['title', 'time', 'memory', 'status', 'description',
-        'input', 'output', 'in', 'out', 'hint', 'type', 'code']),
+      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
       owner,
     })
     if (course) {
@@ -205,7 +212,7 @@ const createProblem = async (ctx: Context) => {
     }
     logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
-      = pick(problem, ['pid'])
+      = pick(problem, [ 'pid' ])
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -235,8 +242,8 @@ const updateProblem = async (ctx: Context) => {
   const uid = profile.uid
   try {
     const problem = await problemService.updateProblem(pid, {
-      ...pick(opt, ['title', 'time', 'memory', 'status', 'description',
-        'input', 'output', 'in', 'out', 'hint', 'type', 'code']),
+      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
     })
     logger.info(`Problem <${pid}> is updated by user <${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }

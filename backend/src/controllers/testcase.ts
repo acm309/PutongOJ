@@ -5,20 +5,20 @@ import send from 'koa-send'
 import remove from 'lodash/remove'
 import { v4 as uuid, validate } from 'uuid'
 import { loadProfile } from '../middlewares/authn'
-import { ERR_INVALID_ID } from '../utils/error'
+import courseService from '../services/course'
+import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadProblem } from './problem'
 
 const createTestcase = async (ctx: Context) => {
-  /**
-   * @TODO Permission check
-   */
-  // if (!await hasProblemPerm(ctx)) {
-  //   ctx.throw(...ERR_PERM_DENIED)
-  // }
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
 
-  const { pid } = await loadProblem(ctx)
-  const { uid } = await loadProfile(ctx)
+  const { pid } = problem
+  const { uid } = profile
 
   const testin = ctx.request.body.in || ''
   const testout = ctx.request.body.out || ''
@@ -53,15 +53,14 @@ const createTestcase = async (ctx: Context) => {
 }
 
 const removeTestcase = async (ctx: Context) => {
-  /**
-   * @TODO Permission check
-   */
-  // if (!await hasProblemPerm(ctx)) {
-  //   ctx.throw(...ERR_PERM_DENIED)
-  // }
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
 
-  const { pid } = await loadProblem(ctx)
-  const { uid } = await loadProfile(ctx)
+  const { pid } = problem
+  const { uid } = profile
 
   /**
    * 只移除 meta.json 中的对应元素，但并不删除测试数据的文件！
@@ -80,14 +79,19 @@ const removeTestcase = async (ctx: Context) => {
 }
 
 const fetchTestcase = async (ctx: Context) => {
-  /**
-   * @TODO Permission check
-   */
-  // if (!await hasProblemPerm(ctx, 'viewTestcase')) {
-  //   ctx.throw(...ERR_PERM_DENIED)
-  // }
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(
+    profile.isAdmin
+    || (problem.owner && problem.owner === profile.id)
+    || courseService.hasProblemRole(
+      profile.id, problem.id, 'viewTestcase',
+    )
+  )) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
 
-  const { pid } = await loadProblem(ctx)
+  const { pid } = problem
   const uuid = String(ctx.params.uuid || '').trim()
   if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
@@ -106,14 +110,13 @@ const fetchTestcase = async (ctx: Context) => {
 }
 
 const findTestcases = async (ctx: Context) => {
-  /**
-   * @TODO Permission check
-   */
-  // if (!await hasProblemPerm(ctx)) {
-  //   ctx.throw(...ERR_PERM_DENIED)
-  // }
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
 
-  const { pid } = await loadProblem(ctx)
+  const { pid } = problem
   let meta = { testcases: [] }
   const dir = path.resolve(__dirname, `../../data/${pid}`)
   const file = path.resolve(dir, 'meta.json')

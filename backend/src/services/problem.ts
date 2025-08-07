@@ -1,15 +1,15 @@
+import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
 import type { Paginated, PaginateOption } from '../types'
 import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
-import { ObjectId } from 'mongoose'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
+import mongoose from 'mongoose'
 import Problem from '../models/Problem'
 import { status } from '../utils/constants'
-import mongoose from 'mongoose'
 
-export async function findProblems(
+export async function findProblems (
   opt: PaginateOption & {
     type?: string
     content?: string
@@ -22,7 +22,7 @@ export async function findProblems(
 
   if (!(showReserved === true)) {
     const statusFilters: Record<string, any>[]
-      = [{ status: status.Available }]
+      = [ { status: status.Available } ]
     if (includeOwner) {
       statusFilters.push({
         owner: new mongoose.Types.ObjectId(includeOwner.toString()),
@@ -39,7 +39,7 @@ export async function findProblems(
         break
       case 'tag':
         filters.push({
-          tags: { $in: [new RegExp(escapeRegExp(String(content)), 'i')] },
+          tags: { $in: [ new RegExp(escapeRegExp(String(content)), 'i') ] },
         })
         break
       case 'pid':
@@ -66,7 +66,7 @@ export async function findProblems(
   return result
 }
 
-export async function findProblemItems(
+export async function findProblemItems (
   keyword: string,
 ): Promise<ProblemEntityItem[]> {
   const result: ProblemEntityItem[] = []
@@ -99,21 +99,21 @@ export async function findProblemItems(
   return result
 }
 
-export async function getProblemItems(): Promise<ProblemEntityItem[]> {
+export async function getProblemItems (): Promise<ProblemEntityItem[]> {
   const result = await Problem
     .find({}, { _id: 0, title: 1, pid: 1 })
     .lean()
   return result
 }
 
-export async function getProblem(
+export async function getProblem (
   pid: number,
 ): Promise<ProblemDocument | undefined> {
   const problem = await Problem.findOne({ pid })
   return problem ?? undefined
 }
 
-export async function createProblem(
+export async function createProblem (
   opt: ProblemEntityEditable,
 ): Promise<ProblemDocument> {
   const problem = new Problem(opt)
@@ -129,7 +129,7 @@ export async function createProblem(
   return problem
 }
 
-export async function updateProblem(
+export async function updateProblem (
   pid: number,
   opt: Partial<ProblemEntityEditable>,
 ): Promise<ProblemDocument | undefined> {
@@ -138,7 +138,7 @@ export async function updateProblem(
   return problem ?? undefined
 }
 
-export async function removeProblem(pid: number): Promise<boolean> {
+export async function removeProblem (pid: number): Promise<boolean> {
   const problem = await Problem.deleteOne({ pid })
   return !!problem
 }
