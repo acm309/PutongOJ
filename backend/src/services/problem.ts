@@ -5,6 +5,7 @@ import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview } f
 import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
+import mongoose from 'mongoose'
 import Problem from '../models/Problem'
 import { status } from '../utils/constants'
 
@@ -12,15 +13,22 @@ export async function findProblems (
   opt: PaginateOption & {
     type?: string
     content?: string
+    showReserved?: boolean
+    includeOwner?: ObjectId | string | null
   },
-  showAll: boolean = false,
-  course?: ObjectId | null,
-): Promise<Paginated<ProblemEntityPreview>> {
-  const { page, pageSize, content, type } = opt
+): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
+  const { page, pageSize, content, type, showReserved, includeOwner } = opt
   const filters: Record<string, any>[] = []
 
-  if (!showAll) {
-    filters.push({ status: status.Available })
+  if (!(showReserved === true)) {
+    const statusFilters: Record<string, any>[]
+      = [ { status: status.Available } ]
+    if (includeOwner) {
+      statusFilters.push({
+        owner: new mongoose.Types.ObjectId(includeOwner.toString()),
+      })
+    }
+    filters.push({ $or: statusFilters })
   }
   if (content) {
     switch (type) {
@@ -35,20 +43,16 @@ export async function findProblems (
         })
         break
       case 'pid':
-        filters.push({ $expr: { $regexMatch: {
-          input: { $toString: '$pid' },
-          regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i') },
-        } })
+        filters.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: '$pid' },
+              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
+            },
+          },
+        })
         break
     }
-  }
-  if (course) {
-    filters.push({ course })
-  } else if (!showAll) {
-    filters.push({ $or: [
-      { course: { $exists: false } },
-      { course: null } ],
-    })
   }
 
   const result = await Problem.paginate({ $and: filters }, {
@@ -57,12 +61,45 @@ export async function findProblems (
     limit: pageSize,
     lean: true,
     leanWithId: false,
-    select: '-_id pid title status type tags submit solve',
-  }) as any
+    select: '-_id pid title status type tags submit solve owner',
+  }) as unknown as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
   return result
 }
 
-export async function getAllProblems (): Promise<ProblemEntityItem[]> {
+export async function findProblemItems (
+  keyword: string,
+): Promise<ProblemEntityItem[]> {
+  const result: ProblemEntityItem[] = []
+  if (Number.isInteger(Number(keyword))) {
+    result.push(...await Problem.find(
+      {
+        $expr: {
+          $regexMatch: {
+            input: { $toString: '$pid' },
+            regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
+          },
+        },
+      },
+      { _id: 0, pid: 1, title: 1 },
+      { sort: { pid: 1 }, limit: 10 },
+    ).lean(),
+    )
+  }
+  if (result.length < 10) {
+    result.push(...await Problem.find(
+      {
+        pid: { $nin: result.map(p => p.pid) },
+        title: { $regex: new RegExp(escapeRegExp(keyword), 'i') },
+      },
+      { _id: 0, pid: 1, title: 1 },
+      { sort: { updatedAt: -1 }, limit: 10 - result.length },
+    ).lean(),
+    )
+  }
+  return result
+}
+
+export async function getProblemItems (): Promise<ProblemEntityItem[]> {
   const result = await Problem
     .find({}, { _id: 0, title: 1, pid: 1 })
     .lean()
@@ -72,7 +109,7 @@ export async function getAllProblems (): Promise<ProblemEntityItem[]> {
 export async function getProblem (
   pid: number,
 ): Promise<ProblemDocument | undefined> {
-  const problem = await Problem.findOne({ pid }).populate('course')
+  const problem = await Problem.findOne({ pid })
   return problem ?? undefined
 }
 
@@ -108,7 +145,8 @@ export async function removeProblem (pid: number): Promise<boolean> {
 
 const problemService = {
   findProblems,
-  getAllProblems,
+  findProblemItems,
+  getProblemItems,
   getProblem,
   createProblem,
   updateProblem,

@@ -72,7 +72,7 @@ export interface CourseEntityPreviewWithRole extends CourseEntityPreview {
   role: CourseRole
 }
 
-// Course Permission
+// Course Member
 
 export interface CourseMemberEntity extends Entity {
   user: ObjectId
@@ -82,6 +82,13 @@ export interface CourseMemberEntity extends Entity {
 
 export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View {
   user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
+}
+
+// Course Problem
+
+export interface CourseProblemEntity extends Entity {
+  course: ObjectId
+  problem: ObjectId
 }
 
 // Problem
@@ -109,29 +116,31 @@ export interface ProblemEntity extends Entity {
   /** Judger code */
   code: string
   tags: string[]
-  course: CourseDocument | null
+  owner: ObjectId | null
   submit: number
   solve: number
 }
 
 export type ProblemEntityEditable = Pick<ProblemEntity,
   'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
-  | 'out' | 'hint' | 'status' | 'type' | 'code'
-> & { course?: ObjectId | null }
+  | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'
+>
 
 export type ProblemEntityItem = Pick<ProblemEntity,
   'pid' | 'title'
 >
 
-export type ProblemEntityPreview = Pick<ProblemEntity,
+export interface ProblemEntityPreview extends Pick<ProblemEntity,
   'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
->
+> {
+  isOwner?: boolean
+}
 
-export type ProblemEntityView = Pick<ProblemEntity,
+export interface ProblemEntityView extends Pick<ProblemEntity,
   'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
   | 'input' | 'output' | 'in' | 'out' | 'hint'
-> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
-  course: CourseEntityPreviewWithRole | null
+>, Partial<Pick<ProblemEntity, 'type' | 'code'>> {
+  isOwner: boolean
 }
 
 // Contest

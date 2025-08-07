@@ -49,8 +49,11 @@ function updateCourse () {
 <template>
   <div class="course-settings">
     <Form ref="courseFormRef" :model="course" :label-width="100" :rules="courseRules">
-      <FormItem label="Name" prop="name">
-        <Input v-model="course.name" :maxlength="20" show-word-limit placeholder="Enter course name" />
+      <FormItem prop="name">
+        <template #label>
+          <span style="line-height: 20px;">Name</span>
+        </template>
+        <Input v-model="course.name" size="large" :maxlength="30" show-word-limit placeholder="Enter course name" />
       </FormItem>
       <FormItem label="Description" prop="description">
         <Input

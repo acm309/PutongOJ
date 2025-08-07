@@ -7,6 +7,7 @@ import { Document } from 'mongoose'
 import { loadProfile } from '../middlewares/authn'
 import User from '../models/User'
 import courseService from '../services/course'
+import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 
@@ -249,6 +250,30 @@ const removeCourseMember = async (ctx: Context) => {
   ctx.body = response
 }
 
+const addCourseProblems = async (ctx: Context) => {
+  const { course } = await loadCourse(ctx)
+  const { problemIds } = ctx.request.body
+  if (!Array.isArray(problemIds) || problemIds.length === 0) {
+    return ctx.throw(400, 'problemIds must be a non-empty array')
+  }
+
+  const result = await Promise.all(problemIds.map(async (pid: any) => {
+    const problem = await problemService.getProblem(pid)
+    if (!problem) {
+      return false
+    }
+    return await courseService.addCourseProblem(course.id, problem.id)
+  }))
+
+  const successCount = result.filter(v => v).length
+  const response: { success: boolean, added: number } = {
+    success: successCount === problemIds.length,
+    added: successCount,
+  }
+
+  ctx.body = response
+}
+
 const courseController = {
   loadCourse,
   findCourses,
@@ -261,6 +286,7 @@ const courseController = {
   getCourseMember,
   updateCourseMember,
   removeCourseMember,
+  addCourseProblems,
 }
 
 export default module.exports = courseController

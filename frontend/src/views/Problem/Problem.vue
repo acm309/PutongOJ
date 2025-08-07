@@ -20,7 +20,7 @@ const isEditable = computed(() => {
   if (problem.value?.pid !== Number(route.params.pid)) {
     return false
   }
-  if (isAdmin.value || problem.value?.course?.role.manageProblem) {
+  if (isAdmin.value || problem.value?.isOwner) {
     return true
   }
   return false

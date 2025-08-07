@@ -72,10 +72,13 @@ function submit () {
       class="course-form" :label-width="80"
       :model="courseForm" :rules="courseRules"
     >
-      <FormItem label="Name" prop="name">
+      <FormItem prop="name">
+        <template #label>
+          <span style="line-height: 20px;">Name</span>
+        </template>
         <Input
-          v-model="courseForm.name"
-          :maxlength="20" show-word-limit
+          v-model="courseForm.name" size="large"
+          :maxlength="30" show-word-limit
           placeholder="Enter course name"
         />
       </FormItem>

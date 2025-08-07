@@ -1,13 +1,15 @@
-import type { ObjectId } from 'mongoose'
+import type { ObjectId, PipelineStage } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, UserEntity } from '../types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, ProblemEntityPreview, UserEntity } from '../types/entity'
 import { escapeRegExp, omit } from 'lodash'
+import mongoose from 'mongoose'
 import Course from '../models/Course'
 import CourseMember from '../models/CourseMember'
+import CourseProblem from '../models/CourseProblem'
 import User from '../models/User'
-import { courseRoleEntire, courseRoleNone, encrypt } from '../utils/constants'
+import { courseRoleEntire, courseRoleNone, encrypt, status } from '../utils/constants'
 
 export async function findCourses (
   opt: PaginateOption & {},
@@ -202,6 +204,175 @@ export async function getUserRole (
   return role
 }
 
+export async function findCourseProblems (
+  course: ObjectId | string,
+  opt: PaginateOption & {
+    type?: string
+    content?: string
+    showReserved?: boolean
+  },
+): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
+  const { page, pageSize, type, content, showReserved } = opt
+
+  const filters: Record<string, any>[] = []
+  if (!(showReserved === true)) {
+    filters.push({ 'problem.status': status.Available })
+  }
+  if (content && type) {
+    switch (type) {
+      case 'title':
+        filters.push({
+          'problem.title': {
+            $regex: new RegExp(escapeRegExp(String(content)), 'i'),
+          },
+        })
+        break
+      case 'tag':
+        filters.push({
+          'problem.tags': {
+            $elemMatch: {
+              $regex: new RegExp(escapeRegExp(String(content)), 'i'),
+            },
+          },
+        })
+        break
+      case 'pid':
+        filters.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: '$problem.pid' },
+              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
+            },
+          },
+        })
+        break
+    }
+  }
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        course: new mongoose.Types.ObjectId(course.toString()),
+      },
+    },
+    {
+      $lookup: {
+        from: 'Problem',
+        localField: 'problem',
+        foreignField: '_id',
+        as: 'problem',
+      },
+    },
+    {
+      $unwind: '$problem',
+    },
+    ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
+    {
+      $sort: { pid: 1 },
+    },
+    {
+      $facet: {
+        paginatedResults: [
+          { $skip: (page - 1) * pageSize },
+          { $limit: pageSize },
+          {
+            $project: {
+              _id: 0,
+              problem: {
+                pid: '$problem.pid',
+                title: '$problem.title',
+                status: '$problem.status',
+                type: '$problem.type',
+                tags: '$problem.tags',
+                submit: '$problem.submit',
+                solve: '$problem.solve',
+                owner: '$problem.owner',
+              },
+            },
+          },
+        ],
+        totalCount: [
+          { $count: 'count' },
+        ],
+      },
+    },
+    {
+      $project: {
+        docs: '$paginatedResults.problem',
+        total: {
+          $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ],
+        },
+        pages: {
+          $ceil: {
+            $divide: [
+              { $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ] },
+              pageSize,
+            ],
+          },
+        },
+        page: { $literal: page },
+        limit: { $literal: pageSize },
+      },
+    },
+  ] as PipelineStage[]
+
+  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
+  return result[0] as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
+}
+
+export async function addCourseProblem (
+  course: ObjectId,
+  problem: ObjectId,
+): Promise<boolean> {
+  const result = await CourseProblem.updateOne(
+    { course, problem },
+    { course, problem },
+    { upsert: true },
+  )
+  return result.upsertedCount > 0
+}
+
+export async function hasProblemRole (
+  user: ObjectId | string,
+  problem: ObjectId | string,
+  role: keyof CourseRole,
+): Promise<boolean> {
+  const aggregationPipeline = [
+    {
+      $match: { problem: new mongoose.Types.ObjectId(problem.toString()) },
+    },
+    {
+      $lookup: {
+        from: 'CourseMember',
+        let: { courseId: '$course' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: [ '$user', new mongoose.Types.ObjectId(user.toString()) ] },
+                  { $eq: [ '$course', '$$courseId' ] },
+                  { $eq: [ `$role.${role}`, true ] },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'memberships',
+      },
+    },
+    {
+      $match: {
+        'memberships.0': { $exists: true },
+      },
+    },
+    { $limit: 1 },
+  ] as PipelineStage[]
+
+  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
+  return result.length > 0
+}
+
 const courseService = {
   courseRoleNone,
   courseRoleEntire,
@@ -215,6 +386,9 @@ const courseService = {
   updateCourseMember,
   removeCourseMember,
   getUserRole,
+  findCourseProblems,
+  addCourseProblem,
+  hasProblemRole,
 }
 
 export default courseService
