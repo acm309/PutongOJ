@@ -216,7 +216,7 @@ export async function findCourseProblems (
 
   const filters: Record<string, any>[] = []
   if (!(showReserved === true)) {
-    filters.push({ status: status.Available })
+    filters.push({ 'problem.status': status.Available })
   }
   if (content && type) {
     switch (type) {
