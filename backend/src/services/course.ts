@@ -9,6 +9,7 @@ import CourseMember from '../models/CourseMember'
 import CourseProblem from '../models/CourseProblem'
 import User from '../models/User'
 import { courseRoleEntire, courseRoleNone, encrypt, status } from '../utils/constants'
+import mongoose from 'mongoose'
 
 export async function findCourses (
   opt: PaginateOption & {},
@@ -204,17 +205,17 @@ export async function getUserRole (
 }
 
 export async function findCourseProblems (
-  course: ObjectId,
+  course: ObjectId | string,
   opt: PaginateOption & {
     type?: string
     content?: string
+    showReserved?: boolean
   },
-  showAll: boolean = false,
-): Promise<Paginated<ProblemEntityPreview>> {
-  const { page, pageSize, type, content } = opt
+): Promise<Paginated<ProblemEntityPreview & {owner: ObjectId | null}>> {
+  const { page, pageSize, type, content, showReserved } = opt
 
   const filters: Record<string, any>[] = []
-  if (!showAll) {
+  if (!(showReserved === true)) {
     filters.push({ status: status.Available })
   }
   if (content && type) {
@@ -250,7 +251,9 @@ export async function findCourseProblems (
 
   const aggregationPipeline = [
     {
-      $match: { course },
+      $match: { 
+        course: new mongoose.Types.ObjectId(course.toString()) 
+      },
     },
     {
       $lookup: {
@@ -283,6 +286,7 @@ export async function findCourseProblems (
                 tags: '$problem.tags',
                 submit: '$problem.submit',
                 solve: '$problem.solve',
+                owner: '$problem.owner',
               },
             },
           },
@@ -313,7 +317,7 @@ export async function findCourseProblems (
   ] as PipelineStage[]
 
   const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result[0] as Paginated<ProblemEntityPreview>
+  return result[0] as Paginated<ProblemEntityPreview & {owner: ObjectId | null}>
 }
 
 export async function addCourseProblem (

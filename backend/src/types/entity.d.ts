@@ -130,9 +130,11 @@ export type ProblemEntityItem = Pick<ProblemEntity,
   'pid' | 'title'
 >
 
-export type ProblemEntityPreview = Pick<ProblemEntity,
+export interface ProblemEntityPreview extends Pick<ProblemEntity,
   'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
->
+> {
+  isOwner?: boolean
+}
 
 export interface ProblemEntityView extends Pick<ProblemEntity,
   'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'

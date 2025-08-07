@@ -9,6 +9,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
+import { useSessionStore } from '@/store/modules/session'
 import constant from '@/util/constant'
 import { formate } from '@/util/formate'
 import { onRouteQueryUpdate, purify } from '@/util/helper'
@@ -17,9 +18,11 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const rootStore = useRootStore()
+const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
 const courseStore = useCourseStore()
 const { status, judge } = $(storeToRefs(rootStore))
+const { isAdmin } = storeToRefs(sessionStore)
 const { problems, solved } = $(storeToRefs(problemStore))
 const { course } = storeToRefs(courseStore)
 const { findProblems, update } = problemStore
@@ -177,7 +180,12 @@ onRouteQueryUpdate(fetch)
             </td>
             <td v-if="course.role.manageProblem" class="problem-visible">
               <Tooltip content="Click to change status" placement="right">
-                <a @click="switchStatus(item)">{{ problemStatus[item.status] }}</a>
+                <a
+                  :class="{ 'status-disabled': !(isAdmin || item.isOwner) }"
+                  @click="switchStatus(item)"
+                >
+                  {{ problemStatus[item.status] }}
+                </a>
               </Tooltip>
             </td>
           </tr>
@@ -315,6 +323,9 @@ onRouteQueryUpdate(fetch)
   vertical-align middle
   color #515a6e
   margin 0px 0px 4px 8px
+.status-disabled
+  color #b0b0b0
+  cursor not-allowed
 
 .status-empty
   &:hover

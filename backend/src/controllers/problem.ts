@@ -19,7 +19,7 @@ import { loadCourse } from './course'
 
 const { status, judge } = constants
 
-export async function loadProblem (
+export async function loadProblem(
   ctx: Context,
   inputId?: string | number,
 ): Promise<ProblemDocument> {
@@ -72,7 +72,7 @@ export async function loadProblem (
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = ctx.state.profile
-  let showAll: boolean = !!profile?.isAdmin
+  let showReserved: boolean = !!profile?.isAdmin
 
   /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
   if (Number(opt.page) === -1 && profile?.isAdmin) {
@@ -88,28 +88,44 @@ const findProblems = async (ctx: Context) => {
       return ctx.throw(...ERR_PERM_DENIED)
     }
     if (role.manageProblem) {
-      showAll = true
+      showReserved = true
     }
     courseDocId = course._id as ObjectId
   }
 
   const paginateOption = parsePaginateOption(opt, 30, 100)
-  const type = typeof opt.type === 'string' ? opt.type : undefined
-  const content = typeof opt.content === 'string' ? opt.content : undefined
+  const filterOption = {
+    type: typeof opt.type === 'string' ? opt.type : undefined,
+    content: typeof opt.content === 'string' ? opt.content : undefined,
+  }
 
-  let list: Paginated<ProblemEntityPreview>
+  let list: Paginated<ProblemEntityPreview & { owner?: ObjectId | null }>
   if (courseDocId) {
     list = await courseService.findCourseProblems(
       courseDocId,
-      { ...paginateOption, type, content },
-      showAll,
+      {
+        ...paginateOption,
+        ...filterOption,
+        showReserved
+      },
     )
   } else {
     list = await problemService.findProblems(
-      { ...paginateOption, type, content },
-      showAll,
+      {
+        ...paginateOption,
+        ...filterOption,
+        showReserved,
+        includeOwner: profile?.id ?? null
+      },
     )
   }
+  list.docs = list.docs.map((doc) => ({
+    ...doc,
+    isOwner: profile?.id && doc.owner
+      ? doc.owner.toString() === profile.id.toString()
+      : false,
+    owner: undefined
+  }))
 
   let solved: number[] = []
   if (profile && list.total > 0) {
@@ -123,7 +139,10 @@ const findProblems = async (ctx: Context) => {
       .lean()
   }
 
-  ctx.body = { list, solved }
+  ctx.body = { list, solved } as {
+    list: Paginated<ProblemEntityPreview>,
+    solved: number[]
+  }
 }
 
 const findProblemItems = async (ctx: Context) => {
@@ -143,8 +162,8 @@ const getProblem = async (ctx: Context) => {
   const canManage = profile?.isAdmin ?? isOwner
 
   const response: ProblemEntityView = {
-    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
-      'description', 'input', 'output', 'in', 'out', 'hint' ]),
+    ...pick(problem, ['pid', 'title', 'time', 'memory', 'status', 'tags',
+      'description', 'input', 'output', 'in', 'out', 'hint']),
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
     isOwner,
@@ -177,8 +196,8 @@ const createProblem = async (ctx: Context) => {
 
   try {
     const problem = await problemService.createProblem({
-      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
-        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
+      ...pick(opt, ['title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code']),
       owner,
     })
     if (course) {
@@ -186,7 +205,7 @@ const createProblem = async (ctx: Context) => {
     }
     logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
-      = pick(problem, [ 'pid' ])
+      = pick(problem, ['pid'])
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -216,8 +235,8 @@ const updateProblem = async (ctx: Context) => {
   const uid = profile.uid
   try {
     const problem = await problemService.updateProblem(pid, {
-      ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
-        'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
+      ...pick(opt, ['title', 'time', 'memory', 'status', 'description',
+        'input', 'output', 'in', 'out', 'hint', 'type', 'code']),
     })
     logger.info(`Problem <${pid}> is updated by user <${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }

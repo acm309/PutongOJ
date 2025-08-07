@@ -138,7 +138,7 @@ onProfileUpdate(fetch)
             <th class="problem-ratio">
               Ratio
             </th>
-            <th v-if="isAdmin" class="problem-visible">
+            <th v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="problem-visible">
               Visible
             </th>
             <th v-if="isRoot" class="problem-delete">
@@ -185,8 +185,8 @@ onProfileUpdate(fetch)
               </router-link>
               )
             </td>
-            <td v-if="isAdmin" class="problem-visible">
-              <Tooltip content="Click to change status" placement="right">
+            <td v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="problem-visible">
+              <Tooltip v-if="isAdmin || item.isOwner" content="Click to change status" placement="right">
                 <a @click="change(item)">{{ problemVisible[item.status] }}</a>
               </Tooltip>
             </td>
