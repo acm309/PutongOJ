@@ -29,5 +29,8 @@ problemRouter.del('/:pid',
   authnMiddleware.rootRequire,
   problemController.removeProblem,
 )
+problemRouter.get('/:pid/statistics',
+  problemController.getStatistics,
+)
 
 export default module.exports = problemRouter

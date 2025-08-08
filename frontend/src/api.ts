@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -39,8 +39,6 @@ const utils = {
   getTime: () => instance.get<TimeResp>('/servertime'),
   getRanklist: (params: { [key: string]: any }) =>
     instance.get('/ranklist/list', { params }),
-  getStatistics: (params: { [key: string]: any }) =>
-    instance.get(`/statistics/${params.pid}`, { params }),
 }
 
 const testcase = {
@@ -92,6 +90,8 @@ const problem = {
     instance.put(`/problem/${data.pid}`, data),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/problem/${data.pid}`, data),
+  getStatistics: (pid: number, params: PaginateParams) =>
+    instance.get<ProblemStatistics>(`/problem/${pid}/statistics`, { params }),
 }
 
 const contest = {

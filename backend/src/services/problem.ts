@@ -1,13 +1,14 @@
 import type { ObjectId } from 'mongoose'
 import type { ProblemDocument } from '../models/Problem'
 import type { Paginated, PaginateOption } from '../types'
-import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
+import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
 import mongoose from 'mongoose'
 import Problem from '../models/Problem'
-import { status } from '../utils/constants'
+import Solution from '../models/Solution'
+import { judge, status } from '../utils/constants'
 
 export async function findProblems (
   opt: PaginateOption & {
@@ -143,6 +144,56 @@ export async function removeProblem (pid: number): Promise<boolean> {
   return !!problem
 }
 
+export async function getStatistics (
+  pid: number,
+  opt: PaginateOption,
+): Promise<ProblemStatistics> {
+  const { page, pageSize } = opt
+
+  const list = await Solution.paginate({
+    pid,
+    judge: judge.Accepted,
+  }, {
+    sort: { time: 1, memory: 1, length: 1, create: 1 },
+    page,
+    limit: pageSize,
+    lean: true,
+    leanWithId: false,
+    select: '-_id sid uid time memory language create',
+  }) as unknown as Paginated<Omit<SolutionEntityPreview, 'pid' | 'judge'>>
+
+  const groupResult = await Solution.aggregate([
+    {
+      $match: {
+        pid,
+        judge: { $gte: 2, $lte: 10 },
+      },
+    },
+    {
+      $group: {
+        _id: { judge: '$judge', uid: '$uid' },
+      },
+    },
+    {
+      $group: {
+        _id: '$_id.judge',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+  ])
+
+  const group = Array.from({ length: 9 }).fill(0) as number[]
+  groupResult.forEach((item) => {
+    const i = item._id - 2
+    group[i] = item.count
+  })
+
+  return { group, list }
+}
+
 const problemService = {
   findProblems,
   findProblemItems,
@@ -151,6 +202,7 @@ const problemService = {
   createProblem,
   updateProblem,
   removeProblem,
+  getStatistics,
 }
 
 export default problemService

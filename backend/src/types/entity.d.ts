@@ -1,5 +1,5 @@
 import type { ObjectId } from 'mongoose'
-import type { ContestOption, CourseRole } from '.'
+import type { ContestOption, CourseRole, Paginated } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { encrypt, problemType, status } from '../utils/constants'
 
@@ -143,6 +143,13 @@ export interface ProblemEntityView extends Pick<ProblemEntity,
   isOwner: boolean
 }
 
+// Problem Statistics
+
+export interface ProblemStatistics {
+  group: number[]
+  list: Paginated<Omit<SolutionEntityPreview, 'pid' | 'judge'>>
+}
+
 // Contest
 
 export interface ContestEntity extends Entity {
@@ -211,6 +218,10 @@ export interface SolutionEntity extends Entity {
     memory: number
   }[]
 }
+
+export type SolutionEntityPreview = Pick<SolutionEntity,
+  'sid' | 'pid' | 'uid' | 'judge' | 'time' | 'memory' | 'language' | 'create'
+>
 
 // News
 

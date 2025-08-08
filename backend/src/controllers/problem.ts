@@ -3,7 +3,7 @@ import type { ObjectId } from 'mongoose'
 import type { Paginated } from 'src/types'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocument } from '../models/Problem'
-import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView } from '../types/entity'
+import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
@@ -271,6 +271,15 @@ const removeProblem = async (ctx: Context) => {
   ctx.body = {}
 }
 
+const getStatistics = async (ctx: Context) => {
+  const opt = ctx.request.query
+  const problem = await loadProblem(ctx)
+  const paginateOption = parsePaginateOption(opt, 30, 100)
+
+  const result = await problemService.getStatistics(problem.pid, paginateOption)
+  ctx.body = result as ProblemStatistics
+}
+
 const problemController = {
   loadProblem,
   findProblems,
@@ -279,6 +288,7 @@ const problemController = {
   createProblem,
   updateProblem,
   removeProblem,
+  getStatistics,
 }
 
 export default module.exports = problemController

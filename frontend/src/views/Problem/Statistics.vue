@@ -2,18 +2,15 @@
 import { PieChart } from 'echarts/charts'
 import { LegendComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
-
 import { SVGRenderer } from 'echarts/renderers'
 import { storeToRefs } from 'pinia'
 import { Badge, Icon, Page, Spin } from 'view-ui-plus'
 import Chart from 'vue-echarts'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-
 import { useRootStore } from '@/store'
-
 import { useSessionStore } from '@/store/modules/session'
-import { useStatisticsStore } from '@/store/modules/statistics'
+import { useStatisticsStore } from '@/store/modules/statistics.ts'
 import { language } from '@/util/constant'
 import { timePretty } from '@/util/formate'
 import { onRouteQueryUpdate } from '@/util/helper'
@@ -117,7 +114,6 @@ function handleCurrentChange (val) {
       pageSize: route.query.pageSize || 20,
     },
   })
-  getStatistics()
 }
 
 getStatistics()
