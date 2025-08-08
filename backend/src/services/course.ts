@@ -268,7 +268,7 @@ export async function findCourseProblems (
     },
     ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
     {
-      $sort: { pid: 1 },
+      $sort: { 'problem.pid': 1 },
     },
     {
       $facet: {
