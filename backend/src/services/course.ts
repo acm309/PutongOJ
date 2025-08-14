@@ -324,11 +324,13 @@ export async function addCourseProblem (
   course: ObjectId,
   problem: ObjectId,
 ): Promise<boolean> {
-  const existingCount = await CourseProblem.countDocuments({ course }).exec()
-  const sort = existingCount + 1
+  const currentLast = await CourseProblem.findOne({ course })
+    .sort({ sort: -1, updatedAt: 1 })
+    .limit(1)
+  const sort = currentLast?.sort ?? 0
   const result = await CourseProblem.updateOne(
     { course, problem },
-    { course, problem, sort },
+    { course, problem, sort: sort + 1 },
     { upsert: true },
   )
   return result.upsertedCount > 0
