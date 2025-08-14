@@ -274,6 +274,30 @@ const addCourseProblems = async (ctx: Context) => {
   ctx.body = response
 }
 
+const moveCourseProblem = async (ctx: Context) => {
+  const { course } = await loadCourse(ctx)
+  const { beforePos = 1 } = ctx.request.body
+  const problemId = ctx.params.problemId
+  const problem = await problemService.getProblem(problemId)
+  if (!problem) {
+    return ctx.throw(...ERR_INVALID_ID)
+  }
+  const result = await courseService.moveCourseProblem(
+    course.id, problem.id, beforePos,
+  )
+  ctx.body = { success: result }
+}
+
+const rearrangeCourseProblem = async (ctx: Context) => {
+  const { course } = await loadCourse(ctx)
+  try {
+    await courseService.rearrangeCourseProblem(course.id)
+    ctx.body = { success: true }
+  } catch (e: any) {
+    ctx.throw(500, `Failed to rearrange course problems: ${e.message}`)
+  }
+}
+
 const courseController = {
   loadCourse,
   findCourses,
@@ -287,6 +311,8 @@ const courseController = {
   updateCourseMember,
   removeCourseMember,
   addCourseProblems,
+  moveCourseProblem,
+  rearrangeCourseProblem,
 }
 
 export default module.exports = courseController

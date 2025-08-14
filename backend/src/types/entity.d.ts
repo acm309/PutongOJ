@@ -89,6 +89,7 @@ export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View
 export interface CourseProblemEntity extends Entity {
   course: ObjectId
   problem: ObjectId
+  sort: number
 }
 
 // Problem

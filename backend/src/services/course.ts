@@ -268,7 +268,7 @@ export async function findCourseProblems (
     },
     ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
     {
-      $sort: { 'problem.pid': 1 },
+      $sort: { sort: 1, updatedAt: -1 },
     },
     {
       $facet: {
@@ -324,12 +324,70 @@ export async function addCourseProblem (
   course: ObjectId,
   problem: ObjectId,
 ): Promise<boolean> {
+  const existingCount = await CourseProblem.countDocuments({ course }).exec()
+  const sort = existingCount + 1
   const result = await CourseProblem.updateOne(
     { course, problem },
-    { course, problem },
+    { course, problem, sort },
     { upsert: true },
   )
   return result.upsertedCount > 0
+}
+
+export async function moveCourseProblem (
+  course: ObjectId,
+  problem: ObjectId,
+  beforePos: number,
+): Promise<boolean> {
+  if (!Number.isInteger(beforePos) || beforePos < 1) {
+    return false
+  }
+
+  const [ currentAtPos, currentBeforePos, currentLast ] = await Promise.all([
+    CourseProblem.findOne({ course })
+      .sort({ sort: 1, updatedAt: -1 })
+      .skip(beforePos - 1),
+    beforePos > 1
+      ? CourseProblem.findOne({ course })
+          .sort({ sort: 1, updatedAt: -1 })
+          .skip(beforePos - 2)
+      : null,
+    CourseProblem.findOne({ course })
+      .sort({ sort: -1, updatedAt: 1 })
+      .limit(1),
+  ])
+
+  let sort = 0
+  if (currentLast) {
+    if (currentAtPos) {
+      if (currentBeforePos) {
+        sort = (currentAtPos.sort + currentBeforePos.sort) / 2
+      } else {
+        sort = currentAtPos.sort - 1
+      }
+    } else {
+      if (currentBeforePos) {
+        sort = currentBeforePos.sort + 1
+      } else {
+        sort = currentLast.sort + 1
+      }
+    }
+  }
+
+  const result = await CourseProblem.updateOne(
+    { course, problem },
+    { sort },
+  )
+  return result.modifiedCount > 0
+}
+
+export async function rearrangeCourseProblem (
+  course: ObjectId,
+): Promise<void> {
+  const problems = await CourseProblem.find({ course }).sort({ sort: 1, updatedAt: -1 })
+  await Promise.all(problems.map((problem, index) => {
+    return CourseProblem.updateOne({ _id: problem._id }, { sort: index + 1 })
+  }))
 }
 
 export async function hasProblemRole (
@@ -388,6 +446,8 @@ const courseService = {
   getUserRole,
   findCourseProblems,
   addCourseProblem,
+  moveCourseProblem,
+  rearrangeCourseProblem,
   hasProblemRole,
 }
 

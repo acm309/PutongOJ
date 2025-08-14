@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
-import { Form, FormItem, Input, Radio, RadioGroup } from 'view-ui-plus'
+import { Button, Col, Divider, Form, FormItem, Input, Poptip, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { inject, ref } from 'vue'
 import api from '@/api'
 import { useCourseStore } from '@/store/modules/course'
+import { useSessionStore } from '@/store/modules/session'
 
+const sessionStore = useSessionStore()
 const courseStore = useCourseStore()
+const { isRoot } = storeToRefs(sessionStore)
 const { course } = storeToRefs(courseStore)
 const message = inject('$Message') as typeof Message
 
@@ -43,6 +46,11 @@ function updateCourse () {
       message.warning('Form is not valid, please check your input.')
     }
   })
+}
+
+function rearrangeProblems () {
+  api.course.rearrangeProblems(course.value.courseId)
+  message.info('Rearrange task dispatched.')
 }
 </script>
 
@@ -83,12 +91,29 @@ function updateCourse () {
         </Button>
       </FormItem>
     </Form>
+    <template v-if="isRoot">
+      <Divider simple>
+        System Action
+      </Divider>
+      <Row>
+        <Col flex="auto">
+          <span style="line-height: 32px; padding-left: 16px;">
+            Problem Sort Rearrange
+          </span>
+        </Col>
+        <Col>
+          <Poptip confirm title="Confirm?" @on-ok="rearrangeProblems">
+            <Button>Execute</Button>
+          </Poptip>
+        </Col>
+      </Row>
+    </template>
   </div>
 </template>
 
 <style lang="stylus" scoped>
 .course-settings
-    padding 0 40px 40px
+  padding 0 40px 40px !important
 @media screen and (max-width: 1024px)
   .course-settings
     padding 0 20px 20px
