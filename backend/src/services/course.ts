@@ -339,6 +339,10 @@ export async function moveCourseProblem (
   problem: ObjectId,
   beforePos: number,
 ): Promise<boolean> {
+  if (!Number.isInteger(beforePos) || beforePos < 1) {
+    return false
+  }
+
   const [ currentAtPos, currentBeforePos, currentLast ] = await Promise.all([
     CourseProblem.findOne({ course })
       .sort({ sort: 1, updatedAt: -1 })
@@ -370,10 +374,11 @@ export async function moveCourseProblem (
     }
   }
 
-  return !!CourseProblem.updateOne(
+  const result = await CourseProblem.updateOne(
     { course, problem },
     { sort },
   )
+  return result.modifiedCount > 0
 }
 
 export async function rearrangeCourseProblem (

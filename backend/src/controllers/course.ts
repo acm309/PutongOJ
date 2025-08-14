@@ -276,14 +276,15 @@ const addCourseProblems = async (ctx: Context) => {
 
 const moveCourseProblem = async (ctx: Context) => {
   const { course } = await loadCourse(ctx)
-  const { before = 1 } = ctx.request.body
+  const { beforePos = 1 } = ctx.request.body
   const problemId = ctx.params.problemId
   const problem = await problemService.getProblem(problemId)
   if (!problem) {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.moveCourseProblem(
-    course.id, problem.id, before)
+    course.id, problem.id, beforePos,
+  )
   ctx.body = { success: result }
 }
 
