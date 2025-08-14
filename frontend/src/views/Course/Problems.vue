@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { Message } from 'view-ui-plus'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
-import { Button, Icon, Input, Option, Page, Select, Spin } from 'view-ui-plus'
-import { onBeforeMount } from 'vue'
+import { Button, Form, FormItem, Icon, Input, InputNumber, Modal, Option, Page, Select, Spin } from 'view-ui-plus'
+import { inject, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import api from '@/api'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
@@ -86,6 +88,34 @@ async function switchStatus (problem: ProblemEntityPreview) {
   await fetch()
 }
 
+const message = inject('$Message') as typeof Message
+
+const sortingModal = ref(false)
+const sorting = ref({} as ProblemEntityPreview)
+const newPosition = ref<number | null>(null)
+
+async function updateSorting () {
+  if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.total + 1) {
+    message.error('Invalid position. Please enter a valid position.')
+    return
+  }
+  loading = true
+  try {
+    await api.course.moveCourseProblem(
+      course.value.courseId,
+      sorting.value.pid,
+      newPosition.value,
+    )
+    message.success('Problem sorting updated successfully.')
+    sortingModal.value = false
+    await fetch()
+  } catch (e: any) {
+    message.error(`Failed to update sorting: ${e.message}`)
+  } finally {
+    loading = false
+  }
+}
+
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
 </script>
@@ -122,6 +152,9 @@ onRouteQueryUpdate(fetch)
             <th class="problem-status">
               #
             </th>
+            <th class="problem-id">
+              ID
+            </th>
             <th class="problem-pid">
               PID
             </th>
@@ -137,18 +170,24 @@ onRouteQueryUpdate(fetch)
             <th v-if="course.role.manageProblem" class="problem-visible">
               Visible
             </th>
+            <th v-if="isAdmin" class="problem-sorting">
+              Sorting
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="problems.total === 0" class="status-empty">
-            <td colspan="7">
+            <td :colspan="6 + (course.role.manageProblem ? 1 : 0) + (isAdmin ? 1 : 0)">
               <Icon type="ios-planet-outline" class="empty-icon" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>
             </td>
           </tr>
-          <tr v-for="item in problems.docs" :key="item.pid">
+          <tr v-for="(item, index) in problems.docs" :key="item.pid">
             <td class="problem-status">
               <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
+            </td>
+            <td class="problem-id">
+              {{ pageSize * (page - 1) + index + 1 }}
             </td>
             <td class="problem-pid">
               {{ item.pid }}
@@ -188,6 +227,11 @@ onRouteQueryUpdate(fetch)
                 </a>
               </Tooltip>
             </td>
+            <td v-if="isAdmin" class="problem-sorting">
+              <Button type="text" @click="sortingModal = true; sorting = item">
+                Move
+              </Button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -205,6 +249,19 @@ onRouteQueryUpdate(fetch)
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
+    <Modal v-model="sortingModal" :closable="false" title="Update Problem Sorting" @on-ok="updateSorting">
+      <Form label-position="top" style="margin-bottom: -16px;">
+        <FormItem label="Move problem">
+          <Input v-model="sorting.title" size="large" disabled />
+        </FormItem>
+        <FormItem label="Before position">
+          <InputNumber
+            v-model="newPosition" size="large" :min="1" :max="problems.total + 1"
+            placeholder="Enter new position" controls-outside style="width: 100%;"
+          />
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -293,6 +350,9 @@ onRouteQueryUpdate(fetch)
   width 70px
   text-align center
   padding-left 40px !important
+.problem-id
+  width 50px
+  text-align right
 .problem-pid
   width 70px
   text-align right
@@ -309,7 +369,11 @@ onRouteQueryUpdate(fetch)
 .problem-ratio
   width 200px
 .problem-visible
-  width 120px
+  width 90px
+.problem-sorting
+  width 110px
+  text-align center
+  padding-right 40px !important
 
 .problem-tag
   display inline-block
