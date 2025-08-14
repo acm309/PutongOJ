@@ -19,6 +19,10 @@ const courseProblemSchema = new mongoose.Schema({
     required: true,
     immutable: true,
   },
+  sort: {
+    type: Number,
+    default: 0,
+  },
 }, {
   collection: 'CourseProblem',
   timestamps: true,

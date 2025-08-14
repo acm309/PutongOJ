@@ -50,5 +50,13 @@ courseRouter.post('/:courseId/problem',
   authnMiddleware.adminRequire,
   courseController.addCourseProblems,
 )
+courseRouter.put('/:courseId/problem/:problemId',
+  authnMiddleware.adminRequire,
+  courseController.moveCourseProblem,
+)
+courseRouter.post('/:courseId/problem/rearrange',
+  authnMiddleware.rootRequire,
+  courseController.rearrangeCourseProblem,
+)
 
 export default module.exports = courseRouter
