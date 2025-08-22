@@ -25,7 +25,10 @@
     "lint": "eslint ./src --fix",
     "preview": "vite preview",
     "start": "npm run dev",
-    "zip": "node build/zip.js"
+    "zip": "node build/zip.js",
+    "i18n:upload": "crowdin upload sources",
+    "i18n:download": "crowdin download",
+    "i18n:sync": "npm run i18n:upload && npm run i18n:download"
   },
   "dependencies": {
     "@vitejs/plugin-legacy": "^7.1.0",
@@ -54,6 +57,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.1.0",
+    "@crowdin/cli": "^4.10.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/pangu": "^4.0.2",
     "@vue-macros/reactivity-transform": "3.0.0-beta.20",

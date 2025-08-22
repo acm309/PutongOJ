@@ -37,8 +37,7 @@ import {
 } from 'view-ui-plus'
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
-import en from '@/locales/en'
-import zh from '@/locales/zh'
+import locales from '@/locales'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import App from './App'
@@ -56,10 +55,7 @@ const i18n = createI18n({
   legacy: false,
   locale: 'en-US',
   fallbackLocale: 'en-US',
-  messages: {
-    'zh-CN': zh,
-    'en-US': en,
-  },
+  messages: locales,
 })
 
 app.use(i18n)
