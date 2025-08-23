@@ -3,7 +3,7 @@ import type { CourseMemberView } from '@backend/types/entity'
 import type { Message, Modal } from 'view-ui-plus'
 import type { UserPrivilege } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Button, Checkbox, Icon, Page, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { Button, Checkbox, Icon, Page, Poptip, Spin, Tag, Tooltip } from 'view-ui-plus'
 import { inject, onBeforeMount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -65,12 +65,12 @@ function openEditDialog (userId: string) {
 function removeMember (userId: string) {
   modal.confirm({
     title: t('oj.delete'),
-    content: 'Are you sure to delete this member?',
+    content: t('oj.course.remove_member_confirm'),
     okText: t('oj.ok'),
     cancelText: t('oj.cancel'),
     onOk () {
       course.removeMember(id, userId).then(() => {
-        message.success('Delete member successfully')
+        message.success(t('oj.course.member_remove_success'))
         fetch()
       })
     },
@@ -115,37 +115,37 @@ onRouteQueryUpdate(fetch)
               {{ t('oj.nick') }}
             </th>
             <td class="member-role">
-              <Tooltip content="Basic View" placement="top">
+              <Tooltip :content="t('oj.course.basic_view')" placement="top">
                 <Icon type="md-eye" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip content="View Testcases" placement="top">
+              <Tooltip :content="t('oj.course.view_testcase')" placement="top">
                 <Icon type="md-list-box" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip content="View Solutions" placement="top">
+              <Tooltip :content="t('oj.course.view_solution')" placement="top">
                 <Icon type="md-code-download" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip content="Manage Problems" placement="top">
+              <Tooltip :content="t('oj.course.manage_problem')" placement="top">
                 <Icon type="md-apps" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip content="Manage Contests" placement="top">
+              <Tooltip :content="t('oj.course.manage_contest')" placement="top">
                 <Icon type="md-trophy" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip content="Manage Course" placement="top">
+              <Tooltip :content="t('oj.course.manage_course')" placement="top">
                 <Icon type="md-filing" class="role-icon" />
               </Tooltip>
             </td>
             <th class="member-update">
-              Last Update Time
+              {{ t('oj.last_update') }}
             </th>
             <th class="member-action">
               {{ t('oj.action') }}
@@ -172,10 +172,11 @@ onRouteQueryUpdate(fetch)
               v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege as UserPrivilege)"
               colspan="6"
             >
-              <Tooltip placement="top">
+              <Poptip trigger="hover" placement="top">
                 <template #content>
-                  <p>This user is an admin, will not limited</p>
-                  <p>by the course role setting here.</p>
+                  <p style="max-width: 256px; white-space: normal;">
+                    {{ t('oj.course.admin_override') }}
+                  </p>
                 </template>
                 <Tag v-if="doc.user.privilege === privilege.Admin" class="privilege-tag" color="cyan">
                   Admin
@@ -183,7 +184,7 @@ onRouteQueryUpdate(fetch)
                 <Tag v-else-if="doc.user.privilege === privilege.Root" class="privilege-tag" color="gold">
                   Root
                 </Tag>
-              </Tooltip>
+              </Poptip>
             </td>
             <template v-else>
               <td v-for="field in courseRoleFields" :key="field" class="member-role">
@@ -209,8 +210,8 @@ onRouteQueryUpdate(fetch)
         @on-change="pageChange"
       />
       <Page
-        class="members-page-mobile" size="small" :model-value="page" :total="total" :page-size="pageSize" show-elevator
-        show-total @on-change="pageChange"
+        class="members-page-mobile" size="small" :model-value="page" :total="total" :page-size="pageSize"
+        show-elevator show-total @on-change="pageChange"
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />

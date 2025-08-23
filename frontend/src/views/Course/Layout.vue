@@ -6,6 +6,7 @@ import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
 import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Input, Modal, Row, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { computed, inject, onBeforeMount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import CourseProblemAdd from '@/components/CourseProblemAdd.vue'
@@ -13,6 +14,7 @@ import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 import { onProfileUpdate } from '@/util/helper'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -38,7 +40,7 @@ const joinForm = $ref({
 })
 const joinFormRules = $computed(() => ({
   joinCode: [
-    { required: true, message: 'Join code is required', trigger: 'change' },
+    { required: true, message: t('oj.course.join_code_required'), trigger: 'change' },
   ],
 }))
 const joining = ref(false)
@@ -72,23 +74,23 @@ function createContest () {
 async function joinCourse () {
   joinFormRef.value.validate(async (valid: boolean) => {
     if (!valid) {
-      message.warning('Form is not valid, please check your input.')
+      message.warning(t('oj.form_invalid'))
       return
     }
     joining.value = true
     try {
       const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
       if (result.data?.success === true) {
-        message.success('Successfully joined the course.')
+        message.success(t('oj.course.join_success'))
         fetch()
       } else if (result instanceof AxiosError) {
-        message.error(`Failed to join course: ${result.response?.data?.error || result.message}`)
+        message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
       } else {
-        message.error('Failed to join course, unknown error occurred.')
+        message.error(t('join_failed', { error: t('oj.unknown_error') }))
       }
       joinModal.value = false
     } catch (e: any) {
-      message.error(`Failed to join course: ${e.message}`)
+      message.error(t('join_failed', { error: e?.message || t('oj.unknown_error') }))
     } finally {
       joining.value = false
     }
@@ -118,7 +120,7 @@ onProfileUpdate(fetch)
           {{ spacing(course.description) }}
         </p>
         <p v-else class="course-description">
-          <i>No description found yet...</i>
+          {{ t('oj.no_description') }}
         </p>
       </Col>
       <Col v-if="isAdmin || role.manageProblem || role.manageContest" flex="none" class="course-header-col">
@@ -126,53 +128,53 @@ onProfileUpdate(fetch)
           <ButtonGroup v-if="role.manageProblem || role.manageContest">
             <Button v-if="role.manageProblem" @click="createProblem">
               <Icon type="md-add" />
-              Create Problem
+              {{ t('oj.course.create_problem') }}
             </Button>
             <Button v-if="role.manageContest" @click="createContest">
               <Icon type="md-add" />
-              Create Contest
+              {{ t('oj.course.create_contest') }}
             </Button>
           </ButtonGroup>
           <Button v-if="isAdmin" type="primary" style="float: right;" @click="problemAddModal = true">
             <Icon type="md-add" />
-            Add Problem to Course
+            {{ t('oj.course.add_existing_problem') }}
           </Button>
         </Space>
       </Col>
     </Row>
     <Auth :authority="role.basic">
       <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleTabClick">
-        <TabPane label="Problem" name="courseProblems" />
-        <TabPane label="Contest" name="courseContests" />
-        <TabPane v-if="role.manageCourse" label="Member" name="courseMembers" />
-        <TabPane v-if="role.manageCourse" label="Setting" name="courseSettings" />
+        <TabPane :label="t('oj.course.problem')" name="courseProblems" />
+        <TabPane :label="t('oj.course.contest')" name="courseContests" />
+        <TabPane v-if="role.manageCourse" :label="t('oj.course.member')" name="courseMembers" />
+        <TabPane v-if="role.manageCourse" :label="t('oj.course.setting')" name="courseSettings" />
       </Tabs>
       <router-view class="course-children" />
       <template #noMatch>
         <Divider class="exception-divider" />
         <Exception
           class="exception-box" type="403"
-          desc="This is a private course. To view it, please join the course or contact the instructor for access."
+          :desc="t('oj.course.private_explanation')"
         >
           <template #actions>
             <Button type="primary" :disabled="!course.canJoin" size="large" @click="joinModal = true">
               <Icon type="md-person-add" />
-              Join Course
+              {{ t('oj.course.join') }}
             </Button>
             <Button size="large" @click="() => router.go(-1)">
-              Go Back
+              {{ t('oj.go_back') }}
             </Button>
           </template>
         </Exception>
       </template>
     </Auth>
     <Modal
-      v-if="course.canJoin" v-model="joinModal" :loading="joining" title="Join Course" :closable="false"
+      v-if="course.canJoin" v-model="joinModal" :loading="joining" :title="t('oj.course.join')" :closable="false"
       @on-cancel="joinModal = false" @on-ok="joinCourse"
     >
       <Form ref="joinFormRef" :model="joinForm" :rules="joinFormRules">
-        <FormItem label="Join Code" prop="joinCode">
-          <Input v-model="joinForm.joinCode" placeholder="Enter join code to join the course" />
+        <FormItem :label="t('oj.course.join_code')" prop="joinCode">
+          <Input v-model="joinForm.joinCode" :placeholder="t('oj.course.join_code_placeholder')" />
         </FormItem>
       </Form>
     </Modal>

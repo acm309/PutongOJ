@@ -5,6 +5,7 @@ import type { User } from '@/types'
 import debounce from 'lodash.debounce'
 import { Alert, Checkbox, Form, FormItem, Modal, Option, Select, Spin } from 'view-ui-plus'
 import { computed, inject, onBeforeMount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import { courseRoleFields, privilege } from '@/util/constant'
 
@@ -23,16 +24,18 @@ const props = defineProps({
   },
 })
 const emit = defineEmits([ 'update:modelValue' ])
+
+const { t } = useI18n()
 const message = inject('$Message') as typeof Message
 
-const roleConfig = {
-  basic: 'Basic View',
-  viewTestcase: 'View Testcase',
-  viewSolution: 'View Solution',
-  manageProblem: 'Manage Problem',
-  manageContest: 'Manage Contest',
-  manageCourse: 'Manage Course',
-} as const
+const roleConfig = computed(() => ({
+  basic: t('oj.course.basic_view'),
+  viewTestcase: t('oj.course.view_testcase'),
+  viewSolution: t('oj.course.view_solution'),
+  manageProblem: t('oj.course.manage_problem'),
+  manageContest: t('oj.course.manage_contest'),
+  manageCourse: t('oj.course.manage_course'),
+}))
 
 const defaultRole = () => Object.fromEntries(courseRoleFields.map(field => [ field, false ])) as unknown as CourseRole
 
@@ -100,7 +103,7 @@ async function submit () {
   loading.value = true
   try {
     await api.course.updateMember(courseId.value, userId.value, role.value)
-    message.success('Update member successfully')
+    message.success(t('oj.course.member_update_success'))
     close()
   } finally {
     loading.value = false
@@ -141,17 +144,17 @@ onBeforeMount(initModal)
 </script>
 
 <template>
-  <Modal v-model="modal" :loading="true" :title="`${isEdit ? 'Edit' : 'Add'} Course Member`" :closable="false" @on-cancel="close" @on-ok="submit">
+  <Modal v-model="modal" :loading="true" :title="t(`oj.course.${isEdit ? 'edit' : 'add'}_member`)" :closable="false" @on-cancel="close" @on-ok="submit">
     <Form class="role-form" :label-width="80">
-      <FormItem label="User">
+      <FormItem :label="t('oj.course.user')">
         <Select v-model="userId" :disabled="isEdit" filterable :remote-method="fetchUsers" :loading="loadingUsers" @on-change="value => loadUser(value)">
           <Option v-for="user in users" :key="user.value" :value="user.value" :label="user.label" />
         </Select>
         <Alert v-if="!loaded" class="role-alert">
-          Type something to search, select a user first.
+          {{ t('oj.course.select_user_to_load') }}
         </Alert>
         <Alert v-if="isAdmin" class="role-alert" type="warning">
-          This user is an admin, will not limited by the course role setting here.
+          {{ t('oj.course.admin_override') }}
         </Alert>
       </FormItem>
       <FormItem label="Role">
