@@ -33,7 +33,7 @@ async function submit () {
   const pid = await problemStore.create(problem)
   $Message.success(t('oj.create_problem_success', { pid }))
   if (!problem.in && !problem.out) {
-    $Message.info('样例输入输出均为空，已跳过测试点创建！')
+    $Message.info(t('oj.sample_input_output_empty'))
   } else {
     const test = {
       pid,
@@ -41,7 +41,7 @@ async function submit () {
       out: problem.out,
     }
     await testcaseStore.create(test)
-    $Message.success('成功创建样例数据测试点！')
+    $Message.success(t('oj.sample_testcase_created'))
   }
   router.push({ name: 'problemInfo', params: { pid } })
 }
@@ -54,13 +54,13 @@ async function submitCheck () {
   } else {
     if (!problem.in || !problem.out) {
       $Modal.confirm({
-        title: '提示',
-        content: '<p>样例输入输出不完整，是否继续？</p>',
+        title: t('oj.notice'),
+        content: t('oj.sample_input_output_incomplete'),
         onOk: async () => {
           await submit()
         },
         onCancel: () => {
-          $Message.info('已取消创建！')
+          $Message.info(t('oj.creation_cancelled'))
         },
       })
     } else {

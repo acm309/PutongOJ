@@ -3,10 +3,12 @@ import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
 import { Button, Col, Divider, Form, FormItem, Input, Poptip, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 
+const { t } = useI18n()
 const sessionStore = useSessionStore()
 const courseStore = useCourseStore()
 const { isRoot } = storeToRefs(sessionStore)
@@ -16,12 +18,12 @@ const message = inject('$Message') as typeof Message
 const submiting = ref(false)
 const courseRules = {
   name: [
-    { required: true, message: 'Course name is required', trigger: 'change' },
-    { min: 3, message: 'Course name must be at least 3 characters', trigger: 'change' },
+    { required: true, message: t('oj.course_name_required'), trigger: 'change' },
+    { min: 3, message: t('oj.course_name_min_length'), trigger: 'change' },
   ],
-  description: [ { max: 100, message: 'Description should not exceed 100 characters', trigger: 'change' } ],
+  description: [ { max: 100, message: t('oj.description_max_length'), trigger: 'change' } ],
   encrypt: [ { type: 'number', required: true, trigger: 'change' } ],
-  joinCode: [ { min: 6, max: 20, message: 'Join code must be between 6 and 20 characters', trigger: 'change' } ],
+  joinCode: [ { min: 6, max: 20, message: t('oj.join_code_length'), trigger: 'change' } ],
 }
 const courseFormRef = ref<any>(null)
 
@@ -36,21 +38,21 @@ function updateCourse () {
           encrypt: course.value.encrypt,
           joinCode: course.value.joinCode || '',
         })
-        message.success('Course updated successfully.')
+        message.success(t('oj.course_updated_successfully'))
       } catch (e: any) {
-        message.error(`Failed to update course: ${e.message}`)
+        message.error(t('oj.failed_to_update_course', { error: e.message }))
       } finally {
         submiting.value = false
       }
     } else {
-      message.warning('Form is not valid, please check your input.')
+      message.warning(t('oj.form_invalid'))
     }
   })
 }
 
 function rearrangeProblems () {
   api.course.rearrangeProblems(course.value.courseId)
-  message.info('Rearrange task dispatched.')
+  message.info(t('oj.rearrange_task_dispatched'))
 }
 </script>
 
@@ -59,51 +61,51 @@ function rearrangeProblems () {
     <Form ref="courseFormRef" :model="course" :label-width="100" :rules="courseRules">
       <FormItem prop="name">
         <template #label>
-          <span style="line-height: 20px;">Name</span>
+          <span style="line-height: 20px;">{{ t('oj.name') }}</span>
         </template>
-        <Input v-model="course.name" size="large" :maxlength="30" show-word-limit placeholder="Enter course name" />
+        <Input v-model="course.name" size="large" :maxlength="30" show-word-limit :placeholder="t('oj.enter_course_name')" />
       </FormItem>
-      <FormItem label="Description" prop="description">
+      <FormItem :label="t('oj.description')" prop="description">
         <Input
           v-model="course.description" type="textarea" :maxlength="100" show-word-limit
-          :autosize="{ minRows: 2, maxRows: 5 }" placeholder="Enter course description"
+          :autosize="{ minRows: 2, maxRows: 5 }" :placeholder="t('oj.enter_course_description')"
         />
       </FormItem>
-      <FormItem label="Encryption" prop="encrypt">
+      <FormItem :label="t('oj.encryption')" prop="encrypt">
         <RadioGroup v-model="course.encrypt">
           <Radio :label="1" border>
-            Public
+            {{ t('oj.public') }}
           </Radio>
           <Radio :label="2" border>
-            Private
+            {{ t('oj.private') }}
           </Radio>
         </RadioGroup>
       </FormItem>
-      <FormItem label="Join Code" prop="joinCode">
+      <FormItem :label="t('oj.join_code')" prop="joinCode">
         <Input
-          v-model="course.joinCode" :maxlength="20" show-word-limit placeholder="Enter join code (optional)"
+          v-model="course.joinCode" :maxlength="20" show-word-limit :placeholder="t('oj.enter_join_code_optional')"
           clearable
         />
       </FormItem>
       <FormItem>
         <Button type="primary" size="large" :loading="submiting" @click="updateCourse">
-          Submit
+          {{ t('oj.submit') }}
         </Button>
       </FormItem>
     </Form>
     <template v-if="isRoot">
       <Divider simple>
-        System Action
+        {{ t('oj.system_action') }}
       </Divider>
       <Row>
         <Col flex="auto">
           <span style="line-height: 32px; padding-left: 16px;">
-            Problem Sort Rearrange
+            {{ t('oj.problem_sort_rearrange') }}
           </span>
         </Col>
         <Col>
-          <Poptip confirm title="Confirm?" @on-ok="rearrangeProblems">
-            <Button>Execute</Button>
+          <Poptip confirm :title="t('oj.confirm')" @on-ok="rearrangeProblems">
+            <Button>{{ t('oj.execute') }}</Button>
           </Poptip>
         </Col>
       </Row>

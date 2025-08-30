@@ -15,6 +15,7 @@ const props = defineProps({
 })
 const emit = defineEmits([ 'update:modelValue' ])
 const { locale } = useI18n()
+const { t } = useI18n()
 const rootStore = useRootStore()
 const { vditorCDN } = $(storeToRefs(rootStore))
 
@@ -37,7 +38,7 @@ const config = $computed(() => ({
   lang,
   minHeight: 256,
   mode: 'wysiwyg',
-  placeholder: 'Type something...',
+  placeholder: t('oj.type_something'),
   preview: {
     render: {
       media: {
@@ -132,7 +133,7 @@ watch(() => locale.value, () => nextTick(init))
   <div ref="vditor">
     <div class="vidtor-uninitialized">
       <Icon type="ios-loading" class="card-icon" />
-      <span class="card-text">Initializing...</span>
+      <span class="card-text">{{ t('oj.initializing') }}</span>
     </div>
   </div>
 </template>

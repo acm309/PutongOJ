@@ -43,7 +43,7 @@ let loading = $ref(false)
 
 function onCopy (content) {
   copy(content)
-  $Message.success('Copied!')
+  $Message.success(t('oj.copied'))
 }
 
 function prettyCode (code) {
@@ -73,27 +73,27 @@ onRouteQueryUpdate(fetch)
       <Space direction="vertical">
         <Space class="solution-info" split wrap>
           <span>
-            Problem:
+            {{ t('oj.problem_label') }}
             <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
               {{ solution.pid }}
             </router-link>
           </span>
           <span>
-            Author:
+            {{ t('oj.author_label') }}
             <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
               {{ solution.uid }}
             </router-link>
           </span>
           <span v-if="solution.mid > 0">
-            Contest:
+            {{ t('oj.contest_label') }}
             <router-link :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
               {{ solution.mid }}
             </router-link>
           </span>
         </Space>
         <Space class="solution-info" split wrap>
-          <span>Time: {{ solution.time }}ms</span>
-          <span>Memory: {{ solution.memory }}KB</span>
+          <span>{{ t('oj.time_label') }} {{ solution.time }}ms</span>
+          <span>{{ t('oj.memory_label') }} {{ solution.memory }}KB</span>
           <span>{{ lang[solution.language] }}</span>
           <span>{{ timePretty(solution.create) }}</span>
         </Space>
@@ -104,10 +104,10 @@ onRouteQueryUpdate(fetch)
         <thead>
           <tr>
             <th class="testcase-uuid">
-              UUID
+              {{ t('oj.uuid') }}
             </th>
             <th v-if="isAdmin" class="testcase-files">
-              Files
+              {{ t('oj.files') }}
             </th>
             <th class="testcase-time">
               <Badge>
@@ -124,7 +124,7 @@ onRouteQueryUpdate(fetch)
               </Badge>
             </th>
             <th class="testcase-result">
-              Result
+              {{ t('oj.result') }}
             </th>
           </tr>
         </thead>
@@ -146,9 +146,9 @@ onRouteQueryUpdate(fetch)
             </td>
             <td v-if="isAdmin" class="testcase-files">
               <Space :size="4">
-                <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">Input</a>
+                <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
                 <Divider type="vertical" />
-                <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">Output</a>
+                <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
               </Space>
             </td>
             <td class="testcase-time">
@@ -173,7 +173,7 @@ onRouteQueryUpdate(fetch)
       <div v-if="isAdmin && solution.sim && solution.simSolution">
         <Space split wrap>
           <span>
-            Similar to
+            {{ t('oj.similar_to') }}
             <router-link :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
               {{ solution.simSolution.sid }}
             </router-link>

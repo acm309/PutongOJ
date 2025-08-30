@@ -142,7 +142,7 @@ onProfileUpdate(fetch)
               Visible
             </th>
             <th v-if="isRoot" class="problem-delete">
-              Delete
+              {{ t('oj.delete') }}
             </th>
           </tr>
         </thead>
@@ -191,7 +191,7 @@ onProfileUpdate(fetch)
               </Tooltip>
             </td>
             <td v-if="isRoot" class="problem-delete">
-              <a @click="del(item.pid)">Delete</a>
+              <a @click="del(item.pid)">{{ t('oj.delete') }}</a>
             </td>
           </tr>
         </tbody>

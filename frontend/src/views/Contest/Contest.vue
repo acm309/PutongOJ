@@ -50,7 +50,7 @@ const progressStatus = $computed(() => {
 const contestCountdown = $computed(() => {
   if (currentTime < contest.start) return timeContest(contest.start - currentTime)
   if (currentTime < contest.end) return timeContest(contest.end - currentTime)
-  return 'Contest Ended'
+  return t('oj.contest_ended')
 })
 
 function handleClick (name) {
@@ -84,14 +84,14 @@ onProfileUpdate(fetch)
       <Card class="contest-card" dis-hover>
         <div class="contest-info">
           <span class="contest-begin-time">
-            <span class="tag">Begin</span>
+            <span class="tag">{{ t('oj.begin') }}</span>
             <span class="time">{{ timePretty(contest.start) }}</span>
           </span>
-          <span v-if="currentTime < contest.start" class="contest-status ready">Ready</span>
-          <span v-else-if="currentTime < contest.end" class="contest-status running">Running</span>
-          <span v-else class="contest-status ended">Ended</span>
+          <span v-if="currentTime < contest.start" class="contest-status ready">{{ t('oj.ready') }}</span>
+          <span v-else-if="currentTime < contest.end" class="contest-status running">{{ t('oj.running') }}</span>
+          <span v-else class="contest-status ended">{{ t('oj.ended') }}</span>
           <span class="contest-end-time">
-            <span class="tag">End</span>
+            <span class="tag">{{ t('oj.end') }}</span>
             <span class="time">{{ timePretty(contest.end) }}</span>
           </span>
         </div>

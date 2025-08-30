@@ -52,24 +52,24 @@ function del (item) {
   const sort_uuid = item.uuid.slice(0, 8)
   modal.confirm({
     title: t('oj.alert'),
-    content: t('oj.testcase.delete_confirm', { uuid: sort_uuid }),
+    content: t('oj.testcase_delete_confirm', { uuid: sort_uuid }),
     onOk: async () => {
       const testcase = {
         pid: route.params.pid,
         uuid: item.uuid,
       }
       await testcaseStore.delete(testcase)
-      message.success(t('oj.testcase.delete_success', { uuid: sort_uuid }))
+      message.success(t('oj.testcase_delete_success', { uuid: sort_uuid }))
     },
     onCancel: () => {
-      message.info(t('oj.testcase.delete_cancel'))
+      message.info(t('oj.testcase_delete_cancel'))
     },
   })
 }
 
 async function create (testcase) {
   await testcaseStore.create(testcase)
-  message.success(t('oj.testcase.create_success'))
+  message.success(t('oj.testcase_create_success'))
   fetch()
   test.in = test.out = ''
   testcaseFile.in = testcaseFile.out = null
@@ -83,19 +83,19 @@ async function createCheck () {
       try {
         testcase[key] = await readFile(key)
       } catch (e) {
-        return message.error(t('oj.testcase.error_read_file', { error: e.message }))
+        return message.error(t('oj.testcase_error_read_file', { error: e.message }))
       }
     }
   }
 
   if (!testcase.in.trim() && !testcase.out.trim()) {
-    message.error(t('oj.testcase.error_empty'))
+    message.error(t('oj.testcase_error_empty'))
   } else if (!testcase.in.trim() || !testcase.out.trim()) {
     modal.confirm({
       title: t('oj.alert'),
-      content: t('oj.testcase.error_incomplete'),
+      content: t('oj.testcase_error_incomplete'),
       onOk: () => create(testcase),
-      onCancel: () => message.info(t('oj.testcase.create_cancel')),
+      onCancel: () => message.info(t('oj.testcase_create_cancel')),
     })
   } else {
     create(testcase)
@@ -111,7 +111,7 @@ async function readFile (type) {
       if (/^[\s\x21-\x7E]*$/.test(content)) {
         resolve(content)
       } else {
-        reject(new Error(t('oj.testcase.error_encoding')))
+        reject(new Error(t('oj.testcase_error_encoding')))
       }
     }
     reader.onerror = reject
@@ -183,12 +183,12 @@ fetch()
       </tbody>
     </table>
     <div class="testcase-create">
-      <h1>{{ t('oj.testcase.create') }}</h1>
+      <h1>{{ t('oj.testcase_create') }}</h1>
       <div class="testcase-flex">
         <span class="testcase-title">{{ t('oj.input') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('in', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            {{ t('oj.testcase.from_file') }}
+            {{ t('oj.testcase_from_file') }}
           </Button>
         </Upload>
       </div>
@@ -198,7 +198,7 @@ fetch()
       />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
+        <span class="file-text">{{ t('oj.testcase_file_selected') }}</span>
         <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">
           {{ filename('in') }}
         </Tag>
@@ -207,7 +207,7 @@ fetch()
         <span class="testcase-title">{{ t('oj.output') }}</span>
         <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('out', file)">
           <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            {{ t('oj.testcase.from_file') }}
+            {{ t('oj.testcase_from_file') }}
           </Button>
         </Upload>
       </div>
@@ -217,7 +217,7 @@ fetch()
       />
       <div v-else class="testcase-file">
         <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">{{ t('oj.testcase.file_selected') }}</span>
+        <span class="file-text">{{ t('oj.testcase_file_selected') }}</span>
         <Tag class="file-name" type="dot" closable @on-close="removeFile('out')">
           {{ filename('out') }}
         </Tag>

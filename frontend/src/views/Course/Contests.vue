@@ -51,25 +51,13 @@ function reload (payload = {}) {
 
 const pageChange = val => reload({ page: val })
 
-async function enter (item) {
-  const opt = Object.assign(
-    only(item, 'cid'),
-    { pwd: enterPwd },
-  )
-  const data = await verify(opt)
-  if (data)
-    router.push({ name: 'contestOverview', params: { cid: item.cid } })
-  else
-    $Message.error('Wrong password!')
-}
-
 async function visit (item) {
   if (!isLogined) {
     sessionStore.toggleLoginState()
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
-    $Message.error('This contest hasn\'t started yet!')
+    $Message.error(t('oj.contest_not_started'))
   } else if (+item.encrypt === encrypt.Public) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (+item.encrypt === encrypt.Private) {
@@ -77,12 +65,12 @@ async function visit (item) {
     if (data)
       router.push({ name: 'contestOverview', params: { cid: item.cid } })
     else
-      $Message.error('You\'re not invited to attend this contest!')
+      $Message.error(t('oj.not_invited_to_contest'))
   } else if (+item.encrypt === encrypt.Password) {
     $Modal.confirm({
       render: (h) => {
         return h(Input, {
-          placeholder: 'Please enter password.',
+          placeholder: t('oj.please_enter_password'),
           onChange: event => enterPwd = event.target.value,
           onEnter: () => {
             enter(item)
@@ -95,6 +83,18 @@ async function visit (item) {
       },
     })
   }
+}
+
+async function enter (item) {
+  const opt = Object.assign(
+    only(item, 'cid'),
+    { pwd: enterPwd },
+  )
+  const data = await verify(opt)
+  if (data)
+    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+  else
+    $Message.error(t('oj.wrong_password'))
 }
 
 async function change (contest) {
@@ -143,22 +143,22 @@ onRouteQueryUpdate(fetch)
         <thead>
           <tr>
             <th class="contest-cid">
-              CID
+              {{ t('oj.cid') }}
             </th>
             <th class="contest-title">
-              Title
+              {{ t('oj.title') }}
             </th>
             <th class="contest-status">
-              Status
+              {{ t('oj.status') }}
             </th>
             <th class="contest-type">
-              Type
+              {{ t('oj.type') }}
             </th>
             <th class="contest-start-time">
-              Start Time
+              {{ t('oj.start_time') }}
             </th>
             <th v-if="isAdmin" class="contest-visible">
-              Visible
+              {{ t('oj.visible') }}
             </th>
           </tr>
         </thead>
@@ -178,18 +178,18 @@ onRouteQueryUpdate(fetch)
                 <span class="button-text">{{ item.title }}</span>
                 <Poptip
                   v-show="item.status === status.Reserve" trigger="hover"
-                  content="This item is reserved, no one could see this, except admin" placement="top"
+                  :content="t('oj.reserved_item_notice')" placement="top"
                 >
                   <Tag class="contest-mark">
-                    Reserved
+                    {{ t('oj.reserved') }}
                   </Tag>
                 </Poptip>
               </Button>
             </td>
             <td class="contest-status">
-              <span v-if="item.start > currentTime" class="contest-status-ready">Ready</span>
-              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">Running</span>
-              <span v-if="item.end < currentTime" class="contest-status-end">Ended</span>
+              <span v-if="item.start > currentTime" class="contest-status-ready">{{ t('oj.ready') }}</span>
+              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">{{ t('oj.running') }}</span>
+              <span v-if="item.end < currentTime" class="contest-status-end">{{ t('oj.ended') }}</span>
             </td>
             <td class="contest-type">
               <span
@@ -206,7 +206,7 @@ onRouteQueryUpdate(fetch)
               {{ timePretty(item.start) }}
             </td>
             <td v-if="isAdmin" class="contest-visible">
-              <Poptip trigger="hover" content="Click to change status" placement="right">
+              <Poptip trigger="hover" :content="t('oj.click_to_change_status')" placement="right">
                 <a @click="change(item)">{{ contestVisible[item.status] }}</a>
               </Poptip>
             </td>

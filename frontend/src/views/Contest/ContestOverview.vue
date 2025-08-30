@@ -58,7 +58,7 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
                   {{ item.title }}
                 </Button>
               </router-link>
-              <span v-else>Problem is invalid</span>
+              <span v-else>{{ t('oj.problem_invalid') }}</span>
             </td>
             <td class="problem-ratio">
               <span v-if="!item.invalid">

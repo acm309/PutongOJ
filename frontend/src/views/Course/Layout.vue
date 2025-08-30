@@ -40,7 +40,7 @@ const joinForm = $ref({
 })
 const joinFormRules = $computed(() => ({
   joinCode: [
-    { required: true, message: t('oj.course.join_code_required'), trigger: 'change' },
+    { required: true, message: t('oj.course_join_code_required'), trigger: 'change' },
   ],
 }))
 const joining = ref(false)
@@ -81,7 +81,7 @@ async function joinCourse () {
     try {
       const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
       if (result.data?.success === true) {
-        message.success(t('oj.course.join_success'))
+        message.success(t('oj.course_join_success'))
         fetch()
       } else if (result instanceof AxiosError) {
         message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
@@ -128,38 +128,38 @@ onProfileUpdate(fetch)
           <ButtonGroup v-if="role.manageProblem || role.manageContest">
             <Button v-if="role.manageProblem" @click="createProblem">
               <Icon type="md-add" />
-              {{ t('oj.course.create_problem') }}
+              {{ t('oj.course_create_problem') }}
             </Button>
             <Button v-if="role.manageContest" @click="createContest">
               <Icon type="md-add" />
-              {{ t('oj.course.create_contest') }}
+              {{ t('oj.course_create_contest') }}
             </Button>
           </ButtonGroup>
           <Button v-if="isAdmin" type="primary" style="float: right;" @click="problemAddModal = true">
             <Icon type="md-add" />
-            {{ t('oj.course.add_existing_problem') }}
+            {{ t('oj.course_add_existing_problem') }}
           </Button>
         </Space>
       </Col>
     </Row>
     <Auth :authority="role.basic">
       <Tabs class="course-tabs" :model-value="displayTab" @on-click="handleTabClick">
-        <TabPane :label="t('oj.course.problem')" name="courseProblems" />
-        <TabPane :label="t('oj.course.contest')" name="courseContests" />
-        <TabPane v-if="role.manageCourse" :label="t('oj.course.member')" name="courseMembers" />
-        <TabPane v-if="role.manageCourse" :label="t('oj.course.setting')" name="courseSettings" />
+        <TabPane :label="t('oj.course_problem')" name="courseProblems" />
+        <TabPane :label="t('oj.course_contest')" name="courseContests" />
+        <TabPane v-if="role.manageCourse" :label="t('oj.course_member')" name="courseMembers" />
+        <TabPane v-if="role.manageCourse" :label="t('oj.course_setting')" name="courseSettings" />
       </Tabs>
       <router-view class="course-children" />
       <template #noMatch>
         <Divider class="exception-divider" />
         <Exception
           class="exception-box" type="403"
-          :desc="t('oj.course.private_explanation')"
+          :desc="t('oj.course_private_explanation')"
         >
           <template #actions>
             <Button type="primary" :disabled="!course.canJoin" size="large" @click="joinModal = true">
               <Icon type="md-person-add" />
-              {{ t('oj.course.join') }}
+              {{ t('oj.course_join') }}
             </Button>
             <Button size="large" @click="() => router.go(-1)">
               {{ t('oj.go_back') }}
@@ -169,12 +169,12 @@ onProfileUpdate(fetch)
       </template>
     </Auth>
     <Modal
-      v-if="course.canJoin" v-model="joinModal" :loading="joining" :title="t('oj.course.join')" :closable="false"
+      v-if="course.canJoin" v-model="joinModal" :loading="joining" :title="t('oj.course_join')" :closable="false"
       @on-cancel="joinModal = false" @on-ok="joinCourse"
     >
       <Form ref="joinFormRef" :model="joinForm" :rules="joinFormRules">
-        <FormItem :label="t('oj.course.join_code')" prop="joinCode">
-          <Input v-model="joinForm.joinCode" :placeholder="t('oj.course.join_code_placeholder')" />
+        <FormItem :label="t('oj.course_join_code')" prop="joinCode">
+          <Input v-model="joinForm.joinCode" :placeholder="t('oj.course_join_code_placeholder')" />
         </FormItem>
       </Form>
     </Modal>

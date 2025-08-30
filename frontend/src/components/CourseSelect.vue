@@ -4,6 +4,7 @@ import type { Message } from 'view-ui-plus'
 import debounce from 'lodash.debounce'
 import { Option, Select } from 'view-ui-plus'
 import { computed, inject, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/api'
 
 const props = defineProps({
@@ -16,6 +17,7 @@ const props = defineProps({
   },
 })
 const emit = defineEmits([ 'update:modelValue' ])
+const { t } = useI18n()
 const message = inject('$Message') as typeof Message
 
 const loading = ref(false)
@@ -38,10 +40,10 @@ const findCourseOptions = debounce(async (query: string) => {
     })
     courseOptions.value.push({
       value: -1,
-      label: 'Unrelated to any course',
+      label: t('oj.unrelated_to_any_course'),
     })
   } catch (error: any) {
-    message.error(error.message || 'Failed to fetch courses')
+    message.error(error.message || t('oj.failed_to_fetch_courses'))
   } finally {
     loading.value = false
   }
@@ -66,7 +68,7 @@ onMounted(() => {
 <template>
   <Select
     v-model="value" class="course-select" filterable clearable :remote-method="findCourseOptions"
-    :loading="loading" placeholder="Select a course"
+    :loading="loading" :placeholder="t('oj.select_a_course')"
   >
     <Option
       v-for="(option, index) in courseOptions" :key="index" :value="option.value" :label="option.label"

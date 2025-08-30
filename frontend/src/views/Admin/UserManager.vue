@@ -55,14 +55,14 @@ onRouteQueryUpdate(fetch)
       <div class="users-filter">
         <Select v-model="adminFilter" class="filter-select" filterable clearable :placeholder="t('oj.privilege')">
           <Option :key="0" value="">
-            All
+            {{ t('oj.all') }}
           </Option>
           <Option :key="1" value="admin">
             {{ t('oj.admin') }}
           </Option>
         </Select>
         <Input
-          v-model="content" class="search-input" clearable placeholder="Search by username"
+          v-model="content" class="search-input" clearable :placeholder="t('oj.search_by_username')"
           @keyup.enter="search"
         />
         <Button type="primary" class="filter-button" @click="search">
@@ -84,7 +84,7 @@ onRouteQueryUpdate(fetch)
               {{ t('oj.privilege') }}
             </th>
             <th class="users-create">
-              Register Time
+              {{ t('oj.register_time') }}
             </th>
             <th class="users-action">
               {{ t('oj.edit') }}
@@ -109,16 +109,16 @@ onRouteQueryUpdate(fetch)
             </td>
             <td class="users-privilege">
               <Tag v-if="item.privilege === 0" class="privilege-tag" type="red">
-                Banned
+                {{ t('oj.banned') }}
               </Tag>
               <Tag v-else-if="item.privilege === 1" class="privilege-tag" type="default">
-                User
+                {{ t('oj.user') }}
               </Tag>
               <Tag v-else-if="item.privilege === 2" class="privilege-tag" type="cyan">
-                Admin
+                {{ t('oj.admin') }}
               </Tag>
               <Tag v-else-if="item.privilege === 3" class="privilege-tag" type="gold">
-                Root
+                {{ t('oj.root') }}
               </Tag>
             </td>
             <td class="users-create">

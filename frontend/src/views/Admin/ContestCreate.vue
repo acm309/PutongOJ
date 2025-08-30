@@ -74,7 +74,7 @@ onMounted(init)
       />
     </Steps>
     <Alert show-icon style="margin-bottom: 0;">
-      After the contest is created, you can add problems to it.
+      {{ t('oj.after_contest_created_notice') }}
     </Alert>
     <div v-if="initialized">
       <ContestBasicEdit :contest-id="-1" />

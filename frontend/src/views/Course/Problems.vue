@@ -96,7 +96,7 @@ const newPosition = ref<number | null>(null)
 
 async function updateSorting () {
   if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.total + 1) {
-    message.error('Invalid position. Please enter a valid position.')
+    message.error(t('oj.invalid_position'))
     return
   }
   loading = true
@@ -106,11 +106,11 @@ async function updateSorting () {
       sorting.value.pid,
       newPosition.value,
     )
-    message.success('Problem sorting updated successfully.')
+    message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
   } catch (e: any) {
-    message.error(`Failed to update sorting: ${e.message}`)
+    message.error(t('oj.failed_to_update_sorting', { error: e.message }))
   } finally {
     loading = false
   }
@@ -153,25 +153,25 @@ onRouteQueryUpdate(fetch)
               #
             </th>
             <th class="problem-id">
-              ID
+              {{ t('oj.id') }}
             </th>
             <th class="problem-pid">
-              PID
+              {{ t('oj.pid') }}
             </th>
             <th class="problem-title">
-              Title
+              {{ t('oj.title') }}
             </th>
             <th class="problem-tags">
-              Tags
+              {{ t('oj.tags') }}
             </th>
             <th class="problem-ratio">
-              Ratio
+              {{ t('oj.ratio') }}
             </th>
             <th v-if="course.role.manageProblem" class="problem-visible">
-              Visible
+              {{ t('oj.visible') }}
             </th>
             <th v-if="isAdmin" class="problem-sorting">
-              Sorting
+              {{ t('oj.sorting') }}
             </th>
           </tr>
         </thead>
@@ -218,7 +218,7 @@ onRouteQueryUpdate(fetch)
               )
             </td>
             <td v-if="course.role.manageProblem" class="problem-visible">
-              <Tooltip content="Click to change status" placement="right">
+              <Tooltip :content="t('oj.click_to_change_status')" placement="right">
                 <a
                   :class="{ 'status-disabled': !(isAdmin || item.isOwner) }"
                   @click="switchStatus(item)"
@@ -229,7 +229,7 @@ onRouteQueryUpdate(fetch)
             </td>
             <td v-if="isAdmin" class="problem-sorting">
               <Button type="text" @click="sortingModal = true; sorting = item">
-                Move
+                {{ t('oj.move') }}
               </Button>
             </td>
           </tr>
@@ -249,15 +249,15 @@ onRouteQueryUpdate(fetch)
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
-    <Modal v-model="sortingModal" :closable="false" title="Update Problem Sorting" @on-ok="updateSorting">
+    <Modal v-model="sortingModal" :closable="false" :title="t('oj.update_problem_sorting')" @on-ok="updateSorting">
       <Form label-position="top" style="margin-bottom: -16px;">
-        <FormItem label="Move problem">
+        <FormItem :label="t('oj.move_problem')">
           <Input v-model="sorting.title" size="large" disabled />
         </FormItem>
-        <FormItem label="Before position">
+        <FormItem :label="t('oj.before_position')">
           <InputNumber
             v-model="newPosition" size="large" :min="1" :max="problems.total + 1"
-            placeholder="Enter new position" controls-outside style="width: 100%;"
+            :placeholder="t('oj.enter_new_position')" controls-outside style="width: 100%;"
           />
         </FormItem>
       </Form>

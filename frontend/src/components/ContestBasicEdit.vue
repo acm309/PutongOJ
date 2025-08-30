@@ -4,12 +4,13 @@ import { encrypt } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
 import { DatePicker, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
 import { inject, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useContestStore } from '@/store/modules/contest'
 
 const props = defineProps<{
   contestId: number
 }>()
-
+const { t } = useI18n()
 const contestStore = useContestStore()
 const { contest } = storeToRefs(contestStore)
 const { findOne: findContest } = contestStore
@@ -35,7 +36,7 @@ async function updateDatetime (type: 'start' | 'end', time: string) {
       if (date.getTime() >= contest.value.end) {
         contest.value.end = date.getTime() + 60 * 1000 * 60
         endsAt.value = new Date(contest.value.end)
-        message.warning('Contest end time has been adjusted to be 1 hour after the start time.')
+        message.warning(t('oj.contest_end_time_adjusted'))
       }
       break
     case 'end':
@@ -43,7 +44,7 @@ async function updateDatetime (type: 'start' | 'end', time: string) {
       if (date.getTime() <= contest.value.start) {
         contest.value.start = date.getTime() - 60 * 1000 * 60
         startsAt.value = new Date(contest.value.start)
-        message.warning('Contest start time has been adjusted to be 1 hour before the end time.')
+        message.warning(t('oj.contest_start_time_adjusted'))
       }
       break
   }
@@ -65,37 +66,37 @@ onMounted(async () => {
   <Form label-position="right" :label-width="120">
     <FormItem>
       <template #label>
-        <span style="line-height: 20px;">Contest Title</span>
+        <span style="line-height: 20px;">{{ t('oj.contest_title') }}</span>
       </template>
-      <Input v-model="contest.title" size="large" placeholder="Enter contest title" />
+      <Input v-model="contest.title" size="large" :placeholder="t('oj.enter_contest_title')" />
     </FormItem>
-    <FormItem label="Starts At">
+    <FormItem :label="t('oj.starts_at')">
       <DatePicker
         class="contest-form-item" type="datetime" :model-value="startsAt" :clearable="false"
         :format="('yyyy-MM-dd HH:mm:ss' as any)" @on-change="(time: string) => updateDatetime('start', time)"
       />
     </FormItem>
-    <FormItem label="Ends At">
+    <FormItem :label="t('oj.ends_at')">
       <DatePicker
         class="contest-form-item" type="datetime" :model-value="endsAt" :clearable="false"
         :format="('yyyy-MM-dd HH:mm:ss' as any)" @on-change="(time: string) => updateDatetime('end', time)"
       />
     </FormItem>
-    <FormItem label="Encryption">
+    <FormItem :label="t('oj.encryption')">
       <Select v-model="contest.encrypt" class="contest-form-item">
         <Option :value="encrypt.Public">
-          Public
+          {{ t('oj.public') }}
         </Option>
         <Option :value="encrypt.Private" disabled>
-          Private
+          {{ t('oj.private') }}
         </Option>
         <Option :value="encrypt.Password">
-          Password
+          {{ t('oj.password') }}
         </Option>
       </Select>
     </FormItem>
-    <FormItem v-if="contest.encrypt === encrypt.Password" label="Password">
-      <Input v-model="contest.argument" class="contest-form-item" type="password" password placeholder="Enter contest password" />
+    <FormItem v-if="contest.encrypt === encrypt.Password" :label="t('oj.password')">
+      <Input v-model="contest.argument" class="contest-form-item" type="password" password :placeholder="t('oj.enter_contest_password')" />
     </FormItem>
   </Form>
 </template>

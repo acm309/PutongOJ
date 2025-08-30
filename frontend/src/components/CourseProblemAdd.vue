@@ -4,6 +4,7 @@ import type { Message } from 'view-ui-plus'
 import debounce from 'lodash.debounce'
 import { Form, FormItem, Modal, Option, Select } from 'view-ui-plus'
 import { inject, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/api'
 
 const props = defineProps<{
@@ -11,6 +12,7 @@ const props = defineProps<{
   courseId: number
 }>()
 const emit = defineEmits([ 'update:modelValue', 'close' ])
+const { t } = useI18n()
 const message = inject('$Message') as typeof Message
 
 const modal = ref(false)
@@ -34,7 +36,7 @@ const findProblemOptions = debounce(async (query: string) => {
       })
     })
   } catch (error: any) {
-    console.error(error.message || 'Failed to fetch problems')
+    console.error(error.message || t('oj.failed_to_fetch_problems'))
   } finally {
     loading.value = false
   }
@@ -52,9 +54,9 @@ async function submit () {
   try {
     const { data: { added } } = await api.course.addProblems(props.courseId, selected.value)
     if (added > 0) {
-      message.success(`Successfully added ${added} problem(s) to the course.`)
+      message.success(t('oj.successfully_added_problems', { added }))
     } else {
-      message.warning('No new problems were added.')
+      message.warning(t('oj.no_new_problems_added'))
     }
     close(added)
   } catch (error: any) {
@@ -70,14 +72,14 @@ watch(() => props.modelValue, (val) => {
 
 <template>
   <Modal
-    v-model="modal" :loading="true" title="Add Course Problems" :closable="false" @on-cancel="close"
+    v-model="modal" :loading="true" :title="t('oj.add_course_problems')" :closable="false" @on-cancel="close"
     @on-ok="submit"
   >
     <Form>
-      <FormItem label="Problems to Add">
+      <FormItem :label="t('oj.problems_to_add')">
         <Select
           v-model="selected" multiple filterable :remote-method="findProblemOptions" :loading="loading"
-          placeholder="Search problems by ID or title"
+          :placeholder="t('oj.search_problems_placeholder')"
         >
           <Option v-for="(option, index) in options" :key="index" :value="option.value">
             <span class="problem-sep">[</span>

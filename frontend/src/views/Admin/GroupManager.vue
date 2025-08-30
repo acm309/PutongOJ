@@ -64,7 +64,7 @@ async function manageGroup (name) {
     } else {
       Modal.confirm({
         title: t('oj.warning'),
-        content: `<p>${t('oj.will_remove_group', group)}</p>`,
+        content: t('oj.will_remove_group', group),
         okText: t('oj.ok'),
         cancelText: t('oj.cancel'),
         onOk: async () => {

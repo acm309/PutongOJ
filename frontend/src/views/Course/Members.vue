@@ -65,12 +65,12 @@ function openEditDialog (userId: string) {
 function removeMember (userId: string) {
   modal.confirm({
     title: t('oj.delete'),
-    content: t('oj.course.remove_member_confirm'),
+    content: t('oj.course_remove_member_confirm'),
     okText: t('oj.ok'),
     cancelText: t('oj.cancel'),
     onOk () {
       course.removeMember(id, userId).then(() => {
-        message.success(t('oj.course.member_remove_success'))
+        message.success(t('oj.course_member_remove_success'))
         fetch()
       })
     },
@@ -115,32 +115,32 @@ onRouteQueryUpdate(fetch)
               {{ t('oj.nick') }}
             </th>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.basic_view')" placement="top">
+              <Tooltip :content="t('oj.course_basic_view')" placement="top">
                 <Icon type="md-eye" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.view_testcase')" placement="top">
+              <Tooltip :content="t('oj.course_view_testcase')" placement="top">
                 <Icon type="md-list-box" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.view_solution')" placement="top">
+              <Tooltip :content="t('oj.course_view_solution')" placement="top">
                 <Icon type="md-code-download" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.manage_problem')" placement="top">
+              <Tooltip :content="t('oj.course_manage_problem')" placement="top">
                 <Icon type="md-apps" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.manage_contest')" placement="top">
+              <Tooltip :content="t('oj.course_manage_contest')" placement="top">
                 <Icon type="md-trophy" class="role-icon" />
               </Tooltip>
             </td>
             <td class="member-role">
-              <Tooltip :content="t('oj.course.manage_course')" placement="top">
+              <Tooltip :content="t('oj.course_manage_course')" placement="top">
                 <Icon type="md-filing" class="role-icon" />
               </Tooltip>
             </td>
@@ -175,7 +175,7 @@ onRouteQueryUpdate(fetch)
               <Poptip trigger="hover" placement="top">
                 <template #content>
                   <p style="max-width: 256px; white-space: normal;">
-                    {{ t('oj.course.admin_override') }}
+                    {{ t('oj.course_admin_override') }}
                   </p>
                 </template>
                 <Tag v-if="doc.user.privilege === privilege.Admin" class="privilege-tag" color="cyan">

@@ -37,14 +37,14 @@ async function loadContest () {
 
 async function submitForm () {
   const cid = await updateContest(contest.value)
-  message.success(`update contest ${cid} success!`)
+  message.success(t('oj.update_contest_success', { cid }))
   router.push({ name: 'contestOverview', params: { cid } })
   await loadContest()
 }
 
 async function transferContest () {
   if (!transferTo.value) {
-    message.error('Please select a target course for transfer')
+    message.error(t('oj.please_select_target_course'))
     return
   }
   transferring.value = true
@@ -53,11 +53,11 @@ async function transferContest () {
       cid: contest.value.cid,
       course: transferTo.value,
     })
-    message.success('Contest transferred successfully')
+    message.success(t('oj.contest_transferred_successfully'))
     loadContest()
     transferTo.value = ''
   } catch (error: any) {
-    message.error(error.message || 'Failed to transfer contest')
+    message.error(error.message || t('oj.failed_to_transfer_contest'))
   } finally {
     transferring.value = false
   }
@@ -82,13 +82,13 @@ onMounted(async () => {
   <div v-if="contest" class="conadd-wrap">
     <ContestBasicEdit :contest-id="contest.cid" />
     <Form :label-width="120">
-      <FormItem label="Labeling Style">
+      <FormItem :label="t('oj.labeling_style')">
         <Select v-model="contest.option.labelingStyle" class="contest-form-item">
           <Option :value="contestLabelingStyle.numeric">
-            Numeric
+            {{ t('oj.numeric') }}
           </Option>
           <Option :value="contestLabelingStyle.alphabetic">
-            Alphabetic
+            {{ t('oj.alphabetic') }}
           </Option>
         </Select>
       </FormItem>
@@ -99,7 +99,7 @@ onMounted(async () => {
       </FormItem>
     </Form>
     <Divider simple class="divider">
-      Contest Problems
+      {{ t('oj.contest_problems') }}
     </Divider>
     <OjContestEdit :contest="contest" :overview="overview" />
     <Form :label-width="120">
@@ -111,12 +111,12 @@ onMounted(async () => {
     </Form>
     <template v-if="isRoot">
       <Divider simple class="divider">
-        Course Transfer
+        {{ t('oj.course_transfer') }}
       </Divider>
       <Form label-position="right" :label-width="120">
-        <FormItem label="Current Course">
+        <FormItem :label="t('oj.current_course')">
           <Input
-            :placeholder="(contest as any).course?.name ?? 'Not related to any course'" class="contest-form-item"
+            :placeholder="(contest as any).course?.name ?? t('oj.not_related_to_any_course')" class="contest-form-item"
             disabled
           >
             <template v-if="(contest as any).course" #prepend>
@@ -124,15 +124,15 @@ onMounted(async () => {
             </template>
           </Input>
         </FormItem>
-        <FormItem label="Target Course">
+        <FormItem :label="t('oj.target_course')">
           <CourseSelect
             v-model="transferTo" :current="(contest as any).course?.courseId ?? -1"
-            placeholder="Select a course to transfer" :disabled="transferring" class="contest-form-item"
+            :placeholder="t('oj.select_course_to_transfer')" :disabled="transferring" class="contest-form-item"
           />
         </FormItem>
         <FormItem>
           <Button type="primary" size="large" :disabled="!transferTo" :loading="transferring" @click="transferContest">
-            Transfer
+            {{ t('oj.transfer') }}
           </Button>
         </FormItem>
       </Form>

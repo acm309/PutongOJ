@@ -70,7 +70,7 @@ async function manageTag (name) {
         title: t('oj.warning'),
         okText: t('oj.ok'),
         cancelText: t('oj.cancel'),
-        content: `<p>${t('oj.will_remove_tag', tag)}</p>`,
+        content: t('oj.will_remove_tag', tag),
         onOk: async () => {
           Spin.show()
           try {

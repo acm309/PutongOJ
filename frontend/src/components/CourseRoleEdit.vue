@@ -29,12 +29,12 @@ const { t } = useI18n()
 const message = inject('$Message') as typeof Message
 
 const roleConfig = computed(() => ({
-  basic: t('oj.course.basic_view'),
-  viewTestcase: t('oj.course.view_testcase'),
-  viewSolution: t('oj.course.view_solution'),
-  manageProblem: t('oj.course.manage_problem'),
-  manageContest: t('oj.course.manage_contest'),
-  manageCourse: t('oj.course.manage_course'),
+  basic: t('oj.course_basic_view'),
+  viewTestcase: t('oj.course_view_testcase'),
+  viewSolution: t('oj.course_view_solution'),
+  manageProblem: t('oj.course_manage_problem'),
+  manageContest: t('oj.course_manage_contest'),
+  manageCourse: t('oj.course_manage_course'),
 }))
 
 const defaultRole = () => Object.fromEntries(courseRoleFields.map(field => [ field, false ])) as unknown as CourseRole
@@ -103,7 +103,7 @@ async function submit () {
   loading.value = true
   try {
     await api.course.updateMember(courseId.value, userId.value, role.value)
-    message.success(t('oj.course.member_update_success'))
+    message.success(t('oj.course_member_update_success'))
     close()
   } finally {
     loading.value = false
@@ -144,17 +144,17 @@ onBeforeMount(initModal)
 </script>
 
 <template>
-  <Modal v-model="modal" :loading="true" :title="t(`oj.course.${isEdit ? 'edit' : 'add'}_member`)" :closable="false" @on-cancel="close" @on-ok="submit">
+  <Modal v-model="modal" :loading="true" :title="t(`oj.course_${isEdit ? 'edit' : 'add'}_member`)" :closable="false" @on-cancel="close" @on-ok="submit">
     <Form class="role-form" :label-width="80">
-      <FormItem :label="t('oj.course.user')">
+      <FormItem :label="t('oj.course_user')">
         <Select v-model="userId" :disabled="isEdit" filterable :remote-method="fetchUsers" :loading="loadingUsers" @on-change="value => loadUser(value)">
           <Option v-for="user in users" :key="user.value" :value="user.value" :label="user.label" />
         </Select>
         <Alert v-if="!loaded" class="role-alert">
-          {{ t('oj.course.select_user_to_load') }}
+          {{ t('oj.course_select_user_to_load') }}
         </Alert>
         <Alert v-if="isAdmin" class="role-alert" type="warning">
-          {{ t('oj.course.admin_override') }}
+          {{ t('oj.course_admin_override') }}
         </Alert>
       </FormItem>
       <FormItem label="Role">

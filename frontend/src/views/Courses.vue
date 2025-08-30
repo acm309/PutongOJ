@@ -67,11 +67,11 @@ onRouteQueryUpdate(fetch)
   <div class="courses-wrap">
     <div class="courses-header">
       <span class="courses-title">
-        {{ t('oj.courses') }}
+        {{ t('oj.course') }}
       </span>
       <div v-if="isRoot" class="courses-actions">
         <Button type="primary" icon="md-add" @click="openCreate = true">
-          {{ t('oj.course.create') }}
+          {{ t('oj.course_create') }}
         </Button>
       </div>
     </div>
@@ -87,10 +87,10 @@ onRouteQueryUpdate(fetch)
           <Col flex="auto" class="courses-content">
             <div class="courses-headline">
               <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
-                {{ t('oj.course.public') }}
+                {{ t('oj.course_public') }}
               </Tag>
               <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
-                {{ t('oj.course.private') }}
+                {{ t('oj.course_private') }}
               </Tag>
               <span class="courses-title">{{ spacing(item.name) }}</span>
             </div>

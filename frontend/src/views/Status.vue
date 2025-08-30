@@ -79,12 +79,12 @@ onRouteQueryUpdate(fetch)
         @on-change="pageChange"
       />
       <div class="status-filter">
-        <Input v-model="uid" type="text" placeholder="Username" class="status-filter-input" clearable />
-        <Input v-model="pid" type="number" placeholder="PID" class="status-filter-input" clearable />
-        <Select v-model="judge" placeholder="Judge" class="status-filter-input" clearable>
+        <Input v-model="uid" type="text" :placeholder="t('oj.username')" class="status-filter-input" clearable />
+        <Input v-model="pid" type="number" :placeholder="t('oj.pid')" class="status-filter-input" clearable />
+        <Select v-model="judge" :placeholder="t('oj.judge')" class="status-filter-input" clearable>
           <Option v-for="item in judgeList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
-        <Select v-model="language" placeholder="Language" class="status-filter-input" clearable>
+        <Select v-model="language" :placeholder="t('oj.language')" class="status-filter-input" clearable>
           <Option v-for="item in languageList" :key="item.value" :label="item.label" :value="item.value" />
         </Select>
         <Button type="primary" @click="search">
@@ -97,16 +97,16 @@ onRouteQueryUpdate(fetch)
         <thead>
           <tr>
             <th class="status-sid">
-              SID
+              {{ t('oj.sid') }}
             </th>
             <th class="status-pid">
-              PID
+              {{ t('oj.pid') }}
             </th>
             <th class="status-username">
-              Username
+              {{ t('oj.username') }}
             </th>
             <th class="status-judge">
-              Judge
+              {{ t('oj.judge') }}
             </th>
             <th class="status-time">
               <Badge>
@@ -123,10 +123,10 @@ onRouteQueryUpdate(fetch)
               </Badge>
             </th>
             <th class="status-language">
-              Language
+              {{ t('oj.language') }}
             </th>
             <th class="status-submit-time">
-              Submit Time
+              {{ t('oj.submit_time') }}
             </th>
           </tr>
         </thead>
