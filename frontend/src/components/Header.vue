@@ -35,7 +35,7 @@ function profileAction (name) {
 function getMenuItems () {
   const menuItems = [
     { name: 'home', icon: 'ios-home', label: t('oj.home') },
-    { name: 'courses', icon: 'ios-book', label: 'Course' },
+    { name: 'courses', icon: 'ios-book', label: t('oj.course') },
     { name: 'problems', icon: 'ios-keypad', label: t('oj.problem_list') },
     { name: 'ranklist', icon: 'ios-stats', label: t('oj.ranklist') },
     { name: 'contestList', icon: 'ios-trophy', label: t('oj.contest_list') },
