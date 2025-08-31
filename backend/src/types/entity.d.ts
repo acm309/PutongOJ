@@ -239,6 +239,7 @@ export interface NewsEntity extends Entity {
 
 export interface TagEntity extends Entity {
   tid: string
+  /** @deprecated */
   list: number[]
   create: number
 }

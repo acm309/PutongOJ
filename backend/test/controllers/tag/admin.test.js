@@ -96,7 +96,7 @@ test.serial('Delete a tag', async (t) => {
   const find = await request
     .get(`/api/tag/${newTag.tid}`)
 
-  t.is(find.status, 400)
+  t.is(find.status, 404)
 
   return Promise.all(
     newList.map(async (item) => {
