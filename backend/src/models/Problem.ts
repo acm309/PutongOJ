@@ -1,5 +1,5 @@
 import type { Document, PaginateModel } from 'mongoose'
-import type { ProblemEntity } from 'src/types/entity'
+import type { ProblemEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import config from '../config'

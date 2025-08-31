@@ -1,7 +1,7 @@
-import type { ContestDocument } from 'src/models/Contest'
-import type { ProblemDocument } from 'src/models/Problem'
 import type { CourseRole, SessionProfile } from '.'
+import type { ContestDocument } from '../models/Contest'
 import type { CourseDocument } from '../models/Course'
+import type { ProblemDocument } from '../models/Problem'
 import type { UserDocument } from '../models/User'
 import 'koa'
 
