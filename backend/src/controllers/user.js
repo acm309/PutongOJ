@@ -47,7 +47,7 @@ const find = async (ctx) => {
   let result
   if (page !== -1) {
     result = await User.paginate(filter, {
-      sort: { create: 1 },
+      sort: { createdAt: -1 },
       page,
       limit: pageSize,
       lean: true,
