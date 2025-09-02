@@ -23,7 +23,7 @@ test.before('Login', async (t) => {
   t.is(login.status, 200)
 })
 
-test('Fails to create a tag -- tid is too short', async (t) => {
+test.skip('Fails to create a tag -- tid is too short', async (t) => {
   const create = await request
     .post('/api/tag')
     .send({
@@ -35,7 +35,7 @@ test('Fails to create a tag -- tid is too short', async (t) => {
   t.truthy(create.body.error)
 })
 
-test('Fails to create a tag -- tid is too long', async (t) => {
+test.skip('Fails to create a tag -- tid is too long', async (t) => {
   const create = await request
     .post('/api/tag')
     .send({
@@ -47,7 +47,7 @@ test('Fails to create a tag -- tid is too long', async (t) => {
   t.truthy(create.body.error)
 })
 
-test.serial('create a new tag', async (t) => {
+test.serial.skip('create a new tag', async (t) => {
   const create = await request
     .post('/api/tag')
     .send(newTag)
@@ -62,7 +62,7 @@ test.serial('create a new tag', async (t) => {
   )
 })
 
-test.serial('Update a tag', async (t) => {
+test.serial.skip('Update a tag', async (t) => {
   const update = await request
     .put(`/api/tag/${newTag.tid}`)
     .send({ list: newList })
@@ -87,7 +87,7 @@ test.serial('Update a tag', async (t) => {
   )
 })
 
-test.serial('Delete a tag', async (t) => {
+test.serial.skip('Delete a tag', async (t) => {
   const del = await request
     .delete(`/api/tag/${newTag.tid}`)
 

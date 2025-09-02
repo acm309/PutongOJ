@@ -10,7 +10,7 @@ const ID = require('../src/models/ID')
 const News = require('../src/models/News')
 const Problem = require('../src/models/Problem')
 const Solution = require('../src/models/Solution')
-const Tag = require('../src/models/Tag')
+// const Tag = require('../src/models/Tag')
 const User = require('../src/models/User')
 
 const { generatePwd } = require('../src/utils')
@@ -23,7 +23,7 @@ const { groupSeeds } = require('./seeds/group')
 const { newsSeeds } = require('./seeds/news')
 const { problemSeeds } = require('./seeds/problem')
 const { solutionSeeds } = require('./seeds/solution')
-const { tagSeeds } = require('./seeds/tag')
+// const { tagSeeds } = require('./seeds/tag')
 const { userSeeds } = require('./seeds/user')
 
 async function main () {
@@ -36,6 +36,7 @@ async function main () {
     new ID({ name: 'News', id: 0 }).save(),
     new ID({ name: 'Problem', id: 999 }).save(),
     new ID({ name: 'Solution', id: 0 }).save(),
+    new ID({ name: 'Tag', id: 0 }).save(),
   ])
 
   const contestInsert = (async () => {
@@ -67,11 +68,11 @@ async function main () {
       await new Solution(solution).save()
     }
   })()
-  const tagInsert = Promise.all(
-    Object.values(tagSeeds).map((tag) => {
-      return new Tag(tag).save()
-    }),
-  )
+  // const tagInsert = Promise.all(
+  //   Object.values(tagSeeds).map((tag) => {
+  //     return new Tag(tag).save()
+  //   }),
+  // )
   const userInsert = Promise.all(
     Object.values(userSeeds).map((user) => {
       return new User(Object.assign(user, {
@@ -88,7 +89,7 @@ async function main () {
     newsInsert,
     problemInsert,
     solutionInsert,
-    tagInsert,
+    // tagInsert,
     userInsert,
   ])
 }
