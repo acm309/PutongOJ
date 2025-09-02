@@ -1,7 +1,7 @@
 import type { ObjectId } from 'mongoose'
 import type { ContestOption, CourseRole, Paginated } from '.'
 import type { CourseDocument } from '../models/Course'
-import type { encrypt, problemType, status } from '../utils/constants'
+import type { encrypt, problemType, status, tagColors } from '../utils/constants'
 
 // Common
 
@@ -238,9 +238,14 @@ export interface NewsEntity extends Entity {
 // Tag
 
 export interface TagEntity extends Entity {
+  tagId: number
+  name: string
+  color: typeof tagColors[number]
+  /** @deprecated */
   tid: string
   /** @deprecated */
   list: number[]
+  /** @deprecated */
   create: number
 }
 

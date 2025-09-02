@@ -1,13 +1,38 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { TagEntity } from '../types/entity'
 import mongoose from 'mongoose'
-import mongoosePaginate from 'mongoose-paginate-v2' // 分页
+import mongoosePaginate from 'mongoose-paginate-v2'
+import { tagColors } from '../utils/constants'
+import ID from './ID'
 
-export interface TagDocument extends Document, TagEntity {}
+export interface TagDocument extends Document, TagEntity { }
 
 type TagModel = PaginateModel<TagDocument>
 
 const tagSchema = new mongoose.Schema({
+  tagId: {
+    type: Number,
+    index: {
+      unique: true,
+    },
+    default: -1,
+  },
+  name: {
+    type: String,
+    required: true,
+    validate: {
+      validator (v: any) {
+        return v.length > 0 && v.length < 20
+      },
+    },
+  },
+  color: {
+    type: String,
+    required: true,
+    enum: tagColors,
+    default: 'default',
+  },
+  /** @deprecated */
   tid: {
     type: String,
     required: true,
@@ -21,10 +46,12 @@ const tagSchema = new mongoose.Schema({
       unique: true,
     },
   },
+  /** @deprecated */
   list: {
     type: [ Number ],
     default: [],
   },
+  /** @deprecated */
   create: {
     type: Number,
     default: Date.now,
@@ -35,6 +62,13 @@ const tagSchema = new mongoose.Schema({
 })
 
 tagSchema.plugin(mongoosePaginate)
+
+tagSchema.pre('save', async function (this: TagDocument, next) {
+  if (this.tagId === -1) {
+    this.tagId = await ID.generateId('Tag')
+  }
+  next()
+})
 
 const Tag
   = mongoose.model<TagDocument, TagModel>(

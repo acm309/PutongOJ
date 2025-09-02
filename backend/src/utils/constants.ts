@@ -72,6 +72,22 @@ export const contestLabelingStyle = Object.freeze({
   alphabetic: 2,
 })
 
+export const tagColors = Object.freeze([
+  'default',
+  'magenta',
+  'red',
+  'volcano',
+  'orange',
+  'gold',
+  'yellow',
+  'lime',
+  'green',
+  'cyan',
+  'blue',
+  'geekblue',
+  'purple',
+] as const)
+
 export default Object.freeze({
   deploy,
   encrypt,
@@ -83,4 +99,5 @@ export default Object.freeze({
   courseRoleNone,
   courseRoleEntire,
   contestLabelingStyle,
+  tagColors,
 })

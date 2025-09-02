@@ -15,6 +15,7 @@ async function databaseSetup () {
     News: 0,
     Problem: 999,
     Solution: 0,
+    Tag: 0,
   }
 
   const ps: Promise<any>[]
