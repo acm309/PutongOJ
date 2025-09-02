@@ -1,11 +1,17 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { ProblemEntity } from '../types/entity'
+import type { TagDocument } from './Tag'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import config from '../config'
 import ID from './ID'
 
-export interface ProblemDocument extends Document, ProblemEntity {}
+export type ProblemDocument = Document & ProblemEntity
+export type ProblemDocumentPopulated = Omit<ProblemDocument,
+  'tags'
+> & {
+  tags: TagDocument[]
+}
 
 type CourseModel = PaginateModel<ProblemDocument>
 
@@ -80,9 +86,17 @@ const problemSchema = new mongoose.Schema({
     default: '',
   },
   tags: {
-    type: [ String ],
+    type: [ mongoose.Schema.Types.ObjectId ],
+    ref: 'Tag',
     default: [],
     index: true,
+    validate: {
+      validator (v: any) {
+        return Array.isArray(v)
+          && v.every(id => mongoose.Types.ObjectId.isValid(id))
+      },
+      message: 'Invalid tag ID array',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

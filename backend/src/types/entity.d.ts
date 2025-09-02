@@ -116,32 +116,36 @@ export interface ProblemEntity extends Entity {
   type: typeof problemType[keyof typeof problemType]
   /** Judger code */
   code: string
-  tags: string[]
+  tags: ObjectId[]
   owner: ObjectId | null
   submit: number
   solve: number
 }
 
-export type ProblemEntityEditable = Pick<ProblemEntity,
+export type ProblemEntityForm = Pick<ProblemEntity,
   'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
   | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'
->
+ > & {
+   tags?: number[]
+ }
 
 export type ProblemEntityItem = Pick<ProblemEntity,
   'pid' | 'title'
 >
 
-export interface ProblemEntityPreview extends Pick<ProblemEntity,
-  'pid' | 'title' | 'status' | 'type' | 'tags' | 'submit' | 'solve'
-> {
+export type ProblemEntityPreview = Pick<ProblemEntity,
+  'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'
+> & {
   isOwner?: boolean
+  tags: TagEntityItem[]
 }
 
-export interface ProblemEntityView extends Pick<ProblemEntity,
-  'pid' | 'title' | 'time' | 'memory' | 'status' | 'tags' | 'description'
+export type ProblemEntityView = Pick<ProblemEntity,
+  'pid' | 'title' | 'time' | 'memory' | 'status' | 'description'
   | 'input' | 'output' | 'in' | 'out' | 'hint'
->, Partial<Pick<ProblemEntity, 'type' | 'code'>> {
+> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
   isOwner: boolean
+  tags: TagEntityItem[]
 }
 
 // Problem Statistics
@@ -248,6 +252,20 @@ export interface TagEntity extends Entity {
   /** @deprecated */
   create: number
 }
+
+export type TagEntityForm = Pick<TagEntity,
+  'name' | 'color'
+>
+
+export type TagEntityItem = Pick<TagEntity,
+  'tagId' | 'name' | 'color'
+>
+
+export type TagEntityPreview = Pick<TagEntity,
+  'tagId' | 'name' | 'color'
+> & View
+
+export type TagEntityView = TagEntityPreview
 
 // Group
 

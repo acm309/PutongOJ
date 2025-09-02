@@ -1,29 +1,27 @@
 import type { Context } from 'koa'
+import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from 'src/types/entity'
 import type { TagDocument } from '../models/Tag'
 import { pick } from 'lodash'
-import difference from 'lodash/difference'
-import without from 'lodash/without'
 import { loadProfile } from '../middlewares/authn'
-import Problem from '../models/Problem'
-import Tag from '../models/Tag'
+import tagService from '../services/tag'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 import logger from '../utils/logger'
 
-const loadTag = async (
+export async function loadTag (
   ctx: Context,
-  inputId?: string,
-): Promise<TagDocument> => {
-  const tagId = String(
-    inputId || ctx.params.tid || ctx.request.query.tid,
+  inputId?: number | string,
+): Promise<TagDocument> {
+  const tagId = Number(
+    inputId || ctx.params.tagId || ctx.request.query.tagId,
   )
-  if (!tagId) {
+  if (!Number.isInteger(tagId) || tagId <= 0) {
     return ctx.throw(...ERR_INVALID_ID)
   }
-  if (ctx.state.tag?.tid === tagId) {
+  if (ctx.state.tag?.tagId === tagId) {
     return ctx.state.tag
   }
 
-  const tag = await Tag.findOne({ tid: tagId })
+  const tag = await tagService.getTag(tagId)
   if (!tag) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -32,145 +30,86 @@ const loadTag = async (
   return tag
 }
 
-const findTags = async (ctx: Context) => {
-  const list = await Tag.find({}, { tid: 1 }).exec()
-
-  ctx.body = {
-    list,
-  }
+export async function findTags (ctx: Context) {
+  const response: TagEntityPreview[]
+    = await tagService.getTags()
+  ctx.body = response
 }
 
-const getTag = async (ctx: Context) => {
+export async function findTagItems (ctx: Context) {
+  const response: TagEntityItem[]
+    = await tagService.getTagItems()
+  ctx.body = response
+}
+
+export async function getTag (ctx: Context) {
   const tag = await loadTag(ctx)
-
-  ctx.body = {
-    tag,
-  }
+  const response: TagEntityView
+    = tagService.toView(tag)
+  ctx.body = response
 }
 
-const createTag = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const { uid } = await loadProfile(ctx)
-
-  const doc = await Tag.findOne({ tid: opt.tid }).exec()
-  if (doc) {
-    ctx.throw(400, '标签名已被占用!')
-  }
-
-  const tag = new Tag(Object.assign(
-    pick(opt, [ 'tid', 'list' ]), {
-      create: Date.now(),
-    },
-  ))
+export async function createTag (ctx: Context) {
+  const opt: Partial<TagEntityForm> = ctx.request.body
+  const profile = await loadProfile(ctx)
 
   try {
-    await tag.save()
-    logger.info(`Tag <${tag.tid}> is created by user <${uid}>`)
+    const tag = await tagService.createTag(
+      pick(opt, [ 'name', 'color' ]),
+    )
+    logger.info(`Tag <${tag.tagId}> is created by user <${profile.uid}>`)
+    const response: Pick<TagEntity, 'tagId'>
+      = pick(tag, [ 'tagId' ])
+    ctx.body = response
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
-
-  const procedure = opt.list.map(async (pid: number) => {
-    const problem = await Problem.findOne({ pid })
-    if (!problem) {
-      ctx.throw(...ERR_INVALID_ID)
-    }
-    problem.tags.push(tag.tid)
-    problem.save()
-    logger.info(`Problem <${problem.pid}> is added to tag <${tag.tid}>`)
-  })
-  await Promise.all(procedure)
-
-  ctx.body = {
-    tid: tag.tid,
-  }
 }
 
-const updateTag = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const tag = await loadTag(ctx)
-  const newList = opt.list as number[]
-  const oldList = tag.list as number[]
-  const tid = tag.tid
-
-  // 这些 pid 被移除了 tid
-  const pidsOfRemovedTids = difference(oldList, newList)
-
-  // 这些 pid 被新增了 tid
-  const pidsOfImportedTids = difference(newList, oldList)
-
-  // 删除 tag 表里的原 problem 表的 tid
-  const delProcedure = pidsOfRemovedTids.map(async (pid: number) => {
-    const problem = await Problem.findOne({ pid })
-    if (!problem) {
-      return
-    }
-    problem.tags = without(problem.tags, tid)
-    problem.save()
-    logger.info(`Problem <${problem.pid}> is deleted from tag <${tag.tid}>`)
-  })
-  await Promise.all(delProcedure)
-
-  // 新增 tag 表里 user 的 tid
-  const addProcedure = pidsOfImportedTids.map(async (pid: number) => {
-    const problem = await Problem.findOne({ pid }).exec()
-    if (!problem) {
-      ctx.throw(...ERR_INVALID_ID)
-    }
-    problem.tags.push(tid)
-    problem.save()
-    logger.info(`Problem <${problem.pid}> is added to tag <${tag.tid}>`)
-  })
-  await Promise.all(addProcedure)
-
-  tag.list = newList
+export async function updateTag (ctx: Context) {
+  const opt: Partial<TagEntityForm> = ctx.request.body
+  const { tagId } = await loadTag(ctx)
+  const profile = await loadProfile(ctx)
 
   try {
-    await tag.save()
-    logger.info(`Tag <${tag.tid}> is updated`)
+    const tag = await tagService.updateTag(
+      tagId,
+      pick(opt, [ 'name', 'color' ]),
+    )
+    if (!tag) {
+      return ctx.throw(...ERR_NOT_FOUND)
+    }
+    logger.info(`Tag <${tag.tagId}> is updated by user <${profile.uid}>`)
+    const response: { success: boolean } = { success: true }
+    ctx.body = response
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
-
-  ctx.body = {
-    tid: tag.tid,
-  }
 }
 
-const removeTag = async (ctx: Context) => {
-  const tid = ctx.params.tid
+export async function removeTag (ctx: Context) {
   const tag = await loadTag(ctx)
-  const list = tag.list
-  const { uid } = await loadProfile(ctx)
+  const profile = await loadProfile(ctx)
 
-  // 删除 problem 表里的 tid
-  const procedure = list.map(async (pid: number) => {
-    const problem = await Problem.findOne({ pid })
-    if (!problem) {
-      return
-    }
-    problem.tags = without(problem.tags, tid)
-    problem.save()
-    logger.info(`Problem <${problem.pid}> is deleted from tag <${tag.tid}>`)
-  })
-  await Promise.all(procedure)
-
-  // 删除 tag 表里的 tid
   try {
-    await Tag.deleteOne({ tid }).exec()
-    logger.info(`Tag <${tid}> is deleted by user <${uid}>`)
+    const success = await tagService.removeTag(tag.tagId)
+    if (!success) {
+      return ctx.throw(...ERR_NOT_FOUND)
+    }
+    const response: { success: boolean } = { success: true }
+    ctx.body = response
+    logger.info(`Tag <${tag.tagId}> is deleted by user <${profile.uid}>`)
   } catch (e: any) {
-    ctx.throw(400, e.message)
+    ctx.throw(500, e.message)
   }
-
-  ctx.body = {}
 }
 
 const tagController = {
   loadTag,
-  createTag,
   findTags,
+  findTagItems,
   getTag,
+  createTag,
   updateTag,
   removeTag,
 }

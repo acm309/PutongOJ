@@ -1,7 +1,7 @@
 import type { CourseRole, SessionProfile } from '.'
 import type { ContestDocument } from '../models/Contest'
 import type { CourseDocument } from '../models/Course'
-import type { ProblemDocument } from '../models/Problem'
+import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { TagDocument } from '../models/Tag'
 import type { UserDocument } from '../models/User'
 import 'koa'
@@ -12,7 +12,7 @@ declare module 'koa' {
     contest?: ContestDocument
     course?: CourseDocument
     courseRole?: CourseRole
-    problem?: ProblemDocument
+    problem?: ProblemDocumentPopulated
     profile?: UserDocument
     tag?: TagDocument
   }

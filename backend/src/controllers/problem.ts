@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
-import type { ProblemDocument } from '../models/Problem'
+import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { Paginated } from '../types'
 import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
 import { pick } from 'lodash'
@@ -10,6 +10,7 @@ import Solution from '../models/Solution'
 import User from '../models/User'
 import courseService from '../services/course'
 import problemService from '../services/problem'
+import tagService from '../services/tag'
 import { parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
@@ -22,7 +23,7 @@ const { status, judge } = constants
 export async function loadProblem (
   ctx: Context,
   inputId?: string | number,
-): Promise<ProblemDocument> {
+): Promise<ProblemDocumentPopulated> {
   const problemId = Number(
     inputId || ctx.params.pid || ctx.request.query.pid,
   )
@@ -169,10 +170,11 @@ const getProblem = async (ctx: Context) => {
   const canManage = profile?.isAdmin ?? isOwner
 
   const response: ProblemEntityView = {
-    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status', 'tags',
+    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status',
       'description', 'input', 'output', 'in', 'out', 'hint' ]),
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
+    tags: problem.tags.map(tagService.toItem),
     isOwner,
   }
   ctx.body = response
@@ -244,6 +246,11 @@ const updateProblem = async (ctx: Context) => {
     const problem = await problemService.updateProblem(pid, {
       ...pick(opt, [ 'title', 'time', 'memory', 'status', 'description',
         'input', 'output', 'in', 'out', 'hint', 'type', 'code' ]),
+      tags: Array.isArray(opt.tags)
+        ? await tagService.getTagObjectIds(
+            opt.tags.map((id: any) => Number(id)).filter((id: number) => Number.isInteger(id) && id > 0),
+          )
+        : undefined,
     })
     logger.info(`Problem <${pid}> is updated by user <${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }

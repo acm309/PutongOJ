@@ -7,21 +7,25 @@ const tagRouter = new Router<DefaultState, DefaultContext>({
   prefix: '/tag',
 })
 
-tagRouter.get('/list',
+tagRouter.get('/',
   tagController.findTags,
+)
+tagRouter.get('/items',
+  tagController.findTagItems,
 )
 tagRouter.post('/',
   authnMiddleware.adminRequire,
   tagController.createTag,
 )
-tagRouter.get('/:tid',
+tagRouter.get('/:tagId',
+  authnMiddleware.adminRequire,
   tagController.getTag,
 )
-tagRouter.put('/:tid',
+tagRouter.put('/:tagId',
   authnMiddleware.adminRequire,
   tagController.updateTag,
 )
-tagRouter.del('/:tid',
+tagRouter.delete('/:tagId',
   authnMiddleware.adminRequire,
   tagController.removeTag,
 )
