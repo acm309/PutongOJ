@@ -2,6 +2,7 @@ import type { ObjectId } from 'mongoose'
 import type { TagDocument } from '../models/Tag'
 import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview } from '../types/entity'
 import Tag from '../models/Tag'
+import { escapeRegExp } from 'lodash'
 
 export const toItem = Tag.toItem
 export const toPreview = Tag.toPreview
@@ -36,6 +37,14 @@ export async function getTag (
   return tag as TagDocument | null
 }
 
+export async function findTagObjectIdsByQuery (
+  query: string,
+): Promise<ObjectId[]> {
+  const tags = await Tag
+  .find({ name: { $regex: escapeRegExp(query), $options: 'i' } }, '_id')
+  return tags.map(t => t._id) as ObjectId[]
+}
+
 export async function createTag (
   opt: Partial<TagEntityForm>,
 ): Promise<TagDocument> {
@@ -68,9 +77,10 @@ const tagService = {
   getTagItems,
   getTagObjectIds,
   getTag,
+  findTagObjectIdsByQuery,
   createTag,
   updateTag,
   removeTag,
 }
 
-export default module.exports = tagService
+export default tagService

@@ -9,6 +9,7 @@ import mongoose from 'mongoose'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { judge, status } from '../utils/constants'
+import tagService from './tag'
 
 export async function findProblems (
   opt: PaginateOption & {
@@ -40,7 +41,7 @@ export async function findProblems (
         break
       case 'tag':
         filters.push({
-          tags: { $in: [ new RegExp(escapeRegExp(String(content)), 'i') ] },
+          tags: { $in: await tagService.findTagObjectIdsByQuery(String(content)) },
         })
         break
       case 'pid':
