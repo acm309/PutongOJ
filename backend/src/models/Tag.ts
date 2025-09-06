@@ -39,7 +39,6 @@ const tagSchema = new mongoose.Schema({
   /** @deprecated */
   tid: {
     type: String,
-    required: true,
     index: {
       unique: true,
     },

@@ -8,6 +8,7 @@ const tagRouter = new Router<DefaultState, DefaultContext>({
 })
 
 tagRouter.get('/',
+  authnMiddleware.adminRequire,
   tagController.findTags,
 )
 tagRouter.get('/items',
@@ -26,7 +27,7 @@ tagRouter.put('/:tagId',
   tagController.updateTag,
 )
 tagRouter.delete('/:tagId',
-  authnMiddleware.adminRequire,
+  authnMiddleware.rootRequire,
   tagController.removeTag,
 )
 

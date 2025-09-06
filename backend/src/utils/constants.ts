@@ -74,18 +74,18 @@ export const contestLabelingStyle = Object.freeze({
 
 export const tagColors = Object.freeze([
   'default',
-  'magenta',
-  'red',
-  'volcano',
-  'orange',
-  'gold',
-  'yellow',
-  'lime',
-  'green',
-  'cyan',
-  'blue',
-  'geekblue',
   'purple',
+  'geekblue',
+  'blue',
+  'cyan',
+  'green',
+  'lime',
+  'yellow',
+  'gold',
+  'orange',
+  'volcano',
+  'red',
+  'magenta',
 ] as const)
 
 export default Object.freeze({

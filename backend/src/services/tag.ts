@@ -1,8 +1,8 @@
 import type { ObjectId } from 'mongoose'
 import type { TagDocument } from '../models/Tag'
 import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview } from '../types/entity'
-import Tag from '../models/Tag'
 import { escapeRegExp } from 'lodash'
+import Tag from '../models/Tag'
 
 export const toItem = Tag.toItem
 export const toPreview = Tag.toPreview
@@ -41,7 +41,7 @@ export async function findTagObjectIdsByQuery (
   query: string,
 ): Promise<ObjectId[]> {
   const tags = await Tag
-  .find({ name: { $regex: escapeRegExp(query), $options: 'i' } }, '_id')
+    .find({ name: { $regex: escapeRegExp(query), $options: 'i' } }, '_id')
   return tags.map(t => t._id) as ObjectId[]
 }
 
