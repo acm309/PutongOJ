@@ -1,6 +1,6 @@
 import type { Context } from 'koa'
-import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '../types/entity'
 import type { TagDocument } from '../models/Tag'
+import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '../types/entity'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import tagService from '../services/tag'

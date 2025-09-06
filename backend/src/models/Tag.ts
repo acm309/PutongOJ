@@ -26,32 +26,16 @@ const tagSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator (v: any) {
-        return v.length > 0 && v.length < 20
+        return v.length > 0 && v.length < 30
       },
     },
+    index: true,
   },
   color: {
     type: String,
     required: true,
     enum: tagColors,
     default: 'default',
-  },
-  /** @deprecated */
-  tid: {
-    type: String,
-    index: {
-      unique: true,
-    },
-  },
-  /** @deprecated */
-  list: {
-    type: [ Number ],
-    default: [],
-  },
-  /** @deprecated */
-  create: {
-    type: Number,
-    default: Date.now,
   },
 }, {
   collection: 'Tag',

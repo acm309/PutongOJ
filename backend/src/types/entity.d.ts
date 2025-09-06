@@ -125,9 +125,9 @@ export interface ProblemEntity extends Entity {
 export type ProblemEntityForm = Pick<ProblemEntity,
   'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
   | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'
- > & {
-   tags?: number[]
- }
+> & {
+  tags?: number[]
+}
 
 export type ProblemEntityItem = Pick<ProblemEntity,
   'pid' | 'title'
@@ -245,12 +245,6 @@ export interface TagEntity extends Entity {
   tagId: number
   name: string
   color: typeof tagColors[number]
-  /** @deprecated */
-  tid: string
-  /** @deprecated */
-  list: number[]
-  /** @deprecated */
-  create: number
 }
 
 export type TagEntityForm = Pick<TagEntity,

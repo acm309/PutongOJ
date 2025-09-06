@@ -17,10 +17,9 @@ const modal = inject('$Modal') as typeof Modal
 
 const loadingTag = ref(false)
 const loadingTags = ref(false)
-const modalCreate = ref(false)
-const modalDetail = ref(false)
-const tagCreateFormRef = ref<any>(null)
-const tagDetailFormRef = ref<any>(null)
+const tagModal = ref(false)
+const isCreate = ref(false)
+const tagFormRef = ref<any>(null)
 
 async function fetch () {
   loadingTags.value = true
@@ -30,7 +29,8 @@ async function fetch () {
 
 async function openTagDetail (tagId: number) {
   loadingTag.value = true
-  modalDetail.value = true
+  isCreate.value = false
+  tagModal.value = true
   await tagStore.findTag(tagId)
   loadingTag.value = false
 }
@@ -40,7 +40,8 @@ function openTagCreate () {
     name: '',
     color: 'default',
   } as any
-  modalCreate.value = true
+  isCreate.value = true
+  tagModal.value = true
 }
 
 const tagCreatedAt = $computed(() => {
@@ -55,7 +56,7 @@ const tagUpdatedAt = $computed(() => {
 const tagRules = $computed(() => ({
   name: [
     { required: true, trigger: 'change' },
-    { max: 20, trigger: 'change' },
+    { max: 30, trigger: 'change' },
   ],
   color: [
     { required: true, trigger: 'change' },
@@ -65,13 +66,13 @@ const tagRules = $computed(() => ({
 async function doCreateTag () {
   await tagStore.createTag()
   message.success('Tag created!')
-  modalCreate.value = false
+  tagModal.value = false
   await fetch()
 }
 
 function createTag () {
   tag.value.name = tag.value.name.trim()
-  tagCreateFormRef.value.validate((valid: boolean) => {
+  tagFormRef.value.validate((valid: boolean) => {
     if (!valid) {
       message.error(t('oj.form_invalid'))
       return
@@ -93,13 +94,13 @@ function createTag () {
 
 function saveTag () {
   tag.value.name = tag.value.name.trim()
-  tagDetailFormRef.value.validate(async (valid: boolean) => {
+  tagFormRef.value.validate(async (valid: boolean) => {
     if (!valid) {
       message.error(t('oj.form_invalid'))
       return
     }
     await tagStore.updateTag()
-    modalDetail.value = false
+    tagModal.value = false
     message.success('Tag updated!')
     await fetch()
   })
@@ -143,52 +144,35 @@ onBeforeMount(fetch)
       </div>
     </template>
     <Modal
-      v-model="modalDetail" :title="loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`" cancel-text="Close"
-      ok-text="Save" @on-ok="saveTag"
+      v-model="tagModal"
+      :title="isCreate ? 'Create Problem Tag' : (loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`)" cancel-text="Close"
+      :ok-text="isCreate ? 'Create' : 'Save'" @on-ok="() => isCreate ? createTag() : saveTag()"
     >
-      <Form ref="tagDetailFormRef" class="tags-form" :label-width="90" :model="tag" :rules="tagRules">
+      <Form ref="tagFormRef" class="tags-form" :label-width="90" :model="tag" :rules="tagRules">
         <FormItem prop="name">
           <template #label>
             <span style="line-height: 20px;">{{ t('oj.name') }}</span>
           </template>
-          <Input v-model="tag.name" size="large" :maxlength="20" show-word-limit placeholder="Enter tag name" />
+          <Input v-model="tag.name" size="large" :maxlength="30" show-word-limit placeholder="Enter tag name" />
         </FormItem>
         <FormItem label="Color" prop="color">
           <Select v-model="tag.color">
-            <Option v-for="color in tagColors" :key="color" :value="color">
-              <Tag :color="color">
+            <Option v-for="color in tagColors" :key="color" :value="color" :label="capitalize(color)">
+              <span>{{ capitalize(color) }}</span>
+              <Tag :color="color" style="float: right; margin-top: -1.5px">
                 {{ capitalize(color) }}
               </Tag>
             </Option>
           </Select>
         </FormItem>
-        <FormItem label="Created At">
+        <FormItem v-if="!isCreate" label="Created At">
           <Input v-model="tagCreatedAt" readonly />
         </FormItem>
-        <FormItem label="Updated At">
+        <FormItem v-if="!isCreate" label="Updated At">
           <Input v-model="tagUpdatedAt" readonly />
         </FormItem>
       </Form>
       <Spin size="large" fix :show="loadingTag" class="wrap-loading" />
-    </Modal>
-    <Modal v-model="modalCreate" title="Create Problem Tag" cancel-text="Close" ok-text="Create" @on-ok="createTag">
-      <Form ref="tagCreateFormRef" class="tags-form" :label-width="90" :model="tag" :rules="tagRules">
-        <FormItem prop="name">
-          <template #label>
-            <span style="line-height: 20px;">{{ t('oj.name') }}</span>
-          </template>
-          <Input v-model="tag.name" size="large" :maxlength="20" show-word-limit placeholder="Enter tag name" />
-        </FormItem>
-        <FormItem label="Color" prop="color">
-          <Select v-model="tag.color">
-            <Option v-for="color in tagColors" :key="color" :value="color">
-              <Tag :color="color">
-                {{ capitalize(color) }}
-              </Tag>
-            </Option>
-          </Select>
-        </FormItem>
-      </Form>
     </Modal>
     <Spin size="large" fix :show="loadingTags" class="wrap-loading" />
   </div>
