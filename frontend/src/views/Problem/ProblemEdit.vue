@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProblemEntityForm } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
 import { Spin } from 'view-ui-plus'
@@ -14,11 +15,12 @@ const router = useRouter()
 const problemStore = useProblemStore()
 
 const message = inject('$Message') as typeof Message
-const { problem } = $(storeToRefs(problemStore))
+const { problem } = storeToRefs(problemStore)
 const { findOne, update: updateProblem } = problemStore
 const paramPid = computed(() => Number.parseInt(route.params.pid as string))
 
 const loadingProblem = ref(false)
+const problemForm = ref({} as Partial<ProblemEntityForm>)
 
 async function loadProblem () {
   loadingProblem.value = true
@@ -27,21 +29,25 @@ async function loadProblem () {
 }
 
 async function submitForm () {
-  const data = await updateProblem(problem)
+  const data = await updateProblem(problemForm.value)
   message.success(t('oj.submit_success'))
   router.push({ name: 'problemInfo', params: { pid: data.pid } })
 }
 
-onMounted(() => {
-  if (problem?.pid !== paramPid.value) {
-    loadProblem()
+onMounted(async () => {
+  if (problem.value?.pid !== paramPid.value) {
+    await loadProblem()
+  }
+  problemForm.value = {
+    ...problem.value,
+    tags: problem.value.tags?.map(tag => tag.tagId) || [],
   }
 })
 </script>
 
 <template>
   <div>
-    <OjProblemEdit :problem="problem" />
+    <OjProblemEdit :problem="problemForm" />
     <Button type="primary" size="large" @click="submitForm">
       Submit
     </Button>

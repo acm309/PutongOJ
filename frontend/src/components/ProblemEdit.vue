@@ -2,6 +2,7 @@
 import { Col, Form, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
+import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
 import { problemType } from '@/util/constant'
 
 defineProps([ 'problem' ])
@@ -84,6 +85,12 @@ const { t } = useI18n()
         <span class="form-label">{{ t('oj.hint') }}</span>
       </template>
       <MarkdownEditor v-model="problem.hint" />
+    </FormItem>
+    <FormItem>
+      <template #label>
+        <span class="form-label">Tags</span>
+      </template>
+      <ProblemTagSelect v-model="problem.tags" />
     </FormItem>
     <FormItem>
       <template #label>
