@@ -1,5 +1,5 @@
 import type { CourseRole, Paginated } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
 import axios from 'axios'
@@ -138,16 +138,18 @@ const group = {
 }
 
 const tag = {
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/tag/${data.tid}`, { params: data }),
-  find: (data: { [key: string]: any }) =>
-    instance.get('/tag/list', { params: data }),
-  create: (data: { [key: string]: any }) =>
-    instance.post('/tag/', data),
-  update: (data: { [key: string]: any }) =>
-    instance.put(`/tag/${data.tid}`, data),
-  delete: (data: { [key: string]: any }) =>
-    instance.delete(`/tag/${data.tid}`, data),
+  findTags: () =>
+    instance.get<TagEntityPreview[]>('/tag'),
+  findTagItems: () =>
+    instance.get<TagEntityItem[]>('/tag/items'),
+  getTag: (tagId: number) =>
+    instance.get<TagEntityView>(`/tag/${tagId}`),
+  createTag: (tag: TagEntityForm) =>
+    instance.post<Pick<TagEntity, 'tagId'>>('/tag', tag),
+  updateTag: (tagId: number, tag: Partial<TagEntityForm>) =>
+    instance.put<{ success: boolean }>(`/tag/${tagId}`, tag),
+  removeTag: (tagId: number) =>
+    instance.delete<{ success: boolean }>(`/tag/${tagId}`),
 }
 
 const discuss = {

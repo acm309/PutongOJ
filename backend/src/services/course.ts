@@ -10,6 +10,7 @@ import CourseMember from '../models/CourseMember'
 import CourseProblem from '../models/CourseProblem'
 import User from '../models/User'
 import { courseRoleEntire, courseRoleNone, encrypt, status } from '../utils/constants'
+import tagService from './tag'
 
 export async function findCourses (
   opt: PaginateOption & {},
@@ -230,9 +231,7 @@ export async function findCourseProblems (
       case 'tag':
         filters.push({
           'problem.tags': {
-            $elemMatch: {
-              $regex: new RegExp(escapeRegExp(String(content)), 'i'),
-            },
+            $in: await tagService.findTagObjectIdsByQuery(String(content)),
           },
         })
         break

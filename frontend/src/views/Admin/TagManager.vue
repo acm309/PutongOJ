@@ -1,185 +1,228 @@
-<script setup>
+<script setup lang="ts">
+import type { Message } from 'view-ui-plus'
+import { tagColors } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
+import { Button, Form, FormItem, Icon, Input, Modal, Option, Select, Spin, Tag } from 'view-ui-plus'
+import { capitalize, inject, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { onBeforeRouteLeave } from 'vue-router'
-import { useProblemStore } from '@/store/modules/problem'
 import { useTagStore } from '@/store/modules/tag'
+import { timePretty } from '@/util/formate'
 
 const { t } = useI18n()
-const problemStore = useProblemStore()
 const tagStore = useTagStore()
-const targetTagIdx = $ref(-1)
-let targetKeys = $ref([])
-const listStyle = $ref({
-  width: '350px',
-  height: '400px',
-})
-const newTid = $ref('')
-const Spin = inject('$Spin')
-const Message = inject('$Message')
-const Modal = inject('$Modal')
+const { tag, tags, tagsGroupByColor } = storeToRefs(tagStore)
 
-const { list: problemSum } = $(storeToRefs(problemStore))
-const { list: tagList, tag } = $(storeToRefs(tagStore))
-const { clearSavedProblems } = problemStore
-const {
-  find,
-  findOne,
-  update,
-  create,
-  clearSavedTags,
-  'delete': remove,
-} = tagStore
-const transData = $computed(() => problemSum.map(item => ({
-  key: `${item.pid}`,
-  label: `${item.pid} | ${item.title}`,
-})))
+const message = inject('$Message') as typeof Message
+const modal = inject('$Modal') as typeof Modal
 
-onBeforeRouteLeave(() => {
-  clearSavedProblems()
-  clearSavedTags()
-  targetKeys = []
-})
+const loadingTag = ref(false)
+const loadingTags = ref(false)
+const tagModal = ref(false)
+const isCreate = ref(false)
+const tagFormRef = ref<any>(null)
 
-async function fetchTag () {
-  Spin.show()
-  await Promise.all([ problemStore.find({ page: -1 }), tagStore.find() ])
-  Spin.hide()
+async function fetch () {
+  loadingTags.value = true
+  await tagStore.findTags()
+  loadingTags.value = false
 }
 
-function handleChange (newTargetKeys) {
-  targetKeys = newTargetKeys
+async function openTagDetail (tagId: number) {
+  loadingTag.value = true
+  isCreate.value = false
+  tagModal.value = true
+  await tagStore.findTag(tagId)
+  loadingTag.value = false
 }
 
-async function manageTag (name) {
-  if (name === 'search') {
-    Spin.show()
-    targetKeys = []
-    try {
-      await findOne({ tid: tagList[targetTagIdx].tid })
-      targetKeys = tag.list.map(item => `${item}`)
-    } finally {
-      Spin.hide()
+function openTagCreate () {
+  tag.value = {
+    name: '',
+    color: 'default',
+  } as any
+  isCreate.value = true
+  tagModal.value = true
+}
+
+const tagCreatedAt = $computed(() => {
+  if (!tag.value.createdAt) return ''
+  return timePretty(tag.value.createdAt)
+})
+const tagUpdatedAt = $computed(() => {
+  if (!tag.value.updatedAt) return ''
+  return timePretty(tag.value.updatedAt)
+})
+
+const tagRules = $computed(() => ({
+  name: [
+    { required: true, trigger: 'change' },
+    { max: 30, trigger: 'change' },
+  ],
+  color: [
+    { required: true, trigger: 'change' },
+  ],
+}))
+
+async function doCreateTag () {
+  await tagStore.createTag()
+  message.success('Tag created!')
+  tagModal.value = false
+  await fetch()
+}
+
+function createTag () {
+  tag.value.name = tag.value.name.trim()
+  tagFormRef.value.validate((valid: boolean) => {
+    if (!valid) {
+      message.error(t('oj.form_invalid'))
+      return
     }
-  } else if (name === 'delete') {
-    if (!tag || !tag.tid) {
-      Message.info(t('oj.no_tag'))
-    } else {
-      Modal.confirm({
-        title: t('oj.warning'),
-        okText: t('oj.ok'),
-        cancelText: t('oj.cancel'),
-        content: t('oj.will_remove_tag', tag),
-        onOk: async () => {
-          Spin.show()
-          try {
-            await remove({ tid: tag.tid })
-            Message.success(t('oj.remove_tag_success', tag))
-          } finally {
-            Spin.hide()
-          }
-        },
-        onCancel: () => Message.info(t('oj.cancel_remove')),
+    const exists = tags.value.find(item => item.name === tag.value.name)
+    if (exists) {
+      modal.confirm({
+        title: 'Duplicate Tag Name',
+        content: `Tag with name "${tag.value.name}" already exists. Do you want to create it anyway?`,
+        okText: 'Create',
+        cancelText: 'Cancel',
+        onOk: doCreateTag,
       })
+    } else {
+      doCreateTag()
     }
-  }
+  })
 }
 
-async function saveTag () {
-  const problems = targetKeys.slice()
-  Spin.show()
-  try {
-    const tid = await update({
-      tid: tagList[targetTagIdx].tid,
-      list: problems,
-    })
-    Message.success(t('oj.update_tag_success', { tid }))
-  } finally {
-    Spin.hide()
-  }
+function saveTag () {
+  tag.value.name = tag.value.name.trim()
+  tagFormRef.value.validate(async (valid: boolean) => {
+    if (!valid) {
+      message.error(t('oj.form_invalid'))
+      return
+    }
+    await tagStore.updateTag()
+    tagModal.value = false
+    message.success('Tag updated!')
+    await fetch()
+  })
 }
 
-async function createTag () {
-  const problems = targetKeys.slice()
-  Spin.show()
-  try {
-    await create({ tid: newTid, list: problems })
-    await find()
-    Message.success(t('oj.create_tag_success', { tid: newTid }))
-  } finally {
-    Spin.hide()
-  }
-}
-
-fetchTag()
+onBeforeMount(fetch)
 </script>
 
 <template>
-  <div class="usermanage">
-    <h1>{{ t('oj.manage_tag') }}</h1>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">
-        Title
-      </Col>
-      <Col :span="4">
-        <Input v-model="newTid" />
-      </Col>
-      <Col offset="1" :span="6">
-        <Button type="primary" :disabled="!newTid" @click="createTag">
-          {{ t('oj.create') }}
+  <div class="tags-wrap">
+    <div class="tags-header">
+      <span class="tags-header-title">
+        Problem Tags
+      </span>
+      <div>
+        <Button type="primary" icon="md-add" @click="openTagCreate">
+          Create Tag
         </Button>
-        <!-- TODO: implement rename -->
-        <!-- &nbsp;
-        <Button type="primary" :disabled="!tag.tid" @click="saveTag">
-          {{ t('oj.rename') }}
-        </Button> -->
-      </Col>
-    </Row>
-    <Row type="flex" justify="start">
-      <Col :span="2" class="label">
-        Tag
-      </Col>
-      <Col :span="4">
-        <Select v-model="targetTagIdx" filterable @on-select="manageTag('search')">
-          <Option v-for="(item, index) in tagList" :key="item.tid" :value="index">
-            {{ item.tid }}
-          </Option>
-        </Select>
-      </Col>
-      <Col offset="1" :span="6">
-        <Button type="primary" :disabled="targetTagIdx !== -1" @click="manageTag('delete')">
-          {{ t('oj.delete') }}
-        </Button>
-      </Col>
-    </Row>
-
-    <Transfer
-      :data="transData" :target-keys="targetKeys" :list-style="listStyle" filterable class="tranfer"
-      @on-change="handleChange"
-    />
-    <Button type="primary" class="submit" @click="saveTag">
-      {{ t('oj.submit') }}
-    </Button>
+      </div>
+    </div>
+    <div v-if="tags.length === 0" class="tags-empty">
+      <Icon type="ios-planet-outline" class="empty-icon" />
+      <span class="empty-text">{{ t('oj.empty_content') }}</span>
+    </div>
+    <template v-for="color in tagColors" v-else>
+      <div v-if="tagsGroupByColor[color]?.length > 0" :key="color" class="tags-group">
+        <div class="tags-group-header">
+          <span class="tags-group-title">
+            {{ capitalize(color) }}
+          </span>
+          <span class="tags-group-count">({{ tagsGroupByColor[color].length }})</span>
+        </div>
+        <div class="tags-group-items">
+          <Tag
+            v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="tag-item" size="large"
+            :color="color" @click="openTagDetail(tagItem.tagId)"
+          >
+            {{ tagItem.name }}
+          </Tag>
+        </div>
+      </div>
+    </template>
+    <Modal
+      v-model="tagModal"
+      :title="isCreate ? 'Create Problem Tag' : (loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`)" cancel-text="Close"
+      :ok-text="isCreate ? 'Create' : 'Save'" @on-ok="() => isCreate ? createTag() : saveTag()"
+    >
+      <Form ref="tagFormRef" class="tags-form" :label-width="90" :model="tag" :rules="tagRules">
+        <FormItem prop="name">
+          <template #label>
+            <span style="line-height: 20px;">{{ t('oj.name') }}</span>
+          </template>
+          <Input v-model="tag.name" size="large" :maxlength="30" show-word-limit placeholder="Enter tag name" />
+        </FormItem>
+        <FormItem label="Color" prop="color">
+          <Select v-model="tag.color">
+            <Option v-for="color in tagColors" :key="color" :value="color" :label="capitalize(color)">
+              <span>{{ capitalize(color) }}</span>
+              <Tag :color="color" style="float: right; margin-top: -1.5px">
+                {{ capitalize(color) }}
+              </Tag>
+            </Option>
+          </Select>
+        </FormItem>
+        <FormItem v-if="!isCreate" label="Created At">
+          <Input v-model="tagCreatedAt" readonly />
+        </FormItem>
+        <FormItem v-if="!isCreate" label="Updated At">
+          <Input v-model="tagUpdatedAt" readonly />
+        </FormItem>
+      </Form>
+      <Spin size="large" fix :show="loadingTag" class="wrap-loading" />
+    </Modal>
+    <Spin size="large" fix :show="loadingTags" class="wrap-loading" />
   </div>
 </template>
 
 <style lang="stylus" scoped>
-.ivu-col-offset-1
-  margin-left: 1%
-.tranfer
-  margin-top: 20px
-  margin-bottom: 20px
-.ivu-tag
-  height: 28px
-  line-height: 26px
-.usermanage
-  h1
-    margin-bottom: 20px
-  .ivu-row-flex
-    margin-bottom: 10px
-  .label
-    line-height: 32px
-  .submit
-    margin-bottom: 20px
+.tags-wrap
+  max-width 768px
+  padding-bottom 20px
+
+.tags-header
+  margin-bottom 20px
+  display flex
+  justify-content space-between
+  .tags-header-title
+    font-size 20px
+    line-height 32px
+
+.tags-group
+  margin-bottom 20px
+  .tags-group-header
+    margin-bottom 6px
+  .tags-group-title
+    font-size 16px
+  .tags-group-count
+    margin-left 8px
+  .tags-group-items
+    .tag-item
+      cursor: pointer
+
+.tags-form
+  padding 12px
+  margin-bottom -24px
+
+.tags-empty
+  margin-bottom 20px
+  padding 32px
+  border 1px solid #dcdee2
+  border-radius 4px
+  display flex
+  align-items center
+  justify-content center
+  .empty-icon
+    font-size 32px
+  .empty-text
+    margin-left 32px
+
+@media screen and (max-width: 1024px)
+  .tags-wrap
+    padding-bottom 0
+  .tags-header
+    padding-top 10px
 </style>

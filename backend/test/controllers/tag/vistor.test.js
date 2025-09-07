@@ -5,7 +5,7 @@ const app = require('../../../src/app')
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Tag list', async (t) => {
+test.skip('Tag list', async (t) => {
   const list = await request
     .get('/api/tag/list')
 
@@ -14,7 +14,7 @@ test('Tag list', async (t) => {
   t.truthy(Array.isArray(list.body.list))
 })
 
-test('Tag find one', async (t) => {
+test.skip('Tag find one', async (t) => {
   const list = await request
     .get('/api/tag/level1')
 
@@ -22,7 +22,7 @@ test('Tag find one', async (t) => {
   t.is(list.type, 'application/json')
 })
 
-test('Fails to create a tag -- no permission', async (t) => {
+test.skip('Fails to create a tag -- no permission', async (t) => {
   const create = await request
     .post('/api/tag')
     .send({

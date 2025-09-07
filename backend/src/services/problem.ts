@@ -1,7 +1,7 @@
 import type { ObjectId } from 'mongoose'
-import type { ProblemDocument } from '../models/Problem'
+import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
 import type { Paginated, PaginateOption } from '../types'
-import type { ProblemEntityEditable, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
+import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
@@ -9,6 +9,7 @@ import mongoose from 'mongoose'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { judge, status } from '../utils/constants'
+import tagService from './tag'
 
 export async function findProblems (
   opt: PaginateOption & {
@@ -40,7 +41,7 @@ export async function findProblems (
         break
       case 'tag':
         filters.push({
-          tags: { $in: [ new RegExp(escapeRegExp(String(content)), 'i') ] },
+          tags: { $in: await tagService.findTagObjectIdsByQuery(String(content)) },
         })
         break
       case 'pid':
@@ -59,6 +60,7 @@ export async function findProblems (
   const result = await Problem.paginate({ $and: filters }, {
     sort: { pid: 1 },
     page,
+    populate: { path: 'tags', select: '-_id tagId name color' },
     limit: pageSize,
     lean: true,
     leanWithId: false,
@@ -109,13 +111,15 @@ export async function getProblemItems (): Promise<ProblemEntityItem[]> {
 
 export async function getProblem (
   pid: number,
-): Promise<ProblemDocument | undefined> {
-  const problem = await Problem.findOne({ pid })
-  return problem ?? undefined
+): Promise<ProblemDocumentPopulated | undefined> {
+  const problem = await Problem
+    .findOne({ pid })
+    .populate('tags')
+  return (problem ?? undefined) as ProblemDocumentPopulated | undefined
 }
 
 export async function createProblem (
-  opt: ProblemEntityEditable,
+  opt: ProblemEntityForm,
 ): Promise<ProblemDocument> {
   const problem = new Problem(opt)
   await problem.save()
@@ -132,10 +136,10 @@ export async function createProblem (
 
 export async function updateProblem (
   pid: number,
-  opt: Partial<ProblemEntityEditable>,
+  opt: Partial<ProblemEntity>,
 ): Promise<ProblemDocument | undefined> {
   const problem = await Problem
-    .findOneAndUpdate({ pid }, opt, { new: true })
+    .findOneAndUpdate({ pid }, { $set: opt }, { new: true })
   return problem ?? undefined
 }
 
