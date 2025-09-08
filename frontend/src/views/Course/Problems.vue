@@ -3,7 +3,7 @@ import type { ProblemEntityPreview } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
-import { Button, Form, FormItem, Icon, Input, InputNumber, Modal, Option, Page, Select, Spin } from 'view-ui-plus'
+import { Button, Form, FormItem, Icon, Input, InputNumber, Modal, Option, Page, Select, Spin, Tag } from 'view-ui-plus'
 import { inject, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -200,10 +200,13 @@ onRouteQueryUpdate(fetch)
               </router-link>
             </td>
             <td class="problem-tags">
-              <template v-for="(item2, index2) in item.tags" :key="index2">
-                <router-link :to="{ name: 'problems', query: { type: 'tag', content: item2 } }">
-                  <span class="problem-tag">{{ item2 }}</span>
-                </router-link>
+              <template v-for="(tag, tagIdx) in item.tags" :key="tagIdx">
+                <Tag
+                  class="problem-tag" :color="tag.color"
+                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
+                >
+                  {{ tag.name }}
+                </Tag>
               </template>
             </td>
             <td class="problem-ratio">
@@ -376,17 +379,8 @@ onRouteQueryUpdate(fetch)
   padding-right 40px !important
 
 .problem-tag
-  display inline-block
-  height 22px;
-  line-height 22px;
-  padding 0 8px
-  border 1px solid #e8eaec
-  border-radius 3px
-  background #f7f7f7
-  font-size 12px
-  vertical-align middle
-  color #515a6e
-  margin 0px 0px 4px 8px
+  margin-top: -2px
+  cursor: pointer
 .status-disabled
   color #b0b0b0
   cursor not-allowed

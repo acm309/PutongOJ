@@ -266,6 +266,15 @@ export async function findCourseProblems (
       $unwind: '$problem',
     },
     ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
+    // 新增：关联 Tag 集合
+    {
+      $lookup: {
+        from: 'Tag',
+        localField: 'problem.tags',
+        foreignField: '_id',
+        as: 'problem.tagsInfo',
+      },
+    },
     {
       $sort: { sort: 1, updatedAt: -1 },
     },
@@ -282,7 +291,17 @@ export async function findCourseProblems (
                 title: '$problem.title',
                 status: '$problem.status',
                 type: '$problem.type',
-                tags: '$problem.tags',
+                tags: {
+                  $map: {
+                    input: '$problem.tagsInfo',
+                    as: 'tag',
+                    in: {
+                      tagId: '$$tag.tagId',
+                      name: '$$tag.name',
+                      color: '$$tag.color',
+                    },
+                  },
+                },
                 submit: '$problem.submit',
                 solve: '$problem.solve',
                 owner: '$problem.owner',
