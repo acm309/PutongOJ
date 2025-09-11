@@ -60,8 +60,8 @@ Replace `<YOUR_MONGODB_URL>` and `<YOUR_REDIS_URL>` with your actual database co
 docker run -d --name ptoj-app \
     -p 3000:3000 \
     -e NODE_ENV=production \
-    -e dbURL=<YOUR_MONGODB_URL> \
-    -e redisURL=<YOUR_REDIS_URL> \
+    -e PTOJ_MONGODB_URL=<YOUR_MONGODB_URL> \
+    -e PTOJ_REDIS_URL=<YOUR_REDIS_URL> \
     ptoj-app
 ```
 

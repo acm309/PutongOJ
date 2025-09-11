@@ -7,7 +7,7 @@ import logger from '../utils/logger'
 mongoose.set('strictQuery', true)
 mongoose.Promise = globalThis.Promise
 
-mongoose.connect(config.dbURL, { authSource: 'admin' })
+mongoose.connect(config.mongodbURL, { authSource: 'admin' })
 
 mongoose.connection.on('connected', () => {
   logger.info('MongoDB connected successfully')
