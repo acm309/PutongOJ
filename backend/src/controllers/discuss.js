@@ -1,5 +1,5 @@
-const only = require('only')
 const Discuss = require('../models/Discuss')
+const { only } = require('../utils')
 const { isLogined, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 

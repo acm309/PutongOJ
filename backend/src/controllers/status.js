@@ -2,12 +2,12 @@ const Buffer = require('node:buffer').Buffer
 const path = require('node:path')
 const fse = require('fs-extra')
 const { pick } = require('lodash')
-const only = require('only')
 const config = require('../config')
 const redis = require('../config/redis')
 const Contest = require('../models/Contest')
 const Problem = require('../models/Problem')
 const Solution = require('../models/Solution')
+const { only } = require('../utils')
 const { purify, isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 

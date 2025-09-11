@@ -1,6 +1,6 @@
-const only = require('only')
 const config = require('../config')
 const News = require('../models/News')
+const { only } = require('../utils')
 const { isAdmin } = require('../utils/helper')
 const logger = require('../utils/logger')
 

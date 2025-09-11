@@ -1,8 +1,8 @@
 const test = require('ava')
-const only = require('only')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
+const { only } = require('../../../src/utils')
 const { discussSeeds } = require('../../seeds/discuss')
 
 const server = app.listen()

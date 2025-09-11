@@ -1,5 +1,6 @@
 import type { PaginateOption } from '../types'
 import crypto from 'node:crypto'
+import { pick } from 'lodash'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -25,4 +26,20 @@ export function parsePaginateOption (
 export function generatePwd (pwd: string): string {
   return crypto.createHash('md5').update(pwd).digest('hex')
     + crypto.createHash('sha1').update(pwd).digest('hex')
+}
+
+export function only<T extends object> (
+  obj: T,
+  keys: string | string[],
+): Partial<T> {
+  if (typeof keys === 'string') {
+    keys = keys.split(' ')
+  }
+  return pick(obj, keys)
+}
+
+export default module.exports = {
+  parsePaginateOption,
+  generatePwd,
+  only,
 }

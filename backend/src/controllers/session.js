@@ -1,6 +1,6 @@
-const only = require('only')
 const { privilege } = require('../config')
 const User = require('../models/User')
+const { only } = require('../utils')
 const { generatePwd } = require('../utils/helper')
 const logger = require('../utils/logger')
 
