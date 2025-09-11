@@ -1,5 +1,5 @@
 import type { ContestEntityView, ProblemEntityPreview } from '@backend/types/entity'
-import type { privilege } from '@/util/constant'
+import type { privilege } from '@/utils/constant'
 
 export interface TimeResp {
   serverTime: number

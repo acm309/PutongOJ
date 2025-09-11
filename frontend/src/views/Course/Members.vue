@@ -11,9 +11,9 @@ import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
-import { courseRoleFields } from '@/util/constant'
-import { timePretty } from '@/util/formate'
-import { onRouteQueryUpdate } from '@/util/helper'
+import { courseRoleFields } from '@/utils/constant'
+import { timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate } from '@/utils/helper'
 
 const route = useRoute()
 const router = useRouter()

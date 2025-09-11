@@ -6,8 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import { timeContest, timePretty } from '@/util/formate'
-import { onProfileUpdate, onRouteParamUpdate, purify } from '@/util/helper'
+import { timeContest, timePretty } from '@/utils/formate'
+import { onProfileUpdate, onRouteParamUpdate, purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const contestStore = useContestStore()

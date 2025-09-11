@@ -4,7 +4,7 @@ import { toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { useSessionStore } from '@/store/modules/session'
-import { timeagoPretty } from '@/util/formate'
+import { timeagoPretty } from '@/utils/formate'
 
 const props = defineProps([ 'did' ])
 const { did } = $(toRefs(props))

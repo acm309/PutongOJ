@@ -6,8 +6,8 @@ import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem'
 import { useContestStore } from '@/store/modules/contest'
 import { useProblemStore } from '@/store/modules/problem'
-import { contestLabeling } from '@/util/formate'
-import { onRouteParamUpdate } from '@/util/helper'
+import { contestLabeling } from '@/utils/formate'
+import { onRouteParamUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
 const problemStore = useProblemStore()

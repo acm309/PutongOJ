@@ -9,8 +9,8 @@ import { useRoute } from 'vue-router'
 import api from '@/api'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import { contestLabeling, timeContest, timePretty } from '@/util/formate'
-import { exportSheet, normalize } from '@/util/ranklist'
+import { contestLabeling, timeContest, timePretty } from '@/utils/formate'
+import { exportSheet, normalize } from '@/utils/ranklist'
 
 const { t } = useI18n()
 const contestStore = useContestStore()

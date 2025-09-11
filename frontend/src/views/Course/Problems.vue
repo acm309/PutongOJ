@@ -12,9 +12,9 @@ import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import constant from '@/util/constant'
-import { formate } from '@/util/formate'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import constant from '@/utils/constant'
+import { formate } from '@/utils/formate'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const route = useRoute()
 const router = useRouter()

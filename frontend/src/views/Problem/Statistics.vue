@@ -11,9 +11,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useStatisticsStore } from '@/store/modules/statistics.ts'
-import { language } from '@/util/constant'
-import { timePretty } from '@/util/formate'
-import { onRouteQueryUpdate } from '@/util/helper'
+import { language } from '@/utils/constant'
+import { timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate } from '@/utils/helper'
 
 use([
   LegendComponent,

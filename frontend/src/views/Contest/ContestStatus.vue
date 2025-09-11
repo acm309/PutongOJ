@@ -9,9 +9,9 @@ import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import constant from '@/util/constant'
-import { contestLabeling, similarityColor, timePretty } from '@/util/formate'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import constant from '@/utils/constant'
+import { contestLabeling, similarityColor, timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()

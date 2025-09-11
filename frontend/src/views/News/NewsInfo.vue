@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import MarkdownPreview from '@/components/MarkdownPreview'
 
 import { useNewsStore } from '@/store/modules/news'
-import { timePretty } from '@/util/formate'
+import { timePretty } from '@/utils/formate'
 
 const { news } = $(storeToRefs(useNewsStore()))
 </script>

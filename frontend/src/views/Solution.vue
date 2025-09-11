@@ -12,9 +12,9 @@ import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import constant from '@/util/constant'
-import { timePretty } from '@/util/formate'
-import { onRouteQueryUpdate, testcaseUrl } from '@/util/helper'
+import constant from '@/utils/constant'
+import { timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
 import 'highlight.js/styles/atom-one-light.css'
 
 highlight.registerLanguage('c', cpp)

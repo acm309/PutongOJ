@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n'
 import Header from '@/components/Header.vue'
 import Dialog from '@/components/LoginAndRegister.vue'
 import { useRootStore } from '@/store'
-import { timeDiffPretty, timePretty } from '@/util/formate'
-import { useHumanLanguage } from '@/util/helper'
+import { timeDiffPretty, timePretty } from '@/utils/formate'
+import { useHumanLanguage } from '@/utils/helper'
 
 const { locale } = useI18n()
 const rootStore = useRootStore()

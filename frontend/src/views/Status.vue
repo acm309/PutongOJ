@@ -5,10 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import constant from '@/util/constant'
-import { similarityColor, timePretty } from '@/util/formate'
+import constant from '@/utils/constant'
+import { similarityColor, timePretty } from '@/utils/formate'
 
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const sessionStore = useSessionStore()

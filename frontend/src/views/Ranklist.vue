@@ -8,9 +8,9 @@ import { useRootStore } from '@/store'
 import { useGroupStore } from '@/store/modules/group'
 import { useRanklistStore } from '@/store/modules/ranklist'
 
-import { formate } from '@/util/formate'
+import { formate } from '@/utils/formate'
 
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const route = useRoute()
 const router = useRouter()

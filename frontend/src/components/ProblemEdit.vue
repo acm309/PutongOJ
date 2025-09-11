@@ -3,7 +3,7 @@ import { Col, Form, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
-import { problemType } from '@/util/constant'
+import { problemType } from '@/utils/constant'
 
 defineProps([ 'problem' ])
 

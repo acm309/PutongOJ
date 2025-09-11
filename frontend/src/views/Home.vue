@@ -6,9 +6,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useNewsStore } from '@/store/modules/news'
 
-import { timePretty } from '@/util/formate'
+import { timePretty } from '@/utils/formate'
 
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { locale, t } = useI18n()
 const isZH = $computed(() => locale.value === 'zh-CN')

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/store/modules/user'
-import { purify } from '@/util/helper'
+import { purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const userStore = useUserStore()
