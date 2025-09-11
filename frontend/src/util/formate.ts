@@ -50,7 +50,7 @@ export function similarityColor (val: number) {
 export function contestLabeling (
   value: number,
   style: typeof contestLabelingStyle[keyof typeof contestLabelingStyle]
-  = contestLabelingStyle.numeric,
+    = contestLabelingStyle.numeric,
 ): string {
   //
   function toAlphabetic (n: number): string {

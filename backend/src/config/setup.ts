@@ -19,11 +19,11 @@ async function databaseSetup () {
   }
 
   const ps: Promise<any>[]
-   = Object.entries(models).map(async ([ model, id ]) => {
-     const item = await ID.findOne({ name: model }).exec()
-     if (item != null && item.id >= id) { return }
-     return new ID({ name: model, id }).save()
-   })
+    = Object.entries(models).map(async ([ model, id ]) => {
+      const item = await ID.findOne({ name: model }).exec()
+      if (item != null && item.id >= id) { return }
+      return new ID({ name: model, id }).save()
+    })
 
   const admin = await User.findOne({ uid: 'admin' }).exec()
   if (admin == null) {

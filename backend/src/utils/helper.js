@@ -34,11 +34,6 @@ function isRoot (profile) {
   }
 }
 
-/** @deprecated */
-function isUndefined (item) {
-  return typeof item === 'undefined'
-}
-
 module.exports = {
   purify,
   /** @deprecated Import from utils */
@@ -47,5 +42,4 @@ module.exports = {
   isLogined,
   isAdmin,
   isRoot,
-  isUndefined,
 }

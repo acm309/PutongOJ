@@ -22,17 +22,6 @@ test('helper.purify', (t) => {
   })
 })
 
-test('helper.isUndefined', (t) => {
-  t.true(helper.isUndefined())
-  t.true(helper.isUndefined(undefined))
-  t.false(helper.isUndefined(null))
-  t.false(helper.isUndefined(''))
-  t.false(helper.isUndefined('undefined'))
-  t.false(helper.isUndefined({}))
-  t.false(helper.isUndefined([]))
-  t.false(helper.isUndefined(0))
-})
-
 test('helper.isAdmin', (t) => {
   t.true(helper.isAdmin({
     privilege: config.privilege.Root,
