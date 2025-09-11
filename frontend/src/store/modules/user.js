@@ -1,5 +1,6 @@
+import { md5 } from '@noble/hashes/legacy.js'
+import { bytesToHex } from '@noble/hashes/utils'
 import axios from 'axios'
-import MD5 from 'crypto-js/md5'
 import { defineStore } from 'pinia'
 import api from '@/api'
 
@@ -42,7 +43,9 @@ export const useUserStore = defineStore('user', {
         && this.user.privilege > 1
         && this.user.mail.trim().length > 0
       ) {
-        const mailHash = MD5(this.user.mail.trim().toLowerCase()).toString()
+        const mailHash = bytesToHex(md5(
+          new TextEncoder().encode(this.user.mail.trim().toLowerCase()),
+        ))
         const cravatar = `https://cn.cravatar.com/avatar/${mailHash}?d=404&s=256`
         const response = await axios.get(cravatar, {
           withCredentials: false,
