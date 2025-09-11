@@ -10,6 +10,7 @@ export interface WebsiteConfigResp {
     title: string
     buildSHA: string
     buildTime: number
+    apiPublicKey: string
   }
 }
 

@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import vditorInfo from 'vditor/package.json'
 import api from '@/api'
 import { privilege } from '@/utils/constant'
+import { setServerPublicKey } from '@/utils/crypto'
 
 export const useRootStore = defineStore('root', {
   state: () => ({
@@ -67,6 +68,7 @@ export const useRootStore = defineStore('root', {
     async fetchWebsiteConfig () {
       const { data } = await api.getWebsiteConfig()
       this.website = data.website
+      setServerPublicKey(this.website.apiPublicKey)
     },
   },
 })
