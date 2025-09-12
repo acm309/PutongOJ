@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
-import { contestLabeling, formate, timePretty } from '@/util/formate'
+import { contestLabeling, formate, timePretty } from '@/utils/formate'
 
 const { t } = useI18n()
 const contestStore = useContestStore()

@@ -5,8 +5,8 @@ import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
-import { language } from '@/util/constant'
-import { useSolutionStorage } from '@/util/helper'
+import { language } from '@/utils/constant'
+import { useSolutionStorage } from '@/utils/helper'
 
 const props = defineProps({
   pid: {

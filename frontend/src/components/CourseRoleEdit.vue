@@ -7,7 +7,7 @@ import { Alert, Checkbox, Form, FormItem, Modal, Option, Select, Spin } from 'vi
 import { computed, inject, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
-import { courseRoleFields, privilege } from '@/util/constant'
+import { courseRoleFields, privilege } from '@/utils/constant'
 
 const props = defineProps({
   modelValue: {

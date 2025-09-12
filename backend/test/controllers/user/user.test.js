@@ -2,6 +2,7 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
+const { encryptData } = require('../../../src/services/crypto')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -19,7 +20,7 @@ test.before('Create user and login', async (t) => {
 
   r = await request
     .post('/api/session')
-    .send({ uid, pwd })
+    .send({ uid, pwd: await encryptData(pwd) })
   t.is(r.status, 200)
 
   r = await request
@@ -214,7 +215,7 @@ test.after('Update user\'s pwd then check', async (t) => {
 
   r = await request
     .post('/api/session')
-    .send({ uid, pwd: newPwd })
+    .send({ uid, pwd: await encryptData(newPwd) })
   t.is(r.status, 200)
 
   r = await request

@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useTestcaseStore } from '@/store/modules/testcase'
 
-import { testcaseUrl } from '@/util/helper'
+import { testcaseUrl } from '@/utils/helper'
 
 const { t } = useI18n()
 const route = useRoute()

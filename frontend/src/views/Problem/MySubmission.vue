@@ -8,10 +8,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import { color, language, result } from '@/util/constant'
-import { timePretty } from '@/util/formate'
+import { color, language, result } from '@/utils/constant'
+import { timePretty } from '@/utils/formate'
 
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const route = useRoute()

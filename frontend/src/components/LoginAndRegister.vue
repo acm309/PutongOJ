@@ -1,9 +1,9 @@
 <script setup>
-import only from 'only'
 import { inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
+import { encryptData } from '@/utils/crypto'
 
 const { t } = useI18n()
 
@@ -56,7 +56,10 @@ function submit () {
   if (mode === 'login') {
     loginForm.value.validate(async (valid) => {
       if (!valid) return
-      await login(only(form, 'uid pwd'))
+      await login({
+        uid: form.uid,
+        pwd: await encryptData(form.pwd),
+      })
       $Message.success(`Welcome, ${form.uid} !`)
       triggerLogin()
     })

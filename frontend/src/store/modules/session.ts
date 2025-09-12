@@ -1,7 +1,7 @@
 import type { LoginParam, Profile } from '@/types'
 import { defineStore } from 'pinia'
 import api from '@/api'
-import { privilege } from '@/util/constant'
+import { privilege } from '@/utils/constant'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({

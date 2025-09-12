@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
 import { useUserStore } from '@/store/modules/user'
 
-import { timePretty } from '@/util/formate'
+import { timePretty } from '@/utils/formate'
 
 const { t } = useI18n()
 

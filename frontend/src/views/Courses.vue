@@ -9,7 +9,7 @@ import CourseCreate from '@/components/CourseCreate.vue'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
-import { onRouteQueryUpdate } from '@/util/helper'
+import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
 const route = useRoute()

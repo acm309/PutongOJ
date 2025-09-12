@@ -3,6 +3,7 @@ import path from 'node:path'
 import fse from 'fs-extra'
 import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
+import cryptoService from '../services/crypto'
 import logger from '../utils/logger'
 
 const uploadDir = path.join(__dirname, '../../public/uploads')
@@ -37,9 +38,12 @@ const serverTime = (ctx: Context) => {
   }
 }
 
-const websiteConfig = (ctx: Context) => {
+const websiteConfig = async (ctx: Context) => {
   ctx.body = {
-    website: websiteConf,
+    website: {
+      ...websiteConf,
+      apiPublicKey: await cryptoService.getServerPublicKey(),
+    },
   }
 }
 

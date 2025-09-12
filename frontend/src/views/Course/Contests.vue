@@ -8,9 +8,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import constant from '@/util/constant'
-import { timePretty } from '@/util/formate'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import constant from '@/utils/constant'
+import { timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { t } = useI18n()
 const { 'contestType': type, 'status': contestVisible } = constant

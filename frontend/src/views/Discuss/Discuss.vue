@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useDiscussStore } from '@/store/modules/discuss'
 import { useSessionStore } from '@/store/modules/session'
-import { timeagoPretty } from '@/util/formate'
+import { timeagoPretty } from '@/utils/formate'
 
 /**
  * @TODO add pagination

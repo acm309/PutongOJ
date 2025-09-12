@@ -12,7 +12,7 @@ import api from '@/api'
 import CourseProblemAdd from '@/components/CourseProblemAdd.vue'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
-import { onProfileUpdate } from '@/util/helper'
+import { onProfileUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
 const route = useRoute()

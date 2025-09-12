@@ -4,8 +4,8 @@ import { Button, Option, Page, Select } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
-import { timePretty } from '@/util/formate'
-import { onRouteQueryUpdate, purify } from '@/util/helper'
+import { timePretty } from '@/utils/formate'
+import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const route = useRoute()
 const router = useRouter()

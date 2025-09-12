@@ -31,6 +31,8 @@
     "i18n:sync": "npm run i18n:upload && npm run i18n:download"
   },
   "dependencies": {
+    "@noble/ciphers": "^2.0.0",
+    "@noble/curves": "^2.0.0",
     "@noble/hashes": "^2.0.0",
     "@vitejs/plugin-legacy": "^7.2.1",
     "@vitejs/plugin-vue": "^6.0.1",

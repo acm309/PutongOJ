@@ -9,9 +9,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import constant from '@/util/constant'
-import { formate } from '@/util/formate'
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/util/helper'
+import constant from '@/utils/constant'
+import { formate } from '@/utils/formate'
+import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const options = reactive([
   { value: 'pid', label: 'Pid' },

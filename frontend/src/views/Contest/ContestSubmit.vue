@@ -7,7 +7,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Submit from '@/components/Submit'
 import { useContestStore } from '@/store/modules/contest'
 import { useSolutionStore } from '@/store/modules/solution'
-import { contestLabeling } from '@/util/formate'
+import { contestLabeling } from '@/utils/formate'
 
 const { t } = useI18n()
 const contestStore = useContestStore()

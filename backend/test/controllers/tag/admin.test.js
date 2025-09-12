@@ -2,6 +2,7 @@ const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
 const config = require('../../../src/config')
+const { encryptData } = require('../../../src/services/crypto')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -17,7 +18,7 @@ test.before('Login', async (t) => {
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd,
+      pwd: await encryptData(config.deploy.adminInitPwd),
     })
 
   t.is(login.status, 200)

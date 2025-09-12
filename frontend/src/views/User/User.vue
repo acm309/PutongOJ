@@ -9,7 +9,7 @@ import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 
-import { onProfileUpdate, onRouteParamUpdate } from '@/util/helper'
+import { onProfileUpdate, onRouteParamUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
 const route = useRoute()
