@@ -23,7 +23,7 @@ const problem = $ref({
   out: '',
   type: 1,
   code: '',
-  course: null,
+  tags: [],
 })
 
 const $Message = inject('$Message')
