@@ -30,6 +30,9 @@ export function setServerPublicKey (base64Key: string) {
 
 export async function encryptData (data: string): Promise<string> {
   try {
+    if (!data) {
+      throw new Error('Input data is empty')
+    }
     if (serverPublicKey == null) {
       throw new Error('Server public key is not set')
     }
