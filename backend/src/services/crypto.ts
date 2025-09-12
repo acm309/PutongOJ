@@ -10,7 +10,7 @@ export interface KeyPair {
   generatedAt: number
 }
 
-const REDIS_KEY = 'crypto:keypair'
+export const REDIS_KEY = 'crypto:keypair'
 
 async function generateKeyPair (): Promise<KeyPair> {
   const { secretKey, publicKey } = x25519.keygen()
@@ -47,6 +47,10 @@ async function getKeyPairFromRedis (): Promise<KeyPair | null> {
   return keyPair
 }
 
+async function clearKeyPairFromRedis (): Promise<void> {
+  await redis.del(REDIS_KEY)
+}
+
 export async function getServerPublicKey (): Promise<string> {
   let keyPair = await getKeyPairFromRedis()
   if (!keyPair) {
@@ -56,12 +60,42 @@ export async function getServerPublicKey (): Promise<string> {
   return Buffer.from(keyPair.publicKey).toString('base64')
 }
 
+export async function revokeServerKeyPair (): Promise<void> {
+  await clearKeyPairFromRedis()
+} 
+
 function deriveSharedKey (
   serverSecretKey: Uint8Array,
   clientPublicKey: Uint8Array,
 ): Uint8Array {
   const sharedSecret = x25519.getSharedSecret(serverSecretKey, clientPublicKey)
   return sha256(sharedSecret)
+}
+
+export async function encryptData (data: string): Promise<string> {
+  try {
+    const serverKeyPair = await getKeyPairFromRedis()
+    if (!serverKeyPair) {
+      throw new Error('Server key pair not found')
+    }
+    const { secretKey, publicKey } = x25519.keygen()
+
+    const aesKey = deriveSharedKey(secretKey, serverKeyPair.publicKey)
+    const nonce = crypto.getRandomValues(new Uint8Array(12))
+
+    const cipher = gcm(aesKey, nonce)
+    const plaintext = new TextEncoder().encode(data)
+    const ciphertext = cipher.encrypt(plaintext)
+
+    const encryptedData = new Uint8Array(32 + 12 + ciphertext.length)
+    encryptedData.set(publicKey, 0)
+    encryptedData.set(nonce, 32)
+    encryptedData.set(ciphertext, 44)
+
+    return Buffer.from(encryptedData).toString('base64')
+  } catch (e: any) {
+    throw new Error(`Encryption failed: ${e.message}`)
+  }
 }
 
 export async function decryptData (
@@ -75,7 +109,7 @@ export async function decryptData (
 
     const encryptedData = Buffer.from(encryptedDataBase64, 'base64')
     if (encryptedData.length < 44) {
-      throw new Error('Invalid encrypted data length')
+      throw new Error('Invalid input data')
     }
 
     const { secretKey } = serverKeyPair
@@ -95,7 +129,10 @@ export async function decryptData (
 }
 
 const cryptoService = {
+  REDIS_KEY,
   getServerPublicKey,
+  revokeServerKeyPair,
+  encryptData,
   decryptData,
 }
 
