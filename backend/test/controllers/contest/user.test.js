@@ -1,6 +1,7 @@
 const test = require('ava')
 const supertest = require('supertest')
 const app = require('../../../src/app')
+const { encryptData } = require('../../../src/services/crypto')
 const { userSeeds } = require('../../seeds/user')
 
 const server = app.listen()
@@ -12,7 +13,7 @@ test.before('Login', async (t) => {
     .post('/api/session')
     .send({
       uid: user.uid,
-      pwd: user.pwd,
+      pwd: await encryptData(user.pwd),
     })
 
   t.is(login.status, 200)

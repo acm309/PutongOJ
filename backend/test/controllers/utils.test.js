@@ -5,6 +5,7 @@ const supertest = require('supertest')
 const app = require('../../src/app')
 const config = require('../../src/config')
 const websiteConfig = require('../../src/config/website')
+const { encryptData } = require('../../src/services/crypto')
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -28,7 +29,10 @@ test('Website config', async (t) => {
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
-  t.deepEqual(res.body.website, websiteConfig)
+  t.is(res.body.website.title, websiteConfig.title)
+  t.is(res.body.website.buildSHA, websiteConfig.buildSHA)
+  t.is(res.body.website.buildTime, websiteConfig.buildTime)
+  t.is(typeof res.body.website.apiPublicKey, 'string')
 })
 
 test('Visitor can not submit file', async (t) => {
@@ -43,7 +47,7 @@ test('Admin could submit file', async (t) => {
     .post('/api/session')
     .send({
       uid: 'admin',
-      pwd: config.deploy.adminInitPwd,
+      pwd: await encryptData(config.deploy.adminInitPwd),
     })
   t.is(res.status, 200)
 

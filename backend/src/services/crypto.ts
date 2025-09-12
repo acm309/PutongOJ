@@ -62,7 +62,7 @@ export async function getServerPublicKey (): Promise<string> {
 
 export async function revokeServerKeyPair (): Promise<void> {
   await clearKeyPairFromRedis()
-} 
+}
 
 function deriveSharedKey (
   serverSecretKey: Uint8Array,
@@ -74,13 +74,15 @@ function deriveSharedKey (
 
 export async function encryptData (data: string): Promise<string> {
   try {
-    const serverKeyPair = await getKeyPairFromRedis()
-    if (!serverKeyPair) {
-      throw new Error('Server key pair not found')
+    if (!data) {
+      throw new Error('Input data is empty')
     }
+
+    const serverPublicKeyBase64 = await getServerPublicKey()
+    const serverPublicKey = Buffer.from(serverPublicKeyBase64, 'base64')
     const { secretKey, publicKey } = x25519.keygen()
 
-    const aesKey = deriveSharedKey(secretKey, serverKeyPair.publicKey)
+    const aesKey = deriveSharedKey(secretKey, serverPublicKey)
     const nonce = crypto.getRandomValues(new Uint8Array(12))
 
     const cipher = gcm(aesKey, nonce)
@@ -136,4 +138,4 @@ const cryptoService = {
   decryptData,
 }
 
-export default cryptoService
+export default module.exports = cryptoService
