@@ -33,4 +33,4 @@ problemRouter.get('/:pid/statistics',
   problemController.getStatistics,
 )
 
-export default module.exports = problemRouter
+export default problemRouter

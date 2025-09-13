@@ -24,4 +24,4 @@ testcaseRouter.del('/:pid/:uuid',
   testcaseController.removeTestcase,
 )
 
-export default module.exports = testcaseRouter
+export default testcaseRouter

@@ -35,4 +35,4 @@ contestRouter.post('/:cid/verify',
   contestController.verifyParticipant,
 )
 
-export default module.exports = contestRouter
+export default contestRouter

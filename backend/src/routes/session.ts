@@ -16,4 +16,4 @@ sessionRouter.del('/',
   sessionController.logout,
 )
 
-export default module.exports = sessionRouter
+export default sessionRouter
