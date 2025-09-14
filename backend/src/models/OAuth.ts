@@ -1,0 +1,84 @@
+import type { Document, Model, ObjectId } from 'mongoose'
+import type { OAuthConnection } from '../services/oauth'
+import type { Entity, View } from '../types/entity'
+import type { UserDocument } from './User'
+import mongoose from 'mongoose'
+
+export interface OAuthEntity extends Entity, OAuthConnection {
+  user: ObjectId
+}
+
+export type OAuthEntityUserView = View & Pick<OAuthEntity,
+  'providerId' | 'displayName'
+>
+
+export type OAuthDocument = Document & OAuthEntity
+
+export interface OAuthDocumentPopulated extends Document {
+  user: UserDocument
+}
+
+type OAuthModel = Model<OAuthDocument> & {
+  toUserView: (oauth: Partial<OAuthEntity>) => OAuthEntityUserView
+}
+
+const oauthSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    immutable: true,
+  },
+  provider: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  providerId: {
+    type: String,
+    required: true,
+    immutable: true,
+  },
+  displayName: {
+    type: String,
+    required: true,
+  },
+  accessToken: {
+    type: String,
+    required: true,
+  },
+  refreshToken: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  raw: {
+    type: mongoose.Schema.Types.Mixed,
+    required: false,
+    default: null,
+  },
+}, {
+  collection: 'OAuth',
+  timestamps: true,
+})
+
+oauthSchema.index({ user: 1, provider: 1 }, { unique: true })
+oauthSchema.index({ provider: 1, providerId: 1 }, { unique: true })
+
+const toUserView = (oauth: Partial<OAuthEntity>): OAuthEntityUserView => {
+  return {
+    providerId: oauth.providerId ?? 'Unknown',
+    displayName: oauth.displayName ?? 'Unknown',
+    createdAt: new Date(oauth?.createdAt ?? Date.now()).getTime(),
+    updatedAt: new Date(oauth?.updatedAt ?? Date.now()).getTime(),
+  }
+}
+
+oauthSchema.statics.toUserView = toUserView
+
+const OAuth
+  = mongoose.model<OAuthDocument, OAuthModel>(
+    'OAuth', oauthSchema,
+  )
+
+export default OAuth
