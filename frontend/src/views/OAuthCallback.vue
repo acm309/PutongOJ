@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { OAuthProvider } from '@backend/services/oauth'
 import type { Message } from 'view-ui-plus'
+import { storeToRefs } from 'pinia'
 import { Alert } from 'view-ui-plus'
 import { computed, inject, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -11,6 +12,7 @@ const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const { fetch: fetchSession } = sessionStore
+const { profile } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
 const code = computed(() => route.query.code as string || '')
@@ -30,7 +32,7 @@ async function processOAuthCallback () {
   const { action } = data.data
   if (action === 'connect') {
     message.success('OAuth account successfully connected!')
-    router.replace({ name: 'userEdit' })
+    router.replace({ name: 'userEdit', params: { uid: profile.value!.uid } })
     return
   }
   if (action === 'login') {
