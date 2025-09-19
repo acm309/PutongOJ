@@ -61,6 +61,10 @@ const removeTestcase = async (ctx: Context) => {
 
   const { pid } = problem
   const { uid } = profile
+  const uuid = String(ctx.params.uuid || '').trim()
+  if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
+    ctx.throw(...ERR_INVALID_ID)
+  }
 
   /**
    * 只移除 meta.json 中的对应元素，但并不删除测试数据的文件！
