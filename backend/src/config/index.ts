@@ -11,9 +11,7 @@ interface GlobalConfig {
   mongodbURL: string
   redisURL: string
   secretKey: string
-  oauthConfigs: {
-    [key in OAuthProvider]: { enabled: boolean } & OAuthClientConfig
-  }
+  oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
 }
 
 function stringEnv (name: string): string | undefined
@@ -87,6 +85,6 @@ const config = {
   ...globalConfig,
   /** @deprecated */
   ...constants,
-}
+} as const
 
 export default module.exports = config

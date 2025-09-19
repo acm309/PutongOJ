@@ -6,6 +6,6 @@ const router = new Router()
 
 router.post('/upload', auth.login, auth.admin, utils.upload)
 router.get('/servertime', utils.serverTime)
-router.get('/website', utils.websiteConfig)
+router.get('/website', utils.websiteInformation)
 
 module.exports = router

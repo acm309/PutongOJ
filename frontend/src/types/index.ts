@@ -5,15 +5,6 @@ export interface TimeResp {
   serverTime: number
 }
 
-export interface WebsiteConfigResp {
-  website: {
-    title: string
-    buildSHA: string
-    buildTime: number
-    apiPublicKey: string
-  }
-}
-
 export type UserPrivilege = (typeof privilege)[keyof typeof privilege]
 
 export interface User {

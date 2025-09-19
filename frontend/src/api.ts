@@ -1,9 +1,10 @@
+import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { OAuthEntityUserView } from '@backend/models/OAuth'
 import type { OAuthAction, OAuthProvider, OAuthState } from '@backend/services/oauth'
 import type { CourseRole, Paginated } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
-import type { LoginParam, Profile, TimeResp, User, WebsiteConfigResp } from '@/types'
+import type { LoginParam, Profile, TimeResp, User } from '@/types'
 import axios from 'axios'
 import { useSessionStore } from './store/modules/session'
 
@@ -37,7 +38,7 @@ instance.interceptors.response.use((resp) => {
 })
 
 const utils = {
-  getWebsiteConfig: () => instance.get<WebsiteConfigResp>('/website'),
+  getWebsiteInformaton: () => instance.get<WebsiteInformation>('/website'),
   getTime: () => instance.get<TimeResp>('/servertime'),
   getRanklist: (params: { [key: string]: any }) =>
     instance.get('/ranklist/list', { params }),

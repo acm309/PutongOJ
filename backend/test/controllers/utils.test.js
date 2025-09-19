@@ -23,16 +23,16 @@ test('Server time', async (t) => {
   t.truthy(Number.isInteger(res.body.serverTime))
 })
 
-test('Website config', async (t) => {
+test('Website information', async (t) => {
   const res = await request
     .get('/api/website')
 
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
-  t.is(res.body.website.title, websiteConfig.title)
-  t.is(res.body.website.buildSHA, websiteConfig.buildSHA)
-  t.is(res.body.website.buildTime, websiteConfig.buildTime)
-  t.is(typeof res.body.website.apiPublicKey, 'string')
+  t.is(res.body.title, websiteConfig.title)
+  t.is(res.body.buildSHA, websiteConfig.buildSHA)
+  t.is(res.body.buildTime, websiteConfig.buildTime)
+  t.is(typeof res.body.apiPublicKey, 'string')
 })
 
 test('Visitor can not submit file', async (t) => {

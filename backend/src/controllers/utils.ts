@@ -1,10 +1,20 @@
 import type { Context } from 'koa'
+import type { OAuthProvider } from '../services/oauth'
 import path from 'node:path'
 import fse from 'fs-extra'
+import { globalConfig } from '../config'
 import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import logger from '../utils/logger'
+
+export interface WebsiteInformation {
+  title: string
+  buildSHA: string
+  buildTime: number
+  apiPublicKey: string
+  oauthEnabled: Record<OAuthProvider, boolean>
+}
 
 const uploadDir = path.join(__dirname, '../../public/uploads')
 
@@ -38,17 +48,19 @@ const serverTime = (ctx: Context) => {
   }
 }
 
-const websiteConfig = async (ctx: Context) => {
-  ctx.body = {
-    website: {
-      ...websiteConf,
-      apiPublicKey: await cryptoService.getServerPublicKey(),
+const websiteInformation = async (ctx: Context) => {
+  const result: WebsiteInformation = {
+    ...websiteConf,
+    apiPublicKey: await cryptoService.getServerPublicKey(),
+    oauthEnabled: {
+      CJLU: globalConfig.oauthConfigs.CJLU.enabled,
     },
   }
+  ctx.body = result
 }
 
 module.exports = {
   upload,
   serverTime,
-  websiteConfig,
+  websiteInformation,
 }
