@@ -1,27 +1,29 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { Button, Divider, Form, FormItem, Input, Radio, RadioGroup, Spin } from 'view-ui-plus'
-import { inject } from 'vue'
-
+import { Button, Col, Divider, Form, FormItem, Input, Radio, RadioGroup, Row, Spin, Tooltip } from 'view-ui-plus'
+import { computed, inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRootStore } from '@/store'
+import api from '@/api'
+import { useOAuthStore } from '@/store/modules/oauth'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
+import { privilege } from '@/utils/constant'
 
 const { t, locale } = useI18n()
-const isZH = $computed(() => locale.value === 'zh-CN')
+const isZH = computed(() => locale.value === 'zh-CN')
 
-const rootStore = useRootStore()
+const oauthStore = useOAuthStore()
 const sessionStore = useSessionStore()
 const userStore = useUserStore()
 
 const message = inject('$Message')
+
 const { update } = userStore
 const { logout } = sessionStore
-const { privilege } = $(storeToRefs(rootStore))
 const { isRoot, isAdmin, profile } = $(storeToRefs(sessionStore))
 const { user } = $(storeToRefs(userStore))
+const { connections } = storeToRefs(oauthStore)
 
 let loading = $ref(false)
 
@@ -32,6 +34,18 @@ const securityForm = $ref({
   oldPwd: '',
   newPwd: '',
   checkPwd: '',
+})
+const connectionsMap = $computed(() => {
+  const map = {}
+  Object.keys(connections.value).forEach((key) => {
+    const connection = connections.value[key]
+    if (connection) {
+      map[key] = `${connection.displayName} (${connection.providerId})`
+    } else {
+      map[key] = null
+    }
+  })
+  return map
 })
 
 const userInfoValidate = {
@@ -103,6 +117,17 @@ async function updatePassword () {
   }
   userSecurityForm.validate(submit)
 }
+
+async function connectOAuth (provider) {
+  const url = await api.oauth.generateOAuthUrl(provider, { action: 'connect' })
+  window.open(url.data.url, '_self', 'noopener,noreferrer')
+}
+
+onMounted(async () => {
+  loading = true
+  await oauthStore.fetchConnections()
+  loading = false
+})
 </script>
 
 <template>
@@ -137,6 +162,28 @@ async function updatePassword () {
         <Button type="primary" size="large" @click="updateProfile">
           {{ t('oj.submit') }}
         </Button>
+      </FormItem>
+    </Form>
+    <Form :label-width="isZH ? 80 : 130">
+      <Divider simple class="user-divider">
+        Connection
+      </Divider>
+      <FormItem>
+        <template #label>
+          <Tooltip content="中国计量大学统一身份认证" placement="top">
+            CJLU Authn
+          </Tooltip>
+        </template>
+        <Row>
+          <Col flex="auto">
+            <Input v-model="connectionsMap.CJLU" placeholder="Not connected" readonly />
+          </Col>
+          <Col style="margin-left: 8px;">
+            <Button :disabled="!!connectionsMap.CJLU" @click="connectOAuth('cjlu')">
+              {{ connectionsMap.CJLU ? 'Connected' : 'Connect' }}
+            </Button>
+          </Col>
+        </Row>
       </FormItem>
     </Form>
     <Form ref="userSecurityForm" :label-width="isZH ? 80 : 130" :rules="userSecurityValidate" :model="securityForm">

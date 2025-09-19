@@ -205,9 +205,9 @@ const course = {
 }
 
 const oauth = {
-  generateOAuthUrl: (provider: OAuthProvider, params: { action: OAuthAction }) =>
+  generateOAuthUrl: (provider: Lowercase<OAuthProvider>, params: { action: OAuthAction }) =>
     instance.get<{ url: string }>(`/oauth/${provider}/url`, { params }),
-  handleOAuthCallback: (provider: OAuthProvider, params: { state: string, code: string }) =>
+  handleOAuthCallback: (provider: Lowercase<OAuthProvider>, params: { state: string, code: string }) =>
     instance.get<Pick<OAuthState, 'action'> & { connection: OAuthEntityUserView }>(`/oauth/${provider}/callback`, { params }),
   getUserOAuthConnections: () =>
     instance.get<Record<OAuthProvider, OAuthEntityUserView | null>>('/oauth'),
