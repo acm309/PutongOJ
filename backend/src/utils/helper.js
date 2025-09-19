@@ -1,13 +1,9 @@
 const pickBy = require('lodash/pickBy')
 const config = require('../config')
-const { generatePwd } = require('./index')
+const { generatePwd, isComplexPwd } = require('./index')
 
 function purify (obj) {
   return pickBy(obj, x => x != null && x !== '')
-}
-
-function isComplexPwd (pwd) {
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
 }
 
 function isLogined (ctx) {
@@ -38,6 +34,7 @@ module.exports = {
   purify,
   /** @deprecated Import from utils */
   generatePwd,
+  /** @deprecated Import from utils */
   isComplexPwd,
   isLogined,
   isAdmin,

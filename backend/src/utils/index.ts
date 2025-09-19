@@ -28,6 +28,13 @@ export function generatePwd (pwd: string): string {
     + crypto.createHash('sha1').update(pwd).digest('hex')
 }
 
+export function isComplexPwd (pwd: string): boolean {
+  if (pwd.length < 8) {
+    return false
+  }
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
+}
+
 export function only<T extends object> (
   obj: T,
   keys: string | string[],
@@ -41,5 +48,6 @@ export function only<T extends object> (
 export default module.exports = {
   parsePaginateOption,
   generatePwd,
+  isComplexPwd,
   only,
 }

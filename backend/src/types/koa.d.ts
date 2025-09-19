@@ -15,6 +15,7 @@ declare module 'koa' {
     problem?: ProblemDocumentPopulated
     profile?: UserDocument
     tag?: TagDocument
+    user?: UserDocument
   }
 
   interface DefaultContext {
