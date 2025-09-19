@@ -33,7 +33,7 @@ export async function loadUser (
 }
 
 const find = async (ctx: Context) => {
-  const profile = await loadProfile(ctx)
+  const profile = ctx.state.profile
   const opt = ctx.request.query
   const page = Number.parseInt(opt.page as string) || 1
   const pageSize = Number.parseInt(opt.pageSize as string) || 30
@@ -42,7 +42,7 @@ const find = async (ctx: Context) => {
   const filterContent = String(opt.content || '')
 
   const filter: Record<string, any> = {}
-  if (privilege === 'admin' && profile.isAdmin) {
+  if (privilege === 'admin' && profile?.isAdmin) {
     filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
   }
   if (filterType === 'uid' || filterType === 'name') {

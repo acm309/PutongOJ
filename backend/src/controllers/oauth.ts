@@ -6,6 +6,7 @@ import { loadProfile } from '../middlewares/authn'
 import oauthService, { OAuthAction, OAuthProvider } from '../services/oauth'
 import sessionService from '../services/session'
 import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/error'
+import logger from '../utils/logger'
 
 const providerMap: Record<string, OAuthProvider> = {
   cjlu: OAuthProvider.CJLU,
@@ -77,7 +78,7 @@ export async function handleOAuthCallback (ctx: Context) {
       ctx.throw(400, 'No user is connected with this 3rd-party account')
     }
     user = connectedUser
-    ctx.logger.info(`User <${user.uid}> login via ${provider} OAuth successfully [${requestId}]`)
+    logger.info(`User <${user.uid}> login via ${provider} OAuth successfully [${requestId}]`)
     sessionService.setUserSession(ctx, user)
   } else {
     ctx.throw(400, 'Unknown OAuth action')
