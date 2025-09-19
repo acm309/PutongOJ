@@ -48,8 +48,8 @@ const progressStatus = $computed(() => {
   return 'normal'
 })
 const contestCountdown = $computed(() => {
-  if (currentTime < contest.start) return timeContest(contest.start - currentTime)
-  if (currentTime < contest.end) return timeContest(contest.end - currentTime)
+  if (currentTime < contest.start) return timeContest((contest.start - currentTime) / 1000)
+  if (currentTime < contest.end) return timeContest((contest.end - currentTime) / 1000)
   return t('oj.contest_ended')
 })
 
