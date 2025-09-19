@@ -1,3 +1,4 @@
+import type { OAuthClientConfig, OAuthProvider } from '../services/oauth'
 import { randomBytes } from 'node:crypto'
 import { env } from 'node:process'
 import dotenvFlow from 'dotenv-flow'
@@ -10,16 +11,80 @@ interface GlobalConfig {
   mongodbURL: string
   redisURL: string
   secretKey: string
+  oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
 }
 
-const config: GlobalConfig = {
-  port: Number.parseInt(env.PTOJ_WEB_PORT || '3000', 10),
-  mongodbURL: env.PTOJ_MONGODB_URL || 'mongodb://localhost:27017/oj',
-  redisURL: env.PTOJ_REDIS_URL || 'redis://localhost:6379',
-  secretKey: env.PTOJ_SECRET_KEY || randomBytes(16).toString('hex'),
+function stringEnv (name: string): string | undefined
+function stringEnv (name: string, defaultValue: string | (() => string)): string
+function stringEnv (name: string, defaultValue?: string | (() => string)): string | undefined {
+  const value = env[name]
+  if (value === undefined || value === '') {
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue
+  }
+  return value
 }
 
-export default module.exports = Object.freeze({
-  ...config,
+function numberEnv (name: string): number | undefined
+function numberEnv (name: string, defaultValue: number): number
+function numberEnv (name: string, defaultValue?: number): number | undefined {
+  const value = env[name]
+  if (value === undefined || value === '') {
+    return defaultValue
+  }
+  const parsed = Number.parseInt(value, 10)
+  if (Number.isNaN(parsed)) {
+    return defaultValue
+  }
+  return parsed
+}
+
+function booleanEnv (name: string): boolean | undefined
+function booleanEnv (name: string, defaultValue: boolean): boolean
+function booleanEnv (name: string, defaultValue?: boolean): boolean | undefined {
+  const value = env[name]
+  if (value === undefined || value === '') {
+    return defaultValue
+  }
+  if (value.toLowerCase() === 'true') {
+    return true
+  }
+  if (value.toLowerCase() === 'false') {
+    return false
+  }
+  return defaultValue
+}
+
+const oauthConfigs: GlobalConfig['oauthConfigs'] = {
+  CJLU: {
+    enabled: booleanEnv('PTOJ_OAUTH_CJLU_ENABLED', false),
+    clientId: stringEnv('PTOJ_OAUTH_CJLU_CLIENT_ID', ''),
+    clientSecret: stringEnv('PTOJ_OAUTH_CJLU_CLIENT_SECRET', ''),
+    redirectUri: stringEnv('PTOJ_OAUTH_CJLU_REDIRECT_URI', ''),
+    authserverURL: stringEnv('PTOJ_OAUTH_CJLU_AUTHSERVER_URL', ''),
+    stateTTL: numberEnv('PTOJ_OAUTH_CJLU_STATE_TTL'),
+  },
+}
+
+if (
+  !oauthConfigs.CJLU.clientId || !oauthConfigs.CJLU.clientSecret
+  || !oauthConfigs.CJLU.redirectUri || !oauthConfigs.CJLU.authserverURL
+) {
+  oauthConfigs.CJLU.enabled = false
+}
+
+export const globalConfig: GlobalConfig = {
+  port: numberEnv('PTOJ_WEB_PORT', 3000),
+  mongodbURL: stringEnv('PTOJ_MONGODB_URL', 'mongodb://localhost:27017/oj'),
+  redisURL: stringEnv('PTOJ_REDIS_URL', 'redis://localhost:6379'),
+  secretKey: stringEnv('PTOJ_SECRET_KEY', () => randomBytes(16).toString('hex')),
+  oauthConfigs,
+}
+
+const config = {
+  globalConfig,
+  ...globalConfig,
+  /** @deprecated */
   ...constants,
-})
+} as const
+
+export default module.exports = config

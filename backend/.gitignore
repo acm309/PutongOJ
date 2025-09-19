@@ -1,3 +1,6 @@
+.env*
+!.env.example
+!.env.test
 data/*
 !data/example
 public/uploads/*

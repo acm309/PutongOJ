@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
-import { pick } from 'lodash'
 import User from '../models/User'
 import cryptoService from '../services/crypto'
+import sessionService from '../services/session'
 import { generatePwd } from '../utils'
 import { privilege } from '../utils/constants'
 import logger from '../utils/logger'
@@ -37,11 +37,8 @@ const login = async (ctx: Context) => {
   if (user.privilege === privilege.Banned) { ctx.throw(403, `User <${uid}> is banned`) }
 
   logger.info(`User <${uid}> login successfully [${requestId}]`)
-  ctx.session.profile = pick(user, [ 'uid', 'nick', 'privilege', 'pwd' ])
-  ctx.session.profile.verifyContest = []
-  ctx.body = {
-    profile: ctx.session.profile,
-  }
+  const profile = sessionService.setUserSession(ctx, user)
+  ctx.body = { profile }
 }
 
 // 登出
@@ -51,7 +48,7 @@ const logout = async (ctx: Context) => {
     const uid = ctx.session.profile.uid
     logger.info(`User <${uid}> logout successfully [${requestId}]`)
   }
-  delete ctx.session.profile
+  sessionService.deleteUserSession(ctx)
   ctx.body = {}
 }
 

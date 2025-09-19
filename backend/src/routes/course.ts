@@ -59,4 +59,4 @@ courseRouter.post('/:courseId/problem/rearrange',
   courseController.rearrangeCourseProblem,
 )
 
-export default module.exports = courseRouter
+export default courseRouter

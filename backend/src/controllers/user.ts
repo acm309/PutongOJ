@@ -1,41 +1,48 @@
-const difference = require('lodash/difference')
-const escapeRegExp = require('lodash/escapeRegExp')
-const config = require('../config')
-const Group = require('../models/Group')
-const Solution = require('../models/Solution')
-const User = require('../models/User')
-const { only } = require('../utils')
-const { generatePwd, isComplexPwd } = require('../utils/helper')
-const { isAdmin, isRoot } = require('../utils/helper')
-const logger = require('../utils/logger')
+import type { Context } from 'koa'
+import type { UserDocument } from '../models/User'
+import difference from 'lodash/difference'
+import escapeRegExp from 'lodash/escapeRegExp'
+import config from '../config'
+import { loadProfile } from '../middlewares/authn'
+import Group from '../models/Group'
+import Solution from '../models/Solution'
+import User from '../models/User'
+import { generatePwd, isComplexPwd, only } from '../utils'
+import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
+import logger from '../utils/logger'
 
-/**
- * 预加载用户信息
- */
-const preload = async (ctx, next) => {
-  const uid = ctx.params.uid
-  const user = await User.findOne({ uid }).exec()
-  if (!user) {
-    ctx.throw(404, 'User not found!')
+export async function loadUser (
+  ctx: Context,
+  input?: string,
+): Promise<UserDocument> {
+  const uid = String(ctx.params.uid || input || '').trim()
+  if (!uid) {
+    ctx.throw(...ERR_INVALID_ID)
   }
+  if (ctx.state.user?.uid === uid) {
+    return ctx.state.user
+  }
+
+  const user = await User.findOne({ uid })
+  if (!user) {
+    ctx.throw(...ERR_NOT_FOUND)
+  }
+
   ctx.state.user = user
-  return next()
+  return user
 }
 
-/**
- * 查询用户列表
- */
-const find = async (ctx) => {
-  const profile = ctx.session.profile
+const find = async (ctx: Context) => {
+  const profile = ctx.state.profile
   const opt = ctx.request.query
-  const page = Number.parseInt(opt.page) || 1
-  const pageSize = Number.parseInt(opt.pageSize) || 30
+  const page = Number.parseInt(opt.page as string) || 1
+  const pageSize = Number.parseInt(opt.pageSize as string) || 30
   const privilege = String(opt.privilege || '')
   const filterType = String(opt.type || 'nick')
   const filterContent = String(opt.content || '')
 
-  const filter = {}
-  if (privilege === 'admin' && isAdmin(profile)) {
+  const filter: Record<string, any> = {}
+  if (privilege === 'admin' && profile?.isAdmin) {
     filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
   }
   if (filterType === 'uid' || filterType === 'name') {
@@ -64,11 +71,8 @@ const find = async (ctx) => {
   ctx.body = result
 }
 
-/**
- * 查询用户信息
- */
-const findOne = async (ctx) => {
-  const user = ctx.state.user
+const findOne = async (ctx: Context) => {
+  const user = await loadUser(ctx)
   const [ solved, failed, groups ] = await Promise.all([
     Solution
       .find({ uid: user.uid, judge: config.judge.Accepted })
@@ -97,10 +101,7 @@ const findOne = async (ctx) => {
   }
 }
 
-/**
- * 创建用户
- */
-const create = async (ctx) => {
+const create = async (ctx: Context) => {
   const opt = ctx.request.body
   const uid = String(opt.uid || '')
   const pwd = String(opt.pwd || '')
@@ -123,31 +124,28 @@ const create = async (ctx) => {
     await user.save()
     const { requestId = 'unknown' } = ctx.state
     logger.info(`User <${user.uid}> is created [${requestId}]`)
-  } catch (err) {
+  } catch (err: any) {
     ctx.throw(400, err.message)
   }
   ctx.body = {}
 }
 
-/**
- * 更新用户信息
- */
-const update = async (ctx) => {
-  const profile = ctx.session.profile
-  const user = ctx.state.user
+const update = async (ctx: Context) => {
+  const profile = await loadProfile(ctx)
+  const user = await loadUser(ctx)
 
   if (!(
     profile.uid === user.uid || (
       user.privilege === config.privilege.Root
-        ? isRoot(profile)
-        : isAdmin(profile)
+        ? profile.isRoot
+        : profile.isAdmin
     ))
   ) {
     ctx.throw(403, 'You don\'t have permission to change this user\'s information!')
   }
 
   const opt = ctx.request.body
-  const fields = [ 'nick', 'motto', 'school', 'mail' ]
+  const fields = [ 'nick', 'motto', 'school', 'mail' ] as const
   fields.forEach((field) => {
     if (typeof opt[field] === 'string') {
       user[field] = opt[field]
@@ -156,7 +154,7 @@ const update = async (ctx) => {
 
   const privilege = Number.parseInt(opt.privilege ?? user.privilege)
   if (privilege !== user.privilege && !(
-    isRoot(profile)
+    profile.isRoot
     && profile.uid !== user.uid
   )) {
     ctx.throw(403, 'You don\'t have permission to change the privilege!')
@@ -166,7 +164,7 @@ const update = async (ctx) => {
   const oldPwd = String(opt.oldPwd || '')
   const newPwd = String(opt.newPwd || '')
   if (newPwd !== '') {
-    if (user.pwd !== generatePwd(oldPwd) && !isAdmin(profile)) {
+    if (user.pwd !== generatePwd(oldPwd) && !profile.isAdmin) {
       ctx.throw(400, 'Old password is wrong!')
     }
     if (!isComplexPwd(newPwd)) {
@@ -178,16 +176,17 @@ const update = async (ctx) => {
   try {
     await user.save()
     logger.info(`User <${user.uid}> is updated by user <${profile.uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
   ctx.body = {}
 }
 
-module.exports = {
-  preload,
+const userController = {
   find,
   findOne,
   create,
   update,
 }
+
+export default userController

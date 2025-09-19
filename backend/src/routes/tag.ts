@@ -31,4 +31,4 @@ tagRouter.delete('/:tagId',
   tagController.removeTag,
 )
 
-export default module.exports = tagRouter
+export default tagRouter

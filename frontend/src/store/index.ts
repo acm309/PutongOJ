@@ -1,4 +1,4 @@
-import type { WebsiteConfigResp } from '@/types'
+import type { WebsiteInformation } from '@backend/controllers/utils'
 import { defineStore } from 'pinia'
 import vditorInfo from 'vditor/package.json'
 import api from '@/api'
@@ -9,7 +9,7 @@ export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
     timeDiff: Number.NaN,
-    website: {} as WebsiteConfigResp['website'],
+    website: {} as WebsiteInformation,
     vditorCDN: `${location.origin}/static/vditor-${vditorInfo.version}`,
     // Todo: remove
     privilege,
@@ -66,8 +66,8 @@ export const useRootStore = defineStore('root', {
       }, 1000 - this.currentTime % 1000)
     },
     async fetchWebsiteConfig () {
-      const { data } = await api.getWebsiteConfig()
-      this.website = data.website
+      const { data } = await api.getWebsiteInformaton()
+      this.website = data
       setServerPublicKey(this.website.apiPublicKey)
     },
   },

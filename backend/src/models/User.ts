@@ -1,10 +1,10 @@
-import type { Document, PaginateModel, Schema } from 'mongoose'
+import type { Document, ObjectId, PaginateModel, Schema } from 'mongoose'
 import type { UserEntity } from '../types/entity'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import { privilege } from '../utils/constants'
 
-export interface UserDocument extends Document, UserEntity {
+export interface UserDocument extends Document<ObjectId>, UserEntity {
   isBanned: boolean
   isAdmin: boolean
   isRoot: boolean
