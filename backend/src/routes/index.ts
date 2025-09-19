@@ -5,6 +5,7 @@ import course from './course'
 import discuss from './discuss'
 import group from './group'
 import news from './news'
+import oauth from './oauth'
 import problem from './problem'
 import ranklist from './ranklist'
 import session from './session'
@@ -30,6 +31,7 @@ router.use(status.routes(), status.allowedMethods())
 router.use(tag.routes(), tag.allowedMethods())
 router.use(testcase.routes(), testcase.allowedMethods())
 router.use(user.routes(), user.allowedMethods())
+router.use(oauth.routes(), oauth.allowedMethods())
 router.use(utils.routes(), utils.allowedMethods())
 
 export default module.exports = router

@@ -42,7 +42,7 @@ interface OAuthTokenResponse {
 }
 
 interface OAuthUserProfile {
-  provider: string
+  provider: OAuthProvider
   providerId: string
   displayName: string
   raw?: any
@@ -55,9 +55,9 @@ export interface OAuthConnection extends OAuthUserProfile {
 
 abstract class OAuthClient {
   protected config: OAuthClientConfig
-  protected providerName: string
+  protected providerName: OAuthProvider
 
-  constructor (providerName: string, config: OAuthClientConfig) {
+  constructor (providerName: OAuthProvider, config: OAuthClientConfig) {
     this.providerName = providerName
     this.config = config
   }

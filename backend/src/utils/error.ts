@@ -2,6 +2,8 @@ type ErrorTuple = Readonly<[number, string]>
 
 export const ERR_INVALID_ID: ErrorTuple = Object.freeze([
   400, 'Invalid entity ID, please check the parameters.' ])
+export const ERR_BAD_PARAMS: ErrorTuple = Object.freeze([
+  400, 'Bad request parameters, please check the parameters.' ])
 export const ERR_LOGIN_REQUIRE: ErrorTuple = Object.freeze([
   401, 'Unauthenticated user, please login first.' ])
 export const ERR_PERM_DENIED: ErrorTuple = Object.freeze([
