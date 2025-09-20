@@ -1,8 +1,7 @@
-import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import sessionController from '../controllers/session'
 
-const sessionRouter = new Router<DefaultState, DefaultContext>({
+const sessionRouter = new Router({
   prefix: '/session',
 })
 

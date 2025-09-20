@@ -1,13 +1,13 @@
-const config = require('../config')
-const News = require('../models/News')
-const { only } = require('../utils')
-const { isAdmin } = require('../utils/helper')
-const logger = require('../utils/logger')
+import type { Context } from 'node:vm'
+import config from '../config'
+import News from '../models/News'
+import { only } from '../utils'
+import logger from '../utils/logger'
 
 /**
  * 预加载通知信息
  */
-const preload = async (ctx, next) => {
+const preload = async (ctx: Context, next: () => Promise<any>) => {
   const nid = Number.parseInt(ctx.params.nid)
   if (Number.isNaN(nid)) {
     ctx.throw(400, 'Nid has to be a number')
@@ -23,13 +23,13 @@ const preload = async (ctx, next) => {
 /**
  * 查询通知列表
  */
-const find = async (ctx) => {
+const find = async (ctx: Context) => {
   const opt = ctx.request.query
   const page = Number.parseInt(opt.page) || 1
   const pageSize = Number.parseInt(opt.pageSize) || 5
 
-  const filter = {}
-  if (!isAdmin(ctx.session.profile)) {
+  const filter: Record<string, any> = {}
+  if (!ctx.session.profile?.isAdmin) {
     filter.status = config.status.Available
   }
 
@@ -47,13 +47,13 @@ const find = async (ctx) => {
 /**
  * 查询一条通知
  */
-const findOne = async (ctx) => {
+const findOne = async (ctx: Context) => {
   const news = ctx.state.news
   ctx.body = { news: only(news, 'nid title content status create') }
 }
 
 // 新建一条消息
-const create = async (ctx) => {
+const create = async (ctx: Context) => {
   const opt = ctx.request.body
   const { profile: { uid } } = ctx.state
   const news = new News(Object.assign(
@@ -66,7 +66,7 @@ const create = async (ctx) => {
   try {
     await news.save()
     logger.info(`News <${news.nid}> is created by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
@@ -76,7 +76,7 @@ const create = async (ctx) => {
 }
 
 // 更新一条消息
-const update = async (ctx) => {
+const update = async (ctx: Context) => {
   const opt = ctx.request.body
   const news = ctx.state.news
   const { profile: { uid } } = ctx.state
@@ -87,7 +87,7 @@ const update = async (ctx) => {
   try {
     await news.save()
     logger.info(`News <${news.nid}> is updated by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
@@ -97,21 +97,21 @@ const update = async (ctx) => {
 }
 
 // 删除一条消息
-const del = async (ctx) => {
+const del = async (ctx: Context) => {
   const nid = ctx.params.nid
   const { profile: { uid } } = ctx.state
 
   try {
     await News.deleteOne({ nid }).exec()
     logger.info(`News <${nid}> is deleted by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
   ctx.body = {}
 }
 
-module.exports = {
+export default {
   preload,
   find,
   findOne,

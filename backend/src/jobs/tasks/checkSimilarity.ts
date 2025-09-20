@@ -57,4 +57,4 @@ async function checkSimilarity (item: string) {
   await solution.save()
 }
 
-export default module.exports = checkSimilarity
+export default checkSimilarity

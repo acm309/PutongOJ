@@ -1,21 +1,17 @@
-require('dotenv-flow').config()
-
-const path = require('node:path')
-const process = require('node:process')
-const Koa = require('koa')
-const { koaBody } = require('koa-body')
-const koaLogger = require('koa-logger')
-const send = require('koa-send')
-const { createSession: session } = require('koa-session')
-const staticServe = require('koa-static')
-// In order to apply the moongoose plugin,
-// DB must be inited before others.
-require('./config/db')
-const config = require('./config')
-const setup = require('./config/setup')
-const authnMiddleware = require('./middlewares/authn')
-const router = require('./routes')
-const logger = require('./utils/logger')
+import path from 'node:path'
+import process from 'node:process'
+import Koa from 'koa'
+import { koaBody } from 'koa-body'
+import koaLogger from 'koa-logger'
+import send from 'koa-send'
+import { createSession as session } from 'koa-session'
+import staticServe from 'koa-static'
+import config from './config'
+import setup from './config/setup'
+import authnMiddleware from './middlewares/authn'
+import router from './routes'
+import logger from './utils/logger'
+import './config/db'
 
 const app = new Koa()
 
@@ -57,7 +53,7 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   try {
     await next()
-  } catch (err) {
+  } catch (err: any) {
     const { requestId = 'unknown' } = ctx.state
     ctx.status = err.status || 500
     ctx.body = { error: err.message }
@@ -86,4 +82,4 @@ if (process.env.NODE_ENV !== 'test') {
   })
 }
 
-module.exports = app
+export default module.exports = app

@@ -141,4 +141,4 @@ const testcaseController = {
   removeTestcase,
 }
 
-export default module.exports = testcaseController
+export default testcaseController

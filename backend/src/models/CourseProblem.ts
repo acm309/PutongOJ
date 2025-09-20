@@ -1,6 +1,6 @@
 import type { Document, Model } from 'mongoose'
 import type { CourseProblemEntity } from '../types/entity'
-import mongoose from 'mongoose'
+import mongoose from '../config/db'
 
 export interface CourseProblemDocument extends Document, CourseProblemEntity { }
 

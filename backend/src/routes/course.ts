@@ -1,9 +1,8 @@
-import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import courseController from '../controllers/course'
 import authnMiddleware from '../middlewares/authn'
 
-const courseRouter = new Router<DefaultState, DefaultContext>({
+const courseRouter = new Router({
   prefix: '/course',
 })
 

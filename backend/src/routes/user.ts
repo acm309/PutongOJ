@@ -1,10 +1,9 @@
-import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import userController from '../controllers/user'
 import { userRegisterRateLimit } from '../middlewares'
 import authnMiddleware from '../middlewares/authn'
 
-const userRouter = new Router<DefaultState, DefaultContext>({
+const userRouter = new Router({
   prefix: '/user',
 })
 

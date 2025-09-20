@@ -1,12 +1,13 @@
-const Discuss = require('../models/Discuss')
-const { only } = require('../utils')
-const { isLogined, isAdmin } = require('../utils/helper')
-const logger = require('../utils/logger')
+import type { Context } from 'koa'
+import { loadProfile } from '../middlewares/authn'
+import Discuss from '../models/Discuss'
+import { only } from '../utils'
+import logger from '../utils/logger'
 
 /**
  * 讨论预加载中间件
  */
-const preload = async (ctx, next) => {
+const preload = async (ctx: Context, next: () => Promise<any>) => {
   const did = Number(ctx.params.did)
   if (!Number.isInteger(did) || did <= 0) {
     return ctx.throw(400, 'Invalid discuss ID')
@@ -16,8 +17,8 @@ const preload = async (ctx, next) => {
     return ctx.throw(404, 'Discuss not found')
   }
 
-  const { profile } = ctx.state
-  if (discuss.uid !== profile.uid && !isAdmin(profile)) {
+  const profile = await loadProfile(ctx)
+  if (discuss.uid !== profile.uid && !profile.isAdmin) {
     return ctx.throw(403, 'Permission denied')
   }
 
@@ -28,14 +29,14 @@ const preload = async (ctx, next) => {
 /**
  * 讨论列表
  */
-const find = async (ctx) => {
-  if (!isLogined(ctx)) {
+const find = async (ctx: Context) => {
+  if (!ctx.session.profile) {
     ctx.body = { list: [] }
     return
   }
 
-  const { profile } = ctx.state
-  const query = isAdmin(profile) ? {} : { uid: profile.uid }
+  const profile = await loadProfile(ctx)
+  const query = profile.isAdmin ? {} : { uid: profile.uid }
   const list = await Discuss
     .find(query, { did: 1, title: 1, update: 1, uid: 1, _id: 0 })
     .sort({ update: -1 })
@@ -48,7 +49,7 @@ const find = async (ctx) => {
 /**
  * 获取单个讨论
  */
-const findOne = async (ctx) => {
+const findOne = async (ctx: Context) => {
   const { discuss } = ctx.state
   ctx.body = { discuss: only(discuss, 'did title uid comments') }
 }
@@ -56,9 +57,9 @@ const findOne = async (ctx) => {
 /**
  * 创建讨论
  */
-const create = async (ctx) => {
+const create = async (ctx: Context) => {
   const { title, content } = ctx.request.body
-  const { profile: { uid } } = ctx.state
+  const { uid } = await loadProfile(ctx)
   const discuss = new Discuss({
     title, uid, comments: [ { uid, content } ],
   })
@@ -66,7 +67,7 @@ const create = async (ctx) => {
   try {
     await discuss.save()
     logger.info(`Discuss <${discuss.did}> is created by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
@@ -76,9 +77,10 @@ const create = async (ctx) => {
 /**
  * 新增评论
  */
-const update = async (ctx) => {
+const update = async (ctx: Context) => {
   const { content } = ctx.request.body
-  const { discuss, profile: { uid } } = ctx.state
+  const { discuss } = ctx.state
+  const { uid } = await loadProfile(ctx)
 
   try {
     discuss.comments.push({ uid, content })
@@ -86,28 +88,28 @@ const update = async (ctx) => {
     await discuss.save()
     // redis.lpush('oj:comment', discuss.did)
     logger.info(`Discuss <${discuss.did}> is updated by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
   ctx.body = only(discuss, 'did')
 }
 
-const del = async (ctx) => {
+const del = async (ctx: Context) => {
   const did = ctx.params.did
-  const { profile: { uid } } = ctx.state
+  const { uid } = await loadProfile(ctx)
 
   try {
     await Discuss.deleteOne({ did }).exec()
     logger.info(`Discuss <${did}> is deleted by <${uid}>`)
-  } catch (e) {
+  } catch (e: any) {
     ctx.throw(400, e.message)
   }
 
   ctx.body = {}
 }
 
-module.exports = {
+export default {
   preload,
   find,
   findOne,

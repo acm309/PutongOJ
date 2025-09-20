@@ -315,4 +315,4 @@ const courseController = {
   rearrangeCourseProblem,
 }
 
-export default module.exports = courseController
+export default courseController

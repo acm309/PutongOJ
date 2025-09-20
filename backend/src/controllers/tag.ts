@@ -114,4 +114,4 @@ const tagController = {
   removeTag,
 }
 
-export default module.exports = tagController
+export default tagController

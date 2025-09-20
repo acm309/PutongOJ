@@ -14,12 +14,12 @@
   ],
   "license": "MIT",
   "repository": "https://github.com/acm309/PutongOJ.git",
-  "main": "app.js",
+  "main": "app.ts",
   "engines": {
     "node": ">= 22.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.js",
+    "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.ts",
     "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.ts",
     "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.ts",
     "build": "tsc",
@@ -39,7 +39,6 @@
     "@noble/ciphers": "^2.0.0",
     "@noble/curves": "^2.0.0",
     "@noble/hashes": "^2.0.0",
-    "@types/koa-send": "^4.1.6",
     "cross-env": "^10.0.0",
     "dotenv-flow": "^4.1.0",
     "fast-levenshtein": "^3.0.0",
@@ -66,6 +65,10 @@
     "@types/fast-levenshtein": "^0.0.4",
     "@types/fs-extra": "^11.0.4",
     "@types/koa": "^2.15.0",
+    "@types/koa-logger": "^3.1.5",
+    "@types/koa-send": "^4.1.6",
+    "@types/koa-static": "^4.0.4",
+    "@types/koa2-ratelimit": "^0.9.7",
     "@types/koa__router": "^12.0.4",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.1",

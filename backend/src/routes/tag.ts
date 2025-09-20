@@ -1,9 +1,8 @@
-import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import tagController from '../controllers/tag'
 import authnMiddleware from '../middlewares/authn'
 
-const tagRouter = new Router<DefaultState, DefaultContext>({
+const tagRouter = new Router({
   prefix: '/tag',
 })
 

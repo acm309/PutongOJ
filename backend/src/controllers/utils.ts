@@ -59,7 +59,7 @@ const websiteInformation = async (ctx: Context) => {
   ctx.body = result
 }
 
-module.exports = {
+export default {
   upload,
   serverTime,
   websiteInformation,

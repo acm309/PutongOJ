@@ -33,4 +33,4 @@ mongoosePaginate.paginate.options = {
   },
 }
 
-export default module.exports = mongoose
+export default mongoose

@@ -6,4 +6,4 @@ const format = env.NODE_ENV === 'test'
   ? ''
   : '<{{title}}> {{message}} (in {{file}}:{{line}})'
 
-export default module.exports = tracer.colorConsole({ format })
+export default tracer.colorConsole({ format })

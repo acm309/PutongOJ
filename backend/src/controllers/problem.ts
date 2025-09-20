@@ -298,4 +298,4 @@ const problemController = {
   getStatistics,
 }
 
-export default module.exports = problemController
+export default problemController

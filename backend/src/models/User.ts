@@ -1,7 +1,7 @@
 import type { Document, ObjectId, PaginateModel, Schema } from 'mongoose'
 import type { UserEntity } from '../types/entity'
-import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
+import mongoose from '../config/db'
 import { privilege } from '../utils/constants'
 
 export interface UserDocument extends Document<ObjectId>, UserEntity {

@@ -380,4 +380,4 @@ const contestController = {
   verifyParticipant,
 }
 
-export default module.exports = contestController
+export default contestController

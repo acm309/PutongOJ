@@ -74,4 +74,4 @@ async function updateStatistic (item: string) {
   }
 }
 
-export default module.exports = updateStatistic
+export default updateStatistic

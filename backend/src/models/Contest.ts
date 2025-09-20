@@ -1,7 +1,7 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { ContestEntity } from '../types/entity'
-import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
+import mongoose from '../config/db'
 import constants from '../utils/constants'
 import ID from './ID'
 

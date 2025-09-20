@@ -1,7 +1,7 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { TagEntity, TagEntityItem, TagEntityPreview, TagEntityView } from '../types/entity'
-import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
+import mongoose from '../config/db'
 import { tagColors } from '../utils/constants'
 import ID from './ID'
 

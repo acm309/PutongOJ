@@ -1,6 +1,6 @@
 import type { Document, Model, Schema } from 'mongoose'
 import { capitalize } from 'lodash'
-import mongoose from 'mongoose'
+import mongoose from '../config/db'
 
 const idFields = [
   'Contest', 'Course', 'Discuss', 'Group', 'News', 'Problem', 'Solution', 'Tag',

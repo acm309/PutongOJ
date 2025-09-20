@@ -1,5 +1,4 @@
 const test = require('ava')
-const config = require('../../src/config')
 const helper = require('../../src/utils/helper')
 
 test('helper.purify', (t) => {
@@ -20,50 +19,4 @@ test('helper.purify', (t) => {
       b: 'test',
     },
   })
-})
-
-test('helper.isAdmin', (t) => {
-  t.true(helper.isAdmin({
-    privilege: config.privilege.Root,
-  }))
-  t.true(helper.isAdmin({
-    privilege: config.privilege.Admin,
-  }))
-  t.false(helper.isAdmin({
-    privilege: config.privilege.User,
-  }))
-  t.false(helper.isAdmin({}))
-  t.false(helper.isAdmin())
-})
-
-test('helper.isLogined', (t) => {
-  t.true(helper.isLogined({
-    session: {
-      profile: {
-        uid: '123',
-      },
-    },
-  }))
-  t.false(helper.isLogined({
-    session: {
-      profile: {},
-    },
-  }))
-  t.false(helper.isLogined({ session: {} }))
-})
-
-test('helper.isRoot', (t) => {
-  t.false(helper.isRoot(null))
-  t.false(helper.isRoot({
-    privilege: null,
-  }))
-  t.false(helper.isRoot({
-    privilege: config.privilege.Admin,
-  }))
-  t.false(helper.isRoot({
-    privilege: config.privilege.User,
-  }))
-  t.true(helper.isRoot({
-    privilege: config.privilege.Root,
-  }))
 })

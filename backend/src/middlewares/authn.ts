@@ -75,4 +75,4 @@ const authnMiddleware = {
   root: rootRequire,
 }
 
-export default module.exports = authnMiddleware
+export default authnMiddleware

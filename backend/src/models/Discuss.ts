@@ -1,6 +1,6 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { DiscussEntity } from '../types/entity'
-import mongoose from 'mongoose'
+import mongoose from '../config/db'
 import ID from './ID'
 
 export interface DiscussDocument extends Document, DiscussEntity {}

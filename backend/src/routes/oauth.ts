@@ -1,9 +1,8 @@
-import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import oauthController from '../controllers/oauth'
 import authnMiddleware from '../middlewares/authn'
 
-const oauthRouter = new Router<DefaultState, DefaultContext>({
+const oauthRouter = new Router({
   prefix: '/oauth',
 })
 

@@ -34,4 +34,4 @@ router.use(user.routes(), user.allowedMethods())
 router.use(oauth.routes(), oauth.allowedMethods())
 router.use(utils.routes(), utils.allowedMethods())
 
-export default module.exports = router
+export default router
