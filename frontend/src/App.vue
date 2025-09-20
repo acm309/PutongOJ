@@ -34,9 +34,14 @@ setErrorHandler((err) => {
       content: t('oj.error_401'),
       duration: 6.5,
     })
+  } else if (err.response && err.response.status === 429) {
+    $Message.error({
+      content: t('oj.error_429'),
+      duration: 6.5,
+    })
   } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
     $Message.error({
-      content: `${err.response.data.error}`,
+      content: err.response.data.error || 'Bad Request',
       duration: 6.5,
     })
   } else if (!err.response) {

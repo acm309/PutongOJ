@@ -202,6 +202,7 @@
   "error_500": "Σ(;ﾟдﾟ) Server Error",
   "error_403": "╮(╯_╰)╭ Unauthorized",
   "error_401": "(〃∀〃) Please log in first",
+  "error_429": "ヽ(￣～￣)ノ Too many requests, please try again later",
   "lose_connection": "_(:з」∠)_ Connection lost",
   "all": "All",
   "search_by_username": "Search by username",
