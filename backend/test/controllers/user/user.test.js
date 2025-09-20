@@ -15,7 +15,7 @@ const mail = 'account@example.com'
 test.before('Create user and login', async (t) => {
   let r = await request
     .post('/api/user')
-    .send({ uid, pwd })
+    .send({ uid, pwd: await encryptData(pwd) })
   t.is(r.status, 200)
 
   r = await request

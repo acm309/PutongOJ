@@ -15,7 +15,9 @@ test('Bannded user login', async (t) => {
       pwd: await encryptData(userSeeds.banned.pwd),
     })
 
-  t.is(res.status, 403)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.data, null)
 })
 
 test('Non-exist user login', async (t) => {
@@ -26,7 +28,9 @@ test('Non-exist user login', async (t) => {
       pwd: await encryptData('non-exist'),
     })
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.data, null)
 })
 
 test('Wrong password login', async (t) => {
@@ -37,7 +41,9 @@ test('Wrong password login', async (t) => {
       pwd: await encryptData('wrong-password'),
     })
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.data, null)
 })
 
 test('Get session profile without login', async (t) => {
