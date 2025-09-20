@@ -7,7 +7,8 @@ import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
-import { generatePwd, isComplexPwd, only } from '../utils'
+import cryptoService from '../services/crypto'
+import { createEnvelopedResponse, createErrorResponse, generatePwd, isComplexPwd, only } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 import logger from '../utils/logger'
 
@@ -101,33 +102,47 @@ const findOne = async (ctx: Context) => {
   }
 }
 
-const create = async (ctx: Context) => {
+async function userRegister (ctx: Context) {
+  const requestId = ctx.state.requestId || 'unknown'
   const opt = ctx.request.body
-  const uid = String(opt.uid || '')
-  const pwd = String(opt.pwd || '')
-  const nick = String(opt.nick || '')
+
+  if (typeof opt.uid !== 'string' || opt.uid.trim() === '') {
+    return createErrorResponse(ctx, 'Username is required')
+  }
+  const uid = opt.uid.trim()
+
+  if (typeof opt.pwd !== 'string' || opt.pwd.trim() === '') {
+    return createErrorResponse(ctx, 'Password is required')
+  }
+  let pwd: string | null = null
+  try {
+    pwd = await cryptoService.decryptData(opt.pwd.trim())
+  } catch (e: any) {
+    logger.info(`Bad password encryption: ${e.message} [${requestId}]`)
+    return createErrorResponse(ctx, 'Bad password encryption')
+  }
 
   if (!isComplexPwd(pwd)) {
-    ctx.throw(400, 'The password is not complex enough!')
+    return createErrorResponse(ctx, 'The password is not complex enough!')
   }
   const exists = await User.findOne({
     uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
-  }).exec()
+  })
   if (exists) {
-    ctx.throw(400, 'The username has been registered!')
+    return createErrorResponse(ctx, 'The username has been registered!')
   }
+
   const user = new User({
-    uid, nick, pwd: generatePwd(pwd),
+    uid, pwd: generatePwd(pwd),
   })
 
   try {
     await user.save()
-    const { requestId = 'unknown' } = ctx.state
     logger.info(`User <${user.uid}> is created [${requestId}]`)
   } catch (err: any) {
-    ctx.throw(400, err.message)
+    return createErrorResponse(ctx, err.message)
   }
-  ctx.body = {}
+  return createEnvelopedResponse(ctx, null)
 }
 
 const update = async (ctx: Context) => {
@@ -185,7 +200,7 @@ const update = async (ctx: Context) => {
 const userController = {
   find,
   findOne,
-  create,
+  userRegister,
   update,
 }
 

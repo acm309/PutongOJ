@@ -2,29 +2,28 @@ import type { Context } from 'koa'
 import User from '../models/User'
 import cryptoService from '../services/crypto'
 import sessionService from '../services/session'
-import { generatePwd } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, generatePwd } from '../utils'
 import { privilege } from '../utils/constants'
 import logger from '../utils/logger'
 
-// 登录
-const login = async (ctx: Context) => {
+export async function userLogin (ctx: Context) {
+  const requestId = ctx.state.requestId || 'unknown'
   const opt = ctx.request.body
-  const { requestId = 'unknown' } = ctx.state
 
   if (typeof opt.uid !== 'string' || opt.uid.trim() === '') {
-    ctx.throw(400, 'Username is required')
+    return createErrorResponse(ctx, 'Username is required')
   }
   const uid = opt.uid.trim()
 
   if (typeof opt.pwd !== 'string' || opt.pwd.trim() === '') {
-    ctx.throw(400, 'Password is required')
+    return createErrorResponse(ctx, 'Password is required')
   }
   let pwd: string | null = null
   try {
     pwd = await cryptoService.decryptData(opt.pwd.trim())
   } catch (e: any) {
     logger.info(`Bad password encryption: ${e.message} [${requestId}]`)
-    ctx.throw(400, 'Bad password encryption')
+    return createErrorResponse(ctx, 'Bad password encryption')
   }
   const pwdHash = generatePwd(pwd)
 
@@ -32,13 +31,20 @@ const login = async (ctx: Context) => {
     .findOne({ uid })
     .exec()
 
-  if (user == null) { ctx.throw(400, `No such a user <${uid}>`) }
-  if (user.pwd !== pwdHash) { ctx.throw(400, `Wrong password for user <${uid}>`) }
-  if (user.privilege === privilege.Banned) { ctx.throw(403, `User <${uid}> is banned`) }
+  if (!user || user.pwd !== pwdHash) {
+    return createErrorResponse(ctx,
+      'Username or password is incorrect',
+    )
+  }
+  if (user.privilege === privilege.Banned) {
+    return createErrorResponse(ctx,
+      'Account has been banned, please contact the administrator',
+    )
+  }
 
   logger.info(`User <${uid}> login successfully [${requestId}]`)
   const profile = sessionService.setUserSession(ctx, user)
-  ctx.body = { profile }
+  return createEnvelopedResponse(ctx, profile)
 }
 
 // 登出
@@ -66,7 +72,7 @@ const profile = async (ctx: Context) => {
 }
 
 const sessionController = {
-  login,
+  userLogin,
   logout,
   profile,
 }

@@ -29,9 +29,11 @@ export const useSessionStore = defineStore('session', {
     setLoginProfile (profile: Profile) {
       this.profile = profile
     },
-    async login (opt: LoginParam) {
-      const { data } = await api.login(opt)
-      this.profile = data.profile
+    async userLogin (opt: LoginParam) {
+      const { data } = await api.session.userLogin(opt)
+      if (data.data !== null) {
+        this.profile = data.data as Profile
+      }
       return data
     },
     async logout () {

@@ -3,21 +3,24 @@ import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
 import type { Message } from 'view-ui-plus'
 import type { Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Button, Divider, Form, FormItem, Input, Modal } from 'view-ui-plus'
+import { Button, Divider, Form, FormItem, Input, Modal, Title } from 'view-ui-plus'
 import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
 import { encryptData } from '@/utils/crypto'
 
+const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const userStore = useUserStore()
 const { register } = userStore
-const { login, toggleLoginState: toggleModal } = sessionStore
+const { userLogin, toggleLoginState: toggleModal } = sessionStore
 const { website } = storeToRefs(rootStore)
 const modalOpen = computed(() => sessionStore.loginDialog)
 const message = inject('$Message') as typeof Message
@@ -67,20 +70,39 @@ const registerRules = computed(() => ({
 function submit () {
   if (tab.value === TabType.login) {
     loginForm.value.validate(async (valid: boolean) => {
-      if (!valid) return
-      await login({
+      if (!valid) {
+        return
+      }
+      const result = await userLogin({
         uid: form.value.uid,
         pwd: await encryptData(form.value.pwd),
       })
-      message.success(`Welcome, ${form.value.uid} !`)
-      toggleModal()
+      if (result.success) {
+        message.success(`Welcome, ${form.value.uid}`)
+        toggleModal()
+        if (route.name === 'oauthCallback') {
+          router.push({ name: 'userEdit', params: { uid: form.value.uid } })
+        }
+        form.value.pwd = ''
+      } else {
+        message.error(result.message)
+      }
     })
   } else {
     registerForm.value.validate(async (valid: boolean) => {
-      if (!valid) return
-      await register(form.value)
-      tab.value = TabType.login
-      submit()
+      if (!valid) {
+        return
+      }
+      const result = await register({
+        uid: form.value.uid,
+        pwd: await encryptData(form.value.pwd),
+      })
+      if (result.success) {
+        tab.value = TabType.login
+        submit()
+      } else {
+        message.error(result.message)
+      }
     })
   }
 }
@@ -92,11 +114,13 @@ async function usingOAuth (provider: Lowercase<OAuthProvider>) {
 </script>
 
 <template>
-  <Modal
-    v-model="modalOpen" :title="tab === TabType.login ? t('oj.login') : t('oj.register')" :closable="false"
-    :footer-hide="true" @on-cancel="toggleModal"
-  >
+  <Modal v-model="modalOpen" :footer-hide="true" @on-cancel="toggleModal">
     <div class="modal-form">
+      <div class="modal-header">
+        <Title :level="2">
+          {{ tab === TabType.login ? t('oj.login') : t('oj.register') }}
+        </Title>
+      </div>
       <div v-show="tab === TabType.login">
         <Form ref="loginForm" :model="form" :rules="loginRules" label-position="top">
           <div v-if="Object.values(website.oauthEnabled).includes(true)">
@@ -161,4 +185,7 @@ async function usingOAuth (provider: Lowercase<OAuthProvider>) {
 <style lang="stylus" scoped>
 .modal-form
   padding 32px 32px 8px
+.modal-header
+  margin-bottom 48px
+  text-align center
 </style>

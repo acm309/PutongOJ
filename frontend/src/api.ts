@@ -1,7 +1,8 @@
+import type { OAuthCallbackResponse } from '@backend/controllers/oauth'
 import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { OAuthEntityUserView } from '@backend/models/OAuth'
-import type { OAuthAction, OAuthProvider, OAuthState } from '@backend/services/oauth'
-import type { CourseRole, Paginated } from '@backend/types'
+import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
+import type { CourseRole, Enveloped, Paginated, SessionProfile } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User } from '@/types'
@@ -60,8 +61,8 @@ const user = {
     instance.get(`/user/${data.uid}`, { params: data }),
   find: (data: { [key: string]: any }) =>
     instance.get<Paginated<User>>('/user/list', { params: data }),
-  create: (data: { [key: string]: any }) =>
-    instance.post('/user', data),
+  userRegister: (data: { [key: string]: any }) =>
+    instance.post<Enveloped<null>>('/user', data),
   update: (data: { [key: string]: any }) =>
     instance.put(`/user/${data.uid}`, data),
   delete: (data: { [key: string]: any }) =>
@@ -169,10 +170,12 @@ const discuss = {
 }
 
 const session = {
-  create: (data: LoginParam) =>
-    instance.post<{ profile: Profile }>('/session', data),
-  delete: () => instance.delete<object>('/session'),
-  fetch: () => instance.get<{ profile: Profile | null }>('/session'),
+  userLogin: (data: LoginParam) =>
+    instance.post<Enveloped<SessionProfile>>('/session', data),
+  delete: () =>
+    instance.delete<object>('/session'),
+  fetch: () =>
+    instance.get<{ profile: Profile | null }>('/session'),
 }
 
 const course = {
@@ -208,16 +211,14 @@ const oauth = {
   generateOAuthUrl: (provider: Lowercase<OAuthProvider>, params: { action: OAuthAction }) =>
     instance.get<{ url: string }>(`/oauth/${provider}/url`, { params }),
   handleOAuthCallback: (provider: Lowercase<OAuthProvider>, params: { state: string, code: string }) =>
-    instance.get<Pick<OAuthState, 'action'> & { connection: OAuthEntityUserView }>(`/oauth/${provider}/callback`, { params }),
+    instance.get<Enveloped<OAuthCallbackResponse>>(`/oauth/${provider}/callback`, { params }),
   getUserOAuthConnections: () =>
     instance.get<Record<OAuthProvider, OAuthEntityUserView | null>>('/oauth'),
 }
 
 export default {
   ...utils,
-  login: session.create,
   logout: session.delete,
-  register: user.create,
   testcase,
   user,
   solution,

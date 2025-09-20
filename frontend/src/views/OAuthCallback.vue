@@ -11,7 +11,7 @@ import { useSessionStore } from '@/store/modules/session'
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
-const { fetch: fetchSession } = sessionStore
+const { fetch: fetchSession, toggleLoginState: toggleLoginModal } = sessionStore
 const { profile } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
@@ -25,11 +25,16 @@ async function processOAuthCallback () {
     router.replace({ name: 'home' })
     return
   }
-  const data = await api.oauth.handleOAuthCallback(
+  const { data } = await api.oauth.handleOAuthCallback(
     provider.value.toLowerCase() as Lowercase<OAuthProvider>,
     { code: code.value, state: state.value },
   )
-  const { action } = data.data
+  if (!data.success) {
+    message.error(data.message || 'OAuth callback processing failed')
+    toggleLoginModal()
+    return
+  }
+  const { action } = data.data!
   if (action === 'connect') {
     message.success('OAuth account successfully connected!')
     router.replace({ name: 'userEdit', params: { uid: profile.value!.uid } })

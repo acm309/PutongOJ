@@ -15,8 +15,9 @@ export const useUserStore = defineStore('user', {
     adminList: [],
   }),
   actions: {
-    register (payload) {
-      return api.register(payload)
+    async register (payload) {
+      const { data } = await api.user.userRegister(payload)
+      return data
     },
     async find (payload) {
       const { data } = await api.user.find(payload)

@@ -5,6 +5,7 @@ import type { OAuthConnection, OAuthState } from '../services/oauth'
 import { loadProfile } from '../middlewares/authn'
 import oauthService, { OAuthAction, OAuthProvider } from '../services/oauth'
 import sessionService from '../services/session'
+import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/error'
 import logger from '../utils/logger'
 
@@ -43,6 +44,11 @@ export async function generateOAuthUrl (ctx: Context) {
   }
 }
 
+export interface OAuthCallbackResponse {
+  action: OAuthAction
+  connection: OAuthEntityUserView
+}
+
 export async function handleOAuthCallback (ctx: Context) {
   const provider = parseProvider(ctx)
   const { state, code } = ctx.request.query
@@ -57,7 +63,7 @@ export async function handleOAuthCallback (ctx: Context) {
     stateData = result.stateData
     connection = result.connection
   } catch (error: any) {
-    ctx.throw(400, error.message)
+    return createErrorResponse(ctx, error.message)
   }
 
   let user: UserDocument | null = null
@@ -66,7 +72,9 @@ export async function handleOAuthCallback (ctx: Context) {
     const isConnected = await oauthService
       .isOAuthConnectedToAnotherUser(profile._id, connection)
     if (isConnected) {
-      ctx.throw(400, 'This 3rd-party account has been connected to another user')
+      return createErrorResponse(ctx,
+        'This 3rd-party account has been connected to another user',
+      )
     }
     user = profile
   } else if (stateData.action === OAuthAction.LOGIN) {
@@ -75,7 +83,9 @@ export async function handleOAuthCallback (ctx: Context) {
     const connectedUser = await oauthService
       .findUserByOAuthConnection(provider, providerId)
     if (!connectedUser) {
-      ctx.throw(400, 'No user is connected with this 3rd-party account')
+      return createErrorResponse(ctx,
+        'No user is connected with this 3rd-party account, please login first and bind it',
+      )
     }
     user = connectedUser
     logger.info(`User <${user.uid}> login via ${provider} OAuth successfully [${requestId}]`)
@@ -85,13 +95,11 @@ export async function handleOAuthCallback (ctx: Context) {
   }
   const updatedConnection = await oauthService
     .upsertOAuthConnection(user._id, connection)
-  const response: Pick<OAuthState, 'action'> & {
-    connection: OAuthEntityUserView
-  } = {
+  const response: OAuthCallbackResponse = {
     action: stateData.action,
     connection: oauthService.toUserView(updatedConnection),
   }
-  ctx.body = response
+  return createEnvelopedResponse(ctx, response)
 }
 
 export async function getUserOAuthConnections (ctx: Context) {

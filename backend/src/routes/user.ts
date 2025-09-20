@@ -1,7 +1,7 @@
 import type { DefaultContext, DefaultState } from 'koa'
 import Router from '@koa/router'
 import userController from '../controllers/user'
-import { userCreateRateLimit } from '../middlewares'
+import { userRegisterRateLimit } from '../middlewares'
 import authnMiddleware from '../middlewares/authn'
 
 const userRouter = new Router<DefaultState, DefaultContext>({
@@ -15,8 +15,8 @@ userRouter.get('/:uid',
   userController.findOne,
 )
 userRouter.post('/',
-  userCreateRateLimit,
-  userController.create,
+  userRegisterRateLimit,
+  userController.userRegister,
 )
 userRouter.put('/:uid',
   authnMiddleware.loginRequire,

@@ -7,7 +7,7 @@ const sessionRouter = new Router<DefaultState, DefaultContext>({
 })
 
 sessionRouter.post('/',
-  sessionController.login,
+  sessionController.userLogin,
 )
 sessionRouter.get('/',
   sessionController.profile,
