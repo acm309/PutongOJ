@@ -33,3 +33,10 @@ export interface Paginated<T> {
   pages: number
   total: number
 }
+
+export interface Enveloped<T = any> {
+  success: boolean
+  message: string
+  data: T | null
+  requestId: string
+}

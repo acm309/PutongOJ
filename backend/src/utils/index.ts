@@ -1,4 +1,5 @@
-import type { PaginateOption } from '../types'
+import type { Context } from 'koa'
+import type { Enveloped, PaginateOption } from '../types'
 import crypto from 'node:crypto'
 import { pick } from 'lodash'
 
@@ -45,9 +46,31 @@ export function only<T extends object> (
   return pick(obj, keys)
 }
 
+export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
+  const requestId = ctx.state.requestId || 'unknown'
+  ctx.body = <Enveloped<T>>{
+    success: true,
+    message: 'OK',
+    data,
+    requestId,
+  }
+}
+
+export function createErrorResponse (ctx: Context, message: string): void {
+  const requestId = ctx.state.requestId || 'unknown'
+  ctx.body = <Enveloped<null>>{
+    success: false,
+    message,
+    data: null,
+    requestId,
+  }
+}
+
 export default module.exports = {
   parsePaginateOption,
   generatePwd,
   isComplexPwd,
   only,
+  createEnvelopedResponse,
+  createErrorResponse,
 }
