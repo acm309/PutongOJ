@@ -164,7 +164,7 @@ onMounted(async () => {
         </Button>
       </FormItem>
     </Form>
-    <Form :label-width="isZH ? 80 : 130">
+    <Form v-if="isSelf" :label-width="isZH ? 80 : 130">
       <Divider simple class="user-divider">
         Connection
       </Divider>
