@@ -15,4 +15,4 @@ redis.on('error', (err) => {
   process.exit(-1)
 })
 
-export default module.exports = redis
+export default redis

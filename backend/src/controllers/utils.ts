@@ -59,8 +59,10 @@ const websiteInformation = async (ctx: Context) => {
   ctx.body = result
 }
 
-export default {
+const utilsController = {
   upload,
   serverTime,
   websiteInformation,
-}
+} as const
+
+export default utilsController

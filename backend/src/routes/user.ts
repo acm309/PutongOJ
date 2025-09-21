@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import userController from '../controllers/user'
-import { userRegisterRateLimit } from '../middlewares'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const userRouter = new Router({
   prefix: '/user',
@@ -14,7 +14,7 @@ userRouter.get('/:uid',
   userController.findOne,
 )
 userRouter.post('/',
-  userRegisterRateLimit,
+  ratelimitMiddleware.userRegisterLimit,
   userController.userRegister,
 )
 userRouter.put('/:uid',

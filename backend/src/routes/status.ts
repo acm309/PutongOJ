@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import statusController from '../controllers/status'
-import { solutionCreateRateLimit } from '../middlewares'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const statusRouter = new Router({
   prefix: '/status',
@@ -20,7 +20,7 @@ statusRouter.put('/:sid',
 )
 statusRouter.post('/',
   authnMiddleware.loginRequire,
-  solutionCreateRateLimit,
+  ratelimitMiddleware.solutionCreateLimit,
   statusController.create,
 )
 

@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import discussController from '../controllers/discuss'
-import { commentCreateRateLimit } from '../middlewares'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const discussRouter = new Router({
   prefix: '/discuss',
@@ -18,12 +18,12 @@ discussRouter.get('/:did',
 )
 discussRouter.post('/',
   authnMiddleware.loginRequire,
-  commentCreateRateLimit,
+  ratelimitMiddleware.commentCreateLimit,
   discussController.create,
 )
 discussRouter.put('/:did',
   authnMiddleware.loginRequire,
-  commentCreateRateLimit,
+  ratelimitMiddleware.commentCreateLimit,
   discussController.preload,
   discussController.update,
 )
