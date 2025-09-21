@@ -1,6 +1,6 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../src/app')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../src/app'
 
 const server = app.listen()
 const request = supertest.agent(server)

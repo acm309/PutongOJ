@@ -1,8 +1,8 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { encryptData } = require('../../../src/services/crypto')
-const { userSeeds } = require('../../seeds/user')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { encryptData } from '../../../src/services/crypto'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -14,7 +14,7 @@ test.before('Login', async (t) => {
     .post('/api/session')
     .send({
       uid: user.uid,
-      pwd: await encryptData(user.pwd),
+      pwd: await encryptData(user.pwd!),
     })
 
   t.is(login.status, 200)

@@ -1,8 +1,8 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { encryptData } = require('../../../src/services/crypto')
-const { userSeeds } = require('../../seeds/user')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { encryptData } from '../../../src/services/crypto'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -12,7 +12,7 @@ test('Bannded user login', async (t) => {
     .post('/api/session')
     .send({
       uid: userSeeds.banned.uid,
-      pwd: await encryptData(userSeeds.banned.pwd),
+      pwd: await encryptData(userSeeds.banned.pwd!),
     })
 
   t.is(res.status, 200)

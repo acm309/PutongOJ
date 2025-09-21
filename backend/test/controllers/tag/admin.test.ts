@@ -1,8 +1,8 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const config = require('../../../src/config')
-const { encryptData } = require('../../../src/services/crypto')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import config from '../../../src/config'
+import { encryptData } from '../../../src/services/crypto'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -76,16 +76,16 @@ test.serial.skip('Update a tag', async (t) => {
   t.is(find.status, 200)
   t.deepEqual(find.body.tag.list, newList)
 
-  return Promise.all(
-    newTag.list.map(async (item) => {
+  return Promise.all([
+    ...newTag.list.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
       t.false(res.body.tags.includes(newTag.tid))
     }),
-    newList.map(async (item) => {
+    ...newList.map(async (item) => {
       const res = await request.get(`/api/problem/${item}`)
       t.true(res.body.tags.includes(newTag.tid))
     }),
-  )
+  ])
 })
 
 test.serial.skip('Delete a tag', async (t) => {

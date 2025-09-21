@@ -1,10 +1,10 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const config = require('../../../src/config')
-const { encryptData } = require('../../../src/services/crypto')
-const { only } = require('../../../src/utils')
-const { discussSeeds } = require('../../seeds/discuss')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import config from '../../../src/config'
+import { encryptData } from '../../../src/services/crypto'
+import { only } from '../../../src/utils'
+import { discussSeeds } from '../../seeds/discuss'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -27,7 +27,7 @@ test('Discuss list', async (t) => {
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list))
-  res.body.list.forEach((item) => {
+  res.body.list.forEach((item: any) => {
     t.truthy(item.title)
     t.truthy(item.uid)
     t.truthy(item.update)
@@ -41,11 +41,11 @@ test('Find Discuss 1', async (t) => {
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
 
-  const select = discussSeeds.find(item => item.title === res.body.discuss.title)
+  const select = discussSeeds.find(item => item.title === res.body.discuss.title)!
   const com = res.body.discuss.comments
 
   t.deepEqual(only(res.body.discuss, 'title uid'), only(select, 'title uid'))
-  com.forEach((item, index) => {
+  com.forEach((item: object, index: number) => {
     t.deepEqual(only(item, 'content create uid'), select.comments[index])
   })
 })

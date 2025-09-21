@@ -1,8 +1,8 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { encryptData } = require('../../../src/services/crypto')
-const { userSeeds } = require('../../seeds/user')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { encryptData } from '../../../src/services/crypto'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -11,14 +11,14 @@ const newDiscuss = {
   title: '一楼',
   content: '我是一楼，欧耶',
 }
-let newDid
+let newDid: number | null = null
 
 test.before('Login', async (t) => {
   const login = await request
     .post('/api/session')
     .send({
       uid: user.uid,
-      pwd: await encryptData(user.pwd),
+      pwd: await encryptData(user.pwd!),
     })
 
   t.is(login.status, 200)
@@ -69,7 +69,7 @@ test('Discuss list', async (t) => {
   t.is(res.status, 200)
   t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list))
-  res.body.list.forEach((item) => {
+  res.body.list.forEach((item: any) => {
     t.truthy(item.title)
     t.truthy(item.uid)
     t.is(item.uid, user.uid)

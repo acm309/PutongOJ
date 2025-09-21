@@ -1,9 +1,9 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const config = require('../../../src/config')
-const { encryptData } = require('../../../src/services/crypto')
-const { userSeeds } = require('../../seeds/user')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import config from '../../../src/config'
+import { encryptData } from '../../../src/services/crypto'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -49,7 +49,7 @@ test.serial('Update Group 2', async (t) => {
   const user = await request
     .get('/api/user/admin')
 
-  t.true(user.body.user.groups.some(group => group.gid === 2))
+  t.true(user.body.user.groups.some((group: any) => group.gid === 2))
 })
 
 test.serial('Update Group 2 -- update members', async (t) => {
@@ -72,12 +72,12 @@ test.serial('Update Group 2 -- update members', async (t) => {
   let r = await request
     .get('/api/user/admin')
 
-  t.false(r.body.user.groups.some(group => group.gid === 2))
+  t.false(r.body.user.groups.some((group: any) => group.gid === 2))
 
   r = await request
     .get(`/api/user/${user.uid}`)
 
-  t.true(r.body.user.groups.some(group => group.gid === 2))
+  t.true(r.body.user.groups.some((group: any) => group.gid === 2))
 })
 
 test.serial('Delete Group 2', async (t) => {
@@ -93,7 +93,7 @@ test.serial('Delete Group 2', async (t) => {
   const user = await request
     .get('/api/user/admin')
 
-  t.false(user.body.user.groups.some(group => group.gid === 2))
+  t.false(user.body.user.groups.some((group: any) => group.gid === 2))
 })
 
 test('The length of group title should be greater than 3', async (t) => {

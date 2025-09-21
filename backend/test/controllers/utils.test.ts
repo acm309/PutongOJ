@@ -1,16 +1,16 @@
-const fs = require('node:fs')
-const { resolve } = require('node:path')
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../src/app')
-const config = require('../../src/config')
-const websiteConfig = require('../../src/config/website')
-const { encryptData } = require('../../src/services/crypto')
+import fs from 'node:fs'
+import { resolve } from 'node:path'
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../src/app'
+import config from '../../src/config'
+import websiteConfig from '../../src/config/website'
+import { encryptData } from '../../src/services/crypto'
 
 const server = app.listen()
 const request = supertest.agent(server)
 
-const filepath = resolve(__dirname, 'utils.test.js')
+const filepath = resolve(__dirname, 'utils.test.ts')
 const content = fs.readFileSync(filepath, 'utf8')
 
 test('Server time', async (t) => {

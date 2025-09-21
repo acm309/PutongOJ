@@ -1,7 +1,7 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { problemSeeds } = require('../../seeds/problem')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { problemSeeds } from '../../seeds/problem'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -27,7 +27,7 @@ test('Problem find one', async (t) => {
 
   t.is(res.status, 200)
 
-  const n = problemSeeds.find(item => item.title === res.body.title)
+  const n = problemSeeds.find(item => item.title === res.body.title)!
 
   for (const [ key, value ] of Object.entries(n)) {
     t.deepEqual(res.body[key], value)

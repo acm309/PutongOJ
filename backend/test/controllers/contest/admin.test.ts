@@ -1,8 +1,8 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const config = require('../../../src/config')
-const { encryptData } = require('../../../src/services/crypto')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import config from '../../../src/config'
+import { encryptData } from '../../../src/services/crypto'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -18,7 +18,7 @@ test.before('Login', async (t) => {
   t.is(login.status, 200)
 })
 
-let newCid = null
+let newCid: number | null = null
 
 test.serial('Create a contest', async (t) => {
   const start = Date.now()

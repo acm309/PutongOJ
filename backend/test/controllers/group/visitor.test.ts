@@ -1,7 +1,7 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { groupSeeds } = require('../../seeds/group')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { groupSeeds } from '../../seeds/group'
 
 const server = app.listen()
 const request = supertest.agent(server)

@@ -1,7 +1,7 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const { newsSeeds } = require('../../seeds/news')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import { newsSeeds } from '../../seeds/news'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -73,7 +73,7 @@ test('News finds one', async (t) => {
   t.truthy(res.body.news.nid)
   t.truthy(res.body.news.title)
 
-  const n = newsSeeds.find(item => item.title === res.body.news.title)
+  const n = newsSeeds.find(item => item.title === res.body.news.title)!
 
   t.is(res.body.news.content, n.content)
 })

@@ -73,6 +73,7 @@
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.1",
     "@types/superagent": "^8.1.9",
+    "@types/supertest": "^6.0.3",
     "ava": "^6.4.1",
     "eslint": "^9.35.0",
     "nodemon": "^3.1.10",

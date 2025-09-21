@@ -1,9 +1,9 @@
-const test = require('ava')
-const supertest = require('supertest')
-const app = require('../../../src/app')
-const config = require('../../../src/config')
-const { encryptData } = require('../../../src/services/crypto')
-const { userSeeds } = require('../../seeds/user')
+import test from 'ava'
+import supertest from 'supertest'
+import app from '../../../src/app'
+import config from '../../../src/config'
+import { encryptData } from '../../../src/services/crypto'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const requestRoot = supertest.agent(server)
@@ -18,7 +18,7 @@ test.before('Login as admin', async (t) => {
     .post('/api/session')
     .send({
       uid: userRoot.uid,
-      pwd: await encryptData(userRoot.pwd),
+      pwd: await encryptData(userRoot.pwd!),
     })
   t.is(r.status, 200)
 
@@ -68,7 +68,7 @@ test.serial('Update user privilege to admin with root privilege', async (t) => {
     .post('/api/session')
     .send({
       uid: userAdmin.uid,
-      pwd: await encryptData(userAdmin.pwd),
+      pwd: await encryptData(userAdmin.pwd!),
     })
   t.is(r.status, 200)
 
