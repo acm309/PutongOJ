@@ -167,11 +167,13 @@ const del = async (ctx: Context) => {
   ctx.body = {}
 }
 
-export default {
+const groupController = {
   preload,
   find,
   findOne,
   create,
   update,
   del,
-}
+} as const
+
+export default groupController

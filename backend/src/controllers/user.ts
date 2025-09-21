@@ -202,6 +202,6 @@ const userController = {
   findOne,
   userRegister,
   update,
-}
+} as const
 
 export default userController

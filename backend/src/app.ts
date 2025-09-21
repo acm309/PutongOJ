@@ -7,7 +7,7 @@ import send from 'koa-send'
 import { createSession as session } from 'koa-session'
 import staticServe from 'koa-static'
 import config from './config'
-import setup from './config/setup'
+import { databaseSetup } from './config/setup'
 import { parseClientIp } from './middlewares'
 import authnMiddleware from './middlewares/authn'
 import router from './routes'
@@ -80,7 +80,7 @@ app.use(router.routes()).use(router.allowedMethods())
 // do not start on 'test'
 if (process.env.NODE_ENV !== 'test') {
   app.listen(config.port, async () => {
-    await setup()
+    await databaseSetup()
     logger.info(`The server is running at http://localhost:${config.port}`)
   })
 }

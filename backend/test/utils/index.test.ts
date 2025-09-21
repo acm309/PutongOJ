@@ -1,7 +1,7 @@
-const test = require('ava')
-const helper = require('../../src/utils/helper')
+import test from 'ava'
+import helper from '../../src/utils'
 
-test('helper.purify', (t) => {
+test('Helper purify', (t) => {
   t.deepEqual(helper.purify({
     a: null,
     b: 'test',

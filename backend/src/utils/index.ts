@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { Enveloped, PaginateOption } from '../types'
 import crypto from 'node:crypto'
-import { pick } from 'lodash'
+import { pick, pickBy } from 'lodash'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -46,6 +46,10 @@ export function only<T extends object> (
   return pick(obj, keys)
 }
 
+export function purify (obj: Record<string, any>) {
+  return pickBy(obj, x => x != null && x !== '')
+}
+
 export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
   const requestId = ctx.state.requestId || 'unknown'
   ctx.body = <Enveloped<T>>{
@@ -71,6 +75,7 @@ export default module.exports = {
   generatePwd,
   isComplexPwd,
   only,
+  purify,
   createEnvelopedResponse,
   createErrorResponse,
 }

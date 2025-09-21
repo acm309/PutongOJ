@@ -323,6 +323,6 @@ const oauthService = {
   isOAuthConnectedToAnotherUser,
   upsertOAuthConnection,
   removeOAuthConnection,
-}
+} as const
 
 export default oauthService

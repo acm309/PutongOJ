@@ -139,6 +139,6 @@ const testcaseController = {
   createTestcase,
   fetchTestcase,
   removeTestcase,
-}
+} as const
 
 export default testcaseController

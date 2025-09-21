@@ -296,6 +296,6 @@ const problemController = {
   updateProblem,
   removeProblem,
   getStatistics,
-}
+} as const
 
 export default problemController

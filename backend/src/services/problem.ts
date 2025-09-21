@@ -207,6 +207,6 @@ const problemService = {
   updateProblem,
   removeProblem,
   getStatistics,
-}
+} as const
 
 export default problemService

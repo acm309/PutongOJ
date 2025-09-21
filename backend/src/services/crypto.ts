@@ -136,6 +136,6 @@ const cryptoService = {
   revokeServerKeyPair,
   encryptData,
   decryptData,
-}
+} as const
 
 export default module.exports = cryptoService

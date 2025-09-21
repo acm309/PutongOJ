@@ -81,6 +81,6 @@ const tagService = {
   createTag,
   updateTag,
   removeTag,
-}
+} as const
 
 export default tagService

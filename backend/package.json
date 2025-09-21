@@ -26,10 +26,10 @@
     "start": "cross-env NODE_ENV=production node dist/app.js",
     "deploy:init": "cross-env NODE_ENV=production node setup.js",
     "deploy:start": "npx pm2 start pm2.config.json",
-    "pretest": "cross-env NODE_ENV=test ts-node test/pretest.js",
-    "test": "cross-env-shell NODE_ENV=test \"ts-node test/pretest.js && nyc ava && ts-node test/posttest.js\"",
+    "pretest": "cross-env NODE_ENV=test ts-node test/pretest.ts",
+    "test": "cross-env-shell NODE_ENV=test \"ts-node test/pretest.ts && nyc ava && ts-node test/posttest.ts\"",
     "report": "nyc report --reporter=html",
-    "posttest": "cross-env NODE_ENV=test ts-node test/posttest.js",
+    "posttest": "cross-env NODE_ENV=test ts-node test/posttest.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov"

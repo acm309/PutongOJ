@@ -469,6 +469,6 @@ const courseService = {
   moveCourseProblem,
   rearrangeCourseProblem,
   hasProblemRole,
-}
+} as const
 
 export default courseService

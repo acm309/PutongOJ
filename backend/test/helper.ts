@@ -10,8 +10,8 @@ import Solution from '../src/models/Solution'
 import Tag from '../src/models/Tag'
 import User from '../src/models/User'
 
-function removeall () {
-  return Promise.all([
+export async function removeall () {
+  await Promise.all([
     Contest.deleteMany({}),
     Course.deleteMany({}),
     CourseMember.deleteMany({}),
@@ -25,5 +25,3 @@ function removeall () {
     User.deleteMany({}),
   ])
 }
-
-export { removeall }

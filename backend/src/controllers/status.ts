@@ -9,8 +9,7 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
-import { only } from '../utils'
-import { purify } from '../utils/helper'
+import { only, purify } from '../utils'
 import logger from '../utils/logger'
 
 // 返回提交列表
@@ -220,9 +219,11 @@ const update = async (ctx: Context) => {
   }
 }
 
-export default {
+const statusController = {
   find,
   findOne,
   create,
   update,
-}
+} as const
+
+export default statusController

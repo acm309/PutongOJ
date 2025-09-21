@@ -378,6 +378,6 @@ const contestController = {
   updateContest,
   removeContest,
   verifyParticipant,
-}
+} as const
 
 export default contestController

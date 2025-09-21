@@ -122,6 +122,6 @@ const oauthController = {
   generateOAuthUrl,
   handleOAuthCallback,
   getUserOAuthConnections,
-}
+} as const
 
 export default oauthController

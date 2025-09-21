@@ -163,6 +163,6 @@ const contestService = {
   updateContest,
   removeContest,
   getRanklist,
-}
+} as const
 
 export default contestService

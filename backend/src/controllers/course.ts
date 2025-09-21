@@ -313,6 +313,6 @@ const courseController = {
   addCourseProblems,
   moveCourseProblem,
   rearrangeCourseProblem,
-}
+} as const
 
 export default courseController

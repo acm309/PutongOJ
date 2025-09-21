@@ -28,6 +28,8 @@ const find = async (ctx: Context) => {
   }
 }
 
-export default {
+const ranklistController = {
   find,
-}
+} as const
+
+export default ranklistController

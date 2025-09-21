@@ -112,6 +112,6 @@ const tagController = {
   createTag,
   updateTag,
   removeTag,
-}
+} as const
 
 export default tagController

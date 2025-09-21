@@ -75,6 +75,6 @@ const sessionController = {
   userLogin,
   logout,
   profile,
-}
+} as const
 
 export default sessionController

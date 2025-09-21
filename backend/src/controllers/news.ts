@@ -111,11 +111,13 @@ const del = async (ctx: Context) => {
   ctx.body = {}
 }
 
-export default {
+const newsController = {
   preload,
   find,
   findOne,
   create,
   update,
   del,
-}
+} as const
+
+export default newsController

@@ -1,30 +1,25 @@
-require('dotenv-flow').config()
-require('../src/config/db')
-const process = require('node:process')
-
-const Contest = require('../src/models/Contest')
-const Course = require('../src/models/Course')
-const Discuss = require('../src/models/Discuss')
-const Group = require('../src/models/Group')
-const ID = require('../src/models/ID')
-const News = require('../src/models/News')
-const Problem = require('../src/models/Problem')
-const Solution = require('../src/models/Solution')
+import process from 'node:process'
+import Contest from '../src/models/Contest'
+import Course from '../src/models/Course'
+import Discuss from '../src/models/Discuss'
+import Group from '../src/models/Group'
+import ID from '../src/models/ID'
+import News from '../src/models/News'
+import Problem from '../src/models/Problem'
+import Solution from '../src/models/Solution'
 // const Tag = require('../src/models/Tag')
-const User = require('../src/models/User')
-
-const { generatePwd } = require('../src/utils')
-const { removeall } = require('./helper')
-
-const { contestSeeds } = require('./seeds/contest')
-const { courseSeeds } = require('./seeds/course')
-const { discussSeeds } = require('./seeds/discuss')
-const { groupSeeds } = require('./seeds/group')
-const { newsSeeds } = require('./seeds/news')
-const { problemSeeds } = require('./seeds/problem')
-const { solutionSeeds } = require('./seeds/solution')
+import User from '../src/models/User'
+import { generatePwd } from '../src/utils'
+import { removeall } from './helper'
+import { contestSeeds } from './seeds/contest'
+import { courseSeeds } from './seeds/course'
+import { discussSeeds } from './seeds/discuss'
+import { groupSeeds } from './seeds/group'
+import { newsSeeds } from './seeds/news'
+import { problemSeeds } from './seeds/problem'
+import { solutionSeeds } from './seeds/solution'
 // const { tagSeeds } = require('./seeds/tag')
-const { userSeeds } = require('./seeds/user')
+import { userSeeds } from './seeds/user'
 
 async function main () {
   await removeall()
@@ -76,12 +71,12 @@ async function main () {
   const userInsert = Promise.all(
     Object.values(userSeeds).map((user) => {
       return new User(Object.assign(user, {
-        pwd: generatePwd(user.pwd),
+        pwd: generatePwd(user.pwd!),
       })).save()
     }),
   )
 
-  return Promise.all([
+  await Promise.all([
     contestInsert,
     courseInsert,
     discussInsert,
