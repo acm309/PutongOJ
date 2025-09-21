@@ -1,5 +1,6 @@
-import type { Context } from 'node:vm'
+import type { Context } from 'koa'
 import config from '../config'
+import { loadProfile } from '../middlewares/authn'
 import News from '../models/News'
 import { only } from '../utils'
 import logger from '../utils/logger'
@@ -25,11 +26,11 @@ const preload = async (ctx: Context, next: () => Promise<any>) => {
  */
 const find = async (ctx: Context) => {
   const opt = ctx.request.query
-  const page = Number.parseInt(opt.page) || 1
-  const pageSize = Number.parseInt(opt.pageSize) || 5
+  const page = Number.parseInt(opt.page as string) || 1
+  const pageSize = Number.parseInt(opt.pageSize as string) || 5
 
   const filter: Record<string, any> = {}
-  if (!ctx.session.profile?.isAdmin) {
+  if (!ctx.state.profile?.isAdmin) {
     filter.status = config.status.Available
   }
 
@@ -55,7 +56,7 @@ const findOne = async (ctx: Context) => {
 // 新建一条消息
 const create = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { profile: { uid } } = ctx.state
+  const { uid } = await loadProfile(ctx)
   const news = new News(Object.assign(
     only(opt, 'title content'),
     { // nid 会自动生成
@@ -79,7 +80,7 @@ const create = async (ctx: Context) => {
 const update = async (ctx: Context) => {
   const opt = ctx.request.body
   const news = ctx.state.news
-  const { profile: { uid } } = ctx.state
+  const { uid } = await loadProfile(ctx)
   const fields = [ 'title', 'content', 'status' ]
   fields.forEach((field) => {
     news[field] = opt[field]
@@ -99,7 +100,7 @@ const update = async (ctx: Context) => {
 // 删除一条消息
 const del = async (ctx: Context) => {
   const nid = ctx.params.nid
-  const { profile: { uid } } = ctx.state
+  const { uid } = await loadProfile(ctx)
 
   try {
     await News.deleteOne({ nid }).exec()
