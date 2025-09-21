@@ -67,12 +67,6 @@ const authnMiddleware = {
   loginRequire,
   adminRequire,
   rootRequire,
-  /** @deprecated Use loginRequire */
-  login: loginRequire,
-  /** @deprecated Use adminRequire */
-  admin: adminRequire,
-  /** @deprecated Use rootRequire */
-  root: rootRequire,
 }
 
 export default authnMiddleware

@@ -6,18 +6,10 @@ import constants from '../utils/constants'
 
 dotenvFlow.config()
 
-interface GlobalConfig {
-  port: number
-  mongodbURL: string
-  redisURL: string
-  secretKey: string
-  oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
-}
-
 function stringEnv (name: string): string | undefined
 function stringEnv (name: string, defaultValue: string | (() => string)): string
 function stringEnv (name: string, defaultValue?: string | (() => string)): string | undefined {
-  const value = env[name]
+  const value = env[name]?.trim()
   if (value === undefined || value === '') {
     return typeof defaultValue === 'function' ? defaultValue() : defaultValue
   }
@@ -27,7 +19,7 @@ function stringEnv (name: string, defaultValue?: string | (() => string)): strin
 function numberEnv (name: string): number | undefined
 function numberEnv (name: string, defaultValue: number): number
 function numberEnv (name: string, defaultValue?: number): number | undefined {
-  const value = env[name]
+  const value = env[name]?.trim()
   if (value === undefined || value === '') {
     return defaultValue
   }
@@ -41,7 +33,7 @@ function numberEnv (name: string, defaultValue?: number): number | undefined {
 function booleanEnv (name: string): boolean | undefined
 function booleanEnv (name: string, defaultValue: boolean): boolean
 function booleanEnv (name: string, defaultValue?: boolean): boolean | undefined {
-  const value = env[name]
+  const value = env[name]?.trim()
   if (value === undefined || value === '') {
     return defaultValue
   }
@@ -52,6 +44,21 @@ function booleanEnv (name: string, defaultValue?: boolean): boolean | undefined 
     return false
   }
   return defaultValue
+}
+
+interface GlobalConfig {
+  port: number
+  mongodbURL: string
+  redisURL: string
+  secretKey: string
+  reverseProxy: {
+    enabled: boolean
+    forwardLimit: number
+    forwardedForHeader: string
+    trustedProxies: string[]
+  }
+  disableRateLimit: boolean
+  oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
 }
 
 const oauthConfigs: GlobalConfig['oauthConfigs'] = {
@@ -65,18 +72,50 @@ const oauthConfigs: GlobalConfig['oauthConfigs'] = {
   },
 }
 
-if (
-  !oauthConfigs.CJLU.clientId || !oauthConfigs.CJLU.clientSecret
-  || !oauthConfigs.CJLU.redirectUri || !oauthConfigs.CJLU.authserverURL
-) {
-  oauthConfigs.CJLU.enabled = false
+for (const [ provider, config ] of Object.entries(oauthConfigs)) {
+  if (config.enabled) {
+    if (!config.clientId || !config.clientSecret || !config.redirectUri || !config.authserverURL) {
+      throw new Error(`OAuth provider ${provider} is enabled but not configured properly.`)
+    }
+  }
 }
 
 export const globalConfig: GlobalConfig = {
   port: numberEnv('PTOJ_WEB_PORT', 3000),
-  mongodbURL: stringEnv('PTOJ_MONGODB_URL', 'mongodb://localhost:27017/oj'),
-  redisURL: stringEnv('PTOJ_REDIS_URL', 'redis://localhost:6379'),
-  secretKey: stringEnv('PTOJ_SECRET_KEY', () => randomBytes(16).toString('hex')),
+  mongodbURL: stringEnv(
+    'PTOJ_MONGODB_URL',
+    'mongodb://localhost:27017/oj',
+  ),
+  redisURL: stringEnv(
+    'PTOJ_REDIS_URL',
+    'redis://localhost:6379',
+  ),
+  secretKey: stringEnv(
+    'PTOJ_SECRET_KEY',
+    () => randomBytes(16).toString('hex'),
+  ),
+  reverseProxy: {
+    enabled: booleanEnv(
+      'PTOJ_REVERSE_PROXY_ENABLED',
+      false,
+    ),
+    forwardLimit: numberEnv(
+      'PTOJ_REVERSE_PROXY_FORWARD_LIMIT',
+      1,
+    ),
+    forwardedForHeader: stringEnv(
+      'PTOJ_REVERSE_PROXY_FORWARDED_FOR_HEADER',
+      'X-Forwarded-For',
+    ),
+    trustedProxies: stringEnv(
+      'PTOJ_REVERSE_PROXY_TRUSTED_PROXIES',
+      '',
+    ).split(',').map(s => s.trim()).filter(s => s.length > 0),
+  },
+  disableRateLimit: booleanEnv(
+    'PTOJ_DISABLE_RATE_LIMIT',
+    false,
+  ),
   oauthConfigs,
 }
 

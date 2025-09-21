@@ -8,7 +8,8 @@ import 'koa'
 
 declare module 'koa' {
   interface DefaultState {
-    requestId?: string
+    clientIp: string
+    requestId: string
     authnChecked?: boolean
     contest?: ContestDocument
     course?: CourseDocument

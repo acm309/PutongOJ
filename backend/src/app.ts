@@ -8,6 +8,7 @@ import { createSession as session } from 'koa-session'
 import staticServe from 'koa-static'
 import config from './config'
 import setup from './config/setup'
+import { parseClientIp } from './middlewares'
 import authnMiddleware from './middlewares/authn'
 import router from './routes'
 import logger from './utils/logger'
@@ -21,6 +22,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.keys = [ config.secretKey ]
+
+app.use(parseClientIp)
 
 app.use(session({
   key: 'koa:oj:sess',
@@ -54,7 +57,7 @@ app.use(async (ctx, next) => {
   try {
     await next()
   } catch (err: any) {
-    const { requestId = 'unknown' } = ctx.state
+    const { requestId } = ctx.state
     ctx.status = err.status || 500
     ctx.body = { error: err.message }
     if (err.status) {
