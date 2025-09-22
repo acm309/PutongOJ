@@ -82,4 +82,4 @@ const Discuss
     'Discuss', discussSchema,
   )
 
-export default module.exports = Discuss
+export default Discuss

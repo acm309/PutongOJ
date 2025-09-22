@@ -117,4 +117,4 @@ const User: UserModel
     'User', userSchema,
   )
 
-export default module.exports = User
+export default User

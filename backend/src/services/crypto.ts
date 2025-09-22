@@ -138,4 +138,4 @@ const cryptoService = {
   decryptData,
 } as const
 
-export default module.exports = cryptoService
+export default cryptoService

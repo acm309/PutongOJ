@@ -160,4 +160,4 @@ const Solution
     'Solution', solutionSchema,
   )
 
-export default module.exports = Solution
+export default Solution

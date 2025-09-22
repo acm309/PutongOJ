@@ -55,5 +55,9 @@ idSchema.statics.generateId = async function (field: string): Promise<number> {
   return result.id
 }
 
-export default module.exports
-  = mongoose.model<IdDocument, IdModel>('ids', idSchema)
+const ID
+  = mongoose.model<IdDocument, IdModel>(
+    'ids', idSchema,
+  )
+
+export default ID

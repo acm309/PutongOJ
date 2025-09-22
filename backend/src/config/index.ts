@@ -126,4 +126,4 @@ const config = {
   ...constants,
 } as const
 
-export default module.exports = config
+export default config

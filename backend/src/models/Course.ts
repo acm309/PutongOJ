@@ -88,4 +88,4 @@ const Course
     'Course', courseSchema,
   )
 
-export default module.exports = Course
+export default Course

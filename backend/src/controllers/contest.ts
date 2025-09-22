@@ -1,6 +1,6 @@
 import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
-import type { ContestDocument } from '../models/Contest'
+import type { ContestDocumentPopulated } from '../models/Contest'
 import type { SessionProfile } from '../types'
 import { pick } from 'lodash'
 import redis from '../config/redis'
@@ -21,7 +21,7 @@ const { encrypt, judge } = constants
 export async function loadContest (
   ctx: Context,
   inputId?: string | number,
-): Promise<ContestDocument> {
+): Promise<ContestDocumentPopulated> {
   const contestId = Number(
     inputId || ctx.params.cid || ctx.request.query.cid,
   )

@@ -41,4 +41,4 @@ const CourseProblem
     'CourseProblem', courseProblemSchema,
   )
 
-export default module.exports = CourseProblem
+export default CourseProblem

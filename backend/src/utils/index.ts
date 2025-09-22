@@ -70,7 +70,7 @@ export function createErrorResponse (ctx: Context, message: string): void {
   }
 }
 
-export default module.exports = {
+export default {
   parsePaginateOption,
   generatePwd,
   isComplexPwd,

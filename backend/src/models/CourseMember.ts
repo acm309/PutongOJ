@@ -97,4 +97,4 @@ const CourseMember
     'CourseMember', courseMemberSchema,
   )
 
-export default module.exports = CourseMember
+export default CourseMember

@@ -1,11 +1,16 @@
 import type { Document, PaginateModel } from 'mongoose'
 import type { ContestEntity } from '../types/entity'
+import type { CourseDocument } from './Course'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import constants from '../utils/constants'
 import ID from './ID'
 
 export interface ContestDocument extends Document, ContestEntity {}
+
+export interface ContestDocumentPopulated extends ContestDocument {
+  course: CourseDocument | null
+}
 
 type ContestModel = PaginateModel<ContestDocument>
 
@@ -121,4 +126,4 @@ const Contest
     'Contest', contestSchema,
   )
 
-export default module.exports = Contest
+export default Contest

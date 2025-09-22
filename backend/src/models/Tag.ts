@@ -78,4 +78,4 @@ const Tag
     'Tag', tagSchema,
   )
 
-export default module.exports = Tag
+export default Tag

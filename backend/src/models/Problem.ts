@@ -136,4 +136,4 @@ const Problem
     'Problem', problemSchema,
   )
 
-export default module.exports = Problem
+export default Problem

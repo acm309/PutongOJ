@@ -64,4 +64,4 @@ const News
     'News', newsSchema,
   )
 
-export default module.exports = News
+export default News

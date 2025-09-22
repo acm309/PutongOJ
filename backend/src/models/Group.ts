@@ -51,4 +51,4 @@ const Group
     'Group', groupSchema,
   )
 
-export default module.exports = Group
+export default Group

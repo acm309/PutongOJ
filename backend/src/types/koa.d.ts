@@ -1,5 +1,5 @@
 import type { CourseRole, SessionProfile } from '.'
-import type { ContestDocument } from '../models/Contest'
+import type { ContestDocumentPopulated } from '../models/Contest'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { TagDocument } from '../models/Tag'
@@ -11,7 +11,7 @@ declare module 'koa' {
     clientIp: string
     requestId: string
     authnChecked?: boolean
-    contest?: ContestDocument
+    contest?: ContestDocumentPopulated
     course?: CourseDocument
     courseRole?: CourseRole
     problem?: ProblemDocumentPopulated
