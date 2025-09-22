@@ -22,13 +22,20 @@ export function timeagoPretty (time: number | string) {
   return formatDistanceToNow(toDate(Number(time)))
 }
 
-export function timeContest (time: number) {
-  const h = Math.floor(time / (60 * 60))
-  const m = Math.floor((time - h * 60 * 60) / 60)
-  const s = Math.floor(time - h * 60 * 60 - m * 60)
-  const ss = `${s}`.padStart(2, '0')
-  const mm = `${m}`.padStart(2, '0')
-  return `${h}:${mm}:${ss}`
+export function timeContest (remainSeconds: number): string {
+  if (remainSeconds <= 0) {
+    return '00:00:00'
+  }
+
+  const hours = Math.floor(remainSeconds / (60 * 60))
+  const minutes = Math.floor((remainSeconds % (60 * 60)) / 60)
+  const seconds = Math.floor(remainSeconds % 60)
+
+  const paddedHours = String(hours).padStart(2, '0')
+  const paddedMinutes = String(minutes).padStart(2, '0')
+  const paddedSeconds = String(seconds).padStart(2, '0')
+
+  return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`
 }
 
 export function timeDiffPretty (ms: number) {

@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { Card, Poptip, Progress, Tabs } from 'view-ui-plus'
+import { Card, Icon, Poptip, Progress, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -48,8 +48,20 @@ const progressStatus = $computed(() => {
   return 'normal'
 })
 const contestCountdown = $computed(() => {
-  if (currentTime < contest.start) return timeContest((contest.start - currentTime) / 1000)
-  if (currentTime < contest.end) return timeContest((contest.end - currentTime) / 1000)
+  if (currentTime < contest.start) {
+    const startsIn = Math.ceil((contest.start - currentTime) / 1000)
+    if (startsIn >= 1000 * 60 * 60) {
+      return t('oj.contest_start_long')
+    }
+    return timeContest(startsIn)
+  }
+  if (currentTime < contest.end) {
+    const endsIn = Math.ceil((contest.end - currentTime) / 1000)
+    if (endsIn >= 1000 * 60 * 60) {
+      return t('oj.contest_last_long')
+    }
+    return timeContest(endsIn)
+  }
   return t('oj.contest_ended')
 })
 
@@ -58,6 +70,13 @@ function handleClick (name) {
     router.push({ name, params: { cid: route.params.cid, id: route.params.id || 1 } })
   else
     router.push({ name, params: { cid: route.params.cid } })
+}
+
+function jumpToCourse () {
+  if (!contest.course) {
+    return
+  }
+  router.push({ name: 'courseContests', params: { id: contest.course.courseId } })
 }
 
 async function fetch () {
@@ -80,6 +99,14 @@ onProfileUpdate(fetch)
       'contest-status-wrap': $route.name === 'contestStatus',
     }"
   >
+    <div v-if="contest.course" class="contest-back-course">
+      <Space class="contest-back-content" @click="jumpToCourse">
+        <Icon class="contest-back-icon" type="md-arrow-back" />
+        <span>
+          {{ contest.course.name }}
+        </span>
+      </Space>
+    </div>
     <Poptip class="contest-poptip" trigger="hover" placement="bottom">
       <Card class="contest-card" dis-hover>
         <div class="contest-info">
@@ -153,6 +180,19 @@ onProfileUpdate(fetch)
   text-align center
   font-family var(--font-verdana)
 
+.contest-back-course
+  padding 15px 40px
+  border-bottom 1px solid #dcdee2
+  font-size 16px
+  transition padding 0.2s ease
+  .contest-back-content
+    cursor pointer
+    &:hover
+      color var(--oj-primary-color)
+    transition color 0.2s ease
+  .contest-back-icon
+    font-size 20px
+
 .contest-card
   margin 40px 40px 24px
   .contest-info
@@ -184,14 +224,18 @@ onProfileUpdate(fetch)
         display block
 
 @media screen and (max-width: 1024px)
+  .contest-back-course
+    padding 10px 20px
   .contest-card
     margin 20px 20px 12px
 
 @media screen and (max-width: 768px)
   .contest-card
     .contest-info
-      padding 8px 20px 20px
+      padding 0 4px 8px
       font-size 14px
+      .contest-status
+        padding 0 20px
 
 .contest-wrap
   padding 0

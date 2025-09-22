@@ -202,6 +202,7 @@
   "error_500": "Σ(;ﾟдﾟ) 服务器崩坏，需要联系管理员维修",
   "error_403": "╮(╯_╰)╭ 你没有相关权限进行此操作",
   "error_401": "(〃∀〃) 请先登录",
+  "error_429": "ヽ(￣～￣)ノ 请求过多，请稍后再试",
   "lose_connection": "_(:з」∠)_ 网络异常，检查你的网线",
   "all": "全部",
   "search_by_username": "按用户名搜索",
@@ -307,5 +308,7 @@
   "sample_testcase_created": "成功创建示例数据测试用例！",
   "notice": "提醒",
   "sample_input_output_incomplete": "示例输入和输出不完整，继续操作？",
-  "creation_cancelled": "创建已取消！"
+  "creation_cancelled": "创建已取消！",
+  "contest_start_long": "比赛还有很久才开始",
+  "contest_last_long": "比赛还会持续很久"
 }

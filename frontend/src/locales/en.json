@@ -308,5 +308,7 @@
   "sample_testcase_created": "Successfully created sample data testcase!",
   "notice": "Notice",
   "sample_input_output_incomplete": "Sample input and output are incomplete, continue?",
-  "creation_cancelled": "Creation cancelled!"
+  "creation_cancelled": "Creation cancelled!",
+  "contest_start_long": "Still a long way off",
+  "contest_last_long": "Will last for a long time"
 }
