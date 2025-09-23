@@ -313,7 +313,7 @@ const verifyParticipant = async (ctx: Context) => {
   }
   const session = ctx.session.profile as SessionProfile
   const profile = await loadProfile(ctx)
-  const contest = await Contest.findOne({ cid })
+  const contest = await contestService.getContest(cid)
   if (!contest) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
