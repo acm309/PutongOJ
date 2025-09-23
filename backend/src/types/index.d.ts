@@ -1,4 +1,5 @@
 import type { contestLabelingStyle } from '../utils/constants'
+import type { ErrorCode } from '../utils/error'
 
 export interface CourseRole {
   basic: boolean
@@ -36,6 +37,7 @@ export interface Paginated<T> {
 
 export interface Enveloped<T = any> {
   success: boolean
+  code: ErrorCode
   message: string
   data: T | null
   requestId: string

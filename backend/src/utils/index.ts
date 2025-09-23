@@ -2,6 +2,7 @@ import type { Context } from 'koa'
 import type { Enveloped, PaginateOption } from '../types'
 import crypto from 'node:crypto'
 import { pick, pickBy } from 'lodash'
+import { ErrorCode } from './error'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -51,19 +52,25 @@ export function purify (obj: Record<string, any>) {
 }
 
 export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
-  const requestId = ctx.state.requestId || 'unknown'
+  const { requestId } = ctx.state
   ctx.body = <Enveloped<T>>{
     success: true,
+    code: ErrorCode.OK,
     message: 'OK',
     data,
     requestId,
   }
 }
 
-export function createErrorResponse (ctx: Context, message: string): void {
-  const requestId = ctx.state.requestId || 'unknown'
+export function createErrorResponse (
+  ctx: Context,
+  message: string,
+  code: ErrorCode = ErrorCode.BadRequest,
+): void {
+  const { requestId } = ctx.state
   ctx.body = <Enveloped<null>>{
     success: false,
+    code,
     message,
     data: null,
     requestId,
