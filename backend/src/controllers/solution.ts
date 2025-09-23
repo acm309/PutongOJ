@@ -219,11 +219,11 @@ const update = async (ctx: Context) => {
   }
 }
 
-const statusController = {
+const solutionController = {
   find,
   findOne,
   create,
   update,
 } as const
 
-export default statusController
+export default solutionController
