@@ -1,25 +1,28 @@
+import type { ContestEntityView } from '@backend/types/entity'
 import type { Cell } from 'exceljs'
-import type { ContestDetail, Ranklist, RawRanklist } from '@/types'
+import type { Ranklist, RawRanklist } from '@/types'
 import { contestLabeling } from './formate'
 
-const PENALTY = 20 * 60 // 失败提交罚时 20 分钟
+const PENALTY = 20 // 失败提交罚时 20 分钟
 
-export function normalize (ranklist: RawRanklist, contest: ContestDetail): Ranklist {
+export function normalize (ranklist: RawRanklist, contest: ContestEntityView): Ranklist {
   const list: Ranklist = [] // 结果
 
   Object.keys(ranklist).forEach((uid) => {
     const row = ranklist[uid]
-    let solved = 0 // 记录 ac 几道题
-    let penalty = 0 // 罚时，尽在 ac 时计算
+    let solved = 0 // 记录 AC 几道题
+    let penalty = 0 // 罚时（分钟），仅在 AC 时计算
     for (const pid of contest.list) {
       if (row[pid] == null) continue // 这道题没有交过
       const submission = row[pid]
-      if (submission.acceptedAt) { // ac 了
+      if (submission.acceptedAt) {
         solved++
-        penalty += submission.acceptedAt + submission.failed * PENALTY
+        penalty += Math.max(0, Math.floor((submission.acceptedAt - contest.start) / 1000 / 60))
+        penalty += submission.failed * PENALTY
       }
     }
     list.push({
+      rank: -1, // 先占位，后面会重新计算排名
       uid,
       solved,
       penalty,
@@ -27,17 +30,37 @@ export function normalize (ranklist: RawRanklist, contest: ContestDetail): Rankl
     })
   })
 
-  // 排序, 先按照 solved, 在按照 penalty
+  // 排序, 先按照 solved 降序，再按照 penalty 升序，最后按照 uid 升序
   list.sort((x, y) => {
-    if (x.solved !== y.solved)
-      return -(x.solved - y.solved)
-    return x.penalty - y.penalty
+    if (x.solved !== y.solved) {
+      return y.solved - x.solved
+    }
+    if (x.penalty !== y.penalty) {
+      return x.penalty - y.penalty
+    }
+    return x.uid.localeCompare(y.uid)
   })
 
-  // 接下来计算 primes
-  const quickest: Record<number, number> = {} // 每到题最早提交的 ac 时间
-  for (const pid of contest.list)
-    quickest[pid] = Number.POSITIVE_INFINITY // init
+  // 重新计算排名
+  let currentRank = 0
+  let calculated = 0
+  let lastSolved = -1
+  let lastPenalty = -1
+  list.forEach((row) => {
+    calculated++
+    if (row.solved !== lastSolved || row.penalty !== lastPenalty) {
+      currentRank = calculated
+      lastSolved = row.solved
+      lastPenalty = row.penalty
+    }
+    row.rank = currentRank
+  })
+
+  // 接下来计算每道题的最早提交
+  const quickest: Record<number, number> = {} // 每到题最早提交的 AC 时间
+  for (const pid of contest.list) {
+    quickest[pid] = Number.POSITIVE_INFINITY
+  }
 
   list.forEach((row) => {
     for (const pid of contest.list) {
@@ -58,11 +81,12 @@ export function normalize (ranklist: RawRanklist, contest: ContestDetail): Rankl
       }
     }
   })
+
   return list
 }
 
 export async function exportSheet (
-  contest: ContestDetail,
+  contest: ContestEntityView,
   ranklist: Ranklist,
 ): Promise<void> {
   const ExcelJS = await import('exceljs')
@@ -124,18 +148,21 @@ export async function exportSheet (
     })
   })
 
-  ranklist.forEach((row, rank) => {
+  ranklist.forEach((row) => {
     const excelRow = worksheet.addRow([
-      rank + 1,
+      row.rank,
       row.uid,
       row.nick || '',
       row.solved,
-      Math.floor(row.penalty / 60),
+      row.penalty,
       ...contest.list.map((pid) => {
         const status = row[pid]
         if (!status) return '-'
         if (!status.acceptedAt) return `-${status.failed}`
-        const time = Math.floor(status.acceptedAt / 60)
+        let time = '-'
+        if (status.acceptedAt >= contest.start) {
+          time = String(Math.floor((status.acceptedAt - contest.start) / 1000 / 60))
+        }
         return `+${status.failed > 0 ? status.failed : ''} (${time})`
       }),
     ])

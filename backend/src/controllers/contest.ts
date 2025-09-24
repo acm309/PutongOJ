@@ -293,8 +293,7 @@ const getRanklist = async (ctx: Context) => {
     return
   }
 
-  const ranklist = await contestService.getRanklist(
-    contest.cid, isFrozen, contest.start, freezeTime)
+  const ranklist = await contestService.getRanklist(contest.cid, isFrozen, freezeTime)
   const cacheTime = isEnded ? 30 : 9
   await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
   logger.info(

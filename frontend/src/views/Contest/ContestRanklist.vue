@@ -9,7 +9,7 @@ import { useRoute } from 'vue-router'
 import api from '@/api'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import { contestLabeling, timeContest, timePretty } from '@/utils/formate'
+import { contestLabeling, timePretty } from '@/utils/formate'
 import { exportSheet, normalize } from '@/utils/ranklist'
 
 const { t } = useI18n()
@@ -26,7 +26,7 @@ const ranklist = ref({} as Ranklist)
 const ranklistInfo = ref({} as RanklistInfo)
 const loading = ref(false)
 
-let autoRefresh: number | null = null
+let autoRefresh: any = null
 const AUTO_REFRESH_GAP = 10 * 1000
 
 async function getRanklist () {
@@ -56,6 +56,15 @@ function setAutoRefresh (enabled: boolean) {
 
 function clearAutoRefresh () {
   autoRefresh && clearInterval(autoRefresh)
+}
+
+function formateAcceptedAt (acceptedAt: number) {
+  if (acceptedAt < 0) {
+    return '--:--'
+  }
+  const hours = String(Math.floor(acceptedAt / 1000 / 60 / 60)).padStart(2, '0')
+  const minutes = String(Math.floor(acceptedAt / 1000 / 60) % 60).padStart(2, '0')
+  return `${hours}:${minutes}`
 }
 
 onBeforeMount(getRanklist)
@@ -118,9 +127,15 @@ onBeforeUnmount(clearAutoRefresh)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in ranklist" :key="item.uid">
+          <tr v-if="ranklist.length === 0" class="status-empty">
+            <td :colspan="5 + contest.list.length">
+              <Icon type="ios-planet-outline" class="empty-icon" />
+              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+            </td>
+          </tr>
+          <tr v-for="(item, index) in ranklist" :key="index">
             <td class="table-rank">
-              {{ index + 1 }}
+              {{ item.rank }}
             </td>
             <td class="table-uid">
               <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
@@ -134,7 +149,7 @@ onBeforeUnmount(clearAutoRefresh)
               {{ item.solved }}
             </td>
             <td class="table-penalty">
-              {{ timeContest(item.penalty) }}
+              {{ item.penalty }}
             </td>
             <template v-for="(pid, pindex) in contest.list">
               <td v-if="!item[pid]" :key="`${pid} ${1}`" class="table-problem" />
@@ -147,7 +162,7 @@ onBeforeUnmount(clearAutoRefresh)
                 >
                   <span class="cell-accept">{{ item[pid].failed > 0 ? `+${item[pid].failed}` : '+' }}</span>
                   <span class="cell-time">
-                    {{ timeContest(item[pid].acceptedAt) }}
+                    {{ formateAcceptedAt(item[pid].acceptedAt - contest.start) }}
                   </span>
                 </router-link>
               </td>
@@ -268,4 +283,16 @@ td.table-solve, td.table-penalty
 .prime, .normal
   .cell-accept, .cell-time
     color white
+
+.status-empty
+  &:hover
+    background-color transparent !important
+  td
+    margin-bottom 20px
+    padding 32px !important
+    border-radius 4px
+    text-align center
+    .empty-icon
+      display block
+      font-size 32px
 </style>

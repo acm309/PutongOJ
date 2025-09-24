@@ -80,6 +80,7 @@ export interface RanklistInfo {
 }
 
 export interface RanklistRow {
+  rank: number
   uid: string
   nick: string
   solved: number

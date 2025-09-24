@@ -87,7 +87,6 @@ export async function removeContest (cid: number): Promise<boolean> {
 export async function getRanklist (
   cid: number,
   isFrozen: boolean = false,
-  startTime: number = 0,
   freezeTime: number = 0,
 ): Promise<ContestRanklist> {
   const ranklist = {} as ContestRanklist
@@ -102,7 +101,10 @@ export async function getRanklist (
 
   solutions.forEach((solution: SolutionEntity) => {
     const { pid, uid, judge: judgement, createdAt } = solution
-    const createdTS = new Date(createdAt).getTime()
+    if (judgement === judge.CompileError || judgement === judge.SystemError || judgement === judge.Skipped) {
+      // 如果是 Compile Error / System Error /  Skipped 视为不计入任何结果
+      return
+    }
 
     if (!ranklist[uid]) {
       ranklist[uid] = { nick: '' }
@@ -114,25 +116,27 @@ export async function getRanklist (
         pending: 0, // 无结果的提交计数
       }
     }
+
+    const createdTimestamp = new Date(createdAt).getTime()
     const item = ranklist[uid][pid]
 
     if (item.acceptedAt) {
       // 已经有正确提交了则不需要再更新了
       return
     }
-    if (isFrozen && createdTS >= freezeTime) {
+    if (isFrozen && createdTimestamp >= freezeTime) {
       // 封榜时间内的提交视为无结果
       item.pending += 1
       return
     }
-    if (judgement === judge.Pending || judgement === judge.Running) {
+    if (judgement === judge.Pending || judgement === judge.RejudgePending || judgement === judge.Running) {
       // 如果是 Pending / Running 视为无结果
       item.pending += 1
       return
     }
     if (judgement === judge.Accepted) {
       // 如果是 Accepted 视为正确提交
-      item.acceptedAt = Math.floor((createdTS - startTime) / 1000)
+      item.acceptedAt = createdTimestamp
     } else {
       // 否则视为错误提交
       item.failed += 1
