@@ -3,7 +3,7 @@ import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { OAuthEntityUserView } from '@backend/models/OAuth'
 import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
 import type { CourseRole, Enveloped, Paginated, SessionProfile } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
 import type { LoginParam, Profile, TimeResp, User } from '@/types'
 import axios from 'axios'
@@ -76,6 +76,8 @@ const solution = {
     instance.get('/status/list', { params: data }),
   create: (data: { [key: string]: any }) =>
     instance.post('/status', data),
+  updateSolution: (solutionId: number, data: { judge: number }) =>
+    instance.put<Enveloped<SolutionEntity>>(`/status/${solutionId}`, data),
 }
 
 const problem = {

@@ -16,7 +16,7 @@ solutionRouter.get('/:sid',
 )
 solutionRouter.put('/:sid',
   authnMiddleware.rootRequire,
-  solutionController.update,
+  solutionController.updateSolution,
 )
 solutionRouter.post('/',
   authnMiddleware.loginRequire,

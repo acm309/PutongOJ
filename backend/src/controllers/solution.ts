@@ -3,13 +3,14 @@ import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { pick } from 'lodash'
-import config from '../config'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
-import { only, purify } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, only, purify } from '../utils'
+import { judgeResult } from '../utils/constants'
+import { ErrorCode } from '../utils/error'
 import logger from '../utils/logger'
 
 // 返回提交列表
@@ -157,34 +158,63 @@ const create = async (ctx: Context) => {
   }
 }
 
-/**
- * 重测一个提交
- */
-const update = async (ctx: Context) => {
-  const opt = ctx.request.body
+async function updateSolution (ctx: Context) {
   const profile = await loadProfile(ctx)
-  if (opt.judge !== config.judge.RejudgePending) {
-    ctx.throw(400, 'Invalid update')
+  const opt = ctx.request.body
+
+  const sid = Number(ctx.params.sid)
+  if (!Number.isInteger(sid) || sid <= 0) {
+    return createErrorResponse(ctx,
+      'Invalid submission id',
+      ErrorCode.BadRequest,
+    )
+  }
+  const updatedJudge = Number(opt.judge)
+  if (updatedJudge !== judgeResult.RejudgePending && updatedJudge !== judgeResult.Skipped) {
+    return createErrorResponse(ctx,
+      'Invalid judge status, only support RejudgePending and Skipped',
+      ErrorCode.BadRequest,
+    )
   }
 
-  const sid = Number.parseInt(ctx.params.sid)
-  const solution = await Solution.findOne({ sid }).exec()
+  const solution = await Solution.findOne({ sid })
   if (!solution) {
-    ctx.throw(400, 'No such a solution')
+    return createErrorResponse(ctx,
+      'Solution not found',
+      ErrorCode.NotFound,
+    )
   }
-
   const pid = solution.pid
-  const problem = await Problem.findOne({ pid }).lean().exec()
+  const problem = await Problem.findOne({ pid })
   if (!problem) {
-    ctx.throw(400, 'No such a problem')
+    return createErrorResponse(ctx,
+      'Problem of the solution not found',
+      ErrorCode.NotFound,
+    )
   }
 
   try {
-    solution.judge = config.judge.RejudgePending
+    solution.judge = updatedJudge
+    solution.time = 0
+    solution.memory = 0
+    solution.error = ''
     solution.sim = 0
     solution.sim_s_id = 0
-    await solution.save()
+    solution.testcases = []
 
+    await solution.save()
+  } catch (e: any) {
+    return createErrorResponse(ctx,
+      e.message || 'Failed to update the solution',
+      ErrorCode.InternalServerError,
+    )
+  }
+
+  if (updatedJudge !== judgeResult.RejudgePending) {
+    return createEnvelopedResponse(ctx, solution)
+  }
+
+  try {
     const timeLimit = problem.time
     const memoryLimit = problem.memory
     const type = problem.type
@@ -212,18 +242,21 @@ const update = async (ctx: Context) => {
 
     redis.rpush('judger:task', JSON.stringify(submission))
     logger.info(`Submission <${sid}> is called for rejudge by user <${profile.uid}>`)
-
-    ctx.body = only(solution, 'sid judge')
   } catch (e: any) {
-    ctx.throw(400, e.message)
+    return createErrorResponse(ctx,
+      e.message || 'Failed to push the solution to judger queue',
+      ErrorCode.InternalServerError,
+    )
   }
+
+  return createEnvelopedResponse(ctx, solution)
 }
 
 const solutionController = {
   find,
   findOne,
   create,
-  update,
+  updateSolution,
 } as const
 
 export default solutionController

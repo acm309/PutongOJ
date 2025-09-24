@@ -5,8 +5,8 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
 import { storeToRefs } from 'pinia'
-import { Badge, Button, Card, Divider, Icon, Poptip, Space, Spin } from 'view-ui-plus'
-import { inject } from 'vue'
+import { Button, ButtonGroup, Col, Divider, Icon, Numeral, Poptip, Row, Space, Spin } from 'view-ui-plus'
+import { inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -31,12 +31,13 @@ const color = $ref(constant.color)
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
 const root = useRootStore()
-const { findOne } = solutionStore
+const { findOne, updateSolution } = solutionStore
 const { solution } = $(storeToRefs(solutionStore))
-const { isAdmin } = storeToRefs(session)
+const { isAdmin, isRoot } = storeToRefs(session)
 const route = useRoute()
 
 const $Message = inject('$Message')
+const $Modal = inject('$Modal')
 const { copy } = useClipboard()
 
 let loading = $ref(false)
@@ -60,45 +61,121 @@ async function fetch () {
   loading = false
 }
 
+const showRefresh = ref(false)
+
+async function rejudge () {
+  if (!isRoot.value) {
+    return
+  }
+  $Modal.confirm({
+    title: 'Rejudge this solution?',
+    content: 'This action will rejudge this solution using the latest problem data. '
+      + 'All previous results will be truncated.',
+    onOk: async () => {
+      loading = true
+      const res = await updateSolution({ judge: 11 })
+      if (res.success) {
+        $Message.success('Rejudge request sent')
+      } else {
+        $Message.error(res.message || 'Failed to send rejudge request')
+      }
+      showRefresh.value = true
+      loading = false
+    },
+    okText: t('oj.ok'),
+    cancelText: t('oj.cancel'),
+  })
+}
+
+async function markAsSkipped () {
+  if (!isRoot.value) {
+    return
+  }
+  $Modal.confirm({
+    title: 'Mark this solution as Skipped?',
+    content: 'This action will mark this solution as Skipped. '
+      + 'All previous results will be truncated.',
+    onOk: async () => {
+      loading = true
+      const res = await updateSolution({ judge: 12 })
+      if (res.success) {
+        $Message.success('Marked as Skipped')
+      } else {
+        $Message.error(res.message || 'Failed to mark as Skipped')
+      }
+      loading = false
+    },
+    okText: t('oj.ok'),
+    cancelText: t('oj.cancel'),
+  })
+}
+
 fetch()
 onRouteQueryUpdate(fetch)
 </script>
 
 <template>
   <div class="solution-wrap">
-    <Card class="solution-overview" dis-hover>
-      <div class="solution-result">
-        {{ result[solution.judge || 0] }}
-      </div>
-      <Space direction="vertical">
-        <Space class="solution-info" split wrap>
-          <span>
-            {{ t('oj.problem_label') }}
-            <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
-              {{ solution.pid }}
-            </router-link>
-          </span>
-          <span>
-            {{ t('oj.author_label') }}
-            <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
-              {{ solution.uid }}
-            </router-link>
-          </span>
-          <span v-if="solution.mid > 0">
-            {{ t('oj.contest_label') }}
-            <router-link :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
-              {{ solution.mid }}
-            </router-link>
-          </span>
+    <Row class="solution-header" justify="end">
+      <Col flex="auto" class="solution-header-col">
+        <h1 class="solution-result">
+          {{ result[solution.judge || 0] }}
+        </h1>
+        <Space direction="vertical">
+          <Space class="solution-info" split wrap>
+            <span>
+              {{ t('oj.problem_label') }}
+              <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
+                {{ solution.pid }}
+              </router-link>
+            </span>
+            <span>
+              {{ t('oj.author_label') }}
+              <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
+                {{ solution.uid }}
+              </router-link>
+            </span>
+            <span v-if="solution.mid > 0">
+              {{ t('oj.contest_label') }}
+              <router-link :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
+                {{ solution.mid }}
+              </router-link>
+            </span>
+          </Space>
+          <Space class="solution-info" split wrap>
+            <span>
+              {{ t('oj.time_label') }}
+              <Numeral :value="solution.time" format="0,0" /> <small>ms</small>
+            </span>
+            <span>
+              {{ t('oj.memory_label') }}
+              <Numeral :value="solution.memory" format="0,0" /> <small>KB</small>
+            </span>
+            <span>
+              {{ lang[solution.language] }}
+            </span>
+            <span>
+              {{ timePretty(solution.create) }}
+            </span>
+          </Space>
         </Space>
-        <Space class="solution-info" split wrap>
-          <span>{{ t('oj.time_label') }} {{ solution.time }}ms</span>
-          <span>{{ t('oj.memory_label') }} {{ solution.memory }}KB</span>
-          <span>{{ lang[solution.language] }}</span>
-          <span>{{ timePretty(solution.create) }}</span>
+      </Col>
+      <Col v-if="isRoot" flex="none" class="solution-header-col">
+        <Space direction="vertical">
+          <ButtonGroup style="float: right;">
+            <Button v-if="showRefresh" @click="fetch">
+              <Icon type="md-refresh" /> Refresh
+            </Button>
+            <Button type="primary" @click="rejudge">
+              <Icon type="md-redo" /> Rejudge
+            </Button>
+          </ButtonGroup>
+          <Button style="float: right;" @click="markAsSkipped">
+            <Icon type="md-flag" /> Mark as Skipped
+          </Button>
         </Space>
-      </Space>
-    </Card>
+      </Col>
+    </Row>
     <div class="testcase-table-container">
       <table class="testcase-table">
         <thead>
@@ -110,18 +187,10 @@ onRouteQueryUpdate(fetch)
               {{ t('oj.files') }}
             </th>
             <th class="testcase-time">
-              <Badge>
-                Time<template #count>
-                  <span class="testcase-badge">(ms)</span>
-                </template>
-              </Badge>
+              Time
             </th>
             <th class="testcase-memory">
-              <Badge>
-                Memory<template #count>
-                  <span class="testcase-badge">(KB)</span>
-                </template>
-              </Badge>
+              Memory
             </th>
             <th class="testcase-result">
               {{ t('oj.result') }}
@@ -152,10 +221,10 @@ onRouteQueryUpdate(fetch)
               </Space>
             </td>
             <td class="testcase-time">
-              {{ item.time }}
+              <Numeral :value="item.time" format="0,0" /> <small>ms</small>
             </td>
             <td class="testcase-memory">
-              {{ item.memory }}
+              <Numeral :value="item.memory" format="0,0" /> <small>KB</small>
             </td>
             <td class="testcase-result" :class="[color[item.judge]]">
               {{ result[item.judge] }}
@@ -204,13 +273,15 @@ onRouteQueryUpdate(fetch)
   max-width 1024px
   padding 0
 
-.solution-overview
-  margin 40px 40px 12px
-  padding 10px
+.solution-header
+  padding 40px 40px 20px
+  margin 0 -20px -20px 0
+  .solution-header-col
+    margin 0 20px 20px 0
   .solution-result
-    font-size 24px
+    font-size 28px
     font-weight bold
-    margin 10px 0
+    margin-bottom 12px
     font-family var(--font-verdana)
 
 .testcase-table-container
@@ -233,13 +304,8 @@ onRouteQueryUpdate(fetch)
 .testcase-time, .testcase-memory
   width 100px
   text-align right
-.testcase-badge
-  position absolute
-  font-size 8px
-  top 10px
-  right 8px
 .testcase-result
-  padding-right 40px !important
+  padding-right 50px !important
   text-align right
 
 .testcase-empty
@@ -266,8 +332,8 @@ onRouteQueryUpdate(fetch)
       background-color: #FFF9C4
 
 @media screen and (max-width: 1024px)
-  .solution-overview
-    margin 20px 20px 6px
+  .solution-header
+    padding 20px 20px 10px
   .solution-detail
     padding 20px
 </style>

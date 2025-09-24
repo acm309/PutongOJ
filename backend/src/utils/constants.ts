@@ -23,6 +23,8 @@ export const judge = Object.freeze({
   Skipped: 12,
 })
 
+export const judgeResult = judge
+
 export const limitation = Object.freeze({
   time: 10 * 1000,
   memory: 256 * 1024,
