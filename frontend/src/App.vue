@@ -24,6 +24,11 @@ setErrorHandler((err) => {
       content: t('oj.error_500'),
       duration: 6.5,
     })
+  } else if (err.response && err.response.status === 404) {
+    $Message.error({
+      content: t('oj.error_404'),
+      duration: 6.5,
+    })
   } else if (err.response && err.response.status === 403) {
     $Message.error({
       content: t('oj.error_403'),

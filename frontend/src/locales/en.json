@@ -200,6 +200,7 @@
   "course_add_existing_problem": "Add Problem to Course",
   "course_private_explanation": "This is a private course. To view it, please join the course or contact the instructor for access.",
   "error_500": "Σ(;ﾟдﾟ) Server Error",
+  "error_404": "(⊙_⊙;) Entity Not Found",
   "error_403": "╮(╯_╰)╭ Unauthorized",
   "error_401": "(〃∀〃) Please log in first",
   "error_429": "ヽ(￣～￣)ノ Too many requests, please try again later",
