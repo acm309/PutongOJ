@@ -1,11 +1,12 @@
 <script setup>
 import only from 'only'
-import { Button, Col, Icon, Input, Row } from 'view-ui-plus'
+import { Button, Col, Icon, Row } from 'view-ui-plus'
 import { inject, onBeforeMount, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Draggable from 'vuedraggable'
 import { useProblemStore } from '@/store/modules/problem'
+import ProblemSelect from './ProblemSelect.vue'
 
 const props = defineProps([ 'contest', 'overview' ])
 const { t } = useI18n()
@@ -28,6 +29,10 @@ if (typeof overview !== 'undefined') {
 }
 
 async function add () {
+  if (!pid) {
+    $Message.error('Please select a problem')
+    return
+  }
   const { problem } = await findOneProblem({ pid })
   contest.list.push(problem.pid)
   jobs[problem.pid] = problem.title
@@ -59,7 +64,7 @@ onBeforeMount(async () => {
     </Draggable>
     <Row :gutter="14">
       <Col flex="auto" class="add">
-        <Input v-model="pid" placeholder="Add a pid" @keyup.enter="add" />
+        <ProblemSelect v-model="pid" :course="contest.course?.courseId" @keyup.enter="add" />
       </Col>
       <Col flex="unset" class="ivu-mp-8">
         <Button type="primary" style="width: 100%" @click="add">

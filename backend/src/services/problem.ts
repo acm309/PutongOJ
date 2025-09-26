@@ -1,4 +1,4 @@
-import type { ObjectId } from 'mongoose'
+import type { ObjectId, PipelineStage } from 'mongoose'
 import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
 import type { Paginated, PaginateOption } from '../types'
 import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
@@ -6,6 +6,7 @@ import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
 import mongoose from 'mongoose'
+import CourseProblem from '../models/CourseProblem'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { judge, status } from '../utils/constants'
@@ -71,6 +72,7 @@ export async function findProblems (
 
 export async function findProblemItems (
   keyword: string,
+  limit: number = 10,
 ): Promise<ProblemEntityItem[]> {
   const result: ProblemEntityItem[] = []
   if (Number.isInteger(Number(keyword))) {
@@ -84,18 +86,18 @@ export async function findProblemItems (
         },
       },
       { _id: 0, pid: 1, title: 1 },
-      { sort: { pid: 1 }, limit: 10 },
+      { sort: { pid: 1 }, limit },
     ).lean(),
     )
   }
-  if (result.length < 10) {
+  if (result.length < limit) {
     result.push(...await Problem.find(
       {
         pid: { $nin: result.map(p => p.pid) },
         title: { $regex: new RegExp(escapeRegExp(keyword), 'i') },
       },
       { _id: 0, pid: 1, title: 1 },
-      { sort: { updatedAt: -1 }, limit: 10 - result.length },
+      { sort: { updatedAt: -1 }, limit: limit - result.length },
     ).lean(),
     )
   }
@@ -198,6 +200,194 @@ export async function getStatistics (
   return { group, list }
 }
 
+export async function findCourseProblems (
+  course: ObjectId | string,
+  opt: PaginateOption & {
+    type?: string
+    content?: string
+  },
+): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
+  const { page, pageSize, type, content } = opt
+  const filters: Record<string, any>[] = []
+
+  if (content && type) {
+    switch (type) {
+      case 'title':
+        filters.push({
+          'problem.title': {
+            $regex: new RegExp(escapeRegExp(String(content)), 'i'),
+          },
+        })
+        break
+      case 'tag':
+        filters.push({
+          'problem.tags': {
+            $in: await tagService.findTagObjectIdsByQuery(String(content)),
+          },
+        })
+        break
+      case 'pid':
+        filters.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: '$problem.pid' },
+              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
+            },
+          },
+        })
+        break
+    }
+  }
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        course: new mongoose.Types.ObjectId(course.toString()),
+      },
+    },
+    {
+      $lookup: {
+        from: 'Problem',
+        localField: 'problem',
+        foreignField: '_id',
+        as: 'problem',
+      },
+    },
+    {
+      $unwind: '$problem',
+    },
+    ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
+    {
+      $lookup: {
+        from: 'Tag',
+        localField: 'problem.tags',
+        foreignField: '_id',
+        as: 'problem.tagsInfo',
+      },
+    },
+    {
+      $sort: { sort: 1, updatedAt: -1 },
+    },
+    {
+      $facet: {
+        paginatedResults: [
+          { $skip: (page - 1) * pageSize },
+          { $limit: pageSize },
+          {
+            $project: {
+              _id: 0,
+              problem: {
+                pid: '$problem.pid',
+                title: '$problem.title',
+                status: '$problem.status',
+                type: '$problem.type',
+                tags: {
+                  $map: {
+                    input: '$problem.tagsInfo',
+                    as: 'tag',
+                    in: {
+                      tagId: '$$tag.tagId',
+                      name: '$$tag.name',
+                      color: '$$tag.color',
+                    },
+                  },
+                },
+                submit: '$problem.submit',
+                solve: '$problem.solve',
+                owner: '$problem.owner',
+              },
+            },
+          },
+        ],
+        totalCount: [
+          { $count: 'count' },
+        ],
+      },
+    },
+    {
+      $project: {
+        docs: '$paginatedResults.problem',
+        total: {
+          $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ],
+        },
+        pages: {
+          $ceil: {
+            $divide: [
+              { $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ] },
+              pageSize,
+            ],
+          },
+        },
+        page: { $literal: page },
+        limit: { $literal: pageSize },
+      },
+    },
+  ] as PipelineStage[]
+
+  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
+  return result[0] as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
+}
+
+export async function findCourseProblemItems (
+  course: ObjectId | string,
+  keyword: string,
+  limit: number = 10,
+): Promise<ProblemEntityItem[]> {
+  const filters: Record<string, any>[] = []
+
+  if (Number.isInteger(Number(keyword))) {
+    filters.push({
+      $expr: {
+        $regexMatch: {
+          input: { $toString: '$problem.pid' },
+          regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
+        },
+      },
+    })
+  }
+  filters.push({
+    'problem.title': { $regex: new RegExp(escapeRegExp(keyword), 'i') },
+  })
+
+  const aggregationPipeline = [
+    {
+      $match: {
+        course: new mongoose.Types.ObjectId(course.toString()),
+      },
+    },
+    {
+      $lookup: {
+        from: 'Problem',
+        localField: 'problem',
+        foreignField: '_id',
+        as: 'problem',
+      },
+    },
+    {
+      $unwind: '$problem',
+    },
+    {
+      $match: { $or: filters },
+    },
+    {
+      $sort: { sort: 1, updatedAt: -1 },
+    },
+    {
+      $limit: limit,
+    },
+    {
+      $project: {
+        _id: 0,
+        pid: '$problem.pid',
+        title: '$problem.title',
+      },
+    },
+  ] as PipelineStage[]
+
+  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
+  return result as ProblemEntityItem[]
+}
+
 const problemService = {
   findProblems,
   findProblemItems,
@@ -207,6 +397,8 @@ const problemService = {
   updateProblem,
   removeProblem,
   getStatistics,
+  findCourseProblems,
+  findCourseProblemItems,
 } as const
 
 export default problemService

@@ -2,15 +2,14 @@ import type { ObjectId, PipelineStage } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument } from '../models/User'
 import type { CourseRole, Paginated, PaginateOption } from '../types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, ProblemEntityPreview, UserEntity } from '../types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView, UserEntity } from '../types/entity'
 import { escapeRegExp, omit } from 'lodash'
 import mongoose from 'mongoose'
 import Course from '../models/Course'
 import CourseMember from '../models/CourseMember'
 import CourseProblem from '../models/CourseProblem'
 import User from '../models/User'
-import { courseRoleEntire, courseRoleNone, encrypt, status } from '../utils/constants'
-import tagService from './tag'
+import { courseRoleEntire, courseRoleNone, encrypt } from '../utils/constants'
 
 export async function findCourses (
   opt: PaginateOption & {},
@@ -205,139 +204,6 @@ export async function getUserRole (
   return role
 }
 
-export async function findCourseProblems (
-  course: ObjectId | string,
-  opt: PaginateOption & {
-    type?: string
-    content?: string
-    showReserved?: boolean
-  },
-): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
-  const { page, pageSize, type, content, showReserved } = opt
-
-  const filters: Record<string, any>[] = []
-  if (!(showReserved === true)) {
-    filters.push({ 'problem.status': status.Available })
-  }
-  if (content && type) {
-    switch (type) {
-      case 'title':
-        filters.push({
-          'problem.title': {
-            $regex: new RegExp(escapeRegExp(String(content)), 'i'),
-          },
-        })
-        break
-      case 'tag':
-        filters.push({
-          'problem.tags': {
-            $in: await tagService.findTagObjectIdsByQuery(String(content)),
-          },
-        })
-        break
-      case 'pid':
-        filters.push({
-          $expr: {
-            $regexMatch: {
-              input: { $toString: '$problem.pid' },
-              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
-            },
-          },
-        })
-        break
-    }
-  }
-
-  const aggregationPipeline = [
-    {
-      $match: {
-        course: new mongoose.Types.ObjectId(course.toString()),
-      },
-    },
-    {
-      $lookup: {
-        from: 'Problem',
-        localField: 'problem',
-        foreignField: '_id',
-        as: 'problem',
-      },
-    },
-    {
-      $unwind: '$problem',
-    },
-    ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
-    // 新增：关联 Tag 集合
-    {
-      $lookup: {
-        from: 'Tag',
-        localField: 'problem.tags',
-        foreignField: '_id',
-        as: 'problem.tagsInfo',
-      },
-    },
-    {
-      $sort: { sort: 1, updatedAt: -1 },
-    },
-    {
-      $facet: {
-        paginatedResults: [
-          { $skip: (page - 1) * pageSize },
-          { $limit: pageSize },
-          {
-            $project: {
-              _id: 0,
-              problem: {
-                pid: '$problem.pid',
-                title: '$problem.title',
-                status: '$problem.status',
-                type: '$problem.type',
-                tags: {
-                  $map: {
-                    input: '$problem.tagsInfo',
-                    as: 'tag',
-                    in: {
-                      tagId: '$$tag.tagId',
-                      name: '$$tag.name',
-                      color: '$$tag.color',
-                    },
-                  },
-                },
-                submit: '$problem.submit',
-                solve: '$problem.solve',
-                owner: '$problem.owner',
-              },
-            },
-          },
-        ],
-        totalCount: [
-          { $count: 'count' },
-        ],
-      },
-    },
-    {
-      $project: {
-        docs: '$paginatedResults.problem',
-        total: {
-          $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ],
-        },
-        pages: {
-          $ceil: {
-            $divide: [
-              { $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ] },
-              pageSize,
-            ],
-          },
-        },
-        page: { $literal: page },
-        limit: { $literal: pageSize },
-      },
-    },
-  ] as PipelineStage[]
-
-  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result[0] as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
-}
-
 export async function addCourseProblem (
   course: ObjectId,
   problem: ObjectId,
@@ -464,7 +330,6 @@ const courseService = {
   updateCourseMember,
   removeCourseMember,
   getUserRole,
-  findCourseProblems,
   addCourseProblem,
   moveCourseProblem,
   rearrangeCourseProblem,

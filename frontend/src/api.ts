@@ -88,8 +88,8 @@ const problem = {
     instance.get('/problem', { params: data }),
   findProblems: (params: FindProblemsParams) =>
     instance.get<FindProblemsResponse>('/problem', { params }),
-  findProblemItems: (keyword: string) =>
-    instance.get<ProblemEntityItem[]>('/problem/items', { params: { keyword } }),
+  findProblemItems: (params: { keyword: string, course?: number }) =>
+    instance.get<ProblemEntityItem[]>('/problem/items', { params }),
   create: (data: { [key: string]: any }) =>
     instance.post('/problem/', data),
   update: (data: { [key: string]: any }) =>

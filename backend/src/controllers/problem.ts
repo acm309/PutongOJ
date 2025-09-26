@@ -80,7 +80,7 @@ export async function loadProblem (
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = ctx.state.profile
-  let showReserved: boolean = !!profile?.isAdmin
+  const showReserved: boolean = !!profile?.isAdmin
 
   /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
   if (Number(opt.page) === -1 && profile?.isAdmin) {
@@ -95,10 +95,7 @@ const findProblems = async (ctx: Context) => {
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
-    if (role.manageProblem) {
-      showReserved = true
-    }
-    courseDocId = course._id as ObjectId
+    courseDocId = course._id
   }
 
   const paginateOption = parsePaginateOption(opt, 30, 100)
@@ -109,12 +106,11 @@ const findProblems = async (ctx: Context) => {
 
   let list: Paginated<ProblemEntityPreview & { owner?: ObjectId | null }>
   if (courseDocId) {
-    list = await courseService.findCourseProblems(
+    list = await problemService.findCourseProblems(
       courseDocId,
       {
         ...paginateOption,
         ...filterOption,
-        showReserved: true,
       },
     )
   } else {
@@ -154,9 +150,28 @@ const findProblems = async (ctx: Context) => {
 }
 
 const findProblemItems = async (ctx: Context) => {
-  const keyword = String(ctx.request.query.keyword ?? '').trim()
-  const response: ProblemEntityItem[]
-    = await problemService.findProblemItems(keyword)
+  const opt = ctx.request.query
+
+  let courseDocId: ObjectId | undefined
+  if (typeof opt.course === 'string') {
+    const { course, role } = await loadCourse(ctx, opt.course)
+    if (!role.basic) {
+      return ctx.throw(...ERR_PERM_DENIED)
+    }
+    courseDocId = course._id
+  }
+
+  const keyword = String(opt.keyword).trim()
+  let response: ProblemEntityItem[] | undefined
+
+  if (courseDocId) {
+    response = await problemService.findCourseProblemItems(
+      courseDocId, keyword,
+    )
+  } else {
+    response = await problemService.findProblemItems(keyword)
+  }
+
   ctx.body = response
 }
 

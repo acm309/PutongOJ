@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { ProblemEntityItem } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
-import debounce from 'lodash.debounce'
-import { Form, FormItem, Modal, Option, Select } from 'view-ui-plus'
+import { Form, FormItem, Modal } from 'view-ui-plus'
 import { inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
+import ProblemSelect from '@/components/ProblemSelect.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -16,38 +15,13 @@ const { t } = useI18n()
 const message = inject('$Message') as typeof Message
 
 const modal = ref(false)
-const loading = ref(false)
-const options = ref<{ value: number, label: string }[]>([])
 const selected = ref<number[]>([])
-
-const findProblemOptions = debounce(async (query: string) => {
-  query = query.trim()
-  if (options.value.some(option => option.label === query)) {
-    return
-  }
-  loading.value = true
-  try {
-    const { data } = await api.problem.findProblemItems(query)
-    options.value.length = 0
-    data.forEach((item: ProblemEntityItem) => {
-      options.value.push({
-        value: item.pid,
-        label: item.title,
-      })
-    })
-  } catch (error: any) {
-    console.error(error.message || t('oj.failed_to_fetch_problems'))
-  } finally {
-    loading.value = false
-  }
-}, 500)
 
 function close (added: number = 0) {
   emit('update:modelValue', false)
   emit('close', added)
   modal.value = false
   selected.value = []
-  options.value = []
 }
 
 async function submit () {
@@ -77,26 +51,10 @@ watch(() => props.modelValue, (val) => {
   >
     <Form>
       <FormItem :label="t('oj.problems_to_add')">
-        <Select
-          v-model="selected" multiple filterable :remote-method="findProblemOptions" :loading="loading"
-          :placeholder="t('oj.search_problems_placeholder')"
-        >
-          <Option v-for="(option, index) in options" :key="index" :value="option.value">
-            <span class="problem-sep">[</span>
-            <span class="problem-id">{{ option.value }}</span>
-            <span class="problem-sep">] </span>
-            <span>{{ option.label }}</span>
-          </Option>
-        </Select>
+        <ProblemSelect
+          v-model="selected" multiple :scope="{ courseId }"
+        />
       </FormItem>
     </Form>
   </Modal>
 </template>
-
-<style lang="stylus" scoped>
-.problem-id
-  color: #c5c8ce
-  margin-right: 8px
-.problem-sep
-  display: none
-</style>
