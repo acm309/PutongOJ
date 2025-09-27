@@ -1,10 +1,10 @@
 import path from 'node:path'
-import process from 'node:process'
+import { env } from 'node:process'
 import Koa from 'koa'
 import { koaBody } from 'koa-body'
 import koaLogger from 'koa-logger'
 import send from 'koa-send'
-import { createSession as session } from 'koa-session'
+import session from 'koa-session'
 import staticServe from 'koa-static'
 import config from './config'
 import { databaseSetup } from './config/setup'
@@ -17,7 +17,7 @@ import './config/db'
 const app = new Koa()
 
 // 日志，会在控制台显示请求的方法和路由
-if (process.env.NODE_ENV === 'development') {
+if (env.NODE_ENV === 'development') {
   app.use(koaLogger())
 }
 
@@ -26,10 +26,10 @@ app.keys = [ config.secretKey ]
 app.use(parseClientIp)
 
 app.use(session({
-  key: 'koa:oj:sess',
-  maxAge: 7 * 24 * 60 * 60 * 60 * 1000, // ms
-  httpOnly: true, /** (boolean) httpOnly or not (default true) */
-  signed: true, /** (boolean) signed or not (default true) */
+  key: 'ptoj.session',
+  maxAge: config.sessionMaxAge * 1000,
+  signed: true,
+  renew: true,
 }, app))
 
 app.use(koaBody({
@@ -78,7 +78,7 @@ app.use(async (ctx, next) => {
 app.use(router.routes()).use(router.allowedMethods())
 
 // do not start on 'test'
-if (process.env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test') {
   app.listen(config.port, async () => {
     await databaseSetup()
     logger.info(`The server is running at http://localhost:${config.port}`)

@@ -51,6 +51,7 @@ interface GlobalConfig {
   mongodbURL: string
   redisURL: string
   secretKey: string
+  sessionMaxAge: number
   reverseProxy: {
     enabled: boolean
     forwardLimit: number
@@ -93,6 +94,10 @@ export const globalConfig: GlobalConfig = {
   secretKey: stringEnv(
     'PTOJ_SECRET_KEY',
     () => randomBytes(16).toString('hex'),
+  ),
+  sessionMaxAge: numberEnv(
+    'PTOJ_SESSION_MAX_AGE',
+    7 * 24 * 60 * 60,
   ),
   reverseProxy: {
     enabled: booleanEnv(
