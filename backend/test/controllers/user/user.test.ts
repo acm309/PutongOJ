@@ -27,7 +27,6 @@ test.before('Create user and login', async (t) => {
     .get('/api/session')
   t.is(r.status, 200)
   t.is(r.body.profile.uid, uid)
-  t.is(r.body.profile.nick, '')
   t.is(r.body.profile.privilege, config.privilege.User)
 })
 

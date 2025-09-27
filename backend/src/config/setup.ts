@@ -4,7 +4,7 @@ import config from '.'
 import ID from '../models/ID'
 import Problem from '../models/Problem'
 import User from '../models/User'
-import { generatePwd } from '../utils'
+import { passwordHash } from '../utils'
 import { privilege } from '../utils/constants'
 
 export async function databaseSetup () {
@@ -35,7 +35,7 @@ export async function databaseSetup () {
     tasks.push(
       new User({
         uid: 'admin',
-        pwd: generatePwd(config.deploy.adminInitPwd),
+        pwd: passwordHash(config.deploy.adminInitPwd),
         privilege: privilege.Root,
       }).save(),
     )

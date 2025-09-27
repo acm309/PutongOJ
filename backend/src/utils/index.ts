@@ -1,6 +1,8 @@
 import type { Context } from 'koa'
 import type { Enveloped, PaginateOption } from '../types'
-import crypto from 'node:crypto'
+import { Buffer } from 'node:buffer'
+import { md5, sha1 } from '@noble/hashes/legacy'
+import { sha256 } from '@noble/hashes/sha2'
 import { pick, pickBy } from 'lodash'
 import { ErrorCode } from './error'
 
@@ -25,9 +27,23 @@ export function parsePaginateOption (
   return { page, pageSize }
 }
 
-export function generatePwd (pwd: string): string {
-  return crypto.createHash('md5').update(pwd).digest('hex')
-    + crypto.createHash('sha1').update(pwd).digest('hex')
+export function passwordHash (password: string): string {
+  const passwordArr = Uint8Array.from(Buffer.from(password))
+
+  const md5Hash = md5(passwordArr)
+  const sha1Hash = sha1(passwordArr)
+
+  const combined = new Uint8Array(md5Hash.length + sha1Hash.length)
+  combined.set(md5Hash)
+  combined.set(sha1Hash, md5Hash.length)
+
+  return Buffer.from(combined).toString('hex')
+}
+
+export function passwordChecksum (passwordHash: string): string {
+  const hashArr = Uint8Array.from(Buffer.from(passwordHash, 'hex'))
+  const sha256Hash = sha256(hashArr)
+  return Buffer.from(sha256Hash.slice(0, 12)).toString('base64')
 }
 
 export function isComplexPwd (pwd: string): boolean {
@@ -79,7 +95,7 @@ export function createErrorResponse (
 
 export default {
   parsePaginateOption,
-  generatePwd,
+  passwordHash,
   isComplexPwd,
   only,
   purify,

@@ -1,18 +1,21 @@
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
 import type { SessionProfile } from '../types'
-import { pick } from 'lodash'
+import { passwordChecksum } from '../utils'
 
 export function setUserSession (
   ctx: Context,
   user: UserDocument,
 ): SessionProfile {
+  const { uid, privilege, pwd } = user
+  const checksum = passwordChecksum(pwd)
   const profile: SessionProfile = {
-    ...pick(user, [
-      'uid', 'nick', 'privilege', 'pwd',
-    ]),
+    uid,
+    privilege,
+    checksum,
     verifyContest: [],
   }
+
   ctx.session.profile = profile
   return profile
 }

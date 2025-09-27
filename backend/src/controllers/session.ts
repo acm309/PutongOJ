@@ -2,7 +2,7 @@ import type { Context } from 'koa'
 import User from '../models/User'
 import cryptoService from '../services/crypto'
 import sessionService from '../services/session'
-import { createEnvelopedResponse, createErrorResponse, generatePwd } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, passwordHash } from '../utils'
 import { privilege } from '../utils/constants'
 import logger from '../utils/logger'
 
@@ -25,7 +25,7 @@ export async function userLogin (ctx: Context) {
     logger.info(`Bad password encryption: ${e.message} [${requestId}]`)
     return createErrorResponse(ctx, 'Bad password encryption')
   }
-  const pwdHash = generatePwd(pwd)
+  const pwdHash = passwordHash(pwd)
 
   const user = await User
     .findOne({ uid })

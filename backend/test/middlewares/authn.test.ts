@@ -1,7 +1,7 @@
 import type { UserDocument } from '../../src/models/User'
 import test from 'ava'
 import authnMiddleware from '../../src/middlewares/authn'
-import { generatePwd } from '../../src/utils'
+import { passwordChecksum, passwordHash } from '../../src/utils'
 import constants from '../../src/utils/constants'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/error'
 import { userSeeds } from '../seeds/user'
@@ -10,19 +10,19 @@ import '../../src/config/db'
 const { privilege } = constants
 
 const nonExistUserId = 'MauthnNonExist'
-const anyPassword = generatePwd('Mauthn4nyPwd')
+const anyChecksum = passwordChecksum(passwordHash('Mauthn4nyPwd'))
 const testUsers: Record<string, Partial<UserDocument>> = {
   banned: Object.assign({}, userSeeds.MauthnBanned, {
-    pwd: generatePwd(userSeeds.MauthnBanned.pwd as string),
+    checksum: passwordChecksum(passwordHash(userSeeds.MauthnBanned.pwd!)),
   }),
   normal: Object.assign({}, userSeeds.MauthnNormal, {
-    pwd: generatePwd(userSeeds.MauthnNormal.pwd as string),
+    checksum: passwordChecksum(passwordHash(userSeeds.MauthnNormal.pwd!)),
   }),
   admin: Object.assign({}, userSeeds.MauthnAdmin, {
-    pwd: generatePwd(userSeeds.MauthnAdmin.pwd as string),
+    checksum: passwordChecksum(passwordHash(userSeeds.MauthnAdmin.pwd!)),
   }),
   root: Object.assign({}, userSeeds.MauthnRoot, {
-    pwd: generatePwd(userSeeds.MauthnRoot.pwd as string),
+    checksum: passwordChecksum(passwordHash(userSeeds.MauthnRoot.pwd!)),
   }),
 }
 
@@ -48,7 +48,7 @@ test('checkSession (already checked)', async (t) => {
       authnChecked: true,
       profile: {
         uid: nonExistUserId,
-        pwd: anyPassword,
+        checksum: anyChecksum,
         privilege: privilege.User,
       },
     },
@@ -66,7 +66,7 @@ test('checkSession (non-existent user)', async (t) => {
     session: {
       profile: {
         uid: nonExistUserId,
-        pwd: anyPassword,
+        checksum: anyChecksum,
         privilege: privilege.User,
       },
     },
@@ -84,7 +84,7 @@ test('checkSession (password changed)', async (t) => {
     session: {
       profile: {
         ...testUsers.normal,
-        pwd: anyPassword,
+        checksum: anyChecksum,
       },
     },
   } as any

@@ -16,9 +16,8 @@ export interface ContestOption {
 
 export interface SessionProfile {
   uid: string
-  nick: string
   privilege: number
-  pwd: string
+  checksum: string
   verifyContest?: number[]
 }
 

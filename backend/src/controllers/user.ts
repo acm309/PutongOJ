@@ -8,7 +8,7 @@ import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import cryptoService from '../services/crypto'
-import { createEnvelopedResponse, createErrorResponse, generatePwd, isComplexPwd, only } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, isComplexPwd, only, passwordHash } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 import logger from '../utils/logger'
 
@@ -133,7 +133,7 @@ async function userRegister (ctx: Context) {
   }
 
   const user = new User({
-    uid, pwd: generatePwd(pwd),
+    uid, pwd: passwordHash(pwd),
   })
 
   try {
@@ -179,13 +179,13 @@ const update = async (ctx: Context) => {
   const oldPwd = String(opt.oldPwd || '')
   const newPwd = String(opt.newPwd || '')
   if (newPwd !== '') {
-    if (user.pwd !== generatePwd(oldPwd) && !profile.isAdmin) {
+    if (user.pwd !== passwordHash(oldPwd) && !profile.isAdmin) {
       ctx.throw(400, 'Old password is wrong!')
     }
     if (!isComplexPwd(newPwd)) {
       ctx.throw(400, 'The new password is not complex enough!')
     }
-    user.pwd = generatePwd(newPwd)
+    user.pwd = passwordHash(newPwd)
   }
 
   try {

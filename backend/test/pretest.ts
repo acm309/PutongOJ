@@ -9,7 +9,7 @@ import Problem from '../src/models/Problem'
 import Solution from '../src/models/Solution'
 // const Tag = require('../src/models/Tag')
 import User from '../src/models/User'
-import { generatePwd } from '../src/utils'
+import { passwordHash } from '../src/utils'
 import { removeall } from './helper'
 import { contestSeeds } from './seeds/contest'
 import { courseSeeds } from './seeds/course'
@@ -71,7 +71,7 @@ async function main () {
   const userInsert = Promise.all(
     Object.values(userSeeds).map((user) => {
       return new User(Object.assign(user, {
-        pwd: generatePwd(user.pwd!),
+        pwd: passwordHash(user.pwd!),
       })).save()
     }),
   )

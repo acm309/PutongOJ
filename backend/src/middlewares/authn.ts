@@ -2,6 +2,7 @@ import type { Context, Middleware } from 'koa'
 import type { UserDocument } from '../models/User'
 import type { SessionProfile } from '../types'
 import User from '../models/User'
+import { passwordChecksum } from '../utils'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/error'
 
 export async function checkSession (
@@ -18,7 +19,7 @@ export async function checkSession (
   const session = ctx.session.profile as SessionProfile
 
   const user = await User.findOne({ uid: session.uid })
-  if (!user || user.pwd !== session.pwd || user.isBanned) {
+  if (!user || user.isBanned || session.checksum !== passwordChecksum(user.pwd)) {
     delete ctx.session.profile
     return
   }
