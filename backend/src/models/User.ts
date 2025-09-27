@@ -1,8 +1,24 @@
 import type { Document, ObjectId, PaginateModel, Schema } from 'mongoose'
-import type { UserEntity } from '../types/entity'
+import type { Entity } from '../types/entity'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { privilege } from '../utils/constants'
+
+export interface UserEntity extends Entity {
+  /** Unique user ID (case-insensitive) */
+  uid: string
+  /** User password (MD5 + SHA1) */
+  pwd: string
+  privilege: number
+  nick: string
+  motto: string
+  mail: string
+  school: string
+  gid: number[]
+  submit: number
+  solve: number
+  lastVisitedAt?: Date
+}
 
 export interface UserDocument extends Document<ObjectId>, UserEntity {
   isBanned: boolean
@@ -94,6 +110,9 @@ const userSchema: Schema = new mongoose.Schema({
   solve: {
     type: Number,
     default: 0,
+  },
+  lastVisitedAt: {
+    type: Date,
   },
 }, {
   collection: 'User',

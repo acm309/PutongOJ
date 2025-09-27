@@ -1,5 +1,6 @@
 import type { Document, PaginateModel } from 'mongoose'
-import type { CourseMemberEntity, CourseMemberView, UserEntity } from '../types/entity'
+import type { CourseMemberEntity, CourseMemberView } from '../types/entity'
+import type { UserEntity } from './User'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { courseRoleNone } from '../utils/constants'

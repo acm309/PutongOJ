@@ -1,6 +1,7 @@
 import type { ObjectId } from 'mongoose'
 import type { ContestOption, CourseRole, Paginated } from '.'
 import type { CourseDocument } from '../models/Course'
+import type { UserEntity } from '../models/User'
 import type { encrypt, problemType, status, tagColors } from '../utils/constants'
 
 // Common
@@ -18,23 +19,6 @@ interface ViewTimestamps {
 }
 
 interface View extends ViewTimestamps { }
-
-// User
-
-export interface UserEntity extends Entity {
-  /** Unique user ID (Case-insensitive) */
-  uid: string
-  /** User password (hashed) */
-  pwd: string
-  privilege: number
-  nick: string
-  motto: string
-  mail: string
-  school: string
-  gid: number[]
-  submit: number
-  solve: number
-}
 
 // Course
 

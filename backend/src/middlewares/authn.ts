@@ -27,6 +27,11 @@ export async function checkSession (
     ctx.session.profile.privilege = user.privilege
   }
 
+  if ((user.lastVisitedAt?.getTime() ?? 0) < Date.now() - 15 * 1000) {
+    user.lastVisitedAt = new Date()
+    await user.save()
+  }
+
   ctx.state.profile = user
   return user
 }
