@@ -24,7 +24,9 @@ export async function loadUser (
     return ctx.state.user
   }
 
-  const user = await User.findOne({ uid })
+  const user = await User.findOne({
+    uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
+  })
   if (!user) {
     ctx.throw(...ERR_NOT_FOUND)
   }
