@@ -1,6 +1,10 @@
 import type { contestLabelingStyle } from '../utils/constants'
 import type { ErrorCode } from '../utils/error'
 
+export * from './api'
+export * from './enum'
+export * from './model'
+
 export interface CourseRole {
   basic: boolean
   viewTestcase: boolean
@@ -26,6 +30,11 @@ export interface PaginateOption {
   pageSize: number
 }
 
+export interface SortOption {
+  sort: 1 | -1
+  sortBy: string
+}
+
 export interface Paginated<T> {
   docs: T[]
   limit: number
@@ -34,10 +43,20 @@ export interface Paginated<T> {
   total: number
 }
 
-export interface Enveloped<T = any> {
-  success: boolean
-  code: ErrorCode
+interface SuccessEnveloped<T = any> {
+  success: true
+  code: ErrorCode.OK
   message: string
-  data: T | null
+  data: T
   requestId: string
 }
+
+interface ErrorEnveloped {
+  success: false
+  code: Exclude<ErrorCode, ErrorCode.OK>
+  message: string
+  data: null
+  requestId: string
+}
+
+export type Enveloped<T = any> = SuccessEnveloped<T> | ErrorEnveloped

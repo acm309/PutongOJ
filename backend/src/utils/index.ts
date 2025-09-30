@@ -1,4 +1,5 @@
 import type { Context } from 'koa'
+import type { ZodError } from 'zod'
 import type { Enveloped, PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
 import { md5, sha1 } from '@noble/hashes/legacy'
@@ -93,6 +94,26 @@ export function createErrorResponse (
   }
 }
 
+function getFriendlyZodErrorMessage (error: ZodError): string {
+  if (error.issues.length === 0) {
+    return 'Unknown validation error occurred'
+  }
+
+  const firstIssue = error.issues[0]
+  const message = firstIssue.message
+  const path = firstIssue.path.length > 0 ? ` at ${firstIssue.path.join('.')}` : ''
+
+  return message + path
+}
+
+export function createZodErrorResponse (
+  ctx: Context,
+  error: ZodError,
+): void {
+  const message = getFriendlyZodErrorMessage(error)
+  createErrorResponse(ctx, message, ErrorCode.BadRequest)
+}
+
 export default {
   parsePaginateOption,
   passwordHash,
@@ -101,4 +122,5 @@ export default {
   purify,
   createEnvelopedResponse,
   createErrorResponse,
+  createZodErrorResponse,
 }

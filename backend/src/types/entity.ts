@@ -11,14 +11,14 @@ interface EntityTimestamps {
   updatedAt: Date
 }
 
-interface Entity extends EntityTimestamps { }
+export interface Entity extends EntityTimestamps { }
 
 interface ViewTimestamps {
   createdAt: number
   updatedAt: number
 }
 
-interface View extends ViewTimestamps { }
+export interface View extends ViewTimestamps { }
 
 // Course
 
