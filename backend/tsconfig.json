@@ -5,8 +5,6 @@
     "rootDir": "./src",
     "module": "commonjs",
     "moduleResolution": "node",
-    "allowJs": true,
-    "checkJs": false,
     "strict": true,
     "outDir": "./dist",
     "esModuleInterop": true,
