@@ -10,7 +10,7 @@ problemRouter.get('/',
   problemController.findProblems,
 )
 problemRouter.get('/items',
-  authnMiddleware.adminRequire,
+  authnMiddleware.loginRequire,
   problemController.findProblemItems,
 )
 problemRouter.post('/',
