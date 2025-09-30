@@ -2,7 +2,7 @@
 import only from 'only'
 import { storeToRefs } from 'pinia'
 import { Button, Input, Page, Poptip, Spin } from 'view-ui-plus'
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -11,15 +11,18 @@ import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
 import { timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate, purify } from '@/utils/helper'
+import { useCourseStore } from '@/store/modules/course'
 
 const { t } = useI18n()
 const { 'contestType': type, 'status': contestVisible } = constant
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
+const courseStore = useCourseStore()
 const rootStore = useRootStore()
 const route = useRoute()
 const router = useRouter()
 
+const { course } = storeToRefs(courseStore)
 const { list, sum } = $(storeToRefs(contestStore))
 const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
 const { profile, isLogined, isAdmin } = $(storeToRefs(sessionStore))
@@ -29,6 +32,12 @@ const $Message = inject('$Message')
 const $Modal = inject('$Modal')
 let enterPwd = $ref('')
 const courseId = $computed(() => Number.parseInt(route.params.id))
+const role = computed(() => {
+  if (course.value?.courseId !== courseId) {
+    return courseRoleNone
+  }
+  return course.value?.role ?? courseRoleNone
+})
 const query = $computed(() => purify({ page, pageSize, course: courseId }))
 const contestTitle = $ref('')
 
@@ -54,7 +63,7 @@ const pageChange = val => reload({ page: val })
 async function visit (item) {
   if (!isLogined) {
     sessionStore.toggleLoginState()
-  } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
+  } else if (isAdmin || role.value.manageContest || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
     $Message.error(t('oj.contest_not_started'))
