@@ -1,9 +1,9 @@
 import type { Context } from 'koa'
-import userServices from '../services/user'
 import {
   AdminUsersQueryResultSchema,
   AdminUsersQuerySchema,
-} from '../types'
+} from '@putongoj/shared'
+import userServices from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 
 export async function findUsers (ctx: Context) {

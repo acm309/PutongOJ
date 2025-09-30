@@ -20,6 +20,9 @@ importers:
       '@noble/hashes':
         specifier: ^2.0.0
         version: 2.0.0
+      '@putongoj/shared':
+        specifier: file:../shared
+        version: file:../shared
       cross-env:
         specifier: ^10.0.0
         version: 10.0.0
@@ -744,6 +747,9 @@ packages:
 
   '@pm2/pm2-version-check@1.0.4':
     resolution: {integrity: sha512-SXsM27SGH3yTWKc2fKR4SYNxsmnvuBQ9dd6QHtEWmiZ/VqaOYPAIlS8+vMcn27YLtAEBGvNRSh3TPNvtjZgfqA==}
+
+  '@putongoj/shared@file:../shared':
+    resolution: {directory: ../shared, type: directory}
 
   '@rollup/pluginutils@5.3.0':
     resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
@@ -5104,6 +5110,10 @@ snapshots:
       debug: 4.4.1(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
+
+  '@putongoj/shared@file:../shared':
+    dependencies:
+      zod: 4.1.11
 
   '@rollup/pluginutils@5.3.0(rollup@4.40.0)':
     dependencies:

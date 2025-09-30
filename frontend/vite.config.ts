@@ -1,11 +1,11 @@
 // https://vitejs.dev/config/
 import path from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   resolve: {

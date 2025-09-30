@@ -2,7 +2,7 @@
 import type { Message } from 'view-ui-plus'
 import { contestLabelingStyle } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Divider, Form, FormItem, Input, Option, Select, Spin } from 'view-ui-plus'
+import { Button, Divider, Form, FormItem, Input, Option, Select, Spin } from 'view-ui-plus'
 import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

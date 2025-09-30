@@ -1,4 +1,5 @@
 import { contestLabelingStyle } from '@backend/utils/constants'
+import { UserPrivilege } from '@putongoj/shared'
 import { format } from 'date-fns/format'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { toDate } from 'date-fns/toDate'
@@ -80,5 +81,35 @@ export function contestLabeling (
     case contestLabelingStyle.numeric:
     default:
       return String(value)
+  }
+}
+
+export function getPrivilegeLabel (privilege: any) {
+  switch (privilege) {
+    case UserPrivilege.Root:
+      return 'Root'
+    case UserPrivilege.Admin:
+      return 'Admin'
+    case UserPrivilege.User:
+      return 'User'
+    case UserPrivilege.Banned:
+      return 'Banned'
+    default:
+      return 'Unknown'
+  }
+}
+
+export function getPrivilegeSeverity (privilege: any) {
+  switch (privilege) {
+    case UserPrivilege.Root:
+      return 'warn'
+    case UserPrivilege.Admin:
+      return 'success'
+    case UserPrivilege.User:
+      return 'primary'
+    case UserPrivilege.Banned:
+      return 'danger'
+    default:
+      return 'contrast'
   }
 }

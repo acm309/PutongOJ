@@ -1,6 +1,7 @@
+import type { Enveloped } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { ZodError } from 'zod'
-import type { Enveloped, PaginateOption } from '../types'
+import type { PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
 import { md5, sha1 } from '@noble/hashes/legacy'
 import { sha256 } from '@noble/hashes/sha2'

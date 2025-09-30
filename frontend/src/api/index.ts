@@ -4,39 +4,11 @@ import type { OAuthEntityUserView } from '@backend/models/OAuth'
 import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
 import type { CourseRole, Enveloped, Paginated, SessionProfile } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
-import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
+import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from '../types/api'
 import type { LoginParam, Profile, TimeResp, User } from '@/types'
-import axios from 'axios'
-import { useSessionStore } from './store/modules/session'
+import { instance } from './instance'
 
-// 设置全局axios默认值
-axios.defaults.baseURL = '/api/'
-axios.defaults.withCredentials = true
-axios.defaults.timeout = 100000 // 100000ms的超时验证
-axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
-const instance = axios.create()
-
-let errHandler: null | ((err: any) => void) = null
-
-export function setErrorHandler (handler: typeof errHandler) {
-  errHandler = handler
-}
-
-instance.interceptors.response.use((resp) => {
-  const data: { profile: Profile | null } = resp.data
-  if (data.profile)
-    useSessionStore().setLoginProfile(data.profile)
-  return resp
-}, (err) => {
-  if (errHandler) {
-    errHandler(err)
-  } else {
-    // eslint-disable-next-line no-alert
-    window.alert('Cannot connect to server, '
-      + 'please check your network connection or try again later.')
-  }
-  return err
-})
+export * from './instance'
 
 const utils = {
   getWebsiteInformaton: () => instance.get<WebsiteInformation>('/website'),

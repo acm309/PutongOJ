@@ -1,6 +1,7 @@
+import type { Paginated } from '@putongoj/shared'
 import type { ObjectId } from 'mongoose'
 import type { ContestDocument, ContestDocumentPopulated } from '../models/Contest'
-import type { Paginated, PaginateOption } from '../types'
+import type { PaginateOption } from '../types'
 import type { ContestEntityEditable, ContestEntityPreview, ContestRanklist, SolutionEntity } from '../types/entity'
 import { escapeRegExp } from 'lodash'
 import Contest from '../models/Contest'

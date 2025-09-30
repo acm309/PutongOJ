@@ -1,6 +1,7 @@
+import type { Paginated } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
-import type { CourseRole, Paginated } from '../types'
+import type { CourseRole } from '../types'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
 import { pick } from 'lodash'
 import { Document } from 'mongoose'

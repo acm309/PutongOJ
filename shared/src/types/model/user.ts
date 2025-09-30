@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { isoDatetimeToDate } from '../codec'
-import { UserPrivilege } from '../enum'
+import { UserPrivilege } from '../../consts/index.js'
+import { isoDatetimeToDate } from '../codec.js'
 
 export const UserModelSchema = z.object({
   uid: z.string().min(3).max(20).regex(/^[\w-]+$/),

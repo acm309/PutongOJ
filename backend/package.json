@@ -39,6 +39,7 @@
     "@noble/ciphers": "^2.0.0",
     "@noble/curves": "^2.0.0",
     "@noble/hashes": "^2.0.0",
+    "@putongoj/shared": "file:../shared",
     "cross-env": "^10.0.0",
     "dotenv-flow": "^4.1.0",
     "fast-levenshtein": "^3.0.0",

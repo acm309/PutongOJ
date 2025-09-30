@@ -1,4 +1,5 @@
-import type { Paginated, PaginateOption, SortOption, UserModel, UserPrivilege } from '../types'
+import type { Paginated, UserModel, UserPrivilege } from '@putongoj/shared'
+import type { PaginateOption, SortOption } from '../types'
 import { escapeRegExp } from 'lodash'
 import User from '../models/User'
 

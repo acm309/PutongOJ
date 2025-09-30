@@ -86,7 +86,6 @@ function langSelected (lang: string) {
 .app-layout
   min-height 100vh
   position relative
-  overflow hidden
 
 .layout-content
   margin 82px 20px 0
