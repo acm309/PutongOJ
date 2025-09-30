@@ -1,19 +1,8 @@
 {
-  "name": "putongoj-fe",
+  "name": "@putongoj/frontend",
   "type": "module",
-  "version": "2.1.0-beta.13",
+  "version": "3.0.0",
   "private": true,
-  "author": "Kerminate <kepeilin@outlook.com>",
-  "contributors": [
-    {
-      "name": "lazzzis",
-      "url": "https://github.com/lazzzis"
-    },
-    {
-      "name": "Kerminate",
-      "url": "https://github.com/Kerminate"
-    }
-  ],
   "engines": {
     "node": ">= 22.0.0",
     "npm": ">= 10.0.0",
@@ -37,7 +26,7 @@
     "@noble/curves": "^2.0.0",
     "@noble/hashes": "^2.0.0",
     "@primeuix/themes": "^1.2.5",
-    "@putongoj/shared": "file:../shared",
+    "@putongoj/shared": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
     "@vitejs/plugin-legacy": "^7.2.1",
     "@vitejs/plugin-vue": "^6.0.1",

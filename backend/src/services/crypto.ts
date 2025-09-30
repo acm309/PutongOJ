@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
-import { gcm } from '@noble/ciphers/aes'
-import { x25519 } from '@noble/curves/ed25519'
-import { sha256 } from '@noble/hashes/sha2'
+import { gcm } from '@noble/ciphers/aes.js'
+import { x25519 } from '@noble/curves/ed25519.js'
+import { sha256 } from '@noble/hashes/sha2.js'
 import redis from '../config/redis'
 
 export interface KeyPair {

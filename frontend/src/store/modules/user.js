@@ -1,5 +1,5 @@
 import { md5 } from '@noble/hashes/legacy.js'
-import { bytesToHex } from '@noble/hashes/utils'
+import { bytesToHex } from '@noble/hashes/utils.js'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import api from '@/api'

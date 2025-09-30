@@ -1,7 +1,7 @@
-import { gcm } from '@noble/ciphers/aes'
-import { randomBytes } from '@noble/ciphers/utils'
-import { x25519 } from '@noble/curves/ed25519'
-import { sha256 } from '@noble/hashes/sha2'
+import { gcm } from '@noble/ciphers/aes.js'
+import { randomBytes } from '@noble/ciphers/utils.js'
+import { x25519 } from '@noble/curves/ed25519.js'
+import { sha256 } from '@noble/hashes/sha2.js'
 
 let serverPublicKey: Uint8Array | null = null
 
