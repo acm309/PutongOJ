@@ -2,6 +2,7 @@
   "name": "putongoj-fe",
   "version": "2.1.0-beta.13",
   "private": true,
+  "type": "module",
   "author": "Kerminate <kepeilin@outlook.com>",
   "contributors": [
     {
@@ -20,12 +21,12 @@
   },
   "scripts": {
     "build": "npm run config && vite build",
-    "config": "node build/vditor.js",
+    "config": "node build/vditor.cjs",
     "dev": "npm run config && vite",
     "lint": "eslint ./src --fix",
     "preview": "vite preview",
     "start": "npm run dev",
-    "zip": "node build/zip.js",
+    "zip": "node build/zip.cjs",
     "i18n:upload": "crowdin upload sources",
     "i18n:download": "crowdin download",
     "i18n:sync": "npm run i18n:upload && npm run i18n:download"
