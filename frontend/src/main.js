@@ -1,4 +1,6 @@
 import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
 import {
   Button,
   Card,
@@ -40,14 +42,28 @@ import { createI18n } from 'vue-i18n'
 import locales from '@/locales'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
+import { PutongAura } from '@/theme/aura'
 import App from './App'
 import router from './router'
 import '@/theme/index.less'
+import 'primeicons/primeicons.css'
 
 const pinia = createPinia()
 const app = createApp(App)
 
 app.use(pinia)
+
+app.use(PrimeVue, {
+  theme: {
+    preset: PutongAura,
+    options: {
+      prefix: 'p',
+      darkModeSelector: false,
+      ripple: true,
+    },
+  },
+})
+app.use(ToastService)
 
 const i18n = createI18n({
   allowComposition: true,

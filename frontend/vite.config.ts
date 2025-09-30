@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   resolve: {
@@ -15,6 +16,7 @@ export default defineConfig({
     extensions: [ '.mjs', '.js', '.ts', '.json', '.vue' ],
   },
   plugins: [
+    tailwindcss(),
     legacy(),
     ReactivityTransform(),
     visualizer({ gzipSize: true }),
