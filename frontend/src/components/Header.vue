@@ -4,7 +4,6 @@ import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
 import Menubar from 'primevue/menubar'
-
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -17,9 +16,9 @@ const router = useRouter()
 const { t } = useI18n()
 const message = useMessage()
 const { toggleLoginState, logout } = sessionStore
-const { profile, isAdmin, isLogined } = $(storeToRefs(sessionStore))
+const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 
-const currentRoute = $computed(() => route.name)
+const currentRoute = computed(() => route.name)
 const profileMenu = ref()
 
 const login = toggleLoginState
@@ -117,14 +116,14 @@ const profileItems = computed(() => [
     label: t('oj.profile'),
     icon: 'pi pi-user',
     command: () => {
-      router.push({ name: 'userProfile', params: { uid: profile!.uid } })
+      router.push({ name: 'userProfile', params: { uid: profile.value!.uid } })
     },
   },
   {
     label: t('oj.settings'),
     icon: 'pi pi-cog',
     command: () => {
-      router.push({ name: 'userEdit', params: { uid: profile!.uid } })
+      router.push({ name: 'userEdit', params: { uid: profile.value!.uid } })
     },
   },
   {
@@ -167,8 +166,7 @@ const profileItems = computed(() => [
       <div class="flex gap-3 items-center">
         <div v-if="isLogined" class="flex items-center">
           <Button
-            text plain
-            class="flex gap-2 hover:bg-primary-50 items-center p-2 rounded-lg text-primary transition-colors"
+            text plain class="flex gap-2 items-center p-2 rounded-lg transition-colors"
             @click="toggleProfileMenu"
           >
             <Avatar icon="pi pi-user" shape="circle" />
@@ -186,10 +184,7 @@ const profileItems = computed(() => [
           </Menu>
         </div>
 
-        <Button
-          v-else text :label="`${t('oj.login')} / ${t('oj.register')}`"
-          class="font-medium hover:bg-primary-50 text-primary" @click="login"
-        />
+        <Button v-else text :label="`${t('oj.login')} / ${t('oj.register')}`" class="font-medium" @click="login" />
       </div>
     </template>
   </Menubar>

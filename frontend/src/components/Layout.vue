@@ -30,10 +30,10 @@ function langSelected (lang: string) {
 </script>
 
 <template>
-  <Layout class="app-layout">
+  <Layout class="app-layout bg-emphasis text-color">
     <Header />
     <Content class="layout-content">
-      <router-view class="bg-(--p-content-background) border border-surface md:rounded-xl mx-auto shadow-lg text-color" />
+      <router-view class="bg-(--p-content-background) border border-surface md:rounded-xl mx-auto shadow-lg" />
     </Content>
     <Footer class="layout-footer">
       <RadioGroup v-model="selectedLang" type="button" size="small" class="lang-radio-group" @on-change="langSelected">

@@ -156,13 +156,17 @@ onRouteQueryUpdate(fetch)
 
       <Column header="Created At" field="createdAt" sortable>
         <template #body="{ data }">
-          {{ timePretty(data.createdAt) }}
+          <span class="font-mono">
+            {{ timePretty(data.createdAt) }}
+          </span>
         </template>
       </Column>
 
       <Column header="Last Visited At" field="lastVisitedAt" sortable>
         <template #body="{ data }">
-          {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
+          <span class="font-mono">
+            {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
+          </span>
         </template>
       </Column>
 
