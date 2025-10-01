@@ -1,9 +1,8 @@
-<script setup>
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
-// PrimeVue components
 import Menubar from 'primevue/menubar'
 
 import { computed, ref } from 'vue'
@@ -25,12 +24,22 @@ const profileMenu = ref()
 
 const login = toggleLoginState
 
-function toggleProfileMenu (event) {
+function toggleProfileMenu (event: any) {
   profileMenu.value.toggle(event)
 }
 
 const menuItems = computed(() => {
-  const items = [ {
+  const items = [] as ({
+    label: string
+    icon: string
+    items?: typeof items
+  } | {
+    label: string
+    icon: string
+    route: string
+  })[]
+
+  items.push({
     label: t('oj.home'),
     icon: 'pi pi-home',
     route: 'home',
@@ -66,7 +75,7 @@ const menuItems = computed(() => {
       icon: 'pi pi-question-circle',
       route: 'faq',
     } ],
-  } ]
+  })
 
   if (isAdmin) {
     items.push({
@@ -74,21 +83,27 @@ const menuItems = computed(() => {
       icon: 'pi pi-cog',
       items: [ {
         label: t('oj.create_problem'),
+        icon: 'pi pi-plus',
         route: 'problemCreate',
       }, {
         label: t('oj.create_contest'),
+        icon: 'pi pi-plus',
         route: 'contestCreate',
       }, {
         label: t('oj.create_news'),
+        icon: 'pi pi-plus',
         route: 'newsCreate',
       }, {
         label: t('oj.user_management'),
+        icon: 'pi pi-users',
         route: 'UserManagement',
       }, {
         label: t('oj.tag_management'),
+        icon: 'pi pi-tags',
         route: 'tagManager',
       }, {
         label: t('oj.group_management'),
+        icon: 'pi pi-paperclip',
         route: 'groupManager',
       } ],
     })
@@ -102,14 +117,14 @@ const profileItems = computed(() => [
     label: t('oj.profile'),
     icon: 'pi pi-user',
     command: () => {
-      router.push({ name: 'userProfile', params: { uid: profile.uid } })
+      router.push({ name: 'userProfile', params: { uid: profile!.uid } })
     },
   },
   {
     label: t('oj.settings'),
     icon: 'pi pi-cog',
     command: () => {
-      router.push({ name: 'userEdit', params: { uid: profile.uid } })
+      router.push({ name: 'userEdit', params: { uid: profile!.uid } })
     },
   },
   {
@@ -157,7 +172,7 @@ const profileItems = computed(() => [
             @click="toggleProfileMenu"
           >
             <Avatar icon="pi pi-user" shape="circle" />
-            <span class="font-medium hidden sm:block">{{ profile.uid }}</span>
+            <span class="font-medium hidden sm:block">{{ profile!.uid }}</span>
             <i class="pi pi-chevron-down text-xs" />
           </Button>
 
