@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 const AdminEdit = () => import('@/views/Admin/UserManage/AdminEdit.vue')
 const GroupManager = () => import('@/views/Admin/GroupManager.vue')
 const TagManager = () => import('@/views/Admin/TagManager.vue')
-const UserManager = () => import('@/views/Admin/UserManager.vue')
+const UserManagement = () => import('@/views/Admin/UserManagement.vue')
 const UserEdit = () => import('@/views/Admin/UserManage/UserEdit.vue')
 
 const adminRoutes: Array<RouteRecordRaw> = [
@@ -21,9 +21,9 @@ const adminRoutes: Array<RouteRecordRaw> = [
   },
   {
     path: '/admin/users',
-    name: 'userManager',
-    component: UserManager,
-    meta: { title: 'User Manage', requiresAdmin: true },
+    name: 'UserManagement',
+    component: UserManagement,
+    meta: { title: 'User Management', requiresAdmin: true },
   },
   {
     path: '/userEdit',

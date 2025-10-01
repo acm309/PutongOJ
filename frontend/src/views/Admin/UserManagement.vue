@@ -59,38 +59,45 @@ async function fetch () {
 }
 
 function onSort (event: any) {
-  router.replace({
-    query: {
-      ...route.query,
-      sortBy: event.sortField,
-      sort: event.sortOrder,
-    },
-  })
+  router.replace({ query: {
+    ...route.query,
+    sortBy: event.sortField,
+    sort: event.sortOrder,
+  } })
 }
 
 function onPage (event: any) {
-  router.replace({
-    query: {
-      ...route.query,
-      page: (event.first / event.rows + 1),
-      pageSize: event.rows,
-    },
-  })
+  router.replace({ query: {
+    ...route.query,
+    page: (event.first / event.rows + 1),
+    pageSize: event.rows,
+  } })
 }
 
 function onSearch () {
-  router.replace({
-    query: {
-      ...route.query,
-      keyword: query.value.keyword || undefined,
-      privilege: query.value.privilege,
-      page: 1,
-    },
-  })
+  router.replace({ query: {
+    ...route.query,
+    keyword: query.value.keyword || undefined,
+    privilege: query.value.privilege,
+    page: 1,
+  } })
 }
 
 function onReset () {
-  router.replace({ query: {} })
+  router.replace({ query: {
+    ...route.query,
+    keyword: undefined,
+    privilege: undefined,
+    page: 1,
+  } })
+}
+
+function onView (data: any) {
+  router.push({ name: 'userProfile', params: { uid: data.uid } })
+}
+
+function onEdit (data: any) {
+  router.push({ name: 'userEdit', params: { uid: data.uid } })
 }
 
 onMounted(fetch)
@@ -98,14 +105,18 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="border border-(--p-content-border-color) max-w-7xl md:rounded-xl mx-auto p-0 shadow-lg">
+  <div class="max-w-7xl p-0">
     <div class="border-(--p-content-border-color) border-b p-6">
+      <div class="flex font-semibold gap-4 items-center mb-4">
+        <i class="pi pi-users text-2xl" />
+        <span class="text-xl">User Management</span>
+      </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField class="w-full">
           <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
           <InputText
             v-model="query.keyword" class="w-full" placeholder="Search by username or nickname..."
-            @keypress.enter="onSearch"
+            maxlength="30" @keypress.enter="onSearch"
           />
         </IconField>
 
@@ -133,34 +144,33 @@ onRouteQueryUpdate(fetch)
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
       :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort" @page="onPage"
     >
-      <Column class="font-medium" field="uid" header="Username" sortable frozen />
+      <Column header="Username" field="uid" class="font-medium max-w-48 pl-6 truncate" sortable frozen />
 
-      <Column class="max-w-48 truncate" field="nick" header="Nickname" />
+      <Column header="Nickname" field="nick" class="max-w-48 truncate" />
 
-      <Column field="privilege" header="Privilege">
-        <template #body="{ data: { privilege } }">
-          <Tag :value="getPrivilegeLabel(privilege)" :severity="getPrivilegeSeverity(privilege)" class="font-medium" />
+      <Column header="Privilege" field="privilege">
+        <template #body="{ data }">
+          <Tag :value="getPrivilegeLabel(data.privilege)" :severity="getPrivilegeSeverity(data.privilege)" />
         </template>
       </Column>
 
-      <Column field="createdAt" header="Created At" sortable>
-        <template #body="{ data: { createdAt } }">
-          {{ timePretty(createdAt) }}
+      <Column header="Created At" field="createdAt" sortable>
+        <template #body="{ data }">
+          {{ timePretty(data.createdAt) }}
         </template>
       </Column>
 
-      <Column field="lastVisitedAt" header="Last Visited At" sortable>
-        <template #body="{ data: { lastVisitedAt } }">
-          {{ lastVisitedAt ? timePretty(lastVisitedAt) : 'Not logged yet' }}
+      <Column header="Last Visited At" field="lastVisitedAt" sortable>
+        <template #body="{ data }">
+          {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
         </template>
       </Column>
 
-      <Column header="Actions" class="w-20">
-        <template #body>
+      <Column class="pr-6 py-2 w-20">
+        <template #body="{ data }">
           <div class="flex gap-1 items-center">
-            <Button icon="pi pi-eye" severity="secondary" text rounded />
-            <Button icon="pi pi-pencil" severity="secondary" text rounded />
-            <Button icon="pi pi-ellipsis-v" severity="secondary" text rounded />
+            <Button icon="pi pi-eye" text @click="onView(data)" />
+            <Button icon="pi pi-pencil" text @click="onEdit(data)" />
           </div>
         </template>
       </Column>
