@@ -33,7 +33,7 @@ function langSelected (lang: string) {
   <Layout class="app-layout">
     <Header />
     <Content class="layout-content">
-      <router-view class="border border-(--p-content-border-color) md:rounded-xl mx-auto shadow-lg" />
+      <router-view class="bg-(--p-content-background) border border-surface md:rounded-xl mx-auto shadow-lg text-color" />
     </Content>
     <Footer class="layout-footer">
       <RadioGroup v-model="selectedLang" type="button" size="small" class="lang-radio-group" @on-change="langSelected">
@@ -94,7 +94,6 @@ function langSelected (lang: string) {
     position relative
     padding 40px
     max-width 1280px
-    background #fff
   .wrap-loading
     z-index 50
 

@@ -106,7 +106,7 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-(--p-content-border-color) border-b p-6">
+    <div class="border-b border-surface p-6">
       <div class="flex font-semibold gap-4 items-center mb-4">
         <i class="pi pi-users text-2xl" />
         <span class="text-xl">User Management</span>
@@ -181,7 +181,7 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <Paginator
-      class="border-(--p-content-border-color) border-t bottom-0 sticky"
+      class="border-surface border-t bottom-0 sticky"
       :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       current-page-report-template="{first} to {last} of {totalRecords}" @page="onPage"
