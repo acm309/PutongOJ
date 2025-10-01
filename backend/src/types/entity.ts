@@ -1,8 +1,9 @@
 import type { ObjectId } from 'mongoose'
-import type { ContestOption, CourseRole, Paginated } from '.'
+import type { ContestOption, CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { UserEntity } from '../models/User'
 import type { encrypt, problemType, status, tagColors } from '../utils/constants'
+import { Paginated } from '@putongoj/shared'
 
 // Common
 
