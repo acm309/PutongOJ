@@ -104,7 +104,7 @@ else:
             </td>
           </tr>
           <tr>
-            <td class="info ce">
+            <td class="ce info">
               <b>{{ isZH ? '编译错误' : 'CE' }}</b><br>Compile Error
             </td>
             <td v-if="isZH">
@@ -115,7 +115,7 @@ else:
             </td>
           </tr>
           <tr>
-            <td class="info ac">
+            <td class="ac info">
               <b>{{ isZH ? '通过' : 'AC' }}</b><br>Accepted
             </td>
             <td v-if="isZH">

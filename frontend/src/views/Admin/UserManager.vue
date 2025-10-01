@@ -98,9 +98,9 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto p-0 border border-(--p-content-border-color) md:rounded-xl shadow-lg">
-    <div class="p-6 border-b border-(--p-content-border-color)">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+  <div class="border border-(--p-content-border-color) max-w-7xl md:rounded-xl mx-auto p-0 shadow-lg">
+    <div class="border-(--p-content-border-color) border-b p-6">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField class="w-full">
           <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
           <InputText
@@ -121,7 +121,7 @@ onRouteQueryUpdate(fetch)
           </template>
         </Select>
 
-        <div class="flex items-center gap-2 justify-end">
+        <div class="flex gap-2 items-center justify-end">
           <Button icon="pi pi-refresh" severity="secondary" outlined @click="fetch" />
           <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="onReset" />
           <Button label="Search" icon="pi pi-search" @click="onSearch" />
@@ -130,7 +130,7 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <DataTable
-      class="whitespace-nowrap -mb-px" :value="docs" sort-mode="single" :sort-field="query.sortBy"
+      class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
       :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort" @page="onPage"
     >
       <Column class="font-medium" field="uid" header="Username" sortable frozen />
@@ -157,7 +157,7 @@ onRouteQueryUpdate(fetch)
 
       <Column header="Actions" class="w-20">
         <template #body>
-          <div class="flex items-center gap-1">
+          <div class="flex gap-1 items-center">
             <Button icon="pi pi-eye" severity="secondary" text rounded />
             <Button icon="pi pi-pencil" severity="secondary" text rounded />
             <Button icon="pi pi-ellipsis-v" severity="secondary" text rounded />
@@ -171,7 +171,7 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <Paginator
-      class="sticky bottom-0 border-t border-(--p-content-border-color)"
+      class="border-(--p-content-border-color) border-t bottom-0 sticky"
       :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       current-page-report-template="{first} to {last} of {totalRecords}" @page="onPage"

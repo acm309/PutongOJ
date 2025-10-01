@@ -35,6 +35,7 @@ export default defineConfig({
         manualChunks: {
           common: [ 'vue', 'pinia', 'vue-router', 'axios' ],
           interface: [ 'view-ui-plus' ],
+          primevue: [ 'primevue' ],
         },
       },
     },
