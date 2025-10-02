@@ -5,18 +5,14 @@ import {
   Button,
   Card,
   Col,
-  Content,
   DatePicker,
   Dropdown,
   DropdownItem,
   DropdownMenu,
-  Footer,
   Form,
   FormItem,
-  Header,
   Icon,
   Input,
-  Layout,
   Menu,
   MenuItem,
   Message,
@@ -96,13 +92,9 @@ app.component('Transfer', Transfer)
 app.component('Steps', Steps)
 app.component('Step', Step)
 app.component('DatePicker', DatePicker)
-app.component('Layout', Layout)
-app.component('Header', Header)
 app.component('Menu', Menu)
 app.component('MenuItem', MenuItem)
 app.component('Submenu', Submenu)
-app.component('Content', Content)
-app.component('Footer', Footer)
 app.component('Modal', Modal)
 app.component('Form', Form)
 app.component('FormItem', FormItem)
