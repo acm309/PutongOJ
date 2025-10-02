@@ -1,4 +1,5 @@
 import type { CourseRole } from '@backend/types'
+import { UserPrivilege } from '@putongoj/shared'
 
 export const result = {
   0: 'Pending',
@@ -108,6 +109,13 @@ export const courseRoleFields: readonly (keyof CourseRole)[] = [
   'manageProblem',
   'manageContest',
   'manageCourse',
+]
+
+export const privilegeOptions = [
+  { label: 'Banned', value: UserPrivilege.Banned },
+  { label: 'User', value: UserPrivilege.User },
+  { label: 'Admin', value: UserPrivilege.Admin },
+  { label: 'Root', value: UserPrivilege.Root },
 ]
 
 export default {

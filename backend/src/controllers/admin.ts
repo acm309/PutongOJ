@@ -1,10 +1,22 @@
 import type { Context } from 'koa'
 import {
+  AdminUserDetailQueryResultSchema,
+  AdminUserEditPayloadSchema,
   AdminUserListQueryResultSchema,
   AdminUserListQuerySchema,
+  ErrorCode,
 } from '@putongoj/shared'
+import { loadProfile } from '../middlewares/authn'
+import cryptoService from '../services/crypto'
 import userServices from '../services/user'
-import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
+import {
+  createEnvelopedResponse,
+  createErrorResponse,
+  createZodErrorResponse,
+  isComplexPwd,
+  passwordHash,
+} from '../utils'
+import { loadUser } from './user'
 
 export async function findUsers (ctx: Context) {
   const query = AdminUserListQuerySchema.safeParse(ctx.request.query)
@@ -17,8 +29,65 @@ export async function findUsers (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function getUser (ctx: Context) {
+  const user = await loadUser(ctx)
+  const result = AdminUserDetailQueryResultSchema.encode(user)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function updateUser (ctx: Context) {
+  const payload = AdminUserEditPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  let pwd: string | undefined
+  if (payload.data.password) {
+    try {
+      const password = await cryptoService.decryptData(payload.data.password)
+      if (!isComplexPwd(password)) {
+        return createErrorResponse(ctx,
+          'Password is not complex enough', ErrorCode.BadRequest,
+        )
+      }
+      pwd = passwordHash(password)
+    } catch {
+      return createErrorResponse(ctx,
+        'Failed to decrypt password field', ErrorCode.BadRequest,
+      )
+    }
+  }
+
+  const user = await loadUser(ctx)
+  const profile = await loadProfile(ctx)
+  if (profile.privilege < user.privilege) {
+    return createErrorResponse(ctx,
+      'Insufficient privilege to edit this user', ErrorCode.Forbidden,
+    )
+  }
+  if (payload.data.privilege !== undefined) {
+    if (profile.uid === user.id) {
+      return createErrorResponse(ctx,
+        'Cannot change your own privilege', ErrorCode.Forbidden,
+      )
+    }
+    if (profile.privilege <= payload.data.privilege) {
+      return createErrorResponse(ctx,
+        'Cannot elevate user privilege to equal or higher than yourself', ErrorCode.Forbidden,
+      )
+    }
+  }
+
+  const updatedUser = await userServices.updateUser(user, {
+    ...payload.data, pwd,
+  })
+  const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const adminController = {
   findUsers,
+  getUser,
+  updateUser,
 } as const
 
 export default adminController

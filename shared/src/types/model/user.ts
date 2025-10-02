@@ -8,7 +8,7 @@ export const UserModelSchema = z.object({
   privilege: z.enum(UserPrivilege),
   nick: z.string().max(30),
   motto: z.string().max(300),
-  mail: z.email(),
+  mail: z.union([z.email(), z.literal('')]),
   school: z.string().max(30),
   gid: z.array(z.int().nonnegative()),
   submit: z.int().nonnegative(),

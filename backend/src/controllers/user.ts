@@ -8,6 +8,7 @@ import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import cryptoService from '../services/crypto'
+import userServices from '../services/user'
 import { createEnvelopedResponse, createErrorResponse, isComplexPwd, only, passwordHash } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 import logger from '../utils/logger'
@@ -24,9 +25,7 @@ export async function loadUser (
     return ctx.state.user
   }
 
-  const user = await User.findOne({
-    uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
-  })
+  const user = await userServices.getUser(uid)
   if (!user) {
     ctx.throw(...ERR_NOT_FOUND)
   }

@@ -7,8 +7,18 @@ const adminRouter = new Router({
 })
 
 adminRouter.get('/user',
-  authnMiddleware.loginRequire,
+  authnMiddleware.adminRequire,
   adminController.findUsers,
+)
+
+adminRouter.get('/user/:uid',
+  authnMiddleware.adminRequire,
+  adminController.getUser,
+)
+
+adminRouter.patch('/user/:uid',
+  authnMiddleware.adminRequire,
+  adminController.updateUser,
 )
 
 export default adminRouter

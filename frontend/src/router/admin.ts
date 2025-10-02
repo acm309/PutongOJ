@@ -4,6 +4,7 @@ const AdminEdit = () => import('@/views/Admin/UserManage/AdminEdit.vue')
 const GroupManager = () => import('@/views/Admin/GroupManager.vue')
 const TagManager = () => import('@/views/Admin/TagManager.vue')
 const UserManagement = () => import('@/views/Admin/UserManagement.vue')
+const UserManagementDetail = () => import('@/views/Admin/UserManagementDetail.vue')
 const UserEdit = () => import('@/views/Admin/UserManage/UserEdit.vue')
 
 const adminRoutes: Array<RouteRecordRaw> = [
@@ -20,9 +21,15 @@ const adminRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'Problem Tag Manage', requiresAdmin: true },
   },
   {
-    path: '/admin/users',
+    path: '/admin/user',
     name: 'UserManagement',
     component: UserManagement,
+    meta: { title: 'User Management', requiresAdmin: true },
+  },
+  {
+    path: '/admin/user/:uid',
+    name: 'UserManagementDetail',
+    component: UserManagementDetail,
     meta: { title: 'User Management', requiresAdmin: true },
   },
   {

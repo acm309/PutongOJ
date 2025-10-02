@@ -24,3 +24,27 @@ export const AdminUserListQueryResultSchema = PaginatedSchema(z.object({
 }))
 
 export type AdminUserListQueryResult = z.input<typeof AdminUserListQueryResultSchema>
+
+export const AdminUserDetailQueryResultSchema = z.object({
+  uid: UserModelSchema.shape.uid,
+  privilege: UserModelSchema.shape.privilege,
+  nick: UserModelSchema.shape.nick,
+  motto: UserModelSchema.shape.motto,
+  mail: UserModelSchema.shape.mail,
+  school: UserModelSchema.shape.school,
+  lastVisitedAt: UserModelSchema.shape.lastVisitedAt,
+  createdAt: UserModelSchema.shape.createdAt,
+})
+
+export type AdminUserDetailQueryResult = z.infer<typeof AdminUserDetailQueryResultSchema>
+
+export const AdminUserEditPayloadSchema = z.object({
+  privilege: z.enum(UserPrivilege).optional(),
+  nick: UserModelSchema.shape.nick.optional(),
+  motto: UserModelSchema.shape.motto.optional(),
+  mail: UserModelSchema.shape.mail.optional(),
+  school: UserModelSchema.shape.school.optional(),
+  password: z.base64().optional(),
+})
+
+export type AdminUserEditPayload = z.infer<typeof AdminUserEditPayloadSchema>

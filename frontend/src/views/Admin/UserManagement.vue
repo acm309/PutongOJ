@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { AdminUserListQuery, AdminUserListQueryResult } from '@putongoj/shared'
-import { AdminUserListQuerySchema, UserPrivilege } from '@putongoj/shared'
+import { AdminUserListQuerySchema } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -14,6 +14,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findUsers } from '@/api/admin'
+import { privilegeOptions } from '@/utils/constant'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -28,13 +29,6 @@ const docs = ref([] as AdminUserListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 
-const privilegeOptions = [
-  { label: 'Banned', value: UserPrivilege.Banned },
-  { label: 'User', value: UserPrivilege.User },
-  { label: 'Admin', value: UserPrivilege.Admin },
-  { label: 'Root', value: UserPrivilege.Root },
-]
-
 async function fetch () {
   const parsed = AdminUserListQuerySchema.safeParse(route.query)
   if (parsed.success) {
@@ -48,7 +42,7 @@ async function fetch () {
   const resp = await findUsers(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error('Failed to fetch users', resp.message)
+    message.error('Failed to fetch user list', resp.message)
     docs.value = []
     total.value = 0
     return
@@ -97,7 +91,7 @@ function onView (data: any) {
 }
 
 function onEdit (data: any) {
-  router.push({ name: 'userEdit', params: { uid: data.uid } })
+  router.push({ name: 'UserManagementDetail', params: { uid: data.uid } })
 }
 
 onMounted(fetch)
@@ -109,7 +103,9 @@ onRouteQueryUpdate(fetch)
     <div class="border-b border-surface p-6">
       <div class="flex font-semibold gap-4 items-center mb-4">
         <i class="pi pi-users text-2xl" />
-        <span class="text-xl">User Management</span>
+        <h1 class="text-xl">
+          User Management
+        </h1>
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField class="w-full">
