@@ -24,6 +24,12 @@ COPY backend/ backend/
 
 RUN pnpm --filter @putongoj/frontend build
 
+# Backend deps
+FROM base_builder AS backend_deps
+WORKDIR /app
+
+RUN pnpm --filter @putongoj/backend deploy /app/backend_deploy
+
 # Backend builder
 FROM base_builder AS backend_builder
 WORKDIR /app
@@ -31,16 +37,15 @@ WORKDIR /app
 COPY backend/ backend/
 
 RUN pnpm --filter @putongoj/backend build
-RUN pnpm --filter @putongoj/backend deploy /app/backend_deploy
 
 # Runtime
 FROM node:24-alpine AS runtime
 WORKDIR /app
 
-COPY --from=backend_builder /app/backend_deploy/node_modules ./node_modules
-COPY --from=backend_builder /app/backend_deploy/package.json ./package.json
+COPY --from=backend_deps /app/backend_deploy/node_modules ./node_modules
+COPY --from=backend_deps /app/backend_deploy/package.json ./package.json
 
-COPY --from=backend_builder /app/backend_deploy/dist ./dist
+COPY --from=backend_builder /app/backend/dist ./dist
 COPY --from=frontend_builder /app/frontend/dist ./public
 
 COPY backend/setup.js .
