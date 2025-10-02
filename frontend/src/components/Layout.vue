@@ -45,7 +45,7 @@ function onLangSelected (event: any) {
         class="bg-(--p-content-background) border border-surface layout-content md:rounded-xl mx-auto shadow-lg"
       />
     </div>
-    <div class="50px] p-8 padding-[24px text-base/relaxed text-center">
+    <div class="p-8 text-base/relaxed text-center">
       <SelectButton
         v-model="selectedLang" class="block" :options="langs" option-label="label" option-value="value"
         @change="onLangSelected"

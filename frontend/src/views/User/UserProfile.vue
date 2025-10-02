@@ -135,6 +135,7 @@ const username = $computed(() => user.nick && user.nick !== user.uid ? user.uid 
     flex 1
 
 .user-avatar
+  display inline-block
   width 100%
   max-width 256px
   border-radius 4px
