@@ -70,7 +70,7 @@ export async function updateUser (ctx: Context) {
         'Cannot change your own privilege', ErrorCode.Forbidden,
       )
     }
-    if (profile.privilege <= payload.data.privilege) {
+    if (!profile.isRoot && profile.privilege <= payload.data.privilege) {
       return createErrorResponse(ctx,
         'Cannot elevate user privilege to equal or higher than yourself', ErrorCode.Forbidden,
       )
