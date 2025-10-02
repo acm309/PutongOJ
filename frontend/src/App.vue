@@ -76,10 +76,7 @@ watch(() => route.meta, () => changeDomTitle(route.meta))
   </div>
 </template>
 
-<style lang="css">
-@import "tailwindcss" important;
-@import "tailwindcss-primeui";
-</style>
+<style src="./styles/tailwind.css" />
 
 <style lang="stylus">
 html
