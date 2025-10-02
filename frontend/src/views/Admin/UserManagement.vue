@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { AdminUsersQuery, AdminUsersQueryResult } from '@putongoj/shared'
-import { AdminUsersQuerySchema, UserPrivilege } from '@putongoj/shared'
+import type { AdminUserListQuery, AdminUserListQueryResult } from '@putongoj/shared'
+import { AdminUserListQuerySchema, UserPrivilege } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -23,8 +23,8 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const query = ref({} as AdminUsersQuery)
-const docs = ref([] as AdminUsersQueryResult['docs'])
+const query = ref({} as AdminUserListQuery)
+const docs = ref([] as AdminUserListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 
@@ -36,7 +36,7 @@ const privilegeOptions = [
 ]
 
 async function fetch () {
-  const parsed = AdminUsersQuerySchema.safeParse(route.query)
+  const parsed = AdminUserListQuerySchema.safeParse(route.query)
   if (parsed.success) {
     query.value = parsed.data
   } else {

@@ -1,19 +1,19 @@
 import type { Context } from 'koa'
 import {
-  AdminUsersQueryResultSchema,
-  AdminUsersQuerySchema,
+  AdminUserListQueryResultSchema,
+  AdminUserListQuerySchema,
 } from '@putongoj/shared'
 import userServices from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 
 export async function findUsers (ctx: Context) {
-  const query = AdminUsersQuerySchema.safeParse(ctx.request.query)
+  const query = AdminUserListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
 
   const users = await userServices.findUsers(query.data)
-  const result = AdminUsersQueryResultSchema.encode(users)
+  const result = AdminUserListQueryResultSchema.encode(users)
   return createEnvelopedResponse(ctx, result)
 }
 

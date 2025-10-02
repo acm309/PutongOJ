@@ -4,7 +4,7 @@ import { stringToInt } from '../codec.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
-export const AdminUsersQuerySchema = z.object({
+export const AdminUserListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
@@ -13,9 +13,9 @@ export const AdminUsersQuerySchema = z.object({
   privilege: stringToInt.pipe(z.enum(UserPrivilege)).optional(),
 })
 
-export type AdminUsersQuery = z.infer<typeof AdminUsersQuerySchema>
+export type AdminUserListQuery = z.infer<typeof AdminUserListQuerySchema>
 
-export const AdminUsersQueryResultSchema = PaginatedSchema(z.object({
+export const AdminUserListQueryResultSchema = PaginatedSchema(z.object({
   uid: UserModelSchema.shape.uid,
   privilege: UserModelSchema.shape.privilege,
   nick: UserModelSchema.shape.nick.optional(),
@@ -23,4 +23,4 @@ export const AdminUsersQueryResultSchema = PaginatedSchema(z.object({
   lastVisitedAt: UserModelSchema.shape.lastVisitedAt.optional(),
 }))
 
-export type AdminUsersQueryResult = z.input<typeof AdminUsersQueryResultSchema>
+export type AdminUserListQueryResult = z.input<typeof AdminUserListQueryResultSchema>
