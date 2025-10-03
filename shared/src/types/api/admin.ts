@@ -8,7 +8,7 @@ export const AdminUserListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['uid', 'createdAt', 'lastVisitedAt']).default('createdAt'),
+  sortBy: z.enum(['uid', 'createdAt', 'lastVisitedAt']).default('lastVisitedAt'),
   keyword: z.string().max(30).optional(),
   privilege: stringToInt.pipe(z.enum(UserPrivilege)).optional(),
 })
