@@ -55,7 +55,6 @@ app.use(PrimeVue, {
     options: {
       prefix: 'p',
       darkModeSelector: false,
-      ripple: true,
     },
   },
 })

@@ -148,14 +148,14 @@ const profileItems = computed(() => [
     <template #item="{ item, props, hasSubmenu }">
       <router-link v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
         <a
-          v-ripple :href="href" v-bind="props.action"
+          :href="href" v-bind="props.action"
           :class="{ 'text-(--p-primary-color) font-semibold': currentRoute === item.route }" @click="navigate"
         >
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
         </a>
       </router-link>
-      <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
+      <a v-else :href="item.url" :target="item.target" v-bind="props.action">
         <span :class="item.icon" />
         <span>{{ item.label }}</span>
         <span v-if="hasSubmenu" class="pi pi-angle-down pi-fw" />
@@ -176,7 +176,7 @@ const profileItems = computed(() => [
 
           <Menu ref="profileMenu" :model="profileItems" popup>
             <template #item="{ item, props }">
-              <a v-ripple class="flex items-center" v-bind="props.action">
+              <a class="flex items-center" v-bind="props.action">
                 <span :class="item.icon" />
                 <span>{{ item.label }}</span>
               </a>

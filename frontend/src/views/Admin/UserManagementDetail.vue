@@ -248,14 +248,14 @@ onRouteParamUpdate(fetch)
           <IftaLabel>
             <InputText
               id="new-password" v-model="passwordNew" class="w-full" type="password"
-              placeholder="Enter new password" required
+              placeholder="Enter new password" required autocomplete="new-password"
             />
             <label for="new-password">New Password</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="confirm-password" v-model="passwordConfirm" class="w-full" type="password"
-              placeholder="Confirm new password" required
+              placeholder="Confirm new password" required autocomplete="new-password"
               :invalid="!!passwordConfirm && passwordConfirm !== passwordNew"
             />
             <label for="confirm-password">Confirm Password</label>
