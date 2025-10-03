@@ -18,7 +18,7 @@ import {
 } from '../utils'
 import { loadUser } from './user'
 
-export async function findUsers (ctx: Context) {
+export async function findUsers(ctx: Context) {
   const query = AdminUserListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
@@ -29,32 +29,35 @@ export async function findUsers (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-export async function getUser (ctx: Context) {
+export async function getUser(ctx: Context) {
   const user = await loadUser(ctx)
   const result = AdminUserDetailQueryResultSchema.encode(user)
   return createEnvelopedResponse(ctx, result)
 }
 
-export async function updateUser (ctx: Context) {
+export async function updateUser(ctx: Context) {
   const payload = AdminUserEditPayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
   }
-  let pwd: string | undefined
+  let password: string | undefined
   if (payload.data.password) {
     try {
-      const password = await cryptoService.decryptData(payload.data.password)
-      if (!isComplexPwd(password)) {
-        return createErrorResponse(ctx,
-          'Password is not complex enough', ErrorCode.BadRequest,
-        )
-      }
-      pwd = passwordHash(password)
+      password = await cryptoService.decryptData(payload.data.password)
     } catch {
       return createErrorResponse(ctx,
         'Failed to decrypt password field', ErrorCode.BadRequest,
       )
     }
+  }
+  let pwd: string | undefined
+  if (password !== undefined) {
+    if (!isComplexPwd(password)) {
+      return createErrorResponse(ctx,
+        'Password is not complex enough', ErrorCode.BadRequest,
+      )
+    }
+    pwd = passwordHash(password)
   }
 
   const user = await loadUser(ctx)
