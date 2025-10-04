@@ -1,5 +1,6 @@
 import type { Context } from 'koa'
 import {
+  AdminUserChangePasswordPayloadSchema,
   AdminUserDetailQueryResultSchema,
   AdminUserEditPayloadSchema,
   AdminUserListQueryResultSchema,
@@ -40,25 +41,6 @@ export async function updateUser (ctx: Context) {
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
   }
-  let password: string | undefined
-  if (payload.data.password) {
-    try {
-      password = await cryptoService.decryptData(payload.data.password)
-    } catch {
-      return createErrorResponse(ctx,
-        'Failed to decrypt password field', ErrorCode.BadRequest,
-      )
-    }
-  }
-  let pwd: string | undefined
-  if (password !== undefined) {
-    if (!isComplexPwd(password)) {
-      return createErrorResponse(ctx,
-        'Password is not complex enough', ErrorCode.BadRequest,
-      )
-    }
-    pwd = passwordHash(password)
-  }
 
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
@@ -83,10 +65,39 @@ export async function updateUser (ctx: Context) {
   try {
     const { privilege, nick, motto, school, mail } = payload.data
     const updatedUser = await userServices.updateUser(user, {
-      privilege, nick, motto, school, mail, pwd,
+      privilege, nick, motto, school, mail,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
     return createEnvelopedResponse(ctx, result)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
+export async function updateUserPassword (ctx: Context) {
+  const payload = AdminUserChangePasswordPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  let password: string | undefined
+  try {
+    password = await cryptoService.decryptData(payload.data.newPassword)
+  } catch {
+    return createErrorResponse(ctx,
+      'Failed to decrypt password field', ErrorCode.BadRequest,
+    )
+  }
+  if (!isComplexPwd(password)) {
+    return createErrorResponse(ctx,
+      'Password is not complex enough', ErrorCode.BadRequest,
+    )
+  }
+  const pwd = passwordHash(password)
+  const user = await loadUser(ctx)
+
+  try {
+    await userServices.updateUser(user, { pwd })
+    return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
   }
@@ -96,6 +107,7 @@ const adminController = {
   findUsers,
   getUser,
   updateUser,
+  updateUserPassword,
 } as const
 
 export default adminController

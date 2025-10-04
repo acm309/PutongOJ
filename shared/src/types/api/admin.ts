@@ -44,7 +44,12 @@ export const AdminUserEditPayloadSchema = z.object({
   motto: UserModelSchema.shape.motto.optional(),
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school.optional(),
-  password: z.base64().optional(),
 })
 
 export type AdminUserEditPayload = z.infer<typeof AdminUserEditPayloadSchema>
+
+export const AdminUserChangePasswordPayloadSchema = z.object({
+  newPassword: z.base64(),
+})
+
+export type AdminUserChangePasswordPayload = z.infer<typeof AdminUserChangePasswordPayloadSchema>

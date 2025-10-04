@@ -1,4 +1,5 @@
 import type {
+  AdminUserChangePasswordPayload,
   AdminUserDetailQueryResult,
   AdminUserEditPayload,
   AdminUserListQuery,
@@ -18,6 +19,11 @@ export async function getUser (uid: string) {
 }
 
 export async function updateUser (uid: string, payload: AdminUserEditPayload) {
-  const { data } = await instance.patch(`/admin/user/${encodeURIComponent(uid)}`, payload)
+  const { data } = await instance.put(`/admin/user/${encodeURIComponent(uid)}`, payload)
   return data as Enveloped<AdminUserDetailQueryResult>
+}
+
+export async function updateUserPassword (uid: string, payload: AdminUserChangePasswordPayload) {
+  const { data } = await instance.put(`/admin/user/${encodeURIComponent(uid)}/password`, payload)
+  return data as Enveloped<null>
 }

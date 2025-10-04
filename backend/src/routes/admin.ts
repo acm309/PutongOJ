@@ -16,9 +16,14 @@ adminRouter.get('/user/:uid',
   adminController.getUser,
 )
 
-adminRouter.patch('/user/:uid',
+adminRouter.put('/user/:uid',
   authnMiddleware.adminRequire,
   adminController.updateUser,
+)
+
+adminRouter.put('/user/:uid/password',
+  authnMiddleware.adminRequire,
+  adminController.updateUserPassword,
 )
 
 export default adminRouter

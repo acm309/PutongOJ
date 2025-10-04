@@ -12,7 +12,7 @@ import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getUser, updateUser } from '@/api/admin'
+import { getUser, updateUser, updateUserPassword } from '@/api/admin'
 import { useRootStore } from '@/store'
 import { privilegeOptions } from '@/utils/constant'
 import { encryptData } from '@/utils/crypto'
@@ -27,7 +27,7 @@ const { changeDomTitle } = useRootStore()
 
 const uid = computed(() => route.params.uid as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
-const editingUser = ref<Omit<AdminUserEditPayload, 'password'>>({})
+const editingUser = ref<AdminUserEditPayload>({})
 const loading = ref(false)
 const saving = ref(false)
 const passwordDialog = ref(false)
@@ -123,8 +123,8 @@ async function changePassword () {
   }
 
   saving.value = true
-  const resp = await updateUser(uid.value, {
-    password: await encryptData(newPassword.value),
+  const resp = await updateUserPassword(uid.value, {
+    newPassword: await encryptData(newPassword.value),
   })
   saving.value = false
   if (!resp.success) {
