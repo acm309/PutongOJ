@@ -3,14 +3,12 @@ import type { UserDocument } from '../models/User'
 import difference from 'lodash/difference'
 import escapeRegExp from 'lodash/escapeRegExp'
 import config from '../config'
-import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import userServices from '../services/user'
-import { isComplexPwd, only, passwordHash } from '../utils'
+import { only } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
-import logger from '../utils/logger'
 
 export async function loadUser (
   ctx: Context,
@@ -102,62 +100,9 @@ const findOne = async (ctx: Context) => {
   }
 }
 
-const update = async (ctx: Context) => {
-  const profile = await loadProfile(ctx)
-  const user = await loadUser(ctx)
-
-  if (!(
-    profile.uid === user.uid || (
-      user.privilege === config.privilege.Root
-        ? profile.isRoot
-        : profile.isAdmin
-    ))
-  ) {
-    ctx.throw(403, 'You don\'t have permission to change this user\'s information!')
-  }
-
-  const opt = ctx.request.body
-  const fields = [ 'nick', 'motto', 'school', 'mail' ] as const
-  fields.forEach((field) => {
-    if (typeof opt[field] === 'string') {
-      user[field] = opt[field]
-    }
-  })
-
-  const privilege = Number.parseInt(opt.privilege ?? user.privilege)
-  if (privilege !== user.privilege && !(
-    profile.isRoot
-    && profile.uid !== user.uid
-  )) {
-    ctx.throw(403, 'You don\'t have permission to change the privilege!')
-  }
-  user.privilege = privilege
-
-  const oldPwd = String(opt.oldPwd || '')
-  const newPwd = String(opt.newPwd || '')
-  if (newPwd !== '') {
-    if (user.pwd !== passwordHash(oldPwd) && !profile.isAdmin) {
-      ctx.throw(400, 'Old password is wrong!')
-    }
-    if (!isComplexPwd(newPwd)) {
-      ctx.throw(400, 'The new password is not complex enough!')
-    }
-    user.pwd = passwordHash(newPwd)
-  }
-
-  try {
-    await user.save()
-    logger.info(`User <${user.uid}> is updated by user <${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-  ctx.body = {}
-}
-
 const userController = {
   find,
   findOne,
-  update,
 } as const
 
 export default userController

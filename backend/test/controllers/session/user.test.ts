@@ -34,10 +34,11 @@ test('User logout', async (t) => {
 
   // after loging out, users can not update his/her info
   res = await request
-    .put('/api/user/admin')
-    .send({ nick: 'failed' })
+    .get('/api/account/profile')
 
-  t.is(res.status, 401)
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.data, null)
 })
 
 test.after.always('close server', () => {

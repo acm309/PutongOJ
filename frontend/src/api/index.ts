@@ -31,12 +31,6 @@ const user = {
     instance.get(`/user/${data.uid}`, { params: data }),
   find: (data: { [key: string]: any }) =>
     instance.get<Paginated<User>>('/user/list', { params: data }),
-  userRegister: (data: { [key: string]: any }) =>
-    instance.post<Enveloped<null>>('/user', data),
-  update: (data: { [key: string]: any }) =>
-    instance.put(`/user/${data.uid}`, data),
-  delete: (data: { [key: string]: any }) =>
-    instance.delete(`/user/${data.uid}`, data),
 }
 
 const solution = {

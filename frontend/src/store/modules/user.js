@@ -15,10 +15,6 @@ export const useUserStore = defineStore('user', {
     adminList: [],
   }),
   actions: {
-    async register (payload) {
-      const { data } = await api.user.userRegister(payload)
-      return data
-    },
     async find (payload) {
       const { data } = await api.user.find(payload)
       this.list = data.docs
@@ -30,13 +26,6 @@ export const useUserStore = defineStore('user', {
       this.solved = data.solved
       this.unsolved = data.unsolved
       this.fetchAvatar()
-    },
-    update (payoad) {
-      this.fetchAvatar()
-      return api.user.update(payoad)
-    },
-    delete (payload) {
-      return api.user.delete(payload)
     },
     async fetchAvatar () {
       this.user.avatar = null
