@@ -15,13 +15,13 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const message = useMessage()
-const { toggleLoginState, logout } = sessionStore
+const { toggleAuthnDialog, userLogout } = sessionStore
 const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
 
-const login = toggleLoginState
+const login = toggleAuthnDialog
 
 function toggleProfileMenu (event: any) {
   profileMenu.value.toggle(event)
@@ -133,7 +133,7 @@ const profileItems = computed(() => [
     label: t('oj.logout'),
     icon: 'pi pi-sign-out',
     command: async () => {
-      await logout()
+      await userLogout()
       message.success('User logged out', 'Byebye!')
     },
   },

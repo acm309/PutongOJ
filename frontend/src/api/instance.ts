@@ -1,6 +1,4 @@
-import type { Profile } from '@/types'
 import axios from 'axios'
-import { useSessionStore } from '../store/modules/session'
 
 // 设置全局axios默认值
 axios.defaults.baseURL = '/api/'
@@ -15,12 +13,7 @@ export function setErrorHandler (handler: typeof errHandler) {
   errHandler = handler
 }
 
-instance.interceptors.response.use((resp) => {
-  const data: { profile: Profile | null } = resp.data
-  if (data.profile)
-    useSessionStore().setLoginProfile(data.profile)
-  return resp
-}, (err) => {
+instance.interceptors.response.use(resp => resp, (err) => {
   if (errHandler) {
     errHandler(err)
   } else {

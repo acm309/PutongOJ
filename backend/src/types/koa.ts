@@ -1,4 +1,5 @@
-import type { CourseRole, SessionProfile } from '.'
+import type { AccountSession } from '@putongoj/shared'
+import type { CourseRole } from '.'
 import type { ContestDocumentPopulated } from '../models/Contest'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
@@ -23,7 +24,7 @@ declare module 'koa' {
   interface DefaultContext {
     state: DefaultState
     session: {
-      profile?: SessionProfile
+      profile?: AccountSession
     }
   }
 }

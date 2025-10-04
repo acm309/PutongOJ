@@ -1,191 +1,267 @@
 <script lang="ts" setup>
 import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
-import type { Message } from 'view-ui-plus'
-import type { Ref } from 'vue'
+import type { ErrorEnveloped } from '@putongoj/shared'
+import { ErrorCode } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
-import { Button, Divider, Form, FormItem, Input, Modal, Title } from 'view-ui-plus'
-import { computed, inject, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import Divider from 'primevue/divider'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import { userLogin, userRegister } from '@/api/account'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
-import { useUserStore } from '@/store/modules/user'
 import { encryptData } from '@/utils/crypto'
+import { useMessage } from '@/utils/message'
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const message = useMessage()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
-const userStore = useUserStore()
-const { register } = userStore
-const { userLogin, toggleLoginState: toggleModal } = sessionStore
+
 const { website } = storeToRefs(rootStore)
-const modalOpen = computed(() => sessionStore.loginDialog)
-const message = inject('$Message') as typeof Message
+const { authnDialog } = storeToRefs(sessionStore)
 
-const loginForm = ref(null) as Ref<any>
-const registerForm = ref(null) as Ref<any>
-
-enum TabType {
-  login = 'login',
-  register = 'register',
+enum AuthnDialogTab {
+  LOGIN = 'login',
+  REGISTER = 'register',
 }
-const tab = ref(TabType.login)
 
-const form = ref({
-  uid: '',
-  pwd: '',
-  checkPwd: '',
+const loading = ref(false)
+const currentTab = ref(AuthnDialogTab.LOGIN)
+const authnDialogVisible = ref(false)
+
+const isLogin = computed(() => currentTab.value === AuthnDialogTab.LOGIN)
+const hasOAuthEnabled = computed(() => Object.values(website.value.oauthEnabled).includes(true))
+
+const formData = ref({
+  username: '',
+  password: '',
+  confirmPassword: '',
+})
+const fieldValidity = ref({
+  username: true,
+  password: true,
+  confirmPassword: true,
 })
 
-function checkPwdValidator (_: any, value: string, callback: (error?: Error) => void) {
-  const error = value !== form.value.pwd ? new Error(t('oj.password_not_match')) : null
-  if (error) { callback(error) } else { callback() }
+function resetValidity () {
+  fieldValidity.value = { username: true, password: true, confirmPassword: true }
 }
 
-const basicRules = computed(() => ({
-  uid: [ { required: true, message: t('oj.username_missing'), trigger: 'change' } ],
-  pwd: [ { required: true, message: t('oj.password_missing'), trigger: 'change' } ],
-}))
+function validateForm (): boolean {
+  resetValidity()
 
-const loginRules = basicRules
-const registerRules = computed(() => ({
-  uid: [
-    ...basicRules.value.uid,
-    { min: 3, max: 20, message: t('oj.username_length_requirement'), trigger: 'change' },
-    { required: true, type: 'string', pattern: /^[\w-]+$/, message: t('oj.username_char_requirement'), trigger: 'change' },
-  ],
-  pwd: [
-    { required: true, message: t('oj.password_missing'), trigger: 'change' },
-    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, message: t('oj.password_requirement'), trigger: 'change' },
-  ],
-  checkPwd: [
-    { required: true, message: t('oj.password_confirm_missing'), trigger: 'change' },
-    { validator: checkPwdValidator, trigger: 'change' },
-  ],
-}))
+  let isValid = true
+  const { username, password, confirmPassword } = formData.value
+  const isRegister = !isLogin.value
 
-function submit () {
-  if (tab.value === TabType.login) {
-    loginForm.value.validate(async (valid: boolean) => {
-      if (!valid) {
-        return
-      }
-      const result = await userLogin({
-        uid: form.value.uid,
-        pwd: await encryptData(form.value.pwd),
-      })
-      if (result.success) {
-        message.success(`Welcome, ${form.value.uid}`)
-        toggleModal()
-        if (route.name === 'oauthCallback') {
-          router.push({ name: 'userEdit', params: { uid: form.value.uid } })
-        }
-        form.value.pwd = ''
-      } else {
-        message.error(result.message)
-      }
-    })
-  } else {
-    registerForm.value.validate(async (valid: boolean) => {
-      if (!valid) {
-        return
-      }
-      const result = await register({
-        uid: form.value.uid,
-        pwd: await encryptData(form.value.pwd),
-      })
-      if (result.success) {
-        tab.value = TabType.login
-        submit()
-      } else {
-        message.error(result.message)
-      }
-    })
+  if (!username.trim()) {
+    fieldValidity.value.username = false
+    message.error('Username Required', 'Please enter your username')
+    isValid = false
+  } else if (isRegister) {
+    if (username.length < 3 || username.length > 20) {
+      fieldValidity.value.username = false
+      message.error('Invalid Username', 'Username must be between 3 and 20 characters')
+      isValid = false
+    } else if (!/^[\w-]+$/.test(username)) {
+      fieldValidity.value.username = false
+      message.error('Invalid Username', 'Username can only contain letters, numbers, underscores and hyphens')
+      isValid = false
+    }
+  }
+
+  if (!password) {
+    fieldValidity.value.password = false
+    message.error('Password Required', 'Please enter your password')
+    isValid = false
+  } else if (isRegister) {
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      fieldValidity.value.password = false
+      message.error('Weak Password', 'Password must be at least 8 characters with uppercase, lowercase and numbers')
+      isValid = false
+    }
+  }
+
+  if (isRegister) {
+    if (!confirmPassword) {
+      fieldValidity.value.confirmPassword = false
+      message.error('Confirmation Required', 'Please confirm your password')
+      isValid = false
+    } else if (password !== confirmPassword) {
+      fieldValidity.value.confirmPassword = false
+      message.error('Password Mismatch', 'Passwords do not match')
+      isValid = false
+    }
+  }
+
+  return isValid
+}
+
+function handleAuthError (result: ErrorEnveloped) {
+  switch (result.code) {
+    case ErrorCode.Unauthorized:
+      message.error('Login Failed', 'Invalid username or password')
+      break
+    case ErrorCode.Forbidden:
+      message.error('Account Suspended', 'Your account has been suspended')
+      break
+    case ErrorCode.Conflict:
+      message.error('Registration Failed', 'Username already taken')
+      break
+    case ErrorCode.BadRequest:
+      message.error('Invalid Password', 'Password does not meet requirements')
+      break
+    default:
+      message.error('Authentication Error', result.message || 'An unexpected error occurred')
+      break
   }
 }
 
-async function usingOAuth (provider: Lowercase<OAuthProvider>) {
+async function handleAuthSubmit () {
+  if (!validateForm()) {
+    return
+  }
+
+  loading.value = true
+  try {
+    const { username, password } = formData.value
+    const encryptedPassword = await encryptData(password)
+
+    if (currentTab.value === AuthnDialogTab.LOGIN) {
+      const result = await userLogin({
+        username,
+        password: encryptedPassword,
+      })
+
+      if (result.success) {
+        const { uid } = result.data
+
+        message.success('Login Successful', `Welcome back, ${uid}!`)
+        await sessionStore.fetchProfile()
+        closeModal()
+
+        if (route.name === 'oauthCallback') {
+          router.push({ name: 'userEdit', params: { uid } })
+        }
+      } else {
+        handleAuthError(result)
+      }
+    } else {
+      const result = await userRegister({
+        username,
+        password: encryptedPassword,
+      })
+
+      if (result.success) {
+        message.success('Registration Successful', 'Your account has been created successfully')
+        await sessionStore.fetchProfile()
+        closeModal()
+      } else {
+        handleAuthError(result)
+      }
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+function switchTab (newTab: AuthnDialogTab) {
+  currentTab.value = newTab
+  resetValidity()
+  formData.value.password = ''
+  formData.value.confirmPassword = ''
+}
+
+function resetForm () {
+  formData.value = { username: '', password: '', confirmPassword: '' }
+  resetValidity()
+}
+
+function closeModal () {
+  resetForm()
+  authnDialogVisible.value = false
+}
+
+async function handleOAuthLogin (provider: Lowercase<OAuthProvider>) {
   const url = await api.oauth.generateOAuthUrl(provider, { action: 'login' as OAuthAction })
   window.open(url.data.url, '_self', 'noopener,noreferrer')
 }
+
+watch(authnDialog, (newValue) => {
+  authnDialogVisible.value = newValue
+})
+watch(authnDialogVisible, (newValue) => {
+  if (newValue !== authnDialog.value) {
+    sessionStore.toggleAuthnDialog()
+  }
+})
 </script>
 
 <template>
-  <Modal v-model="modalOpen" :footer-hide="true" @on-cancel="toggleModal">
-    <div class="modal-form">
-      <div class="modal-header">
-        <Title :level="2">
-          {{ tab === TabType.login ? t('oj.login') : t('oj.register') }}
-        </Title>
+  <Dialog
+    v-model:visible="authnDialogVisible" modal :closable="true" :close-on-escape="true" class="max-w-md mx-6 w-full"
+    @hide="closeModal"
+  >
+    <template #header>
+      <div class="font-semibold pl-[35px] text-center text-xl w-full">
+        {{ isLogin ? 'Login' : 'Register' }}
       </div>
-      <div v-show="tab === TabType.login">
-        <Form ref="loginForm" :model="form" :rules="loginRules" label-position="top">
-          <div v-if="Object.values(website.oauthEnabled).includes(true)">
-            <FormItem v-if="website.oauthEnabled.CJLU">
-              <Button size="large" long @click="usingOAuth('cjlu')">
-                中国计量大学统一身份认证
-              </Button>
-            </FormItem>
-            <Divider>OR</Divider>
-          </div>
-          <FormItem :label="t('oj.username')" prop="uid">
-            <Input v-model="form.uid" prefix="ios-contact-outline" size="large" />
-          </FormItem>
-          <FormItem :label="t('oj.password')" prop="pwd">
-            <Input
-              v-model="form.pwd" prefix="ios-lock-outline" type="password" password size="large"
-              @keyup.enter="submit"
-            />
-          </FormItem>
-          <FormItem>
-            <Button type="primary" size="large" long @click="submit">
-              {{ t('oj.login') }}
-            </Button>
-          </FormItem>
-          <FormItem>
-            <Button size="large" long @click="tab = TabType.register">
-              {{ t('oj.register') }}
-            </Button>
-          </FormItem>
-        </Form>
-      </div>
-      <div v-show="tab === TabType.register">
-        <Form ref="registerForm" :model="form" :rules="registerRules" label-position="top">
-          <FormItem :label="t('oj.username')" prop="uid">
-            <Input
-              v-model="form.uid" :placeholder="t('oj.username_description')" prefix="ios-contact-outline"
-              size="large"
-            />
-          </FormItem>
-          <FormItem :label="t('oj.password')" prop="pwd">
-            <Input v-model="form.pwd" prefix="ios-lock-outline" type="password" password size="large" />
-          </FormItem>
-          <FormItem :label="t('oj.password_confirm')" prop="checkPwd">
-            <Input v-model="form.checkPwd" prefix="ios-lock-outline" type="password" password size="large" />
-          </FormItem>
-          <FormItem>
-            <Button type="primary" size="large" long @click="submit">
-              {{ t('oj.register') }}
-            </Button>
-          </FormItem>
-          <FormItem>
-            <Button size="large" long @click="tab = TabType.login">
-              {{ t('oj.login') }}
-            </Button>
-          </FormItem>
-        </Form>
-      </div>
-    </div>
-  </Modal>
-</template>
+    </template>
 
-<style lang="stylus" scoped>
-.modal-form
-  padding 32px 32px 8px
-.modal-header
-  margin-bottom 48px
-  text-align center
-</style>
+    <div v-if="hasOAuthEnabled && isLogin">
+      <Button v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined class="w-full" @click="handleOAuthLogin('cjlu')">
+        China Jiliang University SSO
+      </Button>
+      <Divider align="center">
+        <b>OR</b>
+      </Divider>
+    </div>
+
+    <form class="space-y-4" @submit.prevent="handleAuthSubmit">
+      <IftaLabel>
+        <InputText
+          id="username" v-model="formData.username" class="w-full" :invalid="!fieldValidity.username"
+          :placeholder="isLogin ? 'Enter your username' : 'Choose a username (3-20 characters)'"
+          autocomplete="username" size="large"
+        />
+        <label for="username">Username</label>
+      </IftaLabel>
+
+      <IftaLabel>
+        <InputText
+          id="password" v-model="formData.password" type="password" class="w-full"
+          :invalid="!fieldValidity.password"
+          :placeholder="isLogin ? 'Enter your password' : 'Create a strong password'"
+          :autocomplete="isLogin ? 'current-password' : 'new-password'" size="large"
+        />
+        <label for="password">Password</label>
+      </IftaLabel>
+
+      <IftaLabel v-if="!isLogin">
+        <InputText
+          id="confirm-password" v-model="formData.confirmPassword" type="password" class="w-full"
+          :invalid="!fieldValidity.confirmPassword" placeholder="Confirm your password"
+          autocomplete="new-password" size="large"
+        />
+        <label for="confirm-password">Confirm Password</label>
+      </IftaLabel>
+
+      <Button
+        type="submit" :label="isLogin ? 'Login' : 'Register'" size="large"
+        :icon="isLogin ? 'pi pi-sign-in' : 'pi pi-user-plus'" class="w-full" :loading="loading"
+      />
+
+      <Button
+        type="button" :label="isLogin ? 'Go to Register' : 'Back to Login'" size="large" outlined
+        :icon="isLogin ? 'pi pi-user-plus' : 'pi pi-sign-in'" severity="secondary" class="w-full" :disabled="loading"
+        @click="switchTab(isLogin ? AuthnDialogTab.REGISTER : AuthnDialogTab.LOGIN)"
+      />
+    </form>
+  </Dialog>
+</template>

@@ -36,7 +36,7 @@ export const AdminUserDetailQueryResultSchema = z.object({
   createdAt: UserModelSchema.shape.createdAt,
 })
 
-export type AdminUserDetailQueryResult = z.infer<typeof AdminUserDetailQueryResultSchema>
+export type AdminUserDetailQueryResult = z.input<typeof AdminUserDetailQueryResultSchema>
 
 export const AdminUserEditPayloadSchema = z.object({
   privilege: z.enum(UserPrivilege).optional(),

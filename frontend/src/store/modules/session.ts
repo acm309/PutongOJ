@@ -1,49 +1,45 @@
-import type { LoginParam, Profile } from '@/types'
+import type { AccountProfileQueryResult } from '@putongoj/shared'
+import { UserPrivilege } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
-import { privilege } from '@/utils/constant'
+import { getProfile, userLogout } from '@/api/account'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
-    loginDialog: false,
-    profile: null as (null | Profile),
+    authnDialog: false,
+    profile: null as (AccountProfileQueryResult | null),
   }),
   getters: {
-    isLogined: state => state.profile != null,
-    // Return type must be set in order to use `this`
-    // https://pinia.vuejs.org/core-concepts/getters.html#getters
+    isLogined (): boolean {
+      return this.profile !== null
+    },
     isAdmin (): boolean {
-      return this.isLogined
-        && (this.profile?.privilege === privilege.Admin
-          || this.profile?.privilege === privilege.Root)
+      return this.profile?.privilege === UserPrivilege.Admin || this.isRoot
     },
     isRoot (): boolean {
-      return this.isLogined
-        && (this.profile?.privilege === privilege.Root)
+      return this.profile?.privilege === UserPrivilege.Root
     },
   },
   actions: {
-    toggleLoginState () {
-      this.loginDialog = !this.loginDialog
+    toggleAuthnDialog () {
+      this.authnDialog = !this.authnDialog
     },
-    setLoginProfile (profile: Profile) {
+    setProfile (profile: AccountProfileQueryResult) {
       this.profile = profile
     },
-    async userLogin (opt: LoginParam) {
-      const { data } = await api.session.userLogin(opt)
-      if (data.data !== null) {
-        this.profile = data.data as Profile
-      }
-      return data
-    },
-    async logout () {
-      await api.logout()
+    clearProfile () {
       this.profile = null
-      sessionStorage.clear()
     },
-    async fetch () {
-      const { data } = await api.session.fetch()
-      this.profile = data.profile
+    async fetchProfile () {
+      const resp = await getProfile()
+      if (resp.success) {
+        this.setProfile(resp.data)
+      }
+      return resp
+    },
+    async userLogout () {
+      this.clearProfile()
+      sessionStorage.clear()
+      await userLogout()
     },
   },
 })

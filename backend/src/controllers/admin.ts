@@ -18,7 +18,7 @@ import {
 } from '../utils'
 import { loadUser } from './user'
 
-export async function findUsers(ctx: Context) {
+export async function findUsers (ctx: Context) {
   const query = AdminUserListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
@@ -29,13 +29,13 @@ export async function findUsers(ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-export async function getUser(ctx: Context) {
+export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
   const result = AdminUserDetailQueryResultSchema.encode(user)
   return createEnvelopedResponse(ctx, result)
 }
 
-export async function updateUser(ctx: Context) {
+export async function updateUser (ctx: Context) {
   const payload = AdminUserEditPayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
@@ -80,11 +80,16 @@ export async function updateUser(ctx: Context) {
     }
   }
 
-  const updatedUser = await userServices.updateUser(user, {
-    ...payload.data, pwd,
-  })
-  const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
-  return createEnvelopedResponse(ctx, result)
+  try {
+    const { privilege, nick, motto, school, mail } = payload.data
+    const updatedUser = await userServices.updateUser(user, {
+      privilege, nick, motto, school, mail, pwd,
+    })
+    const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
+    return createEnvelopedResponse(ctx, result)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
 }
 
 const adminController = {

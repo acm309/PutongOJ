@@ -43,7 +43,7 @@ export async function userLogin (ctx: Context) {
   }
 
   logger.info(`User <${uid}> login successfully [${requestId}]`)
-  const profile = sessionService.setUserSession(ctx, user)
+  const profile = sessionService.setSession(ctx, user)
   return createEnvelopedResponse(ctx, profile)
 }
 
@@ -54,7 +54,7 @@ const logout = async (ctx: Context) => {
     const uid = ctx.session.profile.uid
     logger.info(`User <${uid}> logout successfully [${requestId}]`)
   }
-  sessionService.deleteUserSession(ctx)
+  sessionService.deleteSession(ctx)
   ctx.body = {}
 }
 

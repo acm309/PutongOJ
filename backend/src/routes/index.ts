@@ -1,5 +1,6 @@
 import Router from '@koa/router'
 
+import account from './account'
 import admin from './admin'
 import contest from './contest'
 import course from './course'
@@ -20,6 +21,7 @@ const router = new Router({
   prefix: '/api',
 })
 
+router.use(account.routes(), account.allowedMethods())
 router.use(admin.routes(), admin.allowedMethods())
 router.use(contest.routes(), contest.allowedMethods())
 router.use(course.routes(), course.allowedMethods())

@@ -64,10 +64,20 @@ export async function updateUser (user: UserDocument, data: Partial<UserModel>):
   return user
 }
 
+export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise<UserDocument> {
+  const user = new User({
+    uid: data.uid,
+    pwd: data.pwd,
+  })
+  await user.save()
+  return user
+}
+
 const userServices = {
   findUsers,
   getUser,
   updateUser,
+  createUser,
 } as const
 
 export default userServices

@@ -53,7 +53,7 @@ const pageChange = val => reload({ page: val })
 
 async function visit (item) {
   if (!isLogined) {
-    sessionStore.toggleLoginState()
+    sessionStore.toggleAuthnDialog()
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
@@ -91,10 +91,12 @@ async function enter (item) {
     { pwd: enterPwd },
   )
   const data = await verify(opt)
-  if (data)
+  if (data) {
+    profile.verifyContest.push(+item.cid)
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
-  else
+  } else {
     $Message.error(t('oj.wrong_password'))
+  }
 }
 
 async function change (contest) {

@@ -5,8 +5,8 @@ import type { PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
 import { sha256 } from '@noble/hashes/sha2.js'
+import { ErrorCode } from '@putongoj/shared'
 import { pick, pickBy } from 'lodash'
-import { ErrorCode } from './error'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -29,7 +29,7 @@ export function parsePaginateOption (
   return { page, pageSize }
 }
 
-export function passwordHash (password: string): string {
+export function passwordHashBuffer (password: string): Buffer {
   const passwordArr = Uint8Array.from(Buffer.from(password))
 
   const md5Hash = md5(passwordArr)
@@ -39,7 +39,11 @@ export function passwordHash (password: string): string {
   combined.set(md5Hash)
   combined.set(sha1Hash, md5Hash.length)
 
-  return Buffer.from(combined).toString('hex')
+  return Buffer.from(combined)
+}
+
+export function passwordHash (password: string): string {
+  return Buffer.from(passwordHashBuffer(password)).toString('hex')
 }
 
 export function passwordChecksum (passwordHash: string): string {
@@ -117,6 +121,7 @@ export function createZodErrorResponse (
 
 export default {
   parsePaginateOption,
+  passwordHashBuffer,
   passwordHash,
   isComplexPwd,
   only,

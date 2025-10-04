@@ -19,7 +19,7 @@ const courseStore = useCourseStore()
 const sessionStore = useSessionStore()
 
 const { findCourses } = courseStore
-const { toggleLoginState } = sessionStore
+const { toggleAuthnDialog } = sessionStore
 const { encrypt } = $(storeToRefs(rootStore))
 const { courses } = $(storeToRefs(courseStore))
 const { isLogined, isRoot } = $(storeToRefs(sessionStore))
@@ -51,7 +51,7 @@ function pageChange (page: number) {
 
 function visit (id: number) {
   if (!isLogined) {
-    return toggleLoginState()
+    return toggleAuthnDialog()
   }
   router.push({
     name: 'courseProblems',

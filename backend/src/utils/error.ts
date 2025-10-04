@@ -1,15 +1,6 @@
-type ErrorTuple = Readonly<[number, string]>
+import { ErrorCode } from '@putongoj/shared'
 
-export enum ErrorCode {
-  OK = 200,
-  BadRequest = 400,
-  Unauthorized = 401,
-  Forbidden = 403,
-  NotFound = 404,
-  Teapot = 418,
-  InternalServerError = 500,
-  NotImplemented = 501,
-}
+type ErrorTuple = Readonly<[number, string]>
 
 export const ERR_INVALID_ID: ErrorTuple = [
   ErrorCode.BadRequest,

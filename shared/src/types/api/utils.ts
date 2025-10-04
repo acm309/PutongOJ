@@ -31,7 +31,7 @@ export type Paginated<T> = {
   total: number
 }
 
-type SuccessEnveloped<T = any> = {
+export type SuccessEnveloped<T = any> = {
   success: true
   code: ErrorCode.OK
   message: string
@@ -39,7 +39,7 @@ type SuccessEnveloped<T = any> = {
   requestId: string
 }
 
-type ErrorEnveloped = {
+export type ErrorEnveloped = {
   success: false
   code: Exclude<ErrorCode, ErrorCode.OK>
   message: string

@@ -112,7 +112,7 @@ app.provide('$Modal', app.config.globalProperties.$Modal)
 app.provide('$Spin', app.config.globalProperties.$Spin)
 
 Promise.all([
-  useSessionStore().fetch(),
+  useSessionStore().fetchProfile(),
   useRootStore().fetchWebsiteConfig(),
 ]).then(() => {
   // Router must be loaded after session/website config is loaded
