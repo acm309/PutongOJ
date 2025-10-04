@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { AdminUserDetailQueryResult, AdminUserEditPayload } from '@putongoj/shared'
+import type {
+  AdminUserDetailQueryResult,
+  AdminUserEditPayload,
+} from '@putongoj/shared'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -28,8 +31,17 @@ const editingUser = ref<Omit<AdminUserEditPayload, 'password'>>({})
 const loading = ref(false)
 const saving = ref(false)
 const passwordDialog = ref(false)
-const passwordConfirm = ref('')
-const passwordNew = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+
+const hasChanges = computed(() => {
+  if (!user.value) return false
+  return editingUser.value.privilege !== user.value.privilege
+    || editingUser.value.nick !== user.value.nick
+    || editingUser.value.motto !== user.value.motto
+    || editingUser.value.mail !== user.value.mail
+    || editingUser.value.school !== user.value.school
+})
 
 function setEditingUser () {
   if (!user.value) return
@@ -97,22 +109,22 @@ async function saveUser () {
 }
 
 async function changePassword () {
-  if (!passwordNew.value) {
+  if (!newPassword.value) {
     message.error('Password required', 'Please enter a new password')
     return
   }
-  if (passwordNew.value !== passwordConfirm.value) {
+  if (newPassword.value !== confirmPassword.value) {
     message.error('Password mismatch', 'The passwords you entered do not match')
     return
   }
-  if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(passwordNew.value) === false) {
+  if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword.value) === false) {
     message.error('Weak password', 'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers')
     return
   }
 
   saving.value = true
   const resp = await updateUser(uid.value, {
-    password: await encryptData(passwordNew.value),
+    password: await encryptData(newPassword.value),
   })
   saving.value = false
   if (!resp.success) {
@@ -126,8 +138,8 @@ async function changePassword () {
 
 function openPasswordDialog () {
   passwordDialog.value = true
-  passwordNew.value = ''
-  passwordConfirm.value = ''
+  newPassword.value = ''
+  confirmPassword.value = ''
 }
 
 onMounted(fetch)
@@ -189,14 +201,6 @@ onRouteParamUpdate(fetch)
         </IftaLabel>
 
         <IftaLabel class="md:col-span-2">
-          <Textarea
-            id="motto" v-model="editingUser.motto" class="w-full" rows="3" maxlength="300"
-            placeholder="Enter motto" auto-resize
-          />
-          <label for="motto">Motto</label>
-        </IftaLabel>
-
-        <IftaLabel class="md:col-span-2">
           <InputText
             id="school" v-model="editingUser.school" class="w-full" maxlength="30"
             placeholder="Enter school"
@@ -204,13 +208,33 @@ onRouteParamUpdate(fetch)
           <label for="school">School</label>
         </IftaLabel>
 
+        <IftaLabel class="-mb-[5px] md:col-span-2">
+          <Textarea
+            id="motto" v-model="editingUser.motto" class="w-full" rows="3" maxlength="300"
+            placeholder="Enter motto" auto-resize
+          />
+          <label for="motto">Motto</label>
+        </IftaLabel>
+
         <div class="flex gap-2 justify-end md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="fetch" />
-          <Button label="Save Changes" icon="pi pi-check" :loading="saving" @click="saveUser" />
+          <Button label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!hasChanges" @click="saveUser" />
         </div>
       </div>
 
       <div class="border-b border-surface p-6">
+        <h2 class="font-semibold mb-4 text-lg">
+          Password
+        </h2>
+        <div class="space-y-4">
+          <p class="text-sm text-surface-600">
+            Change the user's password. This will immediately invalidate the current password and all active sessions.
+          </p>
+          <Button label="Change Password" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />
+        </div>
+      </div>
+
+      <div class="p-6">
         <h2 class="font-semibold mb-4 text-lg">
           Audit Information
         </h2>
@@ -228,35 +252,26 @@ onRouteParamUpdate(fetch)
           </IftaLabel>
         </div>
       </div>
-
-      <div class="p-6">
-        <h2 class="font-semibold mb-4 text-lg">
-          Password
-        </h2>
-        <div class="space-y-4">
-          <p class="text-sm text-surface-600">
-            Change the user's password. This will immediately invalidate the current password and all active sessions.
-          </p>
-          <Button label="Change Password" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />
-        </div>
-      </div>
     </template>
 
-    <Dialog v-model:visible="passwordDialog" modal header="Change Password" :closable="false" class="max-w-md mx-6 w-full">
+    <Dialog
+      v-model:visible="passwordDialog" modal header="Change Password" :closable="false"
+      class="max-w-md mx-6 w-full"
+    >
       <form @submit.prevent="changePassword">
         <div class="space-y-4">
           <IftaLabel>
             <InputText
-              id="new-password" v-model="passwordNew" class="w-full" type="password"
+              id="new-password" v-model="newPassword" class="w-full" type="password"
               placeholder="Enter new password" required autocomplete="new-password"
             />
             <label for="new-password">New Password</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
-              id="confirm-password" v-model="passwordConfirm" class="w-full" type="password"
+              id="confirm-password" v-model="confirmPassword" class="w-full" type="password"
               placeholder="Confirm new password" required autocomplete="new-password"
-              :invalid="!!passwordConfirm && passwordConfirm !== passwordNew"
+              :invalid="!!confirmPassword && confirmPassword !== newPassword"
             />
             <label for="confirm-password">Confirm Password</label>
           </IftaLabel>

@@ -123,7 +123,7 @@ const profileItems = computed(() => [
     label: t('oj.settings'),
     icon: 'pi pi-cog',
     command: () => {
-      router.push({ name: 'userEdit', params: { uid: profile.value!.uid } })
+      router.push({ name: 'AccountSettings' })
     },
   },
   {
