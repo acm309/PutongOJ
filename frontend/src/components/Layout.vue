@@ -4,8 +4,8 @@ import SelectButton from 'primevue/selectbutton'
 import { Poptip, Space } from 'view-ui-plus'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AuthnDialog from '@/components/AuthnDialog.vue'
 import Header from '@/components/Header.vue'
-import LoginAndRegister from '@/components/LoginAndRegister.vue'
 import { useRootStore } from '@/store'
 import { timeDiffPretty, timePretty } from '@/utils/formate'
 import { useHumanLanguage } from '@/utils/helper'
@@ -79,7 +79,7 @@ function onLangSelected (event: any) {
       </Poptip>
     </div>
   </div>
-  <LoginAndRegister />
+  <AuthnDialog />
 </template>
 
 <style lang="stylus">

@@ -15,18 +15,19 @@ const userPrimary = userSeeds.primaryuser
 
 test.before('Login as admin', async (t) => {
   let r = await requestRoot
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: userRoot.uid,
-      pwd: await encryptData(userRoot.pwd!),
+      username: userRoot.uid,
+      password: await encryptData(userRoot.pwd!),
     })
   t.is(r.status, 200)
 
   r = await requestRoot
-    .get('/api/session')
+    .get('/api/account/profile')
   t.is(r.status, 200)
-  t.is(r.body.profile.uid, userRoot.uid)
-  t.is(r.body.profile.privilege, config.privilege.Root)
+  t.true(r.body.success)
+  t.is(r.body.data.uid, userRoot.uid)
+  t.is(r.body.data.privilege, config.privilege.Root)
 })
 
 test('Fetch user list filter by privilege', async (t) => {
@@ -65,18 +66,19 @@ test.serial('Update user privilege to admin with root privilege', async (t) => {
   t.is(r.status, 200)
 
   r = await requestAdmin
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: userAdmin.uid,
-      pwd: await encryptData(userAdmin.pwd!),
+      username: userAdmin.uid,
+      password: await encryptData(userAdmin.pwd!),
     })
   t.is(r.status, 200)
 
   r = await requestAdmin
-    .get('/api/session')
+    .get('/api/account/profile')
   t.is(r.status, 200)
-  t.is(r.body.profile.uid, userAdmin.uid)
-  t.is(r.body.profile.privilege, config.privilege.Admin)
+  t.true(r.body.success)
+  t.is(r.body.data.uid, userAdmin.uid)
+  t.is(r.body.data.privilege, config.privilege.Admin)
 })
 
 test.serial('Update user privilege with admin privilege', async (t) => {

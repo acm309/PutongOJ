@@ -37,8 +37,8 @@ test('Fetch entire user list', async (t) => {
 
 test('Create user already exists', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: userSeeds.admin.uid, pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ username: userSeeds.admin.uid, password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -46,8 +46,8 @@ test('Create user already exists', async (t) => {
 
 test('Create user without uid', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -55,8 +55,8 @@ test('Create user without uid', async (t) => {
 
 test('Create user with uid not valid (char not allowed)', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'admin@', pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ username: 'admin@', password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -64,8 +64,8 @@ test('Create user with uid not valid (char not allowed)', async (t) => {
 
 test('Create user with uid not valid (too sort)', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'hi', pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ username: 'hi', password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -73,8 +73,8 @@ test('Create user with uid not valid (too sort)', async (t) => {
 
 test('Create user with uid not valid (too long)', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'a'.repeat(21), pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ username: 'a'.repeat(21), password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -82,8 +82,8 @@ test('Create user with uid not valid (too long)', async (t) => {
 
 test('Create user without pwd', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'test20810' })
+    .post('/api/account/register')
+    .send({ username: 'test20810' })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -91,8 +91,8 @@ test('Create user without pwd', async (t) => {
 
 test('Create user with pwd not valid (too short)', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'test17873', pwd: await encryptData('Aa@1') })
+    .post('/api/account/register')
+    .send({ username: 'test17873', password: await encryptData('Aa@1') })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)
@@ -100,8 +100,8 @@ test('Create user with pwd not valid (too short)', async (t) => {
 
 test('Create user with pwd not valid (too simple)', async (t) => {
   const res = await request
-    .post('/api/user')
-    .send({ uid: 'test28699', pwd: await encryptData('12345678') })
+    .post('/api/account/register')
+    .send({ username: 'test28699', password: await encryptData('12345678') })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)

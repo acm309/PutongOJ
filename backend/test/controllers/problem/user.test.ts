@@ -11,10 +11,10 @@ const user = userSeeds.ugordon
 
 test.before('Login', async (t) => {
   const login = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: user.uid,
-      pwd: await encryptData(user.pwd!),
+      username: user.uid,
+      password: await encryptData(user.pwd!),
     })
 
   t.is(login.status, 200)

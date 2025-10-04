@@ -9,25 +9,26 @@ const request = supertest.agent(server)
 
 test.before(async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'admin',
-      pwd: await encryptData(config.deploy.adminInitPwd),
+      username: 'admin',
+      password: await encryptData(config.deploy.adminInitPwd),
     })
   t.is(res.status, 200)
 })
 
 test.serial('get session profile', async (t) => {
   const res = await request
-    .get('/api/session')
+    .get('/api/account/profile')
 
   t.is(res.status, 200)
-  t.is(res.body.profile.uid, 'admin')
-  t.is(res.body.profile.privilege, config.privilege.Root)
+  t.true(res.body.success)
+  t.is(res.body.data.uid, 'admin')
+  t.is(res.body.data.privilege, config.privilege.Root)
 })
 
 test('User logout', async (t) => {
-  let res = await request.del('/api/session')
+  let res = await request.post('/api/account/logout')
 
   t.is(res.status, 200)
 

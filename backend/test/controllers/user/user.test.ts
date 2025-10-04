@@ -14,20 +14,21 @@ const mail = 'account@example.com'
 
 test.before('Create user and login', async (t) => {
   let r = await request
-    .post('/api/user')
-    .send({ uid, pwd: await encryptData(pwd) })
+    .post('/api/account/register')
+    .send({ username: uid, password: await encryptData(pwd) })
   t.is(r.status, 200)
 
   r = await request
-    .post('/api/session')
-    .send({ uid, pwd: await encryptData(pwd) })
+    .post('/api/account/login')
+    .send({ username: uid, password: await encryptData(pwd) })
   t.is(r.status, 200)
 
   r = await request
-    .get('/api/session')
+    .get('/api/account/profile')
   t.is(r.status, 200)
-  t.is(r.body.profile.uid, uid)
-  t.is(r.body.profile.privilege, config.privilege.User)
+  t.true(r.body.success)
+  t.is(r.body.data.uid, uid)
+  t.is(r.body.data.privilege, config.privilege.User)
 })
 
 test('Update other\'s profile', async (t) => {
@@ -213,14 +214,15 @@ test.after('Update user\'s pwd then check', async (t) => {
   t.is(r.status, 401)
 
   r = await request
-    .post('/api/session')
-    .send({ uid, pwd: await encryptData(newPwd) })
+    .post('/api/account/login')
+    .send({ username: uid, password: await encryptData(newPwd) })
   t.is(r.status, 200)
 
   r = await request
-    .get('/api/session')
+    .get('/api/account/profile')
   t.is(r.status, 200)
-  t.is(r.body.profile.uid, uid)
+  t.true(r.body.success)
+  t.is(r.body.data.uid, uid)
 })
 
 test.after.always('close server', () => {

@@ -2,11 +2,11 @@ import type { OAuthCallbackResponse } from '@backend/controllers/oauth'
 import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { OAuthEntityUserView } from '@backend/models/OAuth'
 import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
-import type { CourseRole, SessionProfile } from '@backend/types'
+import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from '../types/api'
-import type { LoginParam, Profile, TimeResp, User } from '@/types'
+import type { TimeResp, User } from '@/types'
 import { instance } from './instance'
 
 export * from './instance'
@@ -144,15 +144,6 @@ const discuss = {
     instance.delete(`/discuss/${data.did}`, data),
 }
 
-const session = {
-  userLogin: (data: LoginParam) =>
-    instance.post<Enveloped<SessionProfile>>('/session', data),
-  delete: () =>
-    instance.delete<object>('/session'),
-  fetch: () =>
-    instance.get<{ profile: Profile | null }>('/session'),
-}
-
 const course = {
   findCourses: (params: PaginateParams) =>
     instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
@@ -193,7 +184,6 @@ const oauth = {
 
 export default {
   ...utils,
-  logout: session.delete,
   testcase,
   user,
   solution,
@@ -203,7 +193,6 @@ export default {
   group,
   tag,
   discuss,
-  session,
   course,
   oauth,
 }

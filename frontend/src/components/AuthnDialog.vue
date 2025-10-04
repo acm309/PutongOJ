@@ -143,7 +143,7 @@ async function handleAuthSubmit () {
         const { uid } = result.data
 
         message.success('Login Successful', `Welcome back, ${uid}!`)
-        await sessionStore.fetchProfile()
+        sessionStore.setProfile(result.data)
         closeModal()
 
         if (route.name === 'oauthCallback') {
@@ -160,7 +160,7 @@ async function handleAuthSubmit () {
 
       if (result.success) {
         message.success('Registration Successful', 'Your account has been created successfully')
-        await sessionStore.fetchProfile()
+        sessionStore.setProfile(result.data)
         closeModal()
       } else {
         handleAuthError(result)
