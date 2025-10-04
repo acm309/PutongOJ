@@ -80,12 +80,14 @@ async function visit (item) {
     else
       $Message.error('You\'re not invited to attend this contest!')
   } else if (+item.encrypt === encrypt.Password) {
+    document.activeElement.blur()
     $Modal.confirm({
       render: (h) => {
         return h(Input, {
           placeholder: 'Please enter password.',
+          autofocus: true,
           onChange: event => enterPwd = event.target.value,
-          onEnter: () => {
+          onOnEnter: () => {
             enter(item)
             $Modal.remove()
           },

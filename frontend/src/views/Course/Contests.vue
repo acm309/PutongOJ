@@ -7,11 +7,11 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
+import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
 import { timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate, purify } from '@/utils/helper'
-import { useCourseStore } from '@/store/modules/course'
 
 const { t } = useI18n()
 const { 'contestType': type, 'status': contestVisible } = constant
@@ -76,12 +76,14 @@ async function visit (item) {
     else
       $Message.error(t('oj.not_invited_to_contest'))
   } else if (+item.encrypt === encrypt.Password) {
+    document.activeElement.blur()
     $Modal.confirm({
       render: (h) => {
         return h(Input, {
-          placeholder: t('oj.please_enter_password'),
+          placeholder: 'Please enter password.',
+          autofocus: true,
           onChange: event => enterPwd = event.target.value,
-          onEnter: () => {
+          onOnEnter: () => {
             enter(item)
             $Modal.remove()
           },

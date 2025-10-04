@@ -52,7 +52,9 @@ onBeforeMount(init)
 
 <template>
   <div>
-    <h1>{{ pid }}: {{ title }}</h1>
+    <h1 class="font-bold">
+      {{ pid }}: {{ title }}
+    </h1>
     <Submit :pid="pid" />
     <Button type="primary" :disabled="!isLogined" @click="submitSolution">
       {{ isLogined ? t('oj.submit') : t('oj.please_login') }}
