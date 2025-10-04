@@ -151,14 +151,19 @@ const findProblems = async (ctx: Context) => {
 
 const findProblemItems = async (ctx: Context) => {
   const opt = ctx.request.query
+  const profile = await loadProfile(ctx)
 
   let courseDocId: ObjectId | undefined
   if (typeof opt.course === 'string') {
     const { course, role } = await loadCourse(ctx, opt.course)
-    if (!role.basic) {
+    if (!role.manageContest) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
     courseDocId = course._id
+  }
+
+  if (!courseDocId && !profile.isAdmin) {
+    return ctx.throw(...ERR_PERM_DENIED)
   }
 
   const keyword = String(opt.keyword).trim()
