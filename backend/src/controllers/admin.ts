@@ -62,7 +62,7 @@ export async function updateUser (ctx: Context) {
 
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
-  if (profile.privilege < user.privilege) {
+  if (profile.privilege <= user.privilege) {
     return createErrorResponse(ctx,
       'Insufficient privilege to edit this user', ErrorCode.Forbidden,
     )

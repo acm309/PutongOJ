@@ -134,6 +134,7 @@ const profileItems = computed(() => [
     icon: 'pi pi-sign-out',
     command: async () => {
       await userLogout()
+      router.push({ name: 'home' })
       message.success('User logged out', 'Byebye!')
     },
   },
