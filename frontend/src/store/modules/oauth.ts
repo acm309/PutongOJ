@@ -1,7 +1,7 @@
 import type { OAuthEntityUserView } from '@backend/models/OAuth'
-import type { OAuthProvider } from '@backend/services/oauth'
+import type { OAuthProvider } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { getUserOAuthConnections } from '@/api/oauth'
 
 export const useOAuthStore = defineStore('oauth', {
   state: () => ({
@@ -11,7 +11,7 @@ export const useOAuthStore = defineStore('oauth', {
   }),
   actions: {
     async fetchConnections () {
-      const { data } = await api.oauth.getUserOAuthConnections()
+      const data = await getUserOAuthConnections()
       this.connections = data
     },
   },

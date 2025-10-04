@@ -2,21 +2,13 @@ import type { ObjectId } from 'mongoose'
 import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
 import crypto from 'node:crypto'
+import { OAuthAction, OAuthProvider } from '@putongoj/shared'
 import superagent from 'superagent'
 import { globalConfig } from '../config'
 import redis from '../config/redis'
 import OAuth from '../models/OAuth'
 
 export const toUserView = OAuth.toUserView
-
-export enum OAuthProvider {
-  CJLU = 'CJLU',
-}
-
-export enum OAuthAction {
-  LOGIN = 'login',
-  CONNECT = 'connect',
-}
 
 export interface OAuthClientConfig {
   clientId: string

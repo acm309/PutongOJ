@@ -1,7 +1,4 @@
-import type { OAuthCallbackResponse } from '@backend/controllers/oauth'
 import type { WebsiteInformation } from '@backend/controllers/utils'
-import type { OAuthEntityUserView } from '@backend/models/OAuth'
-import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
 import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
@@ -173,15 +170,6 @@ const course = {
     instance.post<{ success: boolean }>(`/course/${courseId}/problem/rearrange`),
 }
 
-const oauth = {
-  generateOAuthUrl: (provider: Lowercase<OAuthProvider>, params: { action: OAuthAction }) =>
-    instance.get<{ url: string }>(`/oauth/${provider}/url`, { params }),
-  handleOAuthCallback: (provider: Lowercase<OAuthProvider>, params: { state: string, code: string }) =>
-    instance.get<Enveloped<OAuthCallbackResponse>>(`/oauth/${provider}/callback`, { params }),
-  getUserOAuthConnections: () =>
-    instance.get<Record<OAuthProvider, OAuthEntityUserView | null>>('/oauth'),
-}
-
 export default {
   ...utils,
   testcase,
@@ -194,5 +182,4 @@ export default {
   tag,
   discuss,
   course,
-  oauth,
 }

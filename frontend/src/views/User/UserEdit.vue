@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { Button, Col, Divider, Form, FormItem, Input, Radio, RadioGroup, Row, Spin, Tooltip } from 'view-ui-plus'
 import { computed, inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { generateOAuthUrl } from '@/api/oauth'
 import { useOAuthStore } from '@/store/modules/oauth'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
@@ -119,8 +119,8 @@ async function updatePassword () {
 }
 
 async function connectOAuth (provider) {
-  const url = await api.oauth.generateOAuthUrl(provider, { action: 'connect' })
-  window.open(url.data.url, '_self', 'noopener,noreferrer')
+  const url = await generateOAuthUrl(provider, { action: 'connect' })
+  window.open(url.url, '_self', 'noopener,noreferrer')
 }
 
 onMounted(async () => {

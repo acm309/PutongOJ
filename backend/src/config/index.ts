@@ -1,4 +1,5 @@
-import type { OAuthClientConfig, OAuthProvider } from '../services/oauth'
+import type { OAuthProvider } from '@putongoj/shared'
+import type { OAuthClientConfig } from '../services/oauth'
 import { randomBytes } from 'node:crypto'
 import { env } from 'node:process'
 import dotenvFlow from 'dotenv-flow'

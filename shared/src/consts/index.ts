@@ -21,3 +21,12 @@ export enum UserPrivilege {
   Admin = 2,
   Root = 3,
 }
+
+export enum OAuthProvider {
+  CJLU = 'CJLU',
+}
+
+export enum OAuthAction {
+  LOGIN = 'login',
+  CONNECT = 'connect',
+}

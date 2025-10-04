@@ -1,5 +1,5 @@
+import type { OAuthProvider } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { OAuthProvider } from '../services/oauth'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { globalConfig } from '../config'

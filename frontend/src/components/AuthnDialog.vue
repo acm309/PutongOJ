@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
-import type { ErrorEnveloped } from '@putongoj/shared'
+import type {
+  ErrorEnveloped,
+  OAuthAction,
+  OAuthProvider,
+} from '@putongoj/shared'
 import { ErrorCode } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -10,8 +13,8 @@ import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
 import { userLogin, userRegister } from '@/api/account'
+import { generateOAuthUrl } from '@/api/oauth'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { encryptData } from '@/utils/crypto'
@@ -189,8 +192,8 @@ function closeModal () {
 }
 
 async function handleOAuthLogin (provider: Lowercase<OAuthProvider>) {
-  const url = await api.oauth.generateOAuthUrl(provider, { action: 'login' as OAuthAction })
-  window.open(url.data.url, '_self', 'noopener,noreferrer')
+  const url = await generateOAuthUrl(provider, { action: 'login' as OAuthAction })
+  window.open(url.url, '_self', 'noopener,noreferrer')
 }
 
 watch(authnDialog, (newValue) => {
