@@ -3,10 +3,12 @@ import type {
   AdminUserDetailQueryResult,
   AdminUserEditPayload,
 } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
+import Message from 'primevue/message'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
@@ -14,6 +16,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser, updateUser, updateUserPassword } from '@/api/admin'
 import { useRootStore } from '@/store'
+import { useSessionStore } from '@/store/modules/session'
 import { privilegeOptions } from '@/utils/constant'
 import { encryptData } from '@/utils/crypto'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
@@ -23,7 +26,9 @@ import { useMessage } from '@/utils/message'
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
+const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
+const { profile } = storeToRefs(sessionStore)
 
 const uid = computed(() => route.params.uid as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
@@ -41,6 +46,11 @@ const hasChanges = computed(() => {
     || editingUser.value.motto !== user.value.motto
     || editingUser.value.mail !== user.value.mail
     || editingUser.value.school !== user.value.school
+})
+const canOperate = computed(() => {
+  if (!profile.value || !user.value) return false
+  if (profile.value.uid === user.value.uid) return true
+  return profile.value.privilege > user.value.privilege
 })
 
 function setEditingUser () {
@@ -70,7 +80,7 @@ async function fetch () {
 }
 
 async function saveUser () {
-  if (!user.value) return
+  if (!user.value || !profile.value) return
 
   const payload: AdminUserEditPayload = {}
   if (editingUser.value.privilege !== user.value.privilege) {
@@ -91,6 +101,11 @@ async function saveUser () {
 
   if (Object.keys(payload).length === 0) {
     message.info('No changes detected', 'User information remains unchanged')
+    return
+  }
+
+  if (payload.privilege !== undefined && profile.value.privilege <= payload.privilege) {
+    message.error('Insufficient privilege', 'You cannot elevate this user to a privilege level equal to or higher than yours')
     return
   }
 
@@ -164,6 +179,10 @@ onRouteParamUpdate(fetch)
 
     <template v-else>
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
+        <Message v-if="!canOperate" class="md:col-span-2" severity="warn" variant="outlined" icon="pi pi-info-circle">
+          You do not have permission to operate on this user because their privilege is not lower than yours.
+        </Message>
+
         <IftaLabel>
           <InputText id="username" :value="user.uid" class="w-full" readonly />
           <label for="username">Username</label>
@@ -171,8 +190,8 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <Select
-            id="privilege" v-model="editingUser.privilege" class="w-full" :options="privilegeOptions"
-            option-label="label" option-value="value"
+            v-if="canOperate" id="privilege" v-model="editingUser.privilege" class="w-full"
+            :options="privilegeOptions" option-label="label" option-value="value"
           >
             <template #option="slotProps">
               <Tag
@@ -181,13 +200,14 @@ onRouteParamUpdate(fetch)
               />
             </template>
           </Select>
+          <InputText v-else id="privilege" :value="getPrivilegeLabel(user.privilege)" class="w-full" readonly />
           <label for="privilege">Privilege</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingUser.nick" class="w-full" maxlength="30"
-            placeholder="Enter nickname"
+            id="nickname" v-model="editingUser.nick" class="w-full" maxlength="30" placeholder="Enter nickname"
+            :readonly="!canOperate"
           />
           <label for="nickname">Nickname</label>
         </IftaLabel>
@@ -195,15 +215,15 @@ onRouteParamUpdate(fetch)
         <IftaLabel>
           <InputText
             id="email" v-model="editingUser.mail" class="w-full" type="email" maxlength="254"
-            placeholder="Enter email address"
+            placeholder="Enter email address" :readonly="!canOperate"
           />
           <label for="email">Email</label>
         </IftaLabel>
 
         <IftaLabel class="md:col-span-2">
           <InputText
-            id="school" v-model="editingUser.school" class="w-full" maxlength="30"
-            placeholder="Enter school"
+            id="school" v-model="editingUser.school" class="w-full" maxlength="30" placeholder="Enter school"
+            :readonly="!canOperate"
           />
           <label for="school">School</label>
         </IftaLabel>
@@ -211,14 +231,17 @@ onRouteParamUpdate(fetch)
         <IftaLabel class="-mb-[5px] md:col-span-2">
           <Textarea
             id="motto" v-model="editingUser.motto" class="w-full" rows="3" maxlength="300"
-            placeholder="Enter motto" auto-resize
+            placeholder="Enter motto" auto-resize :readonly="!canOperate"
           />
           <label for="motto">Motto</label>
         </IftaLabel>
 
         <div class="flex gap-2 justify-end md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="fetch" />
-          <Button label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!hasChanges" @click="saveUser" />
+          <Button
+            label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!canOperate || !hasChanges"
+            @click="saveUser"
+          />
         </div>
       </div>
 
@@ -230,7 +253,7 @@ onRouteParamUpdate(fetch)
           <p class="text-sm text-surface-600">
             Change the user's password. This will immediately invalidate the current password and all active sessions.
           </p>
-          <Button label="Change Password" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />
+          <Button label="Change Password" icon="pi pi-key" severity="warning" :disabled="!canOperate" @click="openPasswordDialog" />
         </div>
       </div>
 

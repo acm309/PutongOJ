@@ -128,7 +128,7 @@ onRouteQueryUpdate(fetch)
           </template>
         </Select>
 
-        <div class="flex gap-2 items-center justify-end">
+        <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined @click="fetch" />
           <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="onReset" />
           <Button label="Search" icon="pi pi-search" @click="onSearch" />
