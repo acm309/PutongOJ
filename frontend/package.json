@@ -16,10 +16,7 @@
     "lint:fix": "eslint ./src --fix",
     "preview": "vite preview",
     "start": "npm run dev",
-    "zip": "node build/zip.cjs",
-    "i18n:upload": "crowdin upload sources",
-    "i18n:download": "crowdin download",
-    "i18n:sync": "npm run i18n:upload && npm run i18n:download"
+    "zip": "node build/zip.cjs"
   },
   "dependencies": {
     "@noble/ciphers": "^2.0.0",
@@ -58,7 +55,6 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.3.0",
-    "@crowdin/cli": "^4.11.0",
     "@types/lodash.debounce": "^4.0.9",
     "@types/pangu": "^4.0.2",
     "@vue-macros/reactivity-transform": "3.0.0-beta.23",
