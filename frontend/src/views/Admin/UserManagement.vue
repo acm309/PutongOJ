@@ -166,7 +166,7 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column class="pr-6 py-2 w-20">
+      <Column class="px-6 py-2 w-20">
         <template #body="{ data }">
           <div class="flex gap-1 items-center">
             <Button icon="pi pi-eye" text @click="onView(data)" />

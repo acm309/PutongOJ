@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import type {
-  AdminUserDetailQueryResult,
-  AdminUserEditPayload,
-} from '@putongoj/shared'
+import type { AdminUserDetailQueryResult, AdminUserEditPayload } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import IconField from 'primevue/iconfield'
 import IftaLabel from 'primevue/iftalabel'
+import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Select from 'primevue/select'
@@ -28,7 +27,7 @@ const router = useRouter()
 const message = useMessage()
 const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
-const { profile } = storeToRefs(sessionStore)
+const { profile, isRoot } = storeToRefs(sessionStore)
 
 const uid = computed(() => route.params.uid as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
@@ -47,9 +46,10 @@ const hasChanges = computed(() => {
     || editingUser.value.mail !== user.value.mail
     || editingUser.value.school !== user.value.school
 })
+const isSelf = computed(() => profile.value?.uid === user.value?.uid)
 const canOperate = computed(() => {
   if (!profile.value || !user.value) return false
-  if (profile.value.uid === user.value.uid) return true
+  if (isSelf.value || isRoot.value) return true
   return profile.value.privilege > user.value.privilege
 })
 
@@ -101,11 +101,6 @@ async function saveUser () {
 
   if (Object.keys(payload).length === 0) {
     message.info('No changes detected', 'User information remains unchanged')
-    return
-  }
-
-  if (payload.privilege !== undefined && profile.value.privilege <= payload.privilege) {
-    message.error('Insufficient privilege', 'You cannot elevate this user to a privilege level equal to or higher than yours')
     return
   }
 
@@ -190,8 +185,9 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <Select
-            v-if="canOperate" id="privilege" v-model="editingUser.privilege" class="w-full"
-            :options="privilegeOptions" option-label="label" option-value="value"
+            v-if="!isSelf && (user.privilege < profile!.privilege || isRoot)" id="privilege"
+            v-model="editingUser.privilege" class="w-full" :options="privilegeOptions" option-label="label"
+            option-value="value" :option-disabled="(option) => !isRoot && option.value >= profile!.privilege"
           >
             <template #option="slotProps">
               <Tag
@@ -200,7 +196,10 @@ onRouteParamUpdate(fetch)
               />
             </template>
           </Select>
-          <InputText v-else id="privilege" :value="getPrivilegeLabel(user.privilege)" class="w-full" readonly />
+          <IconField v-else>
+            <InputText id="privilege" :value="getPrivilegeLabel(user.privilege)" class="w-full" readonly />
+            <InputIcon class="pi pi-lock" />
+          </IconField>
           <label for="privilege">Privilege</label>
         </IftaLabel>
 
@@ -253,7 +252,10 @@ onRouteParamUpdate(fetch)
           <p class="text-sm text-surface-600">
             Change the user's password. This will immediately invalidate the current password and all active sessions.
           </p>
-          <Button label="Change Password" icon="pi pi-key" severity="warning" :disabled="!canOperate" @click="openPasswordDialog" />
+          <Button
+            label="Change Password" icon="pi pi-key" severity="warning" :disabled="!canOperate"
+            @click="openPasswordDialog"
+          />
         </div>
       </div>
 

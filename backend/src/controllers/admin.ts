@@ -19,6 +19,18 @@ import {
 } from '../utils'
 import { loadUser } from './user'
 
+async function loadEditingUser (ctx: Context) {
+  const user = await loadUser(ctx)
+  const profile = await loadProfile(ctx)
+  if (!profile.isRoot && profile.privilege <= user.privilege && profile.uid !== user.id) {
+    createErrorResponse(ctx,
+      'Insufficient privilege to edit this user', ErrorCode.Forbidden,
+    )
+    return null
+  }
+  return user
+}
+
 export async function findUsers (ctx: Context) {
   const query = AdminUserListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
@@ -42,13 +54,12 @@ export async function updateUser (ctx: Context) {
     return createZodErrorResponse(ctx, payload.error)
   }
 
-  const user = await loadUser(ctx)
-  const profile = await loadProfile(ctx)
-  if (profile.privilege <= user.privilege) {
-    return createErrorResponse(ctx,
-      'Insufficient privilege to edit this user', ErrorCode.Forbidden,
-    )
+  const user = await loadEditingUser(ctx)
+  if (!user) {
+    return
   }
+
+  const profile = await loadProfile(ctx)
   if (payload.data.privilege !== undefined) {
     if (profile.uid === user.id) {
       return createErrorResponse(ctx,
@@ -93,7 +104,11 @@ export async function updateUserPassword (ctx: Context) {
     )
   }
   const pwd = passwordHash(password)
-  const user = await loadUser(ctx)
+
+  const user = await loadEditingUser(ctx)
+  if (!user) {
+    return
+  }
 
   try {
     await userServices.updateUser(user, { pwd })
