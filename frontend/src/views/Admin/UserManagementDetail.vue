@@ -1,5 +1,13 @@
 <script lang="ts" setup>
-import type { AdminUserDetailQueryResult, AdminUserEditPayload } from '@putongoj/shared'
+import type {
+  AdminUserDetailQueryResult,
+  AdminUserEditPayload,
+  AdminUserOAuthQueryResult,
+} from '@putongoj/shared'
+import {
+  OAuthProvider,
+
+} from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -11,9 +19,10 @@ import Message from 'primevue/message'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
+import { useConfirm } from 'primevue/useconfirm'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getUser, updateUser, updateUserPassword } from '@/api/admin'
+import { getUser, getUserOAuthConnections, removeUserOAuthConnection, updateUser, updateUserPassword } from '@/api/admin'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { privilegeOptions } from '@/utils/constant'
@@ -24,6 +33,7 @@ import { useMessage } from '@/utils/message'
 
 const route = useRoute()
 const router = useRouter()
+const confirm = useConfirm()
 const message = useMessage()
 const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
@@ -32,6 +42,7 @@ const { profile, isRoot } = storeToRefs(sessionStore)
 const uid = computed(() => route.params.uid as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
 const editingUser = ref<AdminUserEditPayload>({})
+const connections = ref<AdminUserOAuthQueryResult>({ CJLU: null })
 const loading = ref(false)
 const saving = ref(false)
 const passwordDialog = ref(false)
@@ -66,15 +77,23 @@ function setEditingUser () {
 
 async function fetch () {
   loading.value = true
-  const resp = await getUser(uid.value)
+  const [ userResp, oauthResp ] = await Promise.all([
+    getUser(uid.value),
+    getUserOAuthConnections(uid.value),
+  ])
   loading.value = false
-  if (!resp.success) {
-    message.error('Failed to load user', resp.message)
+  if (!userResp.success) {
+    message.error('Failed to load user', userResp.message)
     router.back()
     return
   }
+  if (!oauthResp.success) {
+    message.error('Failed to load user OAuth connections', oauthResp.message)
+  } else {
+    connections.value = oauthResp.data
+  }
 
-  user.value = resp.data
+  user.value = userResp.data
   setEditingUser()
   changeDomTitle({ title: `${user.value.uid} - User Management` })
 }
@@ -144,6 +163,31 @@ async function changePassword () {
 
   message.success('Password updated', 'User password has been changed successfully')
   passwordDialog.value = false
+}
+
+function disconnectOAuth (event: Event, provider: OAuthProvider) {
+  confirm.require({
+    target: event.currentTarget as HTMLElement,
+    message: 'Are you sure you want to proceed?',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: 'Disconnect',
+      severity: 'danger',
+    },
+    accept: async () => {
+      const result = await removeUserOAuthConnection(uid.value, provider)
+      if (!result.success) {
+        message.error('Failed to disconnect', result.message)
+        return
+      }
+      connections.value[provider] = null
+      message.success('Disconnected', 'OAuth connection has been removed successfully')
+    },
+  })
 }
 
 function openPasswordDialog () {
@@ -241,6 +285,32 @@ onRouteParamUpdate(fetch)
             label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!canOperate || !hasChanges"
             @click="saveUser"
           />
+        </div>
+      </div>
+
+      <div class="border-b border-surface p-6">
+        <h2 class="font-semibold mb-4 text-lg">
+          Connections
+        </h2>
+        <div class="space-y-4">
+          <div class="border border-surface flex gap-2 items-center justify-between p-4 rounded-lg">
+            <div>
+              <div class="font-medium">
+                China Jiliang University SSO
+              </div>
+              <div class="text-sm text-surface-600">
+                <span v-if="connections.CJLU">
+                  Connected as {{ connections.CJLU.providerId }} ({{ connections.CJLU.displayName }})
+                  at {{ timePretty(connections.CJLU.createdAt) }}
+                </span>
+                <span v-else>Not connected</span>
+              </div>
+            </div>
+            <Button
+              v-if="connections.CJLU" label="Disconnect" severity="danger" outlined :disabled="!canOperate || !isRoot"
+              class="min-w-fit" @click="event => disconnectOAuth(event, OAuthProvider.CJLU)"
+            />
+          </div>
         </div>
       </div>
 

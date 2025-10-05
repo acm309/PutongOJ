@@ -1,5 +1,5 @@
+import type { OAuthConnection } from '@putongoj/shared'
 import type { Document, Model, ObjectId } from 'mongoose'
-import type { OAuthConnection } from '../services/oauth'
 import type { Entity, View } from '../types/entity'
 import type { UserDocument } from './User'
 import mongoose from '../config/db'

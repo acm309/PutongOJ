@@ -4,7 +4,9 @@ import type {
   AdminUserEditPayload,
   AdminUserListQuery,
   AdminUserListQueryResult,
+  AdminUserOAuthQueryResult,
   Enveloped,
+  OAuthProvider,
 } from '@putongoj/shared'
 import { instance } from './instance'
 
@@ -25,5 +27,15 @@ export async function updateUser (uid: string, payload: AdminUserEditPayload) {
 
 export async function updateUserPassword (uid: string, payload: AdminUserChangePasswordPayload) {
   const { data } = await instance.put(`/admin/user/${encodeURIComponent(uid)}/password`, payload)
+  return data as Enveloped<null>
+}
+
+export async function getUserOAuthConnections (uid: string) {
+  const { data } = await instance.get(`/admin/user/${encodeURIComponent(uid)}/oauth`)
+  return data as Enveloped<AdminUserOAuthQueryResult>
+}
+
+export async function removeUserOAuthConnection (uid: string, provider: OAuthProvider) {
+  const { data } = await instance.delete(`/admin/user/${encodeURIComponent(uid)}/oauth/${encodeURIComponent(provider)}`)
   return data as Enveloped<null>
 }

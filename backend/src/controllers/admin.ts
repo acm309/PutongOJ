@@ -5,10 +5,13 @@ import {
   AdminUserEditPayloadSchema,
   AdminUserListQueryResultSchema,
   AdminUserListQuerySchema,
+  AdminUserOAuthQueryResultSchema,
   ErrorCode,
+  OAuthProvider,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
+import oauthService from '../services/oauth'
 import userServices from '../services/user'
 import {
   createEnvelopedResponse,
@@ -118,11 +121,46 @@ export async function updateUserPassword (ctx: Context) {
   }
 }
 
+export async function getUserOAuthConnections (ctx: Context) {
+  const user = await loadUser(ctx)
+  const connections = await oauthService.getUserOAuthConnections(user._id)
+  const result = AdminUserOAuthQueryResultSchema.encode(connections)
+  return createEnvelopedResponse(ctx, result)
+}
+
+const providerMap = {
+  cjlu: OAuthProvider.CJLU,
+} as const
+
+export async function removeUserOAuthConnection (ctx: Context) {
+  const providerName = ctx.params.provider
+  if (typeof providerName !== 'string' || !(providerName in providerMap)) {
+    return createErrorResponse(ctx,
+      'No such OAuth provider', ErrorCode.BadRequest,
+    )
+  }
+  const provider = providerMap[providerName as keyof typeof providerMap]
+  const user = await loadEditingUser(ctx)
+  if (!user) {
+    return
+  }
+  const result = await oauthService.removeOAuthConnection(user._id, provider)
+  if (!result) {
+    return createErrorResponse(ctx,
+      'No such OAuth connection', ErrorCode.NotFound,
+    )
+  } else {
+    return createEnvelopedResponse(ctx, null)
+  }
+}
+
 const adminController = {
   findUsers,
   getUser,
   updateUser,
   updateUserPassword,
+  getUserOAuthConnections,
+  removeUserOAuthConnection,
 } as const
 
 export default adminController

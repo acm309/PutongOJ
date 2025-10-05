@@ -12,7 +12,6 @@ import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { getProfile, updatePassword, updateProfile } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
-import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { encryptData } from '@/utils/crypto'
 import { useMessage } from '@/utils/message'
@@ -24,7 +23,6 @@ interface OAuthConnection {
 
 const message = useMessage()
 const { setProfile } = useSessionStore()
-const { changeDomTitle } = useRootStore()
 
 const profile = ref<AccountProfileQueryResult | null>(null)
 const editingProfile = ref<AccountEditPayload>({})
@@ -56,20 +54,19 @@ function setEditingProfile () {
 
 async function fetch () {
   loading.value = true
-  const resp = await getProfile()
+  const [ profileResp, oauthResp ] = await Promise.all([
+    getProfile(),
+    getUserOAuthConnections(),
+  ])
   loading.value = false
-  if (!resp.success) {
-    message.error('Failed to load profile', resp.message)
+  if (!profileResp.success) {
+    message.error('Failed to load profile', profileResp.message)
     return
   }
 
-  profile.value = resp.data
+  connections.value = oauthResp
+  profile.value = profileResp.data
   setEditingProfile()
-  changeDomTitle({ title: 'Account Settings' })
-}
-
-async function fetchConnections () {
-  connections.value = await getUserOAuthConnections()
 }
 
 async function saveProfile () {
@@ -150,9 +147,7 @@ async function connectOAuth (provider: string) {
   window.open(resp.url, '_self', 'noopener,noreferrer')
 }
 
-onMounted(async () => {
-  await Promise.all([ fetch(), fetchConnections() ])
-})
+onMounted(fetch)
 </script>
 
 <template>

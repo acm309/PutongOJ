@@ -1,4 +1,5 @@
 <script>
+import ConfirmPopup from 'primevue/confirmpopup'
 import Toast from 'primevue/toast'
 import { inject, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -73,6 +74,7 @@ watch(() => route.meta, () => changeDomTitle(route.meta))
   <div id="app">
     <OjLayout />
     <Toast group="global" />
+    <ConfirmPopup />
   </div>
 </template>
 

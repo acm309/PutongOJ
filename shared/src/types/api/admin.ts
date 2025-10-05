@@ -1,6 +1,7 @@
 import { z } from 'zod'
-import { UserPrivilege } from '../../consts/index.js'
+import { OAuthProvider, UserPrivilege } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
+import { OAuthModelSchema } from '../model/oauth.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
@@ -53,3 +54,14 @@ export const AdminUserChangePasswordPayloadSchema = z.object({
 })
 
 export type AdminUserChangePasswordPayload = z.infer<typeof AdminUserChangePasswordPayloadSchema>
+
+export const AdminUserOAuthQueryResultSchema = z.record(
+  z.enum(OAuthProvider),
+  z.object({
+    providerId: OAuthModelSchema.shape.providerId,
+    displayName: OAuthModelSchema.shape.displayName,
+    createdAt: OAuthModelSchema.shape.createdAt,
+  }).nullable(),
+)
+
+export type AdminUserOAuthQueryResult = z.input<typeof AdminUserOAuthQueryResultSchema>

@@ -1,3 +1,4 @@
+import type { OAuthConnection, OAuthUserProfile } from '@putongoj/shared'
 import type { ObjectId } from 'mongoose'
 import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
@@ -31,18 +32,6 @@ interface OAuthTokenResponse {
   expires_in: number
   refresh_token?: string
   scope?: string
-}
-
-interface OAuthUserProfile {
-  provider: OAuthProvider
-  providerId: string
-  displayName: string
-  raw?: any
-}
-
-export interface OAuthConnection extends OAuthUserProfile {
-  accessToken: string
-  refreshToken?: string
 }
 
 abstract class OAuthClient {
