@@ -128,11 +128,10 @@ export async function getUserOAuthConnections (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-const providerMap = {
-  cjlu: OAuthProvider.CJLU,
-} as const
-
 export async function removeUserOAuthConnection (ctx: Context) {
+  const providerMap: Record<string, OAuthProvider> = {
+    cjlu: OAuthProvider.CJLU,
+  }
   const providerName = ctx.params.provider
   if (typeof providerName !== 'string' || !(providerName in providerMap)) {
     return createErrorResponse(ctx,

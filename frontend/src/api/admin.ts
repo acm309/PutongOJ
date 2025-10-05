@@ -6,6 +6,8 @@ import type {
   AdminUserListQueryResult,
   AdminUserOAuthQueryResult,
   Enveloped,
+} from '@putongoj/shared'
+import {
   OAuthProvider,
 } from '@putongoj/shared'
 import { instance } from './instance'
@@ -36,6 +38,9 @@ export async function getUserOAuthConnections (uid: string) {
 }
 
 export async function removeUserOAuthConnection (uid: string, provider: OAuthProvider) {
-  const { data } = await instance.delete(`/admin/user/${encodeURIComponent(uid)}/oauth/${encodeURIComponent(provider)}`)
+  const providerMap: Record<OAuthProvider, string> = {
+    [OAuthProvider.CJLU]: 'cjlu',
+  }
+  const { data } = await instance.delete(`/admin/user/${encodeURIComponent(uid)}/oauth/${providerMap[provider]}`)
   return data as Enveloped<null>
 }
