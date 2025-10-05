@@ -3,13 +3,14 @@ import type {
   AccountEditPayload,
   AccountProfileQueryResult,
 } from '@putongoj/shared'
-import { OAuthAction } from '@putongoj/shared'
+import { ErrorCode, OAuthAction } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getProfile, updatePassword, updateProfile } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
 import { useSessionStore } from '@/store/modules/session'
@@ -21,6 +22,7 @@ interface OAuthConnection {
   providerId: string
 }
 
+const { t } = useI18n()
 const message = useMessage()
 const { setProfile } = useSessionStore()
 
@@ -60,7 +62,7 @@ async function fetch () {
   ])
   loading.value = false
   if (!profileResp.success) {
-    message.error('Failed to load profile', profileResp.message)
+    message.error(t('ptoj.failed_load_profile'), profileResp.message)
     return
   }
 
@@ -86,37 +88,28 @@ async function saveProfile () {
     payload.school = editingProfile.value.school
   }
 
-  if (Object.keys(payload).length === 0) {
-    message.info('No changes detected', 'Your profile information remains unchanged')
-    return
-  }
-
   saving.value = true
   const resp = await updateProfile(payload)
   saving.value = false
 
   if (!resp.success) {
-    message.error('Failed to save changes', resp.message)
+    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
-  message.success('Profile updated', 'Your profile information has been saved successfully')
+  message.success(t('ptoj.successful_updated'), t('ptoj.profile_updated_detail'))
   profile.value = resp.data
   setEditingProfile()
   setProfile(resp.data)
 }
 
 async function changePassword () {
-  if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
-    message.error('All fields required', 'Please fill in all password fields')
-    return
-  }
   if (newPassword.value !== confirmPassword.value) {
-    message.error('Password mismatch', 'The new passwords you entered do not match')
+    message.error(t('ptoj.password_mismatch'), t('ptoj.password_mismatch_detail'))
     return
   }
   if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword.value) === false) {
-    message.error('Weak password', 'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers')
+    message.error(t('ptoj.password_weak'), t('ptoj.password_weak_detail'))
     return
   }
 
@@ -127,11 +120,16 @@ async function changePassword () {
   })
   saving.value = false
   if (!resp.success) {
-    message.error('Password update failed', resp.message)
+    message.error(
+      t('ptoj.failed_update_password'),
+      resp.code === ErrorCode.Unauthorized
+        ? t('ptoj.password_current_incorrect')
+        : resp.message,
+    )
     return
   }
 
-  message.success('Password updated', 'Your password has been changed successfully')
+  message.success(t('ptoj.successful_updated'), t('ptoj.password_updated_detail'))
   passwordDialog.value = false
 }
 
@@ -155,14 +153,14 @@ onMounted(fetch)
     <div class="flex font-semibold gap-4 items-center pt-6 px-6">
       <i class="pi pi-user-edit text-2xl" />
       <h1 class="text-xl">
-        Account Settings
+        {{ t('ptoj.account_settings') }}
       </h1>
     </div>
 
     <template v-if="loading || !profile">
       <div class="flex gap-4 items-center justify-center px-6 py-24">
         <i class="pi pi-spin pi-spinner text-2xl" />
-        <span>{{ loading ? 'Loading profile...' : 'Failed to load profile' }}</span>
+        <span>{{ loading ? t('ptoj.loading') : t('ptoj.failed_load_profile') }}</span>
       </div>
     </template>
 
@@ -170,45 +168,45 @@ onMounted(fetch)
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
         <IftaLabel>
           <InputText id="username" :value="profile.uid" class="w-full" readonly />
-          <label for="username">Username</label>
+          <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
             id="nickname" v-model="editingProfile.nick" class="w-full" maxlength="30"
-            placeholder="Enter nickname"
+            :placeholder="t('ptoj.enter_nickname')"
           />
-          <label for="nickname">Nickname</label>
+          <label for="nickname">{{ t('ptoj.nickname') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
             id="email" v-model="editingProfile.mail" class="w-full" type="email" maxlength="254"
-            placeholder="Enter email address"
+            :placeholder="t('ptoj.enter_email')"
           />
-          <label for="email">Email</label>
+          <label for="email">{{ t('ptoj.email') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
             id="school" v-model="editingProfile.school" class="w-full" maxlength="30"
-            placeholder="Enter school"
+            :placeholder="t('ptoj.enter_school')"
           />
-          <label for="school">School</label>
+          <label for="school">{{ t('ptoj.school') }}</label>
         </IftaLabel>
 
         <IftaLabel class="-mb-[5px] md:col-span-2">
           <Textarea
             id="motto" v-model="editingProfile.motto" class="w-full" rows="3" maxlength="300"
-            placeholder="Enter motto" auto-resize
+            :placeholder="t('ptoj.enter_motto')" auto-resize
           />
-          <label for="motto">Motto</label>
+          <label for="motto">{{ t('ptoj.motto') }}</label>
         </IftaLabel>
 
         <div class="flex gap-2 justify-end md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="fetch" />
           <Button
-            label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!hasChanges"
+            :label="t('ptoj.save_changes')" icon="pi pi-check" :loading="saving" :disabled="!hasChanges"
             @click="saveProfile"
           />
         </div>
@@ -216,47 +214,47 @@ onMounted(fetch)
 
       <div class="border-b border-surface p-6">
         <h2 class="font-semibold mb-4 text-lg">
-          Connections
+          {{ t('ptoj.connect_accounts') }}
         </h2>
         <div class="space-y-4">
           <div class="border border-surface flex items-center justify-between p-4 rounded-lg">
             <div>
               <div class="font-medium">
-                China Jiliang University SSO
+                {{ t('ptoj.cjlu_sso') }}
               </div>
               <div class="text-sm text-surface-600">
                 <span v-if="connections.CJLU">
-                  Connected as {{ connections.CJLU.providerId }}
+                  {{ t('ptoj.connected_as_brief', { display: connections.CJLU.providerId }) }}
                 </span>
-                <span v-else>Not connected</span>
+                <span v-else>{{ t('ptoj.not_connected') }}</span>
               </div>
             </div>
             <Button
-              :label="connections.CJLU ? 'Connected' : 'Connect'" :disabled="!!connections.CJLU"
+              :label="connections.CJLU ? t('ptoj.connected') : t('ptoj.connect')" :disabled="!!connections.CJLU"
               @click="connectOAuth('cjlu')"
             />
           </div>
           <p class="text-sm text-surface-600">
-            Connecting external accounts allows you to log in using those services.
+            {{ t('ptoj.connect_accounts_desc') }}
           </p>
         </div>
       </div>
 
       <div class="p-6">
         <h2 class="font-semibold mb-4 text-lg">
-          Password
+          {{ t('ptoj.change_password') }}
         </h2>
         <div class="space-y-4">
           <p class="text-sm text-surface-600">
-            Change your password. This will log you out from all active sessions.
+            {{ t('ptoj.change_password_desc') }}
           </p>
-          <Button label="Change Password" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />
+          <Button :label="t('ptoj.change_password')" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />
         </div>
       </div>
     </template>
 
     <Dialog
-      v-model:visible="passwordDialog" modal header="Change Password" :closable="false"
+      v-model:visible="passwordDialog" modal :header="t('ptoj.change_password')" :closable="false"
       class="max-w-md mx-6 w-full"
     >
       <form @submit.prevent="changePassword">
@@ -264,32 +262,32 @@ onMounted(fetch)
           <IftaLabel>
             <InputText
               id="old-password" v-model="oldPassword" class="w-full" type="password"
-              placeholder="Enter current password" required autocomplete="current-password"
+              :placeholder="t('ptoj.enter_current_password')" required autocomplete="current-password"
             />
-            <label for="old-password">Current Password</label>
+            <label for="old-password">{{ t('ptoj.current_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="new-password" v-model="newPassword" class="w-full" type="password"
-              placeholder="Enter new password" required autocomplete="new-password"
+              :placeholder="t('ptoj.enter_new_password')" required autocomplete="new-password"
             />
-            <label for="new-password">New Password</label>
+            <label for="new-password">{{ t('ptoj.new_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="confirm-password" v-model="confirmPassword" class="w-full" type="password"
-              placeholder="Confirm new password" required autocomplete="new-password"
+              :placeholder="t('ptoj.enter_confirm_new_password')" required autocomplete="new-password"
               :invalid="!!confirmPassword && confirmPassword !== newPassword"
             />
-            <label for="confirm-password">Confirm Password</label>
+            <label for="confirm-password">{{ t('ptoj.confirm_new_password') }}</label>
           </IftaLabel>
         </div>
         <div class="flex gap-2 justify-end mt-6">
           <Button
-            type="button" label="Cancel" icon="pi pi-times" severity="secondary" outlined
+            type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
             @click="passwordDialog = false"
           />
-          <Button type="submit" label="Change Password" icon="pi pi-check" :loading="saving" />
+          <Button type="submit" :label="t('ptoj.change_password')" icon="pi pi-check" :loading="saving" />
         </div>
       </form>
     </Dialog>

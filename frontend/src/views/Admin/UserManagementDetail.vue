@@ -4,10 +4,7 @@ import type {
   AdminUserEditPayload,
   AdminUserOAuthQueryResult,
 } from '@putongoj/shared'
-import {
-  OAuthProvider,
-
-} from '@putongoj/shared'
+import { OAuthProvider } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -21,6 +18,7 @@ import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
 import { useConfirm } from 'primevue/useconfirm'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser, getUserOAuthConnections, removeUserOAuthConnection, updateUser, updateUserPassword } from '@/api/admin'
 import { useRootStore } from '@/store'
@@ -31,6 +29,7 @@ import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/for
 import { onRouteParamUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const confirm = useConfirm()
@@ -83,12 +82,12 @@ async function fetch () {
   ])
   loading.value = false
   if (!userResp.success) {
-    message.error('Failed to load user', userResp.message)
+    message.error(t('ptoj.failed_load_user'), userResp.message)
     router.back()
     return
   }
   if (!oauthResp.success) {
-    message.error('Failed to load user OAuth connections', oauthResp.message)
+    message.error(t('ptoj.failed_load_connect_accounts'), oauthResp.message)
   } else {
     connections.value = oauthResp.data
   }
@@ -118,36 +117,27 @@ async function saveUser () {
     payload.school = editingUser.value.school
   }
 
-  if (Object.keys(payload).length === 0) {
-    message.info('No changes detected', 'User information remains unchanged')
-    return
-  }
-
   saving.value = true
   const resp = await updateUser(uid.value, payload)
   saving.value = false
 
   if (!resp.success) {
-    message.error('Failed to save changes', resp.message)
+    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
-  message.success('User updated', 'User information has been saved successfully')
+  message.success(t('ptoj.successful_updated'), t('ptoj.user_updated_detail'))
   user.value = resp.data
   setEditingUser()
 }
 
 async function changePassword () {
-  if (!newPassword.value) {
-    message.error('Password required', 'Please enter a new password')
-    return
-  }
   if (newPassword.value !== confirmPassword.value) {
-    message.error('Password mismatch', 'The passwords you entered do not match')
+    message.error(t('ptoj.password_mismatch'), t('ptoj.password_mismatch_detail'))
     return
   }
   if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword.value) === false) {
-    message.error('Weak password', 'Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers')
+    message.error(t('ptoj.password_weak'), t('ptoj.password_weak_detail'))
     return
   }
 
@@ -157,35 +147,35 @@ async function changePassword () {
   })
   saving.value = false
   if (!resp.success) {
-    message.error('Password update failed', resp.message)
+    message.error(t('ptoj.failed_update_password'), resp.message)
     return
   }
 
-  message.success('Password updated', 'User password has been changed successfully')
+  message.success(t('ptoj.successful_updated'), t('ptoj.password_updated_detail'))
   passwordDialog.value = false
 }
 
 function disconnectOAuth (event: Event, provider: OAuthProvider) {
   confirm.require({
     target: event.currentTarget as HTMLElement,
-    message: 'Are you sure you want to proceed?',
+    message: t('ptoj.proceed_confirm_message'),
     rejectProps: {
-      label: 'Cancel',
+      label: t('ptoj.cancel'),
       severity: 'secondary',
       outlined: true,
     },
     acceptProps: {
-      label: 'Disconnect',
+      label: t('ptoj.disconnect'),
       severity: 'danger',
     },
     accept: async () => {
       const result = await removeUserOAuthConnection(uid.value, provider)
       if (!result.success) {
-        message.error('Failed to disconnect', result.message)
+        message.error(t('ptoj.failed_proceed'), result.message)
         return
       }
       connections.value[provider] = null
-      message.success('Disconnected', 'OAuth connection has been removed successfully')
+      message.success(t('ptoj.successful_proceed'), t('ptoj.account_disconnected_detail'))
     },
   })
 }
@@ -205,26 +195,26 @@ onRouteParamUpdate(fetch)
     <div class="flex font-semibold gap-4 items-center pt-6 px-6">
       <i class="pi pi-user-edit text-2xl" />
       <h1 class="text-xl">
-        User Management
+        {{ t('ptoj.user_management') }}
       </h1>
     </div>
 
     <template v-if="loading || !user">
       <div class="flex gap-4 items-center justify-center px-6 py-24">
         <i class="pi pi-spin pi-spinner text-2xl" />
-        <span>{{ loading ? 'Loading user data...' : 'Failed to load user data' }}</span>
+        <span>{{ loading ? t('ptoj.loading') : t('ptoj.failed_load_profile') }}</span>
       </div>
     </template>
 
     <template v-else>
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
         <Message v-if="!canOperate" class="md:col-span-2" severity="warn" variant="outlined" icon="pi pi-info-circle">
-          You do not have permission to operate on this user because their privilege is not lower than yours.
+          {{ t('ptoj.user_management_cannot_operate_desc') }}
         </Message>
 
         <IftaLabel>
           <InputText id="username" :value="user.uid" class="w-full" readonly />
-          <label for="username">Username</label>
+          <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
@@ -244,71 +234,75 @@ onRouteParamUpdate(fetch)
             <InputText id="privilege" :value="getPrivilegeLabel(user.privilege)" class="w-full" readonly />
             <InputIcon class="pi pi-lock" />
           </IconField>
-          <label for="privilege">Privilege</label>
+          <label for="privilege">{{ t('ptoj.privilege') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingUser.nick" class="w-full" maxlength="30" placeholder="Enter nickname"
-            :readonly="!canOperate"
+            id="nickname" v-model="editingUser.nick" class="w-full" maxlength="30"
+            :placeholder="t('ptoj.enter_nickname')" :readonly="!canOperate"
           />
-          <label for="nickname">Nickname</label>
+          <label for="nickname">{{ t('ptoj.nickname') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
             id="email" v-model="editingUser.mail" class="w-full" type="email" maxlength="254"
-            placeholder="Enter email address" :readonly="!canOperate"
+            :placeholder="t('ptoj.enter_email')" :readonly="!canOperate"
           />
-          <label for="email">Email</label>
+          <label for="email">{{ t('ptoj.email') }}</label>
         </IftaLabel>
 
         <IftaLabel class="md:col-span-2">
           <InputText
-            id="school" v-model="editingUser.school" class="w-full" maxlength="30" placeholder="Enter school"
-            :readonly="!canOperate"
+            id="school" v-model="editingUser.school" class="w-full" maxlength="30"
+            :placeholder="t('ptoj.enter_school')" :readonly="!canOperate"
           />
-          <label for="school">School</label>
+          <label for="school">{{ t('ptoj.school') }}</label>
         </IftaLabel>
 
         <IftaLabel class="-mb-[5px] md:col-span-2">
           <Textarea
             id="motto" v-model="editingUser.motto" class="w-full" rows="3" maxlength="300"
-            placeholder="Enter motto" auto-resize :readonly="!canOperate"
+            :placeholder="t('ptoj.enter_motto')" auto-resize :readonly="!canOperate"
           />
-          <label for="motto">Motto</label>
+          <label for="motto">{{ t('ptoj.motto') }}</label>
         </IftaLabel>
 
         <div class="flex gap-2 justify-end md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="fetch" />
           <Button
-            label="Save Changes" icon="pi pi-check" :loading="saving" :disabled="!canOperate || !hasChanges"
-            @click="saveUser"
+            :label="t('ptoj.save_changes')" icon="pi pi-check" :loading="saving"
+            :disabled="!canOperate || !hasChanges" @click="saveUser"
           />
         </div>
       </div>
 
       <div class="border-b border-surface p-6">
         <h2 class="font-semibold mb-4 text-lg">
-          Connections
+          {{ t('ptoj.connect_accounts') }}
         </h2>
         <div class="space-y-4">
           <div class="border border-surface flex gap-2 items-center justify-between p-4 rounded-lg">
             <div>
               <div class="font-medium">
-                China Jiliang University SSO
+                {{ t('ptoj.cjlu_sso') }}
               </div>
               <div class="text-sm text-surface-600">
                 <span v-if="connections.CJLU">
-                  Connected as {{ connections.CJLU.providerId }} ({{ connections.CJLU.displayName }})
-                  at {{ timePretty(connections.CJLU.createdAt) }}
+                  {{ t('ptoj.connected_as_detail', {
+                    id: connections.CJLU.providerId,
+                    name: connections.CJLU.displayName,
+                    time: timePretty(connections.CJLU.createdAt),
+                  }) }}
                 </span>
-                <span v-else>Not connected</span>
+                <span v-else>{{ t('ptoj.not_connected') }}</span>
               </div>
             </div>
             <Button
-              v-if="connections.CJLU" label="Disconnect" severity="danger" outlined :disabled="!canOperate || !isRoot"
-              class="min-w-fit" @click="event => disconnectOAuth(event, OAuthProvider.CJLU)"
+              v-if="connections.CJLU" :label="t('ptoj.disconnect')" severity="danger" outlined
+              :disabled="!canOperate || !isRoot" class="min-w-fit"
+              @click="event => disconnectOAuth(event, OAuthProvider.CJLU)"
             />
           </div>
         </div>
@@ -316,14 +310,14 @@ onRouteParamUpdate(fetch)
 
       <div class="border-b border-surface p-6">
         <h2 class="font-semibold mb-4 text-lg">
-          Password
+          {{ t('ptoj.change_password') }}
         </h2>
         <div class="space-y-4">
           <p class="text-sm text-surface-600">
-            Change the user's password. This will immediately invalidate the current password and all active sessions.
+            {{ t('ptoj.change_password_admin_desc') }}
           </p>
           <Button
-            label="Change Password" icon="pi pi-key" severity="warning" :disabled="!canOperate"
+            :label="t('ptoj.change_password')" icon="pi pi-key" severity="warning" :disabled="!canOperate"
             @click="openPasswordDialog"
           />
         </div>
@@ -331,19 +325,19 @@ onRouteParamUpdate(fetch)
 
       <div class="p-6">
         <h2 class="font-semibold mb-4 text-lg">
-          Audit Information
+          {{ t('ptoj.audit_information') }}
         </h2>
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
           <IftaLabel>
             <InputText id="created-at" :value="timePretty(user.createdAt)" class="font-mono w-full" readonly />
-            <label for="created-at">Created At</label>
+            <label for="created-at">{{ t('ptoj.created_at') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="last-visited" :value="user.lastVisitedAt ? timePretty(user.lastVisitedAt) : 'Unknown'"
               class="font-mono w-full" readonly
             />
-            <label for="last-visited">Last Visited At</label>
+            <label for="last-visited">{{ t('ptoj.last_visited_at') }}</label>
           </IftaLabel>
         </div>
       </div>

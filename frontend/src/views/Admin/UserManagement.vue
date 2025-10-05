@@ -42,7 +42,7 @@ async function fetch () {
   const resp = await findUsers(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error('Failed to fetch user list', resp.message)
+    message.error(t('ptoj.failed_fetch_users'), resp.message)
     docs.value = []
     total.value = 0
     return
@@ -104,21 +104,21 @@ onRouteQueryUpdate(fetch)
       <div class="flex font-semibold gap-4 items-center mb-4">
         <i class="pi pi-users text-2xl" />
         <h1 class="text-xl">
-          User Management
+          {{ t('ptoj.user_management') }}
         </h1>
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField class="w-full">
           <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
           <InputText
-            v-model="query.keyword" class="w-full" placeholder="Search by username or nickname..."
+            v-model="query.keyword" class="w-full" :placeholder="t('ptoj.search_by_username_or_nickname')"
             maxlength="30" @keypress.enter="onSearch"
           />
         </IconField>
 
         <Select
           v-model="query.privilege" class="w-full" :options="privilegeOptions" option-label="label"
-          option-value="value" show-clear placeholder="All privileges"
+          option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')"
         >
           <template #option="slotProps">
             <Tag
@@ -131,7 +131,7 @@ onRouteQueryUpdate(fetch)
         <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined @click="fetch" />
           <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="onReset" />
-          <Button label="Search" icon="pi pi-search" @click="onSearch" />
+          <Button :label="t('ptoj.search')" icon="pi pi-search" @click="onSearch" />
         </div>
       </div>
     </div>
@@ -140,17 +140,17 @@ onRouteQueryUpdate(fetch)
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
       :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort" @page="onPage"
     >
-      <Column header="Username" field="uid" class="font-medium max-w-48 pl-6 truncate" sortable frozen />
+      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-48 pl-6 truncate" sortable frozen />
 
-      <Column header="Nickname" field="nick" class="max-w-48 truncate" />
+      <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
 
-      <Column header="Privilege" field="privilege">
+      <Column :header="t('ptoj.privilege')" field="privilege">
         <template #body="{ data }">
           <Tag :value="getPrivilegeLabel(data.privilege)" :severity="getPrivilegeSeverity(data.privilege)" />
         </template>
       </Column>
 
-      <Column header="Created At" field="createdAt" sortable>
+      <Column :header="t('ptoj.created_at')" field="createdAt" sortable>
         <template #body="{ data }">
           <span class="font-mono">
             {{ timePretty(data.createdAt) }}
@@ -158,7 +158,7 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column header="Last Visited At" field="lastVisitedAt" sortable>
+      <Column :header="t('ptoj.last_visited_at')" field="lastVisitedAt" sortable>
         <template #body="{ data }">
           <span class="font-mono">
             {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
@@ -176,7 +176,9 @@ onRouteQueryUpdate(fetch)
       </Column>
 
       <template #empty>
-        {{ t('oj.empty_content') }}
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
       </template>
     </DataTable>
 
@@ -184,7 +186,7 @@ onRouteQueryUpdate(fetch)
       class="border-surface border-t bottom-0 sticky"
       :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-      current-page-report-template="{first} to {last} of {totalRecords}" @page="onPage"
+      :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
   </div>
 </template>

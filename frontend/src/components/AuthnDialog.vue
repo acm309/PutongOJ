@@ -12,6 +12,7 @@ import Divider from 'primevue/divider'
 import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { userLogin, userRegister } from '@/api/account'
 import { generateOAuthUrl } from '@/api/oauth'
@@ -20,6 +21,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { encryptData } from '@/utils/crypto'
 import { useMessage } from '@/utils/message'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
@@ -58,47 +60,23 @@ function resetValidity () {
 
 function validateForm (): boolean {
   resetValidity()
-
   let isValid = true
   const { username, password, confirmPassword } = formData.value
-  const isRegister = !isLogin.value
 
-  if (!username.trim()) {
-    fieldValidity.value.username = false
-    message.error('Username Required', 'Please enter your username')
-    isValid = false
-  } else if (isRegister) {
-    if (username.length < 3 || username.length > 20) {
+  if (!isLogin.value) {
+    if (!/^[\w-]{3,20}$/.test(username)) {
       fieldValidity.value.username = false
-      message.error('Invalid Username', 'Username must be between 3 and 20 characters')
-      isValid = false
-    } else if (!/^[\w-]+$/.test(username)) {
-      fieldValidity.value.username = false
-      message.error('Invalid Username', 'Username can only contain letters, numbers, underscores and hyphens')
+      message.error(t('ptoj.username_invalid'), t('ptoj.username_invalid_detail'))
       isValid = false
     }
-  }
-
-  if (!password) {
-    fieldValidity.value.password = false
-    message.error('Password Required', 'Please enter your password')
-    isValid = false
-  } else if (isRegister) {
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
       fieldValidity.value.password = false
-      message.error('Weak Password', 'Password must be at least 8 characters with uppercase, lowercase and numbers')
+      message.error(t('ptoj.password_weak'), t('ptoj.password_weak_detail'))
       isValid = false
     }
-  }
-
-  if (isRegister) {
-    if (!confirmPassword) {
+    if (password !== confirmPassword) {
       fieldValidity.value.confirmPassword = false
-      message.error('Confirmation Required', 'Please confirm your password')
-      isValid = false
-    } else if (password !== confirmPassword) {
-      fieldValidity.value.confirmPassword = false
-      message.error('Password Mismatch', 'Passwords do not match')
+      message.error(t('ptoj.password_mismatch'), t('ptoj.password_mismatch_detail'))
       isValid = false
     }
   }
@@ -109,19 +87,16 @@ function validateForm (): boolean {
 function handleAuthError (result: ErrorEnveloped) {
   switch (result.code) {
     case ErrorCode.Unauthorized:
-      message.error('Login Failed', 'Invalid username or password')
+      message.error(t('ptoj.failed_login'), t('ptoj.incorrect_username_or_password'))
       break
     case ErrorCode.Forbidden:
-      message.error('Account Suspended', 'Your account has been suspended')
+      message.error(t('ptoj.failed_login'), t('ptoj.account_banned_detail'))
       break
     case ErrorCode.Conflict:
-      message.error('Registration Failed', 'Username already taken')
-      break
-    case ErrorCode.BadRequest:
-      message.error('Invalid Password', 'Password does not meet requirements')
+      message.error(t('ptoj.failed_register'), t('ptoj.username_already_taken'))
       break
     default:
-      message.error('Authentication Error', result.message || 'An unexpected error occurred')
+      message.error(t('ptoj.failed_proceed'), result.message || t('ptoj.unexpected_error_occurred'))
       break
   }
 }
@@ -145,7 +120,7 @@ async function handleAuthSubmit () {
       if (result.success) {
         const { uid } = result.data
 
-        message.success('Login Successful', `Welcome back, ${uid}!`)
+        message.success(t('ptoj.successful_login'), t('ptoj.welcome_back', { username: uid }))
         sessionStore.setProfile(result.data)
         closeModal()
 
@@ -162,7 +137,7 @@ async function handleAuthSubmit () {
       })
 
       if (result.success) {
-        message.success('Registration Successful', 'Your account has been created successfully')
+        message.success(t('ptoj.successful_register'), t('ptoj.successful_register_detail'))
         sessionStore.setProfile(result.data)
         closeModal()
       } else {
@@ -208,21 +183,24 @@ watch(authnDialogVisible, (newValue) => {
 
 <template>
   <Dialog
-    v-model:visible="authnDialogVisible" modal :closable="true" :close-on-escape="true" class="max-w-md mx-6 w-full"
-    @hide="closeModal"
+    v-model:visible="authnDialogVisible" modal :closable="true" :close-on-escape="true"
+    class="max-w-md mx-6 w-full" @hide="closeModal"
   >
     <template #header>
       <div class="font-semibold pl-[35px] text-center text-xl w-full">
-        {{ isLogin ? 'Login' : 'Register' }}
+        {{ isLogin ? t('ptoj.login') : t('ptoj.register') }}
       </div>
     </template>
 
     <div v-if="hasOAuthEnabled && isLogin">
-      <Button v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined class="w-full" @click="handleOAuthLogin('cjlu')">
-        China Jiliang University SSO
+      <Button
+        v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined class="w-full"
+        @click="handleOAuthLogin('cjlu')"
+      >
+        {{ t('ptoj.cjlu_sso') }}
       </Button>
       <Divider align="center">
-        <b>OR</b>
+        <b>{{ t('ptoj.or') }}</b>
       </Divider>
     </div>
 
@@ -230,38 +208,37 @@ watch(authnDialogVisible, (newValue) => {
       <IftaLabel>
         <InputText
           id="username" v-model="formData.username" class="w-full" :invalid="!fieldValidity.username"
-          :placeholder="isLogin ? 'Enter your username' : 'Choose a username (3-20 characters)'"
-          autocomplete="username" size="large"
+          :placeholder="isLogin ? t('ptoj.enter_username') : t('ptoj.choose_username')" autocomplete="username"
+          size="large" required
         />
-        <label for="username">Username</label>
+        <label for="username">{{ t('ptoj.username') }}</label>
       </IftaLabel>
 
       <IftaLabel>
         <InputText
           id="password" v-model="formData.password" type="password" class="w-full"
-          :invalid="!fieldValidity.password"
-          :placeholder="isLogin ? 'Enter your password' : 'Create a strong password'"
-          :autocomplete="isLogin ? 'current-password' : 'new-password'" size="large"
+          :invalid="!fieldValidity.password" :placeholder="isLogin ? t('ptoj.enter_password') : t('ptoj.create_strong_password')"
+          :autocomplete="isLogin ? 'current-password' : 'new-password'" size="large" required
         />
-        <label for="password">Password</label>
+        <label for="password">{{ t('ptoj.password') }}</label>
       </IftaLabel>
 
       <IftaLabel v-if="!isLogin">
         <InputText
           id="confirm-password" v-model="formData.confirmPassword" type="password" class="w-full"
-          :invalid="!fieldValidity.confirmPassword" placeholder="Confirm your password"
-          autocomplete="new-password" size="large"
+          :invalid="!fieldValidity.confirmPassword" :placeholder="t('ptoj.enter_confirm_password')" autocomplete="new-password"
+          size="large" required
         />
-        <label for="confirm-password">Confirm Password</label>
+        <label for="confirm-password">{{ t('ptoj.confirm_password') }}</label>
       </IftaLabel>
 
       <Button
-        type="submit" :label="isLogin ? 'Login' : 'Register'" size="large"
+        type="submit" :label="isLogin ? t('ptoj.login') : t('ptoj.register')" size="large"
         :icon="isLogin ? 'pi pi-sign-in' : 'pi pi-user-plus'" class="w-full" :loading="loading"
       />
 
       <Button
-        type="button" :label="isLogin ? 'Go to Register' : 'Back to Login'" size="large" outlined
+        type="button" :label="isLogin ? t('ptoj.go_to_register') : t('ptoj.back_to_login')" size="large" outlined
         :icon="isLogin ? 'pi pi-user-plus' : 'pi pi-sign-in'" severity="secondary" class="w-full" :disabled="loading"
         @click="switchTab(isLogin ? AuthnDialogTab.REGISTER : AuthnDialogTab.LOGIN)"
       />
