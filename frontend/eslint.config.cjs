@@ -24,6 +24,7 @@ module.exports = antfu(
       // Other rules
       'unused-imports/no-unused-vars': [ 'warn' ],
       'antfu/if-newline': [ 'off' ],
+      'vue/static-class-names-order': [ 'warn' ],
     },
   },
 )

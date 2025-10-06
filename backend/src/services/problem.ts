@@ -1,6 +1,7 @@
+import type { Paginated } from '@putongoj/shared'
 import type { ObjectId, PipelineStage } from 'mongoose'
 import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
-import type { Paginated, PaginateOption } from '../types'
+import type { PaginateOption } from '../types'
 import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
 import path from 'node:path'
 import fse from 'fs-extra'

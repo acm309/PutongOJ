@@ -2,7 +2,7 @@
 import type { ProblemEntityForm } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
-import { Spin } from 'view-ui-plus'
+import { Button, Spin } from 'view-ui-plus'
 import { computed, inject, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

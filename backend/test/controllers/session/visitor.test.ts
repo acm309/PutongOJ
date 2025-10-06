@@ -9,10 +9,10 @@ const request = supertest.agent(server)
 
 test('Bannded user login', async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: userSeeds.banned.uid,
-      pwd: await encryptData(userSeeds.banned.pwd!),
+      username: userSeeds.banned.uid,
+      password: await encryptData(userSeeds.banned.pwd!),
     })
 
   t.is(res.status, 200)
@@ -22,10 +22,10 @@ test('Bannded user login', async (t) => {
 
 test('Non-exist user login', async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'non-exist',
-      pwd: await encryptData('non-exist'),
+      username: 'non-exist',
+      password: await encryptData('non-exist'),
     })
 
   t.is(res.status, 200)
@@ -35,10 +35,10 @@ test('Non-exist user login', async (t) => {
 
 test('Wrong password login', async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: userSeeds.admin.uid,
-      pwd: await encryptData('wrong-password'),
+      username: userSeeds.admin.uid,
+      password: await encryptData('wrong-password'),
     })
 
   t.is(res.status, 200)
@@ -48,10 +48,11 @@ test('Wrong password login', async (t) => {
 
 test('Get session profile without login', async (t) => {
   const res = await request
-    .get('/api/session')
+    .get('/api/account/profile')
 
   t.is(res.status, 200)
-  t.is(res.body.profile, null)
+  t.false(res.body.success)
+  t.is(res.body.data, null)
 })
 
 test.after.always('close server', () => {

@@ -1,0 +1,199 @@
+import type { Context } from 'koa'
+import { Buffer } from 'node:buffer'
+import { timingSafeEqual } from 'node:crypto'
+import {
+  AccountChangePasswordPayloadSchema,
+  AccountEditPayloadSchema,
+  AccountLoginPayloadSchema,
+  AccountProfileQueryResultSchema,
+  AccountRegisterPayloadSchema,
+  ErrorCode,
+  UserPrivilege,
+} from '@putongoj/shared'
+import { checkSession, loadProfile } from '../middlewares/authn'
+import cryptoService from '../services/crypto'
+import sessionService from '../services/session'
+import userServices from '../services/user'
+import {
+  createEnvelopedResponse,
+  createErrorResponse,
+  createZodErrorResponse,
+  isComplexPwd,
+  passwordHash,
+  passwordHashBuffer,
+} from '../utils'
+
+export async function getProfile (ctx: Context) {
+  const profile = await checkSession(ctx)
+  const session = sessionService.getSession(ctx)
+  if (!profile || !session) {
+    return createErrorResponse(ctx, 'Not logged in', ErrorCode.Unauthorized)
+  }
+
+  const result = AccountProfileQueryResultSchema.encode({
+    ...session, ...profile.toObject(),
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function userLogin (ctx: Context) {
+  const payload = AccountLoginPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  let password: string
+  try {
+    password = await cryptoService.decryptData(payload.data.password)
+  } catch {
+    return createErrorResponse(ctx,
+      'Failed to decrypt password field', ErrorCode.BadRequest,
+    )
+  }
+  const pwdHash = passwordHashBuffer(password)
+
+  const user = await userServices.getUser(payload.data.username)
+  if (!user) {
+    return createErrorResponse(ctx,
+      'Username or password is incorrect', ErrorCode.Unauthorized,
+    )
+  }
+  if (timingSafeEqual(Buffer.from(user.pwd, 'hex'), pwdHash) === false) {
+    return createErrorResponse(ctx,
+      'Username or password is incorrect', ErrorCode.Unauthorized,
+    )
+  }
+  if (user.privilege === UserPrivilege.Banned) {
+    return createErrorResponse(ctx,
+      'Account has been banned, please contact the administrator', ErrorCode.Forbidden,
+    )
+  }
+
+  const session = sessionService.setSession(ctx, user)
+  const result = AccountProfileQueryResultSchema.encode({
+    ...session, ...user.toObject(),
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function userRegister (ctx: Context) {
+  const profile = await checkSession(ctx)
+  if (profile) {
+    return createErrorResponse(ctx, 'Already logged in', ErrorCode.BadRequest)
+  }
+
+  const payload = AccountRegisterPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  let password: string
+  try {
+    password = await cryptoService.decryptData(payload.data.password)
+  } catch {
+    return createErrorResponse(ctx,
+      'Failed to decrypt password field', ErrorCode.BadRequest,
+    )
+  }
+
+  const exists = await userServices.getUser(payload.data.username)
+  if (exists) {
+    return createErrorResponse(ctx,
+      'The username has been registered', ErrorCode.Conflict,
+    )
+  }
+  if (!isComplexPwd(password)) {
+    return createErrorResponse(ctx,
+      'Password is not complex enough', ErrorCode.BadRequest,
+    )
+  }
+
+  try {
+    const user = await userServices.createUser({
+      uid: payload.data.username,
+      pwd: passwordHash(password),
+    })
+    const session = sessionService.setSession(ctx, user)
+    const result = AccountProfileQueryResultSchema.encode({
+      ...session, ...user.toObject(),
+    })
+    return createEnvelopedResponse(ctx, result)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
+export async function userLogout (ctx: Context) {
+  sessionService.deleteSession(ctx)
+  return createEnvelopedResponse(ctx, null)
+}
+
+export async function updateProfile (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const payload = AccountEditPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  try {
+    const { nick, motto, mail, school } = payload.data
+    const updatedUser = await userServices.updateUser(profile, {
+      nick, motto, mail, school,
+    })
+    const session = sessionService.getSession(ctx)
+    const result = AccountProfileQueryResultSchema.encode({
+      ...session, ...updatedUser.toObject(),
+    })
+    return createEnvelopedResponse(ctx, result)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
+export async function updatePassword (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const payload = AccountChangePasswordPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  let oldPassword: string | undefined
+  let newPassword: string | undefined
+  try {
+    oldPassword = await cryptoService.decryptData(payload.data.oldPassword)
+    newPassword = await cryptoService.decryptData(payload.data.newPassword)
+  } catch {
+    return createErrorResponse(ctx,
+      'Failed to decrypt password field', ErrorCode.BadRequest,
+    )
+  }
+
+  if (!isComplexPwd(newPassword)) {
+    return createErrorResponse(ctx,
+      'New password is not complex enough', ErrorCode.BadRequest,
+    )
+  }
+  const oldPwdHash = passwordHashBuffer(oldPassword)
+  if (timingSafeEqual(Buffer.from(profile.pwd, 'hex'), oldPwdHash) === false) {
+    return createErrorResponse(ctx,
+      'Old password is incorrect', ErrorCode.Unauthorized,
+    )
+  }
+  const pwd = passwordHash(newPassword)
+
+  try {
+    const updatedUser = await userServices.updateUser(profile, { pwd })
+    sessionService.setSession(ctx, updatedUser)
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
+const accountController = {
+  getProfile,
+  userLogin,
+  userRegister,
+  userLogout,
+  updateProfile,
+  updatePassword,
+} as const
+
+export default accountController

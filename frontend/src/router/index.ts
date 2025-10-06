@@ -14,7 +14,7 @@ router.beforeEach((to, from, next) => {
   const session = useSessionStore()
 
   if (to.meta.requiresLogin && !session.isLogined) {
-    session.toggleLoginState()
+    session.toggleAuthnDialog()
     return next({ name: 'home' })
   }
   if (to.meta.requiresAdmin && !session.isAdmin) {

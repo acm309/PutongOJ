@@ -56,14 +56,14 @@ onBeforeMount(async () => {
     <!-- eslint-disable-next-line vue/no-mutating-props -->
     <Draggable v-model="contest.list" item-key="pid">
       <template #item="{ element, index }">
-        <div class="list-item">
+        <div class="problem-item">
           <p>{{ element }} -- {{ jobs[element] }}</p>
           <Icon type="md-close-circle" @click="removeJob(index)" />
         </div>
       </template>
     </Draggable>
     <Row :gutter="14">
-      <Col flex="auto" class="add">
+      <Col flex="auto" class="mb-[20px]">
         <ProblemSelect v-model="pid" :course="contest.course?.courseId" @keyup.enter="add" />
       </Col>
       <Col flex="unset" class="ivu-mp-8">
@@ -76,12 +76,10 @@ onBeforeMount(async () => {
 </template>
 
 <style lang="stylus" scoped>
-.list-item
+.problem-item
   display: flex
   justify-content: space-between
   padding: 14px 20px
   margin-bottom: 14px
   background-color: #f2f2f2
-.add
-  margin-bottom: 20px
 </style>

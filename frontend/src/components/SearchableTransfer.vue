@@ -47,7 +47,7 @@ function handleChange (newTargetKeys, direction, moveKeys) {
         @on-change="handleChange"
       />
     </Col>
-    <Col span="12" class=" transfer-right">
+    <Col span="12" class="transfer-right">
       <Transfer
         filterable
         :data="rightSource"

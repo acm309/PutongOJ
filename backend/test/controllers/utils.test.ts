@@ -44,10 +44,10 @@ test('Visitor can not submit file', async (t) => {
 
 test('Admin could submit file', async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'admin',
-      pwd: await encryptData(config.deploy.adminInitPwd),
+      username: 'admin',
+      password: await encryptData(config.deploy.adminInitPwd),
     })
   t.is(res.status, 200)
 

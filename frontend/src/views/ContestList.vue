@@ -56,15 +56,17 @@ async function enter (item) {
     { pwd: enterPwd },
   )
   const data = await verify(opt)
-  if (data)
+  if (data) {
+    profile.verifyContest.push(+item.cid)
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
-  else
+  } else {
     $Message.error('Wrong password!')
+  }
 }
 
 async function visit (item) {
   if (!isLogined) {
-    sessionStore.toggleLoginState()
+    sessionStore.toggleAuthnDialog()
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
@@ -78,12 +80,14 @@ async function visit (item) {
     else
       $Message.error('You\'re not invited to attend this contest!')
   } else if (+item.encrypt === encrypt.Password) {
+    document.activeElement.blur()
     $Modal.confirm({
       render: (h) => {
         return h(Input, {
           placeholder: 'Please enter password.',
+          autofocus: true,
           onChange: event => enterPwd = event.target.value,
-          onEnter: () => {
+          onOnEnter: () => {
             enter(item)
             $Modal.remove()
           },

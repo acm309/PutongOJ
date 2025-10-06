@@ -1,230 +1,26 @@
-<script setup>
-import only from 'only'
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import { Button, Col, Divider, Form, FormItem, Input, Radio, RadioGroup, Row, Spin, Tooltip } from 'view-ui-plus'
-import { computed, inject, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import api from '@/api'
-import { useOAuthStore } from '@/store/modules/oauth'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useUserStore } from '@/store/modules/user'
-import { privilege } from '@/utils/constant'
 
-const { t, locale } = useI18n()
-const isZH = computed(() => locale.value === 'zh-CN')
-
-const oauthStore = useOAuthStore()
-const sessionStore = useSessionStore()
+const router = useRouter()
 const userStore = useUserStore()
+const sessionStore = useSessionStore()
 
-const message = inject('$Message')
-
-const { update } = userStore
-const { logout } = sessionStore
-const { isRoot, isAdmin, profile } = $(storeToRefs(sessionStore))
-const { user } = $(storeToRefs(userStore))
-const { connections } = storeToRefs(oauthStore)
-
-let loading = $ref(false)
-
-const userInfoForm = $ref(null)
-const userSecurityForm = $ref(null)
-const isSelf = $computed(() => profile?.uid === user.uid)
-const securityForm = $ref({
-  oldPwd: '',
-  newPwd: '',
-  checkPwd: '',
-})
-const connectionsMap = $computed(() => {
-  const map = {}
-  Object.keys(connections.value).forEach((key) => {
-    const connection = connections.value[key]
-    if (connection) {
-      map[key] = `${connection.displayName} (${connection.providerId})`
-    } else {
-      map[key] = null
-    }
-  })
-  return map
-})
-
-const userInfoValidate = {
-  uid: [ { required: true, trigger: 'blur' } ],
-  nick: [ { type: 'string', max: 30, trigger: 'change' } ],
-  motto: [ { type: 'string', max: 300, trigger: 'change' } ],
-  mail: [ { type: 'email', trigger: 'change' } ],
-  school: [ { type: 'string', max: 30, trigger: 'change' } ],
-}
-
-function checkPwdValidator (rule, value, callback) {
-  const error = value !== securityForm.newPwd ? new Error(t('oj.password_not_match')) : null
-  if (error) { callback(error) } else { callback() }
-}
-
-const userSecurityValidate = $computed(() => ({
-  oldPwd: [ { required: !isAdmin, message: t('oj.password_missing'), trigger: 'change' } ],
-  newPwd: [
-    { required: true, message: t('oj.password_missing'), trigger: 'change' },
-    { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, message: t('oj.password_requirement'), trigger: 'change' },
-  ],
-  checkPwd: [
-    { required: true, message: t('oj.password_confirm_missing'), trigger: 'change' },
-    { validator: checkPwdValidator, trigger: 'change' },
-  ],
-}))
-
-const privilegeOptions = [
-  { label: 'Banned', value: privilege.Banned },
-  { label: 'User', value: privilege.User },
-  { label: 'Admin', value: privilege.Admin },
-  { label: 'Root', value: privilege.Root },
-]
-
-function updateProfile () {
-  const submit = async (valid) => {
-    if (!valid) return
-    loading = true
-    const updatedUser = only(user, 'uid nick motto mail school')
-    if (isRoot) updatedUser.privilege = user.privilege
-    const response = await update(updatedUser)
-    if (!response.isAxiosError) {
-      message.success(t('oj.update_success'))
-    }
-    loading = false
-  }
-  userInfoForm.validate(submit)
-}
-
-async function updatePassword () {
-  const submit = async (valid) => {
-    if (!valid) return
-    loading = true
-    const response = await update({
-      uid: user.uid,
-      oldPwd: securityForm.oldPwd,
-      newPwd: securityForm.newPwd,
-    })
-    if (!response.isAxiosError) {
-      securityForm.oldPwd = ''
-      securityForm.newPwd = ''
-      securityForm.checkPwd = ''
-      message.success(t('oj.update_success'))
-      if (isSelf) {
-        logout().then(() => message.info(t('oj.please_relogin')))
-      }
-    }
-    loading = false
-  }
-  userSecurityForm.validate(submit)
-}
-
-async function connectOAuth (provider) {
-  const url = await api.oauth.generateOAuthUrl(provider, { action: 'connect' })
-  window.open(url.data.url, '_self', 'noopener,noreferrer')
-}
+const { user } = storeToRefs(userStore)
+const { isAdmin } = storeToRefs(sessionStore)
 
 onMounted(async () => {
-  loading = true
-  await oauthStore.fetchConnections()
-  loading = false
+  if (isAdmin.value) {
+    router.replace({ name: 'UserManagementDetail', params: { uid: (user.value as any).uid } })
+  } else {
+    router.replace({ name: 'AccountSettings' })
+  }
 })
 </script>
 
 <template>
-  <div class="user-edit">
-    <Form ref="userInfoForm" :label-width="isZH ? 80 : 130" :rules="userInfoValidate" :model="user">
-      <FormItem :label="t('oj.username')" prop="uid">
-        <Input v-model="user.uid" disabled />
-      </FormItem>
-      <FormItem :label="t('oj.nick')" prop="nick">
-        <Input v-model="user.nick" :maxlength="30" show-word-limit />
-      </FormItem>
-      <FormItem :label="t('oj.motto')" prop="motto">
-        <Input
-          v-model="user.motto" type="textarea" maxlength="300" show-word-limit
-          :autosize="{ minRows: 3, maxRows: 10 }"
-        />
-      </FormItem>
-      <FormItem :label="t('oj.mail')" prop="mail">
-        <Input v-model="user.mail" maxlength="254" />
-      </FormItem>
-      <FormItem :label="t('oj.school')" prop="school">
-        <Input v-model="user.school" maxlength="30" show-word-limit />
-      </FormItem>
-      <FormItem v-if="isRoot" :label="t('oj.privilege')">
-        <RadioGroup v-model="user.privilege">
-          <Radio v-for="item in privilegeOptions" :key="item.value" :label="item.value" :disabled="isSelf" border>
-            {{ item.label }}
-          </Radio>
-        </RadioGroup>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" size="large" @click="updateProfile">
-          {{ t('oj.submit') }}
-        </Button>
-      </FormItem>
-    </Form>
-    <Form v-if="isSelf" :label-width="isZH ? 80 : 130">
-      <Divider simple class="user-divider">
-        Connection
-      </Divider>
-      <FormItem>
-        <template #label>
-          <Tooltip content="中国计量大学统一身份认证" placement="top">
-            CJLU Authn
-          </Tooltip>
-        </template>
-        <Row>
-          <Col flex="auto">
-            <Input v-model="connectionsMap.CJLU" placeholder="Not connected" readonly />
-          </Col>
-          <Col style="margin-left: 8px;">
-            <Button :disabled="!!connectionsMap.CJLU" @click="connectOAuth('cjlu')">
-              {{ connectionsMap.CJLU ? 'Connected' : 'Connect' }}
-            </Button>
-          </Col>
-        </Row>
-      </FormItem>
-    </Form>
-    <Form ref="userSecurityForm" :label-width="isZH ? 80 : 130" :rules="userSecurityValidate" :model="securityForm">
-      <Divider simple class="user-divider">
-        {{ t('oj.security') }}
-      </Divider>
-      <FormItem v-if="!isAdmin" :label="t('oj.password_old')" prop="oldPwd">
-        <Input v-model="securityForm.oldPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
-      </FormItem>
-      <FormItem :label="t('oj.password_new')" prop="newPwd">
-        <Input v-model="securityForm.newPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
-      </FormItem>
-      <FormItem :label="t('oj.password_confirm')" prop="checkPwd">
-        <Input v-model="securityForm.checkPwd" type="password" :placeholder="t('oj.leave_it_blank_if_no_change')" />
-      </FormItem>
-      <FormItem>
-        <Button type="primary" size="large" @click="updatePassword">
-          {{ t('oj.submit') }}
-        </Button>
-      </FormItem>
-    </Form>
-    <Spin size="large" fix :show="loading" />
-  </div>
+  <div />
 </template>
-
-<style lang="stylus">
-.user-wrap .ivu-radio-group-button .ivu-radio-wrapper-checked:before
-  background transparent !important
-</style>
-
-<style lang="stylus" scoped>
-.user-edit
-  padding 40px
-  position relative
-
-.user-divider
-  margin 40px 0 !important
-
-@media screen and (max-width: 1024px)
-  .user-edit
-    padding 20px
-  .user-divider
-    margin 20px 0 !important
-</style>

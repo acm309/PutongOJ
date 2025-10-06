@@ -1,42 +1,12 @@
-import type { OAuthCallbackResponse } from '@backend/controllers/oauth'
 import type { WebsiteInformation } from '@backend/controllers/utils'
-import type { OAuthEntityUserView } from '@backend/models/OAuth'
-import type { OAuthAction, OAuthProvider } from '@backend/services/oauth'
-import type { CourseRole, Enveloped, Paginated, SessionProfile } from '@backend/types'
+import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
-import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from './types/api'
-import type { LoginParam, Profile, TimeResp, User } from '@/types'
-import axios from 'axios'
-import { useSessionStore } from './store/modules/session'
+import type { Enveloped, Paginated } from '@putongoj/shared'
+import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from '../types/api'
+import type { TimeResp, User } from '@/types'
+import { instance } from './instance'
 
-// 设置全局axios默认值
-axios.defaults.baseURL = '/api/'
-axios.defaults.withCredentials = true
-axios.defaults.timeout = 100000 // 100000ms的超时验证
-axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
-const instance = axios.create()
-
-let errHandler: null | ((err: any) => void) = null
-
-export function setErrorHandler (handler: typeof errHandler) {
-  errHandler = handler
-}
-
-instance.interceptors.response.use((resp) => {
-  const data: { profile: Profile | null } = resp.data
-  if (data.profile)
-    useSessionStore().setLoginProfile(data.profile)
-  return resp
-}, (err) => {
-  if (errHandler) {
-    errHandler(err)
-  } else {
-    // eslint-disable-next-line no-alert
-    window.alert('Cannot connect to server, '
-      + 'please check your network connection or try again later.')
-  }
-  return err
-})
+export * from './instance'
 
 const utils = {
   getWebsiteInformaton: () => instance.get<WebsiteInformation>('/website'),
@@ -61,12 +31,6 @@ const user = {
     instance.get(`/user/${data.uid}`, { params: data }),
   find: (data: { [key: string]: any }) =>
     instance.get<Paginated<User>>('/user/list', { params: data }),
-  userRegister: (data: { [key: string]: any }) =>
-    instance.post<Enveloped<null>>('/user', data),
-  update: (data: { [key: string]: any }) =>
-    instance.put(`/user/${data.uid}`, data),
-  delete: (data: { [key: string]: any }) =>
-    instance.delete(`/user/${data.uid}`, data),
 }
 
 const solution = {
@@ -171,15 +135,6 @@ const discuss = {
     instance.delete(`/discuss/${data.did}`, data),
 }
 
-const session = {
-  userLogin: (data: LoginParam) =>
-    instance.post<Enveloped<SessionProfile>>('/session', data),
-  delete: () =>
-    instance.delete<object>('/session'),
-  fetch: () =>
-    instance.get<{ profile: Profile | null }>('/session'),
-}
-
 const course = {
   findCourses: (params: PaginateParams) =>
     instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
@@ -209,18 +164,8 @@ const course = {
     instance.post<{ success: boolean }>(`/course/${courseId}/problem/rearrange`),
 }
 
-const oauth = {
-  generateOAuthUrl: (provider: Lowercase<OAuthProvider>, params: { action: OAuthAction }) =>
-    instance.get<{ url: string }>(`/oauth/${provider}/url`, { params }),
-  handleOAuthCallback: (provider: Lowercase<OAuthProvider>, params: { state: string, code: string }) =>
-    instance.get<Enveloped<OAuthCallbackResponse>>(`/oauth/${provider}/callback`, { params }),
-  getUserOAuthConnections: () =>
-    instance.get<Record<OAuthProvider, OAuthEntityUserView | null>>('/oauth'),
-}
-
 export default {
   ...utils,
-  logout: session.delete,
   testcase,
   user,
   solution,
@@ -230,7 +175,5 @@ export default {
   group,
   tag,
   discuss,
-  session,
   course,
-  oauth,
 }

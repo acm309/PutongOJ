@@ -15,10 +15,10 @@ const newList = [ 1002, 1003 ]
 
 test.before('Login', async (t) => {
   const login = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'admin',
-      pwd: await encryptData(config.deploy.adminInitPwd),
+      username: 'admin',
+      password: await encryptData(config.deploy.adminInitPwd),
     })
 
   t.is(login.status, 200)

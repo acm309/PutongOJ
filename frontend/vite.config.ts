@@ -1,5 +1,6 @@
 // https://vitejs.dev/config/
 import path from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
@@ -15,6 +16,7 @@ export default defineConfig({
     extensions: [ '.mjs', '.js', '.ts', '.json', '.vue' ],
   },
   plugins: [
+    tailwindcss(),
     legacy(),
     ReactivityTransform(),
     visualizer({ gzipSize: true }),
@@ -33,6 +35,7 @@ export default defineConfig({
         manualChunks: {
           common: [ 'vue', 'pinia', 'vue-router', 'axios' ],
           interface: [ 'view-ui-plus' ],
+          primevue: [ 'primevue' ],
         },
       },
     },

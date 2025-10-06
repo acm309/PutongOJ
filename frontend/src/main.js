@@ -1,20 +1,19 @@
 import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice'
 import {
   Button,
   Card,
   Col,
-  Content,
   DatePicker,
   Dropdown,
   DropdownItem,
   DropdownMenu,
-  Footer,
   Form,
   FormItem,
-  Header,
   Icon,
   Input,
-  Layout,
   Menu,
   MenuItem,
   Message,
@@ -40,14 +39,28 @@ import { createI18n } from 'vue-i18n'
 import locales from '@/locales'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
+import { PutongAura } from '@/theme/aura'
 import App from './App'
 import router from './router'
 import '@/theme/index.less'
+import 'primeicons/primeicons.css'
 
 const pinia = createPinia()
 const app = createApp(App)
 
 app.use(pinia)
+
+app.use(PrimeVue, {
+  theme: {
+    preset: PutongAura,
+    options: {
+      prefix: 'p',
+      darkModeSelector: false,
+    },
+  },
+})
+app.use(ToastService)
+app.use(ConfirmationService)
 
 const i18n = createI18n({
   allowComposition: true,
@@ -80,13 +93,9 @@ app.component('Transfer', Transfer)
 app.component('Steps', Steps)
 app.component('Step', Step)
 app.component('DatePicker', DatePicker)
-app.component('Layout', Layout)
-app.component('Header', Header)
 app.component('Menu', Menu)
 app.component('MenuItem', MenuItem)
 app.component('Submenu', Submenu)
-app.component('Content', Content)
-app.component('Footer', Footer)
 app.component('Modal', Modal)
 app.component('Form', Form)
 app.component('FormItem', FormItem)
@@ -105,7 +114,7 @@ app.provide('$Modal', app.config.globalProperties.$Modal)
 app.provide('$Spin', app.config.globalProperties.$Spin)
 
 Promise.all([
-  useSessionStore().fetch(),
+  useSessionStore().fetchProfile(),
   useRootStore().fetchWebsiteConfig(),
 ]).then(() => {
   // Router must be loaded after session/website config is loaded

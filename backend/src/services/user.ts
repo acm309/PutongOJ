@@ -1,4 +1,6 @@
-import type { Paginated, PaginateOption, SortOption, UserModel, UserPrivilege } from '../types'
+import type { Paginated, UserModel, UserPrivilege } from '@putongoj/shared'
+import type { UserDocument } from '../models/User'
+import type { PaginateOption, SortOption } from '../types'
 import { escapeRegExp } from 'lodash'
 import User from '../models/User'
 
@@ -32,8 +34,50 @@ export async function findUsers (
   return await User.paginate(filter, query) as any
 }
 
+export async function getUser (uid: string): Promise<UserDocument | null> {
+  return await User.findOne({
+    uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
+  })
+}
+
+export async function updateUser (user: UserDocument, data: Partial<UserModel>): Promise<UserDocument> {
+  if (data.privilege !== undefined) {
+    user.privilege = data.privilege
+  }
+  if (data.nick !== undefined) {
+    user.nick = data.nick
+  }
+  if (data.motto !== undefined) {
+    user.motto = data.motto
+  }
+  if (data.mail !== undefined) {
+    user.mail = data.mail
+  }
+  if (data.school !== undefined) {
+    user.school = data.school
+  }
+  if (data.pwd !== undefined) {
+    user.pwd = data.pwd
+  }
+
+  await user.save()
+  return user
+}
+
+export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise<UserDocument> {
+  const user = new User({
+    uid: data.uid,
+    pwd: data.pwd,
+  })
+  await user.save()
+  return user
+}
+
 const userServices = {
   findUsers,
+  getUser,
+  updateUser,
+  createUser,
 } as const
 
 export default userServices

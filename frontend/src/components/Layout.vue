@@ -1,74 +1,74 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import { Footer, Icon, Layout, Poptip, Radio, RadioGroup, Space } from 'view-ui-plus'
+import SelectButton from 'primevue/selectbutton'
+import { Poptip, Space } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AuthnDialog from '@/components/AuthnDialog.vue'
 import Header from '@/components/Header.vue'
-import Dialog from '@/components/LoginAndRegister.vue'
 import { useRootStore } from '@/store'
 import { timeDiffPretty, timePretty } from '@/utils/formate'
 import { useHumanLanguage } from '@/utils/helper'
 
 const { locale } = useI18n()
 const rootStore = useRootStore()
-const { website: backend, currentTime, timeDiff } = $(storeToRefs(rootStore))
 
-const serverTime = $computed(() =>
-  Number.isNaN(timeDiff)
+const { website: backend, currentTime, timeDiff } = storeToRefs(rootStore)
+
+const serverTime = computed(() =>
+  Number.isNaN(timeDiff.value)
     ? 'Syncing...'
-    : `${timePretty(currentTime)} (${timeDiffPretty(timeDiff)})`)
+    : `${timePretty(currentTime.value)} (${timeDiffPretty(timeDiff.value)})`)
 const frontend = {
   buildSHA: import.meta.env.VITE_BUILD_SHA || 'unknown',
   buildTime: Number.parseInt(import.meta.env.VITE_BUILD_TIME) || Date.now(),
 }
 
-let selectedLang = $(useHumanLanguage())
-locale.value = selectedLang
+let selectedLang = useHumanLanguage()
+locale.value = selectedLang.value
 
-function langSelected (lang: string) {
-  locale.value = selectedLang = lang
+const langs = [
+  { label: '简体中文', value: 'zh-CN' },
+  { label: 'English', value: 'en-US' },
+]
+
+function onLangSelected (event: any) {
+  locale.value = selectedLang = event.value
 }
 </script>
 
 <template>
-  <Layout class="app-layout">
+  <div class="bg-emphasis flex flex-col font-sans min-h-screen relative text-color">
     <Header />
-    <Content class="layout-content">
-      <router-view />
-    </Content>
-    <Footer class="layout-footer">
-      <RadioGroup v-model="selectedLang" type="button" size="small" class="lang-radio-group" @on-change="langSelected">
-        <Radio label="zh-CN" class="lang-radio">
-          简体中文
-        </Radio>
-        <Radio label="en-US" class="lang-radio">
-          English
-        </Radio>
-      </RadioGroup>
-      <p>Server Time: {{ serverTime }}</p>
+    <div class="flex-auto lg:pt-4 lg:px-4 md:pt-2 md:px-2 min-h-[512px] mt-[61px]">
+      <router-view
+        class="bg-(--p-content-background) border border-surface layout-content md:rounded-xl mx-auto shadow-lg"
+      />
+    </div>
+    <div class="p-8 text-base/relaxed text-center">
+      <SelectButton
+        v-model="selectedLang" class="block" :options="langs" option-label="label" option-value="value"
+        @change="onLangSelected"
+      />
+      <div class="mb-4">
+        Server time: {{ serverTime }}
+      </div>
       <Poptip trigger="hover">
-        <p>
-          <strong>Putong OJ</strong> by
-          <a href="https://github.com/acm309" target="_blank" class="github-link">
-            acm309
-            <Icon type="logo-github" class="github-icon" />
-          </a>.
-          <br>
-          The source code is under the
-          <a href="https://github.com/acm309/PutongOJ/blob/master/LICENSE" target="_blank" class="license-link">
-            MIT License
-          </a>.
-        </p>
+        <div class="font-bold mb-px text-lg">
+          Putong OJ
+        </div>
+        <div>Copyright &copy; 2017-2025 CJLU ACM Lab.</div>
         <template #content>
           <Space direction="vertical">
             <div>
-              <div class="component-version">
+              <div class="flex justify-between w-full">
                 <code><b>Putong OJ Backend</b></code>
                 <code>#{{ backend.buildSHA }}</code>
               </div>
               <code>Built at {{ timePretty(backend.buildTime) }}</code>
             </div>
             <div>
-              <div class="component-version">
+              <div class="flex justify-between w-full">
                 <code><b>Putong OJ Frontend</b></code>
                 <code>#{{ frontend.buildSHA }}</code>
               </div>
@@ -77,76 +77,27 @@ function langSelected (lang: string) {
           </Space>
         </template>
       </Poptip>
-    </Footer>
-  </Layout>
-  <Dialog />
+    </div>
+  </div>
+  <AuthnDialog />
 </template>
 
 <style lang="stylus">
-.app-layout
-  min-height 100vh
-  position relative
-  overflow hidden
-
 .layout-content
-  margin 82px 20px 0
-  min-height 512px
-  & > div
-    position relative
-    margin 0 auto
-    padding 40px
-    max-width 1280px
-    border 1px solid #d7dde4
-    border-radius 7px
-    background #fff
-    box-shadow 0 7px 8px -4px rgba(0, 0, 0, .1),
-               0 12px 17px 2px rgba(0, 0, 0, .07),
-               0 5px 22px 4px rgba(0, 0, 0, .06)
-  .wrap-loading
-    z-index 50
+  position relative
+  padding 40px
+  max-width 1280px
 
+.wrap-loading
+  z-index 40
 .wrap-loading, .modal-loading
   border-radius 7px
 
-.layout-footer
-  text-align center
-  background none !important
-  padding-top 42px !important
-  p
-    margin-bottom 16px
-
-  .lang-radio-group
-    margin-bottom 4px
-    .lang-radio
-      background none
-
-  .github-link
-    text-decoration none
-    &:hover
-      text-decoration underline
-  .github-icon
-    vertical-align -0.06em
-  .license-link
-    text-decoration none
-    &:hover
-      text-decoration underline
-
-  .component-version
-    display flex
-    justify-content space-between
-    width 100%
-
 @media screen and (max-width 1024px)
   .layout-content
-    margin 72px 10px 0
-    & > div
-      padding 10px 20px 20px
+    padding 10px 20px 20px
 
 @media screen and (max-width 768px)
-  .layout-content
-    margin 61px 0 0
-    & > div
-      border-radius 0
-    .wrap-loading
-      border-radius 0
+  .wrap-loading
+    border-radius 0
 </style>

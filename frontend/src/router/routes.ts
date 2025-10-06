@@ -1,6 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 
 import NotFound from '@/views/404.vue'
+import AccountSettings from '@/views/AccountSettings.vue'
 import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
@@ -31,6 +32,12 @@ const routes: Array<RouteRecordRaw> = [
   ...userRoutes,
   ...courseRoutes,
   ...adminRoutes,
+  {
+    path: '/settings',
+    name: 'AccountSettings',
+    component: AccountSettings,
+    meta: { title: 'Account Settings' },
+  },
   {
     path: '/oauth/:provider/callback',
     name: 'oauthCallback',

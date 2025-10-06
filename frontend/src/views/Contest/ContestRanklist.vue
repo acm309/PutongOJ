@@ -2,7 +2,7 @@
 import type { Message } from 'view-ui-plus'
 import type { Ranklist, RanklistInfo } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Alert, BackTop, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
+import { Alert, BackTop, Button, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
 import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

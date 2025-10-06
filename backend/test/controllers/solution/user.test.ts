@@ -11,10 +11,10 @@ let sid = null
 
 test.before(async (t) => {
   const res = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'primaryuser',
-      pwd: await encryptData(userSeeds.primaryuser.pwd!),
+      username: 'primaryuser',
+      password: await encryptData(userSeeds.primaryuser.pwd!),
     })
   t.is(res.status, 200)
 })

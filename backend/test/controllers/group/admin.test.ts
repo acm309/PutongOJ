@@ -10,10 +10,10 @@ const request = supertest.agent(server)
 
 test.before('Login', async (t) => {
   const login = await request
-    .post('/api/session')
+    .post('/api/account/login')
     .send({
-      uid: 'admin',
-      pwd: await encryptData(config.deploy.adminInitPwd),
+      username: 'admin',
+      password: await encryptData(config.deploy.adminInitPwd),
     })
 
   t.is(login.status, 200)

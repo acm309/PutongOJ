@@ -7,8 +7,28 @@ const adminRouter = new Router({
 })
 
 adminRouter.get('/user',
-  authnMiddleware.loginRequire,
+  authnMiddleware.adminRequire,
   adminController.findUsers,
+)
+adminRouter.get('/user/:uid',
+  authnMiddleware.adminRequire,
+  adminController.getUser,
+)
+adminRouter.put('/user/:uid',
+  authnMiddleware.adminRequire,
+  adminController.updateUser,
+)
+adminRouter.put('/user/:uid/password',
+  authnMiddleware.adminRequire,
+  adminController.updateUserPassword,
+)
+adminRouter.get('/user/:uid/oauth',
+  authnMiddleware.adminRequire,
+  adminController.getUserOAuthConnections,
+)
+adminRouter.delete('/user/:uid/oauth/:provider',
+  authnMiddleware.rootRequire,
+  adminController.removeUserOAuthConnection,
 )
 
 export default adminRouter

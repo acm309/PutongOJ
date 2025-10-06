@@ -21,7 +21,7 @@ function onCopy (content: string) {
 
 <template>
   <div class="proinfo-wrap">
-    <h1>
+    <h1 class="font-bold">
       <slot name="title">
         {{ problem.pid }}: {{ problem.title }}
       </slot>
@@ -32,20 +32,24 @@ function onCopy (content: string) {
         <span>Memory Limit: {{ problem.memory }}KB</span>
       </Space>
     </h5>
-    <h2 class="text-primary">
+    <h2 class="font-semibold">
       {{ t('oj.description') }}
     </h2>
     <MarkdownPreview v-model="problem.description" class="cont" />
     <template v-if="problem.input?.trim()">
-      <h2>{{ t('oj.input') }}</h2>
+      <h2 class="font-semibold">
+        {{ t('oj.input') }}
+      </h2>
       <MarkdownPreview v-model="problem.input" class="cont" />
     </template>
     <template v-if="problem.output?.trim()">
-      <h2>{{ t('oj.output') }}</h2>
+      <h2 class="font-semibold">
+        {{ t('oj.output') }}
+      </h2>
       <MarkdownPreview v-model="problem.output" class="cont" />
     </template>
     <template v-if="problem.in?.trim()">
-      <h2>
+      <h2 class="font-semibold">
         {{ t('oj.sample_input') }}
         <Tooltip content="Click to copy" placement="top">
           <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.in)" />
@@ -54,7 +58,7 @@ function onCopy (content: string) {
       <pre><code>{{ problem.in }}</code></pre>
     </template>
     <template v-if="problem.out?.trim()">
-      <h2>
+      <h2 class="font-semibold">
         {{ t('oj.sample_output') }}
         <Tooltip :content="t('oj.click_to_copy_code')" placement="top">
           <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.out)" />
@@ -63,7 +67,7 @@ function onCopy (content: string) {
       <pre><code>{{ problem.out }}</code></pre>
     </template>
     <template v-if="problem.hint?.trim()">
-      <h2>
+      <h2 class="font-semibold">
         {{ t('oj.hint') }}
       </h2>
       <MarkdownPreview v-model="problem.hint" class="cont" />

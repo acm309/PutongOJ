@@ -1,6 +1,7 @@
 import type { Context } from 'koa'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
+import { ErrorCode } from '@putongoj/shared'
 import fse from 'fs-extra'
 import { pick } from 'lodash'
 import redis from '../config/redis'
@@ -10,7 +11,6 @@ import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { createEnvelopedResponse, createErrorResponse, only, purify } from '../utils'
 import { judgeResult } from '../utils/constants'
-import { ErrorCode } from '../utils/error'
 import logger from '../utils/logger'
 
 // 返回提交列表

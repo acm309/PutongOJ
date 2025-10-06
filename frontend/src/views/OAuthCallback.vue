@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import type { OAuthProvider } from '@backend/services/oauth'
+import type { OAuthProvider } from '@putongoj/shared'
 import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
 import { Alert } from 'view-ui-plus'
 import { computed, inject, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { handleOAuthCallback } from '@/api/oauth'
 import { useSessionStore } from '@/store/modules/session'
 
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
-const { fetch: fetchSession, toggleLoginState: toggleLoginModal } = sessionStore
+const { fetchProfile, toggleAuthnDialog } = sessionStore
 const { profile } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
@@ -25,13 +25,13 @@ async function processOAuthCallback () {
     router.replace({ name: 'home' })
     return
   }
-  const { data } = await api.oauth.handleOAuthCallback(
+  const data = await handleOAuthCallback(
     provider.value.toLowerCase() as Lowercase<OAuthProvider>,
     { code: code.value, state: state.value },
   )
   if (!data.success) {
     message.error(data.message || 'OAuth callback processing failed')
-    toggleLoginModal()
+    toggleAuthnDialog()
     return
   }
   const { action } = data.data!
@@ -42,7 +42,7 @@ async function processOAuthCallback () {
   }
   if (action === 'login') {
     message.success('OAuth login successful!')
-    await fetchSession()
+    await fetchProfile()
     router.replace({ name: 'home' })
   }
 }
