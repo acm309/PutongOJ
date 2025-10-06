@@ -224,7 +224,7 @@ onMounted(fetch)
               </div>
               <div class="text-sm text-surface-600">
                 <span v-if="connections.CJLU">
-                  {{ t('ptoj.connected_as_brief', { display: connections.CJLU.providerId }) }}
+                  {{ t('ptoj.connected_to_brief', { display: connections.CJLU.providerId }) }}
                 </span>
                 <span v-else>{{ t('ptoj.not_connected') }}</span>
               </div>

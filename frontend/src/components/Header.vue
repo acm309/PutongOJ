@@ -93,7 +93,7 @@ const menuItems = computed(() => {
         icon: 'pi pi-plus',
         route: 'newsCreate',
       }, {
-        label: t('oj.user_management'),
+        label: t('ptoj.user_management'),
         icon: 'pi pi-users',
         route: 'UserManagement',
       }, {
@@ -113,14 +113,14 @@ const menuItems = computed(() => {
 
 const profileItems = computed(() => [
   {
-    label: t('oj.profile'),
+    label: t('ptoj.header_profile'),
     icon: 'pi pi-user',
     command: () => {
       router.push({ name: 'userProfile', params: { uid: profile.value!.uid } })
     },
   },
   {
-    label: t('oj.settings'),
+    label: t('ptoj.header_settings'),
     icon: 'pi pi-cog',
     command: () => {
       router.push({ name: 'AccountSettings' })
@@ -130,12 +130,12 @@ const profileItems = computed(() => [
     separator: true,
   },
   {
-    label: t('oj.logout'),
+    label: t('ptoj.logout'),
     icon: 'pi pi-sign-out',
     command: async () => {
       await userLogout()
       router.push({ name: 'home' })
-      message.success('User logged out', 'Byebye!')
+      message.success(t('ptoj.successful_logout'), t('ptoj.goodbye'))
     },
   },
 ])

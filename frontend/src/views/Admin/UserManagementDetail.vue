@@ -290,7 +290,7 @@ onRouteParamUpdate(fetch)
               </div>
               <div class="text-sm text-surface-600">
                 <span v-if="connections.CJLU">
-                  {{ t('ptoj.connected_as_detail', {
+                  {{ t('ptoj.connected_to_detail', {
                     id: connections.CJLU.providerId,
                     name: connections.CJLU.displayName,
                     time: timePretty(connections.CJLU.createdAt),
@@ -344,7 +344,7 @@ onRouteParamUpdate(fetch)
     </template>
 
     <Dialog
-      v-model:visible="passwordDialog" modal header="Change Password" :closable="false"
+      v-model:visible="passwordDialog" modal :header="t('ptoj.change_password')" :closable="false"
       class="max-w-md mx-6 w-full"
     >
       <form @submit.prevent="changePassword">
@@ -352,25 +352,25 @@ onRouteParamUpdate(fetch)
           <IftaLabel>
             <InputText
               id="new-password" v-model="newPassword" class="w-full" type="password"
-              placeholder="Enter new password" required autocomplete="new-password"
+              :placeholder="t('ptoj.enter_new_password')" required autocomplete="new-password"
             />
-            <label for="new-password">New Password</label>
+            <label for="new-password">{{ t('ptoj.new_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="confirm-password" v-model="confirmPassword" class="w-full" type="password"
-              placeholder="Confirm new password" required autocomplete="new-password"
+              :placeholder="t('ptoj.enter_confirm_new_password')" required autocomplete="new-password"
               :invalid="!!confirmPassword && confirmPassword !== newPassword"
             />
-            <label for="confirm-password">Confirm Password</label>
+            <label for="confirm-password">{{ t('ptoj.confirm_new_password') }}</label>
           </IftaLabel>
         </div>
         <div class="flex gap-2 justify-end mt-6">
           <Button
-            type="button" label="Cancel" icon="pi pi-times" severity="secondary" outlined
+            type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
             @click="passwordDialog = false"
           />
-          <Button type="submit" label="Change Password" icon="pi pi-check" :loading="saving" />
+          <Button type="submit" :label="t('ptoj.change_password')" icon="pi pi-check" :loading="saving" />
         </div>
       </form>
     </Dialog>
