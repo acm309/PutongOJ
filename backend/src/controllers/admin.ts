@@ -25,7 +25,7 @@ import { loadUser } from './user'
 async function loadEditingUser (ctx: Context) {
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
-  if (!profile.isRoot && profile.privilege <= user.privilege && profile.uid !== user.id) {
+  if (!profile.isRoot && profile.privilege <= user.privilege && profile.uid !== user.uid) {
     createErrorResponse(ctx,
       'Insufficient privilege to edit this user', ErrorCode.Forbidden,
     )
@@ -64,7 +64,7 @@ export async function updateUser (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   if (payload.data.privilege !== undefined) {
-    if (profile.uid === user.id) {
+    if (profile.uid === user.uid) {
       return createErrorResponse(ctx,
         'Cannot change your own privilege', ErrorCode.Forbidden,
       )
