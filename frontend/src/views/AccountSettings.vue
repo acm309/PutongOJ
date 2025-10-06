@@ -217,6 +217,9 @@ onMounted(fetch)
           {{ t('ptoj.connect_accounts') }}
         </h2>
         <div class="space-y-4">
+          <p class="text-sm text-surface-600">
+            {{ t('ptoj.connect_accounts_desc') }}
+          </p>
           <div class="border border-surface flex items-center justify-between p-4 rounded-lg">
             <div>
               <div class="font-medium">
@@ -234,9 +237,6 @@ onMounted(fetch)
               @click="connectOAuth('cjlu')"
             />
           </div>
-          <p class="text-sm text-surface-600">
-            {{ t('ptoj.connect_accounts_desc') }}
-          </p>
         </div>
       </div>
 
