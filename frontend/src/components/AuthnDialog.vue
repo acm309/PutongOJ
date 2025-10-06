@@ -194,7 +194,7 @@ watch(authnDialogVisible, (newValue) => {
 
     <div v-if="hasOAuthEnabled && isLogin">
       <Button
-        v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined class="w-full"
+        v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined fluid
         @click="handleOAuthLogin('cjlu')"
       >
         {{ t('ptoj.cjlu_sso') }}
@@ -207,7 +207,7 @@ watch(authnDialogVisible, (newValue) => {
     <form class="space-y-4" @submit.prevent="handleAuthSubmit">
       <IftaLabel>
         <InputText
-          id="username" v-model="formData.username" class="w-full" :invalid="!fieldValidity.username"
+          id="username" v-model="formData.username" fluid :invalid="!fieldValidity.username"
           :placeholder="isLogin ? t('ptoj.enter_username') : t('ptoj.choose_username')" autocomplete="username"
           size="large" required
         />
@@ -216,8 +216,8 @@ watch(authnDialogVisible, (newValue) => {
 
       <IftaLabel>
         <InputText
-          id="password" v-model="formData.password" type="password" class="w-full"
-          :invalid="!fieldValidity.password" :placeholder="isLogin ? t('ptoj.enter_password') : t('ptoj.create_strong_password')"
+          id="password" v-model="formData.password" type="password" fluid :invalid="!fieldValidity.password"
+          :placeholder="isLogin ? t('ptoj.enter_password') : t('ptoj.create_strong_password')"
           :autocomplete="isLogin ? 'current-password' : 'new-password'" size="large" required
         />
         <label for="password">{{ t('ptoj.password') }}</label>
@@ -225,21 +225,21 @@ watch(authnDialogVisible, (newValue) => {
 
       <IftaLabel v-if="!isLogin">
         <InputText
-          id="confirm-password" v-model="formData.confirmPassword" type="password" class="w-full"
-          :invalid="!fieldValidity.confirmPassword" :placeholder="t('ptoj.enter_confirm_password')" autocomplete="new-password"
-          size="large" required
+          id="confirm-password" v-model="formData.confirmPassword" type="password" fluid
+          :invalid="!fieldValidity.confirmPassword" :placeholder="t('ptoj.enter_confirm_password')"
+          autocomplete="new-password" size="large" required
         />
         <label for="confirm-password">{{ t('ptoj.confirm_password') }}</label>
       </IftaLabel>
 
       <Button
         type="submit" :label="isLogin ? t('ptoj.login') : t('ptoj.register')" size="large"
-        :icon="isLogin ? 'pi pi-sign-in' : 'pi pi-user-plus'" class="w-full" :loading="loading"
+        :icon="isLogin ? 'pi pi-sign-in' : 'pi pi-user-plus'" fluid :loading="loading"
       />
 
       <Button
         type="button" :label="isLogin ? t('ptoj.go_to_register') : t('ptoj.back_to_login')" size="large" outlined
-        :icon="isLogin ? 'pi pi-user-plus' : 'pi pi-sign-in'" severity="secondary" class="w-full" :disabled="loading"
+        :icon="isLogin ? 'pi pi-user-plus' : 'pi pi-sign-in'" severity="secondary" fluid :disabled="loading"
         @click="switchTab(isLogin ? AuthnDialogTab.REGISTER : AuthnDialogTab.LOGIN)"
       />
     </form>

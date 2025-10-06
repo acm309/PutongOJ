@@ -4,6 +4,7 @@ import type {
   AccountProfileQueryResult,
 } from '@putongoj/shared'
 import { ErrorCode, OAuthAction } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -11,6 +12,7 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { getProfile, updatePassword, updateProfile } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
 import { useSessionStore } from '@/store/modules/session'
@@ -23,8 +25,10 @@ interface OAuthConnection {
 }
 
 const { t } = useI18n()
+const router = useRouter()
 const message = useMessage()
-const { setProfile } = useSessionStore()
+const sessionStore = useSessionStore()
+const { isAdmin } = storeToRefs(sessionStore)
 
 const profile = ref<AccountProfileQueryResult | null>(null)
 const editingProfile = ref<AccountEditPayload>({})
@@ -100,7 +104,7 @@ async function saveProfile () {
   message.success(t('ptoj.successful_updated'), t('ptoj.profile_updated_detail'))
   profile.value = resp.data
   setEditingProfile()
-  setProfile(resp.data)
+  sessionStore.setProfile(resp.data)
 }
 
 async function changePassword () {
@@ -145,13 +149,18 @@ async function connectOAuth (provider: string) {
   window.open(resp.url, '_self', 'noopener,noreferrer')
 }
 
+function gotoUserManagement () {
+  if (!isAdmin.value || !profile.value) return
+  router.push({ name: 'UserManagementDetail', params: { uid: profile.value.uid } })
+}
+
 onMounted(fetch)
 </script>
 
 <template>
   <div class="max-w-4xl p-0">
     <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-      <i class="pi pi-user-edit text-2xl" />
+      <i class="pi pi-cog text-2xl" />
       <h1 class="text-xl">
         {{ t('ptoj.account_settings') }}
       </h1>
@@ -167,13 +176,13 @@ onMounted(fetch)
     <template v-else>
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
         <IftaLabel>
-          <InputText id="username" :value="profile.uid" class="w-full" readonly />
+          <InputText id="username" :value="profile.uid" fluid readonly />
           <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingProfile.nick" class="w-full" maxlength="30"
+            id="nickname" v-model="editingProfile.nick" fluid maxlength="30"
             :placeholder="t('ptoj.enter_nickname')"
           />
           <label for="nickname">{{ t('ptoj.nickname') }}</label>
@@ -181,7 +190,7 @@ onMounted(fetch)
 
         <IftaLabel>
           <InputText
-            id="email" v-model="editingProfile.mail" class="w-full" type="email" maxlength="254"
+            id="email" v-model="editingProfile.mail" fluid type="email" maxlength="254"
             :placeholder="t('ptoj.enter_email')"
           />
           <label for="email">{{ t('ptoj.email') }}</label>
@@ -189,7 +198,7 @@ onMounted(fetch)
 
         <IftaLabel>
           <InputText
-            id="school" v-model="editingProfile.school" class="w-full" maxlength="30"
+            id="school" v-model="editingProfile.school" fluid maxlength="30"
             :placeholder="t('ptoj.enter_school')"
           />
           <label for="school">{{ t('ptoj.school') }}</label>
@@ -197,13 +206,14 @@ onMounted(fetch)
 
         <IftaLabel class="-mb-[5px] md:col-span-2">
           <Textarea
-            id="motto" v-model="editingProfile.motto" class="w-full" rows="3" maxlength="300"
+            id="motto" v-model="editingProfile.motto" fluid rows="3" maxlength="300"
             :placeholder="t('ptoj.enter_motto')" auto-resize
           />
           <label for="motto">{{ t('ptoj.motto') }}</label>
         </IftaLabel>
 
         <div class="flex gap-2 justify-end md:col-span-2">
+          <Button v-if="isAdmin" icon="pi pi-shield" severity="secondary" outlined @click="gotoUserManagement" />
           <Button icon="pi pi-refresh" severity="secondary" outlined :loading="loading" @click="fetch" />
           <Button
             :label="t('ptoj.save_changes')" icon="pi pi-check" :loading="saving" :disabled="!hasChanges"
@@ -220,7 +230,7 @@ onMounted(fetch)
           <p class="text-sm text-surface-600">
             {{ t('ptoj.connect_accounts_desc') }}
           </p>
-          <div class="border border-surface flex items-center justify-between p-4 rounded-lg">
+          <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
             <div>
               <div class="font-medium">
                 {{ t('ptoj.cjlu_sso') }}
@@ -261,21 +271,21 @@ onMounted(fetch)
         <div class="space-y-4">
           <IftaLabel>
             <InputText
-              id="old-password" v-model="oldPassword" class="w-full" type="password"
+              id="old-password" v-model="oldPassword" fluid type="password"
               :placeholder="t('ptoj.enter_current_password')" required autocomplete="current-password"
             />
             <label for="old-password">{{ t('ptoj.current_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
-              id="new-password" v-model="newPassword" class="w-full" type="password"
+              id="new-password" v-model="newPassword" fluid type="password"
               :placeholder="t('ptoj.enter_new_password')" required autocomplete="new-password"
             />
             <label for="new-password">{{ t('ptoj.new_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
-              id="confirm-password" v-model="confirmPassword" class="w-full" type="password"
+              id="confirm-password" v-model="confirmPassword" fluid type="password"
               :placeholder="t('ptoj.enter_confirm_new_password')" required autocomplete="new-password"
               :invalid="!!confirmPassword && confirmPassword !== newPassword"
             />

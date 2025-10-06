@@ -213,14 +213,14 @@ onRouteParamUpdate(fetch)
         </Message>
 
         <IftaLabel>
-          <InputText id="username" :value="user.uid" class="w-full" readonly />
+          <InputText id="username" :value="user.uid" fluid readonly />
           <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <Select
             v-if="!isSelf && (user.privilege < profile!.privilege || isRoot)" id="privilege"
-            v-model="editingUser.privilege" class="w-full" :options="privilegeOptions" option-label="label"
+            v-model="editingUser.privilege" fluid :options="privilegeOptions" option-label="label"
             option-value="value" :option-disabled="(option) => !isRoot && option.value >= profile!.privilege"
           >
             <template #option="slotProps">
@@ -231,7 +231,7 @@ onRouteParamUpdate(fetch)
             </template>
           </Select>
           <IconField v-else>
-            <InputText id="privilege" :value="getPrivilegeLabel(user.privilege)" class="w-full" readonly />
+            <InputText id="privilege" :value="getPrivilegeLabel(user.privilege)" fluid readonly />
             <InputIcon class="pi pi-lock" />
           </IconField>
           <label for="privilege">{{ t('ptoj.privilege') }}</label>
@@ -239,7 +239,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingUser.nick" class="w-full" maxlength="30"
+            id="nickname" v-model="editingUser.nick" fluid maxlength="30"
             :placeholder="t('ptoj.enter_nickname')" :readonly="!canOperate"
           />
           <label for="nickname">{{ t('ptoj.nickname') }}</label>
@@ -247,7 +247,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <InputText
-            id="email" v-model="editingUser.mail" class="w-full" type="email" maxlength="254"
+            id="email" v-model="editingUser.mail" fluid type="email" maxlength="254"
             :placeholder="t('ptoj.enter_email')" :readonly="!canOperate"
           />
           <label for="email">{{ t('ptoj.email') }}</label>
@@ -255,7 +255,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel class="md:col-span-2">
           <InputText
-            id="school" v-model="editingUser.school" class="w-full" maxlength="30"
+            id="school" v-model="editingUser.school" fluid maxlength="30"
             :placeholder="t('ptoj.enter_school')" :readonly="!canOperate"
           />
           <label for="school">{{ t('ptoj.school') }}</label>
@@ -263,7 +263,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel class="-mb-[5px] md:col-span-2">
           <Textarea
-            id="motto" v-model="editingUser.motto" class="w-full" rows="3" maxlength="300"
+            id="motto" v-model="editingUser.motto" fluid rows="3" maxlength="300"
             :placeholder="t('ptoj.enter_motto')" auto-resize :readonly="!canOperate"
           />
           <label for="motto">{{ t('ptoj.motto') }}</label>
@@ -283,7 +283,7 @@ onRouteParamUpdate(fetch)
           {{ t('ptoj.connect_accounts') }}
         </h2>
         <div class="space-y-4">
-          <div class="border border-surface flex gap-2 items-center justify-between p-4 rounded-lg">
+          <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
             <div>
               <div class="font-medium">
                 {{ t('ptoj.cjlu_sso') }}
@@ -329,13 +329,13 @@ onRouteParamUpdate(fetch)
         </h2>
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
           <IftaLabel>
-            <InputText id="created-at" :value="timePretty(user.createdAt)" class="font-mono w-full" readonly />
+            <InputText id="created-at" :value="timePretty(user.createdAt)" class="font-mono" fluid readonly />
             <label for="created-at">{{ t('ptoj.created_at') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="last-visited" :value="user.lastVisitedAt ? timePretty(user.lastVisitedAt) : 'Unknown'"
-              class="font-mono w-full" readonly
+              class="font-mono" fluid readonly
             />
             <label for="last-visited">{{ t('ptoj.last_visited_at') }}</label>
           </IftaLabel>
@@ -351,14 +351,14 @@ onRouteParamUpdate(fetch)
         <div class="space-y-4">
           <IftaLabel>
             <InputText
-              id="new-password" v-model="newPassword" class="w-full" type="password"
+              id="new-password" v-model="newPassword" fluid type="password"
               :placeholder="t('ptoj.enter_new_password')" required autocomplete="new-password"
             />
             <label for="new-password">{{ t('ptoj.new_password') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
-              id="confirm-password" v-model="confirmPassword" class="w-full" type="password"
+              id="confirm-password" v-model="confirmPassword" fluid type="password"
               :placeholder="t('ptoj.enter_confirm_new_password')" required autocomplete="new-password"
               :invalid="!!confirmPassword && confirmPassword !== newPassword"
             />

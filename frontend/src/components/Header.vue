@@ -79,7 +79,7 @@ const menuItems = computed(() => {
   if (isAdmin.value) {
     items.push({
       label: t('oj.admin'),
-      icon: 'pi pi-cog',
+      icon: 'pi pi-shield',
       items: [ {
         label: t('oj.create_problem'),
         icon: 'pi pi-plus',

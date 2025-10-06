@@ -108,16 +108,16 @@ onRouteQueryUpdate(fetch)
         </h1>
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <IconField class="w-full">
+        <IconField>
           <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
           <InputText
-            v-model="query.keyword" class="w-full" :placeholder="t('ptoj.search_by_username_or_nickname')"
+            v-model="query.keyword" fluid :placeholder="t('ptoj.search_by_username_or_nickname')"
             maxlength="30" @keypress.enter="onSearch"
           />
         </IconField>
 
         <Select
-          v-model="query.privilege" class="w-full" :options="privilegeOptions" option-label="label"
+          v-model="query.privilege" fluid :options="privilegeOptions" option-label="label"
           option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')"
         >
           <template #option="slotProps">
