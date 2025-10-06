@@ -10,6 +10,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "shared/**"
   workflow_dispatch:
 
 jobs:
@@ -52,6 +53,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      
+      - name: Build shared
+        run: pnpm --filter shared build
 
       - name: Run tests
         run: pnpm test
@@ -85,7 +89,7 @@ jobs:
       - name: Detect backend changes
         id: detect
         run: |
-          if git diff --quiet HEAD^ HEAD -- backend; then
+          if git diff --quiet HEAD^ HEAD -- backend shared; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
