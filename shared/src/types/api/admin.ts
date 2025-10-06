@@ -33,6 +33,7 @@ export const AdminUserDetailQueryResultSchema = z.object({
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,
+  lastRequestId: UserModelSchema.shape.lastRequestId,
   lastVisitedAt: UserModelSchema.shape.lastVisitedAt,
   createdAt: UserModelSchema.shape.createdAt,
 })

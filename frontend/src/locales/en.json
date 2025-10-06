@@ -49,6 +49,7 @@
   "header_profile": "Profile",
   "header_settings": "Settings",
   "incorrect_username_or_password": "Incorrect username or password. If you forgot your password, please contact the administrator",
+  "last_request_id": "Last Request ID",
   "last_visited_at": "Last Visited At",
   "loading": "Loading...",
   "login": "Login",

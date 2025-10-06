@@ -334,10 +334,14 @@ onRouteParamUpdate(fetch)
           </IftaLabel>
           <IftaLabel>
             <InputText
-              id="last-visited" :value="user.lastVisitedAt ? timePretty(user.lastVisitedAt) : 'Unknown'"
+              id="last-visited-at" :value="user.lastVisitedAt ? timePretty(user.lastVisitedAt) : 'Unknown'"
               class="font-mono" fluid readonly
             />
-            <label for="last-visited">{{ t('ptoj.last_visited_at') }}</label>
+            <label for="last-visited-at">{{ t('ptoj.last_visited_at') }}</label>
+          </IftaLabel>
+          <IftaLabel class="md:col-span-2">
+            <InputText id="last-request-id" :value="user.lastRequestId ?? 'N/A'" class="font-mono" fluid readonly />
+            <label for="last-request-id">{{ t('ptoj.last_request_id') }}</label>
           </IftaLabel>
         </div>
       </div>

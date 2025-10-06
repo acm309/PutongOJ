@@ -13,6 +13,7 @@ export const UserModelSchema = z.object({
   gid: z.array(z.int().nonnegative()),
   submit: z.int().nonnegative(),
   solve: z.int().nonnegative(),
+  lastRequestId: z.string().optional(),
   lastVisitedAt: isoDatetimeToDate.optional(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
