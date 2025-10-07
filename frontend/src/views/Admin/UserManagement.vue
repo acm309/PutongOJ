@@ -140,7 +140,7 @@ onRouteQueryUpdate(fetch)
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
       :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort" @page="onPage"
     >
-      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-48 pl-6 truncate" sortable frozen />
+      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-36 md:max-w-48 pl-6 truncate" sortable frozen />
 
       <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
 

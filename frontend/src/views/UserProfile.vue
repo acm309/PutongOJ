@@ -133,7 +133,7 @@ onRouteParamUpdate(fetch)
         </div>
       </div>
 
-      <div class="gap-6 grid grid-cols-1 lg:grid-cols-3 pt-2">
+      <div class="gap-x-6 gap-y-2 grid grid-cols-1 lg:grid-cols-3 pt-2">
         <div class="lg:col-span-1 space-y-2">
           <Fieldset :legend="t('ptoj.basic_information')">
             <div class="space-y-4">
