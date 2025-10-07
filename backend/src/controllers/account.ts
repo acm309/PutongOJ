@@ -94,10 +94,10 @@ export async function userRegister (ctx: Context) {
     )
   }
 
-  const exists = await userServices.getUser(payload.data.username)
-  if (exists) {
+  const available = await userServices.checkUserAvailable(payload.data.username)
+  if (!available) {
     return createErrorResponse(ctx,
-      'The username has been registered', ErrorCode.Conflict,
+      'The username has been registered or reserved', ErrorCode.Conflict,
     )
   }
   if (!isComplexPwd(password)) {

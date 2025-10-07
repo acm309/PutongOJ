@@ -1,8 +1,13 @@
-import type { Paginated, UserModel, UserPrivilege } from '@putongoj/shared'
+import type { Paginated, UserModel } from '@putongoj/shared'
 import type { UserDocument } from '../models/User'
 import type { PaginateOption, SortOption } from '../types'
+import { RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
 import User from '../models/User'
+
+const reservedUsernames = new Set(
+  RESERVED_KEYWORDS.flatMap(s => [ s.toLowerCase(), `${s.toLowerCase()}s` ]),
+)
 
 export async function findUsers (
   opt: PaginateOption & SortOption & {
@@ -64,6 +69,15 @@ export async function updateUser (user: UserDocument, data: Partial<UserModel>):
   return user
 }
 
+export async function checkUserAvailable (username: string): Promise<boolean> {
+  if (reservedUsernames.has(username.toLowerCase())) {
+    return false
+  }
+
+  const user = await getUser(username)
+  return !user
+}
+
 export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise<UserDocument> {
   const user = new User({
     uid: data.uid,
@@ -77,6 +91,7 @@ const userServices = {
   findUsers,
   getUser,
   updateUser,
+  checkUserAvailable,
   createUser,
 } as const
 
