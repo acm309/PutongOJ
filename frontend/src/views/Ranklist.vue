@@ -119,7 +119,7 @@ onRouteQueryUpdate(fetch)
               {{ index + 1 + (page - 1) * pageSize }}
             </td>
             <td class="ranklist-username">
-              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>

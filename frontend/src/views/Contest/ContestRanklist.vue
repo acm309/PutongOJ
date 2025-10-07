@@ -138,7 +138,7 @@ onBeforeUnmount(clearAutoRefresh)
               {{ item.rank }}
             </td>
             <td class="table-uid">
-              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>

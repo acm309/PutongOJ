@@ -1,19 +1,16 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { inject } from 'vue'
+import { inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave } from 'vue-router'
+import api from '@/api'
 import { useGroupStore } from '@/store/modules/group'
-import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n()
-const userStore = useUserStore()
 const groupStore = useGroupStore()
 const { group, list: groupList } = $(storeToRefs(groupStore))
-const { list: userSum } = $(storeToRefs(userStore))
 const { find, findOne, update, create, clearSavedGroups, delete: remove } = groupStore
-const { clearSavedUsers } = userStore
 const newGid = $ref('')
 const Spin = inject('$Spin')
 const Message = inject('$Message')
@@ -26,7 +23,9 @@ const listStyle = $ref({
   height: '400px',
 })
 
-const transData = $computed(() => userSum.map(item => ({
+const userSum = ref([])
+
+const transData = $computed(() => userSum.value.map(item => ({
   key: item.uid,
   label: `${item.uid} | ${item.nick}`,
 })))
@@ -35,12 +34,16 @@ const transData = $computed(() => userSum.map(item => ({
 // of function
 onBeforeRouteLeave(() => {
   clearSavedGroups()
-  clearSavedUsers()
 })
+
+async function findUsers () {
+  const { data } = await api.user.find({ page: -1 })
+  userSum.value = data.docs
+}
 
 async function fetchGroup () {
   Spin.show()
-  await Promise.all([ userStore.find({ page: -1 }), find() ])
+  await Promise.all([ findUsers(), find() ])
   Spin.hide()
 }
 

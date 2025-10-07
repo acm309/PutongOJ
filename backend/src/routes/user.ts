@@ -9,7 +9,7 @@ userRouter.get('/list',
   userController.find,
 )
 userRouter.get('/:uid',
-  userController.findOne,
+  userController.getUser,
 )
 
 export default userRouter

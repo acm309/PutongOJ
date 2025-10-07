@@ -161,7 +161,7 @@ onRouteQueryUpdate(fetch)
           </tr>
           <tr v-for="doc in docs" :key="doc.user.uid">
             <td class="member-username">
-              <router-link :to="{ name: 'userProfile', params: { uid: doc.user.uid } }">
+              <router-link :to="{ name: 'UserProfile', params: { uid: doc.user.uid } }">
                 {{ doc.user.uid }}
               </router-link>
             </td>

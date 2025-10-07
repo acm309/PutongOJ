@@ -118,7 +118,7 @@ fetch()
             </router-link>
           </td>
           <td class="discuss-author">
-            <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+            <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
               {{ item.uid }}
             </router-link>
           </td>

@@ -175,7 +175,7 @@ onRouteQueryUpdate(getStatistics)
               {{ item.sid }}
             </td>
             <td class="statis-username">
-              <router-link :to="{ name: 'userProfile', params: { uid: item.uid } }">
+              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
               </router-link>
             </td>

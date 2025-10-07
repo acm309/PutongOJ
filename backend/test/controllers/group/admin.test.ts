@@ -49,7 +49,7 @@ test.serial('Update Group 2', async (t) => {
   const user = await request
     .get('/api/user/admin')
 
-  t.true(user.body.user.groups.some((group: any) => group.gid === 2))
+  t.true(user.body.data.groups.some((group: any) => group.gid === 2))
 })
 
 test.serial('Update Group 2 -- update members', async (t) => {
@@ -72,12 +72,12 @@ test.serial('Update Group 2 -- update members', async (t) => {
   let r = await request
     .get('/api/user/admin')
 
-  t.false(r.body.user.groups.some((group: any) => group.gid === 2))
+  t.false(r.body.data.groups.some((group: any) => group.gid === 2))
 
   r = await request
     .get(`/api/user/${user.uid}`)
 
-  t.true(r.body.user.groups.some((group: any) => group.gid === 2))
+  t.true(r.body.data.groups.some((group: any) => group.gid === 2))
 })
 
 test.serial('Delete Group 2', async (t) => {
@@ -93,7 +93,7 @@ test.serial('Delete Group 2', async (t) => {
   const user = await request
     .get('/api/user/admin')
 
-  t.false(user.body.user.groups.some((group: any) => group.gid === 2))
+  t.false(user.body.data.groups.some((group: any) => group.gid === 2))
 })
 
 test('The length of group title should be greater than 3', async (t) => {

@@ -49,7 +49,7 @@ test('Update user\'s nick then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.nick, 'test20424')
+  t.is(r.body.data.nick, 'test20424')
 
   r = await request
     .put('/api/account/profile')
@@ -60,7 +60,7 @@ test('Update user\'s nick then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.nick, '')
+  t.is(r.body.data.nick, '')
 })
 
 test('Update user with motto not valid (too long)', async (t) => {
@@ -81,7 +81,7 @@ test('Update user\'s motto then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.motto, 'test19025')
+  t.is(r.body.data.motto, 'test19025')
 
   r = await request
     .put('/api/account/profile')
@@ -92,7 +92,7 @@ test('Update user\'s motto then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.motto, '')
+  t.is(r.body.data.motto, '')
 })
 
 test('Update user with school not valid (too long)', async (t) => {
@@ -113,7 +113,7 @@ test('Update user\'s school then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.school, 'test31975')
+  t.is(r.body.data.school, 'test31975')
 
   r = await request
     .put('/api/account/profile')
@@ -124,7 +124,7 @@ test('Update user\'s school then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.school, '')
+  t.is(r.body.data.school, '')
 })
 
 test('Update user with mail not valid (too long)', async (t) => {
@@ -153,7 +153,7 @@ test('Update user\'s mail then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.mail, mail)
+  t.is(r.body.data.mail, mail)
 
   r = await request
     .put('/api/account/profile')
@@ -164,7 +164,7 @@ test('Update user\'s mail then clear', async (t) => {
   r = await request
     .get(`/api/user/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.user.mail, '')
+  t.is(r.body.data.mail, '')
 })
 
 test.skip('Update user with privilege remains unchanged', async (t) => {

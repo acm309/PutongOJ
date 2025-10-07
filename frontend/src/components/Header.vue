@@ -116,7 +116,7 @@ const profileItems = computed(() => [
     label: t('ptoj.header_profile'),
     icon: 'pi pi-user',
     command: () => {
-      router.push({ name: 'userProfile', params: { uid: profile.value!.uid } })
+      router.push({ name: 'UserProfile', params: { uid: profile.value!.uid } })
     },
   },
   {

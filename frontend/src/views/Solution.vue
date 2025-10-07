@@ -131,7 +131,7 @@ onRouteQueryUpdate(fetch)
             </span>
             <span>
               {{ t('oj.author_label') }}
-              <router-link v-if="solution.uid" :to="{ name: 'userProfile', params: { uid: solution.uid } }">
+              <router-link v-if="solution.uid" :to="{ name: 'UserProfile', params: { uid: solution.uid } }">
                 {{ solution.uid }}
               </router-link>
             </span>
@@ -252,7 +252,7 @@ onRouteQueryUpdate(fetch)
           </span>
           <span>
             Author:
-            <router-link :to="{ name: 'userProfile', params: { uid: solution.simSolution.uid } }">
+            <router-link :to="{ name: 'UserProfile', params: { uid: solution.simSolution.uid } }">
               {{ solution.simSolution.uid }}
             </router-link>
           </span>

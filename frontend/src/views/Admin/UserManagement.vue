@@ -87,7 +87,7 @@ function onReset () {
 }
 
 function onView (data: any) {
-  router.push({ name: 'userProfile', params: { uid: data.uid } })
+  router.push({ name: 'UserProfile', params: { uid: data.uid } })
 }
 
 function onEdit (data: any) {

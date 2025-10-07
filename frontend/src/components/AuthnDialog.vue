@@ -125,7 +125,7 @@ async function handleAuthSubmit () {
         closeModal()
 
         if (route.name === 'oauthCallback') {
-          router.push({ name: 'userEdit', params: { uid } })
+          router.push({ name: 'AccountSettings' })
         }
       } else {
         handleAuthError(result)

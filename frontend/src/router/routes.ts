@@ -6,6 +6,7 @@ import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
 
+import UserProfile from '@/views/UserProfile.vue'
 import adminRoutes from './admin'
 import contestRoutes from './contest'
 import courseRoutes from './course'
@@ -14,7 +15,6 @@ import newsRoutes from './news'
 import problemRoutes from './problem'
 import ranklistRoutes from './ranklist'
 import statusRoutes from './status'
-import userRoutes from './user'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -29,9 +29,13 @@ const routes: Array<RouteRecordRaw> = [
   ...ranklistRoutes,
   ...contestRoutes,
   ...discussRoutes,
-  ...userRoutes,
   ...courseRoutes,
   ...adminRoutes,
+  {
+    path: '/user/:uid',
+    name: 'UserProfile',
+    component: UserProfile,
+  },
   {
     path: '/settings',
     name: 'AccountSettings',

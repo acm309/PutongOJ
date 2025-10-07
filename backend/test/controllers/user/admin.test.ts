@@ -101,7 +101,7 @@ test.serial('Update other user\'s info with admin privilege', async (t) => {
   const r2 = await requestAdmin
     .get(`/api/user/${userPrimary.uid}`)
   t.is(r2.status, 200)
-  t.is(r2.body.user.motto, 'test')
+  t.is(r2.body.data.motto, 'test')
 })
 
 test.after.always('close server', () => {

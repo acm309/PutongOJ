@@ -1,5 +1,8 @@
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
+import { Buffer } from 'node:buffer'
+import { md5 } from '@noble/hashes/legacy.js'
+import { UserProfileQueryResultSchema } from '@putongoj/shared'
 import difference from 'lodash/difference'
 import escapeRegExp from 'lodash/escapeRegExp'
 import config from '../config'
@@ -7,7 +10,7 @@ import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import userServices from '../services/user'
-import { only } from '../utils'
+import { createEnvelopedResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 
 export async function loadUser (
@@ -70,39 +73,40 @@ const find = async (ctx: Context) => {
   ctx.body = result
 }
 
-const findOne = async (ctx: Context) => {
+export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
   const [ solved, failed, groups ] = await Promise.all([
     Solution
       .find({ uid: user.uid, judge: config.judge.Accepted })
       .distinct('pid')
-      .lean()
-      .exec(),
+      .lean(),
     Solution
-      .find({ uid: user.uid, judge: { $ne: config.judge.Accepted } })
+      .find({ uid: user.uid, judge: { $nin: [ config.judge.Accepted, config.judge.Skipped ] } })
       .distinct('pid')
-      .lean()
-      .exec(),
+      .lean(),
     Group
       .find({ gid: { $in: user.gid } })
       .select('-_id gid title')
-      .lean()
-      .exec(),
+      .lean(),
   ])
 
-  ctx.body = {
-    user: {
-      ...only(user, 'uid nick motto mail school privilege createdAt'),
-      groups,
-    },
-    solved,
-    unsolved: difference(failed, solved),
+  let avatarHash: string | null = null
+  if (user.isAdmin && user.mail) {
+    const mail = user.mail.trim().toLowerCase()
+    const hash = md5(Buffer.from(mail))
+    avatarHash = Buffer.from(hash).toString('hex')
   }
+
+  const attempted = difference(failed, solved)
+  const result = UserProfileQueryResultSchema.encode({
+    ...user.toObject(), avatarHash, groups, solved, attempted,
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
 const userController = {
   find,
-  findOne,
+  getUser,
 } as const
 
 export default userController
