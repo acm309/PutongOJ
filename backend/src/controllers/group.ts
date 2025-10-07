@@ -1,11 +1,13 @@
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
+import { GroupListQueryResultSchema } from '@putongoj/shared'
 import difference from 'lodash/difference'
 import without from 'lodash/without'
 import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import User from '../models/User'
-import { only } from '../utils'
+import groupServices from '../services/group'
+import { createEnvelopedResponse, only } from '../utils'
 import logger from '../utils/logger'
 
 const preload = async (ctx: Context, next: () => Promise<any>) => {
@@ -167,6 +169,12 @@ const del = async (ctx: Context) => {
   ctx.body = {}
 }
 
+export async function findGroups (ctx: Context) {
+  const groups = await groupServices.findGroups()
+  const result = GroupListQueryResultSchema.encode(groups)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const groupController = {
   preload,
   find,
@@ -174,6 +182,7 @@ const groupController = {
   create,
   update,
   del,
+  findGroups,
 } as const
 
 export default groupController

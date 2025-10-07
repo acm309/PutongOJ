@@ -6,6 +6,9 @@ const groupRouter = new Router({
   prefix: '/group',
 })
 
+groupRouter.get('/',
+  groupController.findGroups,
+)
 groupRouter.get('/list',
   groupController.find,
 )

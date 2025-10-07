@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { GroupModelSchema } from '../model/group.js'
 import { UserModelSchema } from '../model/user.js'
 
 export const UserProfileQueryResultSchema = z.object({
@@ -9,8 +10,8 @@ export const UserProfileQueryResultSchema = z.object({
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school,
   groups: z.array(z.object({
-    gid: z.number(),
-    title: z.string(),
+    gid: GroupModelSchema.shape.gid,
+    title: GroupModelSchema.shape.title,
   })),
   avatarHash: z.string().nullable(),
   solved: z.array(z.number()),
