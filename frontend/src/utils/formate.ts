@@ -113,3 +113,9 @@ export function getPrivilegeSeverity (privilege: any) {
       return 'contrast'
   }
 }
+
+export function calculatePercentage (num: number, den: number): string {
+  if (den === 0) return '0.00%'
+  const percentage = (num / den) * 100
+  return `${percentage.toFixed(2)}%`
+}

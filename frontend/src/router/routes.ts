@@ -1,11 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
-
 import NotFound from '@/views/404.vue'
 import AccountSettings from '@/views/AccountSettings.vue'
 import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
-
+import Ranklist from '@/views/Ranklist.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import adminRoutes from './admin'
 import contestRoutes from './contest'
@@ -13,7 +12,6 @@ import courseRoutes from './course'
 import discussRoutes from './discuss'
 import newsRoutes from './news'
 import problemRoutes from './problem'
-import ranklistRoutes from './ranklist'
 import statusRoutes from './status'
 
 const routes: Array<RouteRecordRaw> = [
@@ -26,11 +24,16 @@ const routes: Array<RouteRecordRaw> = [
   ...newsRoutes,
   ...problemRoutes,
   ...statusRoutes,
-  ...ranklistRoutes,
   ...contestRoutes,
   ...discussRoutes,
   ...courseRoutes,
   ...adminRoutes,
+  {
+    path: '/ranklist',
+    name: 'Ranklist',
+    component: Ranklist,
+    meta: { title: 'Ranklist' },
+  },
   {
     path: '/user/:uid',
     name: 'UserProfile',

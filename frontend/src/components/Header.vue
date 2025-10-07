@@ -52,8 +52,8 @@ const menuItems = computed(() => {
     route: 'problems',
   }, {
     label: t('oj.ranklist'),
-    icon: 'pi pi-chart-bar',
-    route: 'ranklist',
+    icon: 'pi pi-chart-line',
+    route: 'Ranklist',
   }, {
     label: t('oj.contest_list'),
     icon: 'pi pi-trophy',

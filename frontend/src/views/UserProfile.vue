@@ -186,7 +186,7 @@ onRouteParamUpdate(fetch)
               />
               <router-link
                 v-for="group in user.groups" :key="group.gid"
-                :to="{ name: 'ranklist', query: { gid: group.gid } }"
+                :to="{ name: 'Ranklist', query: { group: group.gid } }"
               >
                 <Tag :value="group.title" severity="secondary" />
               </router-link>

@@ -1,274 +1,214 @@
-<script setup>
-import pangu from 'pangu'
-import { storeToRefs } from 'pinia'
-import { Button, Option, Page, Select, Text } from 'view-ui-plus'
+<script lang="ts" setup>
+import type {
+  GroupListQueryResult,
+  UserRanklistQuery,
+  UserRanklistQueryResult,
+} from '@putongoj/shared'
+import { UserRanklistQuerySchema } from '@putongoj/shared'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { findGroups } from '@/api/group'
+import { findRanklist } from '@/api/user'
 import { useRootStore } from '@/store'
-import { useGroupStore } from '@/store/modules/group'
-import { useRanklistStore } from '@/store/modules/ranklist'
+import { calculatePercentage } from '@/utils/formate'
+import { onRouteQueryUpdate } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
-import { formate } from '@/utils/formate'
-
-import { onRouteQueryUpdate, purify } from '@/utils/helper'
-
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
-
-const group = $ref(Number.parseInt(route.query.gid) || '')
-const page = $computed(() => Number.parseInt(route.query.page) || 1)
-const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 30)
-
-const query = $computed(() => purify({
-  page,
-  pageSize,
-  gid: group,
-}))
-
+const message = useMessage()
 const rootStore = useRootStore()
-const ranklistStore = useRanklistStore()
-const groupStore = useGroupStore()
+const { judge } = rootStore
 
-const { list: groups } = $(storeToRefs(groupStore))
-const { judge } = $(storeToRefs(rootStore))
-const { list, sum } = $(storeToRefs(ranklistStore))
+const query = ref({} as UserRanklistQuery)
+const docs = ref([] as UserRanklistQueryResult['docs'])
+const groups = ref<GroupListQueryResult>([])
+const total = ref(0)
+const loading = ref(false)
+const loadingGroups = ref(false)
 
-let loading = $ref(false)
-
-function reload (payload = {}) {
-  const routeQuery = Object.assign({}, query, payload)
-  router.push({ name: 'ranklist', query: routeQuery })
+async function fetchGroups () {
+  loadingGroups.value = true
+  const resp = await findGroups()
+  loadingGroups.value = false
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_groups'), resp.message)
+    return
+  }
+  groups.value = resp.data
 }
 
 async function fetch () {
-  loading = true
-  await Promise.all([
-    ranklistStore.find(query),
-    groupStore.find({ lean: 1 }),
-  ])
-  loading = false
+  const parsed = UserRanklistQuerySchema.safeParse(route.query)
+  if (parsed.success) {
+    query.value = parsed.data
+  } else {
+    router.replace({ query: {} })
+    return
+  }
+
+  loading.value = true
+  const resp = await findRanklist(query.value)
+  loading.value = false
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_ranklist'), resp.message)
+    docs.value = []
+    total.value = 0
+    return
+  }
+
+  docs.value = resp.data.docs
+  total.value = resp.data.total
 }
 
-const pageChange = val => reload({ page: val })
-const search = () => reload({ gid: group, page: 1 })
+function onPage (event: any) {
+  router.replace({
+    query: {
+      ...route.query,
+      page: (event.first / event.rows + 1),
+      pageSize: event.rows,
+    },
+  })
+}
 
-fetch()
-onBeforeRouteLeave(() => groupStore.clearSavedGroups())
+function onSearch () {
+  router.replace({
+    query: {
+      ...route.query,
+      group: query.value.group,
+      page: 1,
+    },
+  })
+}
+
+function onReset () {
+  router.replace({
+    query: {
+      ...route.query,
+      group: undefined,
+      page: 1,
+    },
+  })
+}
+
+function onView (data: any) {
+  router.push({ name: 'UserProfile', params: { uid: data.uid } })
+}
+
+function onStatus (data: any, judge?: number) {
+  const queryParams: any = { uid: data.uid }
+  if (judge !== undefined) {
+    queryParams.judge = judge
+  }
+  router.push({ name: 'status', query: queryParams })
+}
+
+onMounted(async () => {
+  await Promise.all([ fetchGroups(), fetch() ])
+})
 onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="ranklist-wrap">
-    <div class="ranklist-header">
-      <Page
-        class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <Page
-        class="ranklist-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <div class="ranklist-filter">
-        <Select v-model="group" class="ranklist-filter-select" filterable clearable :placeholder="t('oj.group')">
-          <Option v-for="item in groups" :key="item.gid" :value="item.gid">
-            {{ item.title }}
-          </Option>
-        </Select>
-        <Button type="primary" class="ranklist-filter-button" @click="search">
-          {{ t('oj.search') }}
-        </Button>
+  <div class="max-w-7xl p-0">
+    <div class="border-b border-surface p-6">
+      <div class="flex font-semibold gap-4 items-center mb-4">
+        <i class="pi pi-chart-line text-2xl" />
+        <h1 class="text-xl">
+          {{ t('ptoj.ranklist') }}
+        </h1>
+      </div>
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+        <Select
+          v-model="query.group" fluid :options="groups" option-label="title" option-value="gid" show-clear
+          :placeholder="t('ptoj.filter_by_group')" :loading="loadingGroups" :disabled="loading" @change="onSearch"
+        />
+
+        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+        </div>
       </div>
     </div>
-    <div class="ranklist-table-container">
-      <table class="ranklist-table">
-        <thead>
-          <tr>
-            <th class="ranklist-rank">
-              Rank
-            </th>
-            <th class="ranklist-username">
-              {{ t('oj.username') }}
-            </th>
-            <th class="ranklist-nick">
-              {{ t('oj.nick') }}
-            </th>
-            <th class="ranklist-motto">
-              {{ t('oj.motto') }}
-            </th>
-            <th class="ranklist-solved">
-              {{ t('oj.solved') }}
-            </th>
-            <th class="ranklist-submit">
-              {{ t('oj.submit') }}
-            </th>
-            <th class="ranklist-ratio">
-              Ratio
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="list.length === 0" class="status-empty">
-            <td colspan="7">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="(item, index) in list" :key="item.uid">
-            <td class="ranklist-rank">
-              {{ index + 1 + (page - 1) * pageSize }}
-            </td>
-            <td class="ranklist-username">
-              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
-                {{ item.uid }}
-              </router-link>
-            </td>
-            <td class="ranklist-nick">
-              {{ item.nick }}
-            </td>
-            <td class="ranklist-motto">
-              <Text class="ranklist-motto-text" :ellipsis="true" :ellipsis-config="{ tooltip: true }">
-                {{ pangu.spacing(item.motto || '').trim() }}
-              </Text>
-            </td>
-            <td class="ranklist-solved">
-              <router-link :to="{ name: 'status', query: { uid: item.uid, judge: judge.Accepted } }">
-                {{ item.solve }}
-              </router-link>
-            </td>
-            <td class="ranklist-submit">
-              <router-link :to="{ name: 'status', query: { uid: item.uid } }">
-                {{ item.submit }}
-              </router-link>
-            </td>
-            <td class="ranklist-ratio">
-              <span>{{ formate(item.solve / (item.submit + 0.0000001)) }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="ranklist-footer">
-      <Page
-        class="ranklist-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange"
-      />
-      <Page
-        class="ranklist-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
-        show-elevator show-total @on-change="pageChange"
-      />
-    </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
+
+    <DataTable class="-mb-px whitespace-nowrap" :value="docs" :lazy="true" :loading="loading" scrollable>
+      <Column class="max-w-18 pl-6 text-center">
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-hashtag" />
+          </span>
+        </template>
+        <template #body="{ index }">
+          {{ index + 1 + (query.page - 1) * query.pageSize }}
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-36 md:max-w-48 truncate" frozen>
+        <template #body="{ data }">
+          <a @click="onView(data)">
+            {{ data.uid }}
+          </a>
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
+
+      <Column :header="t('ptoj.motto')" field="motto" class="max-w-72 md:max-w-96 truncate">
+        <template #body="{ data }">
+          <span class="truncate">{{ data.motto || '' }}</span>
+        </template>
+      </Column>
+
+      <Column field="solve" class="text-center">
+        <template #header>
+          <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
+        </template>
+        <template #body="{ data }">
+          <a @click="onStatus(data, judge.Accepted)">
+            {{ data.solve }}
+          </a>
+        </template>
+      </Column>
+
+      <Column field="submit" class="text-center">
+        <template #header>
+          <span class="font-semibold text-center w-full">{{ t('ptoj.submitted') }}</span>
+        </template>
+        <template #body="{ data }">
+          <a @click="onStatus(data)">
+            {{ data.submit }}
+          </a>
+        </template>
+      </Column>
+
+      <Column class="pr-6 text-right">
+        <template #header>
+          <span class="font-semibold text-right w-full">{{ t('ptoj.ratio') }}</span>
+        </template>
+        <template #body="{ data }">
+          {{ calculatePercentage(data.solve, data.submit) }}
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
+      </template>
+    </DataTable>
+
+    <Paginator
+      class="border-surface border-t bottom-0 sticky"
+      :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
+    />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../styles/common'
-
-.ranklist-wrap
-  width 100%
-  margin 0 auto
-  padding 40px 0
-
-.ranklist-header
-  padding 0 40px
-  margin-bottom 25px
-  display flex
-  justify-content space-between
-  align-items center
-.ranklist-page-simple, .ranklist-page-mobile
-  display none
-.ranklist-filter
-  display flex
-  align-items center
-  > *
-    margin-left 4px
-  .ranklist-filter-select
-    width 160px
-
-@media screen and (max-width: 1024px)
-  .ranklist-wrap
-    padding 20px 0
-  .ranklist-header
-    padding 0 20px
-    margin-bottom 5px
-    .ranklist-page-table
-      display none
-    .ranklist-page-simple
-      display block
-  .ranklist-footer
-    padding 0 20px
-    margin-top 20px !important
-
-@media screen and (max-width: 768px)
-  .ranklist-page-table, .ranklist-page-simple
-    display none !important
-  .ranklist-page-mobile
-    display block
-  .ranklist-filter
-    width 100%
-    .ranklist-filter-select
-      width 100%
-
-.ranklist-table-container
-  overflow-x auto
-  width 100%
-.ranklist-table
-  width 100%
-  min-width 1024px
-  table-layout fixed
-  th, td
-    padding 0 16px
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-
-.ranklist-rank
-  width 90px
-  text-align right
-.ranklist-username
-  width 170px
-  max-width 170px
-  text-align center
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
-.ranklist-nick
-  width 200px
-  max-width 200px
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
-.ranklist-motto-text
-  width 100%
-.ranklist-solved
-  width 100px
-  text-align center
-.ranklist-submit
-  width 80px
-  text-align center
-.ranklist-ratio
-  width 120px
-  text-align right
-  padding-right 40px !important
-th.ranklist-ratio
-  text-align center
-
-.status-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-
-.ranklist-footer
-  padding 0 40px
-  margin-top 40px
-  text-align center
-</style>

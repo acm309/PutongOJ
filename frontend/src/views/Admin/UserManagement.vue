@@ -138,7 +138,7 @@ onRouteQueryUpdate(fetch)
 
     <DataTable
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
-      :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort" @page="onPage"
+      :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort"
     >
       <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-36 md:max-w-48 pl-6 truncate" sortable frozen />
 
