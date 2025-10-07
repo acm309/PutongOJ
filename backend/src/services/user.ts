@@ -39,6 +39,30 @@ export async function findUsers (
   return await User.paginate(filter, query) as any
 }
 
+export async function findRanklist (
+  opt: PaginateOption & { group?: number },
+): Promise<Paginated<UserModel>> {
+  const { page, pageSize, group } = opt
+
+  const filter: Record<string, any> = {
+    solve: { $gt: 0 },
+    privilege: { $ne: UserPrivilege.Banned },
+  }
+  if (typeof group === 'number') {
+    filter.gid = group
+  }
+
+  const query = {
+    sort: { solve: -1, submit: 1, createdAt: 1 },
+    page,
+    limit: pageSize,
+    lean: true,
+    leanWithId: false,
+  }
+
+  return await User.paginate(filter, query) as any
+}
+
 export async function getUser (uid: string): Promise<UserDocument | null> {
   return await User.findOne({
     uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
@@ -89,6 +113,7 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
 
 const userServices = {
   findUsers,
+  findRanklist,
   getUser,
   updateUser,
   checkUserAvailable,

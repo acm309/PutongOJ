@@ -8,6 +8,9 @@ const userRouter = new Router({
 userRouter.get('/list',
   userController.find,
 )
+userRouter.get('/ranklist',
+  userController.findRanklist,
+)
 userRouter.get('/:uid',
   userController.getUser,
 )

@@ -2,7 +2,11 @@ import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
 import { Buffer } from 'node:buffer'
 import { md5 } from '@noble/hashes/legacy.js'
-import { UserProfileQueryResultSchema } from '@putongoj/shared'
+import {
+  UserProfileQueryResultSchema,
+  UserRanklistQueryResultSchema,
+  UserRanklistQuerySchema,
+} from '@putongoj/shared'
 import difference from 'lodash/difference'
 import escapeRegExp from 'lodash/escapeRegExp'
 import config from '../config'
@@ -10,7 +14,7 @@ import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import userServices from '../services/user'
-import { createEnvelopedResponse } from '../utils'
+import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 
 export async function loadUser (
@@ -73,6 +77,17 @@ const find = async (ctx: Context) => {
   ctx.body = result
 }
 
+export async function findRanklist (ctx: Context) {
+  const query = UserRanklistQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const users = await userServices.findRanklist(query.data)
+  const result = UserRanklistQueryResultSchema.encode(users)
+  return createEnvelopedResponse(ctx, result)
+}
+
 export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
   const [ solved, failed, groups ] = await Promise.all([
@@ -106,6 +121,7 @@ export async function getUser (ctx: Context) {
 
 const userController = {
   find,
+  findRanklist,
   getUser,
 } as const
 
