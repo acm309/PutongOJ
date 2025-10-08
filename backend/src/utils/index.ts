@@ -5,7 +5,7 @@ import type { PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
 import { sha256 } from '@noble/hashes/sha2.js'
-import { ErrorCode } from '@putongoj/shared'
+import { ErrorCode, passwordRegex } from '@putongoj/shared'
 import { pick, pickBy } from 'lodash'
 
 export function parsePaginateOption (
@@ -56,7 +56,7 @@ export function isComplexPwd (pwd: string): boolean {
   if (pwd.length < 8) {
     return false
   }
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)
+  return passwordRegex.test(pwd)
 }
 
 export function only<T extends object> (

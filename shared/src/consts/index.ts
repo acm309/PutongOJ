@@ -1,4 +1,5 @@
 export * from './keywords.js'
+export * from './regex.js'
 
 export enum ErrorCode {
   OK = 200,

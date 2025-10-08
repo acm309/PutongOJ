@@ -4,7 +4,7 @@ import type {
   OAuthAction,
   OAuthProvider,
 } from '@putongoj/shared'
-import { ErrorCode } from '@putongoj/shared'
+import { ErrorCode, passwordRegex } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -69,7 +69,7 @@ function validateForm (): boolean {
       message.error(t('ptoj.username_invalid'), t('ptoj.username_invalid_detail'))
       isValid = false
     }
-    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+    if (!passwordRegex.test(password)) {
       fieldValidity.value.password = false
       message.error(t('ptoj.password_weak'), t('ptoj.password_weak_detail'))
       isValid = false

@@ -3,7 +3,7 @@ import type {
   AccountEditPayload,
   AccountProfileQueryResult,
 } from '@putongoj/shared'
-import { ErrorCode, OAuthAction } from '@putongoj/shared'
+import { ErrorCode, OAuthAction, passwordRegex } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -112,7 +112,7 @@ async function changePassword () {
     message.error(t('ptoj.password_mismatch'), t('ptoj.password_mismatch_detail'))
     return
   }
-  if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(newPassword.value) === false) {
+  if (passwordRegex.test(newPassword.value) === false) {
     message.error(t('ptoj.password_weak'), t('ptoj.password_weak_detail'))
     return
   }
