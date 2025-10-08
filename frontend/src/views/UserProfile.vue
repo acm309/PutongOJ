@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { UserProfileQueryResult } from '@putongoj/shared'
-import { UserPrivilege } from '@putongoj/shared'
+import { JudgeStatus, UserPrivilege } from '@putongoj/shared'
 import axios from 'axios'
 import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
@@ -11,7 +11,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser } from '@/api/user'
-import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
 import { onRouteParamUpdate } from '@/utils/helper'
@@ -21,9 +20,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
-const { judge } = storeToRefs(rootStore)
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
 const uid = computed(() => route.params.uid as string)
@@ -195,7 +192,7 @@ onRouteParamUpdate(fetch)
 
           <Fieldset :legend="t('ptoj.statistics')">
             <div class="gap-4 grid grid-cols-2">
-              <router-link :to="{ name: 'status', query: { uid: user.uid, judge: judge.Accepted } }" class="px-4 py-2">
+              <router-link :to="{ name: 'status', query: { uid: user.uid, judge: JudgeStatus.Accepted } }" class="px-4 py-2">
                 <div class="font-bold text-2xl text-primary">
                   {{ user.solved.length }}
                 </div>

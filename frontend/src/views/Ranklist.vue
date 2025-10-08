@@ -4,7 +4,7 @@ import type {
   UserRanklistQuery,
   UserRanklistQueryResult,
 } from '@putongoj/shared'
-import { UserRanklistQuerySchema } from '@putongoj/shared'
+import { JudgeStatus, UserRanklistQuerySchema } from '@putongoj/shared'
 import pangu from 'pangu'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -16,7 +16,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findGroups } from '@/api/group'
 import { findRanklist } from '@/api/user'
-import { useRootStore } from '@/store'
 import { calculatePercentage } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -25,8 +24,6 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
-const rootStore = useRootStore()
-const { judge } = rootStore
 
 const query = ref({} as UserRanklistQuery)
 const docs = ref([] as UserRanklistQueryResult['docs'])
@@ -172,7 +169,7 @@ onRouteQueryUpdate(fetch)
           <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
         </template>
         <template #body="{ data }">
-          <a @click="onStatus(data, judge.Accepted)">
+          <a @click="onStatus(data, JudgeStatus.Accepted)">
             {{ data.solve }}
           </a>
         </template>
