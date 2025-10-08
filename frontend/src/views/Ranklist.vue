@@ -5,6 +5,7 @@ import type {
   UserRanklistQueryResult,
 } from '@putongoj/shared'
 import { UserRanklistQuerySchema } from '@putongoj/shared'
+import pangu from 'pangu'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -162,7 +163,7 @@ onRouteQueryUpdate(fetch)
 
       <Column :header="t('ptoj.motto')" field="motto" class="max-w-72 md:max-w-96 truncate">
         <template #body="{ data }">
-          <span class="truncate">{{ data.motto || '' }}</span>
+          <span class="truncate">{{ pangu.spacing(data.motto || '').trim() }}</span>
         </template>
       </Column>
 
