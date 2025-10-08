@@ -73,7 +73,7 @@ watch(() => route.meta, () => changeDomTitle(route.meta))
 <template>
   <div id="app">
     <OjLayout />
-    <Toast group="global" />
+    <Toast group="global" style="top: 82px" />
     <ConfirmPopup />
   </div>
 </template>
