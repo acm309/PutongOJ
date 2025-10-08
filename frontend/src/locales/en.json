@@ -73,6 +73,8 @@
   "password_updated_detail": "The password has been updated successfully",
   "password_weak": "Weak password",
   "password_weak_detail": "Password must be at least 8 characters long and include uppercase letters, lowercase letters, and digits",
+  "password_weak_detected": "Weak password detected",
+  "password_weak_detected_detail": "For your account security, it is recommended to change your password to a stronger one in account settings",
   "privilege": "Privilege",
   "proceed_confirm_message": "Are you sure you want to proceed?",
   "profile_groups": "Groups",

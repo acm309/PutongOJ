@@ -73,6 +73,8 @@
   "password_updated_detail": "密码已成功更新",
   "password_weak": "密码强度弱",
   "password_weak_detail": "密码长度至少为 8 个字符，且必须包含大写字母、小写字母和数字",
+  "password_weak_detected": "检测到弱密码",
+  "password_weak_detected_detail": "为了您的账户安全，建议前往账户设置将密码修改为更强的密码",
   "privilege": "权限",
   "proceed_confirm_message": "确定要继续操作吗？",
   "profile_groups": "所属群组",

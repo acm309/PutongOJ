@@ -124,6 +124,10 @@ async function handleAuthSubmit () {
         sessionStore.setProfile(result.data)
         closeModal()
 
+        if (!passwordRegex.test(password)) {
+          message.warn(t('ptoj.password_weak_detected'), t('ptoj.password_weak_detected_detail'))
+        }
+
         if (route.name === 'oauthCallback') {
           router.push({ name: 'AccountSettings' })
         }
