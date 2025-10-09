@@ -19,13 +19,13 @@ const adminRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'Problem Tag Manage', requiresAdmin: true },
   },
   {
-    path: '/admin/user',
+    path: '/admin/users',
     name: 'UserManagement',
     component: UserManagement,
     meta: { title: 'User Management', requiresAdmin: true },
   },
   {
-    path: '/admin/user/:uid',
+    path: '/admin/users/:uid',
     name: 'UserManagementDetail',
     component: UserManagementDetail,
     meta: { title: 'User Management', requiresAdmin: true },

@@ -54,7 +54,7 @@ test('Fetch user list filter by uid', async (t) => {
 
 test('Update admin self\'s privilege', async (t) => {
   const r = await requestRoot
-    .put(`/api/admin/user/${userRoot.uid}`)
+    .put(`/api/admin/users/${userRoot.uid}`)
     .send({ privilege: config.privilege.User })
   t.is(r.status, 200)
   t.false(r.body.success)
@@ -62,7 +62,7 @@ test('Update admin self\'s privilege', async (t) => {
 
 test.serial('Update user privilege to admin with root privilege', async (t) => {
   let r = await requestRoot
-    .put(`/api/admin/user/${userAdmin.uid}`)
+    .put(`/api/admin/users/${userAdmin.uid}`)
     .send({ privilege: config.privilege.Admin })
   t.is(r.status, 200)
   t.true(r.body.success)
@@ -85,7 +85,7 @@ test.serial('Update user privilege to admin with root privilege', async (t) => {
 
 test.serial('Update user privilege with admin privilege', async (t) => {
   const r = await requestAdmin
-    .put(`/api/admin/user/${userRoot.uid}`)
+    .put(`/api/admin/users/${userRoot.uid}`)
     .send({ privilege: config.privilege.User })
   t.is(r.status, 200)
   t.false(r.body.success)
@@ -93,7 +93,7 @@ test.serial('Update user privilege with admin privilege', async (t) => {
 
 test.serial('Update other user\'s info with admin privilege', async (t) => {
   const r = await requestAdmin
-    .put(`/api/admin/user/${userPrimary.uid}`)
+    .put(`/api/admin/users/${userPrimary.uid}`)
     .send({ motto: 'test' })
   t.is(r.status, 200)
   t.true(r.body.success)
