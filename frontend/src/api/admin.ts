@@ -1,4 +1,6 @@
 import type {
+  AdminSolutionListQuery,
+  AdminSolutionListQueryResult,
   AdminUserChangePasswordPayload,
   AdminUserDetailQueryResult,
   AdminUserEditPayload,
@@ -7,9 +9,7 @@ import type {
   AdminUserOAuthQueryResult,
   Enveloped,
 } from '@putongoj/shared'
-import {
-  OAuthProvider,
-} from '@putongoj/shared'
+import { OAuthProvider } from '@putongoj/shared'
 import { instance } from './instance'
 
 export async function findUsers (params: AdminUserListQuery) {
@@ -43,4 +43,9 @@ export async function removeUserOAuthConnection (uid: string, provider: OAuthPro
   }
   const { data } = await instance.delete(`/admin/user/${encodeURIComponent(uid)}/oauth/${providerMap[provider]}`)
   return data as Enveloped<null>
+}
+
+export async function findSolutions (params: AdminSolutionListQuery) {
+  const { data } = await instance.get('/admin/solution', { params })
+  return data as Enveloped<AdminSolutionListQueryResult>
 }

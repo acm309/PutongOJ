@@ -1,5 +1,7 @@
 import type { Context } from 'koa'
 import {
+  AdminSolutionListQueryResultSchema,
+  AdminSolutionListQuerySchema,
   AdminUserChangePasswordPayloadSchema,
   AdminUserDetailQueryResultSchema,
   AdminUserEditPayloadSchema,
@@ -12,6 +14,7 @@ import {
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import oauthService from '../services/oauth'
+import solutionService from '../services/solution'
 import userService from '../services/user'
 import {
   createEnvelopedResponse,
@@ -153,6 +156,17 @@ export async function removeUserOAuthConnection (ctx: Context) {
   }
 }
 
+export async function findSolutions (ctx: Context) {
+  const query = AdminSolutionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const solutions = await solutionService.findSolutions(query.data)
+  const result = AdminSolutionListQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -160,6 +174,7 @@ const adminController = {
   updateUserPassword,
   getUserOAuthConnections,
   removeUserOAuthConnection,
+  findSolutions,
 } as const
 
 export default adminController

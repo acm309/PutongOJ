@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { OAuthProvider, UserPrivilege } from '@/consts/index.js'
+import { JudgeStatus, Language, OAuthProvider, UserPrivilege } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
 import { OAuthModelSchema } from '../model/oauth.js'
+import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
@@ -66,3 +67,33 @@ export const AdminUserOAuthQueryResultSchema = z.record(
 )
 
 export type AdminUserOAuthQueryResult = z.input<typeof AdminUserOAuthQueryResultSchema>
+
+export const AdminSolutionListQuerySchema = z.object({
+  page: PaginationSchema.shape.page,
+  pageSize: PaginationSchema.shape.pageSize.default(30),
+  sort: SortOptionSchema.shape.sort,
+  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  user: z.string().max(30).optional(),
+  problem: stringToInt.pipe(z.number().nonnegative()).optional(),
+  contest: stringToInt.pipe(z.number().nonnegative()).optional(),
+  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
+  language: stringToInt.pipe(z.enum(Language)).optional(),
+})
+
+export type AdminSolutionListQuery = z.infer<typeof AdminSolutionListQuerySchema>
+
+export const AdminSolutionListQueryResultSchema = PaginatedSchema(z.object({
+  sid: SolutionModelSchema.shape.sid,
+  pid: SolutionModelSchema.shape.pid,
+  uid: SolutionModelSchema.shape.uid,
+  mid: SolutionModelSchema.shape.mid,
+  language: SolutionModelSchema.shape.language,
+  judge: SolutionModelSchema.shape.judge,
+  time: SolutionModelSchema.shape.time,
+  memory: SolutionModelSchema.shape.memory,
+  sim: SolutionModelSchema.shape.sim,
+  sim_s_id: SolutionModelSchema.shape.sim_s_id,
+  createdAt: SolutionModelSchema.shape.createdAt,
+}))
+
+export type AdminSolutionListQueryResult = z.input<typeof AdminSolutionListQueryResultSchema>

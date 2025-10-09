@@ -31,4 +31,9 @@ adminRouter.delete('/user/:uid/oauth/:provider',
   adminController.removeUserOAuthConnection,
 )
 
+adminRouter.get('/solution',
+  authnMiddleware.adminRequire,
+  adminController.findSolutions,
+)
+
 export default adminRouter

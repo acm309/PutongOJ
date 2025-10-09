@@ -49,3 +49,11 @@ export enum JudgeStatus {
   RejudgePending = 11,
   Skipped = 12,
 }
+
+export enum Language {
+  C = 1,
+  Cpp11 = 2,
+  Java = 3,
+  Python = 4,
+  Cpp17 = 5,
+}
