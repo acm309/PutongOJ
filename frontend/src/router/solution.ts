@@ -5,16 +5,16 @@ import Status from '@/views/Status.vue'
 
 const statusRoutes: Array<RouteRecordRaw> = [
   {
-    path: '/status',
+    path: '/solution',
     name: 'status',
     component: Status,
-    meta: { title: 'Status' },
+    meta: { title: 'Solutions' },
   },
   {
-    path: '/status/:sid',
+    path: '/solution/:sid',
     name: 'solution',
     component: Solution,
-    meta: { title: 'Solution Info' },
+    meta: { title: 'Solution Detail' },
   },
 ]
 

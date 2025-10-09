@@ -11,6 +11,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser } from '@/api/user'
+import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
 import { onRouteParamUpdate } from '@/utils/helper'
@@ -21,6 +22,7 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const sessionStore = useSessionStore()
+const { changeDomTitle } = useRootStore()
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
 const uid = computed(() => route.params.uid as string)
@@ -70,6 +72,7 @@ async function fetch () {
   }
 
   user.value = resp.data
+  changeDomTitle({ title: `${user.value.uid} - User Profile` })
   await fetchAvatar()
 }
 

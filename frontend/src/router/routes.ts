@@ -12,7 +12,7 @@ import courseRoutes from './course'
 import discussRoutes from './discuss'
 import newsRoutes from './news'
 import problemRoutes from './problem'
-import statusRoutes from './status'
+import solutionRoutes from './solution'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -23,13 +23,13 @@ const routes: Array<RouteRecordRaw> = [
   },
   ...newsRoutes,
   ...problemRoutes,
-  ...statusRoutes,
+  ...solutionRoutes,
   ...contestRoutes,
   ...discussRoutes,
   ...courseRoutes,
   ...adminRoutes,
   {
-    path: '/ranklist',
+    path: '/user/ranklist',
     name: 'Ranklist',
     component: Ranklist,
     meta: { title: 'Ranklist' },
@@ -38,6 +38,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/user/:uid',
     name: 'UserProfile',
     component: UserProfile,
+    meta: { title: 'User Profile' },
   },
   {
     path: '/settings',
