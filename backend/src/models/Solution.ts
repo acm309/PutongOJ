@@ -148,6 +148,13 @@ solutionSchema.virtual('isPending').get(function () {
   return this.judge === judge.Pending
 })
 
+solutionSchema.index({ createdAt: -1 })
+solutionSchema.index({ judge: 1, createdAt: -1 })
+solutionSchema.index({ uid: 1, createdAt: -1 })
+solutionSchema.index({ pid: 1, createdAt: -1 })
+solutionSchema.index({ mid: 1, createdAt: -1 })
+solutionSchema.index({ language: 1, createdAt: -1 })
+
 solutionSchema.pre('save', async function (next) {
   if (this.sid === -1) {
     this.sid = await ID.generateId('Solution')
