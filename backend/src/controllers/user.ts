@@ -13,7 +13,7 @@ import config from '../config'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
 import User from '../models/User'
-import userServices from '../services/user'
+import userService from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 
@@ -29,7 +29,7 @@ export async function loadUser (
     return ctx.state.user
   }
 
-  const user = await userServices.getUser(uid)
+  const user = await userService.getUser(uid)
   if (!user) {
     ctx.throw(...ERR_NOT_FOUND)
   }
@@ -83,7 +83,7 @@ export async function findRanklist (ctx: Context) {
     return createZodErrorResponse(ctx, query.error)
   }
 
-  const users = await userServices.findRanklist(query.data)
+  const users = await userService.findRanklist(query.data)
   const result = UserRanklistQueryResultSchema.encode(users)
   return createEnvelopedResponse(ctx, result)
 }

@@ -6,7 +6,7 @@ import without from 'lodash/without'
 import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import User from '../models/User'
-import groupServices from '../services/group'
+import groupService from '../services/group'
 import { createEnvelopedResponse, only } from '../utils'
 import logger from '../utils/logger'
 
@@ -170,7 +170,7 @@ const del = async (ctx: Context) => {
 }
 
 export async function findGroups (ctx: Context) {
-  const groups = await groupServices.findGroups()
+  const groups = await groupService.findGroups()
   const result = GroupListQueryResultSchema.encode(groups)
   return createEnvelopedResponse(ctx, result)
 }

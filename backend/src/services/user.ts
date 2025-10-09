@@ -111,7 +111,7 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
   return user
 }
 
-const userServices = {
+const userService = {
   findUsers,
   findRanklist,
   getUser,
@@ -120,4 +120,4 @@ const userServices = {
   createUser,
 } as const
 
-export default userServices
+export default userService

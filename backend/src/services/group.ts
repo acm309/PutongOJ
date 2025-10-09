@@ -9,8 +9,8 @@ export async function findGroups (): Promise<GroupModel[]> {
   return groups
 }
 
-const groupServices = {
+const groupService = {
   findGroups,
 } as const
 
-export default groupServices
+export default groupService

@@ -13,7 +13,7 @@ import {
 import { checkSession, loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import sessionService from '../services/session'
-import userServices from '../services/user'
+import userService from '../services/user'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -51,7 +51,7 @@ export async function userLogin (ctx: Context) {
   }
   const pwdHash = passwordHashBuffer(password)
 
-  const user = await userServices.getUser(payload.data.username)
+  const user = await userService.getUser(payload.data.username)
   if (!user) {
     return createErrorResponse(ctx,
       'Username or password is incorrect', ErrorCode.Unauthorized,
@@ -94,7 +94,7 @@ export async function userRegister (ctx: Context) {
     )
   }
 
-  const available = await userServices.checkUserAvailable(payload.data.username)
+  const available = await userService.checkUserAvailable(payload.data.username)
   if (!available) {
     return createErrorResponse(ctx,
       'The username has been registered or reserved', ErrorCode.Conflict,
@@ -107,7 +107,7 @@ export async function userRegister (ctx: Context) {
   }
 
   try {
-    const user = await userServices.createUser({
+    const user = await userService.createUser({
       uid: payload.data.username,
       pwd: passwordHash(password),
     })
@@ -135,7 +135,7 @@ export async function updateProfile (ctx: Context) {
 
   try {
     const { nick, motto, mail, school } = payload.data
-    const updatedUser = await userServices.updateUser(profile, {
+    const updatedUser = await userService.updateUser(profile, {
       nick, motto, mail, school,
     })
     const session = sessionService.getSession(ctx)
@@ -179,7 +179,7 @@ export async function updatePassword (ctx: Context) {
   const pwd = passwordHash(newPassword)
 
   try {
-    const updatedUser = await userServices.updateUser(profile, { pwd })
+    const updatedUser = await userService.updateUser(profile, { pwd })
     sessionService.setSession(ctx, updatedUser)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {

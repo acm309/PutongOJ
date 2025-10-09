@@ -12,7 +12,7 @@ import {
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import oauthService from '../services/oauth'
-import userServices from '../services/user'
+import userService from '../services/user'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -40,7 +40,7 @@ export async function findUsers (ctx: Context) {
     return createZodErrorResponse(ctx, query.error)
   }
 
-  const users = await userServices.findUsers(query.data)
+  const users = await userService.findUsers(query.data)
   const result = AdminUserListQueryResultSchema.encode(users)
   return createEnvelopedResponse(ctx, result)
 }
@@ -78,7 +78,7 @@ export async function updateUser (ctx: Context) {
 
   try {
     const { privilege, nick, motto, school, mail } = payload.data
-    const updatedUser = await userServices.updateUser(user, {
+    const updatedUser = await userService.updateUser(user, {
       privilege, nick, motto, school, mail,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
@@ -114,7 +114,7 @@ export async function updateUserPassword (ctx: Context) {
   }
 
   try {
-    await userServices.updateUser(user, { pwd })
+    await userService.updateUser(user, { pwd })
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
