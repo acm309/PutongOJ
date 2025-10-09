@@ -9,7 +9,6 @@ import group from './group'
 import news from './news'
 import oauth from './oauth'
 import problem from './problem'
-import ranklist from './ranklist'
 import solution from './solution'
 import tag from './tag'
 import testcase from './testcase'
@@ -29,7 +28,6 @@ router.use(group.routes(), group.allowedMethods())
 router.use(news.routes(), news.allowedMethods())
 router.use(oauth.routes(), oauth.allowedMethods())
 router.use(problem.routes(), problem.allowedMethods())
-router.use(ranklist.routes(), ranklist.allowedMethods())
 router.use(solution.routes(), solution.allowedMethods())
 router.use(tag.routes(), tag.allowedMethods())
 router.use(testcase.routes(), testcase.allowedMethods())
