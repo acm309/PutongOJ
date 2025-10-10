@@ -144,7 +144,7 @@ const profileItems = computed(() => [
 <template>
   <Menubar
     :model="menuItems"
-    class="border border-surface border-t-0 border-x-0 fixed h-[62px] left-0 lg:px-10 md:px-8 mx-auto px-6 py-2 right-0 rounded-none shadow-lg top-0 z-50"
+    class="border border-surface border-t-0 border-x-0 fixed h-[62px] left-0 lg:px-10 md:px-8 mx-auto px-6 py-2 right-0 rounded-none shadow-lg top-0 z-1002"
   >
     <template #item="{ item, props, hasSubmenu }">
       <router-link v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
