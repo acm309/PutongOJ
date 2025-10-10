@@ -299,6 +299,17 @@ const rearrangeCourseProblem = async (ctx: Context) => {
   }
 }
 
+const removeCourseProblem = async (ctx: Context) => {
+  const { course } = await loadCourse(ctx)
+  const problemId = ctx.params.problemId
+  const problem = await problemService.getProblem(problemId)
+  if (!problem) {
+    return ctx.throw(...ERR_INVALID_ID)
+  }
+  const result = await courseService.removeCourseProblem(course.id, problem.id)
+  ctx.body = { success: result }
+}
+
 const courseController = {
   loadCourse,
   findCourses,
@@ -314,6 +325,7 @@ const courseController = {
   addCourseProblems,
   moveCourseProblem,
   rearrangeCourseProblem,
+  removeCourseProblem,
 } as const
 
 export default courseController

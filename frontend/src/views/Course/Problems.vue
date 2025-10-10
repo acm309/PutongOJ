@@ -3,6 +3,7 @@ import type { ProblemEntityPreview } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
+import { useConfirm } from 'primevue'
 import { Button, Form, FormItem, Icon, Input, InputNumber, Modal, Option, Page, Select, Spin, Tag } from 'view-ui-plus'
 import { inject, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -19,6 +20,7 @@ import { onRouteQueryUpdate, purify } from '@/utils/helper'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const confirm = useConfirm()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
@@ -116,6 +118,27 @@ async function updateSorting () {
   }
 }
 
+function removeProblem (event: any, pid: number) {
+  confirm.require({
+    target: event.currentTarget,
+    message: '你确定要从该课程中移除该题目吗？',
+    rejectProps: {
+      label: '取消',
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: '确定',
+      severity: 'danger',
+    },
+    accept: async () => {
+      await api.course.removeCourseProblem(course.value.courseId, pid)
+      message.success('题目已从课程中移除')
+      fetch()
+    },
+  })
+}
+
 onBeforeMount(fetch)
 onRouteQueryUpdate(fetch)
 </script>
@@ -124,14 +147,12 @@ onRouteQueryUpdate(fetch)
   <div class="problem-list-wrap">
     <div class="problem-list-header">
       <Page
-        class="problem-page-table" :model-value="page"
-        :total="problems.total" :page-size="problems.limit" show-elevator
-        @on-change="pageChange"
+        class="problem-page-table" :model-value="page" :total="problems.total" :page-size="problems.limit"
+        show-elevator @on-change="pageChange"
       />
       <Page
-        class="problem-page-simple" :model-value="page" simple
-        :total="problems.total" :page-size="problems.limit" show-elevator
-        @on-change="pageChange"
+        class="problem-page-simple" :model-value="page" simple :total="problems.total" :page-size="problems.limit"
+        show-elevator @on-change="pageChange"
       />
       <div class="problem-list-filter">
         <Select v-model="type" class="search-type-select">
@@ -172,6 +193,9 @@ onRouteQueryUpdate(fetch)
             </th>
             <th v-if="isAdmin" class="problem-sorting">
               {{ t('oj.sorting') }}
+            </th>
+            <th v-if="isAdmin" class="problem-remove">
+              {{ t('oj.delete') }}
             </th>
           </tr>
         </thead>
@@ -222,10 +246,7 @@ onRouteQueryUpdate(fetch)
             </td>
             <td v-if="course.role.manageProblem" class="problem-visible">
               <Tooltip :content="t('oj.click_to_change_status')" placement="right">
-                <a
-                  :class="{ 'status-disabled': !(isAdmin || item.isOwner) }"
-                  @click="switchStatus(item)"
-                >
+                <a :class="{ 'status-disabled': !(isAdmin || item.isOwner) }" @click="switchStatus(item)">
                   {{ problemStatus[item.status] }}
                 </a>
               </Tooltip>
@@ -235,20 +256,23 @@ onRouteQueryUpdate(fetch)
                 {{ t('oj.move') }}
               </Button>
             </td>
+            <td v-if="isAdmin" class="problem-remove">
+              <Button type="text" @click="event => removeProblem(event, item.pid)">
+                {{ t('oj.delete') }}
+              </Button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="problem-list-footer">
       <Page
-        class="problem-page-table" :model-value="page"
-        :total="problems.total" :page-size="problems.limit" show-elevator show-total
-        @on-change="pageChange"
+        class="problem-page-table" :model-value="page" :total="problems.total" :page-size="problems.limit"
+        show-elevator show-total @on-change="pageChange"
       />
       <Page
-        class="problem-page-mobile" :model-value="page" size="small"
-        :total="problems.total" :page-size="problems.limit" show-totalshow-elevator
-        @on-change="pageChange"
+        class="problem-page-mobile" :model-value="page" size="small" :total="problems.total"
+        :page-size="problems.limit" show-totalshow-elevator @on-change="pageChange"
       />
     </div>
     <Spin size="large" fix :show="loading" class="wrap-loading" />
@@ -374,6 +398,9 @@ onRouteQueryUpdate(fetch)
 .problem-visible
   width 90px
 .problem-sorting
+  width 80px
+  text-align center
+.problem-remove
   width 110px
   text-align center
   padding-right 40px !important

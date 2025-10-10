@@ -57,5 +57,9 @@ courseRouter.post('/:courseId/problem/rearrange',
   authnMiddleware.rootRequire,
   courseController.rearrangeCourseProblem,
 )
+courseRouter.delete('/:courseId/problem/:problemId',
+  authnMiddleware.adminRequire,
+  courseController.removeCourseProblem,
+)
 
 export default courseRouter

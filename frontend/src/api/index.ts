@@ -162,6 +162,8 @@ const course = {
     instance.put<{ success: boolean }>(`/course/${courseId}/problem/${problemId}`, { beforePos }),
   rearrangeProblems: (courseId: number) =>
     instance.post<{ success: boolean }>(`/course/${courseId}/problem/rearrange`),
+  removeCourseProblem: (courseId: number, problemId: number) =>
+    instance.delete<{ success: boolean }>(`/course/${courseId}/problem/${problemId}`),
 }
 
 export default {

@@ -277,6 +277,14 @@ export async function rearrangeCourseProblem (
   }))
 }
 
+export async function removeCourseProblem (
+  course: ObjectId,
+  problem: ObjectId,
+): Promise<boolean> {
+  const result = await CourseProblem.deleteOne({ course, problem })
+  return result.deletedCount > 0
+}
+
 export async function hasProblemRole (
   user: ObjectId | string,
   problem: ObjectId | string,
@@ -334,6 +342,7 @@ const courseService = {
   addCourseProblem,
   moveCourseProblem,
   rearrangeCourseProblem,
+  removeCourseProblem,
   hasProblemRole,
 } as const
 
