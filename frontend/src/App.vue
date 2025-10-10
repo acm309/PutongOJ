@@ -83,4 +83,6 @@ watch(() => route.meta, () => changeDomTitle(route.meta))
 <style lang="stylus">
 html
   font-size: 14px !important
+[class^="p-"], [class*=" p-"]
+  line-height: normal !important
 </style>
