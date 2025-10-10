@@ -55,7 +55,7 @@ app.use(PrimeVue, {
     preset: PutongAura,
     options: {
       prefix: 'p',
-      darkModeSelector: false,
+      darkModeSelector: '.ptoj-dark-test',
     },
   },
 })

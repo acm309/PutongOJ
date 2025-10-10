@@ -133,6 +133,18 @@ const profileItems = computed(() => [
   {
     separator: true,
   },
+  ...(isAdmin
+    ? [ {
+        label: '[Test] Toggle Dark Mode',
+        icon: 'pi pi-lightbulb',
+        command: () => {
+          document.documentElement.classList.toggle('ptoj-dark-test')
+        },
+      }, {
+        separator: true,
+      } ]
+    : []
+  ),
   {
     label: t('ptoj.logout'),
     icon: 'pi pi-sign-out',
