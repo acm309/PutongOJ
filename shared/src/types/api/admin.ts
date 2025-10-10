@@ -74,8 +74,8 @@ export const AdminSolutionListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
   user: z.string().max(30).optional(),
-  problem: stringToInt.pipe(z.number().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.number().nonnegative()).optional(),
+  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
+  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
   language: stringToInt.pipe(z.enum(Language)).optional(),
 })

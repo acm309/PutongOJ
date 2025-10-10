@@ -1,5 +1,5 @@
 import { contestLabelingStyle } from '@backend/utils/constants'
-import { UserPrivilege } from '@putongoj/shared'
+import { JudgeStatus, UserPrivilege } from '@putongoj/shared'
 import { format } from 'date-fns/format'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { toDate } from 'date-fns/toDate'
@@ -118,4 +118,35 @@ export function calculatePercentage (num: number, den: number): string {
   if (den === 0) return '0.00%'
   const percentage = (num / den) * 100
   return `${percentage.toFixed(2)}%`
+}
+
+export function thousandSeparator (num: number | string): string {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+export function getJudgeStatusClassname (judgeStatus: JudgeStatus) {
+  switch (judgeStatus) {
+    case JudgeStatus.Accepted:
+      return 'text-red-500'
+    case JudgeStatus.WrongAnswer:
+    case JudgeStatus.RuntimeError:
+    case JudgeStatus.TimeLimitExceeded:
+    case JudgeStatus.MemoryLimitExceeded:
+    case JudgeStatus.OutputLimitExceeded:
+    case JudgeStatus.SystemError:
+      return 'text-green-500'
+    case JudgeStatus.CompileError:
+      return 'text-violet-600'
+    case JudgeStatus.PresentationError:
+      return 'text-yellow-500'
+    default:
+      return ''
+  }
+}
+
+export function getSimilarityClassname (similarity: number) {
+  if (similarity >= 95) return 'text-red-500 bg-red-400/20'
+  if (similarity >= 90) return 'text-orange-500 bg-orange-400/20'
+  if (similarity >= 85) return 'text-yellow-500 bg-yellow-400/20'
+  return 'text-amber-500 bg-amber-400/20'
 }

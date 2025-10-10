@@ -4,6 +4,7 @@ const GroupManager = () => import('@/views/Admin/GroupManager.vue')
 const TagManager = () => import('@/views/Admin/TagManager.vue')
 const UserManagement = () => import('@/views/Admin/UserManagement.vue')
 const UserManagementDetail = () => import('@/views/Admin/UserManagementDetail.vue')
+const SolutionManagement = () => import('@/views/Admin/SolutionManagement.vue')
 
 const adminRoutes: Array<RouteRecordRaw> = [
   {
@@ -29,6 +30,12 @@ const adminRoutes: Array<RouteRecordRaw> = [
     name: 'UserManagementDetail',
     component: UserManagementDetail,
     meta: { title: 'User Management', requiresAdmin: true },
+  },
+  {
+    path: '/admin/solutions',
+    name: 'SolutionManagement',
+    component: SolutionManagement,
+    meta: { title: 'Solution Management', requiresAdmin: true },
   },
 ]
 

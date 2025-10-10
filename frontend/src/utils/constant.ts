@@ -1,42 +1,5 @@
 import type { CourseRole } from '@backend/types'
-import { UserPrivilege } from '@putongoj/shared'
-
-export const result = {
-  0: 'Pending',
-  1: 'Running & Judge',
-  2: 'Compile Error',
-  3: 'Accepted',
-  4: 'Runtime Error',
-  5: 'Wrong Answer',
-  6: 'Time Limit Exceeded',
-  7: 'Memory Limit Exceeded',
-  8: 'Output Limit Exceeded',
-  9: 'Presentation Error',
-  10: 'System Error',
-  11: 'Rejudge Pending',
-  12: 'Skipped',
-} as const
-
-export const judgeList = Object.entries(result)
-  .map(([ value, label ]) => ({
-    value: Number.parseInt(value),
-    label,
-  }))
-
-export const language = {
-  1: 'C',
-  2: 'C++ 11',
-  3: 'Java',
-  4: 'Python 3',
-  5: 'C++ 17',
-} as const
-
-export const languageList = Object.entries(language)
-  .map(([ value, label ]) => ({
-    value: Number.parseInt(value),
-    label,
-  }))
-  .sort((a, b) => a.label.localeCompare(b.label))
+import { JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
 
 export const languageHighlight = {
   1: 'c',
@@ -117,6 +80,47 @@ export const privilegeOptions = [
   { label: 'Admin', value: UserPrivilege.Admin },
   { label: 'Root', value: UserPrivilege.Root },
 ]
+
+export const judgeStatusLabels: Record<JudgeStatus, string> = {
+  [JudgeStatus.Pending]: 'Pending',
+  [JudgeStatus.RunningJudge]: 'Running & Judge',
+  [JudgeStatus.CompileError]: 'Compile Error',
+  [JudgeStatus.Accepted]: 'Accepted',
+  [JudgeStatus.RuntimeError]: 'Runtime Error',
+  [JudgeStatus.WrongAnswer]: 'Wrong Answer',
+  [JudgeStatus.TimeLimitExceeded]: 'Time Limit Exceeded',
+  [JudgeStatus.MemoryLimitExceeded]: 'Memory Limit Exceeded',
+  [JudgeStatus.OutputLimitExceeded]: 'Output Limit Exceeded',
+  [JudgeStatus.PresentationError]: 'Presentation Error',
+  [JudgeStatus.SystemError]: 'System Error',
+  [JudgeStatus.RejudgePending]: 'Rejudge Pending',
+  [JudgeStatus.Skipped]: 'Skipped',
+} as const
+
+export const judgeStatusOptions = Object.entries(judgeStatusLabels)
+  .map(([ value, label ]) => ({ label, value: Number.parseInt(value) }))
+
+/** @deprecated use `judgeStatusLabels` instead */
+export const result = judgeStatusLabels
+/** @deprecated use `judgeStatusOptions` instead */
+export const judgeList = judgeStatusOptions
+
+export const languageLabels: Record<Language, string> = {
+  [Language.C]: 'C',
+  [Language.Cpp11]: 'C++ 11',
+  [Language.Cpp17]: 'C++ 17',
+  [Language.Java]: 'Java',
+  [Language.Python]: 'Python 3',
+}
+
+export const languageOptions = Object.entries(languageLabels)
+  .map(([ value, label ]) => ({ label, value: Number.parseInt(value) }))
+  .sort((a, b) => a.label.localeCompare(b.label))
+
+/** @deprecated use `languageLabels` instead */
+export const language = languageLabels
+/** @deprecated use `languageOptions` instead */
+export const languageList = languageOptions
 
 export default {
   result,
