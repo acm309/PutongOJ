@@ -124,6 +124,13 @@ const profileItems = computed(() => [
     },
   },
   {
+    label: t('ptoj.header_submissions'),
+    icon: 'pi pi-copy',
+    command: () => {
+      router.push({ name: 'MySubmissions' })
+    },
+  },
+  {
     label: t('ptoj.header_settings'),
     icon: 'pi pi-cog',
     command: () => {

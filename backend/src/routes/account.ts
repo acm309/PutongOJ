@@ -30,5 +30,9 @@ accountRouter.put('/password',
   authnMiddleware.loginRequire,
   accountController.updatePassword,
 )
+accountRouter.get('/submissions',
+  authnMiddleware.loginRequire,
+  accountController.findSubmissions,
+)
 
 export default accountRouter

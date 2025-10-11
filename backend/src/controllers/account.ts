@@ -7,12 +7,15 @@ import {
   AccountLoginPayloadSchema,
   AccountProfileQueryResultSchema,
   AccountRegisterPayloadSchema,
+  AccountSubmissionListQueryResultSchema,
+  AccountSubmissionListQuerySchema,
   ErrorCode,
   UserPrivilege,
 } from '@putongoj/shared'
 import { checkSession, loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import sessionService from '../services/session'
+import solutionService from '../services/solution'
 import userService from '../services/user'
 import {
   createEnvelopedResponse,
@@ -187,6 +190,19 @@ export async function updatePassword (ctx: Context) {
   }
 }
 
+export async function findSubmissions (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const query = AccountSubmissionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const solutions = await solutionService
+    .findSolutions({ ...query.data, user: profile.uid })
+  const result = AccountSubmissionListQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const accountController = {
   getProfile,
   userLogin,
@@ -194,6 +210,7 @@ const accountController = {
   userLogout,
   updateProfile,
   updatePassword,
+  findSubmissions,
 } as const
 
 export default accountController

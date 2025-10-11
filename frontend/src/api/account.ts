@@ -4,6 +4,8 @@ import type {
   AccountLoginPayload,
   AccountProfileQueryResult,
   AccountRegisterPayload,
+  AccountSubmissionListQuery,
+  AccountSubmissionListQueryResult,
   Enveloped,
 } from '@putongoj/shared'
 import { instance } from './instance'
@@ -36,4 +38,9 @@ export async function updateProfile (payload: AccountEditPayload) {
 export async function updatePassword (payload: AccountChangePasswordPayload) {
   const { data } = await instance.put('/account/password', payload)
   return data as Enveloped<null>
+}
+
+export async function findSubmissions (params: AccountSubmissionListQuery) {
+  const { data } = await instance.get('/account/submissions', { params })
+  return data as Enveloped<AccountSubmissionListQueryResult>
 }

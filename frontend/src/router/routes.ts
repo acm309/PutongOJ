@@ -3,6 +3,7 @@ import NotFound from '@/views/404.vue'
 import AccountSettings from '@/views/AccountSettings.vue'
 import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
+import MySubmissions from '@/views/MySubmissions.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
 import Ranklist from '@/views/Ranklist.vue'
 import UserProfile from '@/views/UserProfile.vue'
@@ -39,6 +40,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'UserProfile',
     component: UserProfile,
     meta: { title: 'User Profile' },
+  },
+  {
+    path: '/submissions',
+    name: 'MySubmissions',
+    component: MySubmissions,
+    meta: { title: 'My Submissions' },
   },
   {
     path: '/settings',
