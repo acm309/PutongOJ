@@ -124,7 +124,7 @@ onRouteParamUpdate(fetch)
           <h1 class="font-bold mt-4 text-3xl">
             {{ nickname }}
           </h1>
-          <div v-if="username" class="mt-1 text-lg text-surface-600">
+          <div v-if="username" class="mt-1 text-lg text-muted-color">
             {{ username }}
           </div>
           <div v-if="user.motto" class="mt-2">
@@ -138,9 +138,9 @@ onRouteParamUpdate(fetch)
           <Fieldset :legend="t('ptoj.basic_information')">
             <div class="space-y-4">
               <div v-if="user.mail" class="flex gap-3 items-center">
-                <i class="m-2 pi pi-envelope text-lg text-surface-400" />
+                <i class="m-2 pi pi-envelope text-lg text-muted-color" />
                 <div>
-                  <div class="text-sm text-surface-600">
+                  <div class="text-muted-color text-sm">
                     {{ t('ptoj.email') }}
                   </div>
                   <div class="font-medium">
@@ -150,9 +150,9 @@ onRouteParamUpdate(fetch)
               </div>
 
               <div v-if="user.school" class="flex gap-3 items-center">
-                <i class="m-2 pi pi-building text-lg text-surface-400" />
+                <i class="m-2 pi pi-building text-lg text-muted-color" />
                 <div>
-                  <div class="text-sm text-surface-600">
+                  <div class="text-muted-color text-sm">
                     {{ t('ptoj.school') }}
                   </div>
                   <div class="font-medium">
@@ -162,9 +162,9 @@ onRouteParamUpdate(fetch)
               </div>
 
               <div class="flex gap-3 items-center">
-                <i class="m-2 pi pi-calendar text-lg text-surface-400" />
+                <i class="m-2 pi pi-calendar text-lg text-muted-color" />
                 <div>
-                  <div class="text-sm text-surface-600">
+                  <div class="text-muted-color text-sm">
                     {{ t('ptoj.member_since') }}
                   </div>
                   <div class="font-medium">
@@ -199,7 +199,7 @@ onRouteParamUpdate(fetch)
                 <div class="font-bold text-2xl text-primary">
                   {{ user.solved.length }}
                 </div>
-                <div class="mt-1 text-sm text-surface-600">
+                <div class="mt-1 text-muted-color text-sm">
                   {{ t('ptoj.total_solved') }}
                 </div>
               </router-link>
@@ -207,7 +207,7 @@ onRouteParamUpdate(fetch)
                 <div class="font-bold text-2xl text-primary">
                   {{ user.solved.length + user.attempted.length }}
                 </div>
-                <div class="mt-1 text-sm text-surface-600">
+                <div class="mt-1 text-muted-color text-sm">
                   {{ t('ptoj.total_submitted') }}
                 </div>
               </router-link>
@@ -217,7 +217,7 @@ onRouteParamUpdate(fetch)
 
         <div class="lg:col-span-2 space-y-2">
           <Fieldset :legend="t('ptoj.solved_problems')" toggleable>
-            <div v-if="user.solved.length === 0" class="px-6 py-12 text-center text-surface-500">
+            <div v-if="user.solved.length === 0" class="px-6 py-12 text-center text-muted-color">
               <div class="text-lg">
                 {{ t('ptoj.empty_content_desc') }}
               </div>
@@ -233,7 +233,7 @@ onRouteParamUpdate(fetch)
           </Fieldset>
 
           <Fieldset :legend="t('ptoj.attempted_problems')" toggleable>
-            <div v-if="user.attempted.length === 0" class="px-6 py-12 text-center text-surface-500">
+            <div v-if="user.attempted.length === 0" class="px-6 py-12 text-center text-muted-color">
               <div class="text-lg">
                 {{ t('ptoj.empty_content_desc') }}
               </div>

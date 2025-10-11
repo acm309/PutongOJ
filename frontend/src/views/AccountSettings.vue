@@ -227,7 +227,7 @@ onMounted(fetch)
           {{ t('ptoj.connect_accounts') }}
         </h2>
         <div class="space-y-4">
-          <p class="text-sm text-surface-600">
+          <p class="text-muted-color text-sm">
             {{ t('ptoj.connect_accounts_desc') }}
           </p>
           <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
@@ -235,7 +235,7 @@ onMounted(fetch)
               <div class="font-medium">
                 {{ t('ptoj.cjlu_sso') }}
               </div>
-              <div class="text-sm text-surface-600">
+              <div class="text-muted-color text-sm">
                 <span v-if="connections.CJLU">
                   {{ t('ptoj.connected_to_brief', { display: connections.CJLU.providerId }) }}
                 </span>
@@ -255,7 +255,7 @@ onMounted(fetch)
           {{ t('ptoj.change_password') }}
         </h2>
         <div class="space-y-4">
-          <p class="text-sm text-surface-600">
+          <p class="text-muted-color text-sm">
             {{ t('ptoj.change_password_desc') }}
           </p>
           <Button :label="t('ptoj.change_password')" icon="pi pi-key" severity="warning" @click="openPasswordDialog" />

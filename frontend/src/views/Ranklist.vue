@@ -203,7 +203,7 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <Paginator
-      class="border-surface border-t bottom-0 sticky"
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
       :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"

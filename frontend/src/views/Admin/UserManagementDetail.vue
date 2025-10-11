@@ -288,7 +288,7 @@ onRouteParamUpdate(fetch)
               <div class="font-medium">
                 {{ t('ptoj.cjlu_sso') }}
               </div>
-              <div class="text-sm text-surface-600">
+              <div class="text-muted-color text-sm">
                 <span v-if="connections.CJLU">
                   {{ t('ptoj.connected_to_detail', {
                     id: connections.CJLU.providerId,
@@ -313,7 +313,7 @@ onRouteParamUpdate(fetch)
           {{ t('ptoj.change_password') }}
         </h2>
         <div class="space-y-4">
-          <p class="text-sm text-surface-600">
+          <p class="text-muted-color text-sm">
             {{ t('ptoj.change_password_admin_desc') }}
           </p>
           <Button
