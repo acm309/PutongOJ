@@ -1,3 +1,5 @@
+import type { WebSocketDispatch, WebSocketMessage } from '@putongoj/shared'
+import { WebSocketDispatchType, WebSocketMessageType } from '@putongoj/shared'
 import redis from '../config/redis'
 import Solution from '../models/Solution'
 import { judge } from '../utils/constants'
@@ -48,14 +50,28 @@ async function updateResult (result: any) {
     }
   })
 
+  const message: WebSocketMessage = {
+    type: WebSocketMessageType.SubmissionResult,
+    data: {
+      solutionId: solution.sid,
+      judgeStatus: solution.judge as any,
+    },
+  }
+  const dispatch: WebSocketDispatch = {
+    type: WebSocketDispatchType.User,
+    username: solution.uid,
+    message,
+  }
+
   const tasks = [
     solution.save().then(() => {
       logger.info(`Solution <${sid}> update to status ${solution.judge}`)
     }),
-  ]
+  ] as Promise<any>[]
   if (solution.judge !== judge.Running) {
     tasks.push(distributeWork('updateStatistic', `problem:${solution.pid}`))
     tasks.push(distributeWork('updateStatistic', `user:${solution.uid}`))
+    tasks.push(redis.publish('websocket:message', JSON.stringify(dispatch)))
   }
   if (solution.judge === judge.Accepted) {
     tasks.push(distributeWork('checkSimilarity', solution.sid))

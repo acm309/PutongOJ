@@ -103,6 +103,8 @@
   "solved": "Solved",
   "solved_problems": "Solved Problems",
   "statistics": "Statistics",
+  "submission_result": "Submission Result",
+  "submission_result_detail": "Your submission #{solutionId} has been judged as {judgeStatus}",
   "submitted": "Submitted",
   "submitted_at": "Submitted At",
   "successful_login": "Successfully logged in",

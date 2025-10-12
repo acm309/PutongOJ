@@ -49,6 +49,7 @@ function booleanEnv (name: string, defaultValue?: boolean): boolean | undefined 
 
 interface GlobalConfig {
   port: number
+  wsPort: number
   mongodbURL: string
   redisURL: string
   secretKey: string
@@ -84,6 +85,7 @@ for (const [ provider, config ] of Object.entries(oauthConfigs)) {
 
 export const globalConfig: GlobalConfig = {
   port: numberEnv('PTOJ_WEB_PORT', 3000),
+  wsPort: numberEnv('PTOJ_WS_PORT', 3001),
   mongodbURL: stringEnv(
     'PTOJ_MONGODB_URL',
     'mongodb://localhost:27017/oj',

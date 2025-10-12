@@ -31,4 +31,8 @@ adminRouter.get('/solutions',
   adminController.findSolutions,
 )
 
+adminRouter.post('/notifications/broadcast',
+  adminController.sendNotificationBroadcast,
+)
+
 export default adminRouter

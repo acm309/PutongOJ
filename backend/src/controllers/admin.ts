@@ -1,5 +1,6 @@
 import type { Context } from 'koa'
 import {
+  AdminNotificationBroadcastPayloadSchema,
   AdminSolutionListQueryResultSchema,
   AdminSolutionListQuerySchema,
   AdminUserChangePasswordPayloadSchema,
@@ -16,6 +17,7 @@ import cryptoService from '../services/crypto'
 import oauthService from '../services/oauth'
 import solutionService from '../services/solution'
 import userService from '../services/user'
+import websocketService from '../services/websocket'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -167,6 +169,21 @@ export async function findSolutions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function sendNotificationBroadcast (ctx: Context) {
+  const payload = AdminNotificationBroadcastPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  try {
+    const { title, content } = payload.data
+    await websocketService.sendBroadcastNotification(title, content)
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -175,6 +192,7 @@ const adminController = {
   getUserOAuthConnections,
   removeUserOAuthConnection,
   findSolutions,
+  sendNotificationBroadcast,
 } as const
 
 export default adminController

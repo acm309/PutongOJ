@@ -103,6 +103,8 @@
   "solved": "已解决",
   "solved_problems": "已解决题目",
   "statistics": "统计数据",
+  "submission_result": "提交结果",
+  "submission_result_detail": "你的提交 #{solutionId} 已被评测为 {judgeStatus}",
   "submitted": "已提交",
   "submitted_at": "提交时间",
   "successful_login": "登录成功",

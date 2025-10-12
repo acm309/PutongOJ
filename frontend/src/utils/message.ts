@@ -2,6 +2,8 @@ import { useToast } from 'primevue'
 
 const group = 'global'
 
+export type MessageService = ReturnType<typeof useMessage>
+
 export function useMessage () {
   const toast = useToast()
 

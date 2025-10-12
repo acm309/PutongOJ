@@ -7,7 +7,9 @@
     "node": ">= 22.0.0"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.ts",
+    "dev": "concurrently \"npm run dev:app\" \"npm run dev:ws\" \"npm run dev:updater\" \"npm run dev:worker\"",
+    "dev:app": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.ts",
+    "dev:ws": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/ws.ts",
     "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.ts",
     "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.ts",
     "build": "tsc",
@@ -47,6 +49,7 @@
     "superagent": "^10.2.3",
     "tracer": "^1.3.0",
     "uuid": "^13.0.0",
+    "ws": "^8.18.3",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -64,7 +67,9 @@
     "@types/node": "^24.3.1",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^6.0.3",
+    "@types/ws": "^8.18.1",
     "ava": "^6.4.1",
+    "concurrently": "^9.2.1",
     "eslint": "^9.35.0",
     "nodemon": "^3.1.10",
     "nyc": "^17.1.0",

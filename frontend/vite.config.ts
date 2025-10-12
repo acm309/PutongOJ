@@ -44,6 +44,7 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:8008', changeOrigin: true },
       '/uploads': { target: 'http://localhost:8008', changeOrigin: true },
+      '/ws': { target: 'ws://localhost:8009', ws: true },
     },
   },
 })

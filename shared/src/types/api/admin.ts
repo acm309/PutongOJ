@@ -97,3 +97,10 @@ export const AdminSolutionListQueryResultSchema = PaginatedSchema(z.object({
 }))
 
 export type AdminSolutionListQueryResult = z.input<typeof AdminSolutionListQueryResultSchema>
+
+export const AdminNotificationBroadcastPayloadSchema = z.object({
+  title: z.string().min(1).max(30),
+  content: z.string().min(1).max(300),
+})
+
+export type AdminNotificationBroadcastPayload = z.infer<typeof AdminNotificationBroadcastPayloadSchema>

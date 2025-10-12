@@ -29,6 +29,13 @@ async function main () {
     ...commons,
   })
   apps.push({
+    name: 'ws',
+    script: resolve(baseDir, 'ws.js'),
+    out_file: resolve(logsDir, 'ws.out.log'),
+    error_file: resolve(logsDir, 'ws.err.log'),
+    ...commons,
+  })
+  apps.push({
     name: 'updater',
     script: resolve(jobsDir, 'updater.js'),
     out_file: resolve(logsDir, 'updater.out.log'),

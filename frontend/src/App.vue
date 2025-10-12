@@ -1,12 +1,16 @@
 <script>
+import { storeToRefs } from 'pinia'
 import ConfirmPopup from 'primevue/confirmpopup'
 import Toast from 'primevue/toast'
-import { inject, watch } from 'vue'
+import { inject, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import OjLayout from '@/components/Layout'
 import { useRootStore } from '@/store'
 import { setErrorHandler } from './api'
+import { useSessionStore } from './store/modules/session'
+import { onProfileUpdate } from './utils/helper'
+import { useWebSocket } from './utils/websocket'
 
 // https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md#declaring-additional-options
 export default {
@@ -68,6 +72,22 @@ const { changeDomTitle, fetchTime, updateTime } = useRootStore()
 
 setTimeout(() => fetchTime().then(updateTime), 1000)
 watch(() => route.meta, () => changeDomTitle(route.meta))
+
+const { isLogined } = storeToRefs(useSessionStore())
+const websocket = useWebSocket()
+
+async function initWebSocket () {
+  if (isLogined.value) {
+    await websocket.connect()
+  } else {
+    websocket.disconnect()
+  }
+}
+
+setTimeout(async () => {
+  await initWebSocket()
+  onProfileUpdate(() => nextTick(initWebSocket))
+}, 1000)
 </script>
 
 <template>

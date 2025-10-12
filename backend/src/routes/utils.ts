@@ -14,5 +14,9 @@ utilsRouter.get('/servertime',
 utilsRouter.get('/website',
   utilsController.websiteInformation,
 )
+utilsRouter.get('/websocket/token',
+  authnMiddleware.loginRequire,
+  utilsController.getWebSocketToken,
+)
 
 export default utilsRouter

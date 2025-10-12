@@ -2,10 +2,13 @@ import type { OAuthProvider } from '@putongoj/shared'
 import type { Context } from 'koa'
 import path from 'node:path'
 import fse from 'fs-extra'
+import { v4 } from 'uuid'
 import { globalConfig } from '../config'
+import redis from '../config/redis'
 import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
+import { createEnvelopedResponse } from '../utils'
 import logger from '../utils/logger'
 
 export interface WebsiteInformation {
@@ -59,10 +62,18 @@ const websiteInformation = async (ctx: Context) => {
   ctx.body = result
 }
 
+export async function getWebSocketToken (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const token = v4()
+  await redis.setex(`websocket:token:${token}`, 10, profile.uid)
+  return createEnvelopedResponse(ctx, { token })
+}
+
 const utilsController = {
   upload,
   serverTime,
   websiteInformation,
+  getWebSocketToken,
 } as const
 
 export default utilsController
