@@ -45,13 +45,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/submissions',
     name: 'MySubmissions',
     component: MySubmissions,
-    meta: { title: 'My Submissions' },
+    meta: { title: 'My Submissions', requiresLogin: true },
   },
   {
     path: '/settings',
     name: 'AccountSettings',
     component: AccountSettings,
-    meta: { title: 'Account Settings' },
+    meta: { title: 'Account Settings', requiresLogin: true },
   },
   {
     path: '/oauth/:provider/callback',
