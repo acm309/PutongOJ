@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { UserProfileQueryResult } from '@putongoj/shared'
-import { JudgeStatus, UserPrivilege } from '@putongoj/shared'
+import { UserPrivilege } from '@putongoj/shared'
 import axios from 'axios'
 import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
@@ -195,22 +195,22 @@ onRouteParamUpdate(fetch)
 
           <Fieldset :legend="t('ptoj.statistics')">
             <div class="gap-4 grid grid-cols-2">
-              <router-link :to="{ name: 'status', query: { uid: user.uid, judge: JudgeStatus.Accepted } }" class="px-4 py-2">
-                <div class="font-bold text-2xl text-primary">
+              <div class="px-4 py-2">
+                <div class="font-bold text-2xl">
                   {{ user.solved.length }}
                 </div>
                 <div class="mt-1 text-muted-color text-sm">
                   {{ t('ptoj.total_solved') }}
                 </div>
-              </router-link>
-              <router-link :to="{ name: 'status', query: { uid: user.uid } }" class="px-4 py-2">
-                <div class="font-bold text-2xl text-primary">
+              </div>
+              <div class="px-4 py-2">
+                <div class="font-bold text-2xl">
                   {{ user.solved.length + user.attempted.length }}
                 </div>
                 <div class="mt-1 text-muted-color text-sm">
                   {{ t('ptoj.total_submitted') }}
                 </div>
-              </router-link>
+              </div>
             </div>
           </Fieldset>
         </div>
