@@ -47,6 +47,7 @@ const docs = ref([] as AdminSolutionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 const selectedDocs = ref([] as AdminSolutionListQueryResult['docs'])
+const loadingUsers = ref(false)
 const userSuggestions = ref([] as UserSuggestQueryResult)
 const selectedUser = ref('' as string | UserSuggestQueryResult[number])
 
@@ -75,12 +76,14 @@ async function fetch () {
 }
 
 async function fetchUsers (event: any) {
+  loadingUsers.value = true
   const users = await suggestUsers({ keyword: event.query })
   if (users.success) {
     userSuggestions.value = users.data
   } else {
     userSuggestions.value = []
   }
+  loadingUsers.value = false
 }
 
 function onSort (event: any) {
@@ -164,19 +167,19 @@ onRouteQueryUpdate(fetch)
         <IconField>
           <AutoComplete
             v-model="selectedUser" fluid :placeholder="t('ptoj.filter_by_user')" option-label="uid"
-            :suggestions="userSuggestions" @complete="fetchUsers" @keypress.enter="onSearch" @option-select="onSearch"
+            :suggestions="userSuggestions" :disabled="loading" @complete="fetchUsers" @keypress.enter="onSearch" @option-select="onSearch"
           >
             <template #option="{ option }">
               {{ option.uid }} <span v-if="option.nick" class="ml-2 text-muted-color">({{ option.nick }})</span>
             </template>
           </AutoComplete>
-          <InputIcon class="pi pi-user" />
+          <InputIcon v-show="!loadingUsers" class="pi pi-user" />
         </IconField>
 
         <IconField>
           <InputNumber
             v-model="query.problem" mode="decimal" :min="1" fluid :placeholder="t('ptoj.filter_by_problem')"
-            @keypress.enter="onSearch"
+            :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-flag" />
         </IconField>
@@ -184,14 +187,14 @@ onRouteQueryUpdate(fetch)
         <IconField>
           <InputNumber
             v-model="query.contest" mode="decimal" :min="-1" fluid :placeholder="t('ptoj.filter_by_contest')"
-            @keypress.enter="onSearch"
+            :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-trophy" />
         </IconField>
 
         <Select
           v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_judge_status')" @change="onSearch"
+          show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
             <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
@@ -205,7 +208,7 @@ onRouteQueryUpdate(fetch)
 
         <Select
           v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_language')" @change="onSearch"
+          show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
         >
           <template #dropdownicon>
             <i class="pi pi-code" />
@@ -213,9 +216,9 @@ onRouteQueryUpdate(fetch)
         </Select>
 
         <div class="flex gap-2 items-center justify-end xl:col-span-3">
-          <Button icon="pi pi-refresh" severity="secondary" outlined @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="onReset" />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" @click="onSearch" />
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
     </div>

@@ -112,13 +112,13 @@ onRouteQueryUpdate(fetch)
           <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
           <InputText
             v-model="query.keyword" fluid :placeholder="t('ptoj.search_by_username_or_nickname')"
-            maxlength="30" @keypress.enter="onSearch"
+            maxlength="30" :disabled="loading" @keypress.enter="onSearch"
           />
         </IconField>
 
         <Select
           v-model="query.privilege" fluid :options="privilegeOptions" option-label="label"
-          option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')"
+          option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
             <Tag
@@ -129,9 +129,9 @@ onRouteQueryUpdate(fetch)
         </Select>
 
         <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
-          <Button icon="pi pi-refresh" severity="secondary" outlined @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined @click="onReset" />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" @click="onSearch" />
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
     </div>
