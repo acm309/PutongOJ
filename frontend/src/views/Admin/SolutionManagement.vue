@@ -4,10 +4,8 @@ import type {
   AdminSolutionListQueryResult,
   JudgeStatus,
   Language,
-  UserSuggestQueryResult,
 } from '@putongoj/shared'
 import { AdminSolutionListQuerySchema } from '@putongoj/shared'
-import AutoComplete from 'primevue/autocomplete'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -21,7 +19,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSolutions } from '@/api/admin'
-import { suggestUsers } from '@/api/user'
+import UserFilter from '@/components/UserFilter.vue'
 import {
   judgeStatusLabels,
   judgeStatusOptions,
@@ -47,15 +45,11 @@ const docs = ref([] as AdminSolutionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 const selectedDocs = ref([] as AdminSolutionListQueryResult['docs'])
-const loadingUsers = ref(false)
-const userSuggestions = ref([] as UserSuggestQueryResult)
-const selectedUser = ref('' as string | UserSuggestQueryResult[number])
 
 async function fetch () {
   const parsed = AdminSolutionListQuerySchema.safeParse(route.query)
   if (parsed.success) {
     query.value = parsed.data
-    selectedUser.value = query.value.user || ''
   } else {
     router.replace({ query: {} })
     return
@@ -73,17 +67,6 @@ async function fetch () {
 
   docs.value = resp.data.docs
   total.value = resp.data.total
-}
-
-async function fetchUsers (event: any) {
-  loadingUsers.value = true
-  const users = await suggestUsers({ keyword: event.query })
-  if (users.success) {
-    userSuggestions.value = users.data
-  } else {
-    userSuggestions.value = []
-  }
-  loadingUsers.value = false
 }
 
 function onSort (event: any) {
@@ -110,9 +93,7 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      user: (typeof selectedUser.value === 'string'
-        ? selectedUser.value
-        : selectedUser.value?.uid) || undefined,
+      user: query.value.user || undefined,
       problem: query.value.problem || undefined,
       contest: query.value.contest || undefined,
       judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
@@ -164,17 +145,7 @@ onRouteQueryUpdate(fetch)
         </h1>
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
-        <IconField>
-          <AutoComplete
-            v-model="selectedUser" fluid :placeholder="t('ptoj.filter_by_user')" option-label="uid"
-            :suggestions="userSuggestions" :disabled="loading" @complete="fetchUsers" @keypress.enter="onSearch" @option-select="onSearch"
-          >
-            <template #option="{ option }">
-              {{ option.uid }} <span v-if="option.nick" class="ml-2 text-muted-color">({{ option.nick }})</span>
-            </template>
-          </AutoComplete>
-          <InputIcon v-show="!loadingUsers" class="pi pi-user" />
-        </IconField>
+        <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
 
         <IconField>
           <InputNumber
