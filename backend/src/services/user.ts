@@ -57,6 +57,13 @@ export async function suggestUsers (
     .lean()
 }
 
+export async function getAllUserItems (): Promise<Pick<UserModel, 'uid' | 'nick'>[]> {
+  return await User.find()
+    .select({ _id: 0, uid: 1, nick: 1 })
+    .sort({ createdAt: -1 })
+    .lean()
+}
+
 export async function findRanklist (
   opt: PaginateOption & { group?: number },
 ): Promise<Paginated<UserModel>> {
@@ -132,6 +139,7 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
 const userService = {
   findUsers,
   suggestUsers,
+  getAllUserItems,
   findRanklist,
   getUser,
   updateUser,

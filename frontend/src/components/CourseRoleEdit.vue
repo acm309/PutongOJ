@@ -7,6 +7,7 @@ import { Alert, Checkbox, Form, FormItem, Modal, Option, Select, Spin } from 'vi
 import { computed, inject, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
+import { suggestUsers } from '@/api/user'
 import { courseRoleFields, privilege } from '@/utils/constant'
 
 const props = defineProps({
@@ -92,8 +93,12 @@ const fetchUsers = debounce(async (query: string) => {
   }
   loadingUsers.value = true
   try {
-    const { data: found } = await api.user.find({ type: 'name', content: query, page: 1, pageSize: 30 })
-    users.value = found.docs.map(userToSelection)
+    const resp = await suggestUsers({ keyword: query })
+    if (!resp.success) {
+      users.value = []
+      return
+    }
+    users.value = resp.data.map(userToSelection)
   } finally {
     loadingUsers.value = false
   }

@@ -3,7 +3,7 @@ import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from '../types/api'
-import type { TimeResp, User } from '@/types'
+import type { TimeResp } from '@/types'
 import { instance } from './instance'
 
 export * from './instance'
@@ -24,13 +24,6 @@ const testcase = {
     instance.post(`/testcase/${data.pid}`, data),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/testcase/${data.pid}/${data.uuid}`, data),
-}
-
-const user = {
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/user/${data.uid}`, { params: data }),
-  find: (data: { [key: string]: any }) =>
-    instance.get<Paginated<User>>('/user/list', { params: data }),
 }
 
 const solution = {
@@ -169,7 +162,6 @@ const course = {
 export default {
   ...utils,
   testcase,
-  user,
   solution,
   problem,
   contest,

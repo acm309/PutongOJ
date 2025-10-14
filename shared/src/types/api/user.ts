@@ -49,7 +49,14 @@ export type UserSuggestQuery = z.infer<typeof UserSuggestQuerySchema>
 
 export const UserSuggestQueryResultSchema = z.array(z.object({
   uid: UserModelSchema.shape.uid,
-  nick: UserModelSchema.shape.nick,
+  nick: UserModelSchema.shape.nick.optional(),
 }))
 
 export type UserSuggestQueryResult = z.input<typeof UserSuggestQueryResultSchema>
+
+export const UserItemListQueryResultSchema = z.array(z.object({
+  uid: UserModelSchema.shape.uid,
+  nick: UserModelSchema.shape.nick.optional(),
+}))
+
+export type UserItemListQueryResult = z.input<typeof UserItemListQueryResultSchema>

@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave } from 'vue-router'
-import api from '@/api'
+import { getAllUserItems } from '@/api/user'
 import { useGroupStore } from '@/store/modules/group'
 
 const { t } = useI18n()
@@ -37,8 +37,12 @@ onBeforeRouteLeave(() => {
 })
 
 async function findUsers () {
-  const { data } = await api.user.find({ page: -1 })
-  userSum.value = data.docs
+  const resp = await getAllUserItems()
+  if (!resp.success) {
+    userSum.value = []
+    return
+  }
+  userSum.value = resp.data
 }
 
 async function fetchGroup () {

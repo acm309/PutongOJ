@@ -1,5 +1,6 @@
 import type {
   Enveloped,
+  UserItemListQueryResult,
   UserProfileQueryResult,
   UserRanklistQuery,
   UserRanklistQueryResult,
@@ -21,4 +22,9 @@ export async function findRanklist (params: UserRanklistQuery) {
 export async function getUser (uid: string) {
   const { data } = await instance.get(`/user/${uid}`)
   return data as Enveloped<UserProfileQueryResult>
+}
+
+export async function getAllUserItems () {
+  const { data } = await instance.get('/user/items')
+  return data as Enveloped<UserItemListQueryResult>
 }

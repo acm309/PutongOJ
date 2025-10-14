@@ -6,8 +6,9 @@ const userRouter = new Router({
   prefix: '/user',
 })
 
-userRouter.get('/list',
-  userController.find,
+userRouter.get('/items',
+  authnMiddleware.adminRequire,
+  userController.getAllUserItems,
 )
 userRouter.get('/suggest',
   authnMiddleware.loginRequire,

@@ -3,6 +3,7 @@ import type { UserDocument } from '../models/User'
 import { Buffer } from 'node:buffer'
 import { md5 } from '@noble/hashes/legacy.js'
 import {
+  UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
   UserRanklistQueryResultSchema,
   UserRanklistQuerySchema,
@@ -10,11 +11,9 @@ import {
   UserSuggestQuerySchema,
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
-import escapeRegExp from 'lodash/escapeRegExp'
 import config from '../config'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
-import User from '../models/User'
 import userService from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
@@ -38,45 +37,6 @@ export async function loadUser (
 
   ctx.state.user = user
   return user
-}
-
-const find = async (ctx: Context) => {
-  const profile = ctx.state.profile
-  const opt = ctx.request.query
-  const page = Number.parseInt(opt.page as string) || 1
-  const pageSize = Number.parseInt(opt.pageSize as string) || 30
-  const privilege = String(opt.privilege || '')
-  const filterType = String(opt.type || 'nick')
-  const filterContent = String(opt.content || '')
-
-  const filter: Record<string, any> = {}
-  if (privilege === 'admin' && profile?.isAdmin) {
-    filter.privilege = { $in: [ config.privilege.Admin, config.privilege.Root ] }
-  }
-  if (filterType === 'uid' || filterType === 'name') {
-    filter.$or = [
-      { uid: { $regex: new RegExp(escapeRegExp(filterContent), 'i') } },
-      { nick: { $regex: new RegExp(escapeRegExp(filterContent), 'i') } },
-    ]
-  }
-  let result
-  if (page !== -1) {
-    result = await User.paginate(filter, {
-      sort: { createdAt: -1 },
-      page,
-      limit: pageSize,
-      lean: true,
-      leanWithId: false,
-      select: '-_id uid nick privilege createdAt',
-    })
-  } else {
-    const docs = await User.find(filter, { uid: 1, nick: 1, _id: 0 }).lean().exec()
-    result = {
-      docs,
-      total: docs.length,
-    }
-  }
-  ctx.body = result
 }
 
 export async function findRanklist (ctx: Context) {
@@ -132,11 +92,17 @@ export async function suggestUsers (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function getAllUserItems (ctx: Context) {
+  const users = await userService.getAllUserItems()
+  const result = UserItemListQueryResultSchema.encode(users)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const userController = {
-  find,
   findRanklist,
   getUser,
   suggestUsers,
+  getAllUserItems,
 } as const
 
 export default userController
