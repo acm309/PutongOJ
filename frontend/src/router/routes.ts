@@ -30,16 +30,24 @@ const routes: Array<RouteRecordRaw> = [
   ...courseRoutes,
   ...adminRoutes,
   {
-    path: '/user/ranklist',
+    path: '/users/ranklist',
     name: 'Ranklist',
     component: Ranklist,
     meta: { title: 'Ranklist' },
   },
   {
-    path: '/user/:uid',
+    path: '/ranklist',
+    redirect: { name: 'Ranklist' },
+  },
+  {
+    path: '/users/:uid',
     name: 'UserProfile',
     component: UserProfile,
     meta: { title: 'User Profile' },
+  },
+  {
+    path: '/user/:uid',
+    redirect: { name: 'UserProfile' },
   },
   {
     path: '/submissions',
