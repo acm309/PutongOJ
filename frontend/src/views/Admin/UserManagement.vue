@@ -152,17 +152,13 @@ onRouteQueryUpdate(fetch)
 
       <Column :header="t('ptoj.created_at')" field="createdAt" sortable>
         <template #body="{ data }">
-          <span class="font-mono">
-            {{ timePretty(data.createdAt) }}
-          </span>
+          {{ timePretty(data.createdAt) }}
         </template>
       </Column>
 
       <Column :header="t('ptoj.last_visited_at')" field="lastVisitedAt" sortable>
         <template #body="{ data }">
-          <span class="font-mono">
-            {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
-          </span>
+          {{ data.lastVisitedAt ? timePretty(data.lastVisitedAt) : 'Unknown' }}
         </template>
       </Column>
 

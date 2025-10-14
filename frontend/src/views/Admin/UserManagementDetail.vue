@@ -329,13 +329,13 @@ onRouteParamUpdate(fetch)
         </h2>
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
           <IftaLabel>
-            <InputText id="created-at" :value="timePretty(user.createdAt)" class="font-mono" fluid readonly />
+            <InputText id="created-at" :value="timePretty(user.createdAt)" fluid readonly />
             <label for="created-at">{{ t('ptoj.created_at') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputText
               id="last-visited-at" :value="user.lastVisitedAt ? timePretty(user.lastVisitedAt) : 'Unknown'"
-              class="font-mono" fluid readonly
+              fluid readonly
             />
             <label for="last-visited-at">{{ t('ptoj.last_visited_at') }}</label>
           </IftaLabel>

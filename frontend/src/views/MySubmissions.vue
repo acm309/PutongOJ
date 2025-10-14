@@ -274,9 +274,7 @@ onRouteQueryUpdate(fetch)
 
       <Column :header="t('ptoj.submitted_at')" field="createdAt" class="pr-6" sortable>
         <template #body="{ data }">
-          <span class="font-mono">
-            {{ timePretty(data.createdAt) }}
-          </span>
+          {{ timePretty(data.createdAt) }}
         </template>
       </Column>
 
