@@ -3,7 +3,7 @@ import userController from '../controllers/user'
 import authnMiddleware from '../middlewares/authn'
 
 const userRouter = new Router({
-  prefix: '/user',
+  prefix: '/users',
 })
 
 userRouter.get('/items',
