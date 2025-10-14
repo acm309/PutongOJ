@@ -1,5 +1,6 @@
 import Router from '@koa/router'
 import userController from '../controllers/user'
+import authnMiddleware from '../middlewares/authn'
 
 const userRouter = new Router({
   prefix: '/user',
@@ -7,6 +8,10 @@ const userRouter = new Router({
 
 userRouter.get('/list',
   userController.find,
+)
+userRouter.get('/suggest',
+  authnMiddleware.loginRequire,
+  userController.suggestUsers,
 )
 userRouter.get('/ranklist',
   userController.findRanklist,

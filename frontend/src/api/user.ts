@@ -3,8 +3,15 @@ import type {
   UserProfileQueryResult,
   UserRanklistQuery,
   UserRanklistQueryResult,
+  UserSuggestQuery,
+  UserSuggestQueryResult,
 } from '@putongoj/shared'
 import { instance } from './instance'
+
+export async function suggestUsers (params: UserSuggestQuery) {
+  const { data } = await instance.get('/user/suggest', { params })
+  return data as Enveloped<UserSuggestQueryResult>
+}
 
 export async function findRanklist (params: UserRanklistQuery) {
   const { data } = await instance.get('/user/ranklist', { params })

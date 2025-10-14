@@ -6,6 +6,8 @@ import {
   UserProfileQueryResultSchema,
   UserRanklistQueryResultSchema,
   UserRanklistQuerySchema,
+  UserSuggestQueryResultSchema,
+  UserSuggestQuerySchema,
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
 import escapeRegExp from 'lodash/escapeRegExp'
@@ -119,10 +121,22 @@ export async function getUser (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function suggestUsers (ctx: Context) {
+  const query = UserSuggestQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const users = await userService.suggestUsers(query.data.keyword, 10)
+  const result = UserSuggestQueryResultSchema.encode(users)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const userController = {
   find,
   findRanklist,
   getUser,
+  suggestUsers,
 } as const
 
 export default userController

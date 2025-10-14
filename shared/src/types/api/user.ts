@@ -40,3 +40,16 @@ export const UserRanklistQueryResultSchema = PaginatedSchema(z.object({
 }))
 
 export type UserRanklistQueryResult = z.input<typeof UserRanklistQueryResultSchema>
+
+export const UserSuggestQuerySchema = z.object({
+  keyword: z.string().min(1).max(30),
+})
+
+export type UserSuggestQuery = z.infer<typeof UserSuggestQuerySchema>
+
+export const UserSuggestQueryResultSchema = z.array(z.object({
+  uid: UserModelSchema.shape.uid,
+  nick: UserModelSchema.shape.nick,
+}))
+
+export type UserSuggestQueryResult = z.input<typeof UserSuggestQueryResultSchema>

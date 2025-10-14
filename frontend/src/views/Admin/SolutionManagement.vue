@@ -4,15 +4,16 @@ import type {
   AdminSolutionListQueryResult,
   JudgeStatus,
   Language,
+  UserSuggestQueryResult,
 } from '@putongoj/shared'
 import { AdminSolutionListQuerySchema } from '@putongoj/shared'
+import AutoComplete from 'primevue/autocomplete'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputNumber from 'primevue/inputnumber'
-import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
@@ -20,6 +21,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSolutions } from '@/api/admin'
+import { suggestUsers } from '@/api/user'
 import {
   judgeStatusLabels,
   judgeStatusOptions,
@@ -45,11 +47,14 @@ const docs = ref([] as AdminSolutionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 const selectedDocs = ref([] as AdminSolutionListQueryResult['docs'])
+const userSuggestions = ref([] as UserSuggestQueryResult)
+const selectedUser = ref('' as string | UserSuggestQueryResult[number])
 
 async function fetch () {
   const parsed = AdminSolutionListQuerySchema.safeParse(route.query)
   if (parsed.success) {
     query.value = parsed.data
+    selectedUser.value = query.value.user || ''
   } else {
     router.replace({ query: {} })
     return
@@ -67,6 +72,15 @@ async function fetch () {
 
   docs.value = resp.data.docs
   total.value = resp.data.total
+}
+
+async function fetchUsers (event: any) {
+  const users = await suggestUsers({ keyword: event.query })
+  if (users.success) {
+    userSuggestions.value = users.data
+  } else {
+    userSuggestions.value = []
+  }
 }
 
 function onSort (event: any) {
@@ -93,7 +107,9 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      user: query.value.user || undefined,
+      user: (typeof selectedUser.value === 'string'
+        ? selectedUser.value
+        : selectedUser.value?.uid) || undefined,
       problem: query.value.problem || undefined,
       contest: query.value.contest || undefined,
       judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
@@ -146,10 +162,14 @@ onRouteQueryUpdate(fetch)
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
         <IconField>
-          <InputText
-            v-model="query.user" fluid :placeholder="t('ptoj.filter_by_user')" maxlength="30"
-            @keypress.enter="onSearch"
-          />
+          <AutoComplete
+            v-model="selectedUser" fluid :placeholder="t('ptoj.filter_by_user')" option-label="uid"
+            :suggestions="userSuggestions" @complete="fetchUsers" @keypress.enter="onSearch" @option-select="onSearch"
+          >
+            <template #option="{ option }">
+              {{ option.uid }} <span v-if="option.nick" class="ml-2 text-muted-color">({{ option.nick }})</span>
+            </template>
+          </AutoComplete>
           <InputIcon class="pi pi-user" />
         </IconField>
 
@@ -328,8 +348,9 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <Paginator
-      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10" :first="(query.page - 1) * query.pageSize"
-      :rows="query.pageSize" :total-records="total" :current-page-report-template="t('ptoj.paginator_report')"
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
+      :current-page-report-template="t('ptoj.paginator_report')"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" @page="onPage"
     />
   </div>

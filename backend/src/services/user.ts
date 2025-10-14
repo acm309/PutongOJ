@@ -39,6 +39,24 @@ export async function findUsers (
   return await User.paginate(filter, query) as any
 }
 
+export async function suggestUsers (
+  keyword: string, limit: number = 10,
+): Promise<Pick<UserModel, 'uid' | 'nick'>[]> {
+  if (!keyword || limit <= 0) { return [] }
+
+  const filter = {
+    $or: [
+      { uid: { $regex: new RegExp(escapeRegExp(keyword), 'i') } },
+      { nick: { $regex: new RegExp(escapeRegExp(keyword), 'i') } },
+    ],
+  }
+  return await User.find(filter)
+    .select({ _id: 0, uid: 1, nick: 1 })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean()
+}
+
 export async function findRanklist (
   opt: PaginateOption & { group?: number },
 ): Promise<Paginated<UserModel>> {
@@ -113,6 +131,7 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
 
 const userService = {
   findUsers,
+  suggestUsers,
   findRanklist,
   getUser,
   updateUser,
