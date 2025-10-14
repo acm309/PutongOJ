@@ -4,7 +4,7 @@ import type {
   UserRanklistQuery,
   UserRanklistQueryResult,
 } from '@putongoj/shared'
-import { JudgeStatus, UserRanklistQuerySchema } from '@putongoj/shared'
+import { UserRanklistQuerySchema } from '@putongoj/shared'
 import pangu from 'pangu'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -100,14 +100,6 @@ function onView (data: any) {
   router.push({ name: 'UserProfile', params: { uid: data.uid } })
 }
 
-function onStatus (data: any, judge?: number) {
-  const queryParams: any = { uid: data.uid }
-  if (judge !== undefined) {
-    queryParams.judge = judge
-  }
-  router.push({ name: 'status', query: queryParams })
-}
-
 onMounted(async () => {
   await Promise.all([ fetchGroups(), fetch() ])
 })
@@ -168,21 +160,11 @@ onRouteQueryUpdate(fetch)
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
         </template>
-        <template #body="{ data }">
-          <a @click="onStatus(data, JudgeStatus.Accepted)">
-            {{ data.solve }}
-          </a>
-        </template>
       </Column>
 
       <Column field="submit" class="text-center">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.submitted') }}</span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onStatus(data)">
-            {{ data.submit }}
-          </a>
         </template>
       </Column>
 
