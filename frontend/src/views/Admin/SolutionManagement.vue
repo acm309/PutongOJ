@@ -149,16 +149,16 @@ onRouteQueryUpdate(fetch)
 
         <IconField>
           <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" fluid :placeholder="t('ptoj.filter_by_problem')"
-            :disabled="loading" @keypress.enter="onSearch"
+            v-model="query.problem" mode="decimal" :min="1" fluid :use-grouping="false"
+            :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-flag" />
         </IconField>
 
         <IconField>
           <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" fluid :placeholder="t('ptoj.filter_by_contest')"
-            :disabled="loading" @keypress.enter="onSearch"
+            v-model="query.contest" mode="decimal" :min="-1" fluid :use-grouping="false"
+            :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-trophy" />
         </IconField>

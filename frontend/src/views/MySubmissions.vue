@@ -146,16 +146,16 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField>
           <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" fluid :placeholder="t('ptoj.filter_by_problem')"
-            :disabled="loading" @keypress.enter="onSearch"
+            v-model="query.problem" mode="decimal" :min="1" :use-grouping="false" fluid
+            :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-flag" />
         </IconField>
 
         <IconField>
           <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" fluid :placeholder="t('ptoj.filter_by_contest')"
-            :disabled="loading" @keypress.enter="onSearch"
+            v-model="query.contest" mode="decimal" :min="-1" :use-grouping="false" fluid
+            :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-trophy" />
         </IconField>
@@ -192,9 +192,8 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <DataTable
-      class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single"
-      :sort-field="query.sortBy" data-key="sid" :sort-order="query.sort" :lazy="true" :loading="loading" scrollable
-      @sort="onSort"
+      class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
+      data-key="sid" :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort"
     >
       <Column field="sid" class="font-medium pl-6 text-center" frozen>
         <template #header>
@@ -293,8 +292,9 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <Paginator
-      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10" :first="(query.page - 1) * query.pageSize"
-      :rows="query.pageSize" :total-records="total" :current-page-report-template="t('ptoj.paginator_report')"
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
+      :current-page-report-template="t('ptoj.paginator_report')"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" @page="onPage"
     />
   </div>
