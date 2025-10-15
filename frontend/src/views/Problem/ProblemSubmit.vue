@@ -35,7 +35,7 @@ const pid = $computed(() => route.params.pid)
 async function submitSolution () {
   await create(Object.assign({}, solution, { pid }))
   message.info(`submit pid:${problem.pid} success!`)
-  router.push({ name: 'mySubmission', params: { pid } })
+  router.push({ name: 'MySubmissions', query: { problem: pid } })
 }
 
 async function init () {

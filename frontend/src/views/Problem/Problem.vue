@@ -27,8 +27,14 @@ const isEditable = computed(() => {
 })
 
 function handleClick (name) {
-  if (name !== display)
-    router.push({ name, params: { pid: route.params.pid } })
+  if (name === display) {
+    return
+  }
+  if (name === 'MySubmissions') {
+    router.push({ name, query: { problem: route.params.pid } })
+    return
+  }
+  router.push({ name, params: { pid: route.params.pid } })
 }
 </script>
 
@@ -37,7 +43,7 @@ function handleClick (name) {
     <Tabs class="problem-tabs" :model-value="display" @on-click="handleClick">
       <TabPane :label="t('oj.description')" name="problemInfo" />
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
-      <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="mySubmission" />
+      <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="MySubmissions" />
       <TabPane :label="t('oj.statistics')" name="problemStatistics" />
       <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
       <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />

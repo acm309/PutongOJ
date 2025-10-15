@@ -1,6 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import MySubmission from '@/views/Problem/MySubmission.vue'
 import Problem from '@/views/Problem/Problem.vue'
 import ProblemInfo from '@/views/Problem/ProblemInfo.vue'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit.vue'
@@ -42,9 +41,7 @@ const problemRoutes: Array<RouteRecordRaw> = [
       },
       {
         path: 'mySubmission',
-        name: 'mySubmission',
-        component: MySubmission,
-        meta: { title: 'Problem Info' },
+        redirect: { name: 'MySubmissions' },
       },
       {
         path: 'statistics',
