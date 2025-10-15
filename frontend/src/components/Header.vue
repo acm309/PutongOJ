@@ -66,10 +66,6 @@ const menuItems = computed(() => {
       icon: 'pi pi-comments',
       route: 'discuss',
     }, {
-      label: t('oj.status_list'),
-      icon: 'pi pi-chart-line',
-      route: 'status',
-    }, {
       label: t('oj.faq'),
       icon: 'pi pi-question-circle',
       route: 'faq',

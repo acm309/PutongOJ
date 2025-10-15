@@ -8,14 +8,14 @@ const discussRoutes: Array<RouteRecordRaw> = [
     path: '/discuss',
     name: 'discuss',
     component: Discuss,
-    meta: { title: 'Discuss' },
+    meta: { title: 'Discuss', requiresLogin: true },
   },
   {
     path: '/discuss/:did',
     name: 'discussInfo',
     component: DiscussInfo,
     props: route => route.params,
-    meta: { title: 'Discuss Info' },
+    meta: { title: 'Discuss Info', requiresLogin: true },
   },
 ]
 

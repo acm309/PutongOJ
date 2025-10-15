@@ -103,6 +103,7 @@ setTimeout(async () => {
 <style lang="stylus">
 html
   font-size: 14px !important
-[class^="p-"], [class*=" p-"]
-  line-height: normal !important
+#app
+  [class^="p-"], [class*=" p-"]
+    line-height: normal !important
 </style>
