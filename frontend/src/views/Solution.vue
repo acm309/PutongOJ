@@ -13,6 +13,7 @@ import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import constant from '@/utils/constant'
+import emitter from '@/utils/emitter'
 import { timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
 import 'highlight.js/styles/atom-one-light.css'
@@ -109,6 +110,12 @@ async function markAsSkipped () {
     cancelText: t('oj.cancel'),
   })
 }
+
+emitter.on('submission-updated', (sid) => {
+  if (Number(route.params.sid) === sid) {
+    fetch()
+  }
+})
 
 fetch()
 onRouteQueryUpdate(fetch)

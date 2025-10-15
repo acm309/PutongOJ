@@ -24,6 +24,7 @@ import {
   languageLabels,
   languageOptions,
 } from '@/utils/constant'
+import emitter from '@/utils/emitter'
 import {
   getJudgeStatusClassname,
   thousandSeparator,
@@ -122,6 +123,12 @@ function onViewContest (data: any) {
   if (!data.mid || data.mid <= 0) return
   router.push({ name: 'contestOverview', params: { cid: data.mid } })
 }
+
+emitter.on('submission-updated', (sid) => {
+  if (docs.value.some(item => item.sid === sid)) {
+    fetch()
+  }
+})
 
 onMounted(fetch)
 onRouteQueryUpdate(fetch)

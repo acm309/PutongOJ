@@ -36,6 +36,7 @@
     "html-escaper": "^3.0.3",
     "less": "4.4.1",
     "lodash.debounce": "^4.0.8",
+    "mitt": "^3.0.1",
     "only": "^0.0.2",
     "pangu": "^4.0.7",
     "pinia": "^3.0.3",

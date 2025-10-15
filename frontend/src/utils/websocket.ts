@@ -4,6 +4,7 @@ import { WebSocketMessageType } from '@putongoj/shared'
 import { useI18n } from 'vue-i18n'
 import { getWebSocketToken } from '@/api/utils'
 import { judgeStatusLabels } from './constant'
+import emitter from './emitter'
 import { useMessage } from './message'
 
 class WebSocketService {
@@ -74,6 +75,7 @@ class WebSocketService {
           judgeStatus: judgeStatusLabels[judgeStatus],
         }),
       )
+      emitter.emit('submission-updated', solutionId)
     } else if (message.type === WebSocketMessageType.Notification) {
       const { title, content } = message.data
       this.messageService.info(title, content)
