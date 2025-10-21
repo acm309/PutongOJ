@@ -292,7 +292,7 @@ onMounted(fetch)
             <label for="confirm-password">{{ t('ptoj.confirm_new_password') }}</label>
           </IftaLabel>
         </div>
-        <div class="flex gap-2 justify-end mt-6">
+        <div class="flex gap-2 justify-end mt-5">
           <Button
             type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
             @click="passwordDialog = false"
