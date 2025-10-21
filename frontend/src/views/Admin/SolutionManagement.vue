@@ -84,7 +84,6 @@ function onPage (event: any) {
     query: {
       ...route.query,
       page: (event.first / event.rows + 1),
-      pageSize: event.rows,
     },
   })
 }
@@ -98,7 +97,7 @@ function onSearch () {
       contest: query.value.contest || undefined,
       judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
       language: query.value.language || undefined,
-      page: 1,
+      page: undefined,
     },
   })
 }
@@ -112,7 +111,7 @@ function onReset () {
       contest: undefined,
       judge: undefined,
       language: undefined,
-      page: 1,
+      page: undefined,
     },
   })
 }

@@ -64,7 +64,6 @@ function onPage (event: any) {
   router.replace({ query: {
     ...route.query,
     page: (event.first / event.rows + 1),
-    pageSize: event.rows,
   } })
 }
 
@@ -73,7 +72,7 @@ function onSearch () {
     ...route.query,
     keyword: query.value.keyword || undefined,
     privilege: query.value.privilege,
-    page: 1,
+    page: undefined,
   } })
 }
 
@@ -82,7 +81,7 @@ function onReset () {
     ...route.query,
     keyword: undefined,
     privilege: undefined,
-    page: 1,
+    page: undefined,
   } })
 }
 

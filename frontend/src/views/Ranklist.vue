@@ -41,6 +41,9 @@ async function fetchGroups () {
     return
   }
   groups.value = resp.data
+  if (query.value.group && !groups.value.find(g => g.gid === query.value.group)) {
+    onReset()
+  }
 }
 
 async function fetch () {
@@ -71,7 +74,6 @@ function onPage (event: any) {
     query: {
       ...route.query,
       page: (event.first / event.rows + 1),
-      pageSize: event.rows,
     },
   })
 }
@@ -81,7 +83,7 @@ function onSearch () {
     query: {
       ...route.query,
       group: query.value.group,
-      page: 1,
+      page: undefined,
     },
   })
 }
@@ -91,7 +93,7 @@ function onReset () {
     query: {
       ...route.query,
       group: undefined,
-      page: 1,
+      page: undefined,
     },
   })
 }
