@@ -47,7 +47,7 @@ test.serial('Update Group 2', async (t) => {
   t.deepEqual(find.body.group.list, [ 'admin' ])
 
   const user = await request
-    .get('/api/user/admin')
+    .get('/api/users/admin')
 
   t.true(user.body.data.groups.some((group: any) => group.gid === 2))
 })
@@ -70,12 +70,12 @@ test.serial('Update Group 2 -- update members', async (t) => {
   t.deepEqual(find.body.group.list, [ user.uid ])
 
   let r = await request
-    .get('/api/user/admin')
+    .get('/api/users/admin')
 
   t.false(r.body.data.groups.some((group: any) => group.gid === 2))
 
   r = await request
-    .get(`/api/user/${user.uid}`)
+    .get(`/api/users/${user.uid}`)
 
   t.true(r.body.data.groups.some((group: any) => group.gid === 2))
 })
@@ -91,7 +91,7 @@ test.serial('Delete Group 2', async (t) => {
   t.is(find.status, 400)
 
   const user = await request
-    .get('/api/user/admin')
+    .get('/api/users/admin')
 
   t.false(user.body.data.groups.some((group: any) => group.gid === 2))
 })

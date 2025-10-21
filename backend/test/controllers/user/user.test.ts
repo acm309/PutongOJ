@@ -47,7 +47,7 @@ test('Update user\'s nick then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.nick, 'test20424')
 
@@ -58,7 +58,7 @@ test('Update user\'s nick then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.nick, '')
 })
@@ -79,7 +79,7 @@ test('Update user\'s motto then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.motto, 'test19025')
 
@@ -90,7 +90,7 @@ test('Update user\'s motto then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.motto, '')
 })
@@ -111,7 +111,7 @@ test('Update user\'s school then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.school, 'test31975')
 
@@ -122,7 +122,7 @@ test('Update user\'s school then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.school, '')
 })
@@ -151,7 +151,7 @@ test('Update user\'s mail then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.mail, mail)
 
@@ -162,61 +162,61 @@ test('Update user\'s mail then clear', async (t) => {
   t.true(r.body.success)
 
   r = await request
-    .get(`/api/user/${uid}`)
+    .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.mail, '')
 })
 
 test.skip('Update user with privilege remains unchanged', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ privilege: config.privilege.User })
   t.is(r.status, 200)
 })
 
 test.skip('Update user with privilege up to admin', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ privilege: config.privilege.Admin })
   t.is(r.status, 403)
 })
 
 test.skip('Update user with privilege up to root', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ privilege: config.privilege.Root })
   t.is(r.status, 403)
 })
 
 test.skip('Update user with new pwd not valid (too short)', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ oldPwd: pwd, newPwd: 'Aa@12' })
   t.is(r.status, 400)
 })
 
 test.skip('Update user with new pwd not valid (too simple)', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ oldPwd: pwd, newPwd: '12345678' })
   t.is(r.status, 400)
 })
 
 test.skip('Update user with wrong old pwd', async (t) => {
   const r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ oldPwd: `${pwd}7`, newPwd })
   t.is(r.status, 400)
 })
 
 test.after.skip('Update user\'s pwd then check', async (t) => {
   let r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
     .send({ oldPwd: pwd, newPwd })
   t.is(r.status, 200)
 
   r = await request
-    .put(`/api/user/${uid}`)
+    .put(`/api/users/${uid}`)
   t.is(r.status, 401)
 
   r = await request

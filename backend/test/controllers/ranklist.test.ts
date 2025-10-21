@@ -7,7 +7,7 @@ const request = supertest.agent(server)
 
 test('Fetch ranklist', async (t) => {
   const res = await request
-    .get('/api/user/ranklist')
+    .get('/api/users/ranklist')
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -29,7 +29,7 @@ test('Fetch ranklist', async (t) => {
 
 test('Fetch ranklist filtered by group', async (t) => {
   const res = await request
-    .get('/api/user/ranklist?group=1')
+    .get('/api/users/ranklist?group=1')
 
   t.is(res.status, 200)
   t.true(res.body.success)
