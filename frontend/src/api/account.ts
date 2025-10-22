@@ -6,41 +6,29 @@ import type {
   AccountRegisterPayload,
   AccountSubmissionListQuery,
   AccountSubmissionListQueryResult,
-  Enveloped,
 } from '@putongoj/shared'
-import { instance } from './instance'
-
-export async function getProfile () {
-  const { data } = await instance.get('/account/profile')
-  return data as Enveloped<AccountProfileQueryResult>
-}
+import { instanceSafe as instance } from './instance'
 
 export async function userLogin (payload: AccountLoginPayload) {
-  const { data } = await instance.post('/account/login', payload)
-  return data as Enveloped<AccountProfileQueryResult>
+  return instance.post<AccountProfileQueryResult>('/account/login', payload)
 }
-
 export async function userRegister (payload: AccountRegisterPayload) {
-  const { data } = await instance.post('/account/register', payload)
-  return data as Enveloped<AccountProfileQueryResult>
+  return instance.post<AccountProfileQueryResult>('/account/register', payload)
 }
-
 export async function userLogout () {
-  const { data } = await instance.post('/account/logout')
-  return data as Enveloped<null>
+  return instance.post<null>('/account/logout')
 }
 
+export async function getProfile () {
+  return instance.get<AccountProfileQueryResult>('/account/profile')
+}
 export async function updateProfile (payload: AccountEditPayload) {
-  const { data } = await instance.put('/account/profile', payload)
-  return data as Enveloped<AccountProfileQueryResult>
+  return instance.put<AccountProfileQueryResult>('/account/profile', payload)
 }
-
 export async function updatePassword (payload: AccountChangePasswordPayload) {
-  const { data } = await instance.put('/account/password', payload)
-  return data as Enveloped<null>
+  return instance.put<null>('/account/password', payload)
 }
 
 export async function findSubmissions (params: AccountSubmissionListQuery) {
-  const { data } = await instance.get('/account/submissions', { params })
-  return data as Enveloped<AccountSubmissionListQueryResult>
+  return instance.get<AccountSubmissionListQueryResult>('/account/submissions', { params })
 }

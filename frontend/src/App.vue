@@ -1,15 +1,16 @@
-<script>
+<script lang="ts">
 import { storeToRefs } from 'pinia'
 import ConfirmPopup from 'primevue/confirmpopup'
 import Toast from 'primevue/toast'
-import { inject, nextTick, watch } from 'vue'
+import { nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import OjLayout from '@/components/Layout'
+import OjLayout from '@/components/Layout.vue'
 import { useRootStore } from '@/store'
 import { setErrorHandler } from './api'
 import { useSessionStore } from './store/modules/session'
 import { onProfileUpdate } from './utils/helper'
+import { useMessage } from './utils/message'
 import { useWebSocket } from './utils/websocket'
 
 // https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md#declaring-additional-options
@@ -18,55 +19,32 @@ export default {
 }
 </script>
 
-<script setup>
+<script lang="ts" setup>
 const route = useRoute()
-const $Message = inject('$Message')
+const message = useMessage()
 const { t } = useI18n()
 
-$Message.config({ duration: 3.5 }) // default: 1.5s
 setErrorHandler((err) => {
-  if (err.response && err.response.status >= 500) {
-    $Message.error({
-      content: t('oj.error_500'),
-      duration: 6.5,
-    })
-  } else if (err.response && err.response.status === 404) {
-    $Message.error({
-      content: t('oj.error_404'),
-      duration: 6.5,
-    })
-  } else if (err.response && err.response.status === 403) {
-    $Message.error({
-      content: t('oj.error_403'),
-      duration: 6.5,
-    })
-  } else if (err.response && err.response.status === 401) {
-    $Message.error({
-      content: t('oj.error_401'),
-      duration: 6.5,
-    })
-  } else if (err.response && err.response.status === 429) {
-    $Message.error({
-      content: t('oj.error_429'),
-      duration: 6.5,
-    })
-  } else if (err.response && err.response.status >= 400 && err.response.status < 500) {
-    $Message.error({
-      content: err.response.data.error || 'Bad Request',
-      duration: 6.5,
-    })
+  let detail: string = err.message || t('ptoj.unknown_error_occurred')
+  if (err.response?.status) {
+    const status = err.response.status
+    if (status === 401) {
+      detail = t('ptoj.request_error_401')
+    } else if (status === 403) {
+      detail = t('ptoj.request_error_403')
+    } else if (status === 404) {
+      detail = t('ptoj.request_error_404')
+    } else if (status === 429) {
+      detail = t('ptoj.request_error_429')
+    } else if (status >= 500) {
+      detail = t('ptoj.request_error_500')
+    } else {
+      detail = `${status} ${err.response.statusText}`
+    }
   } else if (!err.response) {
-    $Message.error({
-      content: t('oj.lose_connection'),
-      duration: 6.5,
-    })
-  } else {
-    $Message.error({
-      content: err.message,
-      duration: 6.5,
-    })
+    detail = t('ptoj.request_connection_lost')
   }
-  return Promise.reject(err)
+  message.error(t('ptoj.request_error_occurred'), detail)
 })
 
 const { changeDomTitle, fetchTime, updateTime } = useRootStore()

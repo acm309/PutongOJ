@@ -39,7 +39,7 @@ export const useRootStore = defineStore('root', {
     },
   }),
   actions: {
-    changeDomTitle (payload: { title: string }) {
+    changeDomTitle (payload: { title?: string }) {
       if (payload && payload.title)
         window.document.title = payload.title
       window.document.title += ` | ${this.website.title}`

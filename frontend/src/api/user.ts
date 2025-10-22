@@ -1,5 +1,4 @@
 import type {
-  Enveloped,
   UserItemListQueryResult,
   UserProfileQueryResult,
   UserRanklistExportQuery,
@@ -9,29 +8,21 @@ import type {
   UserSuggestQuery,
   UserSuggestQueryResult,
 } from '@putongoj/shared'
-import { instance } from './instance'
+import { instanceSafe as instance } from './instance'
 
 export async function suggestUsers (params: UserSuggestQuery) {
-  const { data } = await instance.get('/users/suggest', { params })
-  return data as Enveloped<UserSuggestQueryResult>
+  return instance.get<UserSuggestQueryResult>('/users/suggest', { params })
+}
+export async function getUser (uid: string) {
+  return instance.get<UserProfileQueryResult>(`/users/${encodeURIComponent(uid)}`)
+}
+export async function getAllUserItems () {
+  return instance.get<UserItemListQueryResult>('/users/items')
 }
 
 export async function findRanklist (params: UserRanklistQuery) {
-  const { data } = await instance.get('/users/ranklist', { params })
-  return data as Enveloped<UserRanklistQueryResult>
+  return instance.get<UserRanklistQueryResult>('/users/ranklist', { params })
 }
-
 export async function exportRanklist (params: UserRanklistExportQuery) {
-  const { data } = await instance.get('/users/ranklist/export', { params })
-  return data as Enveloped<UserRanklistExportQueryResult>
-}
-
-export async function getUser (uid: string) {
-  const { data } = await instance.get(`/users/${encodeURIComponent(uid)}`)
-  return data as Enveloped<UserProfileQueryResult>
-}
-
-export async function getAllUserItems () {
-  const { data } = await instance.get('/users/items')
-  return data as Enveloped<UserItemListQueryResult>
+  return instance.get<UserRanklistExportQueryResult>('/users/ranklist/export', { params })
 }

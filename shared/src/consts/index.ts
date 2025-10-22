@@ -2,6 +2,7 @@ export * from './keywords.js'
 export * from './regex.js'
 
 export enum ErrorCode {
+  NetworkError = -1,
   OK = 200,
   BadRequest = 400,
   Unauthorized = 401,
