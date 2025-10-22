@@ -42,6 +42,7 @@
   "export_data_desc": "Approximately {count} records will be exported.",
   "export_data_large_records": "This export will be quite large. Suggest applying more filters.",
   "export_data_no_records": "There are no records to export.",
+  "export_data_too_many_records": "The number of records to be exported exceeds the maximum limit. Only the first {max} records will be exported.",
   "export_format": "Export Format",
   "exporting_data": "Exporting data...",
   "exporting_data_detail": "Please wait while your data is being prepared for export",

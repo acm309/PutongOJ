@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ExportFormat } from '@putongoj/shared'
+import { EXPORT_SIZE_MAX, ExportFormat } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -46,14 +46,17 @@ watch(visible, (newVal) => {
   >
     <div class="space-y-4">
       <p class="text-muted-color">
-        {{ t('ptoj.export_data_desc', { count: props.estimatedCount }) }}
+        {{ t('ptoj.export_data_desc', { count: Math.min(EXPORT_SIZE_MAX, props.estimatedCount) }) }}
       </p>
 
-      <Message v-if="props.estimatedCount === 0" severity="error">
-        {{ t('ptoj.export_data_no_records') }}
+      <Message v-if="props.estimatedCount > EXPORT_SIZE_MAX" severity="warn">
+        {{ t('ptoj.export_data_too_many_records', { max: EXPORT_SIZE_MAX }) }}
       </Message>
-      <Message v-if="props.estimatedCount >= LARGE_RECORDS_THRESHOLD" severity="warn">
+      <Message v-else-if="props.estimatedCount >= LARGE_RECORDS_THRESHOLD" severity="info">
         {{ t('ptoj.export_data_large_records') }}
+      </Message>
+      <Message v-else-if="props.estimatedCount === 0" severity="error">
+        {{ t('ptoj.export_data_no_records') }}
       </Message>
 
       <IftaLabel>

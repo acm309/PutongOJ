@@ -1,7 +1,7 @@
 import type { Paginated, UserModel } from '@putongoj/shared'
 import type { UserDocument } from '../models/User'
 import type { PaginateOption, SortOption } from '../types'
-import { RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
+import { EXPORT_SIZE_MAX, RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
 import User from '../models/User'
 
@@ -104,6 +104,7 @@ export async function exportRanklist (
   return await User.find(filter)
     .select({ _id: 0, uid: 1, nick: 1, solve: 1, submit: 1 })
     .sort({ solve: -1, submit: 1, createdAt: 1 })
+    .limit(EXPORT_SIZE_MAX)
     .lean()
 }
 

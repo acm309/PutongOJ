@@ -42,6 +42,7 @@
   "export_data_desc": "大约将导出 {count} 条数据。",
   "export_data_large_records": "导出的数据量较大，建议应用更多筛选条件。",
   "export_data_no_records": "没有可导出的数据。",
+  "export_data_too_many_records": "导出的数据量超过限制，仅会导出前 {max} 条数据。",
   "export_format": "导出格式",
   "exporting_data": "正在导出数据...",
   "exporting_data_detail": "请稍候，正在为你准备导出的数据",
