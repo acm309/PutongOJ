@@ -1,4 +1,6 @@
 import type {
+  AdminSolutionListExportQuery,
+  AdminSolutionListExportQueryResult,
   AdminSolutionListQuery,
   AdminSolutionListQueryResult,
   AdminUserChangePasswordPayload,
@@ -35,4 +37,7 @@ export async function removeUserOAuthConnection (uid: string, provider: OAuthPro
 
 export async function findSolutions (params: AdminSolutionListQuery) {
   return instance.get<AdminSolutionListQueryResult>('/admin/solutions', { params })
+}
+export async function exportSolutions (params: AdminSolutionListExportQuery) {
+  return instance.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
 }

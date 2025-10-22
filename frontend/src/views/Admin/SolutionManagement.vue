@@ -2,6 +2,7 @@
 import type {
   AdminSolutionListQuery,
   AdminSolutionListQueryResult,
+  ExportFormat,
   JudgeStatus,
   Language,
 } from '@putongoj/shared'
@@ -15,10 +16,11 @@ import InputNumber from 'primevue/inputnumber'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { findSolutions } from '@/api/admin'
+import { exportSolutions, findSolutions } from '@/api/admin'
+import ExportDialog from '@/components/ExportDialog.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import {
   judgeStatusLabels,
@@ -26,6 +28,7 @@ import {
   languageLabels,
   languageOptions,
 } from '@/utils/constant'
+import { exportDataToFile } from '@/utils/export'
 import {
   getJudgeStatusClassname,
   getSimilarityClassname,
@@ -45,6 +48,17 @@ const docs = ref([] as AdminSolutionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 const selectedDocs = ref([] as AdminSolutionListQueryResult['docs'])
+const exportDialog = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(
+    query.value.user
+    || query.value.problem
+    || query.value.contest
+    || Number.isInteger(query.value.judge)
+    || query.value.language,
+  )
+})
 
 async function fetch () {
   const parsed = AdminSolutionListQuerySchema.safeParse(route.query)
@@ -130,6 +144,24 @@ function onViewContest (data: any) {
   router.push({ name: 'contestOverview', params: { cid: data.mid } })
 }
 
+async function onExport (format: ExportFormat) {
+  message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
+  const resp = await exportSolutions(query.value)
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
+    exportDialog.value = false
+    return
+  }
+
+  const filename = `PutongOJ_Solutions_${Date.now()}`
+  try {
+    exportDataToFile(resp.data, filename, format)
+  } catch (err: any) {
+    message.error(t('ptoj.failed_export_data'), err.message)
+  }
+  exportDialog.value = false
+}
+
 onMounted(fetch)
 onRouteQueryUpdate(fetch)
 </script>
@@ -186,8 +218,15 @@ onRouteQueryUpdate(fetch)
         </Select>
 
         <div class="flex gap-2 items-center justify-end xl:col-span-3">
+          <Button
+            icon="pi pi-file-export" severity="secondary" outlined :disabled="loading"
+            @click="exportDialog = true"
+          />
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
           <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
@@ -324,5 +363,7 @@ onRouteQueryUpdate(fetch)
       :current-page-report-template="t('ptoj.paginator_report')"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" @page="onPage"
     />
+
+    <ExportDialog v-model:visible="exportDialog" :estimated-count="total" @export="onExport" />
   </div>
 </template>

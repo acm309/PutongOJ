@@ -1,6 +1,8 @@
 import type { Context } from 'koa'
 import {
   AdminNotificationBroadcastPayloadSchema,
+  AdminSolutionListExportQueryResultSchema,
+  AdminSolutionListExportQuerySchema,
   AdminSolutionListQueryResultSchema,
   AdminSolutionListQuerySchema,
   AdminUserChangePasswordPayloadSchema,
@@ -169,6 +171,17 @@ export async function findSolutions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function exportSolutions (ctx: Context) {
+  const query = AdminSolutionListExportQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const solutions = await solutionService.exportSolutions(query.data)
+  const result = AdminSolutionListExportQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
 export async function sendNotificationBroadcast (ctx: Context) {
   const payload = AdminNotificationBroadcastPayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
@@ -192,6 +205,7 @@ const adminController = {
   getUserOAuthConnections,
   removeUserOAuthConnection,
   findSolutions,
+  exportSolutions,
   sendNotificationBroadcast,
 } as const
 

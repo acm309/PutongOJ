@@ -1,6 +1,7 @@
 import Router from '@koa/router'
 import adminController from '../controllers/admin'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const adminRouter = new Router({
   prefix: '/admin',
@@ -29,6 +30,10 @@ adminRouter.delete('/users/:uid/oauth/:provider',
 
 adminRouter.get('/solutions',
   adminController.findSolutions,
+)
+adminRouter.get('/solutions/export',
+  ratelimitMiddleware.dataExportLimit,
+  adminController.exportSolutions,
 )
 
 adminRouter.post('/notifications/broadcast',
