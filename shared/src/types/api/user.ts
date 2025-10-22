@@ -41,6 +41,21 @@ export const UserRanklistQueryResultSchema = PaginatedSchema(z.object({
 
 export type UserRanklistQueryResult = z.input<typeof UserRanklistQueryResultSchema>
 
+export const UserRanklistExportQuerySchema = z.object({
+  group: stringToInt.pipe(GroupModelSchema.shape.gid).optional(),
+})
+
+export type UserRanklistExportQuery = z.infer<typeof UserRanklistExportQuerySchema>
+
+export const UserRanklistExportQueryResultSchema = z.array(z.object({
+  uid: UserModelSchema.shape.uid,
+  nick: UserModelSchema.shape.nick,
+  solve: UserModelSchema.shape.solve,
+  submit: UserModelSchema.shape.submit,
+}))
+
+export type UserRanklistExportQueryResult = z.input<typeof UserRanklistExportQueryResultSchema>
+
 export const UserSuggestQuerySchema = z.object({
   keyword: z.string().min(1).max(30),
 })

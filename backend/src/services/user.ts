@@ -88,6 +88,25 @@ export async function findRanklist (
   return await User.paginate(filter, query) as any
 }
 
+export async function exportRanklist (
+  opt: { group?: number },
+): Promise<Pick<UserModel, 'uid' | 'nick' | 'solve' | 'submit'>[]> {
+  const { group } = opt
+
+  const filter: Record<string, any> = {
+    solve: { $gt: 0 },
+    privilege: { $ne: UserPrivilege.Banned },
+  }
+  if (typeof group === 'number') {
+    filter.gid = group
+  }
+
+  return await User.find(filter)
+    .select({ _id: 0, uid: 1, nick: 1, solve: 1, submit: 1 })
+    .sort({ solve: -1, submit: 1, createdAt: 1 })
+    .lean()
+}
+
 export async function getUser (uid: string): Promise<UserDocument | null> {
   return await User.findOne({
     uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
@@ -141,6 +160,7 @@ const userService = {
   suggestUsers,
   getAllUserItems,
   findRanklist,
+  exportRanklist,
   getUser,
   updateUser,
   checkUserAvailable,

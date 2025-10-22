@@ -5,6 +5,8 @@ import { md5 } from '@noble/hashes/legacy.js'
 import {
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
+  UserRanklistExportQueryResultSchema,
+  UserRanklistExportQuerySchema,
   UserRanklistQueryResultSchema,
   UserRanklistQuerySchema,
   UserSuggestQueryResultSchema,
@@ -12,10 +14,15 @@ import {
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
 import config from '../config'
+import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
 import userService from '../services/user'
-import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
+import {
+  createEnvelopedResponse,
+  createErrorResponse,
+  createZodErrorResponse,
+} from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
 
 export async function loadUser (
@@ -47,6 +54,21 @@ export async function findRanklist (ctx: Context) {
 
   const users = await userService.findRanklist(query.data)
   const result = UserRanklistQueryResultSchema.encode(users)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function exportRanklist (ctx: Context) {
+  const query = UserRanklistExportQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+  const profile = await loadProfile (ctx)
+  if (!query.data.group && !profile.isAdmin) {
+    return createErrorResponse(ctx, 'Insufficient privilege to export full ranklist', 403)
+  }
+
+  const users = await userService.exportRanklist(query.data)
+  const result = UserRanklistExportQueryResultSchema.encode(users)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -100,6 +122,7 @@ export async function getAllUserItems (ctx: Context) {
 
 const userController = {
   findRanklist,
+  exportRanklist,
   getUser,
   suggestUsers,
   getAllUserItems,

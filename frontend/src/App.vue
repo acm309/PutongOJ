@@ -66,6 +66,7 @@ setErrorHandler((err) => {
       duration: 6.5,
     })
   }
+  return Promise.reject(err)
 })
 
 const { changeDomTitle, fetchTime, updateTime } = useRootStore()

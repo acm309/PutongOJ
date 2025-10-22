@@ -1,21 +1,26 @@
 <script lang="ts" setup>
 import type {
+  ExportFormat,
   GroupListQueryResult,
   UserRanklistQuery,
   UserRanklistQueryResult,
 } from '@putongoj/shared'
 import { UserRanklistQuerySchema } from '@putongoj/shared'
 import pangu from 'pangu'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findGroups } from '@/api/group'
-import { findRanklist } from '@/api/user'
+import { exportRanklist, findRanklist } from '@/api/user'
+import ExportDialog from '@/components/ExportDialog.vue'
+import { useSessionStore } from '@/store/modules/session'
+import { exportDataToFile } from '@/utils/export'
 import { calculatePercentage } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -25,12 +30,18 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
+const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as UserRanklistQuery)
 const docs = ref([] as UserRanklistQueryResult['docs'])
 const groups = ref<GroupListQueryResult>([])
 const total = ref(0)
 const loading = ref(false)
 const loadingGroups = ref(false)
+const exportDialog = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(query.value.group)
+})
 
 async function fetchGroups () {
   loadingGroups.value = true
@@ -98,6 +109,24 @@ function onReset () {
   })
 }
 
+async function onExport (format: ExportFormat) {
+  message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
+  const resp = await exportRanklist({ group: query.value.group })
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_ranklist'), resp.message)
+    exportDialog.value = false
+    return
+  }
+
+  const filename = `PutongOJ_Users_Ranklist_${Date.now()}`
+  try {
+    exportDataToFile(resp.data, filename, format)
+  } catch (err: any) {
+    message.error(t('ptoj.failed_export_data'), err.message)
+  }
+  exportDialog.value = false
+}
+
 function onView (data: any) {
   router.push({ name: 'UserProfile', params: { uid: data.uid } })
 }
@@ -124,8 +153,16 @@ onRouteQueryUpdate(fetch)
         />
 
         <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+          <Button
+            v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : (!isAdmin && !hasFilter) ? t('ptoj.please_apply_filter_first') : undefined"
+            icon="pi pi-file-export" severity="secondary" outlined
+            :disabled="loading || !isLogined || (!isAdmin && !hasFilter)" @click="exportDialog = true"
+          />
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
         </div>
       </div>
     </div>
@@ -192,5 +229,7 @@ onRouteQueryUpdate(fetch)
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
+
+    <ExportDialog v-model:visible="exportDialog" :estimated-count="total" @export="onExport" />
   </div>
 </template>

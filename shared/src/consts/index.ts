@@ -57,3 +57,9 @@ export enum Language {
   Python = 4,
   Cpp17 = 5,
 }
+
+export enum ExportFormat {
+  JSON_UTF8 = 'json-utf8',
+  CSV_UTF8 = 'csv-utf8',
+  CSV_UTF8_BOM = 'csv-utf8-bom',
+}

@@ -2,6 +2,7 @@ import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
 import {
   Button,
   Card,
@@ -31,8 +32,8 @@ import {
   TabPane,
   Tabs,
   Tag,
-  Tooltip,
   Transfer,
+  Tooltip as VUITooltip,
 } from 'view-ui-plus'
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
@@ -61,6 +62,7 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
+app.directive('tooltip', Tooltip)
 
 const i18n = createI18n({
   allowComposition: true,
@@ -83,7 +85,7 @@ app.component('Button', Button)
 app.component('Select', Select)
 app.component('Option', Option)
 app.component('Page', Page)
-app.component('Tooltip', Tooltip)
+app.component('Tooltip', VUITooltip)
 app.component('Card', Card)
 app.component('Progress', Progress)
 app.component('Dropdown', Dropdown)

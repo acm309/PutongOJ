@@ -38,6 +38,7 @@ export const userLoginLimit = limitByIp('user_login', 60, 10)
 export const userRegisterLimit = limitByIp('user_register', 300, 5)
 export const solutionCreateLimit = limitByUser('solution_create', 5, 1)
 export const commentCreateLimit = limitByUser('comment_create', 5, 1)
+export const dataExportLimit = limitByUser('data_export', 5, 1)
 
 const ratelimitMiddleware = {
   limitByIp,
@@ -46,6 +47,7 @@ const ratelimitMiddleware = {
   userRegisterLimit,
   solutionCreateLimit,
   commentCreateLimit,
+  dataExportLimit,
 } as const
 
 export default ratelimitMiddleware

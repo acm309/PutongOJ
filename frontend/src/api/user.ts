@@ -2,6 +2,8 @@ import type {
   Enveloped,
   UserItemListQueryResult,
   UserProfileQueryResult,
+  UserRanklistExportQuery,
+  UserRanklistExportQueryResult,
   UserRanklistQuery,
   UserRanklistQueryResult,
   UserSuggestQuery,
@@ -17,6 +19,11 @@ export async function suggestUsers (params: UserSuggestQuery) {
 export async function findRanklist (params: UserRanklistQuery) {
   const { data } = await instance.get('/users/ranklist', { params })
   return data as Enveloped<UserRanklistQueryResult>
+}
+
+export async function exportRanklist (params: UserRanklistExportQuery) {
+  const { data } = await instance.get('/users/ranklist/export', { params })
+  return data as Enveloped<UserRanklistExportQueryResult>
 }
 
 export async function getUser (uid: string) {
