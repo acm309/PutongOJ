@@ -6,6 +6,7 @@ import ContestProblem from '@/views/Contest/ContestProblem.vue'
 import ContestRanklist from '@/views/Contest/ContestRanklist.vue'
 import ContestStatus from '@/views/Contest/ContestStatus.vue'
 import ContestSubmit from '@/views/Contest/ContestSubmit.vue'
+import ContestMySubmissions from '@/views/Contest/MySubmissions.vue'
 import ContestList from '@/views/ContestList.vue'
 
 const ContestCreate = () => import('@/views/Admin/ContestCreate.vue')
@@ -46,6 +47,12 @@ const contestRoutes: Array<RouteRecordRaw> = [
         name: 'contestSubmit',
         component: ContestSubmit,
         meta: { title: 'Contest Info', requiresLogin: true },
+      },
+      {
+        path: 'submissions',
+        name: 'ContestMySubmissions',
+        component: ContestMySubmissions,
+        meta: { requiresLogin: true },
       },
       {
         path: 'status',
