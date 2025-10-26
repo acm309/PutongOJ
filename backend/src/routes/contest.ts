@@ -34,4 +34,15 @@ contestRouter.post('/:cid/verify',
   contestController.verifyParticipant,
 )
 
+contestRouter.get('/:cid/solutions',
+  authnMiddleware.loginRequire,
+  contestController.managePermRequire,
+  contestController.findSolutions,
+)
+contestRouter.get('/:cid/solutions/export',
+  authnMiddleware.loginRequire,
+  contestController.managePermRequire,
+  contestController.exportSolutions,
+)
+
 export default contestRouter

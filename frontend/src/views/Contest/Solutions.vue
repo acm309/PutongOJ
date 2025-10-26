@@ -1,0 +1,334 @@
+<script lang="ts" setup>
+import type {
+  ContestSolutionListQuery,
+  ContestSolutionListQueryResult,
+  ExportFormat,
+  JudgeStatus,
+  Language,
+} from '@putongoj/shared'
+import { ContestSolutionListQuerySchema } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
+import Tag from 'primevue/tag'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { exportSolutions, findSolutions } from '@/api/contest'
+import ExportDialog from '@/components/ExportDialog.vue'
+import UserFilter from '@/components/UserFilter.vue'
+import { useContestStore } from '@/store/modules/contest'
+import {
+  judgeStatusLabels,
+  judgeStatusOptions,
+  languageLabels,
+  languageOptions,
+} from '@/utils/constant'
+import { exportDataToFile } from '@/utils/export'
+import {
+  getJudgeStatusClassname,
+  getSimilarityClassname,
+  thousandSeparator,
+  timePretty,
+} from '@/utils/formate'
+import { onRouteQueryUpdate } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
+
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const message = useMessage()
+
+const {
+  contestId,
+  problemMap,
+  problemLabels,
+  problemOptions,
+} = storeToRefs(useContestStore())
+
+const query = ref({} as ContestSolutionListQuery)
+const docs = ref([] as ContestSolutionListQueryResult['docs'])
+const total = ref(0)
+const loading = ref(false)
+const exportDialog = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(
+    query.value.user
+    || query.value.problem
+    || Number.isInteger(query.value.judge)
+    || query.value.language,
+  )
+})
+
+async function fetch () {
+  const parsed = ContestSolutionListQuerySchema.safeParse(route.query)
+  if (parsed.success) {
+    query.value = parsed.data
+  } else {
+    router.replace({ query: {} })
+    return
+  }
+
+  loading.value = true
+  const resp = await findSolutions(contestId.value, query.value)
+  loading.value = false
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
+    docs.value = []
+    total.value = 0
+    return
+  }
+
+  docs.value = resp.data.docs
+  total.value = resp.data.total
+}
+
+function onSort (event: any) {
+  router.replace({
+    query: {
+      ...route.query,
+      sortBy: event.sortField,
+      sort: event.sortOrder,
+    },
+  })
+}
+
+function onPage (event: any) {
+  router.replace({
+    query: {
+      ...route.query,
+      page: (event.first / event.rows + 1),
+    },
+  })
+}
+
+function onSearch () {
+  router.replace({
+    query: {
+      ...route.query,
+      user: query.value.user || undefined,
+      problem: query.value.problem || undefined,
+      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      language: query.value.language || undefined,
+      page: undefined,
+    },
+  })
+}
+
+function onReset () {
+  router.replace({
+    query: {
+      ...route.query,
+      user: undefined,
+      problem: undefined,
+      judge: undefined,
+      language: undefined,
+      page: undefined,
+    },
+  })
+}
+
+function onView (data: any) {
+  router.push({ name: 'solution', params: { sid: data.sid } })
+}
+function onViewUser (data: any) {
+  router.push({ name: 'UserProfile', params: { uid: data.uid } })
+}
+function onViewProblem (data: any) {
+  router.push({
+    name: 'contestProblem',
+    params: {
+      cid: contestId.value,
+      id: problemMap.value.get(data.pid)! + 1,
+    },
+  })
+}
+
+async function onExport (format: ExportFormat) {
+  message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
+  const resp = await exportSolutions(contestId.value, query.value)
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
+    exportDialog.value = false
+    return
+  }
+
+  const filename = `PutongOJ_Solutions_${Date.now()}`
+  try {
+    exportDataToFile(resp.data, filename, format)
+  } catch (err: any) {
+    message.error(t('ptoj.failed_export_data'), err.message)
+  }
+  exportDialog.value = false
+}
+
+onMounted(fetch)
+onRouteQueryUpdate(fetch)
+</script>
+
+<template>
+  <div class="-mt-5 p-0">
+    <div class="border-b border-surface p-6">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+        <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
+
+        <Select
+          v-model="query.problem" fluid :options="problemOptions" option-label="label" option-value="value"
+          show-clear :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @change="onSearch"
+        >
+          <template #dropdownicon>
+            <i class="pi pi-flag" />
+          </template>
+        </Select>
+
+        <Select
+          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
+        >
+          <template #option="slotProps">
+            <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
+              {{ slotProps.option.label }}
+            </div>
+          </template>
+          <template #dropdownicon>
+            <i class="pi pi-check-square" />
+          </template>
+        </Select>
+
+        <Select
+          v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
+          show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
+        >
+          <template #dropdownicon>
+            <i class="pi pi-code" />
+          </template>
+        </Select>
+
+        <div class="flex gap-2 items-center justify-end md:col-span-2">
+          <Button
+            icon="pi pi-file-export" severity="secondary" outlined :disabled="loading"
+            @click="exportDialog = true"
+          />
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
+          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+        </div>
+      </div>
+    </div>
+
+    <DataTable
+      class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single"
+      :sort-field="query.sortBy" data-key="sid" :sort-order="query.sort" :lazy="true" :loading="loading" scrollable
+      @sort="onSort"
+    >
+      <Column field="sid" class="font-medium pl-6 text-center" frozen>
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-hashtag" />
+          </span>
+        </template>
+        <template #body="{ data }">
+          <a @click="onView(data)">
+            {{ data.sid }}
+          </a>
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.user')" field="uid" class="font-medium max-w-36 md:max-w-48 min-w-36 truncate">
+        <template #body="{ data }">
+          <a @click="onViewUser(data)">
+            {{ data.uid }}
+          </a>
+        </template>
+      </Column>
+
+      <Column field="pid" class="text-center">
+        <template #header>
+          <span class="font-semibold text-center w-full">
+            {{ t('ptoj.problem') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          <a @click="onViewProblem(data)">
+            {{ problemLabels.get(data.pid) }}
+          </a>
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.judge_status')" field="judge">
+        <template #body="{ data }">
+          <span :class="getJudgeStatusClassname(data.judge as JudgeStatus)">
+            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
+          </span>
+          <Tag
+            v-if="data.sim" severity="secondary" class="-my-px ml-2 text-xs"
+            :class="getSimilarityClassname(data.sim)"
+          >
+            {{ data.sim }}%
+          </Tag>
+        </template>
+      </Column>
+
+      <Column field="time" class="text-right" sortable>
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.time') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          {{ thousandSeparator(data.time) }} <small>ms</small>
+        </template>
+      </Column>
+
+      <Column field="memory" class="text-right" sortable>
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.memory') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          {{ thousandSeparator(data.memory) }} <small>KB</small>
+        </template>
+      </Column>
+
+      <Column field="language" class="text-center">
+        <template #header>
+          <span class="font-semibold text-center w-full">
+            {{ t('ptoj.language') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          {{ languageLabels[data.language as Language] }}
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.submitted_at')" field="createdAt" class="pr-6" sortable>
+        <template #body="{ data }">
+          {{ timePretty(data.createdAt) }}
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
+      </template>
+    </DataTable>
+
+    <Paginator
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
+      :current-page-report-template="t('ptoj.paginator_report')"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" @page="onPage"
+    />
+
+    <ExportDialog v-model:visible="exportDialog" :estimated-count="total" @export="onExport" />
+  </div>
+</template>

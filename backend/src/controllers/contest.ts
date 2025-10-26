@@ -2,6 +2,13 @@ import type { Context } from 'koa'
 import type { ObjectId } from 'mongoose'
 import type { ContestDocumentPopulated } from '../models/Contest'
 import type { SessionProfile } from '../types'
+import {
+  ContestSolutionListExportQueryResultSchema,
+  ContestSolutionListExportQuerySchema,
+  ContestSolutionListQueryResultSchema,
+  ContestSolutionListQuerySchema,
+  ErrorCode,
+} from '@putongoj/shared'
 import { pick } from 'lodash'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
@@ -9,7 +16,13 @@ import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import contestService from '../services/contest'
-import { parsePaginateOption } from '../utils'
+import solutionService from '../services/solution'
+import {
+  createEnvelopedResponse,
+  createErrorResponse,
+  createZodErrorResponse,
+  parsePaginateOption,
+} from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
@@ -367,6 +380,57 @@ const verifyParticipant = async (ctx: Context) => {
   }
 }
 
+export async function managePermRequire (ctx: Context, next: () => Promise<any>) {
+  const profile = await loadProfile(ctx)
+  const contest = await loadContest(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return createErrorResponse(ctx,
+      'You don\'t have permission to manage this contest', ErrorCode.Forbidden,
+    )
+  }
+  await next()
+}
+
+export async function findSolutions (ctx: Context) {
+  const query = ContestSolutionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const contest = await loadContest(ctx)
+  const solutions = await solutionService.findSolutions({
+    ...query.data,
+    contest: contest.cid,
+  })
+  const result = ContestSolutionListQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function exportSolutions (ctx: Context) {
+  const query = ContestSolutionListExportQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const contest = await loadContest(ctx)
+  const solutions = await solutionService.exportSolutions({
+    ...query.data,
+    contest: contest.cid,
+  })
+  const result = ContestSolutionListExportQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const contestController = {
   loadContest,
   findContests,
@@ -376,6 +440,9 @@ const contestController = {
   updateContest,
   removeContest,
   verifyParticipant,
+  managePermRequire,
+  findSolutions,
+  exportSolutions,
 } as const
 
 export default contestController

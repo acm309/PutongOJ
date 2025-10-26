@@ -27,7 +27,7 @@ const display = $computed(() => route.name || 'contest')
 
 let loading = $ref(false)
 
-const isEditable = $computed(() => {
+const isManageable = $computed(() => {
   if (contest.cid !== Number(route.params.cid)) {
     return false
   }
@@ -136,9 +136,9 @@ onProfileUpdate(fetch)
       <TabPane :label="t('oj.problem')" name="contestProblem" />
       <TabPane :label="t('oj.submit')" name="contestSubmit" />
       <TabPane :label="t('ptoj.my_submissions')" name="ContestMySubmissions" />
-      <TabPane :label="t('oj.status')" name="contestStatus" />
+      <TabPane v-if="isManageable" :label="t('ptoj.all_solutions')" name="ContestSolutions" />
       <TabPane :label="t('oj.ranklist')" name="contestRanklist" />
-      <TabPane v-if="isEditable" :label="t('oj.edit')" name="contestEdit" />
+      <TabPane v-if="isManageable" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
     <!-- 此处 if：为了确保之后的 children 能拿到 contest -->
     <router-view v-if="contest && contest.cid" class="contest-children" />
