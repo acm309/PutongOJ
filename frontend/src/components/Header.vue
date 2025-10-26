@@ -136,7 +136,7 @@ const profileItems = computed(() => [
   {
     separator: true,
   },
-  ...(isAdmin
+  ...(isAdmin.value
     ? [ {
         label: '[Test] Toggle Dark Mode',
         icon: 'pi pi-lightbulb',
@@ -169,7 +169,7 @@ const profileItems = computed(() => [
       <router-link v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
         <a
           :href="href" v-bind="props.action"
-          :class="{ 'text-(--p-primary-color) font-semibold': currentRoute === item.route }" @click="navigate"
+          :class="{ 'text-primary font-semibold': currentRoute === item.route }" @click="navigate"
         >
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
