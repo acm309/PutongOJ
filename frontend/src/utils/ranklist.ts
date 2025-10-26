@@ -197,6 +197,6 @@ export async function exportSheet (
 
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  link.download = `${contest.title} - Ranklist.xlsx`
+  link.download = `${contest.title} - Ranklist - ${Date.now()}.xlsx`
   link.click()
 }

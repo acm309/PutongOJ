@@ -16,7 +16,7 @@ const { t } = useI18n()
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
 const route = useRoute()
-const { isRoot } = $(storeToRefs(sessionStore))
+const { isAdmin } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
 const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
@@ -28,6 +28,16 @@ const loading = ref(false)
 
 let autoRefresh: any = null
 const AUTO_REFRESH_GAP = 10 * 1000
+
+const isManageable = $computed(() => {
+  if (contest.value.cid !== Number(route.params.cid)) {
+    return false
+  }
+  if (isAdmin.value || contest.value.course?.role.manageContest) {
+    return true
+  }
+  return false
+})
 
 async function getRanklist () {
   loading.value = true
@@ -75,7 +85,7 @@ onBeforeUnmount(clearAutoRefresh)
   <div class="contest-children">
     <div class="board-header">
       <Space>
-        <Button size="small" shape="circle" type="primary" :loading="loading" icon="md-refresh" @click="getRanklist" />
+        <Button shape="circle" type="primary" :loading="loading" icon="md-refresh" @click="getRanklist" />
         <Switch @on-change="setAutoRefresh">
           <template #open>
             <Icon type="md-checkmark" />
@@ -86,7 +96,7 @@ onBeforeUnmount(clearAutoRefresh)
         </Switch>
         <span>{{ t('oj.auto_refresh') }}</span>
         <Button
-          v-if="isRoot && ranklistInfo.isEnded" size="small" shape="circle" type="primary" icon="md-download"
+          v-if="isManageable" shape="circle" type="primary" icon="md-download"
           @click="() => exportSheet(contest, ranklist)"
         />
       </Space>
