@@ -1,4 +1,8 @@
 import type {
+  AdminGroupCreatePayload,
+  AdminGroupDetailQueryResult,
+  AdminGroupMembersUpdatePayload,
+  AdminGroupUpdatePayload,
   AdminSolutionListExportQuery,
   AdminSolutionListExportQueryResult,
   AdminSolutionListQuery,
@@ -40,4 +44,20 @@ export async function findSolutions (params: AdminSolutionListQuery) {
 }
 export async function exportSolutions (params: AdminSolutionListExportQuery) {
   return instance.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
+}
+
+export async function createGroup (payload: AdminGroupCreatePayload) {
+  return instance.post<AdminGroupDetailQueryResult>('/admin/groups', payload)
+}
+export async function getGroup (groupId: string) {
+  return instance.get<AdminGroupDetailQueryResult>(`/admin/groups/${encodeURIComponent(groupId)}`)
+}
+export async function updateGroup (groupId: string, payload: AdminGroupUpdatePayload) {
+  return instance.put<null>(`/admin/groups/${encodeURIComponent(groupId)}`, payload)
+}
+export async function updateGroupMembers (groupId: string, payload: AdminGroupMembersUpdatePayload) {
+  return instance.put<{ modifiedCount: number }>(`/admin/groups/${encodeURIComponent(groupId)}/members`, payload)
+}
+export async function removeGroup (groupId: string) {
+  return instance.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)
 }

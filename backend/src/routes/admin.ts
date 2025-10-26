@@ -40,4 +40,20 @@ adminRouter.post('/notifications/broadcast',
   adminController.sendNotificationBroadcast,
 )
 
+adminRouter.get('/groups/:groupId',
+  adminController.getGroup,
+)
+adminRouter.post('/groups',
+  adminController.createGroup,
+)
+adminRouter.put('/groups/:groupId',
+  adminController.updateGroup,
+)
+adminRouter.put('/groups/:groupId/members',
+  adminController.updateGroupMembers,
+)
+adminRouter.delete('/groups/:groupId',
+  adminController.removeGroup,
+)
+
 export default adminRouter
