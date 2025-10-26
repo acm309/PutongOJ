@@ -14,7 +14,7 @@ import InputIcon from 'primevue/inputicon'
 import InputNumber from 'primevue/inputnumber'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
@@ -42,6 +42,15 @@ const query = ref({} as AccountSubmissionListQuery)
 const docs = ref([] as AccountSubmissionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(
+    query.value.problem
+    || query.value.contest
+    || Number.isInteger(query.value.judge)
+    || query.value.language,
+  )
+})
 
 async function fetch () {
   const parsed = AccountSubmissionListQuerySchema.safeParse(route.query)
@@ -184,7 +193,10 @@ onRouteQueryUpdate(fetch)
 
         <div class="flex gap-2 items-center justify-end md:col-span-2 xl:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
           <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>

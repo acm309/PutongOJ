@@ -12,7 +12,7 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
@@ -48,6 +48,14 @@ const query = ref({} as AccountSubmissionListQuery)
 const docs = ref([] as AccountSubmissionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(
+    query.value.problem
+    || Number.isInteger(query.value.judge)
+    || query.value.language,
+  )
+})
 
 async function fetch () {
   const parsed = AccountSubmissionListQuerySchema.safeParse(route.query)
@@ -125,10 +133,13 @@ function onView (data: any) {
   router.push({ name: 'solution', params: { sid: data.sid } })
 }
 function onViewProblem (data: any) {
-  router.push({ name: 'contestProblem', params: {
-    cid: contestId.value,
-    id: problemMap.value.get(data.pid)! + 1,
-  } })
+  router.push({
+    name: 'contestProblem',
+    params: {
+      cid: contestId.value,
+      id: problemMap.value.get(data.pid)! + 1,
+    },
+  })
 }
 
 emitter.on('submission-updated', (sid) => {
@@ -179,7 +190,10 @@ onRouteQueryUpdate(fetch)
 
         <div class="flex gap-2 items-center justify-end lg:col-span-3">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
           <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
