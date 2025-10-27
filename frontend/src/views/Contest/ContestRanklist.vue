@@ -17,7 +17,7 @@ const contestStore = useContestStore()
 const sessionStore = useSessionStore()
 const route = useRoute()
 const router = useRouter()
-const { isAdmin } = storeToRefs(sessionStore)
+const { isAdmin, profile } = storeToRefs(sessionStore)
 const message = inject('$Message') as typeof Message
 
 const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
@@ -79,14 +79,19 @@ function formateAcceptedAt (acceptedAt: number) {
 }
 
 function onViewSolutions (user: string, problem: number) {
-  if (!isManageable) {
-    return
+  if (isManageable) {
+    router.push({
+      name: 'ContestSolutions',
+      params: { cid },
+      query: { user, problem },
+    })
+  } else if (profile.value?.uid === user) {
+    router.push({
+      name: 'ContestMySubmissions',
+      params: { cid },
+      query: { problem },
+    })
   }
-  router.push({
-    name: 'ContestSolutions',
-    params: { cid },
-    query: { user, problem },
-  })
 }
 
 onBeforeMount(getRanklist)
