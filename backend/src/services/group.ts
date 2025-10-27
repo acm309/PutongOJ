@@ -49,12 +49,22 @@ export async function updateGroupMembers (groupId: number, members: string[]) {
   const toAdd = difference(members, group.members)
   const toRemove = difference(group.members, members)
 
-  const result = await Promise.all([
-    User.updateMany({ uid: { $in: toAdd } }, { $addToSet: { gid: groupId } }),
-    User.updateMany({ uid: { $in: toRemove } }, { $pullAll: { gid: groupId } }),
-  ])
+  const tasks = []
+  if (toAdd.length > 0) {
+    tasks.push(User.updateMany(
+      { uid: { $in: toAdd } },
+      { $addToSet: { gid: groupId } },
+    ))
+  }
+  if (toRemove.length > 0) {
+    tasks.push(User.updateMany(
+      { uid: { $in: toRemove } },
+      { $pull: { gid: groupId } },
+    ))
+  }
 
-  return result[0].modifiedCount + result[1].modifiedCount
+  const result = await Promise.all(tasks)
+  return result.reduce((sum, res) => sum + res.modifiedCount, 0)
 }
 
 export async function removeGroup (groupId: number) {
@@ -63,7 +73,7 @@ export async function removeGroup (groupId: number) {
     return null
   }
 
-  await User.updateMany({ gid: groupId }, { $pullAll: { gid: groupId } })
+  await User.updateMany({ gid: groupId }, { $pull: { gid: groupId } })
   return true
 }
 
