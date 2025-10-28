@@ -5,6 +5,7 @@ import type {
   GroupListQueryResult,
   UserItemListQueryResult,
 } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
@@ -25,6 +26,7 @@ import {
 } from '@/api/admin'
 import { findGroups } from '@/api/group'
 import { getAllUserItems } from '@/api/user'
+import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -33,6 +35,8 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const confirm = useConfirm()
+
+const { isRoot } = storeToRefs(useSessionStore())
 
 const groupId = ref<number | null>(null)
 const groups = ref<GroupListQueryResult>([])
@@ -410,8 +414,8 @@ watch([ sourceSearch, targetSearch ], resetSelections)
             @click="editDialog = true"
           />
           <Button
-            icon="pi pi-trash" :label="t('ptoj.delete')" severity="danger" outlined :disabled="loading"
-            @click="handleDeleteGroup"
+            v-if="isRoot" icon="pi pi-trash" :label="t('ptoj.delete')" severity="danger" outlined
+            :disabled="loading" @click="handleDeleteGroup"
           />
         </div>
 

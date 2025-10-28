@@ -53,6 +53,7 @@ adminRouter.put('/groups/:groupId/members',
   adminController.updateGroupMembers,
 )
 adminRouter.delete('/groups/:groupId',
+  authnMiddleware.rootRequire,
   adminController.removeGroup,
 )
 
