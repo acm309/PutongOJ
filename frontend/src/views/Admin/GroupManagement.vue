@@ -369,13 +369,13 @@ watch([ sourceSearch, targetSearch ], resetSelections)
           {{ t('ptoj.group_management') }}
         </h1>
       </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-4 md:grid-cols-2">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
           v-model="groupId" fluid :options="groups" option-label="title" option-value="gid" show-clear
           :placeholder="t('ptoj.select_group')" :loading="loadingGroups" :disabled="loading" @change="onSelect"
         />
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-3 md:col-span-1">
+        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="init" />
           <Button
             icon="pi pi-plus" :label="t('ptoj.create_group')" severity="primary" outlined :disabled="loading"
