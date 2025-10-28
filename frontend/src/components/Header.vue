@@ -97,9 +97,9 @@ const menuItems = computed(() => {
         icon: 'pi pi-tags',
         route: 'tagManager',
       }, {
-        label: t('oj.group_management'),
+        label: t('ptoj.group_management'),
         icon: 'pi pi-paperclip',
-        route: 'groupManager',
+        route: 'GroupManagement',
       }, {
         label: t('ptoj.solution_management'),
         icon: 'pi pi-copy',

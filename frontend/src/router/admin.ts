@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-const GroupManager = () => import('@/views/Admin/GroupManager.vue')
+const GroupManagement = () => import('@/views/Admin/GroupManagement.vue')
 const TagManager = () => import('@/views/Admin/TagManager.vue')
 const UserManagement = () => import('@/views/Admin/UserManagement.vue')
 const UserManagementDetail = () => import('@/views/Admin/UserManagementDetail.vue')
@@ -9,9 +9,9 @@ const SolutionManagement = () => import('@/views/Admin/SolutionManagement.vue')
 const adminRoutes: Array<RouteRecordRaw> = [
   {
     path: '/admin/groups',
-    name: 'groupManager',
-    component: GroupManager,
-    meta: { title: 'User Group Manage', requiresAdmin: true },
+    name: 'GroupManagement',
+    component: GroupManagement,
+    meta: { title: 'User Group Management', requiresAdmin: true },
   },
   {
     path: '/admin/tags',
