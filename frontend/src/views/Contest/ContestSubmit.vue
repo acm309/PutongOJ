@@ -35,7 +35,7 @@ function pageChange (val) {
 async function submit () {
   const response = await create({ pid, mid, ...solution })
   if (response.isAxiosError) return
-  router.push({ name: 'contestStatus', params: route.params })
+  router.push({ name: 'ContestMySubmissions', params: route.params })
   message.info(t('oj.submitSuccess', { id: currentProblemId }))
 }
 </script>

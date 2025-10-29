@@ -32,7 +32,7 @@ const solution = {
   find: (data: { [key: string]: any }) =>
     instance.get('/status/list', { params: data }),
   create: (data: { [key: string]: any }) =>
-    instance.post('/status', data),
+    instance.post<{ sid: number }>('/status', data),
   updateSolution: (solutionId: number, data: { judge: number }) =>
     instance.put<Enveloped<SolutionEntity>>(`/status/${solutionId}`, data),
 }
