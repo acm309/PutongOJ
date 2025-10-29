@@ -63,11 +63,10 @@ async function updateResult (result: any) {
     message,
   }
 
-  const tasks = [
-    solution.save().then(() => {
-      logger.info(`Solution <${sid}> update to status ${solution.judge}`)
-    }),
-  ] as Promise<any>[]
+  await solution.save()
+  logger.info(`Solution <${sid}> update to status ${solution.judge}`)
+
+  const tasks = [] as Promise<any>[]
   if (solution.judge !== judge.Running) {
     tasks.push(distributeWork('updateStatistic', `problem:${solution.pid}`))
     tasks.push(distributeWork('updateStatistic', `user:${solution.uid}`))
