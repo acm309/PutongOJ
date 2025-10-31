@@ -5,7 +5,7 @@ import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
-import { language } from '@/utils/constant'
+import { language, languagesOrder } from '@/utils/constant'
 import { useSolutionStorage } from '@/utils/helper'
 
 const props = defineProps({
@@ -19,7 +19,6 @@ const solutionStore = useSolutionStore()
 const { solution } = $(storeToRefs(solutionStore))
 const solutionStorage = $ref(useSolutionStorage())
 
-const languagesOrder: (keyof typeof language)[] = [ 2, 5, 1, 3, 4 ]
 const languages = $computed(() =>
   languagesOrder.map(key => ({
     value: key,

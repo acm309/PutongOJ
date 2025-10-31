@@ -2,11 +2,12 @@ import type { CourseRole } from '@backend/types'
 import { JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
 
 export const languageHighlight = {
-  1: 'c',
-  2: 'cpp',
-  3: 'java',
-  4: 'python',
-  5: 'cpp',
+  [Language.C]: 'c',
+  [Language.Cpp11]: 'cpp',
+  [Language.Cpp17]: 'cpp',
+  [Language.Java]: 'java',
+  [Language.PyPy]: 'python',
+  [Language.Python]: 'python',
 } as const
 
 export const color = {
@@ -105,17 +106,28 @@ export const result = judgeStatusLabels
 /** @deprecated use `judgeStatusOptions` instead */
 export const judgeList = judgeStatusOptions
 
+export const languagesOrder: Language[] = [
+  Language.Cpp11,
+  Language.Cpp17,
+  Language.C,
+  Language.Java,
+  Language.Python,
+  Language.PyPy,
+]
+
 export const languageLabels: Record<Language, string> = {
   [Language.C]: 'C',
   [Language.Cpp11]: 'C++ 11',
   [Language.Cpp17]: 'C++ 17',
   [Language.Java]: 'Java',
+  [Language.PyPy]: 'PyPy 3',
   [Language.Python]: 'Python 3',
 }
 
-export const languageOptions = Object.entries(languageLabels)
-  .map(([ value, label ]) => ({ label, value: Number.parseInt(value) }))
-  .sort((a, b) => a.label.localeCompare(b.label))
+export const languageOptions = languagesOrder.map(lang => ({
+  label: languageLabels[lang],
+  value: lang,
+}))
 
 /** @deprecated use `languageLabels` instead */
 export const language = languageLabels
