@@ -130,7 +130,10 @@ function handleViewContest (data: any) {
           <span :class="getJudgeStatusClassname(data.judge as JudgeStatus)">
             {{ judgeStatusLabels[data.judge as JudgeStatus] }}
           </span>
-          <Tag v-if="data.sim" severity="secondary" class="ml-2 text-xs" :class="getSimilarityClassname(data.sim)">
+          <Tag
+            v-if="data.sim" v-tooltip.top="t('ptoj.similarity_detected')" :class="getSimilarityClassname(data.sim)"
+            severity="secondary" class="ml-2 text-xs"
+          >
             {{ data.sim }}%
           </Tag>
         </div>
