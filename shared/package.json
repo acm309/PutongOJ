@@ -16,8 +16,8 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^5.4.1",
-    "eslint": "^9.38.0",
+    "@antfu/eslint-config": "^6.2.0",
+    "eslint": "^9.39.0",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3"
   }
