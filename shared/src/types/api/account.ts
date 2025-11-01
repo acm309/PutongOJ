@@ -77,6 +77,7 @@ export const AccountSubmissionListQueryResultSchema = PaginatedSchema(z.object({
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
   memory: SolutionModelSchema.shape.memory,
+  sim: SolutionModelSchema.shape.sim,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 

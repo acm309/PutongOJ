@@ -4,37 +4,24 @@ import type {
   AdminSolutionListQueryResult,
   ExportFormat,
   JudgeStatus,
-  Language,
 } from '@putongoj/shared'
 import { AdminSolutionListQuerySchema } from '@putongoj/shared'
 import Button from 'primevue/button'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputNumber from 'primevue/inputnumber'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import Tag from 'primevue/tag'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { exportSolutions, findSolutions } from '@/api/admin'
 import ExportDialog from '@/components/ExportDialog.vue'
+import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import UserFilter from '@/components/UserFilter.vue'
-import {
-  judgeStatusLabels,
-  judgeStatusOptions,
-  languageLabels,
-  languageOptions,
-} from '@/utils/constant'
+import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import { exportDataToFile } from '@/utils/export'
-import {
-  getJudgeStatusClassname,
-  getSimilarityClassname,
-  thousandSeparator,
-  timePretty,
-} from '@/utils/formate'
+import { getJudgeStatusClassname } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -130,20 +117,6 @@ function onReset () {
   })
 }
 
-function onView (data: any) {
-  router.push({ name: 'solution', params: { sid: data.sid } })
-}
-function onViewUser (data: any) {
-  router.push({ name: 'UserProfile', params: { uid: data.uid } })
-}
-function onViewProblem (data: any) {
-  router.push({ name: 'problemInfo', params: { pid: data.pid } })
-}
-function onViewContest (data: any) {
-  if (!data.mid || data.mid <= 0) return
-  router.push({ name: 'contestOverview', params: { cid: data.mid } })
-}
-
 async function onExport (format: ExportFormat) {
   message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
   const resp = await exportSolutions(query.value)
@@ -232,130 +205,10 @@ onRouteQueryUpdate(fetch)
       </div>
     </div>
 
-    <DataTable
-      v-model:selection="selectedDocs" class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single"
-      :sort-field="query.sortBy" data-key="sid" :sort-order="query.sort" :lazy="true" :loading="loading" scrollable
-      @sort="onSort"
-    >
-      <Column selection-mode="multiple" class="pl-6 w-10" frozen />
-
-      <Column field="sid" class="font-medium text-center" frozen>
-        <template #header>
-          <span class="text-center w-full">
-            <i class="pi pi-hashtag" />
-          </span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onView(data)">
-            {{ data.sid }}
-          </a>
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.user')" field="uid" class="font-medium max-w-36 md:max-w-48 min-w-36 truncate">
-        <template #body="{ data }">
-          <a @click="onViewUser(data)">
-            {{ data.uid }}
-          </a>
-        </template>
-      </Column>
-
-      <Column field="pid" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.problem') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onViewProblem(data)">
-            {{ data.pid }}
-          </a>
-        </template>
-      </Column>
-
-      <Column field="mid" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.contest') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          <a v-if="data.mid && data.mid > 0" @click="onViewContest(data)">
-            {{ data.mid }}
-          </a>
-          <span v-else>
-            -
-          </span>
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.judge_status')" field="judge">
-        <template #body="{ data }">
-          <span :class="getJudgeStatusClassname(data.judge as JudgeStatus)">
-            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
-          </span>
-          <Tag
-            v-if="data.sim" severity="secondary" class="-my-px ml-2 text-xs"
-            :class="getSimilarityClassname(data.sim)"
-          >
-            {{ data.sim }}%
-          </Tag>
-        </template>
-      </Column>
-
-      <Column field="time" class="text-right" sortable>
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.time') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.time) }} <small>ms</small>
-        </template>
-      </Column>
-
-      <Column field="memory" class="text-right" sortable>
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.memory') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.memory) }} <small>KB</small>
-        </template>
-      </Column>
-
-      <Column field="language" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.language') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ languageLabels[data.language as Language] }}
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.submitted_at')" field="createdAt" sortable>
-        <template #body="{ data }">
-          {{ timePretty(data.createdAt) }}
-        </template>
-      </Column>
-
-      <Column class="px-6 py-1 w-20">
-        <template #body="{ data }">
-          <div class="flex gap-1 items-center">
-            <Button icon="pi pi-eye" text @click="onView(data)" />
-          </div>
-        </template>
-      </Column>
-
-      <template #empty>
-        <span class="px-2">
-          {{ t('ptoj.empty_content_desc') }}
-        </span>
-      </template>
-    </DataTable>
+    <SolutionDataTable
+      v-model:selection="selectedDocs" class="-mb-px" :value="docs" :loading="loading"
+      :sort-field="query.sortBy" :sort-order="query.sort" selectable @sort="onSort"
+    />
 
     <Paginator
       class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"

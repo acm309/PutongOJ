@@ -3,31 +3,25 @@ import type {
   AccountSubmissionListQuery,
   AccountSubmissionListQueryResult,
   JudgeStatus,
-  Language,
 } from '@putongoj/shared'
 import { AccountSubmissionListQuerySchema } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
+import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import { useContestStore } from '@/store/modules/contest'
 import {
-  judgeStatusLabels,
   judgeStatusOptions,
-  languageLabels,
   languageOptions,
 } from '@/utils/constant'
 import emitter from '@/utils/emitter'
 import {
   getJudgeStatusClassname,
-  thousandSeparator,
-  timePretty,
 } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -129,10 +123,7 @@ function onReset () {
   })
 }
 
-function onView (data: any) {
-  router.push({ name: 'solution', params: { sid: data.sid } })
-}
-function onViewProblem (data: any) {
+function handleViewProblem (data: any) {
   router.push({
     name: 'contestProblem',
     params: {
@@ -199,89 +190,16 @@ onRouteQueryUpdate(fetch)
       </div>
     </div>
 
-    <DataTable
-      class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
-      data-key="sid" :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort"
+    <SolutionDataTable
+      class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"
+      :sort-order="query.sort" hide-user hide-contest @sort="onSort"
     >
-      <Column field="sid" class="font-medium pl-6 text-center" frozen>
-        <template #header>
-          <span class="text-center w-full">
-            <i class="pi pi-hashtag" />
-          </span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onView(data)">
-            {{ data.sid }}
-          </a>
-        </template>
-      </Column>
-
-      <Column field="pid" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.problem') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onViewProblem(data)">
-            {{ problemLabels.get(data.pid) }}
-          </a>
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.judge_status')" field="judge">
-        <template #body="{ data }">
-          <span :class="getJudgeStatusClassname(data.judge as JudgeStatus)">
-            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
-          </span>
-        </template>
-      </Column>
-
-      <Column field="time" class="text-right" sortable>
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.time') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.time) }} <small>ms</small>
-        </template>
-      </Column>
-
-      <Column field="memory" class="text-right" sortable>
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.memory') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.memory) }} <small>KB</small>
-        </template>
-      </Column>
-
-      <Column field="language" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.language') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ languageLabels[data.language as Language] }}
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.submitted_at')" field="createdAt" class="pr-6" sortable>
-        <template #body="{ data }">
-          {{ timePretty(data.createdAt) }}
-        </template>
-      </Column>
-
-      <template #empty>
-        <span class="px-2">
-          {{ t('ptoj.empty_content_desc') }}
-        </span>
+      <template #problem="{ data }">
+        <a @click="handleViewProblem(data)">
+          {{ problemLabels.get(data.pid) }}
+        </a>
       </template>
-    </DataTable>
+    </SolutionDataTable>
 
     <Paginator
       class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"

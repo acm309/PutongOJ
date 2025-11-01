@@ -1,4 +1,5 @@
 import type { ContestEntityView, ProblemEntityPreview } from '@backend/types/entity'
+import type { SolutionModel } from '@putongoj/shared'
 import type { privilege } from '@/utils/constant'
 
 export interface TimeResp {
@@ -94,3 +95,16 @@ export interface RanklistRow {
 }
 
 export type Ranklist = RanklistRow[]
+
+export interface SolutionModelDataTable {
+  sid: SolutionModel['sid']
+  uid?: SolutionModel['uid']
+  pid?: SolutionModel['pid']
+  mid?: SolutionModel['mid']
+  judge: SolutionModel['judge']
+  sim: SolutionModel['sim']
+  time: SolutionModel['time']
+  memory: SolutionModel['memory']
+  language: SolutionModel['language']
+  createdAt: SolutionModel['createdAt']
+}
