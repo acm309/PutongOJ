@@ -7,9 +7,6 @@ const solutionRouter = new Router({
   prefix: '/status',
 })
 
-solutionRouter.get('/list',
-  solutionController.find,
-)
 solutionRouter.get('/:sid',
   authnMiddleware.loginRequire,
   solutionController.findOne,

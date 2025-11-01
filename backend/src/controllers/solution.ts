@@ -9,30 +9,9 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
-import { createEnvelopedResponse, createErrorResponse, only, purify } from '../utils'
+import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { judgeResult } from '../utils/constants'
 import logger from '../utils/logger'
-
-// 返回提交列表
-const find = async (ctx: Context) => {
-  const opt = ctx.request.query
-  const page = Number.parseInt(opt.page as string) || 1
-  const pageSize = Number.parseInt(opt.pageSize as string) || 30
-  const filter = purify(only(opt, 'uid pid judge language mid'))
-  const list = await Solution.paginate(filter, {
-    sort: { sid: -1 },
-    page,
-    limit: pageSize,
-    select: '-_id -code -error',
-    lean: true,
-    leanWithId: false,
-    useEstimatedCount: Object.keys(filter).length === 0,
-  })
-
-  ctx.body = {
-    list,
-  }
-}
 
 // 返回一个提交
 const findOne = async (ctx: Context) => {
@@ -253,7 +232,6 @@ async function updateSolution (ctx: Context) {
 }
 
 const solutionController = {
-  find,
   findOne,
   create,
   updateSolution,

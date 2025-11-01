@@ -17,7 +17,7 @@ test('Can not create solution without login', async (t) => {
   t.is(res.status, 401)
 })
 
-test('Status list', async (t) => {
+test.skip('Status list', async (t) => {
   const res = await request
     .get('/api/status/list')
 

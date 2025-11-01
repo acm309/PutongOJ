@@ -1,23 +1,29 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { TabPane, Tabs } from 'view-ui-plus'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 
 const { t } = useI18n()
+const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
+
+const { findOne } = problemStore
+const { changeDomTitle } = rootStore
 
 const { isAdmin, isLogined } = storeToRefs(sessionStore)
 const { problem } = storeToRefs(problemStore)
 const route = useRoute()
 const router = useRouter()
 const display = $computed(() => route.name)
+const isLoaded = $computed(() => problem.value?.pid === Number(route.params.pid))
 const isEditable = computed(() => {
-  if (problem.value?.pid !== Number(route.params.pid)) {
+  if (!isLoaded) {
     return false
   }
   if (isAdmin.value || problem.value?.isOwner) {
@@ -25,6 +31,8 @@ const isEditable = computed(() => {
   }
   return false
 })
+
+let loading = $ref(false)
 
 function handleClick (name) {
   if (name === display) {
@@ -36,6 +44,15 @@ function handleClick (name) {
   }
   router.push({ name, params: { pid: route.params.pid } })
 }
+
+async function init () {
+  loading = true
+  await findOne(route.params)
+  changeDomTitle({ title: problem.title })
+  loading = false
+}
+
+onMounted(init)
 </script>
 
 <template>
@@ -45,10 +62,12 @@ function handleClick (name) {
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
       <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="MySubmissions" />
       <TabPane :label="t('oj.statistics')" name="problemStatistics" />
+      <TabPane :label="t('ptoj.all_solutions')" name="ProblemSolutions" />
       <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
       <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />
     </Tabs>
-    <router-view class="problem-children" />
+    <router-view v-if="isLoaded" class="problem-children" />
+    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

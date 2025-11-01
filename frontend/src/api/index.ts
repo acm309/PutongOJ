@@ -29,8 +29,6 @@ const testcase = {
 const solution = {
   findOne: (data: { [key: string]: any }) =>
     instance.get(`/status/${data.sid}`, { params: data }),
-  find: (data: { [key: string]: any }) =>
-    instance.get('/status/list', { params: data }),
   create: (data: { [key: string]: any }) =>
     instance.post<{ sid: number }>('/status', data),
   updateSolution: (solutionId: number, data: { judge: number }) =>

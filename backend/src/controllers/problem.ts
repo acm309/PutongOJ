@@ -4,14 +4,16 @@ import type { ObjectId } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
+import { ProblemSolutionListQueryResultSchema, ProblemSolutionListQuerySchema } from '@putongoj/shared'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import courseService from '../services/course'
 import problemService from '../services/problem'
+import solutionService from '../services/solution'
 import tagService from '../services/tag'
-import { parsePaginateOption } from '../utils'
+import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
@@ -307,6 +309,21 @@ const getStatistics = async (ctx: Context) => {
   ctx.body = result as ProblemStatistics
 }
 
+export async function findSolutions (ctx: Context) {
+  const query = ProblemSolutionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const problem = await loadProblem(ctx)
+  const solutions = await solutionService.findSolutions({
+    ...query.data,
+    problem: problem.pid,
+  })
+  const result = ProblemSolutionListQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const problemController = {
   loadProblem,
   findProblems,
@@ -316,6 +333,7 @@ const problemController = {
   updateProblem,
   removeProblem,
   getStatistics,
+  findSolutions,
 } as const
 
 export default problemController

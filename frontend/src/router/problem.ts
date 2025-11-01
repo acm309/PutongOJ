@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import Problem from '@/views/Problem/Problem.vue'
 import ProblemInfo from '@/views/Problem/ProblemInfo.vue'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit.vue'
+import ProblemSolutions from '@/views/Problem/Solutions.vue'
 import Problems from '@/views/Problems.vue'
 
 const ProblemCreate = () => import('@/views/Admin/ProblemCreate.vue')
@@ -44,10 +45,16 @@ const problemRoutes: Array<RouteRecordRaw> = [
         redirect: { name: 'MySubmissions' },
       },
       {
+        path: 'solutions',
+        name: 'ProblemSolutions',
+        component: ProblemSolutions,
+        meta: { requiresLogin: true },
+      },
+      {
         path: 'statistics',
         name: 'problemStatistics',
         component: ProblemStatistics,
-        meta: { title: 'Problem Info' },
+        meta: { title: 'Problem Info', requiresLogin: true },
       },
       {
         path: 'edit',

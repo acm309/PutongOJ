@@ -57,13 +57,3 @@ test('Pid is not a number', async (t) => {
 test.after.always('close server', () => {
   server.close()
 })
-
-test('Statistics for pid 1001', async (t) => {
-  const res = await request
-    .get('/api/problem/1001/statistics')
-
-  t.is(res.status, 200)
-  t.is(res.type, 'application/json')
-  t.truthy(Array.isArray(res.body.list.docs))
-  t.truthy(Array.isArray(res.body.group))
-})

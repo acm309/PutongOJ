@@ -180,10 +180,10 @@ onProfileUpdate(fetch)
             <td class="problem-ratio">
               <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
               (
-              <router-link :to="{ name: 'status', query: { pid: item.pid, judge: judge.Accepted } }">
+              <router-link :to="{ name: 'ProblemSolutions', params: { pid: item.pid }, query: { judge: judge.Accepted } }">
                 {{ item.solve }}
               </router-link> /
-              <router-link :to="{ name: 'status', query: { pid: item.pid } }">
+              <router-link :to="{ name: 'ProblemSolutions', params: { pid: item.pid } }">
                 {{ item.submit }}
               </router-link>
               )

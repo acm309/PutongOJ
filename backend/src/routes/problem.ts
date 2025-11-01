@@ -17,6 +17,7 @@ problemRouter.post('/',
   authnMiddleware.loginRequire,
   problemController.createProblem,
 )
+
 problemRouter.get('/:pid',
   problemController.getProblem,
 )
@@ -28,8 +29,14 @@ problemRouter.del('/:pid',
   authnMiddleware.rootRequire,
   problemController.removeProblem,
 )
+
 problemRouter.get('/:pid/statistics',
+  authnMiddleware.loginRequire,
   problemController.getStatistics,
+)
+problemRouter.get('/:pid/solutions',
+  authnMiddleware.loginRequire,
+  problemController.findSolutions,
 )
 
 export default problemRouter
