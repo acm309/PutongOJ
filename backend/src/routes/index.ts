@@ -11,7 +11,6 @@ import oauth from './oauth'
 import problem from './problem'
 import solution from './solution'
 import tag from './tag'
-import testcase from './testcase'
 import user from './user'
 import utils from './utils'
 
@@ -30,7 +29,6 @@ router.use(oauth.routes(), oauth.allowedMethods())
 router.use(problem.routes(), problem.allowedMethods())
 router.use(solution.routes(), solution.allowedMethods())
 router.use(tag.routes(), tag.allowedMethods())
-router.use(testcase.routes(), testcase.allowedMethods())
 router.use(user.routes(), user.allowedMethods())
 router.use(utils.routes(), utils.allowedMethods())
 

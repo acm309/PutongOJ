@@ -1,16 +1,40 @@
 import type { Context } from 'koa'
 import path from 'node:path'
+import { ProblemTestcaseListQueryResultSchema } from '@putongoj/shared'
 import fse from 'fs-extra'
 import send from 'koa-send'
 import remove from 'lodash/remove'
 import { v4 as uuid, validate } from 'uuid'
 import { loadProfile } from '../middlewares/authn'
 import courseService from '../services/course'
+import { createEnvelopedResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadProblem } from './problem'
 
-const createTestcase = async (ctx: Context) => {
+export async function findTestcases (ctx: Context) {
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = problem
+  let meta = { testcases: [] }
+  const dir = path.resolve(__dirname, `../../data/${pid}`)
+  const file = path.resolve(dir, 'meta.json')
+  if (!fse.existsSync(file)) {
+    fse.ensureDirSync(dir)
+    fse.outputJsonSync(file, meta, { spaces: 2 })
+  } else {
+    meta = await fse.readJson(file)
+  }
+
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function createTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
@@ -49,10 +73,11 @@ const createTestcase = async (ctx: Context) => {
   ])
   logger.info(`Testcase <${id}> for problem <${pid}> is created by user <${uid}>`)
 
-  ctx.body = meta // 结构就是: {testcases: [{ uuid: 'axxx' }, { uuid: 'yyyy' }]}
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
 }
 
-const removeTestcase = async (ctx: Context) => {
+export async function removeTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
@@ -79,10 +104,11 @@ const removeTestcase = async (ctx: Context) => {
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
   logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
 
-  ctx.body = meta
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
 }
 
-const fetchTestcase = async (ctx: Context) => {
+export async function getTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(
@@ -100,7 +126,7 @@ const fetchTestcase = async (ctx: Context) => {
   if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
-  const type = ctx.query.type
+  const type = ctx.params.type
   if (type !== 'in' && type !== 'out') {
     ctx.throw(400, 'Invalid type')
   }
@@ -113,31 +139,10 @@ const fetchTestcase = async (ctx: Context) => {
   await send(ctx, `${uuid}.${type}`, { root: testDir })
 }
 
-const findTestcases = async (ctx: Context) => {
-  const problem = await loadProblem(ctx)
-  const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  const { pid } = problem
-  let meta = { testcases: [] }
-  const dir = path.resolve(__dirname, `../../data/${pid}`)
-  const file = path.resolve(dir, 'meta.json')
-  if (!fse.existsSync(file)) {
-    fse.ensureDirSync(dir)
-    fse.outputJsonSync(file, meta, { spaces: 2 })
-  } else {
-    meta = await fse.readJson(file)
-  }
-
-  ctx.body = meta
-}
-
 const testcaseController = {
   findTestcases,
   createTestcase,
-  fetchTestcase,
+  getTestcase,
   removeTestcase,
 } as const
 

@@ -28,3 +28,16 @@ export const ProblemSolutionListQueryResultSchema = PaginatedSchema(z.object({
 }))
 
 export type ProblemSolutionListQueryResult = z.input<typeof ProblemSolutionListQueryResultSchema>
+
+export const ProblemTestcaseListQueryResultSchema = z.array(z.object({
+  uuid: z.string(),
+}))
+
+export type ProblemTestcaseListQueryResult = z.input<typeof ProblemTestcaseListQueryResultSchema>
+
+export const ProblemTestcaseCreatePayloadSchema = z.object({
+  in: z.string().optional(),
+  out: z.string().optional(),
+})
+
+export type ProblemTestcaseCreatePayload = z.infer<typeof ProblemTestcaseCreatePayloadSchema>
