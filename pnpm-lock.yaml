@@ -24,6 +24,9 @@ importers:
       '@putongoj/shared':
         specifier: workspace:*
         version: link:../shared
+      '@zip.js/zip.js':
+        specifier: ^2.8.8
+        version: 2.8.8
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -214,9 +217,12 @@ importers:
       '@vueuse/core':
         specifier: ^14.0.0
         version: 14.0.0(vue@3.5.22(typescript@5.9.3))
+      '@zip.js/zip.js':
+        specifier: ^2.8.8
+        version: 2.8.8
       axios:
         specifier: ^1.13.1
-        version: 1.13.1(debug@4.4.3)
+        version: 1.13.1
       csv-stringify:
         specifier: ^6.6.0
         version: 6.6.0
@@ -2342,6 +2348,10 @@ packages:
     resolution: {integrity: sha512-mTCA0uczBgurRlwVaQHfG0Ja7UdGe4g9mwffiJmvLiTtp1G4AQyIjej6si/k8c8pUwTfVpNufck+23gXptPAkw==}
     peerDependencies:
       vue: ^3.5.0
+
+  '@zip.js/zip.js@2.8.8':
+    resolution: {integrity: sha512-v0KutehhSAuaoFAFGLp+V4+UiZ1mIxQ8vNOYMD7k9ZJaBbtQV49MYlg568oRLiuwWDg2Di58Iw3Q0ESNWR+5JA==}
+    engines: {bun: '>=0.7.0', deno: '>=1.0.0', node: '>=18.0.0'}
 
   abbrev@3.0.1:
     resolution: {integrity: sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg==}
@@ -8599,6 +8609,8 @@ snapshots:
     dependencies:
       vue: 3.5.22(typescript@5.9.3)
 
+  '@zip.js/zip.js@2.8.8': {}
+
   abbrev@3.0.1: {}
 
   abort-controller@3.0.0:
@@ -8839,6 +8851,14 @@ snapshots:
       - rollup
       - supports-color
 
+  axios@1.13.1:
+    dependencies:
+      follow-redirects: 1.15.11(debug@4.3.7)
+      form-data: 4.0.4
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   axios@1.13.1(debug@4.4.3):
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.3)
@@ -8846,6 +8866,7 @@ snapshots:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+    optional: true
 
   b4a@1.7.3: {}
 
@@ -10137,6 +10158,7 @@ snapshots:
   follow-redirects@1.15.11(debug@4.4.3):
     optionalDependencies:
       debug: 4.4.3(supports-color@5.5.0)
+    optional: true
 
   foreground-child@2.0.0:
     dependencies:

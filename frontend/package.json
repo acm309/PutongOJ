@@ -28,6 +28,7 @@
     "@vitejs/plugin-legacy": "^7.2.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vueuse/core": "^14.0.0",
+    "@zip.js/zip.js": "^2.8.8",
     "axios": "^1.13.1",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",

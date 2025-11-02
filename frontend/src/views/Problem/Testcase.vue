@@ -10,7 +10,7 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Divider from 'primevue/divider'
 import { useConfirm } from 'primevue/useconfirm'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createTestcase, findTestcases, removeTestcase } from '@/api/problem'
 import TestcaseInput from '@/components/TestcaseInput.vue'
@@ -28,6 +28,10 @@ const testcase = ref({ in: '', out: '' } as Record<TestcaseFileType, string>)
 const testcaseInputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const testcaseOutputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const loading = ref(false)
+
+const testcaseExportUrl = computed(() => {
+  return `/api/problem/${encodeURIComponent(problem.value.pid)}/testcases/export`
+})
 
 async function fetchTestcases () {
   loading.value = true
@@ -117,17 +121,33 @@ function resetForm () {
   testcaseOutputRef.value?.resetForm()
 }
 
+function handleExportZip () {
+  message.info('Export ZIP', 'Exporting testcases...')
+  window.open(testcaseExportUrl.value, '_blank')
+}
+
+function handleImportZip () {
+  message.info('Import ZIP', 'Feature not implemented yet.')
+}
+
 fetchTestcases()
 </script>
 
 <template>
   <div class="-mt-6 lg:-mt-11 p-0">
-    <div class="border-b border-surface flex items-center justify-between p-6">
+    <div class="border-b border-surface flex flex-wrap gap-4 items-center justify-between p-6">
       <div class="flex font-semibold gap-4 items-center">
         <i class="pi pi-database text-2xl" />
         <h1 class="text-xl">
           {{ t('ptoj.testcases') }}
         </h1>
+      </div>
+      <div class="flex gap-2">
+        <Button
+          icon="pi pi-download" label="Export ZIP" outlined severity="secondary" :disabled="docs.length === 0"
+          @click="handleExportZip"
+        />
+        <Button icon="pi pi-upload" label="Import ZIP" outlined severity="secondary" @click="handleImportZip" />
       </div>
     </div>
 

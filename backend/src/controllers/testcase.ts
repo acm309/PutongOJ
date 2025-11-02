@@ -1,6 +1,8 @@
 import type { Context } from 'koa'
+import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { ProblemTestcaseListQueryResultSchema } from '@putongoj/shared'
+import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
 import remove from 'lodash/remove'
@@ -32,6 +34,72 @@ export async function findTestcases (ctx: Context) {
 
   const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
   return createEnvelopedResponse(ctx, result)
+}
+
+export async function exportTestcases (ctx: Context) {
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(
+    profile.isAdmin
+    || (problem.owner && problem.owner === profile.id)
+    || courseService.hasProblemRole(
+      profile.id, problem.id, 'viewTestcase',
+    )
+  )) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = problem
+  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+
+  if (!fse.existsSync(testDir)) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  const metaFile = path.resolve(testDir, 'meta.json')
+  if (!fse.existsSync(metaFile)) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  const meta = await fse.readJson(metaFile)
+  const testcases = meta.testcases || []
+
+  if (testcases.length === 0) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter('application/zip'))
+
+    for (const testcase of testcases) {
+      const { uuid } = testcase
+
+      const inFile = path.resolve(testDir, `${uuid}.in`)
+      if (fse.existsSync(inFile)) {
+        const inContent = await fse.readFile(inFile, 'utf8')
+        await zipWriter.add(`${uuid}.in`, new TextReader(inContent))
+      }
+
+      const outFile = path.resolve(testDir, `${uuid}.out`)
+      if (fse.existsSync(outFile)) {
+        const outContent = await fse.readFile(outFile, 'utf8')
+        await zipWriter.add(`${uuid}.out`, new TextReader(outContent))
+      }
+    }
+
+    const zipBlob = await zipWriter.close()
+    const filename = `PutongOJ-testcases-problem-${pid}-${Date.now()}.zip`
+
+    ctx.set('Content-Type', 'application/zip')
+    ctx.set('Content-Disposition', `attachment; filename="${filename}"`)
+    ctx.set('Cache-Control', 'no-cache')
+
+    ctx.body = Buffer.from(await zipBlob.arrayBuffer())
+    logger.info(`Testcases for problem <${pid}> exported by user <${profile.id}>`)
+  } catch (error) {
+    logger.error(`Failed to export testcases for problem <${pid}>:`, error)
+    ctx.throw(500, 'Failed to export testcases')
+  }
 }
 
 export async function createTestcase (ctx: Context) {
@@ -141,6 +209,7 @@ export async function getTestcase (ctx: Context) {
 
 const testcaseController = {
   findTestcases,
+  exportTestcases,
   createTestcase,
   getTestcase,
   removeTestcase,

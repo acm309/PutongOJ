@@ -2,6 +2,7 @@ import Router from '@koa/router'
 import problemController from '../controllers/problem'
 import testcaseController from '../controllers/testcase'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const problemRouter = new Router({
   prefix: '/problem',
@@ -47,6 +48,11 @@ problemRouter.get('/:pid/testcases',
 problemRouter.post('/:pid/testcases',
   authnMiddleware.loginRequire,
   testcaseController.createTestcase,
+)
+problemRouter.get('/:pid/testcases/export',
+  authnMiddleware.loginRequire,
+  ratelimitMiddleware.dataExportLimit,
+  testcaseController.exportTestcases,
 )
 problemRouter.get('/:pid/testcases/:uuid.:type',
   authnMiddleware.loginRequire,
