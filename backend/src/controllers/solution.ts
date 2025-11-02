@@ -12,16 +12,43 @@ import Solution from '../models/Solution'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { judgeResult } from '../utils/constants'
 import logger from '../utils/logger'
+import { loadCourse } from './course'
 
-// 返回一个提交
-const findOne = async (ctx: Context) => {
-  const opt = Number.parseInt(ctx.params.sid)
+export async function findOne (ctx: Context) {
+  const opt = Number.parseInt(ctx.params.sid, 10)
+  if (!Number.isInteger(opt) || opt <= 0) {
+    ctx.throw(400, 'Invalid submission id')
+  }
+
+  const solution = await Solution.findOne({ sid: opt }).lean()
+  if (!solution) {
+    ctx.throw(400, 'No such a solution')
+  }
+
   const profile = await loadProfile(ctx)
-  // 使用lean solution 就是一个 js 对象，没有 save 等方法
-  const solution = await Solution.findOne({ sid: opt }).populate('course')
-
-  if (solution == null) { ctx.throw(400, 'No such a solution') }
-  if (!profile.isAdmin && solution.uid !== profile.uid) { ctx.throw(403, 'Permission denied') }
+  const hasPermission = await (async () => {
+    if (solution.uid === profile.uid) {
+      return true
+    }
+    if (profile.isAdmin) {
+      return true
+    }
+    if (solution.mid > 0) {
+      const contest = await Contest.findOne({ cid: solution.mid }, 'course').populate('course')
+      console.log(contest)
+      if (contest && contest.course) {
+        const { role } = await loadCourse(ctx, contest.course)
+        console.log(role)
+        if (role.viewSolution) {
+          return true
+        }
+      }
+    }
+    return false
+  })()
+  if (!hasPermission) {
+    ctx.throw(403, 'Permission denied')
+  }
 
   // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
   let simSolution
