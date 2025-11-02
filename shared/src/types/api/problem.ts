@@ -36,8 +36,8 @@ export const ProblemTestcaseListQueryResultSchema = z.array(z.object({
 export type ProblemTestcaseListQueryResult = z.input<typeof ProblemTestcaseListQueryResultSchema>
 
 export const ProblemTestcaseCreatePayloadSchema = z.object({
-  in: z.string().optional(),
-  out: z.string().optional(),
+  in: z.string(),
+  out: z.string(),
 })
 
 export type ProblemTestcaseCreatePayload = z.infer<typeof ProblemTestcaseCreatePayloadSchema>
