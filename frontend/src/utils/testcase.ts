@@ -32,16 +32,17 @@ export class TestcaseZipParser {
       let match: RegExpMatchArray | null
       let pairedFilename: string | undefined
 
-      match = filename.match(/input(.+)\.txt$/i)
+      match = filename.match(/^(.+?)input(.*)\.txt$/i)
       if (match) {
-        const indicator = match[1]
-        pairedFilename = `output${indicator}.txt`
+        const prefix = match[1]
+        const indicator = match[2]
+        pairedFilename = `${prefix}output${indicator}.txt`
       }
 
-      match = filename.match(/(.+)\.in$/i)
+      match = filename.match(/^(.+)\.in$/i)
       if (match) {
-        const indicator = match[1]
-        pairedFilename = `${indicator}.out`
+        const prefix = match[1]
+        pairedFilename = `${prefix}.out`
       }
 
       if (pairedFilename && fileMap.has(pairedFilename)) {
