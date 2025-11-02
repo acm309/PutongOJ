@@ -2,15 +2,14 @@
 import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { createTestcase } from '@/api/problem'
 import OJProblemEdit from '@/components/ProblemEdit'
 import { useProblemStore } from '@/store/modules/problem'
-import { useTestcaseStore } from '@/store/modules/testcase'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
-const testcaseStore = useTestcaseStore()
 const problem = $ref({
   title: '',
   memory: 32768,
@@ -35,12 +34,7 @@ async function submit () {
   if (!problem.in && !problem.out) {
     $Message.info(t('oj.sample_input_output_empty'))
   } else {
-    const test = {
-      pid,
-      in: problem.in,
-      out: problem.out,
-    }
-    await testcaseStore.create(test)
+    await createTestcase(pid, { in: problem.in, out: problem.out })
     $Message.success(t('oj.sample_testcase_created'))
   }
   router.push({ name: 'problemInfo', params: { pid } })
