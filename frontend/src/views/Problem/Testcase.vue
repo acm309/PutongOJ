@@ -3,11 +3,13 @@ import type {
   ProblemTestcaseCreatePayload,
   ProblemTestcaseListQueryResult,
 } from '@putongoj/shared'
+import type { TestcasePair } from '@/utils/testcase'
 import { TestcaseFileType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import { useConfirm } from 'primevue/useconfirm'
 import { computed, ref } from 'vue'
@@ -28,6 +30,10 @@ const testcase = ref({ in: '', out: '' } as Record<TestcaseFileType, string>)
 const testcaseInputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const testcaseOutputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const loading = ref(false)
+const importDialog = ref(false)
+const importLoading = ref(false)
+const parsedTestcases = ref<TestcasePair[]>([])
+const fileInputRef = ref<HTMLInputElement>()
 
 const testcaseExportUrl = computed(() => {
   return `/api/problem/${encodeURIComponent(problem.value.pid)}/testcases/export`
@@ -122,12 +128,90 @@ function resetForm () {
 }
 
 function handleExportZip () {
-  message.info('Export ZIP', 'Exporting testcases...')
-  window.open(testcaseExportUrl.value, '_blank')
+  message.info(t('ptoj.exporting_testcases'), t('ptoj.exporting_testcases_detail'))
+  window.open(testcaseExportUrl.value, '_self')
 }
 
 function handleImportZip () {
-  message.info('Import ZIP', 'Feature not implemented yet.')
+  fileInputRef.value?.click()
+}
+
+async function onFileSelected (event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) {
+    return
+  }
+  input.value = ''
+
+  message.info(t('ptoj.importing_testcases'), t('ptoj.importing_testcases_detail'))
+  try {
+    const { TestcaseZipParser } = await import('@/utils/testcase')
+    const parser = new TestcaseZipParser(file)
+    const pairs = await parser.parse()
+
+    if (pairs.length === 0) {
+      message.warn(t('ptoj.failed_import_testcases'), t('ptoj.no_testcases_found_in_zip'))
+      return
+    }
+
+    parsedTestcases.value = pairs
+    importDialog.value = true
+  } catch (error) {
+    console.error('Failed to parse Zip file:', error)
+    message.error(t('ptoj.failed_import_testcases'), t('ptoj.failed_parse_zip_file'))
+  }
+}
+
+async function confirmImport () {
+  if (parsedTestcases.value.length === 0) return
+
+  importLoading.value = true
+
+  let successCount = 0
+  let errorCount = 0
+
+  for (const testcase of parsedTestcases.value) {
+    try {
+      const resp = await createTestcase(problem.value.pid, {
+        in: testcase.inputContent.replace(/\r\n/g, '\n'),
+        out: testcase.outputContent.replace(/\r\n/g, '\n'),
+      })
+
+      if (resp.success) {
+        successCount++
+      } else {
+        errorCount++
+        console.warn(`Failed to create testcase ${testcase.inputName}:`, resp.message)
+      }
+    } catch (error) {
+      errorCount++
+      console.warn(`Failed to create testcase ${testcase.inputName}:`, error)
+    }
+  }
+
+  importDialog.value = false
+  importLoading.value = false
+  parsedTestcases.value = []
+
+  if (errorCount > 0) {
+    message.error(
+      t('ptoj.failed_import_testcases'),
+      t('ptoj.failed_import_testcases_detail', { count: errorCount }),
+    )
+  }
+  if (successCount > 0) {
+    message.success(
+      t('ptoj.successful_import_testcases'),
+      t('ptoj.successful_import_testcases_detail', { count: successCount }),
+    )
+    await fetchTestcases()
+  }
+}
+
+function cancelImport () {
+  importDialog.value = false
+  parsedTestcases.value = []
 }
 
 fetchTestcases()
@@ -144,10 +228,11 @@ fetchTestcases()
       </div>
       <div class="flex gap-2">
         <Button
-          icon="pi pi-download" label="Export ZIP" outlined severity="secondary" :disabled="docs.length === 0"
-          @click="handleExportZip"
+          icon="pi pi-download" :label="t('ptoj.export')" outlined severity="secondary"
+          :disabled="docs.length === 0" @click="handleExportZip"
         />
-        <Button icon="pi pi-upload" label="Import ZIP" outlined severity="secondary" @click="handleImportZip" />
+        <Button icon="pi pi-upload" :label="t('ptoj.import')" outlined severity="secondary" @click="handleImportZip" />
+        <input ref="fileInputRef" type="file" accept=".zip" class="hidden" @change="onFileSelected">
       </div>
     </div>
 
@@ -202,5 +287,40 @@ fetchTestcases()
         <Button icon="pi pi-plus" :label="t('ptoj.create')" :loading="loading" @click="handleCreateTestcase" />
       </div>
     </div>
+
+    <Dialog
+      v-model:visible="importDialog" modal :header="t('ptoj.import_testcases')" :closable="false"
+      class="max-w-3xl mx-6 w-full"
+    >
+      <div class="space-y-4">
+        <p>{{ t('ptoj.import_testcases_desc', { count: parsedTestcases.length }) }}</p>
+
+        <DataTable
+          :value="parsedTestcases" :rows="5" scrollable scroll-height="400px"
+          class="border-surface border-t mt-4"
+        >
+          <Column :header="t('ptoj.input')" field="inputName">
+            <template #body="{ data }">
+              <span class="font-mono text-sm">{{ data.inputName }}</span>
+            </template>
+          </Column>
+          <Column :header="t('ptoj.output')" field="outputName">
+            <template #body="{ data }">
+              <span class="font-mono text-sm">{{ data.outputName }}</span>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+
+      <template #footer>
+        <div class="flex gap-2 justify-end">
+          <Button
+            :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined :disabled="importLoading"
+            @click="cancelImport"
+          />
+          <Button :label="t('ptoj.import')" icon="pi pi-check" :loading="importLoading" @click="confirmImport" />
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>

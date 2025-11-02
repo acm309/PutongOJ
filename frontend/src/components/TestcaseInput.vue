@@ -116,7 +116,7 @@ defineExpose({ resetForm })
           @change="handleFileSelect($event)"
         >
         <Button
-          icon="pi pi-file-import" :label="t('ptoj.import_file')" severity="secondary" size="small" outlined
+          icon="pi pi-file-import" :label="t('ptoj.import_from_file')" severity="secondary" size="small" outlined
           :disabled="fileInput !== null" @click="inputFileInput?.click()"
         />
       </div>
