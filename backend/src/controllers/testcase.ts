@@ -1,16 +1,108 @@
 import type { Context } from 'koa'
+import { Buffer } from 'node:buffer'
 import path from 'node:path'
+import { ProblemTestcaseListQueryResultSchema } from '@putongoj/shared'
+import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
 import remove from 'lodash/remove'
 import { v4 as uuid, validate } from 'uuid'
 import { loadProfile } from '../middlewares/authn'
 import courseService from '../services/course'
+import { createEnvelopedResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadProblem } from './problem'
 
-const createTestcase = async (ctx: Context) => {
+export async function findTestcases (ctx: Context) {
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = problem
+  let meta = { testcases: [] }
+  const dir = path.resolve(__dirname, `../../data/${pid}`)
+  const file = path.resolve(dir, 'meta.json')
+  if (!fse.existsSync(file)) {
+    fse.ensureDirSync(dir)
+    fse.outputJsonSync(file, meta, { spaces: 2 })
+  } else {
+    meta = await fse.readJson(file)
+  }
+
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function exportTestcases (ctx: Context) {
+  const problem = await loadProblem(ctx)
+  const profile = await loadProfile(ctx)
+  if (!(
+    profile.isAdmin
+    || (problem.owner && problem.owner === profile.id)
+    || courseService.hasProblemRole(
+      profile.id, problem.id, 'viewTestcase',
+    )
+  )) {
+    ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  const { pid } = problem
+  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+
+  if (!fse.existsSync(testDir)) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  const metaFile = path.resolve(testDir, 'meta.json')
+  if (!fse.existsSync(metaFile)) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  const meta = await fse.readJson(metaFile)
+  const testcases = meta.testcases || []
+
+  if (testcases.length === 0) {
+    ctx.throw(404, 'No testcases found for this problem')
+  }
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter('application/zip'))
+
+    for (const testcase of testcases) {
+      const { uuid } = testcase
+
+      const inFile = path.resolve(testDir, `${uuid}.in`)
+      if (fse.existsSync(inFile)) {
+        const inContent = await fse.readFile(inFile, 'utf8')
+        await zipWriter.add(`${uuid}.in`, new TextReader(inContent))
+      }
+
+      const outFile = path.resolve(testDir, `${uuid}.out`)
+      if (fse.existsSync(outFile)) {
+        const outContent = await fse.readFile(outFile, 'utf8')
+        await zipWriter.add(`${uuid}.out`, new TextReader(outContent))
+      }
+    }
+
+    const zipBlob = await zipWriter.close()
+    const filename = `PutongOJ-testcases-problem-${pid}-${Date.now()}.zip`
+
+    ctx.set('Content-Type', 'application/zip')
+    ctx.set('Content-Disposition', `attachment; filename="${filename}"`)
+    ctx.set('Cache-Control', 'no-cache')
+
+    ctx.body = Buffer.from(await zipBlob.arrayBuffer())
+    logger.info(`Testcases for problem <${pid}> exported by user <${profile.id}>`)
+  } catch (error) {
+    logger.error(`Failed to export testcases for problem <${pid}>:`, error)
+    ctx.throw(500, 'Failed to export testcases')
+  }
+}
+
+export async function createTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
@@ -49,10 +141,11 @@ const createTestcase = async (ctx: Context) => {
   ])
   logger.info(`Testcase <${id}> for problem <${pid}> is created by user <${uid}>`)
 
-  ctx.body = meta // 结构就是: {testcases: [{ uuid: 'axxx' }, { uuid: 'yyyy' }]}
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
 }
 
-const removeTestcase = async (ctx: Context) => {
+export async function removeTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
@@ -79,10 +172,11 @@ const removeTestcase = async (ctx: Context) => {
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
   logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
 
-  ctx.body = meta
+  const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
+  return createEnvelopedResponse(ctx, result)
 }
 
-const fetchTestcase = async (ctx: Context) => {
+export async function getTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
   if (!(
@@ -100,7 +194,7 @@ const fetchTestcase = async (ctx: Context) => {
   if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
-  const type = ctx.query.type
+  const type = ctx.params.type
   if (type !== 'in' && type !== 'out') {
     ctx.throw(400, 'Invalid type')
   }
@@ -113,31 +207,11 @@ const fetchTestcase = async (ctx: Context) => {
   await send(ctx, `${uuid}.${type}`, { root: testDir })
 }
 
-const findTestcases = async (ctx: Context) => {
-  const problem = await loadProblem(ctx)
-  const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner === profile.id))) {
-    ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  const { pid } = problem
-  let meta = { testcases: [] }
-  const dir = path.resolve(__dirname, `../../data/${pid}`)
-  const file = path.resolve(dir, 'meta.json')
-  if (!fse.existsSync(file)) {
-    fse.ensureDirSync(dir)
-    fse.outputJsonSync(file, meta, { spaces: 2 })
-  } else {
-    meta = await fse.readJson(file)
-  }
-
-  ctx.body = meta
-}
-
 const testcaseController = {
   findTestcases,
+  exportTestcases,
   createTestcase,
-  fetchTestcase,
+  getTestcase,
   removeTestcase,
 } as const
 

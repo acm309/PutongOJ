@@ -13,7 +13,7 @@ export function purify (obj: Record<string, any>) {
 
 // TODO: 后期这里应该会改 URL
 export function testcaseUrl (pid: number, uuid: string, type = 'in') {
-  return `/api/testcase/${pid}/${uuid}?type=${type}`
+  return `/api/problem/${encodeURIComponent(pid)}/testcases/${encodeURIComponent(uuid)}.${type}`
 }
 
 export function onRouteQueryUpdate (callback: (...args: any[]) => void) {

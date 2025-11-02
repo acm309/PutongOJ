@@ -1,311 +1,326 @@
-<script setup>
+<script lang="ts" setup>
+import type {
+  ProblemTestcaseCreatePayload,
+  ProblemTestcaseListQueryResult,
+} from '@putongoj/shared'
+import type { TestcasePair } from '@/utils/testcase'
+import { TestcaseFileType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
-import { Button, Divider, Icon, Input, Poptip, Space, Tag, Upload } from 'view-ui-plus'
-import { inject } from 'vue'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
+import Divider from 'primevue/divider'
+import { useConfirm } from 'primevue/useconfirm'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-import { useRoute } from 'vue-router'
-import { useTestcaseStore } from '@/store/modules/testcase'
-
+import { createTestcase, findTestcases, removeTestcase } from '@/api/problem'
+import TestcaseInput from '@/components/TestcaseInput.vue'
+import { useProblemStore } from '@/store/modules/problem'
 import { testcaseUrl } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
-const route = useRoute()
-const message = inject('$Message')
-const modal = inject('$Modal')
+const message = useMessage()
+const confirm = useConfirm()
+const { problem } = storeToRefs(useProblemStore())
 
-const testcaseStore = useTestcaseStore()
+const docs = ref<ProblemTestcaseListQueryResult>([])
+const testcase = ref({ in: '', out: '' } as Record<TestcaseFileType, string>)
+const testcaseInputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
+const testcaseOutputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
+const loading = ref(false)
+const importDialog = ref(false)
+const importLoading = ref(false)
+const parsedTestcases = ref<TestcasePair[]>([])
+const fileInputRef = ref<HTMLInputElement>()
 
-const { list } = $(storeToRefs(testcaseStore))
-
-const test = $ref({
-  pid: route.params.pid,
-  in: '',
-  out: '',
+const testcaseExportUrl = computed(() => {
+  return `/api/problem/${encodeURIComponent(problem.value.pid)}/testcases/export`
 })
 
-let loading = $ref(false)
-
-async function fetch () {
-  loading = true
-  await testcaseStore.find(route.params)
-  loading = false
+async function fetchTestcases () {
+  loading.value = true
+  const resp = await findTestcases(problem.value.pid)
+  loading.value = false
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_testcases'), resp.message)
+    return
+  }
+  docs.value = resp.data
 }
 
-const testcaseFile = $ref({ in: null, out: null })
-const fileInput = $computed(() => {
-  return {
-    in: testcaseFile.in !== null,
-    out: testcaseFile.out !== null,
-  }
-})
-
-// function search(item) {
-//   return testcaseStore.findOne({
-//     pid: route.params.pid,
-//     uuid: item.uuid,
-//     type: 'in',
-//   })
-// }
-
-function del (item) {
-  const sort_uuid = item.uuid.slice(0, 8)
-  modal.confirm({
-    title: t('oj.alert'),
-    content: t('oj.testcase_delete_confirm', { uuid: sort_uuid }),
-    onOk: async () => {
-      const testcase = {
-        pid: route.params.pid,
-        uuid: item.uuid,
-      }
-      await testcaseStore.delete(testcase)
-      message.success(t('oj.testcase_delete_success', { uuid: sort_uuid }))
+function handleDeleteTestcase (item: ProblemTestcaseListQueryResult[number]) {
+  confirm.require({
+    message: t('ptoj.delete_confirm_message'),
+    rejectProps: {
+      label: t('ptoj.cancel'),
+      severity: 'secondary',
+      outlined: true,
     },
-    onCancel: () => {
-      message.info(t('oj.testcase_delete_cancel'))
+    acceptProps: {
+      label: t('ptoj.delete'),
+      severity: 'danger',
+    },
+    accept: async () => {
+      loading.value = true
+      const resp = await removeTestcase(problem.value.pid, item.uuid)
+      loading.value = false
+
+      if (!resp.success) {
+        message.error(t('ptoj.failed_delete_testcase'), resp.message)
+        return
+      }
+
+      message.success(
+        t('ptoj.successful_delete_testcase'),
+        t('ptoj.successful_delete_testcase_detail', { id: item.uuid.slice(0, 8) }),
+      )
+      docs.value = resp.data
     },
   })
 }
 
-async function create (testcase) {
-  await testcaseStore.create(testcase)
-  message.success(t('oj.testcase_create_success'))
-  fetch()
-  test.in = test.out = ''
-  testcaseFile.in = testcaseFile.out = null
-}
-
-async function createCheck () {
-  const testcase = { pid: test.pid, in: test.in, out: test.out }
-
-  for (const key in testcaseFile) {
-    if (testcaseFile[key]) {
-      try {
-        testcase[key] = await readFile(key)
-      } catch (e) {
-        return message.error(t('oj.testcase_error_read_file', { error: e.message }))
-      }
-    }
+async function handleCreateTestcase () {
+  if (!testcase.value.in.trim() && !testcase.value.out.trim()) {
+    message.error(t('ptoj.failed_create_testcase'), t('ptoj.testcase_cannot_both_empty'))
+    return
   }
-
-  if (!testcase.in.trim() && !testcase.out.trim()) {
-    message.error(t('oj.testcase_error_empty'))
-  } else if (!testcase.in.trim() || !testcase.out.trim()) {
-    modal.confirm({
-      title: t('oj.alert'),
-      content: t('oj.testcase_error_incomplete'),
-      onOk: () => create(testcase),
-      onCancel: () => message.info(t('oj.testcase_create_cancel')),
+  if (!testcase.value.in.trim() || !testcase.value.out.trim()) {
+    confirm.require({
+      message: t('ptoj.testcase_incomplete_message'),
+      rejectProps: {
+        label: t('ptoj.cancel'),
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptProps: {
+        label: t('ptoj.create'),
+      },
+      accept: () => createTestcaseRequest(testcase.value),
     })
   } else {
-    create(testcase)
+    createTestcaseRequest(testcase.value)
   }
 }
 
-async function readFile (type) {
-  const file = testcaseFile[type]
-  const reader = new FileReader()
-  return new Promise((resolve, reject) => {
-    reader.onload = () => {
-      const content = reader.result.replace(/\r\n/g, '\n')
-      if (/^[\s\x21-\x7E]*$/.test(content)) {
-        resolve(content)
-      } else {
-        reject(new Error(t('oj.testcase_error_encoding')))
-      }
-    }
-    reader.onerror = reject
-    reader.readAsText(file)
+async function createTestcaseRequest (testcase: ProblemTestcaseCreatePayload) {
+  loading.value = true
+  const resp = await createTestcase(problem.value.pid, {
+    in: testcase.in.replace(/\r\n/g, '\n'),
+    out: testcase.out.replace(/\r\n/g, '\n'),
   })
+  loading.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_create_testcase'), resp.message)
+    return
+  }
+
+  message.success(t('ptoj.successful_create_testcase'), t('ptoj.successful_create_testcase_detail'))
+  docs.value = resp.data
+  resetForm()
 }
 
-function fileSelect (type, file) {
-  testcaseFile[type] = file
-  return false
+function resetForm () {
+  testcaseInputRef.value?.resetForm()
+  testcaseOutputRef.value?.resetForm()
 }
 
-function removeFile (type) {
-  testcaseFile[type] = null
+function handleExportZip () {
+  message.info(t('ptoj.exporting_testcases'), t('ptoj.exporting_testcases_detail'))
+  window.open(testcaseExportUrl.value, '_self')
 }
 
-function filename (type) {
-  const name = testcaseFile[type].name
-  const ext = name.slice(name.lastIndexOf('.') + 1)
-  return name.length > 10 ? `${name.slice(0, 10)}...${ext}` : name
+function handleImportZip () {
+  fileInputRef.value?.click()
 }
 
-fetch()
+async function onFileSelected (event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) {
+    return
+  }
+  input.value = ''
+
+  message.info(t('ptoj.importing_testcases'), t('ptoj.importing_testcases_detail'))
+  try {
+    const { TestcaseZipParser } = await import('@/utils/testcase')
+    const parser = new TestcaseZipParser(file)
+    const pairs = await parser.parse()
+
+    if (pairs.length === 0) {
+      message.warn(t('ptoj.failed_import_testcases'), t('ptoj.no_testcases_found_in_zip'))
+      return
+    }
+
+    parsedTestcases.value = pairs
+    importDialog.value = true
+  } catch (error) {
+    console.error('Failed to parse Zip file:', error)
+    message.error(t('ptoj.failed_import_testcases'), t('ptoj.failed_parse_zip_file'))
+  }
+}
+
+async function confirmImport () {
+  if (parsedTestcases.value.length === 0) return
+
+  importLoading.value = true
+
+  let successCount = 0
+  let errorCount = 0
+
+  for (const testcase of parsedTestcases.value) {
+    try {
+      const resp = await createTestcase(problem.value.pid, {
+        in: testcase.inputContent.replace(/\r\n/g, '\n'),
+        out: testcase.outputContent.replace(/\r\n/g, '\n'),
+      })
+
+      if (resp.success) {
+        successCount++
+      } else {
+        errorCount++
+        console.warn(`Failed to create testcase ${testcase.inputName}:`, resp.message)
+      }
+    } catch (error) {
+      errorCount++
+      console.warn(`Failed to create testcase ${testcase.inputName}:`, error)
+    }
+  }
+
+  importDialog.value = false
+  importLoading.value = false
+  parsedTestcases.value = []
+
+  if (errorCount > 0) {
+    message.error(
+      t('ptoj.failed_import_testcases'),
+      t('ptoj.failed_import_testcases_detail', { count: errorCount }),
+    )
+  }
+  if (successCount > 0) {
+    message.success(
+      t('ptoj.successful_import_testcases'),
+      t('ptoj.successful_import_testcases_detail', { count: successCount }),
+    )
+    await fetchTestcases()
+  }
+}
+
+function cancelImport () {
+  importDialog.value = false
+  parsedTestcases.value = []
+}
+
+fetchTestcases()
 </script>
 
 <template>
-  <div class="testcase">
-    <table class="testcase-table">
-      <thead>
-        <tr>
-          <th class="testcase-uuid">
-            UUID
-          </th>
-          <th class="testcase-files">
-            {{ t('oj.files') }}
-          </th>
-          <th class="testcase-action">
-            {{ t('oj.action') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="!(list.testcases?.length > 0)" class="testcase-empty">
-          <td colspan="4">
-            <Icon type="ios-planet-outline" class="empty-icon" />
-            <span class="empty-text">{{ t('oj.empty_content') }}</span>
-          </td>
-        </tr>
-        <tr v-for="item in list.testcases" :key="item.uuid">
-          <td class="testcase-uuid">
-            <Poptip trigger="hover" placement="right">
-              <span><code>{{ item.uuid.slice(0, 8) }}</code></span>
-              <template #content>
-                <code>{{ item.uuid }}</code>
-              </template>
-            </Poptip>
-          </td>
-          <td class="testcase-files">
-            <Space :size="4">
-              <a :href="testcaseUrl(test.pid, item.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
-              <Divider type="vertical" />
-              <a :href="testcaseUrl(test.pid, item.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
-            </Space>
-          </td>
-          <td class="testcase-action">
-            <a @click="del(item)">{{ t('oj.delete') }}</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="testcase-create">
-      <h1>{{ t('oj.testcase_create') }}</h1>
-      <div class="testcase-flex">
-        <span class="testcase-title">{{ t('oj.input') }}</span>
-        <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('in', file)">
-          <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            {{ t('oj.testcase_from_file') }}
-          </Button>
-        </Upload>
+  <div class="-mt-6 lg:-mt-11 p-0">
+    <div class="border-b border-surface flex flex-wrap gap-4 items-center justify-between p-6">
+      <div class="flex font-semibold gap-4 items-center">
+        <i class="pi pi-database text-2xl" />
+        <h1 class="text-xl">
+          {{ t('ptoj.testcases') }}
+        </h1>
       </div>
-      <Input
-        v-if="!fileInput.in" v-model="test.in" class="testcase-textarea" type="textarea"
-        :autosize="{ minRows: 5, maxRows: 15 }"
-      />
-      <div v-else class="testcase-file">
-        <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">{{ t('oj.testcase_file_selected') }}</span>
-        <Tag class="file-name" type="dot" closable @on-close="removeFile('in')">
-          {{ filename('in') }}
-        </Tag>
+      <div class="flex gap-2">
+        <Button
+          icon="pi pi-download" :label="t('ptoj.export')" outlined severity="secondary"
+          :disabled="docs.length === 0" @click="handleExportZip"
+        />
+        <Button icon="pi pi-upload" :label="t('ptoj.import')" outlined severity="secondary" @click="handleImportZip" />
+        <input ref="fileInputRef" type="file" accept=".zip" class="hidden" @change="onFileSelected">
       </div>
-      <div class="testcase-flex">
-        <span class="testcase-title">{{ t('oj.output') }}</span>
-        <Upload class="testcase-upload" action="" :before-upload="(file) => fileSelect('out', file)">
-          <Button class="testcase-upload-button" icon="ios-cloud-upload-outline">
-            {{ t('oj.testcase_from_file') }}
-          </Button>
-        </Upload>
-      </div>
-      <Input
-        v-if="!fileInput.out" v-model="test.out" class="testcase-textarea" type="textarea"
-        :autosize="{ minRows: 5, maxRows: 15 }"
-      />
-      <div v-else class="testcase-file">
-        <Icon type="ios-document-outline" class="file-icon" />
-        <span class="file-text">{{ t('oj.testcase_file_selected') }}</span>
-        <Tag class="file-name" type="dot" closable @on-close="removeFile('out')">
-          {{ filename('out') }}
-        </Tag>
-      </div>
-      <Button class="testcase-submit" size="large" type="primary" @click="createCheck">
-        {{ t('oj.submit') }}
-      </Button>
     </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
+
+    <DataTable :value="docs" :loading="loading">
+      <Column field="uuid" class="pl-6">
+        <template #header>
+          <i class="pi pi-hashtag" />
+        </template>
+        <template #body="{ data }">
+          <span v-tooltip="data.uuid" class="font-mono text-sm">
+            {{ data.uuid.slice(0, 8) }}
+          </span>
+        </template>
+      </Column>
+
+      <Column :header="t('ptoj.files')">
+        <template #body="{ data }">
+          <div class="flex gap-2 items-center">
+            <a :href="testcaseUrl(problem.pid, data.uuid, 'in')" target="_blank" class="text-primary">
+              {{ t('ptoj.input') }}
+            </a>
+            <Divider layout="vertical" />
+            <a :href="testcaseUrl(problem.pid, data.uuid, 'out')" target="_blank" class="text-primary">
+              {{ t('ptoj.output') }}
+            </a>
+          </div>
+        </template>
+      </Column>
+
+      <Column class="px-6 py-1 w-20">
+        <template #body="{ data }">
+          <Button icon="pi pi-trash" severity="danger" text @click="handleDeleteTestcase(data)" />
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
+      </template>
+    </DataTable>
+
+    <div class="p-6 space-y-4">
+      <div class="font-semibold">
+        {{ t('ptoj.create_testcase') }}
+      </div>
+
+      <TestcaseInput ref="testcaseInputRef" v-model="testcase.in" :type="TestcaseFileType.Input" />
+      <TestcaseInput ref="testcaseOutputRef" v-model="testcase.out" :type="TestcaseFileType.Output" />
+
+      <div class="flex justify-end">
+        <Button icon="pi pi-plus" :label="t('ptoj.create')" :loading="loading" @click="handleCreateTestcase" />
+      </div>
+    </div>
+
+    <Dialog
+      v-model:visible="importDialog" modal :header="t('ptoj.import_testcases')" :closable="false"
+      class="max-w-3xl mx-6 w-full"
+    >
+      <div class="space-y-4">
+        <p>{{ t('ptoj.import_testcases_desc', { count: parsedTestcases.length }) }}</p>
+
+        <DataTable
+          :value="parsedTestcases" :rows="5" scrollable scroll-height="400px"
+          class="border-surface border-t mt-4"
+        >
+          <Column :header="t('ptoj.input')" field="inputName">
+            <template #body="{ data }">
+              <span class="font-mono text-sm">{{ data.inputName }}</span>
+            </template>
+          </Column>
+          <Column :header="t('ptoj.output')" field="outputName">
+            <template #body="{ data }">
+              <span class="font-mono text-sm">{{ data.outputName }}</span>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+
+      <template #footer>
+        <div class="flex gap-2 justify-end">
+          <Button
+            :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined :disabled="importLoading"
+            @click="cancelImport"
+          />
+          <Button :label="t('ptoj.import')" icon="pi pi-check" :loading="importLoading" @click="confirmImport" />
+        </div>
+      </template>
+    </Dialog>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../../styles/common'
-
-.testcase
-  padding 0
-  margin-top -20px
-
-.testcase-table
-  table-layout fixed
-  th, td
-    padding 0 16px
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-
-.testcase-uuid
-  padding-left 40px !important
-  text-align left
-.testcase-action
-  padding-right 40px !important
-  text-align right
-
-.testcase-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-
-.testcase-create
-  padding 30px 40px 40px
-
-.testcase-flex
-  margin-top 10px
-  padding 4px 0
-  width 100%
-  display flex
-  justify-content space-between
-  align-items: center
-  .testcase-title, .testcase-upload
-    flex none
-    display flex
-  .testcase-title
-    font-size 16px
-    font-weight bold
-
-.testcase-textarea
-  font-family var(--font-code)
-
-.testcase-file
-  padding 32px
-  border 1px solid #dcdee2
-  border-radius 4px
-  display flex
-  align-items center
-  justify-content center
-  flex-wrap wrap
-  .file-icon
-    font-size 32px
-  .file-text
-    margin 0 16px
-  .file-name
-    font-family var(--font-code)
-
-.testcase-submit
-  margin-top 20px
-
-@media screen and (max-width: 1024px)
-  .testcase
-    margin-top -10px
-  .testcase-create
-    padding 15px 20px 20px
-</style>

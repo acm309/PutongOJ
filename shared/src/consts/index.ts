@@ -65,3 +65,8 @@ export enum ExportFormat {
   CSV_UTF8 = 'csv-utf8',
   CSV_UTF8_BOM = 'csv-utf8-bom',
 }
+
+export enum TestcaseFileType {
+  Input = 'in',
+  Output = 'out',
+}
