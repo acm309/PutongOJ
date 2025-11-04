@@ -12,7 +12,7 @@
     "dayjs": "^1.11.19",
     "debug": "^4.4.3",
     "mermaid": "^11.12.1",
-    "vitepress": "^1.6.4",
+    "vitepress": "2.0.0-alpha.12",
     "vitepress-plugin-mermaid": "^2.0.17"
   }
 }
