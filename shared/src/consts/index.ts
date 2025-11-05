@@ -71,3 +71,10 @@ export enum TestcaseFileType {
   Input = 'in',
   Output = 'out',
 }
+
+export enum DiscussionType {
+  OpenDiscussion = 1,
+  PublicAnnouncement = 2,
+  PrivateClarification = 3,
+  ArchivedDiscussion = 4,
+}

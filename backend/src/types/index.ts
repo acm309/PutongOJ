@@ -1,3 +1,4 @@
+import type { ObjectId } from 'mongoose'
 import type { contestLabelingStyle } from '../utils/constants'
 
 export interface CourseRole {
@@ -28,4 +29,8 @@ export interface PaginateOption {
 export interface SortOption {
   sort: 1 | -1
   sortBy: string
+}
+
+export interface DocumentId {
+  _id: ObjectId
 }

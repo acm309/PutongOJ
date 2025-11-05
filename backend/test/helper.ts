@@ -1,7 +1,7 @@
 import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
 import CourseMember from '../src/models/CourseMember'
-import Discuss from '../src/models/Discuss'
+import Discussion from '../src/models/Discussion'
 import Group from '../src/models/Group'
 import ID from '../src/models/ID'
 import News from '../src/models/News'
@@ -15,7 +15,7 @@ export async function removeall () {
     Contest.deleteMany({}),
     Course.deleteMany({}),
     CourseMember.deleteMany({}),
-    Discuss.deleteMany({}),
+    Discussion.deleteMany({}),
     Group.deleteMany({}),
     ID.deleteMany({}),
     News.deleteMany({}),

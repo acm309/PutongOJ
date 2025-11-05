@@ -1,7 +1,7 @@
 import process from 'node:process'
 import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
-import Discuss from '../src/models/Discuss'
+// import Discuss from '../src/models/Discuss'
 import Group from '../src/models/Group'
 import ID from '../src/models/ID'
 import News from '../src/models/News'
@@ -13,7 +13,7 @@ import { passwordHash } from '../src/utils'
 import { removeall } from './helper'
 import { contestSeeds } from './seeds/contest'
 import { courseSeeds } from './seeds/course'
-import { discussSeeds } from './seeds/discuss'
+// import { discussSeeds } from './seeds/discuss'
 import { groupSeeds } from './seeds/group'
 import { newsSeeds } from './seeds/news'
 import { problemSeeds } from './seeds/problem'
@@ -26,7 +26,7 @@ async function main () {
   await Promise.all([
     new ID({ name: 'Contest', id: 0 }).save(),
     new ID({ name: 'Course', id: 2 }).save(),
-    new ID({ name: 'Discuss', id: 0 }).save(),
+    new ID({ name: 'Discussion', id: 0 }).save(),
     new ID({ name: 'Group', id: 0 }).save(),
     new ID({ name: 'News', id: 0 }).save(),
     new ID({ name: 'Problem', id: 999 }).save(),
@@ -42,11 +42,11 @@ async function main () {
   const courseInsert = Promise.all(
     courseSeeds.map(item => new Course(item).save()),
   )
-  const discussInsert = (async () => {
-    for (const discuss of discussSeeds) {
-      await new Discuss(discuss).save()
-    }
-  })()
+  // const discussInsert = (async () => {
+  //   for (const discuss of discussSeeds) {
+  //     await new Discuss(discuss).save()
+  //   }
+  // })()
   const groupInsert = Promise.all(
     groupSeeds.map(item => new Group(item).save()),
   )
@@ -79,7 +79,7 @@ async function main () {
   await Promise.all([
     contestInsert,
     courseInsert,
-    discussInsert,
+    // discussInsert,
     groupInsert,
     newsInsert,
     problemInsert,
