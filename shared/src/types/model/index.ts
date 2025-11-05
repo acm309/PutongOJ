@@ -1,5 +1,7 @@
+export * from './contest.js'
 export * from './discussion.js'
 export * from './group.js'
 export * from './oauth.js'
+export * from './problem.js'
 export * from './solution.js'
 export * from './user.js'
