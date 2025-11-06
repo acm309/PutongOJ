@@ -3,7 +3,7 @@ import { COMMENT_LENGTH_MAX, DiscussionType, TITLE_LENGTH_MAX } from '@/consts/i
 import { isoDatetimeToDate } from '../codec.js'
 import { ObjectIdSchema } from '../utils.js'
 
-const DiscussionCommentSchema = z.object({
+export const DiscussionCommentModelSchema = z.object({
   user: ObjectIdSchema,
   content: z.string().min(1).max(COMMENT_LENGTH_MAX),
   createdAt: isoDatetimeToDate,
@@ -12,12 +12,12 @@ const DiscussionCommentSchema = z.object({
 
 export const DiscussionModelSchema = z.object({
   discussionId: z.int().nonnegative(),
-  user: ObjectIdSchema,
+  owner: ObjectIdSchema,
   problem: ObjectIdSchema.nullable(),
   contest: ObjectIdSchema.nullable(),
   type: z.enum(DiscussionType),
   title: z.string().min(1).max(TITLE_LENGTH_MAX),
-  comments: z.array(DiscussionCommentSchema),
+  comments: z.array(DiscussionCommentModelSchema),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

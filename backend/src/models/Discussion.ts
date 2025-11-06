@@ -32,7 +32,7 @@ const discussionSchema = new mongoose.Schema({
     },
     default: -1,
   },
-  user: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
