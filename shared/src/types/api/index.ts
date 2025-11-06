@@ -1,6 +1,7 @@
 export * from './account.js'
 export * from './admin.js'
 export * from './contest.js'
+export * from './discussion.js'
 export * from './group.js'
 export * from './problem.js'
 export * from './user.js'

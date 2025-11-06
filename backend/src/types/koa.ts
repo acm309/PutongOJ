@@ -5,6 +5,7 @@ import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { TagDocument } from '../models/Tag'
 import type { UserDocument } from '../models/User'
+import type { DiscussionDocument } from '../services/discussion'
 import 'koa'
 
 declare module 'koa' {
@@ -19,6 +20,7 @@ declare module 'koa' {
     profile?: UserDocument
     tag?: TagDocument
     user?: UserDocument
+    discussion?: DiscussionDocument
   }
 
   interface DefaultContext {
