@@ -1,5 +1,5 @@
 import type { OAuthConnection } from '@putongoj/shared'
-import type { Document, Model, ObjectId } from 'mongoose'
+import type { Document, Model, ObjectId, Types } from 'mongoose'
 import type { Entity, View } from '../types/entity'
 import type { UserDocument } from './User'
 import mongoose from '../config/db'
@@ -12,9 +12,9 @@ export type OAuthEntityUserView = View & Pick<OAuthEntity,
   'providerId' | 'displayName'
 >
 
-export type OAuthDocument = Document & OAuthEntity
+export type OAuthDocument = Document<Types.ObjectId> & OAuthEntity
 
-export interface OAuthDocumentPopulated extends Document {
+export type OAuthDocumentPopulated = OAuthDocument & {
   user: UserDocument
 }
 

@@ -1,10 +1,10 @@
-import type { Document, PaginateModel } from 'mongoose'
+import type { Document, PaginateModel, Types } from 'mongoose'
 import type { GroupEntity } from '../types/entity'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import ID from './ID'
 
-export interface GroupDocument extends Document, GroupEntity {}
+export interface GroupDocument extends Document<Types.ObjectId>, GroupEntity {}
 
 type GroupModel = PaginateModel<GroupDocument>
 

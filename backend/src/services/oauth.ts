@@ -1,5 +1,5 @@
 import type { OAuthConnection, OAuthUserProfile } from '@putongoj/shared'
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
 import crypto from 'node:crypto'
@@ -234,7 +234,7 @@ export async function findUserByOAuthConnection (
 }
 
 export async function getUserOAuthConnections (
-  userId: ObjectId,
+  userId: Types.ObjectId,
 ): Promise<Record<OAuthProvider, OAuthDocument | null>> {
   const records = await OAuth.find({ user: userId }) as OAuthDocument[]
   const connections: Record<OAuthProvider, OAuthDocument | null> = {
@@ -248,7 +248,7 @@ export async function getUserOAuthConnections (
 }
 
 export async function isOAuthConnectedToAnotherUser (
-  userId: ObjectId,
+  userId: Types.ObjectId,
   connectionData: OAuthConnection,
 ): Promise<boolean> {
   const { provider, providerId } = connectionData
@@ -259,7 +259,7 @@ export async function isOAuthConnectedToAnotherUser (
 }
 
 export async function upsertOAuthConnection (
-  userId: ObjectId,
+  userId: Types.ObjectId,
   connectionData: OAuthConnection,
 ): Promise<OAuthDocument> {
   const { provider, providerId, displayName, accessToken, refreshToken, raw } = connectionData
@@ -288,7 +288,7 @@ export async function upsertOAuthConnection (
 }
 
 export async function removeOAuthConnection (
-  userId: ObjectId,
+  userId: Types.ObjectId,
   provider: OAuthProvider,
 ): Promise<boolean> {
   const result = await OAuth.deleteOne({ user: userId, provider })

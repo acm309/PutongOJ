@@ -329,6 +329,9 @@ importers:
 
   shared:
     dependencies:
+      mongoose:
+        specifier: ^8.19.2
+        version: 8.19.2(socks@2.8.7)
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -1370,6 +1373,9 @@ packages:
   '@primevue/icons@4.4.1':
     resolution: {integrity: sha512-UfDimrIjVdY6EziwieyV4zPKzW6mnKHKhy4Dgyjv2oI6pNeuim+onbJo1ce22PEGXW78vfblG/3/JIzVHFweqQ==}
     engines: {node: '>=12.11.0'}
+
+  '@putongoj/shared@file:shared':
+    resolution: {directory: shared, type: directory}
 
   '@rolldown/pluginutils@1.0.0-beta.29':
     resolution: {integrity: sha512-NIJgOsMjbxAXvoGq/X0gD7VPMQ8j9g0BiDaNjVNVjvl+iKXxL3Jre0v31RmBYeLEmkbj2s02v8vFTbUXi5XS2Q==}
@@ -7308,6 +7314,20 @@ snapshots:
       '@primevue/core': 4.4.1(vue@3.5.22(typescript@5.9.3))
     transitivePeerDependencies:
       - vue
+
+  '@putongoj/shared@file:shared(socks@2.8.7)':
+    dependencies:
+      mongoose: 8.19.2(socks@2.8.7)
+      zod: 4.1.12
+    transitivePeerDependencies:
+      - '@aws-sdk/credential-providers'
+      - '@mongodb-js/zstd'
+      - gcp-metadata
+      - kerberos
+      - mongodb-client-encryption
+      - snappy
+      - socks
+      - supports-color
 
   '@rolldown/pluginutils@1.0.0-beta.29': {}
 

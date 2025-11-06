@@ -1,10 +1,10 @@
 import type { DiscussionModel } from '@putongoj/shared'
-import type { Document, Model } from 'mongoose'
+import type { Document, Model, Types } from 'mongoose'
 import { COMMENT_LENGTH_MAX, DiscussionType, TITLE_LENGTH_MAX } from '@putongoj/shared'
 import mongoose from '../config/db'
 import ID from './ID'
 
-export interface DiscussionDocument extends Document, DiscussionModel { }
+interface DiscussionDocument extends Document<Types.ObjectId>, DiscussionModel { }
 
 const discussionCommentSchema = new mongoose.Schema({
   user: {

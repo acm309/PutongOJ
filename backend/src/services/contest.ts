@@ -1,5 +1,5 @@
 import type { Paginated } from '@putongoj/shared'
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { ContestDocument, ContestDocumentPopulated } from '../models/Contest'
 import type { PaginateOption } from '../types'
 import type { ContestEntityEditable, ContestEntityPreview, ContestRanklist, SolutionEntity } from '../types/entity'
@@ -15,7 +15,7 @@ export async function findContests (
     content?: string
   },
   showAll: boolean = false,
-  course: ObjectId | null = null,
+  course: Types.ObjectId | null = null,
 ): Promise<Paginated<ContestEntityPreview>> {
   const { page, pageSize, content, type } = opt
   const filters: Record<string, any>[] = []

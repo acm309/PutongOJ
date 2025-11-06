@@ -1,4 +1,4 @@
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { contestLabelingStyle } from '../utils/constants'
 
 export interface CourseRole {
@@ -32,5 +32,5 @@ export interface SortOption {
 }
 
 export interface DocumentId {
-  _id: ObjectId
+  _id: Types.ObjectId
 }

@@ -1,5 +1,5 @@
 import type { Paginated } from '@putongoj/shared'
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { ContestOption, CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { UserEntity } from '../models/User'
@@ -60,8 +60,8 @@ export interface CourseEntityPreviewWithRole extends CourseEntityPreview {
 // Course Member
 
 export interface CourseMemberEntity extends Entity {
-  user: ObjectId
-  course: ObjectId
+  user: Types.ObjectId
+  course: Types.ObjectId
   role: CourseRole
 }
 
@@ -72,8 +72,8 @@ export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View
 // Course Problem
 
 export interface CourseProblemEntity extends Entity {
-  course: ObjectId
-  problem: ObjectId
+  course: Types.ObjectId
+  problem: Types.ObjectId
   sort: number
 }
 
@@ -101,8 +101,8 @@ export interface ProblemEntity extends Entity {
   type: typeof problemType[keyof typeof problemType]
   /** Judger code */
   code: string
-  tags: ObjectId[]
-  owner: ObjectId | null
+  tags: Types.ObjectId[]
+  owner: Types.ObjectId | null
   submit: number
   solve: number
 }
@@ -157,7 +157,7 @@ export interface ContestEntity extends Entity {
 
 export type ContestEntityEditable = Pick<ContestEntity,
   'title' | 'start' | 'end' | 'list' | 'status' | 'encrypt' | 'argument' | 'option'
-> & { course?: ObjectId | null }
+> & { course?: Types.ObjectId | null }
 
 export type ContestEntityPreview = Pick<ContestEntity,
   'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt'
