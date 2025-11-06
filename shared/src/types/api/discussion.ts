@@ -15,7 +15,7 @@ export const DiscussionListQuerySchema = z.object({
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'updatedAt']).default('updatedAt'),
-  owner: UserModelSchema.shape.uid.optional(),
+  author: UserModelSchema.shape.uid.optional(),
   type: stringToInt.pipe(z.enum(DiscussionType)).optional(),
 })
 
@@ -23,7 +23,7 @@ export type DiscussionListQuery = z.infer<typeof DiscussionListQuerySchema>
 
 export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
   discussionId: DiscussionModelSchema.shape.discussionId,
-  owner: z.object({
+  author: z.object({
     uid: UserModelSchema.shape.uid,
   }),
   type: DiscussionModelSchema.shape.type,
@@ -36,7 +36,7 @@ export type DiscussionListQueryResult = z.input<typeof DiscussionListQueryResult
 
 export const DiscussionDetailQueryResultSchema = z.object({
   discussionId: DiscussionModelSchema.shape.discussionId,
-  owner: z.object({
+  author: z.object({
     uid: UserModelSchema.shape.uid,
   }),
   problem: z.object({

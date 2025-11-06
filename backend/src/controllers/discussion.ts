@@ -44,9 +44,9 @@ export async function loadDiscussion (
 
   const { profile } = ctx.state
   const isAdmin = profile?.isAdmin ?? false
-  const isDiscussionOwner = discussion.owner._id.equals(profile?._id)
+  const isAuthor = discussion.author._id.equals(profile?._id)
   const isProblemOwner = discussion.problem?.owner?.equals(profile?._id) ?? false
-  if (isDiscussionOwner || isAdmin || isProblemOwner) {
+  if (isAuthor || isAdmin || isProblemOwner) {
     ctx.state.discussion = discussion
     return discussion
   }
@@ -72,7 +72,7 @@ async function findDiscussions (ctx: Context) {
   }
 
   const { profile } = ctx.state
-  const { page, pageSize, sort, sortBy, type, owner } = query.data
+  const { page, pageSize, sort, sortBy, type, author } = query.data
 
   const basicFilter: Parameters<typeof discussionService.findDiscussions>[1] = {
     problem: null,
@@ -81,10 +81,10 @@ async function findDiscussions (ctx: Context) {
   if (type) {
     basicFilter.type = type
   }
-  if (owner) {
-    const filterOwner = await getUser(owner)
-    if (filterOwner) {
-      basicFilter.owner = filterOwner._id
+  if (author) {
+    const authorUser = await getUser(author)
+    if (authorUser) {
+      basicFilter.author = authorUser._id
     }
   }
 
@@ -94,7 +94,7 @@ async function findDiscussions (ctx: Context) {
       { type: { $in: publicTypes } },
     ]
     if (profile) {
-      visibilityFilters.push({ owner: profile._id })
+      visibilityFilters.push({ author: profile._id })
     }
     filters.push({ $or: visibilityFilters })
   }
@@ -102,8 +102,8 @@ async function findDiscussions (ctx: Context) {
   const discussions = await discussionService.findDiscussions(
     { page, pageSize, sort, sortBy },
     { $and: filters },
-    [ 'discussionId', 'owner', 'type', 'title', 'createdAt', 'updatedAt' ],
-    { owner: [ 'uid' ] },
+    [ 'discussionId', 'author', 'type', 'title', 'createdAt', 'updatedAt' ],
+    { author: [ 'uid' ] },
   )
   const result = DiscussionListQueryResultSchema.encode(discussions)
   return createEnvelopedResponse(ctx, result)

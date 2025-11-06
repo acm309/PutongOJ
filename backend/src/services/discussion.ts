@@ -12,23 +12,23 @@ import type { FilterQuery } from '../types/mongo'
 import Discussion from '../models/Discussion'
 
 type DiscussionQueryFilters = FilterQuery<{
-  owner?: Types.ObjectId
+  author?: Types.ObjectId
   problem?: Types.ObjectId | null
   contest?: Types.ObjectId | null
   type?: DiscussionType
 }>
 
 interface DiscussionPopulateConfig {
-  owner?: (keyof UserModel)[]
+  author?: (keyof UserModel)[]
   problem?: (keyof ProblemModel)[]
   contest?: (keyof ContestModel)[]
   user?: (keyof UserModel)[]
 }
 
 type DiscussionPopulated<T extends DiscussionPopulateConfig>
-  = Omit<DiscussionModel, 'owner' | 'problem' | 'contest' | 'comments'> & {
-    owner: T['owner'] extends (keyof UserModel)[]
-      ? Pick<UserModel, T['owner'][number]> & DocumentId
+  = Omit<DiscussionModel, 'author' | 'problem' | 'contest' | 'comments'> & {
+    author: T['author'] extends (keyof UserModel)[]
+      ? Pick<UserModel, T['author'][number]> & DocumentId
       : Types.ObjectId
     problem: T['problem'] extends (keyof ProblemModel)[]
       ? Pick<ProblemModel, T['problem'][number]> & DocumentId | null
@@ -47,8 +47,8 @@ function applyPopulate<TPopulate extends DiscussionPopulateConfig> (
   query: ReturnType<typeof Discussion.find> | ReturnType<typeof Discussion.findOne>,
   populate: TPopulate,
 ) {
-  if (populate.owner) {
-    query = query.populate({ path: 'owner', select: populate.owner })
+  if (populate.author) {
+    query = query.populate({ path: 'author', select: populate.author })
   }
   if (populate.problem) {
     query = query.populate({ path: 'problem', select: populate.problem })
@@ -106,7 +106,7 @@ async function getDiscussionPopulated<TPopulate extends DiscussionPopulateConfig
 
 export async function getDiscussion (discussionId: number) {
   return getDiscussionPopulated(discussionId, {
-    owner: [ 'uid' ],
+    author: [ 'uid' ],
     problem: [ 'pid', 'owner' ],
     contest: [ 'cid' ],
     user: [ 'uid', 'nick' ],

@@ -12,7 +12,7 @@ export const DiscussionCommentModelSchema = z.object({
 
 export const DiscussionModelSchema = z.object({
   discussionId: z.int().nonnegative(),
-  owner: ObjectIdSchema,
+  author: ObjectIdSchema,
   problem: ObjectIdSchema.nullable(),
   contest: ObjectIdSchema.nullable(),
   type: z.enum(DiscussionType),
