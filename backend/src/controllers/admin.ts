@@ -1,5 +1,7 @@
 import type { Context } from 'koa'
+import type { DiscussionUpdateDto } from 'src/services/discussion'
 import {
+  AdminDiscussionUpdatePayloadSchema,
   AdminGroupCreatePayloadSchema,
   AdminGroupDetailQueryResultSchema,
   AdminGroupMembersUpdatePayloadSchema,
@@ -18,9 +20,12 @@ import {
   OAuthProvider,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
+import contestService from '../services/contest'
 import cryptoService from '../services/crypto'
+import discussionService from '../services/discussion'
 import groupService from '../services/group'
 import oauthService from '../services/oauth'
+import problemService from '../services/problem'
 import solutionService from '../services/solution'
 import userService from '../services/user'
 import websocketService from '../services/websocket'
@@ -303,6 +308,76 @@ export async function removeGroup (ctx: Context) {
   }
 }
 
+function parseDiscussionId (ctx: Context): number | null {
+  const discussionIdStr = ctx.params.discussionId
+  const discussionId = Number(discussionIdStr)
+
+  if (Number.isNaN(discussionId) || !Number.isInteger(discussionId) || discussionId < 0) {
+    createErrorResponse(ctx, 'Invalid discussion ID', ErrorCode.BadRequest)
+    return null
+  }
+  return discussionId
+}
+
+export async function updateDiscussion (ctx: Context) {
+  const discussionId = parseDiscussionId(ctx)
+  if (discussionId === null) {
+    return
+  }
+
+  const payload = AdminDiscussionUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  const update = {} as DiscussionUpdateDto
+  if (payload.data.author !== undefined) {
+    const author = await userService.getUser(payload.data.author)
+    if (!author) {
+      return createErrorResponse(ctx, 'Author user not found', ErrorCode.BadRequest)
+    }
+    update.author = author._id
+  }
+  if (payload.data.problem !== undefined) {
+    if (payload.data.problem === null) {
+      update.problem = null
+    } else {
+      const problem = await problemService.getProblem(payload.data.problem)
+      if (!problem) {
+        return createErrorResponse(ctx, 'Problem not found', ErrorCode.BadRequest)
+      }
+      update.problem = problem._id
+    }
+  }
+  if (payload.data.contest !== undefined) {
+    if (payload.data.contest === null) {
+      update.contest = null
+    } else {
+      const contest = await contestService.getContest(payload.data.contest)
+      if (!contest) {
+        return createErrorResponse(ctx, 'Contest not found', ErrorCode.BadRequest)
+      }
+      update.contest = contest._id
+    }
+  }
+  if (payload.data.type !== undefined) {
+    update.type = payload.data.type
+  }
+  if (payload.data.title !== undefined) {
+    update.title = payload.data.title
+  }
+
+  try {
+    const result = await discussionService.updateDiscussion(discussionId, update)
+    if (!result) {
+      return createErrorResponse(ctx, 'Discussion not found', ErrorCode.NotFound)
+    }
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -318,6 +393,7 @@ const adminController = {
   updateGroup,
   updateGroupMembers,
   removeGroup,
+  updateDiscussion,
 } as const
 
 export default adminController

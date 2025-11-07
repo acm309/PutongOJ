@@ -26,8 +26,6 @@ interface DiscussionPopulateConfig {
   contest?: (keyof ContestModel)[]
 }
 
-type CommentPopulateConfig = Pick<DiscussionPopulateConfig, 'author'>
-
 type DiscussionPopulated<T extends DiscussionPopulateConfig>
   = Omit<DiscussionModel, 'author' | 'problem' | 'contest'> & {
     author: T['author'] extends (keyof UserModel)[]
@@ -39,13 +37,6 @@ type DiscussionPopulated<T extends DiscussionPopulateConfig>
     contest: T['contest'] extends (keyof ContestModel)[]
       ? Pick<ContestModel, T['contest'][number]> & DocumentId | null
       : Types.ObjectId | null
-  }
-
-type CommentPopulated<T extends CommentPopulateConfig>
-  = Omit<CommentModel, 'author'> & {
-    author: T['author'] extends (keyof UserModel)[]
-      ? Pick<UserModel, T['author'][number]> & DocumentId
-      : Types.ObjectId
   }
 
 export async function findDiscussions<
@@ -118,6 +109,15 @@ export async function getDiscussion (discussionId: number) {
 
 export type DiscussionDocument = Awaited<ReturnType<typeof getDiscussion>>
 
+type CommentPopulateConfig = Pick<DiscussionPopulateConfig, 'author'>
+
+type CommentPopulated<T extends CommentPopulateConfig>
+  = Omit<CommentModel, 'author'> & {
+    author: T['author'] extends (keyof UserModel)[]
+      ? Pick<UserModel, T['author'][number]> & DocumentId
+      : Types.ObjectId
+  }
+
 async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   discussion: Types.ObjectId, populate: TPopulate,
 ) {
@@ -135,26 +135,52 @@ export async function getComments (discussion: Types.ObjectId) {
   })
 }
 
-// interface DiscussionCreateDto {
-//   user: ObjectId
-//   problem: ObjectId | null
-//   contest: ObjectId | null
-//   title: string
-//   content: string
-// }
+export async function createComment (
+  discussion: Types.ObjectId,
+  comment: Pick<CommentModel, 'author' | 'content'>,
+): Promise<CommentModel> {
+  const { author, content } = comment
+  const newComment = new Comment({ discussion, author, content })
+  await newComment.save()
+  return newComment.toObject()
+}
 
-// interface DiscussionCommentCreateDto {
-//   user: ObjectId
-//   content: string
-// }
+export type DiscussionUpdateDto = Partial<Pick<DiscussionModel,
+  'author' | 'problem' | 'contest' | 'type' | 'title'
+>>
 
-// export async function createDiscussion(data: DiscussionCreateDto): Promise<DiscussionModel> { return {} as any }
-// export async function deleteDiscussion(discussionId: number): Promise<void> { return {} as any }
-// export async function addComment(discussion: ObjectId, comment: DiscussionCommentCreateDto): Promise<DiscussionModel> { return {} as any }
+export async function updateDiscussion (
+  discussionId: number,
+  update: DiscussionUpdateDto,
+): Promise<DiscussionModel | null> {
+  const discussion = await Discussion.findOneAndUpdate(
+    { discussionId }, update, { new: true },
+  ).lean()
+  return discussion
+}
+
+type DiscussionCreateDto = Pick<DiscussionModel,
+  'author' | 'problem' | 'contest' | 'type' | 'title'
+> & Pick<CommentModel, 'content'>
+
+export async function createDiscussion (
+  discussion: DiscussionCreateDto,
+): Promise<DiscussionModel> {
+  const { author, problem, contest, type, title, content } = discussion
+  const newDiscussion = new Discussion({
+    author, problem, contest, type, title,
+  })
+  await newDiscussion.save()
+  await createComment(newDiscussion._id, { author, content })
+  return newDiscussion.toObject()
+}
 
 const discussionService = {
   findDiscussions,
+  createDiscussion,
   getDiscussion,
+  updateDiscussion,
+  createComment,
   getComments,
 } as const
 

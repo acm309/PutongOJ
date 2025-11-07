@@ -1,15 +1,23 @@
 <script lang="ts" setup>
-import type { DiscussionDetailQueryResult } from '@putongoj/shared'
+import type { AdminDiscussionUpdatePayload, DiscussionDetailQueryResult } from '@putongoj/shared'
+import { DiscussionType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import IftaLabel from 'primevue/iftalabel'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
 import Panel from 'primevue/panel'
+import Select from 'primevue/select'
 import Tag from 'primevue/tag'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { updateDiscussion } from '@/api/admin'
 import { getDiscussion } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
+import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { spacing, timePretty } from '@/utils/formate'
 import { useMessage } from '@/utils/message'
@@ -19,16 +27,44 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const { isLogined: _WIP_ } = storeToRefs(useSessionStore())
+const { isAdmin } = storeToRefs(useSessionStore())
 const discussion = ref<DiscussionDetailQueryResult | null>(null)
 const loading = ref(false)
+const saving = ref(false)
+const editDialog = ref(false)
+const editingForm = ref({} as Required<AdminDiscussionUpdatePayload>)
+
+const hasChanges = computed(() => {
+  if (!discussion.value) return false
+  return (
+    editingForm.value.title !== discussion.value.title
+    || editingForm.value.type !== discussion.value.type
+    || editingForm.value.author !== discussion.value.author.uid
+    || (editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)
+    || (editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)
+  )
+})
+
+const discussionTypeOptions = computed(() => [ {
+  value: DiscussionType.OpenDiscussion,
+  label: t('ptoj.discussion'),
+  desc: t('ptoj.discussion_type_desc'),
+}, {
+  value: DiscussionType.PublicAnnouncement,
+  label: t('ptoj.announcement'),
+  desc: t('ptoj.announcement_type_desc'),
+}, {
+  value: DiscussionType.PrivateClarification,
+  label: t('ptoj.clarification'),
+  desc: t('ptoj.clarification_type_desc'),
+}, {
+  value: DiscussionType.ArchivedDiscussion,
+  label: t('ptoj.archived'),
+  desc: t('ptoj.archived_type_desc'),
+} ])
 
 async function fetchDiscussion () {
   const discussionId = route.params.discussionId as string
-  if (!discussionId) {
-    message.error(t('ptoj.invalid_discussion_id'))
-    return
-  }
 
   loading.value = true
   const resp = await getDiscussion(discussionId)
@@ -39,6 +75,58 @@ async function fetchDiscussion () {
   }
 
   discussion.value = resp.data
+}
+
+function onEditDiscussion () {
+  if (!discussion.value || !isAdmin.value) return
+  editingForm.value = {
+    title: discussion.value.title,
+    type: discussion.value.type,
+    author: discussion.value.author.uid,
+    problem: discussion.value.problem?.pid || null,
+    contest: discussion.value.contest?.cid || null,
+  }
+  editDialog.value = true
+}
+
+function onFormAuthorBlur () {
+  if (!editingForm.value.author) {
+    editingForm.value.author = discussion.value!.author.uid
+  }
+}
+
+async function editDiscussion () {
+  if (!discussion.value || !isAdmin.value) return
+
+  const payload: AdminDiscussionUpdatePayload = {}
+  if (editingForm.value.title !== discussion.value.title) {
+    payload.title = editingForm.value.title
+  }
+  if (editingForm.value.type !== discussion.value.type) {
+    payload.type = editingForm.value.type
+  }
+  if (editingForm.value.author !== discussion.value.author.uid) {
+    payload.author = editingForm.value.author
+  }
+  if ((editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)) {
+    payload.problem = editingForm.value.problem || null
+  }
+  if ((editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)) {
+    payload.contest = editingForm.value.contest || null
+  }
+
+  saving.value = true
+  const resp = await updateDiscussion(discussion.value.discussionId, payload)
+  saving.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_save_changes'), resp.message)
+    return
+  }
+
+  message.success(t('ptoj.successful_updated'), t('ptoj.discussion_updated_successfully'))
+  editDialog.value = false
+  await fetchDiscussion()
 }
 
 function onViewAuthor (uid: string) {
@@ -76,7 +164,13 @@ onMounted(fetchDiscussion)
           <DiscussionTypeTag :type="discussion.type" />
           <!-- TODO: Relative problem/contest link -->
         </div>
-        <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetchDiscussion" />
+        <div class="flex gap-2">
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetchDiscussion" />
+          <Button
+            v-if="isAdmin" icon="pi pi-pen-to-square" severity="secondary" outlined :disabled="loading"
+            @click="onEditDiscussion"
+          />
+        </div>
       </div>
 
       <h1 class="font-bold mb-4 pt-12 text-2xl">
@@ -117,5 +211,61 @@ onMounted(fetchDiscussion)
         </Panel>
       </div>
     </template>
+
+    <Dialog
+      v-model:visible="editDialog" :header="t('ptoj.edit_discussion')" modal :closable="false"
+      class="max-w-md mx-6 w-full"
+    >
+      <form @submit.prevent="editDiscussion">
+        <div class="space-y-4">
+          <IftaLabel>
+            <InputText
+              id="title" v-model="editingForm.title" fluid :placeholder="t('ptoj.enter_title')" maxlength="80"
+              required
+            />
+            <label for="title">{{ t('ptoj.title') }}</label>
+          </IftaLabel>
+          <IftaLabel>
+            <Select
+              id="type" v-model="editingForm.type" fluid :options="discussionTypeOptions" option-label="label"
+              option-value="value"
+            >
+              <template #option="{ option }">
+                <div class="flex gap-2 items-center">
+                  <DiscussionTypeTag :type="option.value" />
+                  <span class="text-muted text-sm">{{ option.desc }}</span>
+                </div>
+              </template>
+            </Select>
+            <label for="type">{{ t('ptoj.type') }}</label>
+          </IftaLabel>
+          <UserSelect v-model="editingForm.author" :label="t('ptoj.author')" required @blur="onFormAuthorBlur" />
+          <IftaLabel>
+            <InputNumber
+              id="problem" v-model="editingForm.problem" mode="decimal" :min="1" fluid :use-grouping="false"
+              :placeholder="t('ptoj.enter_problem_id')"
+            />
+            <label for="problem">{{ t('ptoj.problem') }}</label>
+          </IftaLabel>
+          <IftaLabel>
+            <InputNumber
+              id="contest" v-model="editingForm.contest" mode="decimal" :min="1" fluid :use-grouping="false"
+              :placeholder="t('ptoj.enter_contest_id')"
+            />
+            <label for="contest">{{ t('ptoj.contest') }}</label>
+          </IftaLabel>
+        </div>
+        <div class="flex gap-2 justify-end mt-5">
+          <Button
+            type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
+            @click="editDialog = false"
+          />
+          <Button
+            type="submit" :label="t('ptoj.save_changes')" icon="pi pi-check" :disabled="!hasChanges"
+            :loading="saving"
+          />
+        </div>
+      </form>
+    </Dialog>
   </div>
 </template>
