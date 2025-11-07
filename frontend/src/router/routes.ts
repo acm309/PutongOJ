@@ -10,7 +10,7 @@ import UserProfile from '@/views/UserProfile.vue'
 import adminRoutes from './admin'
 import contestRoutes from './contest'
 import courseRoutes from './course'
-import discussRoutes from './discuss'
+import discussionRoutes from './discussion'
 import newsRoutes from './news'
 import problemRoutes from './problem'
 import solutionRoutes from './solution'
@@ -26,7 +26,7 @@ const routes: Array<RouteRecordRaw> = [
   ...problemRoutes,
   ...solutionRoutes,
   ...contestRoutes,
-  ...discussRoutes,
+  ...discussionRoutes,
   ...courseRoutes,
   ...adminRoutes,
   {

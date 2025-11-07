@@ -2,7 +2,13 @@ import { contestLabelingStyle } from '@backend/utils/constants'
 import { JudgeStatus, UserPrivilege } from '@putongoj/shared'
 import { format } from 'date-fns/format'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
+import { enUS, zhCN } from 'date-fns/locale'
 import { toDate } from 'date-fns/toDate'
+import pangu from 'pangu'
+
+export function spacing (text: string) {
+  return pangu.spacing(text)
+}
 
 export function formate (value: number) {
   const num = value * 100
@@ -19,8 +25,11 @@ export function timePretty (
   return format(toDate(time), formatStr)
 }
 
-export function timeagoPretty (time: number | string) {
-  return formatDistanceToNow(toDate(Number(time)))
+export function formatRelativeTime (date: string | number | Date, locale: string): string {
+  return formatDistanceToNow(date, {
+    addSuffix: true,
+    locale: locale === 'zh-CN' ? zhCN : enUS,
+  })
 }
 
 export function timeContest (remainSeconds: number): string {
