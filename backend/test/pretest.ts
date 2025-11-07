@@ -24,6 +24,7 @@ import { userSeeds } from './seeds/user'
 async function main () {
   await removeall()
   await Promise.all([
+    new ID({ name: 'Comment', id: 0 }).save(),
     new ID({ name: 'Contest', id: 0 }).save(),
     new ID({ name: 'Course', id: 2 }).save(),
     new ID({ name: 'Discussion', id: 0 }).save(),

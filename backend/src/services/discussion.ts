@@ -1,4 +1,5 @@
 import type {
+  CommentModel,
   ContestModel,
   DiscussionModel,
   DiscussionType,
@@ -9,6 +10,7 @@ import type {
 import type { Types } from 'mongoose'
 import type { DocumentId, PaginateOption, SortOption } from '../types'
 import type { FilterQuery } from '../types/mongo'
+import Comment from '../models/Comment'
 import Discussion from '../models/Discussion'
 
 type DiscussionQueryFilters = FilterQuery<{
@@ -22,11 +24,12 @@ interface DiscussionPopulateConfig {
   author?: (keyof UserModel)[]
   problem?: (keyof ProblemModel)[]
   contest?: (keyof ContestModel)[]
-  user?: (keyof UserModel)[]
 }
 
+type CommentPopulateConfig = Pick<DiscussionPopulateConfig, 'author'>
+
 type DiscussionPopulated<T extends DiscussionPopulateConfig>
-  = Omit<DiscussionModel, 'author' | 'problem' | 'contest' | 'comments'> & {
+  = Omit<DiscussionModel, 'author' | 'problem' | 'contest'> & {
     author: T['author'] extends (keyof UserModel)[]
       ? Pick<UserModel, T['author'][number]> & DocumentId
       : Types.ObjectId
@@ -36,31 +39,14 @@ type DiscussionPopulated<T extends DiscussionPopulateConfig>
     contest: T['contest'] extends (keyof ContestModel)[]
       ? Pick<ContestModel, T['contest'][number]> & DocumentId | null
       : Types.ObjectId | null
-    comments: (Omit<DiscussionModel['comments'][number], 'user'> & {
-      user: T['user'] extends (keyof UserModel)[]
-        ? Pick<UserModel, T['user'][number]> & DocumentId
-        : Types.ObjectId
-    })[]
   }
 
-function applyPopulate<TPopulate extends DiscussionPopulateConfig> (
-  query: ReturnType<typeof Discussion.find> | ReturnType<typeof Discussion.findOne>,
-  populate: TPopulate,
-) {
-  if (populate.author) {
-    query = query.populate({ path: 'author', select: populate.author })
+type CommentPopulated<T extends CommentPopulateConfig>
+  = Omit<CommentModel, 'author'> & {
+    author: T['author'] extends (keyof UserModel)[]
+      ? Pick<UserModel, T['author'][number]> & DocumentId
+      : Types.ObjectId
   }
-  if (populate.problem) {
-    query = query.populate({ path: 'problem', select: populate.problem })
-  }
-  if (populate.contest) {
-    query = query.populate({ path: 'contest', select: populate.contest })
-  }
-  if (populate.user) {
-    query = query.populate({ path: 'comments.user', select: populate.user })
-  }
-  return query
-}
 
 export async function findDiscussions<
   TFields extends (keyof DiscussionModel)[],
@@ -72,7 +58,7 @@ export async function findDiscussions<
   populate: TPopulate = {} as TPopulate,
 ) {
   const { page, pageSize, sort, sortBy } = options
-  const query = Discussion
+  let query = Discussion
     .find(filters)
     .sort({
       [sortBy]: sort,
@@ -81,8 +67,17 @@ export async function findDiscussions<
     .select([ '_id', ...fields ])
     .skip((page - 1) * pageSize)
     .limit(pageSize)
+  if (populate.author) {
+    query = query.populate({ path: 'author', select: populate.author })
+  }
+  if (populate.problem) {
+    query = query.populate({ path: 'problem', select: populate.problem })
+  }
+  if (populate.contest) {
+    query = query.populate({ path: 'contest', select: populate.contest })
+  }
 
-  const docsPromise = applyPopulate(query, populate).lean()
+  const docsPromise = query.lean()
   const countPromise = Discussion.countDocuments(filters)
 
   const [ docs, total ] = await Promise.all([ docsPromise, countPromise ])
@@ -99,8 +94,17 @@ export async function findDiscussions<
 async function getDiscussionPopulated<TPopulate extends DiscussionPopulateConfig> (
   discussionId: number, populate: TPopulate,
 ) {
-  const query = Discussion.findOne({ discussionId })
-  const doc = await applyPopulate(query, populate).lean() as any
+  let query = Discussion.findOne({ discussionId })
+  if (populate.author) {
+    query = query.populate({ path: 'author', select: populate.author })
+  }
+  if (populate.problem) {
+    query = query.populate({ path: 'problem', select: populate.problem })
+  }
+  if (populate.contest) {
+    query = query.populate({ path: 'contest', select: populate.contest })
+  }
+  const doc = await query.lean()
   return doc as (DiscussionPopulated<TPopulate> & DocumentId) | null
 }
 
@@ -109,11 +113,27 @@ export async function getDiscussion (discussionId: number) {
     author: [ 'uid' ],
     problem: [ 'pid', 'owner' ],
     contest: [ 'cid' ],
-    user: [ 'uid', 'nick' ],
   })
 }
 
 export type DiscussionDocument = Awaited<ReturnType<typeof getDiscussion>>
+
+async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
+  discussion: Types.ObjectId, populate: TPopulate,
+) {
+  let query = Comment.find({ discussion }).sort({ createdAt: 1 })
+  if (populate.author) {
+    query = query.populate({ path: 'author', select: populate.author })
+  }
+  const docs = await query.lean() as unknown[]
+  return docs as (CommentPopulated<TPopulate> & DocumentId)[]
+}
+
+export async function getComments (discussion: Types.ObjectId) {
+  return getCommentsPopulated(discussion, {
+    author: [ 'uid', 'nick' ],
+  })
+}
 
 // interface DiscussionCreateDto {
 //   user: ObjectId
@@ -135,6 +155,7 @@ export type DiscussionDocument = Awaited<ReturnType<typeof getDiscussion>>
 const discussionService = {
   findDiscussions,
   getDiscussion,
+  getComments,
 } as const
 
 export default discussionService

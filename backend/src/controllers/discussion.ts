@@ -102,7 +102,7 @@ async function findDiscussions (ctx: Context) {
   const discussions = await discussionService.findDiscussions(
     { page, pageSize, sort, sortBy },
     { $and: filters },
-    [ 'discussionId', 'author', 'type', 'title', 'createdAt', 'updatedAt' ],
+    [ 'discussionId', 'author', 'type', 'title', 'createdAt', 'updatedAt', 'comments' ],
     { author: [ 'uid' ] },
   )
   const result = DiscussionListQueryResultSchema.encode(discussions)
@@ -116,7 +116,8 @@ async function getDiscussion (ctx: Context) {
       'Discussion not found or access denied', ErrorCode.NotFound,
     )
   }
-  const result = DiscussionDetailQueryResultSchema.encode(discussion)
+  const comments = await discussionService.getComments(discussion._id)
+  const result = DiscussionDetailQueryResultSchema.encode({ ...discussion, comments })
   return createEnvelopedResponse(ctx, result)
 }
 

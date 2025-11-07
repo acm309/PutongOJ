@@ -88,19 +88,19 @@ onMounted(fetchDiscussion)
           <template #header>
             <div class="flex gap-4 items-start">
               <Avatar
-                :label="comment.user.uid[0]" class="cursor-pointer flex-none"
-                @click="onViewAuthor(comment.user.uid)"
+                :label="comment.author.uid[0]" class="cursor-pointer flex-none"
+                @click="onViewAuthor(comment.author.uid)"
               />
               <div
                 class="cursor-pointer flex font-medium items-center min-h-8"
-                @click="onViewAuthor(comment.user.uid)"
+                @click="onViewAuthor(comment.author.uid)"
               >
                 <span class="flex flex-wrap gap-2 items-center">
                   <a class="text-lg">
-                    {{ comment.user.uid }}
+                    {{ comment.author.uid }}
                   </a>
-                  <span v-if="comment.user.nick" class="text-muted-color">
-                    {{ comment.user.nick }}
+                  <span v-if="comment.author.nick" class="text-muted-color">
+                    {{ comment.author.nick }}
                   </span>
                 </span>
               </div>

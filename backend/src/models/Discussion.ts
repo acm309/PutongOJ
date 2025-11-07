@@ -21,7 +21,6 @@ const discussionCommentSchema = new mongoose.Schema({
   },
 }, {
   timestamps: true,
-  _id: false,
 })
 
 const discussionSchema = new mongoose.Schema({

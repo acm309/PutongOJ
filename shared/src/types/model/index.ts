@@ -1,3 +1,4 @@
+export * from './comment.js'
 export * from './contest.js'
 export * from './discussion.js'
 export * from './group.js'

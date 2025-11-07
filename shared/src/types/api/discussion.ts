@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { DiscussionType } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
 import {
+  CommentModelSchema,
   ContestModelSchema,
-  DiscussionCommentModelSchema,
   DiscussionModelSchema,
   ProblemModelSchema,
   UserModelSchema,
@@ -14,7 +14,7 @@ export const DiscussionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'updatedAt']).default('updatedAt'),
+  sortBy: z.enum(['createdAt', 'updatedAt', 'comments']).default('updatedAt'),
   author: UserModelSchema.shape.uid.optional(),
   type: stringToInt.pipe(z.enum(DiscussionType)).optional(),
 })
@@ -28,6 +28,7 @@ export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
   }),
   type: DiscussionModelSchema.shape.type,
   title: DiscussionModelSchema.shape.title,
+  comments: DiscussionModelSchema.shape.comments,
   createdAt: DiscussionModelSchema.shape.createdAt,
   updatedAt: DiscussionModelSchema.shape.updatedAt,
 }))
@@ -48,13 +49,14 @@ export const DiscussionDetailQueryResultSchema = z.object({
   type: DiscussionModelSchema.shape.type,
   title: DiscussionModelSchema.shape.title,
   comments: z.array(z.object({
-    user: z.object({
+    commentId: CommentModelSchema.shape.commentId,
+    author: z.object({
       uid: UserModelSchema.shape.uid,
       nick: UserModelSchema.shape.nick,
     }),
-    content: DiscussionCommentModelSchema.shape.content,
-    createdAt: DiscussionCommentModelSchema.shape.createdAt,
-    updatedAt: DiscussionCommentModelSchema.shape.updatedAt,
+    content: CommentModelSchema.shape.content,
+    createdAt: CommentModelSchema.shape.createdAt,
+    updatedAt: CommentModelSchema.shape.updatedAt,
   })),
   createdAt: DiscussionModelSchema.shape.createdAt,
   updatedAt: DiscussionModelSchema.shape.updatedAt,
