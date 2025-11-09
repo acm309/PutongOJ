@@ -1,23 +1,28 @@
 <script lang="ts" setup>
 import type {
+  DiscussionCreatePayload,
   DiscussionListQuery,
   DiscussionListQueryResult,
-  DiscussionType,
 } from '@putongoj/shared'
-import { DiscussionListQuerySchema } from '@putongoj/shared'
+import { DiscussionListQuerySchema, DiscussionType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { findDiscussions } from '@/api/discussion'
+import { createDiscussion, findDiscussions } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useSessionStore } from '@/store/modules/session'
-import { formatRelativeTime, spacing, timePretty } from '@/utils/formate'
+import { formatRelativeTime, spacing } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -26,15 +31,42 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const { isLogined: _WIP_ } = storeToRefs(useSessionStore())
+const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as DiscussionListQuery)
 const docs = ref([] as DiscussionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
+const creating = ref(false)
+const createDialog = ref(false)
+const createForm = ref({
+  type: DiscussionType.PrivateClarification,
+  title: '',
+  content: '',
+} as DiscussionCreatePayload)
 
 const hasFilter = computed(() => {
   return Boolean(query.value.author)
 })
+const hasEntered = computed(() => {
+  return Boolean(createForm.value.title.trim()) && Boolean(createForm.value.content.trim())
+})
+
+const discussionTypeOptions = computed(() => [ {
+  value: DiscussionType.PrivateClarification,
+  label: t('ptoj.clarification'),
+  desc: t('ptoj.clarification_type_desc'),
+  disabled: false,
+}, {
+  value: DiscussionType.PublicAnnouncement,
+  label: t('ptoj.announcement'),
+  desc: t('ptoj.announcement_type_desc'),
+  disabled: !isAdmin.value,
+}, {
+  value: DiscussionType.OpenDiscussion,
+  label: t('ptoj.discussion'),
+  desc: t('ptoj.discussion_type_desc'),
+  disabled: !isAdmin.value,
+} ])
 
 async function fetch () {
   const parsed = DiscussionListQuerySchema.safeParse(route.query)
@@ -109,6 +141,28 @@ function onViewAuthor (data: any) {
   router.push({ name: 'UserProfile', params: { uid } })
 }
 
+function onCreateDiscussion () {
+  createDialog.value = true
+}
+
+async function submitDiscussion () {
+  creating.value = true
+  const resp = await createDiscussion(createForm.value)
+  creating.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_create_discussion'), resp.message)
+    return
+  }
+
+  const { discussionId } = resp.data
+  message.success(
+    t('ptoj.successful_create_discussion'),
+    t('ptoj.successful_create_discussion_detail', { discussionId }),
+  )
+  router.push({ name: 'DiscussionDetail', params: { discussionId } })
+}
+
 onMounted(fetch)
 onRouteQueryUpdate(fetch)
 </script>
@@ -134,6 +188,11 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
           />
+          <Button
+            v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : undefined" icon="pi pi-plus"
+            severity="primary" :label="t('ptoj.create_discussion')" :disabled="loading || !isLogined"
+            @click="onCreateDiscussion"
+          />
         </div>
       </div>
     </div>
@@ -156,7 +215,12 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column :header="t('ptoj.author')" field="author.uid" class="max-w-36 md:max-w-48 truncate">
+      <Column field="author.uid" class="max-w-36 md:max-w-48 text-right truncate">
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.author') }}
+          </span>
+        </template>
         <template #body="{ data }">
           <a @click="onViewAuthor(data)">
             {{ data.author.uid }}
@@ -164,15 +228,22 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column :header="t('ptoj.updated_at')" field="updatedAt" class="whitespace-nowrap" sortable>
-        <template #body="{ data }">
-          {{ formatRelativeTime(data.updatedAt, locale) }}
+      <Column field="comments" class="text-center whitespace-nowrap" sortable>
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-comments" />
+          </span>
         </template>
       </Column>
 
-      <Column :header="t('ptoj.created_at')" field="createdAt" class="pr-6 whitespace-nowrap" sortable>
+      <Column field="updatedAt" class="pr-6 text-right whitespace-nowrap" sortable>
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.updated_at') }}
+          </span>
+        </template>
         <template #body="{ data }">
-          {{ timePretty(data.createdAt) }}
+          {{ formatRelativeTime(data.updatedAt, locale) }}
         </template>
       </Column>
 
@@ -189,5 +260,53 @@ onRouteQueryUpdate(fetch)
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
+
+    <Dialog
+      v-model:visible="createDialog" :header="t('ptoj.create_discussion')" modal :closable="false"
+      class="max-w-3xl mx-6 w-full"
+    >
+      <form @submit.prevent="submitDiscussion">
+        <div class="space-y-4">
+          <IftaLabel>
+            <Select
+              id="type" v-model="createForm.type" fluid :options="discussionTypeOptions" option-label="label"
+              option-value="value" :option-disabled="(option) => option.disabled" required
+            >
+              <template #option="{ option }">
+                <div class="flex gap-2 items-center">
+                  <DiscussionTypeTag :type="option.value" />
+                  <span class="text-muted text-sm">{{ option.desc }}</span>
+                </div>
+              </template>
+            </Select>
+            <label for="type">{{ t('ptoj.type') }}</label>
+          </IftaLabel>
+          <IftaLabel>
+            <InputText
+              id="title" v-model="createForm.title" fluid :placeholder="t('ptoj.enter_title')" maxlength="80"
+              required
+            />
+            <label for="title">{{ t('ptoj.title') }}</label>
+          </IftaLabel>
+          <IftaLabel>
+            <Textarea
+              id="content" v-model="createForm.content" :placeholder="t('ptoj.enter_content')" required fluid
+              rows="7" auto-resize
+            />
+            <label for="content">{{ t('ptoj.content') }}</label>
+          </IftaLabel>
+        </div>
+        <div class="flex gap-2 justify-end mt-5">
+          <Button
+            type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
+            @click="createDialog = false"
+          />
+          <Button
+            type="submit" :label="t('ptoj.submit_discussion')" icon="pi pi-send" :disabled="!hasEntered"
+            :loading="creating"
+          />
+        </div>
+      </form>
+    </Dialog>
   </div>
 </template>

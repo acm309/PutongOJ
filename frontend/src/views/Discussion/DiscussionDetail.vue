@@ -149,16 +149,12 @@ async function editDiscussion () {
 }
 
 async function submitComment () {
-  if (!discussion.value || !canComment.value || !commentContent.value.trim()) {
-    return
-  }
+  if (!discussion.value) return
 
   creatingComment.value = true
-  const payload = {
+  const resp = await createComment(discussion.value.discussionId, {
     content: commentContent.value.trim(),
-  }
-
-  const resp = await createComment(discussion.value.discussionId, payload)
+  })
   creatingComment.value = false
 
   if (!resp.success) {

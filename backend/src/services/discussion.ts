@@ -10,6 +10,7 @@ import type {
 import type { Types } from 'mongoose'
 import type { DocumentId, PaginateOption, SortOption } from '../types'
 import type { FilterQuery } from '../types/mongo'
+import { distributeWork } from '../jobs/helper'
 import Comment from '../models/Comment'
 import Discussion from '../models/Discussion'
 
@@ -142,6 +143,7 @@ export async function createComment (
   const { author, content } = comment
   const newComment = new Comment({ discussion, author, content })
   await newComment.save()
+  await distributeWork('updateStatistic', `discussion:${discussion.toString()}`)
   return newComment.toObject()
 }
 

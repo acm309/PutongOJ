@@ -64,6 +64,16 @@ export const DiscussionDetailQueryResultSchema = z.object({
 
 export type DiscussionDetailQueryResult = z.input<typeof DiscussionDetailQueryResultSchema>
 
+export const DiscussionCreatePayloadSchema = z.object({
+  type: z.enum(DiscussionType).exclude(['ArchivedDiscussion']),
+  title: DiscussionModelSchema.shape.title,
+  problem: ProblemModelSchema.shape.pid.optional(),
+  contest: ContestModelSchema.shape.cid.optional(),
+  content: CommentModelSchema.shape.content,
+})
+
+export type DiscussionCreatePayload = z.infer<typeof DiscussionCreatePayloadSchema>
+
 export const CommentCreatePayloadSchema = z.object({
   content: CommentModelSchema.shape.content,
 })

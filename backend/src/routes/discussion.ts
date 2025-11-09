@@ -10,6 +10,11 @@ const discussionRouter = new Router({
 discussionRouter.get('/',
   discussionController.findDiscussions,
 )
+discussionRouter.post('/',
+  authnMiddleware.loginRequire,
+  ratelimitMiddleware.discussionCreateLimit,
+  discussionController.createDiscussion,
+)
 
 discussionRouter.get('/:discussionId',
   discussionController.getDiscussion,

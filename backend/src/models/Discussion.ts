@@ -1,27 +1,10 @@
 import type { DiscussionModel } from '@putongoj/shared'
 import type { Document, Model, Types } from 'mongoose'
-import { COMMENT_LENGTH_MAX, DiscussionType, TITLE_LENGTH_MAX } from '@putongoj/shared'
+import { DiscussionType, TITLE_LENGTH_MAX } from '@putongoj/shared'
 import mongoose from '../config/db'
 import ID from './ID'
 
 interface DiscussionDocument extends Document<Types.ObjectId>, DiscussionModel { }
-
-const discussionCommentSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (v: string) => v.length <= COMMENT_LENGTH_MAX,
-    },
-  },
-}, {
-  timestamps: true,
-})
 
 const discussionSchema = new mongoose.Schema({
   discussionId: {
@@ -48,7 +31,7 @@ const discussionSchema = new mongoose.Schema({
   },
   type: {
     type: Number,
-    enum: Object.values(DiscussionType),
+    enum: DiscussionType,
     default: DiscussionType.PrivateClarification,
   },
   title: {
@@ -59,8 +42,8 @@ const discussionSchema = new mongoose.Schema({
     },
   },
   comments: {
-    type: [ discussionCommentSchema ],
-    required: true,
+    type: Number,
+    default: 0,
   },
 }, {
   collection: 'Discussion',

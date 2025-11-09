@@ -1,6 +1,8 @@
 import type { Context } from 'koa'
+import type { Types } from 'mongoose'
 import {
   CommentCreatePayloadSchema,
+  DiscussionCreatePayloadSchema,
   DiscussionDetailQueryResultSchema,
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
@@ -17,6 +19,7 @@ import {
 } from '../utils'
 import { loadContest } from './contest'
 import { loadCourse } from './course'
+import { loadProblem } from './problem'
 
 const publicTypes = [
   DiscussionType.OpenDiscussion,
@@ -123,6 +126,57 @@ async function getDiscussion (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+async function createDiscussion (ctx: Context) {
+  const payload = DiscussionCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  const profile = await loadProfile(ctx)
+  let isManaged = profile.isAdmin ?? false
+
+  let problem: Types.ObjectId | null = null
+  if (payload.data.problem) {
+    const problemDoc = await loadProblem(ctx, payload.data.problem)
+
+    problem = problemDoc._id
+    if (!isManaged && problemDoc.owner?.equals(profile._id) === true) {
+      isManaged = true
+    }
+  }
+
+  let contest: Types.ObjectId | null = null
+  if (payload.data.contest) {
+    const contestDoc = await loadContest(ctx, payload.data.contest)
+
+    contest = contestDoc._id
+    if (contestDoc.course) {
+      const { role } = await loadCourse(ctx, contestDoc.course)
+      if (role.manageContest) {
+        isManaged = true
+      }
+    }
+  }
+
+  const { type, title, content } = payload.data
+  const author = profile._id
+
+  if (publicTypes.includes(type) && !isManaged) {
+    return createErrorResponse(ctx,
+      'Insufficient privileges to create this type of discussion', ErrorCode.Forbidden,
+    )
+  }
+
+  try {
+    const discussion = await discussionService.createDiscussion({
+      author, problem, contest, type, title, content,
+    })
+    return createEnvelopedResponse(ctx, { discussionId: discussion.discussionId })
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
 async function createComment (ctx: Context) {
   const payload = CommentCreatePayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
@@ -159,6 +213,7 @@ async function createComment (ctx: Context) {
 const discussionController = {
   findDiscussions,
   getDiscussion,
+  createDiscussion,
   createComment,
 } as const
 
