@@ -312,7 +312,7 @@ function parseDiscussionId (ctx: Context): number | null {
   const discussionIdStr = ctx.params.discussionId
   const discussionId = Number(discussionIdStr)
 
-  if (Number.isNaN(discussionId) || !Number.isInteger(discussionId) || discussionId < 0) {
+  if (Number.isNaN(discussionId) || !Number.isInteger(discussionId) || discussionId <= 0) {
     createErrorResponse(ctx, 'Invalid discussion ID', ErrorCode.BadRequest)
     return null
   }

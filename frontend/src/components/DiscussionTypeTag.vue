@@ -17,7 +17,7 @@ const discussionTypeLabels = computed(() => ({
   [DiscussionType.ArchivedDiscussion]: t('ptoj.archived'),
 } as Record<DiscussionType, string>))
 
-const discussionTypeSeverties = {
+const discussionTypeSeverities = {
   [DiscussionType.OpenDiscussion]: 'success',
   [DiscussionType.PublicAnnouncement]: 'warning',
   [DiscussionType.PrivateClarification]: 'info',
@@ -36,6 +36,6 @@ const discussionTypeIcons = {
   <Tag
     :icon="discussionTypeIcons[props.type]"
     :value="discussionTypeLabels[props.type]"
-    :severity="discussionTypeSeverties[props.type]"
+    :severity="discussionTypeSeverities[props.type]"
   />
 </template>
