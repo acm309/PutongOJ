@@ -1,5 +1,5 @@
 import type { Context } from 'koa'
-import type { DiscussionUpdateDto } from 'src/services/discussion'
+import type { DiscussionUpdateDto } from '../services/discussion'
 import {
   AdminDiscussionUpdatePayloadSchema,
   AdminGroupCreatePayloadSchema,

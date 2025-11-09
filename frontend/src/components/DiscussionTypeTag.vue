@@ -19,7 +19,7 @@ const discussionTypeLabels = computed(() => ({
 
 const discussionTypeSeverities = {
   [DiscussionType.OpenDiscussion]: 'success',
-  [DiscussionType.PublicAnnouncement]: 'warning',
+  [DiscussionType.PublicAnnouncement]: 'primary',
   [DiscussionType.PrivateClarification]: 'info',
   [DiscussionType.ArchivedDiscussion]: 'warn',
 } as Record<DiscussionType, string>
