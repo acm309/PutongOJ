@@ -63,3 +63,9 @@ export const DiscussionDetailQueryResultSchema = z.object({
 })
 
 export type DiscussionDetailQueryResult = z.input<typeof DiscussionDetailQueryResultSchema>
+
+export const CommentCreatePayloadSchema = z.object({
+  content: CommentModelSchema.shape.content,
+})
+
+export type CommentCreatePayload = z.infer<typeof CommentCreatePayloadSchema>

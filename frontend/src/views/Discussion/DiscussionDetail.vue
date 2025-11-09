@@ -5,17 +5,19 @@ import { storeToRefs } from 'pinia'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import Divider from 'primevue/divider'
 import IftaLabel from 'primevue/iftalabel'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Panel from 'primevue/panel'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
+import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { updateDiscussion } from '@/api/admin'
-import { getDiscussion } from '@/api/discussion'
+import { createComment, getDiscussion } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
@@ -27,12 +29,14 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const { isAdmin } = storeToRefs(useSessionStore())
+const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const discussion = ref<DiscussionDetailQueryResult | null>(null)
 const loading = ref(false)
 const saving = ref(false)
 const editDialog = ref(false)
 const editingForm = ref({} as Required<AdminDiscussionUpdatePayload>)
+const commentContent = ref('')
+const creatingComment = ref(false)
 
 const hasChanges = computed(() => {
   if (!discussion.value) return false
@@ -43,6 +47,21 @@ const hasChanges = computed(() => {
     || (editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)
     || (editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)
   )
+})
+
+const canComment = computed(() => {
+  if (!discussion.value) return false
+  if (!isLogined.value) return false
+  if (discussion.value.type === DiscussionType.ArchivedDiscussion) return false
+  if (discussion.value.type === DiscussionType.PublicAnnouncement && !isAdmin.value) return false
+  return true
+})
+
+const commentPlaceholder = computed(() => {
+  if (!isLogined.value) return t('ptoj.login_to_comment')
+  if (discussion.value?.type === DiscussionType.ArchivedDiscussion) return t('ptoj.cannot_comment_archived_discussion')
+  if (discussion.value?.type === DiscussionType.PublicAnnouncement && !isAdmin.value) return t('ptoj.cannot_comment_announcement')
+  return t('ptoj.enter_your_comment_here')
 })
 
 const discussionTypeOptions = computed(() => [ {
@@ -129,24 +148,53 @@ async function editDiscussion () {
   await fetchDiscussion()
 }
 
+async function submitComment () {
+  if (!discussion.value || !canComment.value || !commentContent.value.trim()) {
+    return
+  }
+
+  creatingComment.value = true
+  const payload = {
+    content: commentContent.value.trim(),
+  }
+
+  const resp = await createComment(discussion.value.discussionId, payload)
+  creatingComment.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_create_comment'), resp.message)
+    return
+  }
+
+  message.success(t('ptoj.successful_commented'), t('ptoj.comment_added_successfully'))
+  commentContent.value = ''
+  await fetchDiscussion()
+}
+
 function onViewAuthor (uid: string) {
   router.push({ name: 'UserProfile', params: { uid } })
+}
+function onViewProblem (pid: number) {
+  router.push({ name: 'problemInfo', params: { pid } })
+}
+function onViewContest (cid: number) {
+  router.push({ name: 'contestOverview', params: { cid } })
 }
 
 onMounted(fetchDiscussion)
 </script>
 
 <template>
-  <div class="max-w-4xl p-6">
+  <div class="max-w-4xl p-0">
     <template v-if="loading || !discussion">
-      <div class="flex font-semibold gap-4 items-center">
+      <div class="flex font-semibold gap-4 items-center pt-6 px-6">
         <i class="pi pi-comments text-2xl" />
         <h1 class="text-xl">
           {{ t('ptoj.discussion') }}
         </h1>
       </div>
 
-      <div class="flex gap-4 items-center justify-center pb-18 pt-24">
+      <div class="flex gap-4 items-center justify-center p-24">
         <template v-if="loading">
           <i class="pi pi-spin pi-spinner text-2xl" />
           <span>{{ t('ptoj.loading') }}</span>
@@ -158,11 +206,22 @@ onMounted(fetchDiscussion)
     </template>
 
     <template v-else>
-      <div class="flex items-start justify-between">
-        <div class="flex gap-2 items-center">
-          <Tag :value="discussion.discussionId" severity="secondary" icon="pi pi-hashtag" />
-          <DiscussionTypeTag :type="discussion.type" />
-          <!-- TODO: Relative problem/contest link -->
+      <div class="flex gap-2 items-start justify-between pt-6 px-6">
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="flex gap-2">
+            <DiscussionTypeTag :type="discussion.type" />
+            <Tag :value="discussion.discussionId" severity="secondary" icon="pi pi-hashtag" />
+          </span>
+          <span class="flex gap-2">
+            <Tag
+              v-if="discussion.contest" :value="discussion.contest.cid" severity="secondary" class="cursor-pointer"
+              icon="pi pi-trophy" @click="onViewContest(discussion.contest.cid)"
+            />
+            <Tag
+              v-if="discussion.problem" :value="discussion.problem.pid" severity="secondary" class="cursor-pointer"
+              icon="pi pi-flag" @click="onViewProblem(discussion.problem.pid)"
+            />
+          </span>
         </div>
         <div class="flex gap-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetchDiscussion" />
@@ -173,11 +232,11 @@ onMounted(fetchDiscussion)
         </div>
       </div>
 
-      <h1 class="font-bold mb-4 pt-12 text-2xl">
+      <h1 class="font-bold mb-4 pt-18 px-6 text-2xl">
         {{ spacing(discussion.title) }}
       </h1>
 
-      <div class="space-y-4">
+      <div class="mb-6 px-6 space-y-4">
         <Panel v-for="(comment, index) in discussion.comments" :key="index">
           <template #header>
             <div class="flex gap-4 items-start">
@@ -209,6 +268,28 @@ onMounted(fetchDiscussion)
             {{ spacing(comment.content) }}
           </div>
         </Panel>
+      </div>
+
+      <Divider type="dashed" />
+
+      <div class="mt-6 pb-6 px-6 space-y-4">
+        <h2 class="font-semibold mb-4 text-lg">
+          {{ t('ptoj.add_a_comment') }}
+        </h2>
+        <IftaLabel>
+          <Textarea
+            id="comment" v-model="commentContent" :placeholder="commentPlaceholder" :disabled="!canComment"
+            fluid rows="7" auto-resize
+          />
+          <label for="comment">{{ t('ptoj.comment') }}</label>
+        </IftaLabel>
+        <div class="flex justify-end">
+          <Button
+            :label="t('ptoj.submit_comment')"
+            icon="pi pi-send" :disabled="!canComment || !commentContent.trim()"
+            :loading="creatingComment" @click="submitComment"
+          />
+        </div>
       </div>
     </template>
 

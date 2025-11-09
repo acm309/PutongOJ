@@ -1,11 +1,13 @@
 import type { Context } from 'koa'
 import {
+  CommentCreatePayloadSchema,
   DiscussionDetailQueryResultSchema,
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
   DiscussionType,
   ErrorCode,
 } from '@putongoj/shared'
+import { loadProfile } from '../middlewares/authn'
 import discussionService from '../services/discussion'
 import { getUser } from '../services/user'
 import {
@@ -121,9 +123,43 @@ async function getDiscussion (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+async function createComment (ctx: Context) {
+  const payload = CommentCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  const discussion = await loadDiscussion(ctx)
+  if (!discussion) {
+    return createErrorResponse(ctx,
+      'Discussion not found or access denied', ErrorCode.NotFound,
+    )
+  }
+
+  const isAnnouncement = discussion.type === DiscussionType.PublicAnnouncement
+  const isArchived = discussion.type === DiscussionType.ArchivedDiscussion
+  const profile = await loadProfile(ctx)
+  const isAdmin = profile?.isAdmin ?? false
+  if (isArchived || (isAnnouncement && !isAdmin)) {
+    return createErrorResponse(ctx,
+      'Comments are not allowed for this discussion', ErrorCode.Forbidden,
+    )
+  }
+
+  try {
+    await discussionService.createComment(
+      discussion._id, { author: profile._id, content: payload.data.content },
+    )
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
 const discussionController = {
   findDiscussions,
   getDiscussion,
+  createComment,
 } as const
 
 export default discussionController
