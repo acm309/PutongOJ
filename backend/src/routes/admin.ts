@@ -57,4 +57,8 @@ adminRouter.delete('/groups/:groupId',
   adminController.removeGroup,
 )
 
+adminRouter.put('/discussions/:discussionId',
+  adminController.updateDiscussion,
+)
+
 export default adminRouter

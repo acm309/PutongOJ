@@ -1,8 +1,8 @@
-import type { Document, Model } from 'mongoose'
+import type { Document, Model, Types } from 'mongoose'
 import type { CourseProblemEntity } from '../types/entity'
 import mongoose from '../config/db'
 
-export interface CourseProblemDocument extends Document, CourseProblemEntity { }
+export interface CourseProblemDocument extends Document<Types.ObjectId>, CourseProblemEntity { }
 
 interface CourseProblemModel extends Model<CourseProblemDocument> {}
 

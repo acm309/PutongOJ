@@ -61,6 +61,7 @@ interface GlobalConfig {
     trustedProxies: string[]
   }
   disableRateLimit: boolean
+  mongooseDebug: boolean
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
 }
 
@@ -122,6 +123,10 @@ export const globalConfig: GlobalConfig = {
   },
   disableRateLimit: booleanEnv(
     'PTOJ_DISABLE_RATE_LIMIT',
+    false,
+  ),
+  mongooseDebug: booleanEnv(
+    'PTOJ_MONGOOSE_DEBUG',
     false,
   ),
   oauthConfigs,

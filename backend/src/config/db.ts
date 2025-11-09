@@ -5,6 +5,7 @@ import config from '.'
 import logger from '../utils/logger'
 
 mongoose.set('strictQuery', true)
+mongoose.set('debug', config.mongooseDebug)
 mongoose.Promise = globalThis.Promise
 
 mongoose.connect(config.mongodbURL, { authSource: 'admin' })

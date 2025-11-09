@@ -4,6 +4,7 @@ import redis from '../config/redis'
 import Solution from '../models/Solution'
 import { judge } from '../utils/constants'
 import logger from '../utils/logger'
+import { distributeWork } from './helper'
 import '../config/db'
 
 /**
@@ -13,27 +14,6 @@ import '../config/db'
  * `judger:result` 的内容需要按序处理
  * 所以只能同时运行一个 Updater 实例
  */
-
-/**
- * 将任务推送至任务对应的去重队列
- * @param {string} task 任务名称
- * @param {any} id 项目 ID
- */
-async function distributeWork (task: string, id: string | number) {
-  const taskList = `worker:${task}`
-  const taskSet = `worker:${task}:set`
-
-  id = String(id)
-
-  const exists = await redis.sismember(taskSet, id)
-  if (exists) {
-    logger.debug(`Task <${task}> for <${id}> already exists`)
-    return
-  }
-
-  await redis.multi().sadd(taskSet, id).rpush(taskList, id).exec()
-  logger.debug(`Task <${task}> for <${id}> added`)
-}
 
 async function updateResult (result: any) {
   const { sid } = result

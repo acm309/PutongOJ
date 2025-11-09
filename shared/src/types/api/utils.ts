@@ -1,8 +1,8 @@
 import type { ErrorCode } from '@/consts/index.js'
 import { z } from 'zod'
 import { QuerySort } from '@/consts/index.js'
+import { PAGE_SIZE_MAX } from '@/consts/limit.js'
 import { stringToInt } from '../codec.js'
-import { PAGE_SIZE_MAX } from './limit.js'
 
 export const SortOptionSchema = z.object({
   sort: stringToInt.pipe(z.enum(QuerySort)).default(QuerySort.Desc),

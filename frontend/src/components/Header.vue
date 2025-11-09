@@ -64,7 +64,7 @@ const menuItems = computed(() => {
     items: [ {
       label: t('oj.discussion_list'),
       icon: 'pi pi-comments',
-      route: 'discuss',
+      route: 'Discussions',
     }, {
       label: t('oj.faq'),
       icon: 'pi pi-question-circle',

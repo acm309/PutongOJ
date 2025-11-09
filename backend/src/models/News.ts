@@ -1,11 +1,11 @@
-import type { Document, PaginateModel } from 'mongoose'
+import type { Document, PaginateModel, Types } from 'mongoose'
 import type { NewsEntity } from '../types/entity'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import config from '../config'
 import mongoose from '../config/db'
 import ids from './ID'
 
-export interface NewsDocument extends Document, NewsEntity {}
+export interface NewsDocument extends Document<Types.ObjectId>, NewsEntity {}
 
 type NewsModel = PaginateModel<NewsDocument>
 

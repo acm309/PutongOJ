@@ -1,4 +1,5 @@
 import type {
+  AdminDiscussionUpdatePayload,
   AdminGroupCreatePayload,
   AdminGroupDetailQueryResult,
   AdminGroupMembersUpdatePayload,
@@ -60,4 +61,8 @@ export async function updateGroupMembers (groupId: string, payload: AdminGroupMe
 }
 export async function removeGroup (groupId: string) {
   return instance.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)
+}
+
+export async function updateDiscussion (discussionId: number, payload: AdminDiscussionUpdatePayload) {
+  return instance.put<null>(`/admin/discussions/${discussionId}`, payload)
 }

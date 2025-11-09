@@ -1,11 +1,11 @@
-import type { Document, PaginateModel } from 'mongoose'
+import type { Document, PaginateModel, Types } from 'mongoose'
 import type { TagEntity, TagEntityItem, TagEntityPreview, TagEntityView } from '../types/entity'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { tagColors } from '../utils/constants'
 import ID from './ID'
 
-export type TagDocument = Document & TagEntity
+export type TagDocument = Document<Types.ObjectId> & TagEntity
 
 type TagModel = PaginateModel<TagDocument> & {
   toItem: (tag: Partial<TagEntity>) => TagEntityItem

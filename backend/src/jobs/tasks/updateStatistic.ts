@@ -1,3 +1,5 @@
+import Comment from '../../models/Comment'
+import Discussion from '../../models/Discussion'
 import Problem from '../../models/Problem'
 import Solution from '../../models/Solution'
 import User from '../../models/User'
@@ -54,6 +56,27 @@ async function updateProblemStatistic (pid: number | string) {
   logger.info(`Problem <${pid}> statistic updated`)
 }
 
+async function updateDiscussionStatistic (discussion: string) {
+  const discussionDoc = await Discussion.findOne({ _id: discussion })
+  if (!discussionDoc) {
+    logger.warn(`Discussion <${discussion}> not found while updating statistic`)
+    return
+  }
+
+  const { discussionId } = discussionDoc
+  const commentsCount = await Comment.countDocuments({ discussion: discussionDoc._id })
+  await Discussion.findOneAndUpdate(
+    { discussionId },
+    {
+      $set: {
+        comments: commentsCount,
+      },
+    },
+  )
+
+  logger.info(`Discussion <${discussionId}> statistic updated`)
+}
+
 /**
  * 更新统计信息
  * @param item 任务项，格式为 `type:id`
@@ -68,6 +91,9 @@ async function updateStatistic (item: string) {
       break
     case 'problem':
       await updateProblemStatistic(id)
+      break
+    case 'discussion':
+      await updateDiscussionStatistic(id)
       break
     default:
       logger.warn(`Unknown statistic type <${type}>`)

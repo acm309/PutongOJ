@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import type { UserSuggestQueryResult } from '@putongoj/shared'
 import AutoComplete from 'primevue/autocomplete'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
+import IftaLabel from 'primevue/iftalabel'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { suggestUsers } from '@/api/user'
@@ -10,12 +9,13 @@ import { useMessage } from '@/utils/message'
 
 const props = defineProps<{
   modelValue?: string
-  disabled?: boolean
+  label?: string
   placeholder?: string
 }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'select'): void
+  (e: 'blur'): void
 }>()
 
 const { t } = useI18n()
@@ -51,11 +51,11 @@ async function fetch (event: any) {
 </script>
 
 <template>
-  <IconField>
+  <IftaLabel>
     <AutoComplete
-      v-model="value" :suggestions="users" option-label="uid" :disabled="props.disabled" :loading="loading"
-      :placeholder="props.placeholder || t('ptoj.filter_by_user')" fluid @complete="fetch"
-      @keypress.enter="emit('select')" @option-select="emit('select')"
+      id="user" v-model="value" :suggestions="users" option-label="uid" :loading="loading"
+      :placeholder="props.placeholder || t('ptoj.select_user')" fluid force-selection @complete="fetch"
+      @keypress.enter="emit('select')" @option-select="emit('select')" @blur="emit('blur')"
     >
       <template #option="{ option }">
         {{ option.uid }}
@@ -64,6 +64,6 @@ async function fetch (event: any) {
         </span>
       </template>
     </AutoComplete>
-    <InputIcon v-show="!loading" class="pi pi-user" />
-  </IconField>
+    <label for="user">{{ props.label || t('ptoj.user') }}</label>
+  </IftaLabel>
 </template>

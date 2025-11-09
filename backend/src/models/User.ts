@@ -1,12 +1,12 @@
 import type { UserModel } from '@putongoj/shared'
-import type { Document, ObjectId, PaginateModel, Schema } from 'mongoose'
+import type { Document, PaginateModel, Schema, Types } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { privilege } from '../utils/constants'
 
 export interface UserEntity extends UserModel { }
 
-export interface UserDocument extends Document<ObjectId>, UserEntity {
+export interface UserDocument extends Document<Types.ObjectId>, UserEntity {
   isBanned: boolean
   isAdmin: boolean
   isRoot: boolean

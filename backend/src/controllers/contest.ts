@@ -1,5 +1,5 @@
 import type { Context } from 'koa'
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { ContestDocumentPopulated } from '../models/Contest'
 import type { SessionProfile } from '../types'
 import {
@@ -92,7 +92,7 @@ const findContests = async (ctx: Context) => {
   const profile = ctx.state.profile
   let showAll: boolean = !!profile?.isAdmin
 
-  let courseDocId: ObjectId | undefined
+  let courseDocId: Types.ObjectId | undefined
   if (typeof opt.course === 'string') {
     const { course, role } = await loadCourse(ctx, opt.course)
     if (!role.basic) {
@@ -195,7 +195,7 @@ const createContest = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  let courseDocId: ObjectId | undefined
+  let courseDocId: Types.ObjectId | undefined
   if (opt.course) {
     const { course } = await loadCourse(ctx, opt.course)
     courseDocId = course.id
@@ -233,7 +233,7 @@ const updateContest = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  let courseDocId: ObjectId | undefined | null
+  let courseDocId: Types.ObjectId | undefined | null
   if (opt.course && Number.isInteger(Number(opt.course))) {
     if (Number(opt.course) === -1) {
       courseDocId = null

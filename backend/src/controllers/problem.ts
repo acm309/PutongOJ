@@ -1,6 +1,6 @@
 import type { Paginated } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { ObjectId } from 'mongoose'
+import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
@@ -91,7 +91,7 @@ const findProblems = async (ctx: Context) => {
     return
   }
 
-  let courseDocId: ObjectId | undefined
+  let courseDocId: Types.ObjectId | undefined
   if (typeof opt.course === 'string') {
     const { course, role } = await loadCourse(ctx, opt.course)
     if (!role.basic) {
@@ -106,7 +106,7 @@ const findProblems = async (ctx: Context) => {
     content: typeof opt.content === 'string' ? opt.content : undefined,
   }
 
-  let list: Paginated<ProblemEntityPreview & { owner?: ObjectId | null }>
+  let list: Paginated<ProblemEntityPreview & { owner?: Types.ObjectId | null }>
   if (courseDocId) {
     list = await problemService.findCourseProblems(
       courseDocId,
@@ -155,7 +155,7 @@ const findProblemItems = async (ctx: Context) => {
   const opt = ctx.request.query
   const profile = await loadProfile(ctx)
 
-  let courseDocId: ObjectId | undefined
+  let courseDocId: Types.ObjectId | undefined
   if (typeof opt.course === 'string') {
     const { course, role } = await loadCourse(ctx, opt.course)
     if (!role.manageContest) {
@@ -219,7 +219,7 @@ const createProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const owner = profile.id as ObjectId
+  const owner = profile._id
   let course: CourseDocument | undefined
   if (opt.course) {
     course = (await loadCourse(ctx, opt.course)).course

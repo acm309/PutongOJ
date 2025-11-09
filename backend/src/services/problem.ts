@@ -1,12 +1,12 @@
 import type { Paginated } from '@putongoj/shared'
-import type { ObjectId, PipelineStage } from 'mongoose'
+import type { PipelineStage } from 'mongoose'
 import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
 import type { PaginateOption } from '../types'
 import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import CourseProblem from '../models/CourseProblem'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
@@ -18,9 +18,9 @@ export async function findProblems (
     type?: string
     content?: string
     showReserved?: boolean
-    includeOwner?: ObjectId | string | null
+    includeOwner?: Types.ObjectId | string | null
   },
-): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
+): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
   const { page, pageSize, content, type, showReserved, includeOwner } = opt
   const filters: Record<string, any>[] = []
 
@@ -29,7 +29,7 @@ export async function findProblems (
       = [ { status: status.Available } ]
     if (includeOwner) {
       statusFilters.push({
-        owner: new mongoose.Types.ObjectId(includeOwner.toString()),
+        owner: new Types.ObjectId(includeOwner.toString()),
       })
     }
     filters.push({ $or: statusFilters })
@@ -67,7 +67,7 @@ export async function findProblems (
     lean: true,
     leanWithId: false,
     select: '-_id pid title status type tags submit solve owner',
-  }) as unknown as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
+  }) as unknown as Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>
   return result
 }
 
@@ -202,12 +202,12 @@ export async function getStatistics (
 }
 
 export async function findCourseProblems (
-  course: ObjectId | string,
+  course: Types.ObjectId | string,
   opt: PaginateOption & {
     type?: string
     content?: string
   },
-): Promise<Paginated<ProblemEntityPreview & { owner: ObjectId | null }>> {
+): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
   const { page, pageSize, type, content } = opt
   const filters: Record<string, any>[] = []
 
@@ -326,11 +326,11 @@ export async function findCourseProblems (
   ] as PipelineStage[]
 
   const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result[0] as Paginated<ProblemEntityPreview & { owner: ObjectId | null }>
+  return result[0] as Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>
 }
 
 export async function findCourseProblemItems (
-  course: ObjectId | string,
+  course: Types.ObjectId | string,
   keyword: string,
   limit: number = 10,
 ): Promise<ProblemEntityItem[]> {

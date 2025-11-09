@@ -1,11 +1,26 @@
 import { z } from 'zod'
-import { JudgeStatus, Language, OAuthProvider, UserPrivilege } from '@/consts/index.js'
+import {
+  DiscussionType,
+  JudgeStatus,
+  Language,
+  OAuthProvider,
+  UserPrivilege,
+} from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
-import { GroupModelSchema } from '../model/group.js'
-import { OAuthModelSchema } from '../model/oauth.js'
-import { SolutionModelSchema } from '../model/solution.js'
-import { UserModelSchema } from '../model/user.js'
-import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+import {
+  ContestModelSchema,
+  DiscussionModelSchema,
+  GroupModelSchema,
+  OAuthModelSchema,
+  ProblemModelSchema,
+  SolutionModelSchema,
+  UserModelSchema,
+} from '../model/index.js'
+import {
+  PaginatedSchema,
+  PaginationSchema,
+  SortOptionSchema,
+} from './utils.js'
 
 export const AdminUserListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
@@ -159,3 +174,13 @@ export const AdminGroupMembersUpdatePayloadSchema = z.object({
 })
 
 export type AdminGroupMembersUpdatePayload = z.infer<typeof AdminGroupMembersUpdatePayloadSchema>
+
+export const AdminDiscussionUpdatePayloadSchema = z.object({
+  author: UserModelSchema.shape.uid.optional(),
+  problem: ProblemModelSchema.shape.pid.nullable().optional(),
+  contest: ContestModelSchema.shape.cid.nullable().optional(),
+  type: z.enum(DiscussionType).optional(),
+  title: DiscussionModelSchema.shape.title.optional(),
+})
+
+export type AdminDiscussionUpdatePayload = z.infer<typeof AdminDiscussionUpdatePayloadSchema>
