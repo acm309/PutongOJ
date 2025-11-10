@@ -12,6 +12,7 @@ const props = defineProps<{
   modelValue?: string
   disabled?: boolean
   placeholder?: string
+  forceSelection?: boolean
 }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
@@ -54,8 +55,8 @@ async function fetch (event: any) {
   <IconField>
     <AutoComplete
       v-model="value" :suggestions="users" option-label="uid" :disabled="props.disabled" :loading="loading"
-      :placeholder="props.placeholder || t('ptoj.filter_by_user')" fluid @complete="fetch"
-      @keypress.enter="emit('select')" @option-select="emit('select')"
+      :placeholder="props.placeholder || t('ptoj.filter_by_user')" fluid :force-selection="props.forceSelection"
+      @complete="fetch" @keypress.enter="emit('select')" @option-select="emit('select')"
     >
       <template #option="{ option }">
         {{ option.uid }}

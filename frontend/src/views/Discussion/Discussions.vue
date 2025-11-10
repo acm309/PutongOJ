@@ -179,7 +179,7 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <UserFilter
           v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')"
-          @select="onSearch"
+          force-selection @select="onSearch"
         />
 
         <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
