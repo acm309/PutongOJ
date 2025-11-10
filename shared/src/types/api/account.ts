@@ -18,6 +18,7 @@ export const AccountProfileQueryResultSchema = z.object({
   uid: UserModelSchema.shape.uid,
   privilege: UserModelSchema.shape.privilege,
   nick: UserModelSchema.shape.nick,
+  avatar: UserModelSchema.shape.avatar,
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,

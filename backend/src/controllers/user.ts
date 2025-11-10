@@ -1,7 +1,5 @@
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
-import { Buffer } from 'node:buffer'
-import { md5 } from '@noble/hashes/legacy.js'
 import {
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
@@ -89,16 +87,9 @@ export async function getUser (ctx: Context) {
       .lean(),
   ])
 
-  let avatarHash: string | null = null
-  if (user.isAdmin && user.mail) {
-    const mail = user.mail.trim().toLowerCase()
-    const hash = md5(Buffer.from(mail))
-    avatarHash = Buffer.from(hash).toString('hex')
-  }
-
   const attempted = difference(failed, solved)
   const result = UserProfileQueryResultSchema.encode({
-    ...user.toObject(), avatarHash, groups, solved, attempted,
+    ...user.toObject(), groups, solved, attempted,
   })
   return createEnvelopedResponse(ctx, result)
 }

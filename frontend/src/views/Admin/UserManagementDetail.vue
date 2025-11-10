@@ -55,6 +55,7 @@ const hasChanges = computed(() => {
     || editingUser.value.motto !== user.value.motto
     || editingUser.value.mail !== user.value.mail
     || editingUser.value.school !== user.value.school
+    || editingUser.value.avatar !== user.value.avatar
 })
 const isSelf = computed(() => profile.value?.uid === user.value?.uid)
 const canOperate = computed(() => {
@@ -71,6 +72,7 @@ function setEditingUser () {
     motto: user.value.motto,
     mail: user.value.mail,
     school: user.value.school,
+    avatar: user.value.avatar,
   }
 }
 
@@ -115,6 +117,9 @@ async function saveUser () {
   }
   if (editingUser.value.school !== user.value.school) {
     payload.school = editingUser.value.school
+  }
+  if (editingUser.value.avatar !== user.value.avatar) {
+    payload.avatar = editingUser.value.avatar
   }
 
   saving.value = true
@@ -220,8 +225,8 @@ onRouteParamUpdate(fetch)
         <IftaLabel>
           <Select
             v-if="!isSelf && (user.privilege < profile!.privilege || isRoot)" id="privilege"
-            v-model="editingUser.privilege" fluid :options="privilegeOptions" option-label="label"
-            option-value="value" :option-disabled="(option) => !isRoot && option.value >= profile!.privilege"
+            v-model="editingUser.privilege" fluid :options="privilegeOptions" option-label="label" option-value="value"
+            :option-disabled="(option) => !isRoot && option.value >= profile!.privilege"
           >
             <template #option="slotProps">
               <Tag
@@ -253,12 +258,20 @@ onRouteParamUpdate(fetch)
           <label for="email">{{ t('ptoj.email') }}</label>
         </IftaLabel>
 
-        <IftaLabel class="md:col-span-2">
+        <IftaLabel>
           <InputText
             id="school" v-model="editingUser.school" fluid maxlength="30"
             :placeholder="t('ptoj.enter_school')" :readonly="!canOperate"
           />
           <label for="school">{{ t('ptoj.school') }}</label>
+        </IftaLabel>
+
+        <IftaLabel>
+          <InputText
+            id="avatar" v-model="editingUser.avatar" fluid maxlength="300"
+            :placeholder="t('ptoj.enter_avatar_url')" :readonly="!canOperate || !isRoot"
+          />
+          <label for="avatar">{{ t('ptoj.avatar') }}</label>
         </IftaLabel>
 
         <IftaLabel class="-mb-[5px] md:col-span-2">

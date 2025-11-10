@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { UserProfileQueryResult } from '@putongoj/shared'
 import { UserPrivilege } from '@putongoj/shared'
-import axios from 'axios'
 import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -28,7 +27,6 @@ const { isAdmin, profile } = storeToRefs(sessionStore)
 const uid = computed(() => route.params.uid as string)
 const user = ref<UserProfileQueryResult | null>(null)
 const loading = ref(false)
-const avatar = ref<string | null>(null)
 
 const nickname = computed(() => {
   if (!user.value) return ''
@@ -43,25 +41,6 @@ const isSelf = computed(() => {
   return profile.value.uid === user.value.uid
 })
 
-async function fetchAvatar () {
-  if (!user.value || !user.value.avatarHash) {
-    avatar.value = null
-    return
-  }
-  try {
-    const cravatar = `https://cn.cravatar.com/avatar/${user.value.avatarHash}?d=404&s=256`
-    const resp = await axios.get(cravatar, {
-      withCredentials: false,
-      responseType: 'blob',
-    })
-    if (resp.status === 200) {
-      avatar.value = URL.createObjectURL(resp.data)
-    }
-  } catch {
-    avatar.value = null
-  }
-}
-
 async function fetch () {
   loading.value = true
   const resp = await getUser(uid.value)
@@ -73,7 +52,6 @@ async function fetch () {
 
   user.value = resp.data
   changeDomTitle({ title: `${user.value.uid} - User Profile` })
-  await fetchAvatar()
 }
 
 function gotoUserManagement () {
@@ -115,8 +93,8 @@ onRouteParamUpdate(fetch)
       <div class="gap-6 items-end md:flex mt-18">
         <div class="md:flex-none">
           <img
-            v-if="avatar" :src="avatar" :alt="`${nickname}'s Avatar`"
-            class="border border-surface h-32 rounded-lg w-32"
+            v-if="user.avatar" :src="user.avatar" :alt="`${nickname}'s Avatar`"
+            class="aspect-square border border-surface h-32 rounded-lg w-32"
           >
           <img v-else src="@/assets/logo.jpg" alt="Default Avatar" class="border border-surface h-32 rounded-lg w-32">
         </div>

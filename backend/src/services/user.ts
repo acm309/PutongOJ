@@ -121,6 +121,9 @@ export async function updateUser (user: UserDocument, data: Partial<UserModel>):
   if (data.nick !== undefined) {
     user.nick = data.nick
   }
+  if (data.avatar !== undefined) {
+    user.avatar = data.avatar
+  }
   if (data.motto !== undefined) {
     user.motto = data.motto
   }

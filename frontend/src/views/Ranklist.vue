@@ -19,6 +19,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { findGroups } from '@/api/group'
 import { exportRanklist, findRanklist } from '@/api/user'
 import ExportDialog from '@/components/ExportDialog.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { exportDataToFile } from '@/utils/export'
 import { calculatePercentage } from '@/utils/formate'
@@ -167,8 +168,8 @@ onRouteQueryUpdate(fetch)
       </div>
     </div>
 
-    <DataTable class="-mb-px whitespace-nowrap" :value="docs" :lazy="true" :loading="loading" scrollable>
-      <Column class="max-w-18 pl-6 text-center">
+    <DataTable class="-mb-px" :value="docs" :lazy="true" :loading="loading" scrollable>
+      <Column class="max-w-18 pl-8 text-center">
         <template #header>
           <span class="text-center w-full">
             <i class="pi pi-hashtag" />
@@ -179,37 +180,43 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-36 md:max-w-48 truncate" frozen>
+      <Column field="uid" class="font-medium" frozen>
+        <template #header>
+          <span class="font-semibold text-center w-full">{{ t('ptoj.user') }}</span>
+        </template>
         <template #body="{ data }">
-          <a @click="onView(data)">
-            {{ data.uid }}
-          </a>
+          <span class="cursor-pointer flex gap-2 items-center min-h-10" @click="onView(data)">
+            <UserAvatar :image="data.avatar" shape="circle" class="flex-none" />
+            <a class="min-w-24">{{ data.uid }}</a>
+          </span>
         </template>
       </Column>
 
       <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
 
-      <Column :header="t('ptoj.motto')" field="motto" class="max-w-72 md:max-w-96 truncate">
+      <Column :header="t('ptoj.motto')" field="motto" class="min-w-96">
         <template #body="{ data }">
-          <span class="truncate">{{ pangu.spacing(data.motto || '').trim() }}</span>
+          <span class="-my-px line-clamp-2">
+            {{ pangu.spacing(data.motto || '').trim() }}
+          </span>
         </template>
       </Column>
 
-      <Column field="solve" class="text-center">
+      <Column field="solve" class="text-center  whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
         </template>
       </Column>
 
-      <Column field="submit" class="text-center">
+      <Column field="submit" class="text-center  whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.submitted') }}</span>
         </template>
       </Column>
 
-      <Column class="pr-6 text-right">
+      <Column class="pr-8 text-right">
         <template #header>
-          <span class="font-semibold text-right w-full">{{ t('ptoj.ratio') }}</span>
+          <span class="font-semibold text-center w-full">{{ t('ptoj.ratio') }}</span>
         </template>
         <template #body="{ data }">
           {{ calculatePercentage(data.solve, data.submit) }}

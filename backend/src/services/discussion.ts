@@ -132,7 +132,7 @@ async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
 
 export async function getComments (discussion: Types.ObjectId) {
   return getCommentsPopulated(discussion, {
-    author: [ 'uid', 'nick' ],
+    author: [ 'uid', 'nick', 'avatar' ],
   })
 }
 

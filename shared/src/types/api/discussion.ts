@@ -53,6 +53,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
     author: z.object({
       uid: UserModelSchema.shape.uid,
       nick: UserModelSchema.shape.nick,
+      avatar: UserModelSchema.shape.avatar,
     }),
     content: CommentModelSchema.shape.content,
     createdAt: CommentModelSchema.shape.createdAt,

@@ -91,11 +91,16 @@ export async function updateUser (ctx: Context) {
       )
     }
   }
+  if (payload.data.avatar !== undefined && !profile.isRoot) {
+    return createErrorResponse(ctx,
+      'Only root administrators can change user avatars', ErrorCode.Forbidden,
+    )
+  }
 
   try {
-    const { privilege, nick, motto, school, mail } = payload.data
+    const { privilege, nick, avatar, motto, school, mail } = payload.data
     const updatedUser = await userService.updateUser(user, {
-      privilege, nick, motto, school, mail,
+      privilege, nick, avatar, motto, school, mail,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
     return createEnvelopedResponse(ctx, result)

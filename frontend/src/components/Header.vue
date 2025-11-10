@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
 import Menubar from 'primevue/menubar'
@@ -9,6 +8,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 import { useMessage } from '@/utils/message'
+import UserAvatar from './UserAvatar.vue'
 
 const sessionStore = useSessionStore()
 const route = useRoute()
@@ -189,7 +189,7 @@ const profileItems = computed(() => [
             text plain class="flex gap-2 items-center p-2 rounded-lg transition-colors"
             @click="toggleProfileMenu"
           >
-            <Avatar icon="pi pi-user" shape="circle" />
+            <UserAvatar :image="profile!.avatar" shape="circle" />
             <span class="font-medium hidden sm:block">{{ profile!.uid }}</span>
             <i class="pi pi-chevron-down text-xs" />
           </Button>

@@ -1,5 +1,6 @@
 import type { UserModel } from '@putongoj/shared'
 import type { Document, PaginateModel, Schema, Types } from 'mongoose'
+import { UserModelSchema } from '@putongoj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { privilege } from '../utils/constants'
@@ -47,6 +48,15 @@ const userSchema: Schema = new mongoose.Schema({
       },
       message:
         'Nick is too long. It should be less than 30 characters long',
+    },
+  },
+  avatar: {
+    type: String,
+    default: '',
+    validate: {
+      validator (v: any) {
+        return UserModelSchema.shape.avatar.safeParse(v).success
+      },
     },
   },
   motto: {

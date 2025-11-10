@@ -2,7 +2,6 @@
 import type { AdminDiscussionUpdatePayload, DiscussionDetailQueryResult } from '@putongoj/shared'
 import { DiscussionType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
-import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
@@ -19,6 +18,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { updateDiscussion } from '@/api/admin'
 import { createComment, getDiscussion } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { spacing, timePretty } from '@/utils/formate'
@@ -236,8 +236,8 @@ onMounted(fetchDiscussion)
         <Panel v-for="(comment, index) in discussion.comments" :key="index">
           <template #header>
             <div class="flex gap-4 items-start">
-              <Avatar
-                :label="comment.author.uid[0]" class="cursor-pointer flex-none"
+              <UserAvatar
+                :image="comment.author.avatar" class="cursor-pointer flex-none"
                 @click="onViewAuthor(comment.author.uid)"
               />
               <div

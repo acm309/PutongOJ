@@ -47,6 +47,7 @@ export const AdminUserDetailQueryResultSchema = z.object({
   uid: UserModelSchema.shape.uid,
   privilege: UserModelSchema.shape.privilege,
   nick: UserModelSchema.shape.nick,
+  avatar: UserModelSchema.shape.avatar,
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,
@@ -60,6 +61,7 @@ export type AdminUserDetailQueryResult = z.input<typeof AdminUserDetailQueryResu
 export const AdminUserEditPayloadSchema = z.object({
   privilege: z.enum(UserPrivilege).optional(),
   nick: UserModelSchema.shape.nick.optional(),
+  avatar: UserModelSchema.shape.avatar.optional(),
   motto: UserModelSchema.shape.motto.optional(),
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school.optional(),
