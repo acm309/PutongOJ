@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "mongoose": "^8.19.2",
+    "mongoose": "^8.20.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
