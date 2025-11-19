@@ -8,6 +8,7 @@ export const CommentModelSchema = z.object({
   discussion: ObjectIdSchema,
   author: ObjectIdSchema,
   content: z.string().min(1).max(COMMENT_LENGTH_MAX),
+  hidden: z.boolean(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

@@ -8,6 +8,7 @@ import {
 } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
 import {
+  CommentModelSchema,
   ContestModelSchema,
   DiscussionModelSchema,
   GroupModelSchema,
@@ -186,3 +187,9 @@ export const AdminDiscussionUpdatePayloadSchema = z.object({
 })
 
 export type AdminDiscussionUpdatePayload = z.infer<typeof AdminDiscussionUpdatePayloadSchema>
+
+export const AdminCommentUpdatePayloadSchema = z.object({
+  hidden: CommentModelSchema.shape.hidden.optional(),
+})
+
+export type AdminCommentUpdatePayload = z.infer<typeof AdminCommentUpdatePayloadSchema>

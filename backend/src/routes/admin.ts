@@ -60,5 +60,8 @@ adminRouter.delete('/groups/:groupId',
 adminRouter.put('/discussions/:discussionId',
   adminController.updateDiscussion,
 )
+adminRouter.put('/comments/:commentId',
+  adminController.updateComment,
+)
 
 export default adminRouter

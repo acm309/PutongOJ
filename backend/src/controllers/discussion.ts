@@ -121,7 +121,12 @@ async function getDiscussion (ctx: Context) {
       'Discussion not found or access denied', ErrorCode.NotFound,
     )
   }
-  const comments = await discussionService.getComments(discussion._id)
+
+  const { profile } = ctx.state
+  const comments = await discussionService.getComments(discussion._id, {
+    showHidden: profile?.isAdmin ?? false,
+    exceptUsers: profile ? [ profile._id ] : [],
+  })
   const result = DiscussionDetailQueryResultSchema.encode({ ...discussion, comments })
   return createEnvelopedResponse(ctx, result)
 }

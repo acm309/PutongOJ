@@ -1,6 +1,7 @@
 import type { Context } from 'koa'
 import type { DiscussionUpdateDto } from '../services/discussion'
 import {
+  AdminCommentUpdatePayloadSchema,
   AdminDiscussionUpdatePayloadSchema,
   AdminGroupCreatePayloadSchema,
   AdminGroupDetailQueryResultSchema,
@@ -383,6 +384,41 @@ export async function updateDiscussion (ctx: Context) {
   }
 }
 
+function parseCommentId (ctx: Context): number | null {
+  const commentIdStr = ctx.params.commentId
+  const commentId = Number(commentIdStr)
+
+  if (Number.isNaN(commentId) || !Number.isInteger(commentId) || commentId <= 0) {
+    createErrorResponse(ctx, 'Invalid comment ID', ErrorCode.BadRequest)
+    return null
+  }
+  return commentId
+}
+
+export async function updateComment (ctx: Context) {
+  const commentId = parseCommentId(ctx)
+  if (commentId === null) {
+    return
+  }
+
+  const payload = AdminCommentUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  try {
+    const result = await discussionService.updateComment(commentId, {
+      hidden: payload.data.hidden,
+    })
+    if (!result) {
+      return createErrorResponse(ctx, 'Comment not found', ErrorCode.NotFound)
+    }
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -399,6 +435,7 @@ const adminController = {
   updateGroupMembers,
   removeGroup,
   updateDiscussion,
+  updateComment,
 } as const
 
 export default adminController

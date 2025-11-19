@@ -1,4 +1,5 @@
 import type {
+  AdminCommentUpdatePayload,
   AdminDiscussionUpdatePayload,
   AdminGroupCreatePayload,
   AdminGroupDetailQueryResult,
@@ -65,4 +66,7 @@ export async function removeGroup (groupId: string) {
 
 export async function updateDiscussion (discussionId: number, payload: AdminDiscussionUpdatePayload) {
   return instance.put<null>(`/admin/discussions/${discussionId}`, payload)
+}
+export async function updateComment (commentId: number, payload: AdminCommentUpdatePayload) {
+  return instance.put<null>(`/admin/comments/${commentId}`, payload)
 }

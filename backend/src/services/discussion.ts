@@ -121,8 +121,20 @@ type CommentPopulated<T extends CommentPopulateConfig>
 
 async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   discussion: Types.ObjectId, populate: TPopulate,
+  options: { showHidden?: boolean, exceptUsers?: Types.ObjectId[] } = {},
 ) {
-  let query = Comment.find({ discussion }).sort({ createdAt: 1 })
+  const filters: FilterQuery<CommentModel>[] = [ { discussion } ]
+  if (!options.showHidden) {
+    filters.push({
+      $or: [
+        { hidden: false },
+        { hidden: { $exists: false } },
+        { author: { $in: options.exceptUsers ?? [] } },
+      ],
+    })
+  }
+
+  let query = Comment.find({ $and: filters }).sort({ createdAt: 1 })
   if (populate.author) {
     query = query.populate({ path: 'author', select: populate.author })
   }
@@ -130,10 +142,12 @@ async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   return docs as (CommentPopulated<TPopulate> & DocumentId)[]
 }
 
-export async function getComments (discussion: Types.ObjectId) {
+export async function getComments (
+  discussion: Types.ObjectId, options: { showHidden?: boolean, exceptUsers?: Types.ObjectId[] } = {},
+) {
   return getCommentsPopulated(discussion, {
     author: [ 'uid', 'nick', 'avatar' ],
-  })
+  }, options)
 }
 
 export async function createComment (
@@ -145,6 +159,16 @@ export async function createComment (
   await newComment.save()
   await distributeWork('updateStatistic', `discussion:${discussion.toString()}`)
   return newComment.toObject()
+}
+
+export async function updateComment (
+  commentId: number,
+  update: Partial<Pick<CommentModel, 'hidden'>>,
+): Promise<CommentModel | null> {
+  const comment = await Comment.findOneAndUpdate(
+    { commentId }, update, { new: true },
+  ).lean()
+  return comment
 }
 
 export type DiscussionUpdateDto = Partial<Pick<DiscussionModel,
@@ -182,8 +206,9 @@ const discussionService = {
   createDiscussion,
   getDiscussion,
   updateDiscussion,
-  createComment,
   getComments,
+  createComment,
+  updateComment,
 } as const
 
 export default discussionService

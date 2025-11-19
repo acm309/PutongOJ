@@ -32,6 +32,10 @@ const commentSchema = new mongoose.Schema({
       validator: (v: string) => v.length <= COMMENT_LENGTH_MAX,
     },
   },
+  hidden: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   collection: 'Comment',
   timestamps: true,
