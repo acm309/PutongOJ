@@ -32,7 +32,7 @@ export class TestcaseZipParser {
       let match: RegExpMatchArray | null
       let pairedFilename: string | undefined
 
-      match = filename.match(/^(.+?)input(.*)\.txt$/i)
+      match = filename.match(/^(.*)input(.*)\.txt$/i)
       if (match) {
         const prefix = match[1]
         const indicator = match[2]
