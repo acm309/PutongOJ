@@ -5,12 +5,15 @@ import api from '@/api'
 import { privilege } from '@/utils/constant'
 import { setServerPublicKey } from '@/utils/crypto'
 
+type ColorScheme = 'light' | 'dark'
+
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
     timeDiff: Number.NaN,
     website: {} as WebsiteInformation,
     vditorCDN: `${location.origin}/static/vditor-${vditorInfo.version}`,
+    colorScheme: 'light' as ColorScheme,
     // Todo: remove
     privilege,
     status: {
@@ -44,6 +47,9 @@ export const useRootStore = defineStore('root', {
         return
       }
       window.document.title = `${payload.title} | ${this.website.title}`
+    },
+    toggleColorScheme () {
+      this.colorScheme = this.colorScheme === 'light' ? 'dark' : 'light'
     },
     async fetchTime () {
       const time1 = Date.now()

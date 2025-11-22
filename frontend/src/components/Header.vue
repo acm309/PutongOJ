@@ -6,22 +6,21 @@ import Menubar from 'primevue/menubar'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useMessage } from '@/utils/message'
 import UserAvatar from './UserAvatar.vue'
 
-const sessionStore = useSessionStore()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
 const message = useMessage()
-const { toggleAuthnDialog, userLogout } = sessionStore
-const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
 
+const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
-
-const login = toggleAuthnDialog
 
 function toggleProfileMenu (event: any) {
   profileMenu.value.toggle(event)
@@ -140,9 +139,7 @@ const profileItems = computed(() => [
     ? [ {
         label: '[Test] Toggle Dark Mode',
         icon: 'pi pi-lightbulb',
-        command: () => {
-          document.documentElement.classList.toggle('ptoj-dark-test')
-        },
+        command: rootStore.toggleColorScheme,
       }, {
         separator: true,
       } ]
@@ -152,7 +149,7 @@ const profileItems = computed(() => [
     label: t('ptoj.logout'),
     icon: 'pi pi-sign-out',
     command: async () => {
-      await userLogout()
+      await sessionStore.userLogout()
       router.push({ name: 'home' })
       message.success(t('ptoj.successful_logout'), t('ptoj.goodbye'))
     },
@@ -168,8 +165,8 @@ const profileItems = computed(() => [
     <template #item="{ item, props, hasSubmenu }">
       <router-link v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
         <a
-          :href="href" v-bind="props.action"
-          :class="{ 'text-primary font-semibold': currentRoute === item.route }" @click="navigate"
+          :href="href" v-bind="props.action" :class="{ 'text-primary font-semibold': currentRoute === item.route }"
+          @click="navigate"
         >
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
@@ -204,7 +201,10 @@ const profileItems = computed(() => [
           </Menu>
         </div>
 
-        <Button v-else text :label="`${t('oj.login')} / ${t('oj.register')}`" class="font-medium" @click="login" />
+        <Button
+          v-else text :label="`${t('oj.login')} / ${t('oj.register')}`" class="font-medium"
+          @click="sessionStore.toggleAuthnDialog"
+        />
       </div>
     </template>
   </Menubar>
