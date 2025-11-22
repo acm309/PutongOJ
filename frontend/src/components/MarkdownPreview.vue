@@ -1,56 +1,71 @@
-<script setup>
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
-import VditorPreview from 'vditor/dist/method.min'
-import { onMounted, ref, watch } from 'vue'
+import VditorMethod from 'vditor/dist/method'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
 import 'vditor/dist/index.css'
+import '@/styles/vditor.styl'
 
-const props = defineProps([ 'modelValue' ])
+const props = defineProps<{
+  modelValue: string
+}>()
+
 const { locale } = useI18n()
 const rootStore = useRootStore()
-const { vditorCDN } = $(storeToRefs(rootStore))
 
-let rendering = $ref(false)
-let renderPromise = $ref(Promise.resolve())
-let waiting = $ref(false)
+const { vditorCDN, colorScheme } = storeToRefs(rootStore)
+const preview = ref<HTMLDivElement | null>(null)
+const renderPromise = ref(Promise.resolve())
+const rendering = ref(false)
+const waiting = ref(false)
 
-const preview = ref(null)
-const config = $computed(() => ({
-  after () {
-    rendering = false
-  },
-  cdn: vditorCDN,
-  lang: locale.value.replace('-', '_'),
-  render: {
-    media: {
-      enable: false,
-    },
-  },
-}))
+const i18nLang = computed(() => {
+  return locale.value === 'zh-CN' ? 'zh_CN' : 'en_US'
+})
 
 async function render () {
-  if (!preview.value || waiting
-    || props.modelValue === undefined
-  ) { return }
+  if (!preview.value || waiting.value || props.modelValue === undefined) {
+    return
+  }
 
-  waiting = true
+  waiting.value = true
   try {
-    await renderPromise
+    await renderPromise.value
   } catch (e) {
     console.error(e)
   }
-  waiting = false
-  rendering = true
-  renderPromise = VditorPreview.preview(
+  waiting.value = false
+
+  rendering.value = true
+  renderPromise.value = VditorMethod.preview(
     preview.value,
     props.modelValue,
-    config,
+    {
+      cdn: vditorCDN.value,
+      hljs: {
+        style: colorScheme.value === 'dark' ? 'github-dark' : 'github',
+      },
+      lang: i18nLang.value,
+      mode: colorScheme.value,
+      render: {
+        media: {
+          enable: false,
+        },
+      },
+      theme: {
+        current: colorScheme.value,
+      },
+      after () {
+        rendering.value = false
+      },
+    },
   )
 }
 
-onMounted(render)
+onMounted(() => nextTick(render))
 watch(() => props.modelValue, render)
+watch(colorScheme, render)
 </script>
 
 <template>

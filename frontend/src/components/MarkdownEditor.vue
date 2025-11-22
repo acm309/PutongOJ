@@ -1,132 +1,153 @@
-<script setup>
+<script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import Vditor from 'vditor'
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
 import 'vditor/dist/index.css'
+import '@/styles/vditor.styl'
 
-const props = defineProps({
-  modelValue: String,
-  height: {
-    type: Number,
-    default: 512,
-  },
+const props = withDefaults(defineProps<{
+  modelValue: string
+  height?: number
+}>(), {
+  height: 512,
 })
-const emit = defineEmits([ 'update:modelValue' ])
-const { locale } = useI18n()
-const { t } = useI18n()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
+
+const { t, locale } = useI18n()
 const rootStore = useRootStore()
-const { vditorCDN } = $(storeToRefs(rootStore))
+const { vditorCDN, colorScheme } = storeToRefs(rootStore)
 
-let editor = null
+const editor = ref<Vditor | null>(null)
+const vditor = ref<HTMLElement | null>(null)
 
-const lang = $computed(() => locale.value.replace('-', '_'))
-const vditor = ref(null)
-const config = $computed(() => ({
-  cache: {
-    enable: false,
-  },
-  cdn: vditorCDN,
-  fullscreen: {
-    index: 110,
-  },
-  height: props.height,
-  input: (value) => {
-    emit('update:modelValue', value)
-  },
-  lang,
-  minHeight: 256,
-  mode: 'wysiwyg',
-  placeholder: t('oj.type_something'),
-  preview: {
-    render: {
-      media: {
-        enable: false,
-      },
-    },
-  },
-  resize: {
-    enable: true,
-    position: 'bottom',
-  },
-  toolbar: [
-    'headings',
-    'bold',
-    'italic',
-    'strike',
-    'link',
-    '|',
-    'list',
-    'ordered-list',
-    'check',
-    'outdent',
-    'indent',
-    '|',
-    'quote',
-    'line',
-    'code',
-    'inline-code',
-    'insert-before',
-    'insert-after',
-    '|',
-    'upload',
-    'table',
-    '|',
-    'undo',
-    'redo',
-    '|',
-    'fullscreen',
-    'edit-mode',
-    'preview',
-    {
-      name: 'more',
-      toolbar: [
-        'both',
-        'export',
-        'outline',
-      ],
-    },
-  ],
-  upload: {
-    url: '/api/upload',
-    accept: 'image/*',
-    max: 5 * 1024 * 1024,
-    multiple: false,
-    fieldName: 'image',
-    format: (files, responseText) => {
-      const filename = files[0].name
-      const url = JSON.parse(responseText).url
-      return JSON.stringify({ data: { succMap: { [filename]: url } } })
-    },
-  },
-  after: () => {
-    editor.setValue(props.modelValue || '')
-  },
-}))
+const i18nLang = computed(() => {
+  return locale.value === 'zh-CN' ? 'zh_CN' : 'en_US'
+})
 
 function init () {
-  if (editor) editor.destroy()
-  editor = new Vditor(vditor.value, config)
+  if (!vditor.value) {
+    return
+  }
+  if (editor.value) {
+    editor.value.destroy()
+  }
+  editor.value = new Vditor(vditor.value, {
+    cache: {
+      enable: false,
+    },
+    cdn: vditorCDN.value,
+    fullscreen: {
+      index: 110,
+    },
+    height: props.height,
+    input: (value: string) => {
+      emit('update:modelValue', value)
+    },
+    lang: i18nLang.value,
+    minHeight: 256,
+    mode: 'wysiwyg',
+    placeholder: t('oj.type_something'),
+    preview: {
+      hljs: {
+        style: colorScheme.value === 'dark' ? 'github-dark' : 'github',
+      },
+      render: {
+        media: {
+          enable: false,
+        },
+      },
+      theme: {
+        current: colorScheme.value,
+      },
+    },
+    resize: {
+      enable: true,
+      position: 'bottom',
+    },
+    theme: colorScheme.value === 'dark' ? 'dark' : 'classic',
+    toolbar: [
+      'headings',
+      'bold',
+      'italic',
+      'strike',
+      'link',
+      '|',
+      'list',
+      'ordered-list',
+      'check',
+      'outdent',
+      'indent',
+      '|',
+      'quote',
+      'line',
+      'code',
+      'inline-code',
+      'insert-before',
+      'insert-after',
+      '|',
+      'upload',
+      'table',
+      '|',
+      'undo',
+      'redo',
+      '|',
+      'fullscreen',
+      'edit-mode',
+      'preview',
+      {
+        name: 'more',
+        toolbar: [
+          'both',
+          'export',
+          'outline',
+        ],
+      },
+    ],
+    upload: {
+      url: '/api/upload',
+      accept: 'image/*',
+      max: 5 * 1024 * 1024,
+      multiple: false,
+      fieldName: 'image',
+      format: (files, responseText) => {
+        const filename = files[0].name
+        const url = JSON.parse(responseText).url
+        return JSON.stringify({ data: { succMap: { [filename]: url } } })
+      },
+    },
+    customWysiwygToolbar: () => {},
+    after: () => {
+      editor.value!.setValue(props.modelValue || '')
+    },
+  })
 }
 
 onMounted(init)
 
 onBeforeUnmount(() => {
-  editor.destroy()
-  editor = null
+  editor.value?.destroy()
+  editor.value = null
 })
 
 watch(() => props.modelValue, (value) => {
-  if (!editor) return
-  if (value === editor.getValue()) return
+  if (!editor.value) {
+    return
+  }
+  if (value === editor.value.getValue()) {
+    return
+  }
   nextTick(() => {
-    editor.setValue(value)
+    editor.value!.setValue(value)
   })
 })
 
 watch(() => props.height, init)
-watch(() => locale.value, () => nextTick(init))
+watch(locale, () => nextTick(init))
+watch(colorScheme, () => nextTick(init))
 </script>
 
 <template>
