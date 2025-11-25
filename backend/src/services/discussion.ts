@@ -14,7 +14,7 @@ import { distributeWork } from '../jobs/helper'
 import Comment from '../models/Comment'
 import Discussion from '../models/Discussion'
 
-type DiscussionQueryFilters = FilterQuery<{
+export type DiscussionQueryFilters = FilterQuery<{
   author?: Types.ObjectId
   problem?: Types.ObjectId | null
   contest?: Types.ObjectId | null

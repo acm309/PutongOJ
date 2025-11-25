@@ -1,5 +1,6 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
+import type { DiscussionQueryFilters } from '../services/discussion'
 import {
   CommentCreatePayloadSchema,
   DiscussionCreatePayloadSchema,
@@ -79,28 +80,26 @@ async function findDiscussions (ctx: Context) {
   const { profile } = ctx.state
   const { page, pageSize, sort, sortBy, type, author } = query.data
 
-  const basicFilter: Parameters<typeof discussionService.findDiscussions>[1] = {
-    problem: null,
-    contest: null,
-  }
+  const queryFilter: DiscussionQueryFilters = {}
   if (type) {
-    basicFilter.type = type
+    queryFilter.type = type
   }
   if (author) {
     const authorUser = await getUser(author)
     if (authorUser) {
-      basicFilter.author = authorUser._id
+      queryFilter.author = authorUser._id
     }
   }
-
-  const filters = [ basicFilter ]
-  if (!profile?.isAdmin) {
-    const visibilityFilters: typeof filters = [
-      { type: { $in: publicTypes } },
-    ]
-    if (profile) {
-      visibilityFilters.push({ author: profile._id })
-    }
+  const visibilityFilters: DiscussionQueryFilters[] = [ {
+    problem: null,
+    contest: null,
+    type: { $in: publicTypes },
+  } ]
+  if (profile) {
+    visibilityFilters.push({ author: profile._id })
+  }
+  const filters: DiscussionQueryFilters[] = [ queryFilter ]
+  if (!(profile?.isAdmin)) {
     filters.push({ $or: visibilityFilters })
   }
 
