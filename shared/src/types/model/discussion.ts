@@ -11,6 +11,7 @@ export const DiscussionModelSchema = z.object({
   type: z.enum(DiscussionType),
   title: z.string().min(1).max(TITLE_LENGTH_MAX),
   comments: z.int().nonnegative(),
+  lastCommentAt: isoDatetimeToDate,
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

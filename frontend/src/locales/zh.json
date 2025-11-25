@@ -142,6 +142,7 @@
   "invalid_testcase_content": "测试用例内容无效，应仅包含可打印 ASCII 字符和空格",
   "judge_status": "评测状态",
   "language": "语言",
+  "last_comment_at": "最后评论时间",
   "last_request_id": "最后请求 ID",
   "last_visited_at": "最后访问时间",
   "loading": "加载中...",

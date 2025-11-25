@@ -142,6 +142,7 @@
   "invalid_testcase_content": "Invalid testcase content. It should only contain printable ASCII characters and spaces",
   "judge_status": "Judge Status",
   "language": "Language",
+  "last_comment_at": "Last Comment At",
   "last_request_id": "Last Request ID",
   "last_visited_at": "Last Visited At",
   "loading": "Loading...",

@@ -45,6 +45,10 @@ const discussionSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  lastCommentAt: {
+    type: Date,
+    default: Date.now,
+  },
 }, {
   collection: 'Discussion',
   timestamps: true,

@@ -236,14 +236,14 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column field="updatedAt" class="pr-6 text-right whitespace-nowrap" sortable>
+      <Column field="lastCommentAt" class="pr-6 text-right whitespace-nowrap" sortable>
         <template #header>
           <span class="font-semibold text-right w-full">
-            {{ t('ptoj.updated_at') }}
+            {{ t('ptoj.last_comment_at') }}
           </span>
         </template>
         <template #body="{ data }">
-          {{ formatRelativeTime(data.updatedAt, locale) }}
+          {{ formatRelativeTime(data.lastCommentAt, locale) }}
         </template>
       </Column>
 
