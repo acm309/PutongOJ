@@ -9,8 +9,10 @@ export const DiscussionModelSchema = z.object({
   problem: ObjectIdSchema.nullable(),
   contest: ObjectIdSchema.nullable(),
   type: z.enum(DiscussionType),
+  pinned: z.boolean(),
   title: z.string().min(1).max(TITLE_LENGTH_MAX),
   comments: z.int().nonnegative(),
+  lastCommentAt: isoDatetimeToDate,
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

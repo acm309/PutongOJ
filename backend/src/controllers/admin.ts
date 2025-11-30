@@ -369,6 +369,9 @@ export async function updateDiscussion (ctx: Context) {
   if (payload.data.type !== undefined) {
     update.type = payload.data.type
   }
+  if (payload.data.pinned !== undefined) {
+    update.pinned = payload.data.pinned
+  }
   if (payload.data.title !== undefined) {
     update.title = payload.data.title
   }

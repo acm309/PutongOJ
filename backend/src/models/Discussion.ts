@@ -34,6 +34,10 @@ const discussionSchema = new mongoose.Schema({
     enum: DiscussionType,
     default: DiscussionType.PrivateClarification,
   },
+  pinned: {
+    type: Boolean,
+    default: false,
+  },
   title: {
     type: String,
     required: true,
@@ -44,6 +48,10 @@ const discussionSchema = new mongoose.Schema({
   comments: {
     type: Number,
     default: 0,
+  },
+  lastCommentAt: {
+    type: Date,
+    default: Date.now,
   },
 }, {
   collection: 'Discussion',

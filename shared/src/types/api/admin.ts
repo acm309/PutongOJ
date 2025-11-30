@@ -183,6 +183,7 @@ export const AdminDiscussionUpdatePayloadSchema = z.object({
   problem: ProblemModelSchema.shape.pid.nullable().optional(),
   contest: ContestModelSchema.shape.cid.nullable().optional(),
   type: z.enum(DiscussionType).optional(),
+  pinned: DiscussionModelSchema.shape.pinned.optional(),
   title: DiscussionModelSchema.shape.title.optional(),
 })
 

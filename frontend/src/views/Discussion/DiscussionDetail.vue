@@ -10,6 +10,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Panel from 'primevue/panel'
 import Select from 'primevue/select'
+import SplitButton from 'primevue/splitbutton'
 import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
@@ -43,6 +44,7 @@ const hasChanges = computed(() => {
   return (
     editingForm.value.title !== discussion.value.title
     || editingForm.value.type !== discussion.value.type
+    || editingForm.value.pinned !== discussion.value.pinned
     || editingForm.value.author !== discussion.value.author.uid
     || (editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)
     || (editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)
@@ -101,6 +103,7 @@ function onEditDiscussion () {
   editingForm.value = {
     title: discussion.value.title,
     type: discussion.value.type,
+    pinned: discussion.value.pinned,
     author: discussion.value.author.uid,
     problem: discussion.value.problem?.pid || null,
     contest: discussion.value.contest?.cid || null,
@@ -145,6 +148,24 @@ async function editDiscussion () {
 
   message.success(t('ptoj.successful_updated'), t('ptoj.discussion_updated_successfully'))
   editDialog.value = false
+  await fetchDiscussion()
+}
+
+async function togglePinDiscussion () {
+  if (!discussion.value || !isAdmin.value) return
+
+  saving.value = true
+  const resp = await updateDiscussion(discussion.value.discussionId, {
+    pinned: !discussion.value.pinned,
+  })
+  saving.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_save_changes'), resp.message)
+    return
+  }
+
+  message.success(t('ptoj.successful_updated'), t('ptoj.discussion_updated_successfully'))
   await fetchDiscussion()
 }
 
@@ -203,12 +224,13 @@ onMounted(fetchDiscussion)
 
     <template v-else>
       <div class="flex gap-2 items-start justify-between pt-6 px-6">
-        <div class="flex flex-wrap gap-2 items-center">
-          <span class="flex gap-2">
+        <div class="flex flex-wrap gap-1 items-center">
+          <span class="flex gap-1">
+            <Tag v-if="discussion.pinned" icon="pi pi-thumbtack" />
             <DiscussionTypeTag :type="discussion.type" />
             <Tag :value="discussion.discussionId" severity="secondary" icon="pi pi-hashtag" />
           </span>
-          <span class="flex gap-2">
+          <span class="flex gap-1">
             <Tag
               v-if="discussion.contest" :value="discussion.contest.cid" severity="secondary" class="cursor-pointer"
               icon="pi pi-trophy" @click="onViewContest(discussion.contest.cid)"
@@ -221,10 +243,21 @@ onMounted(fetchDiscussion)
         </div>
         <div class="flex gap-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetchDiscussion" />
-          <Button
+          <SplitButton
             v-if="isAdmin" icon="pi pi-pen-to-square" severity="secondary" outlined :disabled="loading"
-            @click="onEditDiscussion"
-          />
+            :model="[{
+              label: discussion.pinned ? t('ptoj.unpin') : t('ptoj.pin'),
+              icon: 'pi pi-thumbtack',
+              command: () => togglePinDiscussion(),
+            }]" @click="onEditDiscussion"
+          >
+            <template #item="{ item, props }">
+              <span class="flex gap-2 items-center" v-bind="props.action">
+                <span :class="item.icon" />
+                <span>{{ item.label }}</span>
+              </span>
+            </template>
+          </SplitButton>
         </div>
       </div>
 
