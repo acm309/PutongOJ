@@ -263,11 +263,12 @@ onRouteQueryUpdate(fetch)
               <router-link v-if="doc.problem" :to="{ name: 'problemInfo', params: { pid: doc.problem.pid } }">
                 <Tag :value="doc.problem.pid" severity="secondary" class="cursor-pointer" icon="pi pi-flag" />
               </router-link>
+              <Tag v-if="doc.pinned" class="min-h-[22px]" icon="pi pi-thumbtack" />
               <DiscussionTypeTag :type="doc.type" />
             </span>
           </span>
         </div>
-        <div class="flex gap-6 items-end justify-between">
+        <div class="flex flex-wrap gap-x-6 gap-y-1 items-end justify-between text-nowrap">
           <router-link
             class="flex gap-2 hover:text-primary items-center text-muted-color"
             :to="{ name: 'UserProfile', params: { uid: doc.author.uid } }"
@@ -275,7 +276,7 @@ onRouteQueryUpdate(fetch)
             <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatar" />
             {{ doc.author.uid }}
           </router-link>
-          <div class="flex gap-4 text-muted-color text-sm">
+          <div class="flex gap-4 grow justify-end text-muted-color text-sm">
             <span class="flex gap-2">
               <i class="pi pi-comments text-sm" />
               {{ doc.comments }}

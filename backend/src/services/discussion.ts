@@ -53,6 +53,7 @@ export async function findDiscussions<
   let query = Discussion
     .find(filters)
     .sort({
+      pinned: -1,
       [sortBy]: sort,
       ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
     })
@@ -172,7 +173,7 @@ export async function updateComment (
 }
 
 export type DiscussionUpdateDto = Partial<Pick<DiscussionModel,
-  'author' | 'problem' | 'contest' | 'type' | 'title'
+  'author' | 'problem' | 'contest' | 'type' | 'pinned' | 'title'
 >>
 
 export async function updateDiscussion (

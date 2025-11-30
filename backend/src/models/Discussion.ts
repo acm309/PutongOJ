@@ -34,6 +34,10 @@ const discussionSchema = new mongoose.Schema({
     enum: DiscussionType,
     default: DiscussionType.PrivateClarification,
   },
+  pinned: {
+    type: Boolean,
+    default: false,
+  },
   title: {
     type: String,
     required: true,

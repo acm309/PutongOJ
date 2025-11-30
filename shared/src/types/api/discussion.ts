@@ -34,6 +34,7 @@ export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
     cid: ContestModelSchema.shape.cid,
   }).nullable(),
   type: DiscussionModelSchema.shape.type,
+  pinned: DiscussionModelSchema.shape.pinned,
   title: DiscussionModelSchema.shape.title,
   comments: DiscussionModelSchema.shape.comments,
   lastCommentAt: DiscussionModelSchema.shape.lastCommentAt,
@@ -54,6 +55,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
     cid: ContestModelSchema.shape.cid,
   }).nullable(),
   type: DiscussionModelSchema.shape.type,
+  pinned: DiscussionModelSchema.shape.pinned,
   title: DiscussionModelSchema.shape.title,
   comments: z.array(z.object({
     commentId: CommentModelSchema.shape.commentId,
