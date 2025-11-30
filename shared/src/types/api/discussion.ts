@@ -12,7 +12,7 @@ import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const DiscussionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
-  pageSize: PaginationSchema.shape.pageSize.default(30),
+  pageSize: PaginationSchema.shape.pageSize.default(10),
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'lastCommentAt', 'comments']).default('lastCommentAt'),
   author: UserModelSchema.shape.uid.optional(),
@@ -25,7 +25,14 @@ export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
   discussionId: DiscussionModelSchema.shape.discussionId,
   author: z.object({
     uid: UserModelSchema.shape.uid,
+    avatar: UserModelSchema.shape.avatar,
   }),
+  problem: z.object({
+    pid: ProblemModelSchema.shape.pid,
+  }).nullable(),
+  contest: z.object({
+    cid: ContestModelSchema.shape.cid,
+  }).nullable(),
   type: DiscussionModelSchema.shape.type,
   title: DiscussionModelSchema.shape.title,
   comments: DiscussionModelSchema.shape.comments,

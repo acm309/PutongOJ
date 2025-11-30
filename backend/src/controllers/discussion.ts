@@ -106,8 +106,8 @@ async function findDiscussions (ctx: Context) {
   const discussions = await discussionService.findDiscussions(
     { page, pageSize, sort, sortBy },
     { $and: filters },
-    [ 'discussionId', 'author', 'type', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
-    { author: [ 'uid' ] },
+    [ 'discussionId', 'author', 'problem', 'contest', 'type', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
+    { author: [ 'uid', 'avatar' ], problem: [ 'pid' ], contest: [ 'cid' ] },
   )
   const result = DiscussionListQueryResultSchema.encode(discussions)
   return createEnvelopedResponse(ctx, result)

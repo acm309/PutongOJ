@@ -7,22 +7,24 @@ import type {
 import { DiscussionListQuerySchema, DiscussionType } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
+import Inplace from 'primevue/inplace'
 import InputText from 'primevue/inputtext'
+import Menu from 'primevue/menu'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
+import Tag from 'primevue/tag'
 import Textarea from 'primevue/textarea'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { createDiscussion, findDiscussions } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useSessionStore } from '@/store/modules/session'
-import { formatRelativeTime, spacing } from '@/utils/formate'
+import { formatRelativeTime, spacing, timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -68,6 +70,39 @@ const discussionTypeOptions = computed(() => [ {
   disabled: !isAdmin.value,
 } ])
 
+const sortingMenu = ref<any>(null)
+const sortingMenuItems = computed(() => [ {
+  label: t('ptoj.sort_by'),
+  items: [ {
+    label: t('ptoj.last_comment_at'),
+    checked: query.value.sortBy === 'lastCommentAt',
+    command: () => onSort({ sortField: 'lastCommentAt' }),
+  }, {
+    label: t('ptoj.total_comments'),
+    checked: query.value.sortBy === 'comments',
+    command: () => onSort({ sortField: 'comments' }),
+  }, {
+    label: t('ptoj.created_at'),
+    checked: query.value.sortBy === 'createdAt',
+    command: () => onSort({ sortField: 'createdAt' }),
+  } ],
+}, {
+  separator: true,
+}, {
+  label: t('ptoj.sort_order'),
+  items: [ {
+    label: query.value.sortBy === 'comments' ? t('ptoj.descending') : t('ptoj.newest'),
+    icon: 'pi pi-sort-amount-down',
+    checked: query.value.sort === -1,
+    command: () => onSort({ sortOrder: -1 }),
+  }, {
+    label: query.value.sortBy === 'comments' ? t('ptoj.ascending') : t('ptoj.oldest'),
+    icon: 'pi pi-sort-amount-up-alt',
+    checked: query.value.sort === 1,
+    command: () => onSort({ sortOrder: 1 }),
+  } ],
+} ])
+
 async function fetch () {
   const parsed = DiscussionListQuerySchema.safeParse(route.query)
   if (parsed.success) {
@@ -91,12 +126,12 @@ async function fetch () {
   total.value = resp.data.total
 }
 
-function onSort (event: any) {
+function onSort (event: { sortField?: string, sortOrder?: number }) {
   router.replace({
     query: {
       ...route.query,
-      sortBy: event.sortField,
-      sort: event.sortOrder,
+      sortBy: event.sortField || query.value.sortBy,
+      sort: event.sortOrder || query.value.sort,
       page: undefined,
     },
   })
@@ -131,16 +166,6 @@ function onReset () {
   })
 }
 
-function onViewDetail (data: any) {
-  const { discussionId } = data
-  router.push({ name: 'DiscussionDetail', params: { discussionId } })
-}
-
-function onViewAuthor (data: any) {
-  const { author: { uid } } = data
-  router.push({ name: 'UserProfile', params: { uid } })
-}
-
 function onCreateDiscussion () {
   createDialog.value = true
 }
@@ -168,22 +193,27 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
+  <div class="max-w-4xl p-0">
+    <div class="p-6">
       <div class="flex font-semibold gap-4 items-center mb-4">
         <i class="pi pi-comments text-2xl" />
         <h1 class="text-xl">
           {{ t('ptoj.discussions') }}
         </h1>
       </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+
+      <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
         <UserFilter
-          v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')"
-          force-selection @select="onSearch"
+          v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')" force-selection
+          @select="onSearch"
         />
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+        <div class="flex gap-2 items-center justify-end md:col-span-1">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button
+            type="button" severity="secondary" outlined
+            :icon="query.sort === 1 ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'" @click="sortingMenu?.toggle"
+          />
           <Button
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
@@ -195,64 +225,79 @@ onRouteQueryUpdate(fetch)
           />
         </div>
       </div>
+
+      <Menu ref="sortingMenu" :model="sortingMenuItems" :popup="true">
+        <template #item="{ item, props }">
+          <a class="flex items-center justify-between" v-bind="props.action">
+            <span class="flex gap-2 items-center">
+              <span v-if="item.icon" :class="item.icon" />
+              <span>{{ item.label }}</span>
+            </span>
+            <span v-if="item.checked" class="pi pi-check" />
+          </a>
+        </template>
+      </Menu>
     </div>
 
-    <DataTable
-      class="-mb-px" :value="docs" sort-mode="single" :sort-field="query.sortBy" :sort-order="query.sort"
-      :lazy="true" :loading="loading" scrollable @sort="onSort"
-    >
-      <Column :header="t('ptoj.type')" field="type" class="pl-6 py-2 whitespace-nowrap">
-        <template #body="{ data }">
-          <DiscussionTypeTag :type="(data.type as DiscussionType)" />
-        </template>
-      </Column>
+    <template v-if="loading || docs.length === 0">
+      <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">
+        <i v-if="loading" class="pi pi-spin pi-spinner text-2xl" />
+        <span>{{ loading ? t('ptoj.loading') : t('ptoj.empty_content_desc') }}</span>
+      </div>
+    </template>
 
-      <Column :header="t('ptoj.title')" field="title" class="font-medium min-w-xs">
-        <template #body="{ data }">
-          <a class="cursor-pointer hover:text-primary" @click="onViewDetail(data)">
-            {{ spacing(data.title) }}
-          </a>
-        </template>
-      </Column>
-
-      <Column field="author.uid" class="max-w-36 md:max-w-48 text-right truncate">
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.author') }}
+    <template v-else>
+      <div v-for="doc in docs" :key="doc.discussionId" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
+        <div class="flex flex-nowrap gap-x-4 gap-y-1 justify-between">
+          <router-link
+            class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"
+            :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
+          >
+            {{ spacing(doc.title) }}
+          </router-link>
+          <span class="grow pt-px text-nowrap">
+            <span class="flex flex-wrap-reverse gap-1 justify-end">
+              <router-link v-if="doc.contest" :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }">
+                <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer hover:" icon="pi pi-trophy" />
+              </router-link>
+              <router-link v-if="doc.problem" :to="{ name: 'problemInfo', params: { pid: doc.problem.pid } }">
+                <Tag :value="doc.problem.pid" severity="secondary" class="cursor-pointer" icon="pi pi-flag" />
+              </router-link>
+              <DiscussionTypeTag :type="doc.type" />
+            </span>
           </span>
-        </template>
-        <template #body="{ data }">
-          <a @click="onViewAuthor(data)">
-            {{ data.author.uid }}
-          </a>
-        </template>
-      </Column>
-
-      <Column field="comments" class="text-center whitespace-nowrap" sortable>
-        <template #header>
-          <span class="text-center w-full">
-            <i class="pi pi-comments" />
-          </span>
-        </template>
-      </Column>
-
-      <Column field="lastCommentAt" class="pr-6 text-right whitespace-nowrap" sortable>
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.last_comment_at') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ formatRelativeTime(data.lastCommentAt, locale) }}
-        </template>
-      </Column>
-
-      <template #empty>
-        <span class="px-2">
-          {{ t('ptoj.empty_content_desc') }}
-        </span>
-      </template>
-    </DataTable>
+        </div>
+        <div class="flex gap-6 items-end justify-between">
+          <router-link
+            class="flex gap-2 hover:text-primary items-center text-muted-color"
+            :to="{ name: 'UserProfile', params: { uid: doc.author.uid } }"
+          >
+            <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatar" />
+            {{ doc.author.uid }}
+          </router-link>
+          <div class="flex gap-4 text-muted-color text-sm">
+            <span class="flex gap-2">
+              <i class="pi pi-comments text-sm" />
+              {{ doc.comments }}
+            </span>
+            <span v-if="query.sortBy === 'createdAt'" class="flex gap-2">
+              <i class="pi pi-calendar-plus text-sm" />
+              <Inplace unstyled>
+                <template #display>{{ formatRelativeTime(doc.createdAt, locale) }}</template>
+                <template #content>{{ timePretty(doc.createdAt) }}</template>
+              </Inplace>
+            </span>
+            <span v-else class="flex gap-2">
+              <i class="pi pi-clock text-sm" />
+              <Inplace unstyled>
+                <template #display>{{ formatRelativeTime(doc.lastCommentAt, locale) }}</template>
+                <template #content>{{ timePretty(doc.lastCommentAt) }}</template>
+              </Inplace>
+            </span>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <Paginator
       class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
