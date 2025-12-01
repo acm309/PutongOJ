@@ -2,7 +2,6 @@
 import type { Message } from 'view-ui-plus'
 import { courseRoleNone } from '@backend/utils/constants'
 import { AxiosError } from 'axios'
-import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
 import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Input, Modal, Row, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
 import { computed, inject, onBeforeMount, ref } from 'vue'
@@ -114,10 +113,10 @@ onProfileUpdate(fetch)
     <Row class="course-header" justify="end">
       <Col flex="auto" class="course-header-col">
         <h1 class="course-name">
-          {{ spacing(course.name) }}
+          {{ course.name }}
         </h1>
         <p v-if="course.description?.trim()" class="course-description">
-          {{ spacing(course.description) }}
+          {{ course.description }}
         </p>
         <p v-else class="course-description">
           {{ t('oj.no_description') }}

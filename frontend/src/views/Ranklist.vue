@@ -6,7 +6,6 @@ import type {
   UserRanklistQueryResult,
 } from '@putongoj/shared'
 import { UserRanklistQuerySchema } from '@putongoj/shared'
-import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -197,7 +196,7 @@ onRouteQueryUpdate(fetch)
       <Column :header="t('ptoj.motto')" field="motto" class="min-w-96">
         <template #body="{ data }">
           <span class="-my-px line-clamp-2">
-            {{ pangu.spacing(data.motto || '').trim() }}
+            {{ data.motto.trim() || '' }}
           </span>
         </template>
       </Column>

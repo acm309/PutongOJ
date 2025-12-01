@@ -1,5 +1,4 @@
 <script setup>
-import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
 import MarkdownPreview from '@/components/MarkdownPreview'
 
@@ -14,7 +13,7 @@ const { news } = $(storeToRefs(useNewsStore()))
     <div class="news-header-container">
       <div class="news-header">
         <h1 class="font-bold">
-          {{ pangu.spacing(news.title || '') }}
+          {{ news.title || '' }}
         </h1>
         <h4>{{ timePretty(news.create, 'yyyy-MM-dd HH:mm') }}</h4>
       </div>

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { UserProfileQueryResult } from '@putongoj/shared'
 import { UserPrivilege } from '@putongoj/shared'
-import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Fieldset from 'primevue/fieldset'
@@ -106,7 +105,7 @@ onRouteParamUpdate(fetch)
             {{ username }}
           </div>
           <div v-if="user.motto" class="mt-2">
-            {{ pangu.spacing(user.motto).trim() }}
+            {{ user.motto.trim() }}
           </div>
         </div>
       </div>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { spacing } from 'pangu'
 import { storeToRefs } from 'pinia'
 import { Button, Card, Col, Icon, Page, Row, Spin, Tag } from 'view-ui-plus'
 import { onBeforeMount } from 'vue'
@@ -92,10 +91,10 @@ onRouteQueryUpdate(fetch)
               <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
                 {{ t('oj.course_private') }}
               </Tag>
-              <span class="courses-title">{{ spacing(item.name) }}</span>
+              <span class="courses-title">{{ item.name }}</span>
             </div>
             <p v-if="item.description.trim()" class="courses-description">
-              {{ spacing(item.description) }}
+              {{ item.description }}
             </p>
             <p v-else class="courses-description">
               {{ t('oj.no_description') }}

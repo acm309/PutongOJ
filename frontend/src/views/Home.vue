@@ -1,5 +1,4 @@
 <script setup>
-import pangu from 'pangu'
 import { storeToRefs } from 'pinia'
 import { Card, Col, Icon, Page, Row, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
@@ -71,7 +70,7 @@ onRouteQueryUpdate(fetch)
               <Icon type="md-paper" class="icon-paper" />
             </Col>
             <Col flex="auto" class="news-content">
-              <span class="news-title">{{ pangu.spacing(item.title) }}</span>
+              <span class="news-title">{{ item.title }}</span>
               <p class="news-date">
                 {{ timePretty(item.create, 'yyyy-MM-dd HH:mm') }}
               </p>

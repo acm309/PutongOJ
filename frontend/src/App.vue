@@ -92,6 +92,7 @@ watch(colorScheme, (newScheme) => {
 <style lang="stylus">
 html
   font-size: 14px !important
+  text-autospace: normal
 #app
   [class^="p-"], [class*=" p-"]
     line-height: normal !important

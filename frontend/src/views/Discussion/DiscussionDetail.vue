@@ -22,7 +22,7 @@ import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
-import { spacing, timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/formate'
 import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
@@ -262,7 +262,7 @@ onMounted(fetchDiscussion)
       </div>
 
       <h1 class="font-bold mb-4 pt-18 px-6 text-2xl">
-        {{ spacing(discussion.title) }}
+        {{ discussion.title }}
       </h1>
 
       <div class="mb-6 px-6 space-y-4">
@@ -294,7 +294,7 @@ onMounted(fetchDiscussion)
             </div>
           </template>
           <div class="-mb-2 -mt-1 leading-relaxed whitespace-pre-wrap">
-            {{ spacing(comment.content) }}
+            {{ comment.content }}
           </div>
         </Panel>
       </div>

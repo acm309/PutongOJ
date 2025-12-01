@@ -24,7 +24,7 @@ import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useSessionStore } from '@/store/modules/session'
-import { formatRelativeTime, spacing, timePretty } from '@/utils/formate'
+import { formatRelativeTime, timePretty } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -253,7 +253,7 @@ onRouteQueryUpdate(fetch)
             class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"
             :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
           >
-            {{ spacing(doc.title) }}
+            {{ doc.title }}
           </router-link>
           <span class="grow pt-px text-nowrap">
             <span class="flex flex-wrap-reverse gap-1 justify-end">

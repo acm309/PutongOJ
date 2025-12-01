@@ -4,11 +4,6 @@ import { format } from 'date-fns/format'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { enUS, zhCN } from 'date-fns/locale'
 import { toDate } from 'date-fns/toDate'
-import pangu from 'pangu'
-
-export function spacing (text: string) {
-  return pangu.spacing(text)
-}
 
 export function formate (value: number) {
   const num = value * 100
