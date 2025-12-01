@@ -15,8 +15,7 @@
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
     "preview": "vite preview",
-    "start": "npm run dev",
-    "zip": "node build/zip.cjs"
+    "start": "npm run dev"
   },
   "dependencies": {
     "@noble/ciphers": "^2.0.1",
@@ -62,8 +61,7 @@
     "eslint": "^9.39.1",
     "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.9.3",
-    "vite": "7.2.2",
-    "zip-a-folder": "^3.1.9"
+    "vite": "7.2.2"
   },
   "browserslist": [
     "> 0.3%",
