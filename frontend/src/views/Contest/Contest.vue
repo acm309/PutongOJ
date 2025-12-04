@@ -137,6 +137,7 @@ onProfileUpdate(fetch)
       <TabPane :label="t('oj.submit')" name="contestSubmit" />
       <TabPane :label="t('ptoj.my_submissions')" name="ContestMySubmissions" />
       <TabPane v-if="isManageable" :label="t('ptoj.all_solutions')" name="ContestSolutions" />
+      <TabPane :label="t('ptoj.discussions')" name="ContestDiscussions" />
       <TabPane :label="t('oj.ranklist')" name="contestRanklist" />
       <TabPane v-if="isManageable" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>

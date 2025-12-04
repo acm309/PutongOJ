@@ -3,6 +3,8 @@ import type {
   ContestSolutionListExportQueryResult,
   ContestSolutionListQuery,
   ContestSolutionListQueryResult,
+  DiscussionListQuery,
+  DiscussionListQueryResult,
 } from '@putongoj/shared'
 import { instanceSafe as instance } from './instance'
 
@@ -11,4 +13,8 @@ export async function findSolutions (contestId: number, params: ContestSolutionL
 }
 export async function exportSolutions (contestId: number, params: ContestSolutionListExportQuery) {
   return instance.get<ContestSolutionListExportQueryResult>(`/contest/${encodeURIComponent(contestId)}/solutions/export`, { params })
+}
+
+export async function findContestDiscussions (contestId: number, params: DiscussionListQuery) {
+  return instance.get<DiscussionListQueryResult>(`/contest/${encodeURIComponent(contestId)}/discussions`, { params })
 }

@@ -201,6 +201,7 @@
   "search_by_username_or_nickname": "通过用户名或昵称搜索",
   "select_export_format": "选择导出格式",
   "select_group": "选择群组",
+  "select_problem_optional": "选择题目（可留空）",
   "select_user": "选择用户",
   "similarity_detected": "检测到与其它提交相似",
   "solution_management": "提交管理",

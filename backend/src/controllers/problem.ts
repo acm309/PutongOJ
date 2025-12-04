@@ -25,6 +25,7 @@ const { status, judge } = constants
 export async function loadProblem (
   ctx: Context,
   inputId?: string | number,
+  inputContestId?: number,
 ): Promise<ProblemDocumentPopulated> {
   const problemId = Number(
     inputId || ctx.params.pid || ctx.request.query.pid,
@@ -52,7 +53,7 @@ export async function loadProblem (
     return problem
   }
 
-  const contestId = Number(ctx.request.query.cid)
+  const contestId = Number(inputContestId || ctx.request.query.cid)
   if (Number.isInteger(contestId) && contestId > 0) {
     const contest = await loadContest(ctx, contestId)
     if (contest.list.includes(problemId)) {

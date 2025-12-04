@@ -61,6 +61,12 @@ const contestRoutes: Array<RouteRecordRaw> = [
         meta: { requiresLogin: true },
       },
       {
+        path: 'discussions',
+        name: 'ContestDiscussions',
+        component: () => import('@/views/Contest/Discussions.vue'),
+        meta: { title: 'Contest Info', requiresLogin: true },
+      },
+      {
         path: 'ranklist',
         name: 'contestRanklist',
         component: ContestRanklist,

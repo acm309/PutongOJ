@@ -22,7 +22,7 @@ import { loadContest } from './contest'
 import { loadCourse } from './course'
 import { loadProblem } from './problem'
 
-const publicTypes = [
+export const publicDiscussionTypes = [
   DiscussionType.OpenDiscussion,
   DiscussionType.PublicAnnouncement,
 ] as DiscussionType[]
@@ -43,7 +43,7 @@ export async function loadDiscussion (
   if (!discussion) {
     return null
   }
-  if (publicTypes.includes(discussion.type)) {
+  if (publicDiscussionTypes.includes(discussion.type)) {
     ctx.state.discussion = discussion
     return discussion
   }
@@ -93,7 +93,7 @@ async function findDiscussions (ctx: Context) {
   const visibilityFilters: DiscussionQueryFilters[] = [ {
     problem: null,
     contest: null,
-    type: { $in: publicTypes },
+    type: { $in: publicDiscussionTypes },
   } ]
   if (profile) {
     visibilityFilters.push({ author: profile._id })
@@ -141,7 +141,7 @@ async function createDiscussion (ctx: Context) {
 
   let problem: Types.ObjectId | null = null
   if (payload.data.problem) {
-    const problemDoc = await loadProblem(ctx, payload.data.problem)
+    const problemDoc = await loadProblem(ctx, payload.data.problem, payload.data.contest)
 
     problem = problemDoc._id
     if (!isManaged && problemDoc.owner?.equals(profile._id) === true) {
@@ -165,7 +165,7 @@ async function createDiscussion (ctx: Context) {
   const { type, title, content } = payload.data
   const author = profile._id
 
-  if (publicTypes.includes(type) && !isManaged) {
+  if (publicDiscussionTypes.includes(type) && !isManaged) {
     return createErrorResponse(ctx,
       'Insufficient privileges to create this type of discussion', ErrorCode.Forbidden,
     )
