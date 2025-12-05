@@ -437,7 +437,7 @@ export async function exportSolutions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-async function findContestDiscussions (ctx: Context) {
+export async function findContestDiscussions (ctx: Context) {
   const contest = await loadContest(ctx)
   const query = DiscussionListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {

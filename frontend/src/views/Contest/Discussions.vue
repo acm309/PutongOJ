@@ -6,7 +6,6 @@ import type {
 import { DiscussionListQuerySchema } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import Menu from 'primevue/menu'
 import Paginator from 'primevue/paginator'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -14,6 +13,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { findContestDiscussions } from '@/api/contest'
 import DiscussionCreateDialog from '@/components/DiscussionCreateDialog.vue'
 import DiscussionDataView from '@/components/DiscussionDataView.vue'
+import SortingMenu from '@/components/SortingMenu.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
@@ -25,7 +25,13 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const { contestId, problemOptions, problemLabels, problemMap } = storeToRefs(useContestStore())
+const {
+  contest,
+  contestId,
+  problemOptions,
+  problemLabels,
+  problemMap,
+} = storeToRefs(useContestStore())
 const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as DiscussionListQuery)
 const docs = ref([] as DiscussionListQueryResult['docs'])
@@ -36,38 +42,27 @@ const createDialog = ref(false)
 const hasFilter = computed(() => {
   return Boolean(query.value.author)
 })
+const isManageable = $computed(() => {
+  if (contest.value.cid !== Number(route.params.cid)) {
+    return false
+  }
+  if (isAdmin || contest.value.course?.role.manageContest) {
+    return true
+  }
+  return false
+})
 
-const sortingMenu = ref<any>(null)
-const sortingMenuItems = computed(() => [ {
-  label: t('ptoj.sort_by'),
-  items: [ {
-    label: t('ptoj.last_comment_at'),
-    checked: query.value.sortBy === 'lastCommentAt',
-    command: () => onSort({ sortField: 'lastCommentAt' }),
-  }, {
-    label: t('ptoj.total_comments'),
-    checked: query.value.sortBy === 'comments',
-    command: () => onSort({ sortField: 'comments' }),
-  }, {
-    label: t('ptoj.created_at'),
-    checked: query.value.sortBy === 'createdAt',
-    command: () => onSort({ sortField: 'createdAt' }),
-  } ],
+const sortingOptions = computed(() => [ {
+  label: t('ptoj.last_comment_at'),
+  value: 'lastCommentAt',
+  isTimeBased: true,
 }, {
-  separator: true,
+  label: t('ptoj.total_comments'),
+  value: 'comments',
 }, {
-  label: t('ptoj.sort_order'),
-  items: [ {
-    label: query.value.sortBy === 'comments' ? t('ptoj.descending') : t('ptoj.newest'),
-    icon: 'pi pi-sort-amount-down',
-    checked: query.value.sort === -1,
-    command: () => onSort({ sortOrder: -1 }),
-  }, {
-    label: query.value.sortBy === 'comments' ? t('ptoj.ascending') : t('ptoj.oldest'),
-    icon: 'pi pi-sort-amount-up-alt',
-    checked: query.value.sort === 1,
-    command: () => onSort({ sortOrder: 1 }),
-  } ],
+  label: t('ptoj.created_at'),
+  value: 'createdAt',
+  isTimeBased: true,
 } ])
 
 async function fetch () {
@@ -93,12 +88,12 @@ async function fetch () {
   total.value = resp.data.total
 }
 
-function onSort (event: { sortField?: string, sortOrder?: number }) {
+function onSort (event: { field?: string, order?: number }) {
   router.replace({
     query: {
       ...route.query,
-      sortBy: event.sortField || query.value.sortBy,
-      sort: event.sortOrder || query.value.sort,
+      sortBy: event.field || query.value.sortBy,
+      sort: event.order || query.value.sort,
       page: undefined,
     },
   })
@@ -152,10 +147,7 @@ onRouteQueryUpdate(fetch)
 
         <div class="flex gap-2 items-center justify-end lg:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button
-            type="button" severity="secondary" outlined
-            :icon="query.sort === 1 ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'" @click="sortingMenu?.toggle"
-          />
+          <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
           <Button
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
@@ -167,18 +159,6 @@ onRouteQueryUpdate(fetch)
           />
         </div>
       </div>
-
-      <Menu ref="sortingMenu" :model="sortingMenuItems" :popup="true">
-        <template #item="{ item, props }">
-          <a class="flex items-center justify-between" v-bind="props.action">
-            <span class="flex gap-2 items-center">
-              <span v-if="item.icon" :class="item.icon" />
-              <span>{{ item.label }}</span>
-            </span>
-            <span v-if="item.checked" class="pi pi-check" />
-          </a>
-        </template>
-      </Menu>
     </div>
 
     <template v-if="loading || docs.length === 0">
@@ -189,8 +169,8 @@ onRouteQueryUpdate(fetch)
     </template>
 
     <DiscussionDataView
-      v-else :value="docs" :query="query" :contest-id="contestId"
-      :problem-labels="problemLabels" :problem-map="problemMap"
+      v-else :value="docs" :query="query" :contest-id="contestId" :problem-labels="problemLabels"
+      :problem-map="problemMap"
     />
 
     <Paginator
@@ -202,7 +182,7 @@ onRouteQueryUpdate(fetch)
 
     <DiscussionCreateDialog
       v-model:visible="createDialog" :contest="contestId" :problem-options="problemOptions"
-      :is-managed="isAdmin"
+      :is-managed="isManageable"
     />
   </div>
 </template>
