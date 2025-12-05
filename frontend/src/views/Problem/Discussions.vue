@@ -10,11 +10,12 @@ import Paginator from 'primevue/paginator'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { findDiscussions } from '@/api/discussion'
+import { findProblemDiscussions } from '@/api/problem'
 import DiscussionCreateDialog from '@/components/DiscussionCreateDialog.vue'
 import DiscussionDataView from '@/components/DiscussionDataView.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import UserFilter from '@/components/UserFilter.vue'
+import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -24,6 +25,7 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
+const { problem } = storeToRefs(useProblemStore())
 const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as DiscussionListQuery)
 const docs = ref([] as DiscussionListQueryResult['docs'])
@@ -58,7 +60,7 @@ async function fetch () {
   }
 
   loading.value = true
-  const resp = await findDiscussions(query.value)
+  const resp = await findProblemDiscussions(problem.value.pid, query.value)
   loading.value = false
   if (!resp.success) {
     message.error(t('ptoj.failed_fetch_discussions'), resp.message)
@@ -120,22 +122,15 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="max-w-4xl p-0">
+  <div class="-mt-6 lg:-mt-11 p-0">
     <div class="p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="pi pi-comments text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.discussions') }}
-        </h1>
-      </div>
-
-      <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <UserFilter
           v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')" force-selection
           @select="onSearch"
         />
 
-        <div class="flex gap-2 items-center justify-end">
+        <div class="flex gap-2 items-center justify-end lg:col-span-2">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
           <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
           <Button
@@ -158,7 +153,7 @@ onRouteQueryUpdate(fetch)
       </div>
     </template>
 
-    <DiscussionDataView v-else :value="docs" :query="query" />
+    <DiscussionDataView v-else :value="docs" :query="query" :hide-problem-tag="true" />
 
     <Paginator
       class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
@@ -167,6 +162,6 @@ onRouteQueryUpdate(fetch)
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
 
-    <DiscussionCreateDialog v-model:visible="createDialog" :is-managed="isAdmin" />
+    <DiscussionCreateDialog v-model:visible="createDialog" :problem="problem.pid" :is-managed="isAdmin" />
   </div>
 </template>

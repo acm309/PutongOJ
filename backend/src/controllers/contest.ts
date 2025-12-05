@@ -1,12 +1,15 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
 import type { ContestDocumentPopulated } from '../models/Contest'
+import type { DiscussionQueryFilters } from '../services/discussion'
 import type { SessionProfile } from '../types'
 import {
   ContestSolutionListExportQueryResultSchema,
   ContestSolutionListExportQuerySchema,
   ContestSolutionListQueryResultSchema,
   ContestSolutionListQuerySchema,
+  DiscussionListQueryResultSchema,
+  DiscussionListQuerySchema,
   ErrorCode,
 } from '@putongoj/shared'
 import { pick } from 'lodash'
@@ -16,7 +19,9 @@ import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import contestService from '../services/contest'
+import discussionService from '../services/discussion'
 import solutionService from '../services/solution'
+import { getUser } from '../services/user'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -27,6 +32,7 @@ import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadCourse } from './course'
+import { publicDiscussionTypes } from './discussion'
 
 const { encrypt, judge } = constants
 
@@ -431,6 +437,54 @@ export async function exportSolutions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function findContestDiscussions (ctx: Context) {
+  const contest = await loadContest(ctx)
+  const query = DiscussionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const profile = await loadProfile(ctx)
+  const { page, pageSize, sort, sortBy, type, author } = query.data
+
+  const queryFilter: DiscussionQueryFilters = {}
+  if (type) {
+    queryFilter.type = type
+  }
+  if (author) {
+    const authorUser = await getUser(author)
+    if (authorUser) {
+      queryFilter.author = authorUser._id
+    }
+  }
+
+  const filters: DiscussionQueryFilters[] = [
+    { contest: contest._id }, queryFilter,
+  ]
+  if (!profile.isAdmin) {
+    filters.push({
+      $or: [
+        { type: { $in: publicDiscussionTypes } },
+        { author: profile._id },
+      ],
+    })
+  }
+
+  const discussions = await discussionService.findDiscussions(
+    { page, pageSize, sort, sortBy },
+    { $and: filters },
+    [ 'discussionId', 'author', 'problem', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
+    { author: [ 'uid', 'avatar' ], problem: [ 'pid' ] },
+  )
+  const result = DiscussionListQueryResultSchema.encode({
+    ...discussions,
+    docs: discussions.docs.map(discussion => ({
+      ...discussion, contest: { cid: contest.cid },
+    })),
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
 const contestController = {
   loadContest,
   findContests,
@@ -443,6 +497,7 @@ const contestController = {
   managePermRequire,
   findSolutions,
   exportSolutions,
+  findContestDiscussions,
 } as const
 
 export default contestController

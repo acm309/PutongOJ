@@ -45,4 +45,9 @@ contestRouter.get('/:cid/solutions/export',
   contestController.exportSolutions,
 )
 
+contestRouter.get('/:cid/discussions',
+  authnMiddleware.loginRequire,
+  contestController.findContestDiscussions,
+)
+
 export default contestRouter
