@@ -34,7 +34,7 @@ const { locale } = useI18n()
             v-if="!hideProblemTag && doc.contest && !props.contestId"
             :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }"
           >
-            <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer hover:" icon="pi pi-trophy" />
+            <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
           </router-link>
           <router-link
             v-if="props.contestId && doc.problem"
