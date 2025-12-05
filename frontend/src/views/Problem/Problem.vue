@@ -62,6 +62,7 @@ onMounted(init)
       <TabPane :label="t('oj.submit')" name="problemSubmit" />
       <TabPane v-if="isLogined" :label="t('oj.my_submissions')" name="MySubmissions" />
       <TabPane :label="t('oj.statistics')" name="problemStatistics" />
+      <TabPane :label="t('ptoj.discussions')" name="ProblemDiscussions" />
       <TabPane :label="t('ptoj.all_solutions')" name="ProblemSolutions" />
       <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
       <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />

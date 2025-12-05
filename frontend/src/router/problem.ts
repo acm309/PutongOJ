@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import ProblemDiscussions from '@/views/Problem/Discussions.vue'
 import Problem from '@/views/Problem/Problem.vue'
 import ProblemInfo from '@/views/Problem/ProblemInfo.vue'
 import ProblemSubmit from '@/views/Problem/ProblemSubmit.vue'
@@ -49,6 +50,12 @@ const problemRoutes: Array<RouteRecordRaw> = [
         name: 'ProblemSolutions',
         component: ProblemSolutions,
         meta: { requiresLogin: true },
+      },
+      {
+        path: 'discussions',
+        name: 'ProblemDiscussions',
+        component: ProblemDiscussions,
+        meta: { title: 'Problem Info' },
       },
       {
         path: 'statistics',

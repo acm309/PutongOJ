@@ -13,6 +13,7 @@ const props = defineProps<{
   contestId?: number
   problemMap?: Map<number, number>
   problemLabels?: Map<number, string>
+  hideProblemTag?: boolean
 }>()
 
 const { locale } = useI18n()
@@ -29,7 +30,10 @@ const { locale } = useI18n()
       </router-link>
       <span class="grow pt-px text-nowrap">
         <span class="flex flex-wrap-reverse gap-1 justify-end">
-          <router-link v-if="doc.contest && !props.contestId" :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }">
+          <router-link
+            v-if="!hideProblemTag && doc.contest && !props.contestId"
+            :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }"
+          >
             <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer hover:" icon="pi pi-trophy" />
           </router-link>
           <router-link

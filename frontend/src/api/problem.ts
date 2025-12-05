@@ -1,4 +1,6 @@
 import type {
+  DiscussionListQuery,
+  DiscussionListQueryResult,
   ProblemSolutionListQuery,
   ProblemSolutionListQueryResult,
   ProblemTestcaseCreatePayload,
@@ -19,4 +21,8 @@ export async function createTestcase (problemId: number, payload: ProblemTestcas
 }
 export async function removeTestcase (problemId: number, uuid: string) {
   return instance.delete<ProblemTestcaseListQueryResult>(`/problem/${encodeURIComponent(problemId)}/testcases/${encodeURIComponent(uuid)}`)
+}
+
+export async function findProblemDiscussions (problemId: number, params: DiscussionListQuery) {
+  return instance.get<DiscussionListQueryResult>(`/problem/${encodeURIComponent(problemId)}/discussions`, { params })
 }

@@ -3,22 +3,26 @@ import type { Context } from 'koa'
 import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
+import type { DiscussionQueryFilters } from '../services/discussion'
 import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
-import { ProblemSolutionListQueryResultSchema, ProblemSolutionListQuerySchema } from '@putongoj/shared'
+import { DiscussionListQueryResultSchema, DiscussionListQuerySchema, ProblemSolutionListQueryResultSchema, ProblemSolutionListQuerySchema } from '@putongoj/shared'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import courseService from '../services/course'
+import discussionService from '../services/discussion'
 import problemService from '../services/problem'
 import solutionService from '../services/solution'
 import tagService from '../services/tag'
+import { getUser } from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
 import logger from '../utils/logger'
 import { loadContest } from './contest'
 import { loadCourse } from './course'
+import { publicDiscussionTypes } from './discussion'
 
 const { status, judge } = constants
 
@@ -325,6 +329,55 @@ export async function findSolutions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function findProblemDiscussions (ctx: Context) {
+  const problem = await loadProblem(ctx)
+  const query = DiscussionListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const { profile } = ctx.state
+  const { page, pageSize, sort, sortBy, type, author } = query.data
+
+  const queryFilter: DiscussionQueryFilters = {}
+  if (type) {
+    queryFilter.type = type
+  }
+  if (author) {
+    const authorUser = await getUser(author)
+    if (authorUser) {
+      queryFilter.author = authorUser._id
+    }
+  }
+
+  const filters: DiscussionQueryFilters[] = [
+    { problem: problem._id, contest: null }, queryFilter,
+  ]
+  if (!(profile?.isAdmin)) {
+    const visibilityFilters: DiscussionQueryFilters[] = [ {
+      type: { $in: publicDiscussionTypes },
+    } ]
+    if (profile) {
+      visibilityFilters.push({ author: profile._id })
+    }
+    filters.push({ $or: visibilityFilters })
+  }
+
+  const discussions = await discussionService.findDiscussions(
+    { page, pageSize, sort, sortBy },
+    { $and: filters },
+    [ 'discussionId', 'author', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
+    { author: [ 'uid', 'avatar' ] },
+  )
+  const result = DiscussionListQueryResultSchema.encode({
+    ...discussions,
+    docs: discussions.docs.map(discussion => ({
+      ...discussion, contest: null, problem: { pid: problem.pid },
+    })),
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
 const problemController = {
   loadProblem,
   findProblems,
@@ -335,6 +388,7 @@ const problemController = {
   removeProblem,
   getStatistics,
   findSolutions,
+  findProblemDiscussions,
 } as const
 
 export default problemController

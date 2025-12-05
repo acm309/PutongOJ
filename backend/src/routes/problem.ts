@@ -63,4 +63,8 @@ problemRouter.del('/:pid/testcases/:uuid',
   testcaseController.removeTestcase,
 )
 
+problemRouter.get('/:pid/discussions',
+  problemController.findProblemDiscussions,
+)
+
 export default problemRouter
