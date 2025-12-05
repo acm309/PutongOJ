@@ -251,7 +251,6 @@
   "unexpected_error_occurred": "An unexpected error occurred",
   "unknown_error_occurred": "An unknown error occurred",
   "unpin": "Unpin",
-  "updated_at": "Updated At",
   "user": "User",
   "user_management": "User Management",
   "user_management_cannot_operate_desc": "You do not have permission to operate on this user, their privilege is not lower than yours.",

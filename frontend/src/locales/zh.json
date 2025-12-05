@@ -251,7 +251,6 @@
   "unexpected_error_occurred": "发生了意料之外的错误",
   "unknown_error_occurred": "发生了未知错误",
   "unpin": "取消置顶",
-  "updated_at": "更新时间",
   "user": "用户",
   "user_management": "用户管理",
   "user_management_cannot_operate_desc": "你没有权限操作此用户，该用户的权限不低于你。",
