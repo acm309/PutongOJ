@@ -55,14 +55,14 @@ const canComment = computed(() => {
   if (!discussion.value) return false
   if (!isLogined.value) return false
   if (discussion.value.type === DiscussionType.ArchivedDiscussion) return false
-  if (discussion.value.type === DiscussionType.PublicAnnouncement && !isAdmin.value) return false
+  if (discussion.value.type === DiscussionType.PublicAnnouncement && !discussion.value.isJury) return false
   return true
 })
 
 const commentPlaceholder = computed(() => {
   if (!isLogined.value) return t('ptoj.login_to_comment')
   if (discussion.value?.type === DiscussionType.ArchivedDiscussion) return t('ptoj.cannot_comment_archived_discussion')
-  if (discussion.value?.type === DiscussionType.PublicAnnouncement && !isAdmin.value) return t('ptoj.cannot_comment_announcement')
+  if (discussion.value?.type === DiscussionType.PublicAnnouncement && !discussion.value.isJury) return t('ptoj.cannot_comment_announcement')
   return t('ptoj.enter_your_comment_here')
 })
 

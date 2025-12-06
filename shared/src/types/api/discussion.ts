@@ -68,6 +68,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
     createdAt: CommentModelSchema.shape.createdAt,
     updatedAt: CommentModelSchema.shape.updatedAt,
   })),
+  isJury: z.boolean(),
   createdAt: DiscussionModelSchema.shape.createdAt,
   updatedAt: DiscussionModelSchema.shape.updatedAt,
 })

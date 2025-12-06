@@ -46,7 +46,7 @@ const isManageable = $computed(() => {
   if (contest.value.cid !== Number(route.params.cid)) {
     return false
   }
-  if (isAdmin || contest.value.course?.role.manageContest) {
+  if (isAdmin.value || contest.value.course?.role.manageContest) {
     return true
   }
   return false

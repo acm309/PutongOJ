@@ -43,31 +43,31 @@ export async function loadDiscussion (
   if (!discussion) {
     return null
   }
-  if (publicDiscussionTypes.includes(discussion.type)) {
-    ctx.state.discussion = discussion
-    return discussion
+
+  let isJury: boolean = false
+  if (discussion.contest) {
+    const contest = await loadContest(ctx, discussion.contest.cid)
+    if (contest.course) {
+      const { role } = await loadCourse(ctx, contest.course)
+      if (role.manageContest) {
+        isJury = true
+      }
+    }
   }
 
   const { profile } = ctx.state
   const isAdmin = profile?.isAdmin ?? false
   const isAuthor = discussion.author._id.equals(profile?._id)
   const isProblemOwner = discussion.problem?.owner?.equals(profile?._id) ?? false
-  if (isAuthor || isAdmin || isProblemOwner) {
+  if (isAdmin || isAuthor || isProblemOwner) {
+    isJury = true
+  }
+
+  if (publicDiscussionTypes.includes(discussion.type) || isJury) {
     ctx.state.discussion = discussion
+    ctx.state.isDiscussionJury = isJury
     return discussion
   }
-
-  if (discussion.contest) {
-    const contest = await loadContest(ctx, discussion.contest.cid)
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      if (role.manageContest) {
-        ctx.state.discussion = discussion
-        return discussion
-      }
-    }
-  }
-
   return null
 }
 
@@ -121,12 +121,14 @@ async function getDiscussion (ctx: Context) {
     )
   }
 
-  const { profile } = ctx.state
+  const { profile, isDiscussionJury } = ctx.state
   const comments = await discussionService.getComments(discussion._id, {
     showHidden: profile?.isAdmin ?? false,
     exceptUsers: profile ? [ profile._id ] : [],
   })
-  const result = DiscussionDetailQueryResultSchema.encode({ ...discussion, comments })
+  const result = DiscussionDetailQueryResultSchema.encode({
+    ...discussion, comments, isJury: isDiscussionJury ?? false,
+  })
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -196,14 +198,15 @@ async function createComment (ctx: Context) {
 
   const isAnnouncement = discussion.type === DiscussionType.PublicAnnouncement
   const isArchived = discussion.type === DiscussionType.ArchivedDiscussion
-  const profile = await loadProfile(ctx)
-  const isAdmin = profile?.isAdmin ?? false
-  if (isArchived || (isAnnouncement && !isAdmin)) {
+  const { isDiscussionJury } = ctx.state
+  const isJury = isDiscussionJury ?? false
+  if (isArchived || (isAnnouncement && !isJury)) {
     return createErrorResponse(ctx,
       'Comments are not allowed for this discussion', ErrorCode.Forbidden,
     )
   }
 
+  const profile = await loadProfile(ctx)
   try {
     await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },

@@ -21,6 +21,7 @@ declare module 'koa' {
     tag?: TagDocument
     user?: UserDocument
     discussion?: DiscussionDocument
+    isDiscussionJury?: boolean
   }
 
   interface DefaultContext {
