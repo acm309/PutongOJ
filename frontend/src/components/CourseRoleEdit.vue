@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { CourseRole } from '@backend/types'
 import type { Message } from 'view-ui-plus'
 import type { User } from '@/types'

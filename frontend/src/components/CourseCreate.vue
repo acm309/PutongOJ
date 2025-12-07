@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { Message } from 'view-ui-plus'
 import { Form, FormItem, Input, Modal, Radio, RadioGroup } from 'view-ui-plus'
 import { inject, ref, watch } from 'vue'

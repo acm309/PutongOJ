@@ -1,9 +1,9 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { ProblemEntityItem } from '@backend/types/entity'
 import type { Message } from 'view-ui-plus'
 import debounce from 'lodash.debounce'
 import { Option, Select } from 'view-ui-plus'
-import { computed, inject, ref, watch, withDefaults } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 

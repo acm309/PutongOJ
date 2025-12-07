@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Dialog from 'primevue/dialog'
 import SelectButton from 'primevue/selectbutton'
@@ -50,7 +50,7 @@ onMounted(() => {
   <div class="bg-emphasis flex flex-col font-sans min-h-screen relative text-color">
     <Header />
     <div class="flex-auto lg:pt-4 lg:px-4 md:pt-2 md:px-2 min-h-[512px] mt-[61px]">
-      <router-view
+      <RouterView
         class="bg-(--p-content-background) border border-surface layout-content md:rounded-xl mx-auto shadow-lg"
       />
     </div>

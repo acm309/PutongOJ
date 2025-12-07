@@ -148,7 +148,7 @@ onProfileUpdate(fetch)
         <TabPane v-if="role.manageCourse" :label="t('oj.course_member')" name="courseMembers" />
         <TabPane v-if="role.manageCourse" :label="t('oj.course_setting')" name="courseSettings" />
       </Tabs>
-      <router-view class="course-children" />
+      <RouterView class="course-children" />
       <template #noMatch>
         <Divider class="exception-divider" />
         <Exception

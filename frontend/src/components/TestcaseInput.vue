@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { TestcaseFileType } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Textarea from 'primevue/textarea'

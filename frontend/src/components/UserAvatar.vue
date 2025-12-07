@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import Avatar from 'primevue/avatar'
 import defaultAvatar from '@/assets/logo.jpg'
 

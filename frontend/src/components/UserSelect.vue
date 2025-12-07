@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { UserSuggestQueryResult } from '@putongoj/shared'
 import AutoComplete from 'primevue/autocomplete'
 import IftaLabel from 'primevue/iftalabel'

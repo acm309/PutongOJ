@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { DiscussionListQuery, DiscussionListQueryResult } from '@putongoj/shared'
 import Inplace from 'primevue/inplace'
 import Tag from 'primevue/tag'
@@ -22,21 +22,21 @@ const { locale } = useI18n()
 <template>
   <div v-for="doc in props.value" :key="doc.discussionId" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
     <div class="flex flex-nowrap gap-x-4 gap-y-1 justify-between">
-      <router-link
+      <RouterLink
         class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"
         :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
       >
         {{ doc.title }}
-      </router-link>
+      </RouterLink>
       <span class="grow pt-px text-nowrap">
         <span class="flex flex-wrap-reverse gap-1 justify-end">
-          <router-link
+          <RouterLink
             v-if="!hideProblemTag && doc.contest && !props.contestId"
             :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }"
           >
             <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
-          </router-link>
-          <router-link
+          </RouterLink>
+          <RouterLink
             v-if="props.contestId && doc.problem"
             :to="{ name: 'contestProblem', params: { cid: props.contestId, id: (props.problemMap?.get(doc.problem.pid) || 0) + 1 } }"
           >
@@ -44,23 +44,23 @@ const { locale } = useI18n()
               v-if="doc.problem" :value="props.problemLabels?.get(doc.problem.pid) || doc.problem.pid"
               severity="secondary" class="cursor-pointer" icon="pi pi-flag"
             />
-          </router-link>
-          <router-link v-else-if="doc.problem" :to="{ name: 'problemInfo', params: { pid: doc.problem.pid } }">
+          </RouterLink>
+          <RouterLink v-else-if="doc.problem" :to="{ name: 'problemInfo', params: { pid: doc.problem.pid } }">
             <Tag :value="doc.problem.pid" severity="secondary" class="cursor-pointer" icon="pi pi-flag" />
-          </router-link>
+          </RouterLink>
           <Tag v-if="doc.pinned" class="min-h-[22px]" icon="pi pi-thumbtack" />
           <DiscussionTypeTag :type="doc.type" />
         </span>
       </span>
     </div>
     <div class="flex flex-wrap gap-x-6 gap-y-1 items-end justify-between text-nowrap">
-      <router-link
+      <RouterLink
         class="flex gap-2 hover:text-primary items-center text-muted-color"
         :to="{ name: 'UserProfile', params: { uid: doc.author.uid } }"
       >
         <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatar" />
         {{ doc.author.uid }}
-      </router-link>
+      </RouterLink>
       <div class="flex gap-4 grow justify-end text-muted-color text-sm">
         <span class="flex gap-2">
           <i class="pi pi-comments text-sm" />

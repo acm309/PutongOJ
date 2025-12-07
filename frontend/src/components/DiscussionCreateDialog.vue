@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { DiscussionCreatePayload } from '@putongoj/shared'
 import { DiscussionType } from '@putongoj/shared'
 import Button from 'primevue/button'

@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import VditorMethod from 'vditor/dist/method'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'

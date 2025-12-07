@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { UserProfileQueryResult } from '@putongoj/shared'
 import { UserPrivilege } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
@@ -161,12 +161,12 @@ onRouteParamUpdate(fetch)
                 v-if="user.privilege > UserPrivilege.User" :value="getPrivilegeLabel(user.privilege)"
                 :severity="getPrivilegeSeverity(user.privilege)"
               />
-              <router-link
+              <RouterLink
                 v-for="group in user.groups" :key="group.gid"
                 :to="{ name: 'Ranklist', query: { group: group.gid } }"
               >
                 <Tag :value="group.title" severity="secondary" />
-              </router-link>
+              </RouterLink>
             </div>
           </Fieldset>
 
@@ -200,12 +200,12 @@ onRouteParamUpdate(fetch)
               </div>
             </div>
             <div v-else class="flex flex-wrap justify-evenly">
-              <router-link
+              <RouterLink
                 v-for="problemId in user.solved" :key="problemId"
                 :to="{ name: 'problemInfo', params: { pid: problemId } }"
               >
                 <Button :label="problemId.toString()" variant="link" class="text-sm" />
-              </router-link>
+              </RouterLink>
             </div>
           </Fieldset>
 
@@ -216,12 +216,12 @@ onRouteParamUpdate(fetch)
               </div>
             </div>
             <div v-else class="flex flex-wrap justify-evenly">
-              <router-link
+              <RouterLink
                 v-for="problemId in user.attempted" :key="problemId"
                 :to="{ name: 'problemInfo', params: { pid: problemId } }"
               >
                 <Button :label="problemId.toString()" variant="link" class="text-sm" />
-              </router-link>
+              </RouterLink>
             </div>
           </Fieldset>
         </div>

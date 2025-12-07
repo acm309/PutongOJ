@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { AdminUserListQuery, AdminUserListQueryResult } from '@putongoj/shared'
 import { AdminUserListQuerySchema } from '@putongoj/shared'
 import Button from 'primevue/button'

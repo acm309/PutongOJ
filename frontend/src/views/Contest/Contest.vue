@@ -142,7 +142,7 @@ onProfileUpdate(fetch)
       <TabPane v-if="isManageable" :label="t('oj.edit')" name="contestEdit" />
     </Tabs>
     <!-- 此处 if：为了确保之后的 children 能拿到 contest -->
-    <router-view v-if="contest && contest.cid" class="contest-children" />
+    <RouterView v-if="contest && contest.cid" class="contest-children" />
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>

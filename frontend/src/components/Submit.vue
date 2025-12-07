@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
 import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'

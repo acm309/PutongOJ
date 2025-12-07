@@ -60,7 +60,7 @@ onRouteQueryUpdate(fetch)
       {{ t('oj.news_list') }}
     </div>
     <div v-if="list.length > 0">
-      <router-link
+      <RouterLink
         v-for="item in list" :key="item.nid"
         :to="{ name: 'newsInfo', params: { nid: item.nid } }" class="news-link"
       >
@@ -77,7 +77,7 @@ onRouteQueryUpdate(fetch)
             </Col>
           </Row>
         </Card>
-      </router-link>
+      </RouterLink>
     </div>
     <div v-else class="news-empty">
       <Icon type="ios-planet-outline" class="empty-icon" />

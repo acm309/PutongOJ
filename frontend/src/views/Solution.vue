@@ -132,21 +132,21 @@ onRouteQueryUpdate(fetch)
           <Space class="solution-info" split wrap>
             <span>
               {{ t('oj.problem_label') }}
-              <router-link v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
+              <RouterLink v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
                 {{ solution.pid }}
-              </router-link>
+              </RouterLink>
             </span>
             <span>
               {{ t('oj.author_label') }}
-              <router-link v-if="solution.uid" :to="{ name: 'UserProfile', params: { uid: solution.uid } }">
+              <RouterLink v-if="solution.uid" :to="{ name: 'UserProfile', params: { uid: solution.uid } }">
                 {{ solution.uid }}
-              </router-link>
+              </RouterLink>
             </span>
             <span v-if="solution.mid > 0">
               {{ t('oj.contest_label') }}
-              <router-link :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
+              <RouterLink :to="{ name: 'contestOverview', params: { cid: solution.mid } }">
                 {{ solution.mid }}
-              </router-link>
+              </RouterLink>
             </span>
           </Space>
           <Space class="solution-info" split wrap>
@@ -250,18 +250,18 @@ onRouteQueryUpdate(fetch)
         <Space split wrap>
           <span>
             {{ t('oj.similar_to') }}
-            <router-link :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
+            <RouterLink :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
               {{ solution.simSolution.sid }}
-            </router-link>
+            </RouterLink>
           </span>
           <span>
             {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
           </span>
           <span>
             Author:
-            <router-link :to="{ name: 'UserProfile', params: { uid: solution.simSolution.uid } }">
+            <RouterLink :to="{ name: 'UserProfile', params: { uid: solution.simSolution.uid } }">
               {{ solution.simSolution.uid }}
-            </router-link>
+            </RouterLink>
           </span>
           <span>{{ timePretty(solution.simSolution.create) }}</span>
         </Space>

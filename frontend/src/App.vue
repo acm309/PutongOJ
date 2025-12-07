@@ -19,7 +19,7 @@ export default {
 }
 </script>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 const route = useRoute()
 const message = useMessage()
 const { t } = useI18n()

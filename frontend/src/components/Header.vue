@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
@@ -163,7 +163,7 @@ const profileItems = computed(() => [
     class="border border-surface border-t-0 border-x-0 fixed h-[62px] left-0 lg:px-10 md:px-8 mx-auto px-6 py-2 right-0 rounded-none shadow-lg top-0 z-50"
   >
     <template #item="{ item, props, hasSubmenu }">
-      <router-link v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
+      <RouterLink v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
         <a
           :href="href" v-bind="props.action" :class="{ 'text-primary font-semibold': currentRoute === item.route }"
           @click="navigate"
@@ -171,7 +171,7 @@ const profileItems = computed(() => [
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
         </a>
-      </router-link>
+      </RouterLink>
       <a v-else :href="item.url" :target="item.target" v-bind="props.action">
         <span :class="item.icon" />
         <span>{{ item.label }}</span>

@@ -55,11 +55,11 @@ const cid = $computed(() => Number.parseInt(route.params.cid || 1))
               {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
             </td>
             <td class="problem-title">
-              <router-link v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
+              <RouterLink v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
                 <Button type="text" class="table-button">
                   {{ item.title }}
                 </Button>
-              </router-link>
+              </RouterLink>
               <span v-else>{{ t('oj.problem_invalid') }}</span>
             </td>
             <td class="problem-ratio">

@@ -67,7 +67,7 @@ onMounted(init)
       <TabPane v-if="isEditable" :label="t('oj.edit')" name="problemEdit" />
       <TabPane v-if="isEditable" :label="t('oj.test_data')" name="testcase" />
     </Tabs>
-    <router-view v-if="isLoaded" class="problem-children" />
+    <RouterView v-if="isLoaded" class="problem-children" />
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>

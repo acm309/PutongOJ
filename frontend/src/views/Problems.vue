@@ -161,11 +161,11 @@ onProfileUpdate(fetch)
               {{ item.pid }}
             </td>
             <td class="problem-title">
-              <router-link :to="{ name: 'problemInfo', params: { pid: item.pid } }">
+              <RouterLink :to="{ name: 'problemInfo', params: { pid: item.pid } }">
                 <Button type="text" class="table-button">
                   {{ item.title }}
                 </Button>
-              </router-link>
+              </RouterLink>
             </td>
             <td class="problem-tags">
               <template v-for="(tag, tagIdx) in item.tags" :key="tagIdx">
@@ -180,12 +180,12 @@ onProfileUpdate(fetch)
             <td class="problem-ratio">
               <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
               (
-              <router-link :to="{ name: 'ProblemSolutions', params: { pid: item.pid }, query: { judge: judge.Accepted } }">
+              <RouterLink :to="{ name: 'ProblemSolutions', params: { pid: item.pid }, query: { judge: judge.Accepted } }">
                 {{ item.solve }}
-              </router-link> /
-              <router-link :to="{ name: 'ProblemSolutions', params: { pid: item.pid } }">
+              </RouterLink> /
+              <RouterLink :to="{ name: 'ProblemSolutions', params: { pid: item.pid } }">
                 {{ item.submit }}
-              </router-link>
+              </RouterLink>
               )
             </td>
             <td v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="problem-visible">

@@ -142,10 +142,10 @@ onBeforeUnmount(clearAutoRefresh)
             </th>
             <th v-for="(item, index) in overview" :key="index" class="table-problem">
               <Poptip trigger="hover" placement="bottom">
-                <router-link :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
+                <RouterLink :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
                   <span class="cell-pid">{{ contestLabeling(index + 1, contest.option?.labelingStyle) }}</span>
                   <span class="cell-solve">{{ item.solve }}</span>
-                </router-link>
+                </RouterLink>
                 <template #content>
                   {{ item.title }}
                 </template>
@@ -165,9 +165,9 @@ onBeforeUnmount(clearAutoRefresh)
               {{ item.rank }}
             </td>
             <td class="table-uid">
-              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
+              <RouterLink :to="{ name: 'UserProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
-              </router-link>
+              </RouterLink>
             </td>
             <td class="table-nick">
               {{ item.nick }}

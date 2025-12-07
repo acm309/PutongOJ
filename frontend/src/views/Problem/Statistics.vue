@@ -167,17 +167,17 @@ onRouteQueryUpdate(getStatistics)
           </tr>
           <tr v-for="item in list" :key="item.sid">
             <td v-if="isAdmin || (profile && profile.uid === item.uid)" class="statis-sid">
-              <router-link :to="{ name: 'solution', params: { sid: item.sid } }">
+              <RouterLink :to="{ name: 'solution', params: { sid: item.sid } }">
                 {{ item.sid }}
-              </router-link>
+              </RouterLink>
             </td>
             <td v-else class="statis-sid">
               {{ item.sid }}
             </td>
             <td class="statis-username">
-              <router-link :to="{ name: 'UserProfile', params: { uid: item.uid } }">
+              <RouterLink :to="{ name: 'UserProfile', params: { uid: item.uid } }">
                 {{ item.uid }}
-              </router-link>
+              </RouterLink>
             </td>
             <td class="statis-time">
               {{ item.time }}

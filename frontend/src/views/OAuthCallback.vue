@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { OAuthProvider } from '@putongoj/shared'
 import type { Message } from 'view-ui-plus'
 import { Alert } from 'view-ui-plus'

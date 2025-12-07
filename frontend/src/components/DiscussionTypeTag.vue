@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { DiscussionType } from '@putongoj/shared'
 import Tag from 'primevue/tag'
 import { computed } from 'vue'

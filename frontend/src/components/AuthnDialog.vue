@@ -1,9 +1,5 @@
-<script lang="ts" setup>
-import type {
-  ErrorEnveloped,
-  OAuthAction,
-  OAuthProvider,
-} from '@putongoj/shared'
+<script setup lang="ts">
+import type { ErrorEnveloped, OAuthAction, OAuthProvider } from '@putongoj/shared'
 import { ErrorCode, passwordRegex } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'

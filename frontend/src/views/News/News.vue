@@ -38,7 +38,7 @@ onBeforeMount(async () => {
       <TabPane :label="t('oj.overview')" name="newsInfo" />
       <TabPane :label="t('oj.edit')" name="newsEdit" />
     </Tabs>
-    <router-view class="news-children" />
+    <RouterView class="news-children" />
     <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>

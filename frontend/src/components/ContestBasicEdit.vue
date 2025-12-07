@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import type { Message } from 'view-ui-plus'
 import { encrypt } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
