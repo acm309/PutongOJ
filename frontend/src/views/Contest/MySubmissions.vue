@@ -15,14 +15,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
 import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import { useContestStore } from '@/store/modules/contest'
-import {
-  judgeStatusOptions,
-  languageOptions,
-} from '@/utils/constant'
+import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import {
-  getJudgeStatusClassname,
-} from '@/utils/formate'
+import { getJudgeStatusClassname } from '@/utils/formate'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -144,7 +139,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="-mt-5 p-0">
+  <div class="p-0">
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select

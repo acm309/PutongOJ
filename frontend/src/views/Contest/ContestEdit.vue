@@ -143,7 +143,7 @@ onMounted(async () => {
 
 <style lang="stylus" scoped>
 .conadd-wrap
-  padding-top 20px
+  padding-top 40px
 .divider
   margin 40px 0
 .contest-form-item

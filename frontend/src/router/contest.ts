@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
-
 import Contest from '@/views/Contest/Contest.vue'
+import ContestHeader from '@/views/Contest/ContestHeader.vue'
 import ContestOverview from '@/views/Contest/ContestOverview.vue'
 import ContestProblem from '@/views/Contest/ContestProblem.vue'
 import ContestRanklist from '@/views/Contest/ContestRanklist.vue'
@@ -28,7 +28,10 @@ const contestRoutes: Array<RouteRecordRaw> = [
   },
   {
     path: '/contests/:cid',
-    component: Contest,
+    components: {
+      default: Contest,
+      extraHeader: ContestHeader,
+    },
     meta: { requiresLogin: true },
     children: [
       {

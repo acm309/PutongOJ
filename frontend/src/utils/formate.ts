@@ -20,9 +20,13 @@ export function timePretty (
   return format(toDate(time), formatStr)
 }
 
-export function formatRelativeTime (date: string | number | Date, locale: string): string {
+export function formatRelativeTime (
+  date: string | number | Date,
+  locale: string,
+  addSuffix: boolean = true,
+) {
   return formatDistanceToNow(date, {
-    addSuffix: true,
+    addSuffix,
     locale: locale === 'zh-CN' ? zhCN : enUS,
   })
 }

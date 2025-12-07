@@ -66,7 +66,6 @@ async function submit () {
 
 <style lang="stylus" scoped>
 .contest-children
-  margin-top -16px
   padding 40px 0
   position relative
 

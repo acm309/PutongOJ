@@ -1,27 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { Button } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
-import { contestLabeling, formate, timePretty } from '@/utils/formate'
+import { contestLabeling, formate } from '@/utils/formate'
 
 const { t } = useI18n()
 const contestStore = useContestStore()
-const { contest, overview, solved } = $(storeToRefs(contestStore))
+const { contest, overview, solved } = storeToRefs(contestStore)
 
 const route = useRoute()
-const cid = $computed(() => Number.parseInt(route.params.cid || 1))
+const cid = computed(() => Number.parseInt(route.params.cid as string))
 </script>
 
 <template>
   <div class="contest-children problem-list-wrap">
-    <div class="problem-list-header">
-      <h2 class="font-bold text-2xl">
-        {{ contest.title }}
-      </h2>
-      <h4>Start Time:&nbsp;&nbsp;{{ timePretty(contest.start) }}</h4>
-      <h4>End Time:&nbsp;&nbsp;{{ timePretty(contest.end) }}</h4>
-    </div>
     <div class="problem-table-container">
       <table class="problem-table">
         <thead>
@@ -87,24 +82,16 @@ h4
 @import '../../styles/common'
 
 .contest-children
-  margin-top -16px !important
-  padding-top 0
   position relative
 
 .problem-list-wrap
   width 100%
   margin 0 auto
-  padding 40px 0
-.problem-list-header
-  padding 0 40px
-  margin-bottom 25px
+  padding 5px 0 20px
 
 @media screen and (max-width: 1024px)
   .problem-list-wrap
     padding 20px 0
-  .problem-list-header
-    padding 0 20px
-    margin-bottom 5px
   .problem-status
     padding-left 20px
 

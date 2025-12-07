@@ -137,7 +137,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="-mt-5 p-0">
+  <div class="p-0">
     <div class="p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <UserFilter

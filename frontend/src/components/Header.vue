@@ -18,6 +18,12 @@ const message = useMessage()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 
+const hasExtraHeader = computed(() => {
+  return route.matched.some(record =>
+    record.components && record.components.extraHeader,
+  )
+})
+
 const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
@@ -160,7 +166,8 @@ const profileItems = computed(() => [
 <template>
   <Menubar
     :model="menuItems"
-    class="border border-surface border-t-0 border-x-0 fixed h-[62px] left-0 lg:px-10 md:px-8 mx-auto px-6 py-2 right-0 rounded-none shadow-lg top-0 z-50"
+    class="border border-surface border-t-0 border-x-0 h-[62px] lg:px-10 md:px-8 mx-auto px-6 py-2 rounded-none shadow-lg w-full z-50"
+    :class="{ 'sticky top-0': !hasExtraHeader }"
   >
     <template #item="{ item, props, hasSubmenu }">
       <RouterLink v-if="item.route" v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
