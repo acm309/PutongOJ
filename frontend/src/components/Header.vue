@@ -64,17 +64,13 @@ const menuItems = computed(() => {
     icon: 'pi pi-trophy',
     route: 'contestList',
   }, {
-    label: t('oj.more'),
-    icon: 'pi pi-ellipsis-h',
-    items: [ {
-      label: t('oj.discussion_list'),
-      icon: 'pi pi-comments',
-      route: 'Discussions',
-    }, {
-      label: t('oj.faq'),
-      icon: 'pi pi-question-circle',
-      route: 'faq',
-    } ],
+    label: t('oj.discussion_list'),
+    icon: 'pi pi-comments',
+    route: 'Discussions',
+  }, {
+    label: t('oj.faq'),
+    icon: 'pi pi-question-circle',
+    route: 'faq',
   })
 
   if (isAdmin.value) {
