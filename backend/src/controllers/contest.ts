@@ -3,6 +3,8 @@ import type { Types } from 'mongoose'
 import type { ContestDocumentPopulated } from '../models/Contest'
 import type { DiscussionQueryFilters } from '../services/discussion'
 import type { SessionProfile } from '../types'
+import { Buffer } from 'node:buffer'
+import { md5 } from '@noble/hashes/legacy.js'
 import {
   ContestSolutionListExportQueryResultSchema,
   ContestSolutionListExportQuerySchema,
@@ -138,16 +140,28 @@ const getContest = async (ctx: Context) => {
   const problemList = contest.list
   const totalProblems = problemList.length
 
-  const overview = await Promise.all(problemList.map(async (pid) => {
-    const problem = await Problem.findOne({ pid }).lean().exec()
-    if (!problem) { return { pid, invalid: true } }
-    const { title } = problem
-    const [ { length: submit }, { length: solve } ] = await Promise.all([
-      Solution.distinct('uid', { pid, mid: cid }).lean().exec(),
-      Solution.distinct('uid', { pid, mid: cid, judge: judge.Accepted }).lean().exec(),
-    ])
-    return { pid, title, solve, submit }
-  }))
+  const problemListStrArr = Uint8Array.from(Buffer.from(problemList.join(',')))
+  const problemListHash = Buffer.from(md5(problemListStrArr)).toString('hex')
+
+  const cacheKey = `contest:overview:${cid}:${problemListHash}`
+  const cache = await redis.get(cacheKey)
+  let overview = null
+  if (cache) {
+    overview = JSON.parse(cache)
+  } else {
+    overview = await Promise.all(problemList.map(async (pid) => {
+      const problem = await Problem.findOne({ pid }).lean().exec()
+      if (!problem) { return { pid, invalid: true } }
+      const { title } = problem
+      const [ { length: submit }, { length: solve } ] = await Promise.all([
+        Solution.distinct('uid', { pid, mid: cid }).lean().exec(),
+        Solution.distinct('uid', { pid, mid: cid, judge: judge.Accepted }).lean().exec(),
+      ])
+      return { pid, title, solve, submit }
+    }))
+    await redis.set(cacheKey, JSON.stringify(overview), 'EX', 10)
+  }
+
   const solved = profile
     ? await Solution
         .find({
