@@ -121,7 +121,7 @@ function jumpToCourse () {
       </div>
     </div>
   </div>
-  <div class="bg-(--p-content-background) shadow-lg sticky top-6 z-10">
+  <div class="bg-(--p-content-background) border-b border-surface shadow-lg sticky top-6 z-10">
     <Tabs :value="currentView" class="-mb-px max-w-full mx-auto w-fit">
       <TabList :pt="{ prevButton: 'hidden', nextButton: 'hidden' }">
         <RouterLink v-for="tab in tabItems" :key="tab.label" :to="{ name: tab.value, params: tab.params }">
