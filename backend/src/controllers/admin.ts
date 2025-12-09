@@ -254,7 +254,7 @@ export async function createGroup (ctx: Context) {
     const group = await groupService.createGroup(payload.data.name)
     const result = AdminGroupDetailQueryResultSchema.encode(group)
     const profile = await loadProfile(ctx)
-    logger.info(`Admin created group <Group:${group.gid}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    logger.info(`Admin created group <Group:${group.groupId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
