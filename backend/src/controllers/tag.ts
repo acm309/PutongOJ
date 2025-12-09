@@ -57,7 +57,7 @@ export async function createTag (ctx: Context) {
     const tag = await tagService.createTag(
       pick(opt, [ 'name', 'color' ]),
     )
-    logger.info(`Tag <${tag.tagId}> is created by user <${profile.uid}>`)
+    logger.info(`Tag <Tag:${tag.tagId}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     const response: Pick<TagEntity, 'tagId'>
       = pick(tag, [ 'tagId' ])
     ctx.body = response
@@ -79,7 +79,7 @@ export async function updateTag (ctx: Context) {
     if (!tag) {
       return ctx.throw(...ERR_NOT_FOUND)
     }
-    logger.info(`Tag <${tag.tagId}> is updated by user <${profile.uid}>`)
+    logger.info(`Tag <Tag:${tag.tagId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     const response: { success: boolean } = { success: true }
     ctx.body = response
   } catch (e: any) {
@@ -98,7 +98,7 @@ export async function removeTag (ctx: Context) {
     }
     const response: { success: boolean } = { success: true }
     ctx.body = response
-    logger.info(`Tag <${tag.tagId}> is deleted by user <${profile.uid}>`)
+    logger.info(`Tag <Tag:${tag.tagId}> deleted by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     ctx.throw(500, e.message)
   }

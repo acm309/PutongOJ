@@ -66,7 +66,7 @@ const create = async (ctx: Context) => {
 
   try {
     await news.save()
-    logger.info(`News <${news.nid}> is created by <${uid}>`)
+    logger.info(`News <News:${news.nid}> created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -87,7 +87,7 @@ const update = async (ctx: Context) => {
   })
   try {
     await news.save()
-    logger.info(`News <${news.nid}> is updated by <${uid}>`)
+    logger.info(`News <News:${news.nid}> updated by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -104,7 +104,7 @@ const del = async (ctx: Context) => {
 
   try {
     await News.deleteOne({ nid }).exec()
-    logger.info(`News <${nid}> is deleted by <${uid}>`)
+    logger.info(`News <News:${nid}> deleted by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }

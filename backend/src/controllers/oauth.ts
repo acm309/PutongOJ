@@ -90,7 +90,7 @@ export async function handleOAuthCallback (ctx: Context) {
       )
     }
     user = connectedUser
-    logger.info(`User <${user.uid}> login via ${provider} OAuth successfully [${requestId}]`)
+    logger.info(`User <User:${user.uid}> logged in via ${provider} OAuth [${requestId}] from ${ctx.state.clientIp}`)
     sessionService.setSession(ctx, user)
   } else {
     ctx.throw(400, 'Unknown OAuth action')

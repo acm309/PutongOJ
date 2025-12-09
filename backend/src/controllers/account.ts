@@ -25,6 +25,7 @@ import {
   passwordHash,
   passwordHashBuffer,
 } from '../utils'
+import logger from '../utils/logger'
 
 export async function getProfile (ctx: Context) {
   const profile = await checkSession(ctx)
@@ -75,6 +76,7 @@ export async function userLogin (ctx: Context) {
   const result = AccountProfileQueryResultSchema.encode({
     ...session, ...user.toObject(),
   })
+  logger.info(`User <User:${user.uid}> logged in successfully [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -118,6 +120,7 @@ export async function userRegister (ctx: Context) {
     const result = AccountProfileQueryResultSchema.encode({
       ...session, ...user.toObject(),
     })
+    logger.info(`User <User:${user.uid}> registered successfully [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -125,6 +128,10 @@ export async function userRegister (ctx: Context) {
 }
 
 export async function userLogout (ctx: Context) {
+  const profile = await checkSession(ctx)
+  if (profile) {
+    logger.info(`User <User:${profile.uid}> logged out [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  }
   sessionService.deleteSession(ctx)
   return createEnvelopedResponse(ctx, null)
 }
@@ -145,6 +152,7 @@ export async function updateProfile (ctx: Context) {
     const result = AccountProfileQueryResultSchema.encode({
       ...session, ...updatedUser.toObject(),
     })
+    logger.info(`User <User:${profile.uid}> updated profile [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -184,6 +192,7 @@ export async function updatePassword (ctx: Context) {
   try {
     const updatedUser = await userService.updateUser(profile, { pwd })
     sessionService.setSession(ctx, updatedUser)
+    logger.info(`User <User:${profile.uid}> changed password [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

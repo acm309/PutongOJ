@@ -95,9 +95,9 @@ export async function exportTestcases (ctx: Context) {
     ctx.set('Cache-Control', 'no-cache')
 
     ctx.body = Buffer.from(await zipBlob.arrayBuffer())
-    logger.info(`Testcases for problem <${pid}> exported by user <${profile.id}>`)
+    logger.info(`Testcases for problem <Problem:${pid}> exported by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (error) {
-    logger.error(`Failed to export testcases for problem <${pid}>:`, error)
+    logger.error(`Failed to export testcases for problem <Problem:${pid}>:`, error)
     ctx.throw(500, 'Failed to export testcases')
   }
 }
@@ -139,7 +139,7 @@ export async function createTestcase (ctx: Context) {
     fse.outputFile(path.resolve(testDir, `${id}.out`), testout),
     fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 }),
   ])
-  logger.info(`Testcase <${id}> for problem <${pid}> is created by user <${uid}>`)
+  logger.info(`Testcase <Testcase:${id}> for problem <Problem:${pid}> created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
 
   const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
   return createEnvelopedResponse(ctx, result)
@@ -170,7 +170,7 @@ export async function removeTestcase (ctx: Context) {
 
   remove(meta.testcases, item => item.uuid === uuid)
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
-  logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
+  logger.info(`Testcase <Testcase:${uuid}> for problem <Problem:${pid}> deleted by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
 
   const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
   return createEnvelopedResponse(ctx, result)

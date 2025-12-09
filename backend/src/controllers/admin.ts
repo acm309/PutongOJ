@@ -37,6 +37,7 @@ import {
   isComplexPwd,
   passwordHash,
 } from '../utils'
+import logger from '../utils/logger'
 import { loadUser } from './user'
 
 async function loadEditingUser (ctx: Context) {
@@ -104,6 +105,7 @@ export async function updateUser (ctx: Context) {
       privilege, nick, avatar, motto, school, mail,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
+    logger.info(`Admin updated user <User:${user.uid}> profile by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -135,8 +137,10 @@ export async function updateUserPassword (ctx: Context) {
     return
   }
 
+  const profile = await loadProfile(ctx)
   try {
     await userService.updateUser(user, { pwd })
+    logger.info(`Admin changed password for user <User:${user.uid}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -206,6 +210,8 @@ export async function sendNotificationBroadcast (ctx: Context) {
   try {
     const { title, content } = payload.data
     await websocketService.sendBroadcastNotification(title, content)
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin sent broadcast notification by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -247,6 +253,8 @@ export async function createGroup (ctx: Context) {
   try {
     const group = await groupService.createGroup(payload.data.name)
     const result = AdminGroupDetailQueryResultSchema.encode(group)
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin created group <Group:${group.gid}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -269,6 +277,8 @@ export async function updateGroup (ctx: Context) {
     if (!success) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin updated group <Group:${groupId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -308,6 +318,8 @@ export async function removeGroup (ctx: Context) {
     if (result === null) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin deleted group <Group:${groupId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

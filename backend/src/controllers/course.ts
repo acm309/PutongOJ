@@ -11,6 +11,7 @@ import courseService from '../services/course'
 import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
+import logger from '../utils/logger'
 
 export async function loadCourse (
   ctx: Context,
@@ -115,11 +116,13 @@ const joinCourse = async (ctx: Context) => {
 
 const createCourse = async (ctx: Context) => {
   const opt = ctx.request.body
+  const profile = await loadProfile(ctx)
   try {
     const course = await courseService.createCourse(
       pick(opt, [ 'name', 'description', 'encrypt' ]))
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
+    logger.info(`Course <Course:${course.courseId}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -138,10 +141,12 @@ const updateCourse = async (ctx: Context) => {
 
   const opt = ctx.request.body
   const { courseId } = course
+  const profile = await loadProfile(ctx)
   try {
     const course = await courseService.updateCourse(courseId,
       pick(opt, [ 'name', 'description', 'encrypt', 'joinCode' ]))
     const response: { success: boolean } = { success: !!course }
+    logger.info(`Course <Course:${courseId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {

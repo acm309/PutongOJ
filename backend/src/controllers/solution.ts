@@ -154,7 +154,7 @@ const create = async (ctx: Context) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`Submission <${sid}> is created by user <${uid}>`)
+    logger.info(`Submission <Submission:${sid}> created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
 
     ctx.body = { sid }
   } catch (e: any) {
@@ -245,7 +245,7 @@ async function updateSolution (ctx: Context) {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`Submission <${sid}> is called for rejudge by user <${profile.uid}>`)
+    logger.info(`Submission <Submission:${sid}> rejudged by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     return createErrorResponse(ctx,
       e.message || 'Failed to push the solution to judger queue',

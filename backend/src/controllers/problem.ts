@@ -239,7 +239,7 @@ const createProblem = async (ctx: Context) => {
     if (course) {
       await courseService.addCourseProblem(course.id, problem.id)
     }
-    logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
+    logger.info(`Problem <Problem:${problem.pid}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     const response: Pick<ProblemEntity, 'pid'>
       = pick(problem, [ 'pid' ])
     ctx.body = response
@@ -279,7 +279,7 @@ const updateProblem = async (ctx: Context) => {
           )
         : undefined,
     })
-    logger.info(`Problem <${pid}> is updated by user <${uid}>`)
+    logger.info(`Problem <Problem:${pid}> updated by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }
       = { pid: problem?.pid ?? -1, success: !!problem }
     ctx.body = response
@@ -298,7 +298,7 @@ const removeProblem = async (ctx: Context) => {
 
   try {
     await problemService.removeProblem(Number(pid))
-    logger.info(`Problem <${pid}> is deleted by user <${profile.uid}>`)
+    logger.info(`Problem <Problem:${pid}> deleted by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
