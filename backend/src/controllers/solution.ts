@@ -35,10 +35,8 @@ export async function findOne (ctx: Context) {
     }
     if (solution.mid > 0) {
       const contest = await Contest.findOne({ cid: solution.mid }, 'course').populate('course')
-      console.log(contest)
       if (contest && contest.course) {
         const { role } = await loadCourse(ctx, contest.course)
-        console.log(role)
         if (role.viewSolution) {
           return true
         }
