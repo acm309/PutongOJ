@@ -16,26 +16,6 @@ import './config/db'
 
 const app = new Koa()
 
-// Add audit logger to context
-app.context.auditLog = {
-  info(message: string) {
-    const { requestId, clientIp } = this.state
-    logger.info(`${message} [${requestId}] from ${clientIp}`)
-  },
-  error(message: string, error?: any) {
-    const { requestId, clientIp } = this.state
-    if (error) {
-      logger.error(`${message} [${requestId}] from ${clientIp}`, error)
-    } else {
-      logger.error(`${message} [${requestId}] from ${clientIp}`)
-    }
-  },
-  warn(message: string) {
-    const { requestId, clientIp } = this.state
-    logger.warn(`${message} [${requestId}] from ${clientIp}`)
-  },
-}
-
 // 日志，会在控制台显示请求的方法和路由
 if (env.NODE_ENV === 'development') {
   app.use(koaLogger())
@@ -44,6 +24,28 @@ if (env.NODE_ENV === 'development') {
 app.keys = [ config.secretKey ]
 
 app.use(parseClientIp)
+
+app.use(async (ctx, next) => {
+  ctx.auditLog = {
+    info (message: string) {
+      const { requestId, clientIp } = ctx.state
+      logger.info(`${message} [${requestId}] from ${clientIp}`)
+    },
+    error (message: string, error?: any) {
+      const { requestId, clientIp } = ctx.state
+      if (error) {
+        logger.error(`${message} [${requestId}] from ${clientIp}`, error)
+      } else {
+        logger.error(`${message} [${requestId}] from ${clientIp}`)
+      }
+    },
+    warn (message: string) {
+      const { requestId, clientIp } = ctx.state
+      logger.warn(`${message} [${requestId}] from ${clientIp}`)
+    },
+  }
+  await next()
+})
 
 app.use(session({
   key: 'ptoj.session',
