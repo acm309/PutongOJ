@@ -3,7 +3,6 @@ import config from '../config'
 import { loadProfile } from '../middlewares/authn'
 import News from '../models/News'
 import { only } from '../utils'
-import logger from '../utils/logger'
 
 /**
  * 预加载通知信息
@@ -66,7 +65,7 @@ const create = async (ctx: Context) => {
 
   try {
     await news.save()
-    logger.info(`News <News:${news.nid}> created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`News <News:${news.nid}> created by user <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -87,7 +86,7 @@ const update = async (ctx: Context) => {
   })
   try {
     await news.save()
-    logger.info(`News <News:${news.nid}> updated by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`News <News:${news.nid}> updated by user <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -104,7 +103,7 @@ const del = async (ctx: Context) => {
 
   try {
     await News.deleteOne({ nid }).exec()
-    logger.info(`News <News:${nid}> deleted by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`News <News:${nid}> deleted by user <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }

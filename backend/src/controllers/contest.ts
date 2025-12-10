@@ -32,7 +32,6 @@ import {
 } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
-import logger from '../utils/logger'
 import { loadCourse } from './course'
 import { publicDiscussionTypes } from './discussion'
 
@@ -87,7 +86,7 @@ export async function loadContest (
 
   if (contest.encrypt === encrypt.Public) {
     session.verifyContest.push(contest.cid)
-    logger.info(`User <User:${profile.uid}> entered contest <Contest:${contest.cid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`User <User:${profile.uid}> entered contest <Contest:${contest.cid}>`)
     ctx.state.contest = contest
     return contest
   }
@@ -228,7 +227,7 @@ const createContest = async (ctx: Context) => {
         end: new Date(opt.end).getTime(),
         course: courseDocId,
       }))
-    logger.info(`Contest <Contest:${contest.cid}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Contest <Contest:${contest.cid}> created by user <User:${profile.uid}>`)
     ctx.body = { cid: contest.cid }
   } catch (e: any) {
     ctx.throw(400, e.message)
@@ -271,7 +270,7 @@ const updateContest = async (ctx: Context) => {
         end: opt.end ? new Date(opt.end).getTime() : undefined,
         course: courseDocId,
       }))
-    logger.info(`Contest <Contest:${cid}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Contest <Contest:${cid}> updated by user <User:${profile.uid}>`)
     ctx.body = { cid }
   } catch (e: any) {
     ctx.throw(400, e.message)
@@ -284,7 +283,7 @@ const removeContest = async (ctx: Context) => {
 
   try {
     await contestService.removeContest(Number(cid))
-    logger.info(`Contest <Contest:${cid}> deleted by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Contest <Contest:${cid}> deleted by user <User:${profile.uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -329,8 +328,8 @@ const getRanklist = async (ctx: Context) => {
   const ranklist = await contestService.getRanklist(contest.cid, isFrozen, freezeTime)
   const cacheTime = isEnded ? 30 : 9
   await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
-  logger.info(
-    `Contest <Contest:${contest.cid}> ranklist updated ${isFrozen ? '(frozen) ' : ''}and cached for ${cacheTime}s [${ctx.state.requestId}]`)
+  ctx.auditLog.info(
+    `Contest <Contest:${contest.cid}> ranklist updated ${isFrozen ? '(frozen) ' : ''}and cached for ${cacheTime}s`)
   ctx.body = { ranklist, info }
 }
 
@@ -385,7 +384,7 @@ const verifyParticipant = async (ctx: Context) => {
   }
   if (isVerify) {
     session.verifyContest.push(contest.cid)
-    logger.info(`User <User:${profile.uid}> entered contest <Contest:${contest.cid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`User <User:${profile.uid}> entered contest <Contest:${contest.cid}>`)
   }
   ctx.body = {
     isVerify,

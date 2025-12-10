@@ -5,7 +5,6 @@ import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import tagService from '../services/tag'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
-import logger from '../utils/logger'
 
 export async function loadTag (
   ctx: Context,
@@ -57,7 +56,7 @@ export async function createTag (ctx: Context) {
     const tag = await tagService.createTag(
       pick(opt, [ 'name', 'color' ]),
     )
-    logger.info(`Tag <Tag:${tag.tagId}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> created by user <User:${profile.uid}>`)
     const response: Pick<TagEntity, 'tagId'>
       = pick(tag, [ 'tagId' ])
     ctx.body = response
@@ -79,7 +78,7 @@ export async function updateTag (ctx: Context) {
     if (!tag) {
       return ctx.throw(...ERR_NOT_FOUND)
     }
-    logger.info(`Tag <Tag:${tag.tagId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> updated by user <User:${profile.uid}>`)
     const response: { success: boolean } = { success: true }
     ctx.body = response
   } catch (e: any) {
@@ -98,7 +97,7 @@ export async function removeTag (ctx: Context) {
     }
     const response: { success: boolean } = { success: true }
     ctx.body = response
-    logger.info(`Tag <Tag:${tag.tagId}> deleted by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> deleted by user <User:${profile.uid}>`)
   } catch (e: any) {
     ctx.throw(500, e.message)
   }

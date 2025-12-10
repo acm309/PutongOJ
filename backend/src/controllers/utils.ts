@@ -9,7 +9,6 @@ import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import { createEnvelopedResponse } from '../utils'
-import logger from '../utils/logger'
 
 export interface WebsiteInformation {
   title: string
@@ -39,7 +38,7 @@ const upload = async (ctx: Context) => {
   } catch (err: any) {
     ctx.throw(500, `Failed to save file: ${err.message}`)
   }
-  logger.info(`File <File:${filename}> uploaded by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  ctx.auditLog.info(`File <File:${filename}> uploaded by user <User:${uid}>`)
   ctx.body = {
     url: `/uploads/${filename}`,
   }

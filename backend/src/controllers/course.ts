@@ -11,7 +11,6 @@ import courseService from '../services/course'
 import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
-import logger from '../utils/logger'
 
 export async function loadCourse (
   ctx: Context,
@@ -122,7 +121,7 @@ const createCourse = async (ctx: Context) => {
       pick(opt, [ 'name', 'description', 'encrypt' ]))
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
-    logger.info(`Course <Course:${course.courseId}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Course <Course:${course.courseId}> created by user <User:${profile.uid}>`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -146,7 +145,7 @@ const updateCourse = async (ctx: Context) => {
     const course = await courseService.updateCourse(courseId,
       pick(opt, [ 'name', 'description', 'encrypt', 'joinCode' ]))
     const response: { success: boolean } = { success: !!course }
-    logger.info(`Course <Course:${courseId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Course <Course:${courseId}> updated by user <User:${profile.uid}>`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -232,7 +231,7 @@ const updateCourseMember = async (ctx: Context) => {
     user.id,
     newRole as CourseRole,
   )
-  logger.info(`Course member <User:${userId}> in course <Course:${course.courseId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  ctx.auditLog.info(`Course member <User:${userId}> in course <Course:${course.courseId}> updated by user <User:${profile.uid}>`)
   const response: { success: boolean } = { success: result }
   ctx.body = response
 }
@@ -254,7 +253,7 @@ const removeCourseMember = async (ctx: Context) => {
 
   const result = await courseService.removeCourseMember(course.id, userId)
   const response: { success: boolean } = { success: result }
-  logger.info(`Course member <User:${userId}> in course <Course:${course.courseId}> removed by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  ctx.auditLog.info(`Course member <User:${userId}> in course <Course:${course.courseId}> removed by user <User:${profile.uid}>`)
   ctx.body = response
 }
 
@@ -279,7 +278,7 @@ const addCourseProblems = async (ctx: Context) => {
     added: successCount,
   }
   const profile = await loadProfile(ctx)
-  logger.info(`Added ${successCount}/${problemIds.length} problems to course <Course:${course.courseId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  ctx.auditLog.info(`Added ${successCount}/${problemIds.length} problems to course <Course:${course.courseId}> by user <User:${profile.uid}>`)
   ctx.body = response
 }
 
@@ -316,7 +315,7 @@ const removeCourseProblem = async (ctx: Context) => {
   }
   const result = await courseService.removeCourseProblem(course.id, problem.id)
   const profile = await loadProfile(ctx)
-  logger.info(`Removed problem <Problem:${problem.pid}> from course <Course:${course.courseId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+  ctx.auditLog.info(`Removed problem <Problem:${problem.pid}> from course <Course:${course.courseId}> by user <User:${profile.uid}>`)
   ctx.body = { success: result }
 }
 

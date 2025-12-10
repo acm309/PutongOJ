@@ -18,7 +18,6 @@ import {
   createErrorResponse,
   createZodErrorResponse,
 } from '../utils'
-import logger from '../utils/logger'
 import { loadContest } from './contest'
 import { loadCourse } from './course'
 import { loadProblem } from './problem'
@@ -178,7 +177,7 @@ async function createDiscussion (ctx: Context) {
     const discussion = await discussionService.createDiscussion({
       author, problem, contest, type, title, content,
     })
-    logger.info(`Discussion <Discussion:${discussion.discussionId}> created by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Discussion <Discussion:${discussion.discussionId}> created by user <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { discussionId: discussion.discussionId })
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -213,7 +212,7 @@ async function createComment (ctx: Context) {
     const comment = await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },
     )
-    logger.info(`Comment <Comment:${comment.commentId}> created in Discussion <Discussion:${discussion.discussionId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Comment <Comment:${comment.commentId}> created in Discussion <Discussion:${discussion.discussionId}> by user <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

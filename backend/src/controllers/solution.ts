@@ -11,7 +11,6 @@ import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { judgeResult } from '../utils/constants'
-import logger from '../utils/logger'
 import { loadCourse } from './course'
 
 export async function findOne (ctx: Context) {
@@ -154,7 +153,7 @@ const create = async (ctx: Context) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`Submission <Submission:${sid}> of problem <Problem:${pid}> ${mid > 0 ? `in contest <Contest:${mid}> ` : ''} created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Submission <Submission:${sid}> of problem <Problem:${pid}> ${mid > 0 ? `in contest <Contest:${mid}> ` : ''} created by user <User:${uid}>`)
 
     ctx.body = { sid }
   } catch (e: any) {
@@ -245,7 +244,7 @@ async function updateSolution (ctx: Context) {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`Submission <Submission:${sid}> rejudged by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    ctx.auditLog.info(`Submission <Submission:${sid}> rejudged by user <User:${profile.uid}>`)
   } catch (e: any) {
     return createErrorResponse(ctx,
       e.message || 'Failed to push the solution to judger queue',
