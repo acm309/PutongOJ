@@ -11,7 +11,6 @@ import { loadProfile } from '../middlewares/authn'
 import courseService from '../services/course'
 import { createEnvelopedResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
-import logger from '../utils/logger'
 import { loadProblem } from './problem'
 
 export async function findTestcases (ctx: Context) {
@@ -95,9 +94,9 @@ export async function exportTestcases (ctx: Context) {
     ctx.set('Cache-Control', 'no-cache')
 
     ctx.body = Buffer.from(await zipBlob.arrayBuffer())
-    logger.info(`Testcases for problem <${pid}> exported by user <${profile.id}>`)
+    ctx.auditLog.info(`Testcases for <Problem:${pid}> exported by user <User:${profile.uid}>`)
   } catch (error) {
-    logger.error(`Failed to export testcases for problem <${pid}>:`, error)
+    ctx.auditLog.error(`Failed to export testcases for <Problem:${pid}>:`, error)
     ctx.throw(500, 'Failed to export testcases')
   }
 }
@@ -139,7 +138,7 @@ export async function createTestcase (ctx: Context) {
     fse.outputFile(path.resolve(testDir, `${id}.out`), testout),
     fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 }),
   ])
-  logger.info(`Testcase <${id}> for problem <${pid}> is created by user <${uid}>`)
+  ctx.auditLog.info(`<Testcase:${id}> for <Problem:${pid}> created by <User:${uid}>`)
 
   const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
   return createEnvelopedResponse(ctx, result)
@@ -170,7 +169,7 @@ export async function removeTestcase (ctx: Context) {
 
   remove(meta.testcases, item => item.uuid === uuid)
   await fse.outputJson(path.resolve(testDir, 'meta.json'), meta, { spaces: 2 })
-  logger.info(`Testcase <${uuid}> for problem <${pid}> is deleted by user <${uid}>`)
+  ctx.auditLog.info(`<Testcase:${uuid}> for <Problem:${pid}> removed by <User:${uid}>`)
 
   const result = ProblemTestcaseListQueryResultSchema.parse(meta.testcases)
   return createEnvelopedResponse(ctx, result)

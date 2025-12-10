@@ -19,7 +19,6 @@ import { getUser } from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
-import logger from '../utils/logger'
 import { loadContest } from './contest'
 import { loadCourse } from './course'
 import { publicDiscussionTypes } from './discussion'
@@ -239,7 +238,7 @@ const createProblem = async (ctx: Context) => {
     if (course) {
       await courseService.addCourseProblem(course.id, problem.id)
     }
-    logger.info(`Problem <${problem.pid}> is created by user <${profile.uid}>`)
+    ctx.auditLog.info(`<Problem:${problem.pid}> created by <User:${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
       = pick(problem, [ 'pid' ])
     ctx.body = response
@@ -279,7 +278,7 @@ const updateProblem = async (ctx: Context) => {
           )
         : undefined,
     })
-    logger.info(`Problem <${pid}> is updated by user <${uid}>`)
+    ctx.auditLog.info(`<Problem:${pid}> updated by <User:${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }
       = { pid: problem?.pid ?? -1, success: !!problem }
     ctx.body = response
@@ -298,7 +297,7 @@ const removeProblem = async (ctx: Context) => {
 
   try {
     await problemService.removeProblem(Number(pid))
-    logger.info(`Problem <${pid}> is deleted by user <${profile.uid}>`)
+    ctx.auditLog.info(`<Problem:${pid}> removed by <User:${profile.uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }

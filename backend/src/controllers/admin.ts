@@ -104,6 +104,7 @@ export async function updateUser (ctx: Context) {
       privilege, nick, avatar, motto, school, mail,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
+    ctx.auditLog.info(`<User:${user.uid}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -135,8 +136,10 @@ export async function updateUserPassword (ctx: Context) {
     return
   }
 
+  const profile = await loadProfile(ctx)
   try {
     await userService.updateUser(user, { pwd })
+    ctx.auditLog.info(`<User:${user.uid}> changed password by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -171,6 +174,8 @@ export async function removeUserOAuthConnection (ctx: Context) {
       'No such OAuth connection', ErrorCode.NotFound,
     )
   } else {
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<User:${user.uid}> removed ${provider} OAuth connection by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   }
 }
@@ -206,6 +211,8 @@ export async function sendNotificationBroadcast (ctx: Context) {
   try {
     const { title, content } = payload.data
     await websocketService.sendBroadcastNotification(title, content)
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -247,6 +254,8 @@ export async function createGroup (ctx: Context) {
   try {
     const group = await groupService.createGroup(payload.data.name)
     const result = AdminGroupDetailQueryResultSchema.encode(group)
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Group:${group.groupId}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -269,6 +278,8 @@ export async function updateGroup (ctx: Context) {
     if (!success) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Group:${groupId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -291,6 +302,8 @@ export async function updateGroupMembers (ctx: Context) {
     if (modifiedCount === null) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Group:${groupId}> updated ${modifiedCount} members by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { modifiedCount })
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -308,6 +321,8 @@ export async function removeGroup (ctx: Context) {
     if (result === null) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Group:${groupId}> removed by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -381,6 +396,8 @@ export async function updateDiscussion (ctx: Context) {
     if (!result) {
       return createErrorResponse(ctx, 'Discussion not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Discussion:${discussionId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -416,6 +433,8 @@ export async function updateComment (ctx: Context) {
     if (!result) {
       return createErrorResponse(ctx, 'Comment not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`<Comment:${commentId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

@@ -115,11 +115,13 @@ const joinCourse = async (ctx: Context) => {
 
 const createCourse = async (ctx: Context) => {
   const opt = ctx.request.body
+  const profile = await loadProfile(ctx)
   try {
     const course = await courseService.createCourse(
       pick(opt, [ 'name', 'description', 'encrypt' ]))
     const response: Pick<CourseEntity, 'courseId'>
       = { courseId: course.courseId }
+    ctx.auditLog.info(`<Course:${course.courseId}> created by <User:${profile.uid}>`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -138,10 +140,12 @@ const updateCourse = async (ctx: Context) => {
 
   const opt = ctx.request.body
   const { courseId } = course
+  const profile = await loadProfile(ctx)
   try {
     const course = await courseService.updateCourse(courseId,
       pick(opt, [ 'name', 'description', 'encrypt', 'joinCode' ]))
     const response: { success: boolean } = { success: !!course }
+    ctx.auditLog.info(`<Course:${courseId}> updated by <User:${profile.uid}>`)
     ctx.body = response
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -227,6 +231,7 @@ const updateCourseMember = async (ctx: Context) => {
     user.id,
     newRole as CourseRole,
   )
+  ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> updated by <User:${profile.uid}>`)
   const response: { success: boolean } = { success: result }
   ctx.body = response
 }
@@ -248,6 +253,7 @@ const removeCourseMember = async (ctx: Context) => {
 
   const result = await courseService.removeCourseMember(course.id, userId)
   const response: { success: boolean } = { success: result }
+  ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> removed by <User:${profile.uid}>`)
   ctx.body = response
 }
 
@@ -271,7 +277,8 @@ const addCourseProblems = async (ctx: Context) => {
     success: successCount === problemIds.length,
     added: successCount,
   }
-
+  const profile = await loadProfile(ctx)
+  ctx.auditLog.info(`<Course:${course.courseId}> added ${successCount} problems by <User:${profile.uid}>`)
   ctx.body = response
 }
 
@@ -307,6 +314,8 @@ const removeCourseProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.removeCourseProblem(course.id, problem.id)
+  const profile = await loadProfile(ctx)
+  ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${problemId}> by <User:${profile.uid}>`)
   ctx.body = { success: result }
 }
 

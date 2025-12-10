@@ -177,6 +177,7 @@ async function createDiscussion (ctx: Context) {
     const discussion = await discussionService.createDiscussion({
       author, problem, contest, type, title, content,
     })
+    ctx.auditLog.info(`<Discussion:${discussion.discussionId}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { discussionId: discussion.discussionId })
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -208,9 +209,10 @@ async function createComment (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   try {
-    await discussionService.createComment(
+    const comment = await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },
     )
+    ctx.auditLog.info(`<Comment:${comment.commentId}> created in <Discussion:${discussion.discussionId}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

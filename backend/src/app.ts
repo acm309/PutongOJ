@@ -25,6 +25,28 @@ app.keys = [ config.secretKey ]
 
 app.use(parseClientIp)
 
+app.use(async (ctx, next) => {
+  ctx.auditLog = {
+    info (message: string) {
+      const { requestId, clientIp } = ctx.state
+      logger.info(`${message} [${requestId}] from ${clientIp}`)
+    },
+    error (message: string, error?: any) {
+      const { requestId, clientIp } = ctx.state
+      if (error) {
+        logger.error(`${message} [${requestId}] from ${clientIp}`, error)
+      } else {
+        logger.error(`${message} [${requestId}] from ${clientIp}`)
+      }
+    },
+    warn (message: string) {
+      const { requestId, clientIp } = ctx.state
+      logger.warn(`${message} [${requestId}] from ${clientIp}`)
+    },
+  }
+  await next()
+})
+
 app.use(session({
   key: 'ptoj.session',
   maxAge: config.sessionMaxAge * 1000,
