@@ -232,6 +232,7 @@ const updateCourseMember = async (ctx: Context) => {
     user.id,
     newRole as CourseRole,
   )
+  logger.info(`Course member <User:${userId}> in course <Course:${course.courseId}> updated by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   const response: { success: boolean } = { success: result }
   ctx.body = response
 }
@@ -253,6 +254,7 @@ const removeCourseMember = async (ctx: Context) => {
 
   const result = await courseService.removeCourseMember(course.id, userId)
   const response: { success: boolean } = { success: result }
+  logger.info(`Course member <User:${userId}> in course <Course:${course.courseId}> removed by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   ctx.body = response
 }
 
@@ -276,7 +278,8 @@ const addCourseProblems = async (ctx: Context) => {
     success: successCount === problemIds.length,
     added: successCount,
   }
-
+  const profile = await loadProfile(ctx)
+  logger.info(`Added ${successCount}/${problemIds.length} problems to course <Course:${course.courseId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   ctx.body = response
 }
 
@@ -312,6 +315,8 @@ const removeCourseProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.removeCourseProblem(course.id, problem.id)
+  const profile = await loadProfile(ctx)
+  logger.info(`Removed problem <Problem:${problem.pid}> from course <Course:${course.courseId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
   ctx.body = { success: result }
 }
 

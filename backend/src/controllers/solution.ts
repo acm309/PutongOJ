@@ -154,7 +154,7 @@ const create = async (ctx: Context) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    logger.info(`Submission <Submission:${sid}> created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
+    logger.info(`Submission <Submission:${sid}> of problem <Problem:${pid}> ${mid > 0 ? `in contest <Contest:${mid}> ` : ''} created by user <User:${uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
 
     ctx.body = { sid }
   } catch (e: any) {

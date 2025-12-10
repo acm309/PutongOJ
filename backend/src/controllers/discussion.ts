@@ -210,9 +210,10 @@ async function createComment (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   try {
-    await discussionService.createComment(
+    const comment = await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },
     )
+    logger.info(`Comment <Comment:${comment.commentId}> created in Discussion <Discussion:${discussion.discussionId}> by user <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

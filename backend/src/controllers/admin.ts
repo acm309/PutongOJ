@@ -175,6 +175,8 @@ export async function removeUserOAuthConnection (ctx: Context) {
       'No such OAuth connection', ErrorCode.NotFound,
     )
   } else {
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin removed OAuth connection (${provider}) for user <User:${user.uid}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   }
 }
@@ -301,6 +303,8 @@ export async function updateGroupMembers (ctx: Context) {
     if (modifiedCount === null) {
       return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin updated members of group <Group:${groupId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, { modifiedCount })
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -393,6 +397,8 @@ export async function updateDiscussion (ctx: Context) {
     if (!result) {
       return createErrorResponse(ctx, 'Discussion not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin updated discussion <Discussion:${discussionId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -428,6 +434,8 @@ export async function updateComment (ctx: Context) {
     if (!result) {
       return createErrorResponse(ctx, 'Comment not found', ErrorCode.NotFound)
     }
+    const profile = await loadProfile(ctx)
+    logger.info(`Admin updated comment <Comment:${commentId}> by <User:${profile.uid}> [${ctx.state.requestId}] from ${ctx.state.clientIp}`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
