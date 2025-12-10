@@ -238,7 +238,7 @@ const createProblem = async (ctx: Context) => {
     if (course) {
       await courseService.addCourseProblem(course.id, problem.id)
     }
-    ctx.auditLog.info(`Problem <Problem:${problem.pid}> created by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Problem:${problem.pid}> created by <User:${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>
       = pick(problem, [ 'pid' ])
     ctx.body = response
@@ -278,7 +278,7 @@ const updateProblem = async (ctx: Context) => {
           )
         : undefined,
     })
-    ctx.auditLog.info(`Problem <Problem:${pid}> updated by user <User:${uid}>`)
+    ctx.auditLog.info(`<Problem:${pid}> updated by <User:${uid}>`)
     const response: Pick<ProblemEntity, 'pid'> & { success: boolean }
       = { pid: problem?.pid ?? -1, success: !!problem }
     ctx.body = response
@@ -297,7 +297,7 @@ const removeProblem = async (ctx: Context) => {
 
   try {
     await problemService.removeProblem(Number(pid))
-    ctx.auditLog.info(`Problem <Problem:${pid}> deleted by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Problem:${pid}> removed by <User:${profile.uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }

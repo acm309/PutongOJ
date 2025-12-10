@@ -79,7 +79,6 @@ export async function handleOAuthCallback (ctx: Context) {
     }
     user = profile
   } else if (stateData.action === OAuthAction.LOGIN) {
-    const { requestId = 'unknown' } = ctx.state
     const { provider, providerId } = connection
     const connectedUser = await oauthService
       .findUserByOAuthConnection(provider, providerId)
@@ -89,7 +88,7 @@ export async function handleOAuthCallback (ctx: Context) {
       )
     }
     user = connectedUser
-    ctx.auditLog.info(`User <User:${user.uid}> logged in via ${provider} OAuth`)
+    ctx.auditLog.info(`<User:${user.uid}> logged in via ${provider} OAuth`)
     sessionService.setSession(ctx, user)
   } else {
     ctx.throw(400, 'Unknown OAuth action')

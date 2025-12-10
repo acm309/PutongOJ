@@ -56,7 +56,7 @@ export async function createTag (ctx: Context) {
     const tag = await tagService.createTag(
       pick(opt, [ 'name', 'color' ]),
     )
-    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> created by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tag.tagId}> created by <User:${profile.uid}>`)
     const response: Pick<TagEntity, 'tagId'>
       = pick(tag, [ 'tagId' ])
     ctx.body = response
@@ -78,7 +78,7 @@ export async function updateTag (ctx: Context) {
     if (!tag) {
       return ctx.throw(...ERR_NOT_FOUND)
     }
-    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> updated by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tag.tagId}> updated by <User:${profile.uid}>`)
     const response: { success: boolean } = { success: true }
     ctx.body = response
   } catch (e: any) {
@@ -97,7 +97,7 @@ export async function removeTag (ctx: Context) {
     }
     const response: { success: boolean } = { success: true }
     ctx.body = response
-    ctx.auditLog.info(`Tag <Tag:${tag.tagId}> deleted by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tag.tagId}> removed by <User:${profile.uid}>`)
   } catch (e: any) {
     ctx.throw(500, e.message)
   }

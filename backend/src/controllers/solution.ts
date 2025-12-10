@@ -153,7 +153,7 @@ const create = async (ctx: Context) => {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    ctx.auditLog.info(`Submission <Submission:${sid}> of problem <Problem:${pid}> ${mid > 0 ? `in contest <Contest:${mid}> ` : ''} created by user <User:${uid}>`)
+    ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
     ctx.body = { sid }
   } catch (e: any) {
@@ -244,7 +244,7 @@ async function updateSolution (ctx: Context) {
     }
 
     redis.rpush('judger:task', JSON.stringify(submission))
-    ctx.auditLog.info(`Submission <Submission:${sid}> rejudged by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)
   } catch (e: any) {
     return createErrorResponse(ctx,
       e.message || 'Failed to push the solution to judger queue',

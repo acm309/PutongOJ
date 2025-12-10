@@ -38,7 +38,7 @@ const upload = async (ctx: Context) => {
   } catch (err: any) {
     ctx.throw(500, `Failed to save file: ${err.message}`)
   }
-  ctx.auditLog.info(`File <File:${filename}> uploaded by user <User:${uid}>`)
+  ctx.auditLog.info(`<File:${filename}> uploaded by <User:${uid}>`)
   ctx.body = {
     url: `/uploads/${filename}`,
   }

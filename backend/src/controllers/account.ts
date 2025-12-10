@@ -75,7 +75,7 @@ export async function userLogin (ctx: Context) {
   const result = AccountProfileQueryResultSchema.encode({
     ...session, ...user.toObject(),
   })
-  ctx.auditLog.info(`User <User:${user.uid}> logged in successfully`)
+  ctx.auditLog.info(`<User:${user.uid}> logged in successfully`)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -119,7 +119,7 @@ export async function userRegister (ctx: Context) {
     const result = AccountProfileQueryResultSchema.encode({
       ...session, ...user.toObject(),
     })
-    ctx.auditLog.info(`User <User:${user.uid}> registered successfully`)
+    ctx.auditLog.info(`<User:${user.uid}> registered successfully`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -127,9 +127,9 @@ export async function userRegister (ctx: Context) {
 }
 
 export async function userLogout (ctx: Context) {
-  const profile = await checkSession(ctx)
+  const { profile } = ctx.state
   if (profile) {
-    ctx.auditLog.info(`User <User:${profile.uid}> logged out`)
+    ctx.auditLog.info(`<User:${profile.uid}> logged out`)
   }
   sessionService.deleteSession(ctx)
   return createEnvelopedResponse(ctx, null)
@@ -151,7 +151,7 @@ export async function updateProfile (ctx: Context) {
     const result = AccountProfileQueryResultSchema.encode({
       ...session, ...updatedUser.toObject(),
     })
-    ctx.auditLog.info(`User <User:${profile.uid}> updated profile`)
+    ctx.auditLog.info(`<User:${profile.uid}> updated profile`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -191,7 +191,7 @@ export async function updatePassword (ctx: Context) {
   try {
     const updatedUser = await userService.updateUser(profile, { pwd })
     sessionService.setSession(ctx, updatedUser)
-    ctx.auditLog.info(`User <User:${profile.uid}> changed password`)
+    ctx.auditLog.info(`<User:${profile.uid}> changed password`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

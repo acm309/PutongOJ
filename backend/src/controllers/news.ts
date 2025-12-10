@@ -65,7 +65,7 @@ const create = async (ctx: Context) => {
 
   try {
     await news.save()
-    ctx.auditLog.info(`News <News:${news.nid}> created by user <User:${uid}>`)
+    ctx.auditLog.info(`<News:${news.nid}> created by <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -86,7 +86,7 @@ const update = async (ctx: Context) => {
   })
   try {
     await news.save()
-    ctx.auditLog.info(`News <News:${news.nid}> updated by user <User:${uid}>`)
+    ctx.auditLog.info(`<News:${news.nid}> updated by <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
@@ -103,7 +103,7 @@ const del = async (ctx: Context) => {
 
   try {
     await News.deleteOne({ nid }).exec()
-    ctx.auditLog.info(`News <News:${nid}> deleted by user <User:${uid}>`)
+    ctx.auditLog.info(`<News:${nid}> deleted by <User:${uid}>`)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
