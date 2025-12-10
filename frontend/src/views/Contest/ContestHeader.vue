@@ -47,15 +47,15 @@ const contestCountdown = computed(() => {
   if (currentTime.value < contest.value.start) {
     const startsIn = Math.ceil((contest.value.start - currentTime.value) / 1000)
     if (startsIn >= 100 * 60 * 60) {
-      return formatRelativeTime(contest.value.start, locale.value, false)
+      return t('ptoj.starts_in_relative', { time: formatRelativeTime(contest.value.start, locale.value, false) })
     }
-    return timeContest(startsIn)
+    return t('ptoj.starts_in_countdown', { time: timeContest(startsIn) })
   } else if (currentTime.value < contest.value.end) {
     const endsIn = Math.ceil((contest.value.end - currentTime.value) / 1000)
     if (endsIn >= 100 * 60 * 60) {
-      return formatRelativeTime(contest.value.end, locale.value, false)
+      return t('ptoj.ends_in_relative', { time: formatRelativeTime(contest.value.end, locale.value, false) })
     }
-    return timeContest(endsIn)
+    return t('ptoj.ends_in_countdown', { time: timeContest(endsIn) })
   } else {
     return t('ptoj.contest_ended')
   }

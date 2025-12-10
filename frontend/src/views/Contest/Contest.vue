@@ -16,6 +16,7 @@ const { findOne } = contestStore
 const { changeDomTitle } = rootStore
 const { profile } = sessionStore
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 let loading = $ref(false)
 
 async function fetch () {
