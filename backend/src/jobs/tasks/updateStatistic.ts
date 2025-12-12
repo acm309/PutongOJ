@@ -14,7 +14,7 @@ async function updateUserStatistic (uid: string) {
   uid = uid.trim()
 
   const [ submitProblems, solveProblems ] = await Promise.all([
-    Solution.distinct('pid', { uid }),
+    Solution.distinct('pid', { uid, judge: { $ne: judge.Skipped } }),
     Solution.distinct('pid', { uid, judge: judge.Accepted }),
   ])
   await User.findOneAndUpdate(
@@ -40,7 +40,7 @@ async function updateProblemStatistic (pid: number | string) {
   }
 
   const [ submitUsers, acceptedUsers ] = await Promise.all([
-    Solution.distinct('uid', { pid }),
+    Solution.distinct('uid', { pid, judge: { $ne: judge.Skipped } }),
     Solution.distinct('uid', { pid, judge: judge.Accepted }),
   ])
   await Problem.findOneAndUpdate(
