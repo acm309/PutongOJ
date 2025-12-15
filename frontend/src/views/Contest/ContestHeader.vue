@@ -88,7 +88,7 @@ function jumpToCourse () {
     class="bg-(--p-content-background) border-b border-surface h-6 rounded-none sticky top-0 z-10"
     :pt="{ value: `${progressBarClass} transition-all` }"
   >
-    <span class="text-sm">{{ contestCountdown }}</span>
+    <span class="text-sm whitespace-nowrap">{{ contestCountdown }}</span>
   </ProgressBar>
   <div class="bg-(--p-content-background)">
     <div class="flex justify-between pt-1 px-2">

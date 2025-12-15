@@ -1,25 +1,25 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { Button, Space, Spin } from 'view-ui-plus'
+import Button from 'primevue/button'
+import { Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import Problem from '@/components/Problem'
+import { useRoute } from 'vue-router'
+import Problem from '@/components/Problem.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useProblemStore } from '@/store/modules/problem'
 import { contestLabeling } from '@/utils/formate'
 import { onRouteParamUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
+const route = useRoute()
 const problemStore = useProblemStore()
 const contestStore = useContestStore()
-const router = useRouter()
-const route = useRoute()
 
 const { findOne: findOneProblem } = problemStore
 const { problem } = $(storeToRefs(problemStore))
 const { overview, contest, totalProblems } = $(storeToRefs(contestStore))
 
-const proIndex = $computed(() => Number.parseInt(route.params.id || 1))
+const proIndex = $computed(() => Number.parseInt(route.params.id as string))
 
 let loading = $ref(false)
 
@@ -29,56 +29,36 @@ async function fetch () {
   loading = false
 }
 
-function pageChange (val) {
-  if (overview[val - 1].invalid) return
-  router.push({ name: 'contestProblem', params: { cid: contest.cid, id: val } })
-}
-const submit = () => router.push({ name: 'contestSubmit', params: router.params })
-
 fetch()
 onRouteParamUpdate(fetch)
 </script>
 
 <template>
-  <div class="contest-children">
-    <Space class="problem-nav" wrap :size="[8, 8]">
-      <Button
-        v-for="i in totalProblems" :key="i" class="problem-nav-item"
-        :type="i === proIndex ? 'primary' : 'default'" :disabled="overview[i - 1].invalid" @click="pageChange(i)"
+  <div class="p-6">
+    <div class="flex flex-wrap gap-2">
+      <RouterLink
+        v-for="i in totalProblems" :key="i"
+        :to="{ name: 'contestProblem', params: { cid: contest.cid, id: i } }"
       >
-        {{ contestLabeling(i, contest.option?.labelingStyle) }}
-      </Button>
-    </Space>
-    <div class="problem-content">
-      <Problem v-model="problem">
+        <Button
+          class="min-w-10" :severity="i === proIndex ? 'primary' : 'secondary'" :outlined="i !== proIndex"
+          :disabled="overview[i - 1].invalid"
+        >
+          {{ contestLabeling(i, contest.option?.labelingStyle) }}
+        </Button>
+      </RouterLink>
+    </div>
+    <div>
+      <Problem v-model="problem" class="p-4">
         <template #title>
-          {{ $route.params.id }}: {{ problem.title }}
+          {{ contestLabeling(proIndex, contest.option?.labelingStyle) }}:
+          {{ problem.title }}
         </template>
       </Problem>
-      <Button class="problem-submit" shape="circle" icon="md-paper-plane" @click="submit">
-        {{ t('oj.submit') }}
-      </Button>
+      <RouterLink :to="{ name: 'contestSubmit', params: route.params }">
+        <Button icon="pi pi-send" :label="t('oj.submit')" outlined />
+      </RouterLink>
     </div>
     <Spin size="large" fix :show="loading" />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.contest-children
-  padding 40px 0
-  position relative
-.problem-nav
-  padding 0 40px
-  .problem-nav-item
-    padding 0 11.66px
-.problem-content
-  padding 20px 40px 0
-
-@media screen and (max-width: 1024px)
-  .contest-children
-    padding 20px 0
-  .problem-nav
-    padding 0 20px
-  .problem-content
-    padding 10px 20px 0
-</style>

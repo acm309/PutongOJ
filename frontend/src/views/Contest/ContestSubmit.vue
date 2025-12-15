@@ -1,10 +1,11 @@
-<script setup>
+<script setup lang="ts">
+import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
-import { Button, Space } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import Submit from '@/components/Submit'
+import Submit from '@/components/Submit.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useSolutionStore } from '@/store/modules/solution'
 import { contestLabeling } from '@/utils/formate'
@@ -14,7 +15,7 @@ const contestStore = useContestStore()
 const solutionStore = useSolutionStore()
 const route = useRoute()
 const router = useRouter()
-const message = inject('$Message')
+const message = inject('$Message') as typeof Message
 
 const { problems, overview, contest, totalProblems } = $(storeToRefs(contestStore))
 const { solution } = $(storeToRefs(solutionStore))
@@ -27,67 +28,36 @@ const currentTitle = $computed(() => overview[currentProblemId - 1]?.title)
 const pid = $computed(() => problems[currentProblemId - 1])
 const mid = $computed(() => currentContestId)
 
-function pageChange (val) {
-  if (overview[val - 1]?.invalid) return
-  router.push({ name: 'contestSubmit', params: { cid: contest.cid, id: val } })
-}
-
 async function submit () {
-  const response = await create({ pid, mid, ...solution })
-  if (response.isAxiosError) return
+  await create({ pid, mid, ...solution })
   router.push({ name: 'ContestMySubmissions', params: route.params })
   message.info(t('oj.submitSuccess', { id: currentProblemId }))
 }
 </script>
 
 <template>
-  <div class="contest-children">
-    <Space class="problem-nav" wrap :size="[8, 8]">
-      <Button
-        v-for="i in totalProblems" :key="i" class="problem-nav-item"
-        :type="i === currentProblemId ? 'primary' : 'default'" :disabled="overview[i - 1]?.invalid"
-        @click="pageChange(i)"
+  <div class="p-6">
+    <div class="flex flex-wrap gap-2">
+      <RouterLink
+        v-for="i in totalProblems" :key="i"
+        :to="{ name: 'contestSubmit', params: { cid: contest.cid, id: i } }"
       >
-        {{ contestLabeling(i, contest.option?.labelingStyle) }}
-      </Button>
-    </Space>
-    <div class="problem-content">
-      <h1>{{ currentProblemId }}: {{ currentTitle }}</h1>
-      <Submit :pid="String(pid)" />
-      <Button type="primary" @click="submit">
-        {{ t('oj.submit') }}
-      </Button>
-      <Button style="margin-left: 8px" @click="reset">
-        {{ t('oj.reset') }}
-      </Button>
+        <Button
+          class="min-w-10" :severity="i === currentProblemId ? 'primary' : 'secondary'"
+          :outlined="i !== currentProblemId" :disabled="overview[i - 1].invalid"
+        >
+          {{ contestLabeling(i, contest.option?.labelingStyle) }}
+        </Button>
+      </RouterLink>
+    </div>
+    <h1 class="font-bold mb-[20px] mt-[10px] pt-4 text-center">
+      {{ contestLabeling(currentProblemId, contest.option?.labelingStyle) }}:
+      {{ currentTitle }}
+    </h1>
+    <Submit :pid="String(pid)" />
+    <div class="flex gap-4">
+      <Button :label="t('oj.submit')" icon="pi pi-send" @click="submit" />
+      <Button :label="t('oj.reset')" icon="pi pi-trash" severity="secondary" outlined @click="reset" />
     </div>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.contest-children
-  padding 40px 0
-  position relative
-
-.problem-nav
-  padding 0 40px
-  .problem-nav-item
-    padding 0 11.66px
-
-.problem-content
-  padding 20px 40px 0
-
-@media screen and (max-width: 1024px)
-  .contest-children
-    padding 20px 0
-  .problem-nav
-    padding 0 20px
-  .problem-content
-    padding 10px 20px 0
-
-h1
-  color: #757575
-  margin-top 10px
-  margin-bottom 20px
-  text-align center
-</style>

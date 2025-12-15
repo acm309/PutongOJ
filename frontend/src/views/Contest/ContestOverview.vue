@@ -1,146 +1,68 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { Button } from 'view-ui-plus'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
 import { contestLabeling, formate } from '@/utils/formate'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const contestStore = useContestStore()
 const { contest, overview, solved } = storeToRefs(contestStore)
 
-const route = useRoute()
 const cid = computed(() => Number.parseInt(route.params.cid as string))
+
+function onRowSelect (e: any) {
+  if (e.data.invalid) {
+    return
+  }
+  router.push({ name: 'contestProblem', params: { cid: cid.value, id: e.index + 1 } })
+}
 </script>
 
 <template>
-  <div class="contest-children problem-list-wrap">
-    <div class="problem-table-container">
-      <table class="problem-table">
-        <thead>
-          <tr>
-            <th class="problem-status">
-              #
-            </th>
-            <th class="problem-pid">
-              ID
-            </th>
-            <th class="problem-title">
-              Title
-            </th>
-            <th class="problem-ratio">
-              Ratio
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="overview.length === 0" class="status-empty">
-            <td colspan="4">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="(item, index) in overview" :key="item.pid">
-            <td class="problem-status">
-              <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
-            </td>
-            <td class="problem-pid">
-              {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
-            </td>
-            <td class="problem-title">
-              <RouterLink v-if="!item.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
-                <Button type="text" class="table-button">
-                  {{ item.title }}
-                </Button>
-              </RouterLink>
-              <span v-else>{{ t('oj.problem_invalid') }}</span>
-            </td>
-            <td class="problem-ratio">
-              <span v-if="!item.invalid">
-                {{ formate(item.solve / (item.submit + 0.000001)) }}
-                ({{ item.solve }} / {{ item.submit }})
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <DataTable :value="overview" class="pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single" @row-select="onRowSelect">
+    <Column class="pl-6 text-center w-24">
+      <template #header>
+        <span class="text-center w-full">
+          <i class="pi pi-hashtag" />
+        </span>
+      </template>
+      <template #body="{ index }">
+        {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
+      </template>
+    </Column>
+    <Column :header="t('ptoj.title')">
+      <template #body="{ data, index }">
+        <RouterLink v-if="!data.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
+          {{ data.title }}
+        </RouterLink>
+        <span v-else>{{ t('oj.problem_invalid') }}</span>
+      </template>
+    </Column>
+    <Column class="text-center w-16">
+      <template #body="{ data }">
+        <span v-if="solved.includes(data.pid)" class="flex justify-center text-primary">
+          <i class="pi pi-check" />
+        </span>
+      </template>
+    </Column>
+    <Column class="pr-6 text-center w-48">
+      <template #header>
+        <span class="text-center w-full">
+          <i class="pi pi-chart-pie" />
+        </span>
+      </template>
+      <template #body="{ data }">
+        <span v-if="!data.invalid">
+          {{ formate(data.solve / (data.submit + 0.000001)) }}
+          ({{ data.solve }} / {{ data.submit }})
+        </span>
+      </template>
+    </Column>
+  </DataTable>
 </template>
-
-<style lang="stylus" scoped>
-h2
-  text-align: center
-  margin-top: 10px
-  margin-bottom: 8px
-h4
-  text-align: center
-  margin-bottom: 8px
-
-@import '../../styles/common'
-
-.contest-children
-  position relative
-
-.problem-list-wrap
-  width 100%
-  margin 0 auto
-  padding 5px 0 20px
-
-@media screen and (max-width: 1024px)
-  .problem-list-wrap
-    padding 20px 0
-  .problem-status
-    padding-left 20px
-
-@media screen and (max-width: 768px)
-  .problem-page-table, .problem-page-simple
-    display none !important
-
-.problem-table-container
-  overflow-x auto
-  width 100%
-.problem-table
-  width 100%
-  min-width 768px
-  table-layout fixed
-  th, td
-    padding 0 16px
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-  .table-button
-    padding 0
-    border-width 0
-    width 100%
-    &:hover
-      background-color transparent
-
-.problem-status
-  width 70px
-  text-align center
-  padding-left 40px !important
-.problem-pid
-  width 60px
-  text-align center
-.problem-title
-  .table-button
-    text-align left
-.problem-ratio
-  width 200px
-
-.status-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-</style>
