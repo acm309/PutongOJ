@@ -6,7 +6,7 @@ import {
   AdminGroupCreatePayloadSchema,
   AdminGroupDetailQueryResultSchema,
   AdminGroupMembersUpdatePayloadSchema,
-  AdminNotificationBroadcastPayloadSchema,
+  AdminNotificationCreatePayloadSchema,
   AdminSolutionListExportQueryResultSchema,
   AdminSolutionListExportQuerySchema,
   AdminSolutionListQueryResultSchema,
@@ -203,7 +203,7 @@ export async function exportSolutions (ctx: Context) {
 }
 
 export async function sendNotificationBroadcast (ctx: Context) {
-  const payload = AdminNotificationBroadcastPayloadSchema.safeParse(ctx.request.body)
+  const payload = AdminNotificationCreatePayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
   }
@@ -213,6 +213,29 @@ export async function sendNotificationBroadcast (ctx: Context) {
     await websocketService.sendBroadcastNotification(title, content)
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
+    return createEnvelopedResponse(ctx, null)
+  } catch (err: any) {
+    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  }
+}
+
+export async function sendNotificationUser (ctx: Context) {
+  const payload = AdminNotificationCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const username = String(ctx.params.username)
+  if (!username || !(await userService.getUser(username))) {
+    return createErrorResponse(ctx,
+      'User not found', ErrorCode.NotFound,
+    )
+  }
+
+  try {
+    const { title, content } = payload.data
+    await websocketService.sendUserNotification(username, title, content)
+    const profile = await loadProfile(ctx)
+    ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -451,6 +474,7 @@ const adminController = {
   findSolutions,
   exportSolutions,
   sendNotificationBroadcast,
+  sendNotificationUser,
   getGroup,
   createGroup,
   updateGroup,

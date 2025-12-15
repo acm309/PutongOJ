@@ -5,6 +5,7 @@ import type {
   AdminGroupDetailQueryResult,
   AdminGroupMembersUpdatePayload,
   AdminGroupUpdatePayload,
+  AdminNotificationCreatePayload,
   AdminSolutionListExportQuery,
   AdminSolutionListExportQueryResult,
   AdminSolutionListQuery,
@@ -46,6 +47,13 @@ export async function findSolutions (params: AdminSolutionListQuery) {
 }
 export async function exportSolutions (params: AdminSolutionListExportQuery) {
   return instance.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
+}
+
+export async function sendNotificationBroadcast (payload: AdminNotificationCreatePayload) {
+  return instance.post<null>('/admin/notifications/broadcast', payload)
+}
+export async function sendNotificationUser (username: string, payload: AdminNotificationCreatePayload) {
+  return instance.post<null>(`/admin/notifications/users/${encodeURIComponent(username)}`, payload)
 }
 
 export async function createGroup (payload: AdminGroupCreatePayload) {

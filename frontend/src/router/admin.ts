@@ -5,6 +5,7 @@ const TagManager = () => import('@/views/Admin/TagManager.vue')
 const UserManagement = () => import('@/views/Admin/UserManagement.vue')
 const UserManagementDetail = () => import('@/views/Admin/UserManagementDetail.vue')
 const SolutionManagement = () => import('@/views/Admin/SolutionManagement.vue')
+const NotificationCreate = () => import('@/views/Admin/NotificationCreate.vue')
 
 const adminRoutes: Array<RouteRecordRaw> = [
   {
@@ -36,6 +37,12 @@ const adminRoutes: Array<RouteRecordRaw> = [
     name: 'SolutionManagement',
     component: SolutionManagement,
     meta: { title: 'Solution Management', requiresAdmin: true },
+  },
+  {
+    path: '/admin/notifications/create',
+    name: 'NotificationCreate',
+    component: NotificationCreate,
+    meta: { title: 'Create Notification', requiresAdmin: true },
   },
 ]
 
