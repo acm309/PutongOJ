@@ -8,9 +8,10 @@ import type {
 import { ContestSolutionListQuerySchema } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
+import ButtonGroup from 'primevue/buttongroup'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { exportSolutions, findSolutions } from '@/api/contest'
@@ -41,6 +42,7 @@ const docs = ref([] as ContestSolutionListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
 const exportDialog = ref(false)
+const autoRefresh = ref<number | null>(null)
 
 const hasFilter = computed(() => {
   return Boolean(
@@ -147,8 +149,26 @@ async function onExport (format: ExportFormat) {
   exportDialog.value = false
 }
 
+function clearAutoRefresh () {
+  if (autoRefresh.value) {
+    clearInterval(autoRefresh.value)
+    autoRefresh.value = null
+  }
+}
+
+function toggleAutoRefresh () {
+  if (autoRefresh.value) {
+    clearAutoRefresh()
+  } else {
+    autoRefresh.value = window.setInterval(() => {
+      fetch()
+    }, 10000)
+  }
+}
+
 onMounted(fetch)
 onRouteQueryUpdate(fetch)
+onBeforeUnmount(clearAutoRefresh)
 </script>
 
 <template>
@@ -194,7 +214,13 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-file-export" severity="secondary" outlined :disabled="loading"
             @click="exportDialog = true"
           />
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <ButtonGroup>
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              v-tooltip.bottom="t('ptoj.auto_refresh')" :icon="autoRefresh ? 'pi pi-stop' : 'pi pi-play'"
+              :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading" @click="toggleAutoRefresh"
+            />
+          </ButtonGroup>
           <Button
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
