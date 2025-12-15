@@ -5,7 +5,6 @@ import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { judgeStatusLabels, languageLabels } from '@/utils/constant'
 import {
   getJudgeStatusClassname,
@@ -40,24 +39,9 @@ const selection = defineModel<T[]>('selection', {
 })
 
 const { t } = useI18n()
-const router = useRouter()
 
 function handleSort (event: any) {
   emit('sort', event)
-}
-
-function handleView (data: any) {
-  router.push({ name: 'solution', params: { sid: data.sid } })
-}
-function handleViewUser (data: any) {
-  router.push({ name: 'UserProfile', params: { uid: data.uid } })
-}
-function handleViewProblem (data: any) {
-  router.push({ name: 'problemInfo', params: { pid: data.pid } })
-}
-function handleViewContest (data: any) {
-  if (!data.mid || data.mid <= 0) return
-  router.push({ name: 'contestOverview', params: { cid: data.mid } })
 }
 </script>
 
@@ -76,9 +60,9 @@ function handleViewContest (data: any) {
         </span>
       </template>
       <template #body="{ data }">
-        <a @click="handleView(data)">
+        <RouterLink :to="{ name: 'solution', params: { sid: data.sid } }">
           {{ data.sid }}
-        </a>
+        </RouterLink>
       </template>
     </Column>
 
@@ -87,9 +71,9 @@ function handleViewContest (data: any) {
       class="font-medium max-w-36 md:max-w-48 min-w-36 truncate"
     >
       <template #body="{ data }">
-        <a @click="handleViewUser(data)">
+        <RouterLink :to="{ name: 'UserProfile', params: { uid: data.uid } }">
           {{ data.uid }}
-        </a>
+        </RouterLink>
       </template>
     </Column>
 
@@ -101,9 +85,9 @@ function handleViewContest (data: any) {
       </template>
       <template #body="{ data }">
         <slot name="problem" :data="data">
-          <a @click="handleViewProblem(data)">
+          <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
             {{ data.pid }}
-          </a>
+          </RouterLink>
         </slot>
       </template>
     </Column>
@@ -115,9 +99,9 @@ function handleViewContest (data: any) {
         </span>
       </template>
       <template #body="{ data }">
-        <a v-if="data.mid && data.mid > 0" @click="handleViewContest(data)">
+        <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'contestOverview', params: { cid: data.mid } }">
           {{ data.mid }}
-        </a>
+        </RouterLink>
         <span v-else>
           -
         </span>
