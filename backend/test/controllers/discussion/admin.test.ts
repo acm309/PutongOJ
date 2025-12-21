@@ -25,11 +25,11 @@ test('Admin can see all discussions including private ones', async (t) => {
     .get('/api/discussions')
 
   t.is(res.status, 200)
-  t.truthy(res.body.list)
-  t.truthy(Array.isArray(res.body.list.docs))
+  t.truthy(res.body.data)
+  t.truthy(Array.isArray(res.body.data.docs))
   
   // Admin should see all types including private clarifications
-  const types = res.body.list.docs.map((d: any) => d.type)
+  const types = res.body.data.docs.map((d: any) => d.type)
   // Should include at least OpenDiscussion (1), PublicAnnouncement (2), and PrivateClarification (3)
   t.true(types.includes(1))
   t.true(types.includes(2))
@@ -42,9 +42,9 @@ test('Admin can access any private discussion', async (t) => {
     .get('/api/discussions/3')
 
   t.is(res.status, 200)
-  t.is(res.body.discussionId, 3)
-  t.truthy(res.body.title)
-  t.is(res.body.isJury, true) // Admin should be marked as jury
+  t.is(res.body.data.discussionId, 3)
+  t.truthy(res.body.data.title)
+  t.is(res.body.data.isJury, true) // Admin should be marked as jury
 })
 
 test('Admin can create public announcement', async (t) => {
@@ -57,15 +57,15 @@ test('Admin can create public announcement', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.discussionId)
+  t.truthy(res.body.data.discussionId)
   
   // Verify the created announcement
   const getRes = await request
-    .get(`/api/discussions/${res.body.discussionId}`)
+    .get(`/api/discussions/${res.body.data.discussionId}`)
   
   t.is(getRes.status, 200)
-  t.is(getRes.body.type, 2)
-  t.is(getRes.body.title, 'Admin Announcement')
+  t.is(getRes.body.data.type, 2)
+  t.is(getRes.body.data.title, 'Admin Announcement')
 })
 
 test('Admin can add comment to announcement', async (t) => {
@@ -82,7 +82,7 @@ test('Admin can add comment to announcement', async (t) => {
     .get('/api/discussions/2')
   
   t.is(getRes.status, 200)
-  const comments = getRes.body.comments
+  const comments = getRes.body.data.comments
   const lastComment = comments[comments.length - 1]
   t.is(lastComment.content, 'Admin comment on announcement')
 })
@@ -97,7 +97,7 @@ test('Admin can create open discussion', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.discussionId)
+  t.truthy(res.body.data.discussionId)
 })
 
 test('Admin can create private clarification', async (t) => {
@@ -110,7 +110,7 @@ test('Admin can create private clarification', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.discussionId)
+  t.truthy(res.body.data.discussionId)
 })
 
 test('Admin can create discussion with problem reference', async (t) => {
@@ -124,14 +124,14 @@ test('Admin can create discussion with problem reference', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.discussionId)
+  t.truthy(res.body.data.discussionId)
   
   const getRes = await request
-    .get(`/api/discussions/${res.body.discussionId}`)
+    .get(`/api/discussions/${res.body.data.discussionId}`)
   
   t.is(getRes.status, 200)
-  t.truthy(getRes.body.problem)
-  t.is(getRes.body.problem.pid, 1001)
+  t.truthy(getRes.body.data.problem)
+  t.is(getRes.body.data.problem.pid, 1001)
 })
 
 test('Admin sees isJury=true for discussions', async (t) => {
@@ -139,7 +139,7 @@ test('Admin sees isJury=true for discussions', async (t) => {
     .get('/api/discussions/1')
 
   t.is(res.status, 200)
-  t.is(res.body.isJury, true)
+  t.is(res.body.data.isJury, true)
 })
 
 test.after.always('close server', () => {

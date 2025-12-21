@@ -1,3 +1,4 @@
+import Comment from '../src/models/Comment'
 import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
 import CourseMember from '../src/models/CourseMember'
@@ -12,6 +13,7 @@ import User from '../src/models/User'
 
 export async function removeall () {
   await Promise.all([
+    Comment.deleteMany({}),
     Contest.deleteMany({}),
     Course.deleteMany({}),
     CourseMember.deleteMany({}),
