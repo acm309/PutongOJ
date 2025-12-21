@@ -39,6 +39,9 @@ adminRouter.get('/solutions/export',
 adminRouter.post('/notifications/broadcast',
   adminController.sendNotificationBroadcast,
 )
+adminRouter.post('/notifications/users/:username',
+  adminController.sendNotificationUser,
+)
 
 adminRouter.get('/groups/:groupId',
   adminController.getGroup,
