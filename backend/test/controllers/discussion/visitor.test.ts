@@ -16,7 +16,7 @@ test('List discussions - should show public discussions only', async (t) => {
   t.truthy(typeof res.body.data.total === 'number')
 
   // Visitors should only see OpenDiscussion and PublicAnnouncement
-  const visibleTypes = [1, 2] // OpenDiscussion, PublicAnnouncement
+  const visibleTypes = [ 1, 2 ] // OpenDiscussion, PublicAnnouncement
   for (const doc of res.body.data.docs) {
     t.true(visibleTypes.includes(doc.type))
     t.truthy(doc.discussionId)
@@ -59,7 +59,7 @@ test('Get specific public discussion', async (t) => {
   t.truthy(res.body.data.author)
   t.truthy(Array.isArray(res.body.data.comments))
   t.is(res.body.data.isJury, false)
-  
+
   // Should have at least one comment (initial content)
   t.true(res.body.data.comments.length > 0)
   t.truthy(res.body.data.comments[0].content)

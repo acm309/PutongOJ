@@ -27,7 +27,7 @@ test('List discussions - logged in user sees more', async (t) => {
   t.is(res.status, 200)
   t.truthy(res.body.data)
   t.truthy(Array.isArray(res.body.data.docs))
-  
+
   // User should see public discussions and their own private ones
   for (const doc of res.body.data.docs) {
     t.truthy(doc.discussionId)
@@ -137,11 +137,11 @@ test('Add comment to open discussion', async (t) => {
     })
 
   t.is(res.status, 200)
-  
+
   // Verify comment was added
   const getRes = await request
     .get('/api/discussions/1')
-  
+
   t.is(getRes.status, 200)
   const comments = getRes.body.data.comments
   const lastComment = comments[comments.length - 1]
@@ -190,7 +190,7 @@ test('Filter discussions by type', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  
+
   for (const doc of res.body.data.docs) {
     t.is(doc.type, 1)
   }
@@ -203,7 +203,7 @@ test('Filter discussions by author', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  
+
   for (const doc of res.body.data.docs) {
     t.is(doc.author.uid, 'admin')
   }

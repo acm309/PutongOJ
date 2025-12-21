@@ -27,7 +27,7 @@ test('Admin can see all discussions including private ones', async (t) => {
   t.is(res.status, 200)
   t.truthy(res.body.data)
   t.truthy(Array.isArray(res.body.data.docs))
-  
+
   // Admin should see all types including private clarifications
   const types = res.body.data.docs.map((d: any) => d.type)
   // Should include at least OpenDiscussion (1), PublicAnnouncement (2), and PrivateClarification (3)
@@ -58,11 +58,11 @@ test('Admin can create public announcement', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data.discussionId)
-  
+
   // Verify the created announcement
   const getRes = await request
     .get(`/api/discussions/${res.body.data.discussionId}`)
-  
+
   t.is(getRes.status, 200)
   t.is(getRes.body.data.type, 2)
   t.is(getRes.body.data.title, 'Admin Announcement')
@@ -76,11 +76,11 @@ test('Admin can add comment to announcement', async (t) => {
     })
 
   t.is(res.status, 200)
-  
+
   // Verify comment was added
   const getRes = await request
     .get('/api/discussions/2')
-  
+
   t.is(getRes.status, 200)
   const comments = getRes.body.data.comments
   const lastComment = comments[comments.length - 1]
@@ -125,10 +125,10 @@ test('Admin can create discussion with problem reference', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data.discussionId)
-  
+
   const getRes = await request
     .get(`/api/discussions/${res.body.data.discussionId}`)
-  
+
   t.is(getRes.status, 200)
   t.truthy(getRes.body.data.problem)
   t.is(getRes.body.data.problem.pid, 1001)
