@@ -28,6 +28,15 @@ const dispatchMethods = computed(() => [
   { label: t('ptoj.broadcast'), value: 'broadcast' },
   { label: t('ptoj.user_specific'), value: 'user' },
 ])
+const formValid = computed(() => {
+  if (notification.value.title.trim() === '' || notification.value.content.trim() === '') {
+    return false
+  }
+  if (selectedDispatchMethod.value === 'user' && targetUser.value.trim() === '') {
+    return false
+  }
+  return true
+})
 
 async function sendNotification () {
   if (sending.value) {
@@ -109,7 +118,7 @@ function onSendNotification (event: Event) {
 
       <Button
         :label="t('ptoj.send_notification')" icon="pi pi-send" class="md:col-span-2" :loading="sending"
-        @click="onSendNotification"
+        :disabled="!formValid" @click="onSendNotification"
       />
     </div>
   </div>
