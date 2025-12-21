@@ -3,7 +3,9 @@ import constants from '../../src/utils/constants'
 
 const { privilege, deploy } = constants
 
-const userSeeds: Record<string, Partial<UserDocument>> = {
+type UserSeed = Partial<Omit<UserDocument, 'pwd'>> & { pwd?: string }
+
+const userSeeds: Record<string, UserSeed> = {
   admin: {
     uid: 'admin',
     nick: 'admin',
