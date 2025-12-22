@@ -13,12 +13,12 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "mongoose": "^8.20.0",
-    "zod": "^4.1.12"
+    "mongoose": "^8.20.4",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.2.0",
-    "eslint": "^9.39.1",
+    "@antfu/eslint-config": "^6.7.3",
+    "eslint": "^9.39.2",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3"
   }
