@@ -31,7 +31,7 @@ const discussionSchema = new mongoose.Schema({
   },
   type: {
     type: Number,
-    enum: DiscussionType,
+    enum: Object.values(DiscussionType).filter((v): v is number => typeof v === 'number'),
     default: DiscussionType.PrivateClarification,
   },
   pinned: {
