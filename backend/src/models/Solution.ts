@@ -155,11 +155,10 @@ solutionSchema.index({ pid: 1, createdAt: -1 })
 solutionSchema.index({ mid: 1, createdAt: -1 })
 solutionSchema.index({ language: 1, createdAt: -1 })
 
-solutionSchema.pre('save', async function (next) {
+solutionSchema.pre('save', async function () {
   if (this.sid === -1) {
     this.sid = await ID.generateId('Solution')
   }
-  next()
 })
 
 const Solution

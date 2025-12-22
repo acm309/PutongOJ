@@ -236,7 +236,7 @@ const createProblem = async (ctx: Context) => {
       owner,
     })
     if (course) {
-      await courseService.addCourseProblem(course.id, problem.id)
+      await courseService.addCourseProblem(course._id, problem._id)
     }
     ctx.auditLog.info(`<Problem:${problem.pid}> created by <User:${profile.uid}>`)
     const response: Pick<ProblemEntity, 'pid'>

@@ -41,11 +41,10 @@ const commentSchema = new mongoose.Schema({
   timestamps: true,
 })
 
-commentSchema.pre('save', async function (next) {
+commentSchema.pre('save', async function () {
   if (this.commentId === -1) {
     this.commentId = await ID.generateId('Comment')
   }
-  next()
 })
 
 const Comment

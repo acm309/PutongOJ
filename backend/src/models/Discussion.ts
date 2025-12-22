@@ -58,11 +58,10 @@ const discussionSchema = new mongoose.Schema({
   timestamps: true,
 })
 
-discussionSchema.pre('save', async function (next) {
+discussionSchema.pre('save', async function () {
   if (this.discussionId === -1) {
     this.discussionId = await ID.generateId('Discussion')
   }
-  next()
 })
 
 const Discussion

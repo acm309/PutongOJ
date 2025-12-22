@@ -51,7 +51,7 @@ export async function findDiscussions<
 ) {
   const { page, pageSize, sort, sortBy } = options
   let query = Discussion
-    .find(filters)
+    .find(filters as any)
     .sort({
       pinned: -1,
       [sortBy]: sort,
@@ -71,7 +71,7 @@ export async function findDiscussions<
   }
 
   const docsPromise = query.lean()
-  const countPromise = Discussion.countDocuments(filters)
+  const countPromise = Discussion.countDocuments(filters as any)
 
   const [ docs, total ] = await Promise.all([ docsPromise, countPromise ])
   const result: Paginated<Pick<DiscussionPopulated<TPopulate>, TFields[number]> & DocumentId> = {

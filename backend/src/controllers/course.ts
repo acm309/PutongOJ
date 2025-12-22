@@ -269,7 +269,7 @@ const addCourseProblems = async (ctx: Context) => {
     if (!problem) {
       return false
     }
-    return await courseService.addCourseProblem(course.id, problem.id)
+    return await courseService.addCourseProblem(course._id, problem._id)
   }))
 
   const successCount = result.filter(v => v).length
@@ -291,7 +291,7 @@ const moveCourseProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.moveCourseProblem(
-    course.id, problem.id, beforePos,
+    course._id, problem._id, beforePos,
   )
   ctx.body = { success: result }
 }
@@ -299,7 +299,7 @@ const moveCourseProblem = async (ctx: Context) => {
 const rearrangeCourseProblem = async (ctx: Context) => {
   const { course } = await loadCourse(ctx)
   try {
-    await courseService.rearrangeCourseProblem(course.id)
+    await courseService.rearrangeCourseProblem(course._id)
     ctx.body = { success: true }
   } catch (e: any) {
     ctx.throw(500, `Failed to rearrange course problems: ${e.message}`)
@@ -313,7 +313,7 @@ const removeCourseProblem = async (ctx: Context) => {
   if (!problem) {
     return ctx.throw(...ERR_INVALID_ID)
   }
-  const result = await courseService.removeCourseProblem(course.id, problem.id)
+  const result = await courseService.removeCourseProblem(course._id, problem._id)
   const profile = await loadProfile(ctx)
   ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${problemId}> by <User:${profile.uid}>`)
   ctx.body = { success: result }

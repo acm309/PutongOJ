@@ -6,7 +6,7 @@ import config from '../config'
 import mongoose from '../config/db'
 import ID from './ID'
 
-export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
+export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity & { id: string }
 export type ProblemDocumentPopulated = Omit<ProblemDocument,
   'tags'
 > & {
@@ -124,11 +124,10 @@ const problemSchema = new mongoose.Schema({
 
 problemSchema.plugin(mongoosePaginate)
 
-problemSchema.pre('save', async function (this: ProblemDocument, next) {
+problemSchema.pre('save', async function (this: ProblemDocument) {
   if (this.pid === -1) {
     this.pid = await ID.generateId('Problem')
   }
-  next()
 })
 
 const Problem

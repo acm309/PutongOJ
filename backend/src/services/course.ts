@@ -1,5 +1,5 @@
 import type { Paginated } from '@putongoj/shared'
-import type { ObjectId, PipelineStage } from 'mongoose'
+import type { PipelineStage, Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { UserDocument, UserEntity } from '../models/User'
 import type { CourseRole, PaginateOption } from '../types'
@@ -77,7 +77,7 @@ export async function updateCourse (
 }
 
 export async function findCourseMembers (
-  course: ObjectId | string,
+  course: Types.ObjectId | string,
   opt: PaginateOption & {},
 ): Promise<Paginated<CourseMemberView>> {
   const { page, pageSize } = opt
@@ -115,7 +115,7 @@ export async function findCourseMembers (
 }
 
 export async function getCourseMember (
-  course: ObjectId | string,
+  course: Types.ObjectId | string,
   userId: string,
 ): Promise<CourseMemberView | null> {
   const user = await User.findOne({ uid: userId })
@@ -129,8 +129,8 @@ export async function getCourseMember (
 }
 
 export async function updateCourseMember (
-  course: ObjectId | string,
-  user: ObjectId | string,
+  course: Types.ObjectId | string,
+  user: Types.ObjectId | string,
   role: CourseRole,
 ): Promise<boolean> {
   const parsedRole: CourseRole = Object.assign({}, ((role) => {
@@ -161,7 +161,7 @@ export async function updateCourseMember (
 }
 
 export async function removeCourseMember (
-  course: ObjectId | string,
+  course: Types.ObjectId | string,
   userId: string,
 ): Promise<boolean> {
   const user = await User.findOne({ uid: userId })
@@ -206,8 +206,8 @@ export async function getUserRole (
 }
 
 export async function addCourseProblem (
-  course: ObjectId,
-  problem: ObjectId,
+  course: Types.ObjectId,
+  problem: Types.ObjectId,
 ): Promise<boolean> {
   const currentLast = await CourseProblem.findOne({ course })
     .sort({ sort: -1, updatedAt: 1 })
@@ -222,8 +222,8 @@ export async function addCourseProblem (
 }
 
 export async function moveCourseProblem (
-  course: ObjectId,
-  problem: ObjectId,
+  course: Types.ObjectId,
+  problem: Types.ObjectId,
   beforePos: number,
 ): Promise<boolean> {
   if (!Number.isInteger(beforePos) || beforePos < 1) {
@@ -269,7 +269,7 @@ export async function moveCourseProblem (
 }
 
 export async function rearrangeCourseProblem (
-  course: ObjectId,
+  course: Types.ObjectId,
 ): Promise<void> {
   const problems = await CourseProblem.find({ course }).sort({ sort: 1, updatedAt: -1 })
   await Promise.all(problems.map((problem, index) => {
@@ -278,16 +278,16 @@ export async function rearrangeCourseProblem (
 }
 
 export async function removeCourseProblem (
-  course: ObjectId,
-  problem: ObjectId,
+  course: Types.ObjectId,
+  problem: Types.ObjectId,
 ): Promise<boolean> {
   const result = await CourseProblem.deleteOne({ course, problem })
   return result.deletedCount > 0
 }
 
 export async function hasProblemRole (
-  user: ObjectId | string,
-  problem: ObjectId | string,
+  user: Types.ObjectId | string,
+  problem: Types.ObjectId | string,
   role: keyof CourseRole,
 ): Promise<boolean> {
   const aggregationPipeline = [

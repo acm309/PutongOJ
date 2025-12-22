@@ -108,7 +108,7 @@ const findContests = async (ctx: Context) => {
     if (role.manageContest) {
       showAll = true
     }
-    courseDocId = course.id
+    courseDocId = course._id
   }
 
   const paginateOption = parsePaginateOption(opt, 20)
@@ -217,7 +217,7 @@ const createContest = async (ctx: Context) => {
   let courseDocId: Types.ObjectId | undefined
   if (opt.course) {
     const { course } = await loadCourse(ctx, opt.course)
-    courseDocId = course.id
+    courseDocId = course._id
   }
 
   try {
@@ -258,7 +258,7 @@ const updateContest = async (ctx: Context) => {
       courseDocId = null
     } else {
       const { course } = await loadCourse(ctx, opt.course)
-      courseDocId = course.id
+      courseDocId = course._id
     }
   }
 

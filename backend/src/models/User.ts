@@ -8,6 +8,7 @@ import { privilege } from '../utils/constants'
 export interface UserEntity extends UserModel { }
 
 export interface UserDocument extends Document<Types.ObjectId>, UserEntity {
+  id: string
   isBanned: boolean
   isAdmin: boolean
   isRoot: boolean

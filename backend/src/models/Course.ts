@@ -6,6 +6,7 @@ import { encrypt } from '../utils/constants'
 import ID from './ID'
 
 export interface CourseDocument extends Document<Types.ObjectId>, CourseEntity {
+  id: string
   isPublic: boolean
   isPrivate: boolean
   canJoin: boolean
@@ -76,11 +77,10 @@ courseSchema.virtual('canJoin').get(function (this: CourseDocument): boolean {
   return (this.joinCode?.length ?? 0) > 0
 })
 
-courseSchema.pre('save', async function (this: CourseDocument, next) {
+courseSchema.pre('save', async function (this: CourseDocument) {
   if (this.courseId === -1) {
     this.courseId = await ID.generateId('Course')
   }
-  next()
 })
 
 const Course
