@@ -16,7 +16,7 @@ import { loadProblem } from './problem'
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.toString() === profile.id))) {
+  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -40,9 +40,9 @@ export async function exportTestcases (ctx: Context) {
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin
-    || (problem.owner && problem.owner.toString() === profile.id)
+    || (problem.owner && problem.owner.equals(profile._id))
     || courseService.hasProblemRole(
-      profile.id, problem._id, 'viewTestcase',
+      profile._id, problem._id, 'viewTestcase',
     )
   )) {
     ctx.throw(...ERR_PERM_DENIED)
@@ -104,7 +104,7 @@ export async function exportTestcases (ctx: Context) {
 export async function createTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.toString() === profile.id))) {
+  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -147,7 +147,7 @@ export async function createTestcase (ctx: Context) {
 export async function removeTestcase (ctx: Context) {
   const problem = await loadProblem(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.toString() === profile.id))) {
+  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -180,9 +180,9 @@ export async function getTestcase (ctx: Context) {
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin
-    || (problem.owner && problem.owner.toString() === profile.id)
+    || (problem.owner && problem.owner.equals(profile._id))
     || courseService.hasProblemRole(
-      profile.id, problem._id, 'viewTestcase',
+      profile._id, problem._id, 'viewTestcase',
     )
   )) {
     ctx.throw(...ERR_PERM_DENIED)

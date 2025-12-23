@@ -9,16 +9,16 @@ import type {
 } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { DocumentId, PaginateOption, SortOption } from '../types'
-import type { FilterQuery } from '../types/mongo'
+import type { QueryFilter } from '../types/mongo'
 import { distributeWork } from '../jobs/helper'
 import Comment from '../models/Comment'
 import Discussion from '../models/Discussion'
 
-export type DiscussionQueryFilters = FilterQuery<{
-  author?: Types.ObjectId
-  problem?: Types.ObjectId | null
-  contest?: Types.ObjectId | null
-  type?: DiscussionType
+export type DiscussionQueryFilters = QueryFilter<{
+  author: Types.ObjectId
+  problem: Types.ObjectId | null
+  contest: Types.ObjectId | null
+  type: DiscussionType
 }>
 
 interface DiscussionPopulateConfig {
@@ -51,7 +51,7 @@ export async function findDiscussions<
 ) {
   const { page, pageSize, sort, sortBy } = options
   let query = Discussion
-    .find(filters as any)
+    .find(filters)
     .sort({
       pinned: -1,
       [sortBy]: sort,
@@ -71,7 +71,7 @@ export async function findDiscussions<
   }
 
   const docsPromise = query.lean()
-  const countPromise = Discussion.countDocuments(filters as any)
+  const countPromise = Discussion.countDocuments(filters)
 
   const [ docs, total ] = await Promise.all([ docsPromise, countPromise ])
   const result: Paginated<Pick<DiscussionPopulated<TPopulate>, TFields[number]> & DocumentId> = {
@@ -124,7 +124,7 @@ async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   discussion: Types.ObjectId, populate: TPopulate,
   options: { showHidden?: boolean, exceptUsers?: Types.ObjectId[] } = {},
 ) {
-  const filters: FilterQuery<CommentModel>[] = [ { discussion } ]
+  const filters: QueryFilter<CommentModel>[] = [ { discussion } ]
   if (!options.showHidden) {
     filters.push({
       $or: [

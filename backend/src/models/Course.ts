@@ -6,7 +6,6 @@ import { encrypt } from '../utils/constants'
 import ID from './ID'
 
 export interface CourseDocument extends Document<Types.ObjectId>, CourseEntity {
-  id: string
   isPublic: boolean
   isPrivate: boolean
   canJoin: boolean

@@ -6,7 +6,7 @@ import config from '../config'
 import mongoose from '../config/db'
 import ID from './ID'
 
-export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity & { id: string }
+export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
 export type ProblemDocumentPopulated = Omit<ProblemDocument,
   'tags'
 > & {

@@ -254,7 +254,7 @@ export async function isOAuthConnectedToAnotherUser (
   const { provider, providerId } = connectionData
   const count = await OAuth.countDocuments({
     provider, providerId, user: { $ne: userId },
-  } as any)
+  })
   return count > 0
 }
 
@@ -291,7 +291,7 @@ export async function removeOAuthConnection (
   userId: Types.ObjectId,
   provider: OAuthProvider,
 ): Promise<boolean> {
-  const result = await OAuth.deleteOne({ user: userId, provider } as any)
+  const result = await OAuth.deleteOne({ user: userId, provider })
   return result.deletedCount > 0
 }
 

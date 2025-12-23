@@ -123,7 +123,7 @@ export async function getCourseMember (
     return null
   }
   const member = await CourseMember
-    .findOne({ course, user: user.id })
+    .findOne({ course, user: user._id })
     .lean()
   return CourseMember.toView(member, user)
 }
@@ -170,7 +170,7 @@ export async function removeCourseMember (
   }
 
   const courseMember = await CourseMember.findOneAndDelete({
-    user: user.id,
+    user: user._id,
     course,
   })
 
@@ -189,8 +189,8 @@ export async function getUserRole (
     } else {
       const userPerm = await CourseMember
         .findOne({
-          user: profile.id,
-          course: course.id,
+          user: profile._id,
+          course: course._id,
         })
         .lean()
       if (userPerm) {

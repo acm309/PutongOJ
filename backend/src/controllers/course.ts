@@ -105,7 +105,7 @@ const joinCourse = async (ctx: Context) => {
 
   const profile = await loadProfile(ctx)
   const result = await courseService.updateCourseMember(
-    course.id, profile.id,
+    course._id, profile._id,
     { ...role, basic: true },
   )
 
@@ -166,7 +166,7 @@ const findCourseMembers = async (ctx: Context) => {
   const { page, pageSize } = parsePaginateOption(opt, 30, 200)
 
   const response: Paginated<CourseMemberView>
-    = await courseService.findCourseMembers(course.id, { page, pageSize })
+    = await courseService.findCourseMembers(course._id, { page, pageSize })
   ctx.body = response
 }
 
@@ -181,7 +181,7 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Missing uid')
   }
 
-  const member = await courseService.getCourseMember(course.id, userId)
+  const member = await courseService.getCourseMember(course._id, userId)
   if (!member) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -227,8 +227,8 @@ const updateCourseMember = async (ctx: Context) => {
   }
 
   const result = await courseService.updateCourseMember(
-    course.id,
-    user.id,
+    course._id,
+    user._id,
     newRole as CourseRole,
   )
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> updated by <User:${profile.uid}>`)
@@ -251,7 +251,7 @@ const removeCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Cannot remove yourself from the course')
   }
 
-  const result = await courseService.removeCourseMember(course.id, userId)
+  const result = await courseService.removeCourseMember(course._id, userId)
   const response: { success: boolean } = { success: result }
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> removed by <User:${profile.uid}>`)
   ctx.body = response

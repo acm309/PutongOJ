@@ -74,7 +74,7 @@ export async function loadProblem (
   }
 
   if (profile && await courseService.hasProblemRole(
-    profile.id, problem.id, 'basic',
+    profile._id, problem._id, 'basic',
   )) {
     ctx.state.problem = problem
     return problem
@@ -125,14 +125,14 @@ const findProblems = async (ctx: Context) => {
         ...paginateOption,
         ...filterOption,
         showReserved,
-        includeOwner: profile?.id ?? null,
+        includeOwner: profile?._id ?? null,
       },
     )
   }
   list.docs = list.docs.map(doc => ({
     ...doc,
-    isOwner: profile?.id && doc.owner
-      ? doc.owner.toString() === profile.id.toString()
+    isOwner: profile?._id && doc.owner
+      ? doc.owner.equals(profile._id)
       : false,
     owner: undefined,
   }))
@@ -190,8 +190,8 @@ const getProblem = async (ctx: Context) => {
   const problem = await loadProblem(ctx)
   const profile = ctx.state.profile
 
-  const isOwner = (profile?.id && problem.owner)
-    ? profile.id.toString() === problem.owner.toString()
+  const isOwner = (profile?._id && problem.owner)
+    ? problem.owner.equals(profile._id)
     : false
   const canManage = profile?.isAdmin ?? isOwner
 
