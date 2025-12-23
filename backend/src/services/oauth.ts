@@ -236,7 +236,7 @@ export async function findUserByOAuthConnection (
 export async function getUserOAuthConnections (
   userId: Types.ObjectId,
 ): Promise<Record<OAuthProvider, OAuthDocument | null>> {
-  const records = await OAuth.find({ user: userId } as any) as OAuthDocument[]
+  const records = await OAuth.find({ user: userId }) as OAuthDocument[]
   const connections: Record<OAuthProvider, OAuthDocument | null> = {
     [OAuthProvider.CJLU]: null,
   }
