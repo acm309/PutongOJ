@@ -204,7 +204,7 @@ importers:
         version: 2.0.2
       '@putongoj/shared':
         specifier: workspace:*
-        version: file:shared(socks@2.8.7)
+        version: link:../shared
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(less@4.5.1)(lightningcss@1.30.2)(stylus@0.64.0)(terser@5.44.0)(yaml@2.8.2))
