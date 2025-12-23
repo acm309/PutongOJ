@@ -39,11 +39,10 @@ const groupSchema = new mongoose.Schema({
 
 groupSchema.plugin(mongoosePaginate)
 
-groupSchema.pre('save', async function (next) {
+groupSchema.pre('save', async function () {
   if (this.gid === -1) {
     this.gid = await ID.generateId('Group')
   }
-  next()
 })
 
 const Group

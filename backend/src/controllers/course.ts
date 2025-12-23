@@ -105,7 +105,7 @@ const joinCourse = async (ctx: Context) => {
 
   const profile = await loadProfile(ctx)
   const result = await courseService.updateCourseMember(
-    course.id, profile.id,
+    course._id, profile._id,
     { ...role, basic: true },
   )
 
@@ -166,7 +166,7 @@ const findCourseMembers = async (ctx: Context) => {
   const { page, pageSize } = parsePaginateOption(opt, 30, 200)
 
   const response: Paginated<CourseMemberView>
-    = await courseService.findCourseMembers(course.id, { page, pageSize })
+    = await courseService.findCourseMembers(course._id, { page, pageSize })
   ctx.body = response
 }
 
@@ -181,7 +181,7 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Missing uid')
   }
 
-  const member = await courseService.getCourseMember(course.id, userId)
+  const member = await courseService.getCourseMember(course._id, userId)
   if (!member) {
     return ctx.throw(...ERR_NOT_FOUND)
   }
@@ -227,8 +227,8 @@ const updateCourseMember = async (ctx: Context) => {
   }
 
   const result = await courseService.updateCourseMember(
-    course.id,
-    user.id,
+    course._id,
+    user._id,
     newRole as CourseRole,
   )
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> updated by <User:${profile.uid}>`)
@@ -251,7 +251,7 @@ const removeCourseMember = async (ctx: Context) => {
     return ctx.throw(400, 'Cannot remove yourself from the course')
   }
 
-  const result = await courseService.removeCourseMember(course.id, userId)
+  const result = await courseService.removeCourseMember(course._id, userId)
   const response: { success: boolean } = { success: result }
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> removed by <User:${profile.uid}>`)
   ctx.body = response
@@ -269,7 +269,7 @@ const addCourseProblems = async (ctx: Context) => {
     if (!problem) {
       return false
     }
-    return await courseService.addCourseProblem(course.id, problem.id)
+    return await courseService.addCourseProblem(course._id, problem._id)
   }))
 
   const successCount = result.filter(v => v).length
@@ -291,7 +291,7 @@ const moveCourseProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.moveCourseProblem(
-    course.id, problem.id, beforePos,
+    course._id, problem._id, beforePos,
   )
   ctx.body = { success: result }
 }
@@ -299,7 +299,7 @@ const moveCourseProblem = async (ctx: Context) => {
 const rearrangeCourseProblem = async (ctx: Context) => {
   const { course } = await loadCourse(ctx)
   try {
-    await courseService.rearrangeCourseProblem(course.id)
+    await courseService.rearrangeCourseProblem(course._id)
     ctx.body = { success: true }
   } catch (e: any) {
     ctx.throw(500, `Failed to rearrange course problems: ${e.message}`)
@@ -313,7 +313,7 @@ const removeCourseProblem = async (ctx: Context) => {
   if (!problem) {
     return ctx.throw(...ERR_INVALID_ID)
   }
-  const result = await courseService.removeCourseProblem(course.id, problem.id)
+  const result = await courseService.removeCourseProblem(course._id, problem._id)
   const profile = await loadProfile(ctx)
   ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${problemId}> by <User:${profile.uid}>`)
   ctx.body = { success: result }

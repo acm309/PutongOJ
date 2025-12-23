@@ -113,12 +113,12 @@ test.serial('updateCourse (serial)', async (t) => {
 })
 
 test.serial('updateCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   const user = await User.findOne({ uid: testUser.uid })
   if (!user) {
     return t.fail('Test user does not exist')
   }
-  const testUserObjectId = user.id
+  const testUserObjectId = user._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -132,7 +132,7 @@ test.serial('updateCourseMember (serial)', async (t) => {
 })
 
 test.serial('getCourseMember (non-existent user)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -145,7 +145,7 @@ test.serial('getCourseMember (non-existent user)', async (t) => {
 })
 
 test.serial('getCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -163,7 +163,7 @@ test.serial('getCourseMember (serial)', async (t) => {
 })
 
 test.serial('getCourseMember (non-member user)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -181,7 +181,7 @@ test.serial('getCourseMember (non-member user)', async (t) => {
 })
 
 test.serial('findCourseMembers (serial)', async (t) => {
-  const courseId = testContext.course?.id
+  const courseId = testContext.course?._id
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -203,7 +203,7 @@ test.serial('findCourseMembers (serial)', async (t) => {
 })
 
 test.serial('removeCourseMember (non-existent user)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -229,7 +229,7 @@ test.serial('getUserRole (entire)', async (t) => {
 })
 
 test.serial('removeCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?.id
+  const courseObjectId = testContext.course?._id
   if (!courseObjectId) {
     return t.fail('Previous test did not create a course successfully')
   }

@@ -44,7 +44,7 @@
     "koa-session": "^7.0.2",
     "koa-static": "^5.0.0",
     "lodash": "^4.17.21",
-    "mongoose": "^8.20.4",
+    "mongoose": "^9.0.2",
     "mongoose-paginate-v2": "^1.9.1",
     "pm2": "^6.0.14",
     "superagent": "^10.2.3",
