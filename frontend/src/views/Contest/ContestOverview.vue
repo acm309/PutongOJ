@@ -25,8 +25,22 @@ function onRowSelect (e: any) {
 </script>
 
 <template>
-  <DataTable :value="overview" class="pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single" @row-select="onRowSelect">
-    <Column class="pl-6 text-center w-24">
+  <DataTable
+    :value="overview" class="pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single"
+    @row-select="onRowSelect"
+  >
+    <Column class="pl-8 text-center w-18">
+      <template #body="{ data }">
+        <span v-if="solved.includes(data.pid)" class="text-emerald-500">
+          <i class="pi pi-check" />
+        </span>
+        <span v-else>
+          <i class="pi pi-minus text-muted-color text-sm/tight" />
+        </span>
+      </template>
+    </Column>
+
+    <Column class="px-2 text-center w-12">
       <template #header>
         <span class="text-center w-full">
           <i class="pi pi-hashtag" />
@@ -36,6 +50,7 @@ function onRowSelect (e: any) {
         {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
       </template>
     </Column>
+
     <Column :header="t('ptoj.problem')">
       <template #body="{ data, index }">
         <RouterLink v-if="!data.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
@@ -44,13 +59,7 @@ function onRowSelect (e: any) {
         <span v-else>{{ t('oj.problem_invalid') }}</span>
       </template>
     </Column>
-    <Column v-if="solved.length > 0" class="text-center w-16">
-      <template #body="{ data }">
-        <span v-if="solved.includes(data.pid)" class="flex justify-center text-emerald-500">
-          <i class="pi pi-check" />
-        </span>
-      </template>
-    </Column>
+
     <Column class="pr-6 w-42">
       <template #header>
         <span class="text-center w-full">
@@ -68,5 +77,11 @@ function onRowSelect (e: any) {
         </span>
       </template>
     </Column>
+
+    <template #empty>
+      <span class="px-2">
+        {{ t('ptoj.empty_content_desc') }}
+      </span>
+    </template>
   </DataTable>
 </template>
