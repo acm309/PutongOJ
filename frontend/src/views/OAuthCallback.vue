@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OAuthProvider } from '@putongoj/shared'
 import type { Message } from 'view-ui-plus'
-import { Alert } from 'view-ui-plus'
+import { Alert, Icon } from 'view-ui-plus'
 import { computed, inject, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { handleOAuthCallback } from '@/api/oauth'

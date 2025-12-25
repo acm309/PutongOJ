@@ -3,10 +3,8 @@ import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
-
 import { Paragraph, TabPane, Tabs, Title, Typography } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
-
 import 'highlight.js/styles/atom-one-light.css'
 
 const { locale } = useI18n()

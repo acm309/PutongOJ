@@ -1,4 +1,5 @@
 <script setup>
+import { Button } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'

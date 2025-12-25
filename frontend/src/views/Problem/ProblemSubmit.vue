@@ -1,9 +1,9 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { Button, Spin } from 'view-ui-plus'
 import { inject, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-
 import Submit from '@/components/Submit'
 import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'

@@ -3,45 +3,14 @@ import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
-import {
-  Button,
-  Card,
-  Col,
-  DatePicker,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  Form,
-  FormItem,
-  Icon,
-  Input,
-  Menu,
-  MenuItem,
-  Message,
-  Modal,
-  Option,
-  Page,
-  Progress,
-  Row,
-  Select,
-  Spin,
-  Step,
-  Steps,
-  Submenu,
-  Switch,
-  TabPane,
-  Tabs,
-  Tag,
-  Transfer,
-  Tooltip as VUITooltip,
-} from 'view-ui-plus'
+import { Message, Modal, Spin } from 'view-ui-plus'
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 import locales from '@/locales'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { PutongAura } from '@/theme/aura'
-import App from './App'
+import App from './App.vue'
 import router from './router'
 import '@/theme/index.less'
 import 'primeicons/primeicons.css'
@@ -74,36 +43,6 @@ const i18n = createI18n({
 })
 
 app.use(i18n)
-
-app.component('Row', Row)
-app.component('Col', Col)
-app.component('Input', Input)
-app.component('Icon', Icon)
-app.component('Tabs', Tabs)
-app.component('TabPane', TabPane)
-app.component('Button', Button)
-app.component('Select', Select)
-app.component('Option', Option)
-app.component('Page', Page)
-app.component('Tooltip', VUITooltip)
-app.component('Card', Card)
-app.component('Progress', Progress)
-app.component('Dropdown', Dropdown)
-app.component('DropdownMenu', DropdownMenu)
-app.component('DropdownItem', DropdownItem)
-app.component('Transfer', Transfer)
-app.component('Steps', Steps)
-app.component('Step', Step)
-app.component('DatePicker', DatePicker)
-app.component('Menu', Menu)
-app.component('MenuItem', MenuItem)
-app.component('Submenu', Submenu)
-app.component('Modal', Modal)
-app.component('Form', Form)
-app.component('FormItem', FormItem)
-app.component('ISwitch', Switch)
-app.component('Tag', Tag)
-app.component('Spin', Spin)
 
 // https://forum.vuejs.org/t/how-to-use-globalproperties-in-vue-3-setup-method/108387/4
 // https://vuejs.org/api/application.html#app-provide

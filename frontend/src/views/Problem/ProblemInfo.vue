@@ -1,5 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { Button } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Problem from '@/components/Problem.vue'

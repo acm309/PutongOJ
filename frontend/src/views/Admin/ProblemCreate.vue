@@ -1,4 +1,5 @@
 <script setup>
+import { Button, Step, Steps } from 'view-ui-plus'
 import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

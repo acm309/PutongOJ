@@ -1,5 +1,5 @@
 <script setup>
-import { Col, Form, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
+import { Col, Form, FormItem, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'

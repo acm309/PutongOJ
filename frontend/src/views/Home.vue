@@ -4,9 +4,7 @@ import { Card, Col, Icon, Page, Row, Spin } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useNewsStore } from '@/store/modules/news'
-
 import { timePretty } from '@/utils/formate'
-
 import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const { locale, t } = useI18n()

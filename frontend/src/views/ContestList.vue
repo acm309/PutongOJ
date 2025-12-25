@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { Button, Input, Page, Poptip, Spin } from 'view-ui-plus'
+import { Button, Icon, Input, Page, Poptip, Spin, Tag } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

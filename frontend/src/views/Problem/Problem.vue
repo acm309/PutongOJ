@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { TabPane, Tabs } from 'view-ui-plus'
+import { Spin, TabPane, Tabs } from 'view-ui-plus'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

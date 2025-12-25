@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Message } from 'view-ui-plus'
 import { useClipboard } from '@vueuse/core'
-import { Space } from 'view-ui-plus'
+import { Icon, Space, Tooltip } from 'view-ui-plus'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
