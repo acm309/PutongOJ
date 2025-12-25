@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
-import { Form, FormItem, Input, Modal, Radio, RadioGroup } from 'view-ui-plus'
-import { inject, ref, watch } from 'vue'
+import { Form, FormItem, Input, Message, Modal, Radio, RadioGroup } from 'view-ui-plus'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useCourseStore } from '@/store/modules/course'
@@ -15,7 +14,6 @@ const props = defineProps({
 const emit = defineEmits([ 'update:modelValue' ])
 
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 const courseStore = useCourseStore()
 const { createCourse } = courseStore
 const router = useRouter()
@@ -50,13 +48,13 @@ function submit () {
     if (valid) {
       try {
         const id = await createCourse(courseForm as any)
-        message.success(t('oj.course_create_success'))
+        Message.success(t('oj.course_create_success'))
         router.push({ name: 'courseProblems', params: { id } })
       } catch (e: any) {
-        message.error(t('oj.course_create_failed', { error: e.message }))
+        Message.error(t('oj.course_create_failed', { error: e.message }))
       }
     } else {
-      message.warning(t('oj.form_invalid'))
+      Message.warning(t('oj.form_invalid'))
     }
     close()
   })

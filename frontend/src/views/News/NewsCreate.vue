@@ -1,6 +1,5 @@
 <script setup>
-import { Button } from 'view-ui-plus'
-import { inject } from 'vue'
+import { Button, Message } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OjNewsEdit from '@/components/NewsEdit'
@@ -8,7 +7,6 @@ import { useNewsStore } from '@/store/modules/news'
 
 const newsStore = useNewsStore()
 const { create } = newsStore
-const Message = inject('$Message')
 const router = useRouter()
 const { t } = useI18n()
 

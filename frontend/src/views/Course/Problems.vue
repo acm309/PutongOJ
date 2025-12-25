@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { ProblemEntityPreview } from '@backend/types/entity'
-import type { Message } from 'view-ui-plus'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
 import { useConfirm } from 'primevue'
-import { Button, Form, FormItem, Icon, Input, InputNumber, Modal, Option, Page, Select, Spin, Tag, Tooltip } from 'view-ui-plus'
-import { inject, onBeforeMount, ref } from 'vue'
+import { Button, Form, FormItem, Icon, Input, InputNumber, Message, Modal, Option, Page, Select, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -90,15 +89,13 @@ async function switchStatus (problem: ProblemEntityPreview) {
   await fetch()
 }
 
-const message = inject('$Message') as typeof Message
-
 const sortingModal = ref(false)
 const sorting = ref({} as ProblemEntityPreview)
 const newPosition = ref<number | null>(null)
 
 async function updateSorting () {
   if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.total + 1) {
-    message.error(t('oj.invalid_position'))
+    Message.error(t('oj.invalid_position'))
     return
   }
   loading = true
@@ -108,11 +105,11 @@ async function updateSorting () {
       sorting.value.pid,
       newPosition.value,
     )
-    message.success(t('oj.problem_sorting_updated'))
+    Message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
   } catch (e: any) {
-    message.error(t('oj.failed_to_update_sorting', { error: e.message }))
+    Message.error(t('oj.failed_to_update_sorting', { error: e.message }))
   } finally {
     loading = false
   }
@@ -133,7 +130,7 @@ function removeProblem (event: any, pid: number) {
     },
     accept: async () => {
       await api.course.removeCourseProblem(course.value.courseId, pid)
-      message.success('题目已从课程中移除')
+      Message.success('题目已从课程中移除')
       fetch()
     },
   })

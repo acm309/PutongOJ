@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { ContestEntityView } from '@backend/types/entity'
-import type { Message } from 'view-ui-plus'
 import { encrypt, status } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Alert, Button, Form, FormItem, Space, Step, Steps } from 'view-ui-plus'
-import { inject, onMounted, ref } from 'vue'
+import { Alert, Button, Form, FormItem, Message, Space, Step, Steps } from 'view-ui-plus'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import ContestBasicEdit from '@/components/ContestBasicEdit.vue'
@@ -17,7 +16,6 @@ const contestStore = useContestStore()
 
 const { create: createContest } = contestStore
 const { contest } = storeToRefs(contestStore)
-const message = inject('$Message') as typeof Message
 
 const initialized = ref(false)
 
@@ -39,11 +37,11 @@ async function init (): Promise<void> {
 
 async function submit (): Promise<void> {
   if (!contest.value.title.trim()) {
-    message.error(t('oj.title_is_required'))
+    Message.error(t('oj.title_is_required'))
     return
   }
   if (!contest.value.start || !contest.value.end) {
-    message.error(t('oj.time_is_required'))
+    Message.error(t('oj.time_is_required'))
     return
   }
 
@@ -55,7 +53,7 @@ async function submit (): Promise<void> {
       : undefined,
   })
 
-  message.success(t('oj.create_contest_success', contest.value))
+  Message.success(t('oj.create_contest_success', contest.value))
   router.push({ name: 'contestEdit', params: { cid: contestId } })
 }
 onMounted(init)

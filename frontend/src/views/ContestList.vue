@@ -1,8 +1,7 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { Button, Icon, Input, Page, Poptip, Spin, Tag } from 'view-ui-plus'
-import { inject } from 'vue'
+import { Button, Icon, Input, Message, Modal, Page, Poptip, Spin, Tag } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -25,8 +24,6 @@ const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
 const { profile, isLogined, isAdmin, isRoot } = $(storeToRefs(sessionStore))
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
 let enterPwd = $ref('')
 const query = $computed(() => purify({ page, pageSize }))
 const contestTitle = $ref('')
@@ -60,7 +57,7 @@ async function enter (item) {
     profile.verifyContest.push(+item.cid)
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else {
-    $Message.error('Wrong password!')
+    Message.error('Wrong password!')
   }
 }
 
@@ -70,7 +67,7 @@ async function visit (item) {
   } else if (isAdmin || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
-    $Message.error('This contest hasn\'t started yet!')
+    Message.error('This contest hasn\'t started yet!')
   } else if (+item.encrypt === encrypt.Public) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (+item.encrypt === encrypt.Private) {
@@ -78,10 +75,10 @@ async function visit (item) {
     if (data)
       router.push({ name: 'contestOverview', params: { cid: item.cid } })
     else
-      $Message.error('You\'re not invited to attend this contest!')
+      Message.error('You\'re not invited to attend this contest!')
   } else if (+item.encrypt === encrypt.Password) {
     document.activeElement.blur()
-    $Modal.confirm({
+    Modal.confirm({
       render: (h) => {
         return h(Input, {
           placeholder: 'Please enter password.',
@@ -89,7 +86,7 @@ async function visit (item) {
           onChange: event => enterPwd = event.target.value,
           onOnEnter: () => {
             enter(item)
-            $Modal.remove()
+            Modal.remove()
           },
         })
       },
@@ -111,16 +108,16 @@ async function change (contest) {
 }
 
 function del (cid) {
-  $Modal.confirm({
+  Modal.confirm({
     title: '提示',
     content: '<p>此操作将永久删除该文件, 是否继续?</p>',
     onOk: async () => {
       loading = true
       await remove({ cid })
-      $Message.success(`成功删除 ${cid}！`)
+      Message.success(`成功删除 ${cid}！`)
       loading = false
     },
-    onCancel: () => $Message.info('已取消删除！'),
+    onCancel: () => Message.info('已取消删除！'),
   })
 }
 

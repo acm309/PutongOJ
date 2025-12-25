@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Message, Modal } from 'view-ui-plus'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
-import { Button, Icon, Input, Option, Page, Select, Spin, Tag, Tooltip } from 'view-ui-plus'
-import { inject, onBeforeMount, reactive } from 'vue'
+import { Button, Icon, Input, Message, Modal, Option, Page, Select, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { onBeforeMount, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -70,11 +69,8 @@ function change (problem: { pid: number, status: number }) {
   update({ pid: problem.pid, status: problem.status }).then(fetch)
 }
 
-const message = inject('$Message') as typeof Message
-const modal = inject('$Modal') as typeof Modal
-
 function del (pid: number) {
-  modal.confirm({
+  Modal.confirm({
     okText: t('oj.ok'),
     cancelText: t('oj.cancel'),
     title: t('oj.warning'),
@@ -82,10 +78,10 @@ function del (pid: number) {
     onOk: async () => {
       loading = true
       await remove({ pid })
-      message.success(t('oj.remove_problem_success', { pid }))
+      Message.success(t('oj.remove_problem_success', { pid }))
       loading = false
     },
-    onCancel: () => message.info(t('oj.cancel_remove')),
+    onCancel: () => Message.info(t('oj.cancel_remove')),
   })
 }
 

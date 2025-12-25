@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { CourseMemberView } from '@backend/types/entity'
-import type { Message, Modal } from 'view-ui-plus'
 import type { UserPrivilege } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Button, Checkbox, Icon, Page, Poptip, Spin, Tag, Tooltip } from 'view-ui-plus'
-import { inject, onBeforeMount, watch } from 'vue'
+import { Button, Checkbox, Icon, Message, Modal, Page, Poptip, Spin, Tag, Tooltip } from 'view-ui-plus'
+import { onBeforeMount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -23,8 +22,6 @@ const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const { privilege } = $(storeToRefs(rootStore))
 const { isAdmin, profile } = $(storeToRefs(sessionStore))
-const modal = inject('$Modal') as typeof Modal
-const message = inject('$Message') as typeof Message
 
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
@@ -63,14 +60,14 @@ function openEditDialog (userId: string) {
 }
 
 function removeMember (userId: string) {
-  modal.confirm({
+  Modal.confirm({
     title: t('oj.delete'),
     content: t('oj.course_remove_member_confirm'),
     okText: t('oj.ok'),
     cancelText: t('oj.cancel'),
     onOk () {
       course.removeMember(id, userId).then(() => {
-        message.success(t('oj.course_member_remove_success'))
+        Message.success(t('oj.course_member_remove_success'))
         fetch()
       })
     },

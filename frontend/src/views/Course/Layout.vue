@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { courseRoleNone } from '@backend/utils/constants'
 import { AxiosError } from 'axios'
 import { storeToRefs } from 'pinia'
-import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Icon, Input, Modal, Row, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
-import { computed, inject, onBeforeMount, ref } from 'vue'
+import { Auth, Button, ButtonGroup, Col, Divider, Exception, Form, FormItem, Icon, Input, Message, Modal, Row, Space, Spin, TabPane, Tabs } from 'view-ui-plus'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -21,7 +20,6 @@ const sessionStore = useSessionStore()
 const { findCourse } = courseStore
 const { course } = storeToRefs(courseStore)
 const { isAdmin } = storeToRefs(sessionStore)
-const message = inject('$Message') as typeof Message
 
 const displayTab = computed(() => route.name as string || 'courseProblems')
 const courseId = computed(() => Number.parseInt(route.params.id as string))
@@ -73,23 +71,23 @@ function createContest () {
 async function joinCourse () {
   joinFormRef.value.validate(async (valid: boolean) => {
     if (!valid) {
-      message.warning(t('oj.form_invalid'))
+      Message.warning(t('oj.form_invalid'))
       return
     }
     joining.value = true
     try {
       const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
       if (result.data?.success === true) {
-        message.success(t('oj.course_join_success'))
+        Message.success(t('oj.course_join_success'))
         fetch()
       } else if (result instanceof AxiosError) {
-        message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
+        Message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
       } else {
-        message.error(t('join_failed', { error: t('oj.unknown_error') }))
+        Message.error(t('join_failed', { error: t('oj.unknown_error') }))
       }
       joinModal.value = false
     } catch (e: any) {
-      message.error(t('join_failed', { error: e?.message || t('oj.unknown_error') }))
+      Message.error(t('join_failed', { error: e?.message || t('oj.unknown_error') }))
     } finally {
       joining.value = false
     }

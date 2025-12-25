@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import type { Ranklist, RanklistInfo } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Alert, BackTop, Button, Icon, Poptip, Space, Spin, Switch } from 'view-ui-plus'
-import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue'
+import { Alert, BackTop, Button, Icon, Message, Poptip, Space, Spin, Switch } from 'view-ui-plus'
+import { onBeforeMount, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -18,7 +17,6 @@ const sessionStore = useSessionStore()
 const route = useRoute()
 const router = useRouter()
 const { isAdmin, profile } = storeToRefs(sessionStore)
-const message = inject('$Message') as typeof Message
 
 const cid = $computed(() => Number.parseInt(route.params.cid as string) || 1)
 const { contest, overview } = storeToRefs(contestStore)
@@ -55,7 +53,7 @@ function setAutoRefresh (enabled: boolean) {
   if (enabled) {
     autoRefresh = setInterval(async () => {
       await getRanklist()
-      message.info({
+      Message.info({
         content: t('oj.refreshed'),
         duration: 1,
       })

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import { inject } from 'vue'
+import { Message } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Submit from '@/components/Submit.vue'
@@ -15,7 +14,6 @@ const contestStore = useContestStore()
 const solutionStore = useSolutionStore()
 const route = useRoute()
 const router = useRouter()
-const message = inject('$Message') as typeof Message
 
 const { problems, overview, contest, totalProblems } = $(storeToRefs(contestStore))
 const { solution } = $(storeToRefs(solutionStore))
@@ -31,7 +29,7 @@ const mid = $computed(() => currentContestId)
 async function submit () {
   await create({ pid, mid, ...solution })
   router.push({ name: 'ContestMySubmissions', params: route.params })
-  message.info(t('oj.submitSuccess', { id: currentProblemId }))
+  Message.info(t('oj.submitSuccess', { id: currentProblemId }))
 }
 </script>
 

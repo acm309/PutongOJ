@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { contestLabelingStyle } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Button, Divider, Form, FormItem, Input, Option, Select, Spin } from 'view-ui-plus'
-import { computed, inject, onMounted, ref } from 'vue'
+import { Button, Divider, Form, FormItem, Input, Message, Option, Select, Spin } from 'view-ui-plus'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -18,7 +17,6 @@ const route = useRoute()
 const router = useRouter()
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
-const message = inject('$Message') as typeof Message
 
 const { overview, contest } = storeToRefs(contestStore)
 const { update: updateContest, findOne } = contestStore
@@ -37,14 +35,14 @@ async function loadContest () {
 
 async function submitForm () {
   const cid = await updateContest(contest.value)
-  message.success(t('oj.update_contest_success', { cid }))
+  Message.success(t('oj.update_contest_success', { cid }))
   router.push({ name: 'contestOverview', params: { cid } })
   await loadContest()
 }
 
 async function transferContest () {
   if (!transferTo.value) {
-    message.error(t('oj.please_select_target_course'))
+    Message.error(t('oj.please_select_target_course'))
     return
   }
   transferring.value = true
@@ -53,11 +51,11 @@ async function transferContest () {
       cid: contest.value.cid,
       course: transferTo.value,
     })
-    message.success(t('oj.contest_transferred_successfully'))
+    Message.success(t('oj.contest_transferred_successfully'))
     loadContest()
     transferTo.value = ''
   } catch (error: any) {
-    message.error(error.message || t('oj.failed_to_transfer_contest'))
+    Message.error(error.message || t('oj.failed_to_transfer_contest'))
   } finally {
     transferring.value = false
   }

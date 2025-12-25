@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
-import { Form, FormItem, Modal } from 'view-ui-plus'
-import { inject, ref, watch } from 'vue'
+import { Form, FormItem, Message, Modal } from 'view-ui-plus'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import ProblemSelect from '@/components/ProblemSelect.vue'
@@ -12,7 +11,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits([ 'update:modelValue', 'close' ])
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 
 const modal = ref(false)
 const selected = ref<number[]>([])
@@ -28,9 +26,9 @@ async function submit () {
   try {
     const { data: { added } } = await api.course.addProblems(props.courseId, selected.value)
     if (added > 0) {
-      message.success(t('oj.successfully_added_problems', { added }))
+      Message.success(t('oj.successfully_added_problems', { added }))
     } else {
-      message.warning(t('oj.no_new_problems_added'))
+      Message.warning(t('oj.no_new_problems_added'))
     }
     close(added)
   } catch (error: any) {

@@ -1,7 +1,7 @@
 <script setup>
 import only from 'only'
-import { Button, Col, Icon, Row } from 'view-ui-plus'
-import { inject, onBeforeMount, toRefs } from 'vue'
+import { Button, Col, Icon, Message, Row } from 'view-ui-plus'
+import { onBeforeMount, toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Draggable from 'vuedraggable'
@@ -18,19 +18,17 @@ const jobs = $ref({})
 
 let pid = $ref('')
 
-const $Message = inject('$Message')
-
 if (typeof overview !== 'undefined') {
   overview.forEach((item) => {
     if (!item.invalid) return
-    $Message.error(`Problem ${item.pid} is invalid, auto removed`)
+    Message.error(`Problem ${item.pid} is invalid, auto removed`)
     contest.list.splice(contest.list.indexOf(item.pid), 1)
   })
 }
 
 async function add () {
   if (!pid) {
-    $Message.error('Please select a problem')
+    Message.error('Please select a problem')
     return
   }
   const { problem } = await findOneProblem({ pid })

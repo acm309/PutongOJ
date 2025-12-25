@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { tagColors } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Button, Form, FormItem, Icon, Input, Modal, Option, Select, Spin, Tag } from 'view-ui-plus'
-import { capitalize, inject, onBeforeMount, ref } from 'vue'
+import { Button, Form, FormItem, Icon, Input, Message, Modal, Option, Select, Spin, Tag } from 'view-ui-plus'
+import { capitalize, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTagStore } from '@/store/modules/tag'
 import { timePretty } from '@/utils/formate'
@@ -11,9 +10,6 @@ import { timePretty } from '@/utils/formate'
 const { t } = useI18n()
 const tagStore = useTagStore()
 const { tag, tags, tagsGroupByColor } = storeToRefs(tagStore)
-
-const message = inject('$Message') as typeof Message
-const modal = inject('$Modal') as typeof Modal
 
 const loadingTag = ref(false)
 const loadingTags = ref(false)
@@ -65,7 +61,7 @@ const tagRules = $computed(() => ({
 
 async function doCreateTag () {
   await tagStore.createTag()
-  message.success('Tag created!')
+  Message.success('Tag created!')
   tagModal.value = false
   await fetch()
 }
@@ -74,12 +70,12 @@ function createTag () {
   tag.value.name = tag.value.name.trim()
   tagFormRef.value.validate((valid: boolean) => {
     if (!valid) {
-      message.error(t('oj.form_invalid'))
+      Message.error(t('oj.form_invalid'))
       return
     }
     const exists = tags.value.find(item => item.name === tag.value.name)
     if (exists) {
-      modal.confirm({
+      Modal.confirm({
         title: 'Duplicate Tag Name',
         content: `Tag with name "${tag.value.name}" already exists. Do you want to create it anyway?`,
         okText: 'Create',
@@ -96,12 +92,12 @@ function saveTag () {
   tag.value.name = tag.value.name.trim()
   tagFormRef.value.validate(async (valid: boolean) => {
     if (!valid) {
-      message.error(t('oj.form_invalid'))
+      Message.error(t('oj.form_invalid'))
       return
     }
     await tagStore.updateTag()
     tagModal.value = false
-    message.success('Tag updated!')
+    Message.success('Tag updated!')
     await fetch()
   })
 }

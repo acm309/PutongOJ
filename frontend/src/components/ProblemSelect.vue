@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { ProblemEntityItem } from '@backend/types/entity'
-import type { Message } from 'view-ui-plus'
 import debounce from 'lodash.debounce'
-import { Option, Select } from 'view-ui-plus'
-import { computed, inject, ref, watch } from 'vue'
+import { Message, Option, Select } from 'view-ui-plus'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 
@@ -23,7 +22,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 
 const loading = ref(false)
 const options = ref<{ value: number, label: string }[]>([])
@@ -57,7 +55,7 @@ const findProblemOptions = debounce(async (query: string) => {
       })
     })
   } catch (error: any) {
-    message.error(error.message || t('oj.failed_to_fetch_problems'))
+    Message.error(error.message || t('oj.failed_to_fetch_problems'))
   } finally {
     loading.value = false
   }

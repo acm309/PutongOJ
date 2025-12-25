@@ -1,6 +1,6 @@
 <script setup>
-import { Button, Step, Steps } from 'view-ui-plus'
-import { inject, onMounted } from 'vue'
+import { Button, Message, Modal, Step, Steps } from 'view-ui-plus'
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { createTestcase } from '@/api/problem'
@@ -26,36 +26,33 @@ const problem = $ref({
   tags: [],
 })
 
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
-
 async function submit () {
   const pid = await problemStore.create(problem)
-  $Message.success(t('oj.create_problem_success', { pid }))
+  Message.success(t('oj.create_problem_success', { pid }))
   if (!problem.in && !problem.out) {
-    $Message.info(t('oj.sample_input_output_empty'))
+    Message.info(t('oj.sample_input_output_empty'))
   } else {
     await createTestcase(pid, { in: problem.in, out: problem.out })
-    $Message.success(t('oj.sample_testcase_created'))
+    Message.success(t('oj.sample_testcase_created'))
   }
   router.push({ name: 'problemInfo', params: { pid } })
 }
 
 async function submitCheck () {
   if (!problem.title.trim()) {
-    $Message.error(t('oj.title_is_required'))
+    Message.error(t('oj.title_is_required'))
   } else if (!problem.description.trim()) {
-    $Message.error(t('oj.description_is_required'))
+    Message.error(t('oj.description_is_required'))
   } else {
     if (!problem.in || !problem.out) {
-      $Modal.confirm({
+      Modal.confirm({
         title: t('oj.notice'),
         content: t('oj.sample_input_output_incomplete'),
         onOk: async () => {
           await submit()
         },
         onCancel: () => {
-          $Message.info(t('oj.creation_cancelled'))
+          Message.info(t('oj.creation_cancelled'))
         },
       })
     } else {

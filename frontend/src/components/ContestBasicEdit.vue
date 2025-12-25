@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { encrypt } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { DatePicker, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
-import { inject, onMounted, ref } from 'vue'
+import { DatePicker, Form, FormItem, Input, Message, Option, Select } from 'view-ui-plus'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useContestStore } from '@/store/modules/contest'
 
@@ -14,7 +13,6 @@ const { t } = useI18n()
 const contestStore = useContestStore()
 const { contest } = storeToRefs(contestStore)
 const { findOne: findContest } = contestStore
-const message = inject('$Message') as typeof Message
 
 const startsAt = ref(new Date())
 const endsAt = ref(new Date())
@@ -36,7 +34,7 @@ async function updateDatetime (type: 'start' | 'end', time: string) {
       if (date.getTime() >= contest.value.end) {
         contest.value.end = date.getTime() + 60 * 1000 * 60
         endsAt.value = new Date(contest.value.end)
-        message.warning(t('oj.contest_end_time_adjusted'))
+        Message.warning(t('oj.contest_end_time_adjusted'))
       }
       break
     case 'end':
@@ -44,7 +42,7 @@ async function updateDatetime (type: 'start' | 'end', time: string) {
       if (date.getTime() <= contest.value.start) {
         contest.value.start = date.getTime() - 60 * 1000 * 60
         startsAt.value = new Date(contest.value.start)
-        message.warning(t('oj.contest_start_time_adjusted'))
+        Message.warning(t('oj.contest_start_time_adjusted'))
       }
       break
   }

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { CourseRole } from '@backend/types'
-import type { Message } from 'view-ui-plus'
 import type { User } from '@/types'
 import debounce from 'lodash.debounce'
-import { Alert, Checkbox, Form, FormItem, Modal, Option, Select, Spin } from 'view-ui-plus'
-import { computed, inject, onBeforeMount, ref, watch } from 'vue'
+import { Alert, Checkbox, Form, FormItem, Message, Modal, Option, Select, Spin } from 'view-ui-plus'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import { suggestUsers } from '@/api/user'
@@ -27,7 +26,6 @@ const props = defineProps({
 const emit = defineEmits([ 'update:modelValue' ])
 
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 
 const roleConfig = computed(() => ({
   basic: t('oj.course_basic_view'),
@@ -108,7 +106,7 @@ async function submit () {
   loading.value = true
   try {
     await api.course.updateMember(courseId.value, userId.value, role.value)
-    message.success(t('oj.course_member_update_success'))
+    Message.success(t('oj.course_member_update_success'))
     close()
   } finally {
     loading.value = false

@@ -1,8 +1,8 @@
 <script setup>
 import only from 'only'
 import { storeToRefs } from 'pinia'
-import { Button, Icon, Input, Page, Poptip, Spin, Tag } from 'view-ui-plus'
-import { computed, inject } from 'vue'
+import { Button, Icon, Input, Message, Modal, Page, Poptip, Spin, Tag } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -28,8 +28,6 @@ const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
 const { profile, isLogined, isAdmin } = $(storeToRefs(sessionStore))
 const page = $computed(() => Number.parseInt(route.query.page) || 1)
 const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
 let enterPwd = $ref('')
 const courseId = $computed(() => Number.parseInt(route.params.id))
 const role = computed(() => {
@@ -66,7 +64,7 @@ async function visit (item) {
   } else if (isAdmin || role.value.manageContest || profile.verifyContest.includes(+item.cid)) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
-    $Message.error(t('oj.contest_not_started'))
+    Message.error(t('oj.contest_not_started'))
   } else if (+item.encrypt === encrypt.Public) {
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else if (+item.encrypt === encrypt.Private) {
@@ -74,10 +72,10 @@ async function visit (item) {
     if (data)
       router.push({ name: 'contestOverview', params: { cid: item.cid } })
     else
-      $Message.error(t('oj.not_invited_to_contest'))
+      Message.error(t('oj.not_invited_to_contest'))
   } else if (+item.encrypt === encrypt.Password) {
     document.activeElement.blur()
-    $Modal.confirm({
+    Modal.confirm({
       render: (h) => {
         return h(Input, {
           placeholder: 'Please enter password.',
@@ -85,7 +83,7 @@ async function visit (item) {
           onChange: event => enterPwd = event.target.value,
           onOnEnter: () => {
             enter(item)
-            $Modal.remove()
+            Modal.remove()
           },
         })
       },
@@ -106,7 +104,7 @@ async function enter (item) {
     profile.verifyContest.push(+item.cid)
     router.push({ name: 'contestOverview', params: { cid: item.cid } })
   } else {
-    $Message.error(t('oj.wrong_password'))
+    Message.error(t('oj.wrong_password'))
   }
 }
 

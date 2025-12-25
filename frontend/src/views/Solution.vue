@@ -5,8 +5,8 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
 import { storeToRefs } from 'pinia'
-import { Button, ButtonGroup, Col, Divider, Icon, Numeral, Poptip, Row, Space, Spin } from 'view-ui-plus'
-import { inject, ref } from 'vue'
+import { Button, ButtonGroup, Col, Divider, Icon, Message, Modal, Numeral, Poptip, Row, Space, Spin } from 'view-ui-plus'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -37,15 +37,13 @@ const { solution } = $(storeToRefs(solutionStore))
 const { isAdmin, isRoot } = storeToRefs(session)
 const route = useRoute()
 
-const $Message = inject('$Message')
-const $Modal = inject('$Modal')
 const { copy } = useClipboard()
 
 let loading = $ref(false)
 
 function onCopy (content) {
   copy(content)
-  $Message.success(t('oj.copied'))
+  Message.success(t('oj.copied'))
 }
 
 function prettyCode (code) {
@@ -68,7 +66,7 @@ async function rejudge () {
   if (!isRoot.value) {
     return
   }
-  $Modal.confirm({
+  Modal.confirm({
     title: 'Rejudge this solution?',
     content: 'This action will rejudge this solution using the latest problem data. '
       + 'All previous results will be truncated.',
@@ -76,9 +74,9 @@ async function rejudge () {
       loading = true
       const res = await updateSolution({ judge: 11 })
       if (res.success) {
-        $Message.success('Rejudge request sent')
+        Message.success('Rejudge request sent')
       } else {
-        $Message.error(res.message || 'Failed to send rejudge request')
+        Message.error(res.message || 'Failed to send rejudge request')
       }
       showRefresh.value = true
       loading = false
@@ -92,7 +90,7 @@ async function markAsSkipped () {
   if (!isRoot.value) {
     return
   }
-  $Modal.confirm({
+  Modal.confirm({
     title: 'Mark this solution as Skipped?',
     content: 'This action will mark this solution as Skipped. '
       + 'All previous results will be truncated.',
@@ -100,9 +98,9 @@ async function markAsSkipped () {
       loading = true
       const res = await updateSolution({ judge: 12 })
       if (res.success) {
-        $Message.success('Marked as Skipped')
+        Message.success('Marked as Skipped')
       } else {
-        $Message.error(res.message || 'Failed to mark as Skipped')
+        Message.error(res.message || 'Failed to mark as Skipped')
       }
       loading = false
     },

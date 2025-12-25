@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { OAuthProvider } from '@putongoj/shared'
-import type { Message } from 'view-ui-plus'
-import { Alert, Icon } from 'view-ui-plus'
-import { computed, inject, onMounted } from 'vue'
+import { Alert, Icon, Message } from 'view-ui-plus'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { handleOAuthCallback } from '@/api/oauth'
 import { useSessionStore } from '@/store/modules/session'
@@ -11,7 +10,6 @@ const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const { fetchProfile, toggleAuthnDialog } = sessionStore
-const message = inject('$Message') as typeof Message
 
 const code = computed(() => route.query.code as string || '')
 const state = computed(() => route.query.state as string || '')
@@ -19,7 +17,7 @@ const provider = computed(() => route.params.provider as string || '')
 
 async function processOAuthCallback () {
   if (!code.value || !state.value) {
-    message.error('Invalid OAuth callback parameters.')
+    Message.error('Invalid OAuth callback parameters.')
     router.replace({ name: 'home' })
     return
   }
@@ -28,18 +26,18 @@ async function processOAuthCallback () {
     { code: code.value, state: state.value },
   )
   if (!data.success) {
-    message.error(data.message || 'OAuth callback processing failed')
+    Message.error(data.message || 'OAuth callback processing failed')
     toggleAuthnDialog()
     return
   }
   const { action } = data.data!
   if (action === 'connect') {
-    message.success('OAuth account successfully connected!')
+    Message.success('OAuth account successfully connected!')
     router.replace({ name: 'AccountSettings' })
     return
   }
   if (action === 'login') {
-    message.success('OAuth login successful!')
+    Message.success('OAuth login successful!')
     await fetchProfile()
     router.replace({ name: 'home' })
   }

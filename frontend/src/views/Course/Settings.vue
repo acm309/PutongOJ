@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
-import { Button, Col, Divider, Form, FormItem, Input, Poptip, Radio, RadioGroup, Row } from 'view-ui-plus'
-import { inject, ref } from 'vue'
+import { Button, Col, Divider, Form, FormItem, Input, Message, Poptip, Radio, RadioGroup, Row } from 'view-ui-plus'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import { useCourseStore } from '@/store/modules/course'
@@ -13,7 +12,6 @@ const sessionStore = useSessionStore()
 const courseStore = useCourseStore()
 const { isRoot } = storeToRefs(sessionStore)
 const { course } = storeToRefs(courseStore)
-const message = inject('$Message') as typeof Message
 
 const submiting = ref(false)
 const courseRules = {
@@ -38,21 +36,21 @@ function updateCourse () {
           encrypt: course.value.encrypt,
           joinCode: course.value.joinCode || '',
         })
-        message.success(t('oj.course_updated_successfully'))
+        Message.success(t('oj.course_updated_successfully'))
       } catch (e: any) {
-        message.error(t('oj.failed_to_update_course', { error: e.message }))
+        Message.error(t('oj.failed_to_update_course', { error: e.message }))
       } finally {
         submiting.value = false
       }
     } else {
-      message.warning(t('oj.form_invalid'))
+      Message.warning(t('oj.form_invalid'))
     }
   })
 }
 
 function rearrangeProblems () {
   api.course.rearrangeProblems(course.value.courseId)
-  message.info(t('oj.rearrange_task_dispatched'))
+  Message.info(t('oj.rearrange_task_dispatched'))
 }
 </script>
 

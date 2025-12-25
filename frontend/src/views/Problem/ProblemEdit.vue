@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { ProblemEntityForm } from '@backend/types/entity'
-import type { Message } from 'view-ui-plus'
 import { storeToRefs } from 'pinia'
-import { Button, Spin } from 'view-ui-plus'
-import { computed, inject, onMounted, ref } from 'vue'
+import { Button, Message, Spin } from 'view-ui-plus'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import OjProblemEdit from '@/components/ProblemEdit.vue'
@@ -14,7 +13,6 @@ const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
 
-const message = inject('$Message') as typeof Message
 const { problem } = storeToRefs(problemStore)
 const { findOne, update: updateProblem } = problemStore
 const paramPid = computed(() => Number.parseInt(route.params.pid as string))
@@ -30,7 +28,7 @@ async function loadProblem () {
 
 async function submitForm () {
   const data = await updateProblem(problemForm.value)
-  message.success(t('oj.submit_success'))
+  Message.success(t('oj.submit_success'))
   router.push({ name: 'problemInfo', params: { pid: data.pid } })
 }
 

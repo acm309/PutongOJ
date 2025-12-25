@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import type { Message } from 'view-ui-plus'
 import { useClipboard } from '@vueuse/core'
-import { Icon, Space, Tooltip } from 'view-ui-plus'
-import { inject } from 'vue'
+import { Icon, Message, Space, Tooltip } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
 
 const props = defineProps([ 'modelValue' ])
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 const { copy } = useClipboard()
 
 const problem = $computed(() => props.modelValue)
 
 function onCopy (content: string) {
   copy(content)
-  message.success('Copied!')
+  Message.success('Copied!')
 }
 </script>
 

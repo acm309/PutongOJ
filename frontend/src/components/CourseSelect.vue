@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { CourseEntityItem } from '@backend/types/entity'
-import type { Message } from 'view-ui-plus'
 import debounce from 'lodash.debounce'
-import { Option, Select } from 'view-ui-plus'
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { Message, Option, Select } from 'view-ui-plus'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 
@@ -18,7 +17,6 @@ const props = defineProps({
 })
 const emit = defineEmits([ 'update:modelValue' ])
 const { t } = useI18n()
-const message = inject('$Message') as typeof Message
 
 const loading = ref(false)
 const courseOptions = ref<{ value: number, label: string }[]>([])
@@ -43,7 +41,7 @@ const findCourseOptions = debounce(async (query: string) => {
       label: t('oj.unrelated_to_any_course'),
     })
   } catch (error: any) {
-    message.error(error.message || t('oj.failed_to_fetch_courses'))
+    Message.error(error.message || t('oj.failed_to_fetch_courses'))
   } finally {
     loading.value = false
   }

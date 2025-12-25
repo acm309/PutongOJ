@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { Button, Spin } from 'view-ui-plus'
-import { inject, onBeforeMount } from 'vue'
+import { Button, Message, Spin } from 'view-ui-plus'
+import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Submit from '@/components/Submit'
@@ -13,7 +13,6 @@ import { useSolutionStore } from '@/store/modules/solution'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = inject('$Message')
 
 const rootStore = useRootStore()
 const problemStore = useProblemStore()
@@ -34,7 +33,7 @@ const pid = $computed(() => route.params.pid)
 
 async function submitSolution () {
   await create(Object.assign({}, solution, { pid }))
-  message.info(`submit pid:${problem.pid} success!`)
+  Message.info(`submit pid:${problem.pid} success!`)
   router.push({ name: 'MySubmissions', query: { problem: pid } })
 }
 
