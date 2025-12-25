@@ -34,7 +34,10 @@ class WebSocketService {
         return
       }
 
-      this.ws = new WebSocket(`/ws?token=${resp.data.token}`)
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const wsUrl = `${protocol}//${window.location.host}/ws?token=${resp.data.token}`
+
+      this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = () => {
         this.reconnectAttempts = 0

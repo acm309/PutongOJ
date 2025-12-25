@@ -1,9 +1,9 @@
 # Putong OJ
 
 [![Node.JS](https://img.shields.io/badge/node-%3E=22-417e38.svg)](https://nodejs.org/)
-[![Test Status](https://img.shields.io/github/actions/workflow/status/net-escape/putong-oj/backend-test.yml?label=test)](https://github.com/net-escape/putong-oj/actions/workflows/backend-test.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/net-escape/putong-oj/main)](https://app.codecov.io/github/net-escape/putong-oj)
-[![GitHub License](https://img.shields.io/github/license/net-escape/putong-oj)](https://github.com/net-escape/putong-oj/blob/main/LICENSE)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/acm309/PutongOJ/backend-test.yml?label=test)](https://github.com/acm309/PutongOJ/actions/workflows/backend-test.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/acm309/PutongOJ/main)](https://app.codecov.io/github/acm309/PutongOJ)
+[![GitHub License](https://img.shields.io/github/license/acm309/PutongOJ)](https://github.com/acm309/PutongOJ/blob/main/LICENSE)
 
 Putong OJ is an online judge system designed for competitive programming and algorithmic problem-solving. A live instance is available at [acm.cjlu.edu.cn](https://acm.cjlu.edu.cn/).
 
@@ -15,7 +15,7 @@ Putong OJ is an online judge system designed for competitive programming and alg
 
 > [!CAUTION]  
 >   
-> The current branch may contain untested changes after dependency upgrades and a project structure refactor. For production use, we strongly recommend using the last stable version: **backend** at commit [`6c7b68c`](https://github.com/net-escape/putong-oj/tree/6c7b68c183af0ba0a5512ff273c1955d250cc892) and **frontend** at commit [`ce13bf1`](https://github.com/net-escape/putong-oj/tree/ce13bf1988bb4923947b9b72a0b8a371d3110469).
+> The current branch may contain untested changes after dependency upgrades and a project structure refactor. For production use, we strongly recommend using the last stable version: **backend** at commit [`6c7b68c`](https://github.com/acm309/PutongOJ/tree/6c7b68c183af0ba0a5512ff273c1955d250cc892) and **frontend** at commit [`ce13bf1`](https://github.com/acm309/PutongOJ/tree/ce13bf1988bb4923947b9b72a0b8a371d3110469).
 >   
 > Some features might be unstable until comprehensive testing is completed. Proceed with caution when deploying this version.
 

@@ -104,7 +104,7 @@ const create = async (ctx: Context) => {
       ctx.throw(400, 'No such a problem in the contest')
     }
     if (contest.course) {
-      course = contest.course.id
+      course = contest.course._id
     }
   }
   const problem = await Problem.findOne({ pid })
@@ -115,7 +115,7 @@ const create = async (ctx: Context) => {
    * @TODO
    */
   // if (problem.course && !course) {
-  //   course = problem.course.id
+  //   course = problem.course._id
   // }
 
   try {

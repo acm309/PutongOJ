@@ -108,17 +108,15 @@ const contestSchema = new mongoose.Schema({
 
 contestSchema.plugin(mongoosePaginate)
 
-contestSchema.pre('validate', async function (this: ContestDocument, next) {
+contestSchema.pre('validate', async function (this: ContestDocument) {
   if (this.start >= this.end) {
-    next(new Error('The contest end time must be later than the start time!'))
+    throw new Error('The contest end time must be later than the start time!')
   }
-  next()
 })
-contestSchema.pre('save', async function (this: ContestDocument, next) {
+contestSchema.pre('save', async function (this: ContestDocument) {
   if (this.cid === -1) {
     this.cid = await ID.generateId('Contest')
   }
-  next()
 })
 
 const Contest

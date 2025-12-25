@@ -44,11 +44,10 @@ const tagSchema = new mongoose.Schema({
 
 tagSchema.plugin(mongoosePaginate)
 
-tagSchema.pre('save', async function (this: TagDocument, next) {
+tagSchema.pre('save', async function (this: TagDocument) {
   if (this.tagId === -1) {
     this.tagId = await ID.generateId('Tag')
   }
-  next()
 })
 
 const toItem = (tag: Partial<TagEntity>): TagEntityItem => {

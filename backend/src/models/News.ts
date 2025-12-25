@@ -52,11 +52,10 @@ const newsSchema = new mongoose.Schema({
 
 newsSchema.plugin(mongoosePaginate)
 
-newsSchema.pre('save', async function (this: NewsDocument, next) {
+newsSchema.pre('save', async function (this: NewsDocument) {
   if (this.nid === -1) {
     this.nid = await ids.generateId('News')
   }
-  next()
 })
 
 const News

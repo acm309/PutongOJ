@@ -145,12 +145,12 @@ export const AdminSolutionListExportQueryResultSchema = z.array(z.object({
 
 export type AdminSolutionListExportQueryResult = z.input<typeof AdminSolutionListExportQueryResultSchema>
 
-export const AdminNotificationBroadcastPayloadSchema = z.object({
+export const AdminNotificationCreatePayloadSchema = z.object({
   title: z.string().min(1).max(30),
   content: z.string().min(1).max(300),
 })
 
-export type AdminNotificationBroadcastPayload = z.infer<typeof AdminNotificationBroadcastPayloadSchema>
+export type AdminNotificationCreatePayload = z.infer<typeof AdminNotificationCreatePayloadSchema>
 
 export const AdminGroupDetailQueryResultSchema = z.object({
   groupId: GroupModelSchema.shape.gid,
