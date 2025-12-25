@@ -51,7 +51,6 @@ async function submit () {
       </RouterLink>
     </div>
     <h1 class="font-bold mb-[20px] mt-[10px] pt-4 text-center">
-      {{ contestLabeling(currentProblemId, contest.option?.labelingStyle) }}:
       {{ currentTitle }}
     </h1>
     <Submit :pid="String(pid)" />

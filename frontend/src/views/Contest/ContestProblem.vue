@@ -51,7 +51,6 @@ onRouteParamUpdate(fetch)
     <div>
       <Problem v-model="problem" class="p-4">
         <template #title>
-          {{ contestLabeling(proIndex, contest.option?.labelingStyle) }}:
           {{ problem.title }}
         </template>
       </Problem>

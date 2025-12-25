@@ -36,7 +36,7 @@ function onRowSelect (e: any) {
         {{ contestLabeling(index + 1, contest.option?.labelingStyle) }}
       </template>
     </Column>
-    <Column :header="t('ptoj.title')">
+    <Column :header="t('ptoj.problem')">
       <template #body="{ data, index }">
         <RouterLink v-if="!data.invalid" :to="{ name: 'contestProblem', params: { cid, id: index + 1 } }">
           {{ data.title }}
@@ -44,23 +44,27 @@ function onRowSelect (e: any) {
         <span v-else>{{ t('oj.problem_invalid') }}</span>
       </template>
     </Column>
-    <Column class="text-center w-16">
+    <Column v-if="solved.length > 0" class="text-center w-16">
       <template #body="{ data }">
-        <span v-if="solved.includes(data.pid)" class="flex justify-center text-primary">
+        <span v-if="solved.includes(data.pid)" class="flex justify-center text-emerald-500">
           <i class="pi pi-check" />
         </span>
       </template>
     </Column>
-    <Column class="pr-6 text-center w-48">
+    <Column class="pr-6 w-42">
       <template #header>
         <span class="text-center w-full">
           <i class="pi pi-chart-pie" />
         </span>
       </template>
       <template #body="{ data }">
-        <span v-if="!data.invalid">
-          {{ formate(data.solve / (data.submit + 0.000001)) }}
-          ({{ data.solve }} / {{ data.submit }})
+        <span v-if="!data.invalid" class="flex gap-2 items-center">
+          <span class="grow text-center text-muted-color text-sm">
+            {{ data.solve }} / {{ data.submit }}
+          </span>
+          <span class="min-w-18 text-right">
+            {{ formate(data.solve / (data.submit + 0.000001)) }}
+          </span>
         </span>
       </template>
     </Column>
