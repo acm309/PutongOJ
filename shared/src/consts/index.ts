@@ -27,14 +27,19 @@ export enum UserPrivilege {
   Root = 3,
 }
 
-export enum OAuthProvider {
-  CJLU = 'CJLU',
-}
+export const OAuthProvider = {
+  CJLU: 'CJLU',
+  Codeforces: 'Codeforces',
+} as const
 
-export enum OAuthAction {
-  LOGIN = 'login',
-  CONNECT = 'connect',
-}
+export type OAuthProvider = typeof OAuthProvider[keyof typeof OAuthProvider]
+
+export const OAuthAction = {
+  LOGIN: 'login',
+  CONNECT: 'connect',
+} as const
+
+export type OAuthAction = typeof OAuthAction[keyof typeof OAuthAction]
 
 export enum JudgeStatus {
   Pending = 0,
