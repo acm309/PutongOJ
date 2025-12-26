@@ -10,6 +10,9 @@ import { globalConfig } from '../config'
 import redis from '../config/redis'
 import OAuth from '../models/OAuth'
 
+const DEFAULT_TIMEOUT = 5000
+const DEFAULT_STATE_TTL = 600
+
 export const toUserView = OAuth.toUserView
 
 export interface OAuthClientConfig {
@@ -18,6 +21,7 @@ export interface OAuthClientConfig {
   redirectUri: string
   authserverURL: string
   stateTTL?: number
+  timeout?: number
 }
 
 export interface OAuthState {
@@ -68,7 +72,7 @@ abstract class OAuthClient {
     }
 
     const key = `oauth:state:${state}`
-    const ttl = this.config.stateTTL || 600
+    const ttl = this.config.stateTTL || DEFAULT_STATE_TTL
     await redis.setex(key, ttl, JSON.stringify(stateData))
 
     return state
@@ -129,7 +133,7 @@ class CjluOAuthClient extends OAuthClient {
       const response = await superagent
         .post(`${this.config.authserverURL}/oauth2.0/accessToken`)
         .set('User-Agent', 'Putong-OJ-OAuth')
-        .timeout(5000)
+        .timeout(this.config.timeout || DEFAULT_TIMEOUT)
         .type('form')
         .send({
           grant_type: 'authorization_code',
@@ -153,7 +157,7 @@ class CjluOAuthClient extends OAuthClient {
       const response = await superagent
         .post(`${this.config.authserverURL}/oauthApi/user/profile`)
         .set('User-Agent', 'Putong-OJ-OAuth')
-        .timeout(5000)
+        .timeout(this.config.timeout || DEFAULT_TIMEOUT)
         .type('form')
         .send({ access_token: tokenResponse.accessToken })
 
@@ -209,7 +213,7 @@ class CodeforcesOAuthClient extends OAuthClient {
       const response = await superagent
         .post(`${this.config.authserverURL}/oauth/token`)
         .set('User-Agent', 'Putong-OJ-OAuth')
-        .timeout(10000)
+        .timeout(this.config.timeout || DEFAULT_TIMEOUT)
         .type('form')
         .send({
           grant_type: 'authorization_code',
