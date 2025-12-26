@@ -204,7 +204,7 @@ onMounted(fetch)
           <label for="school">{{ t('ptoj.school') }}</label>
         </IftaLabel>
 
-        <IftaLabel class="-mb-[5px] md:col-span-2">
+        <IftaLabel class="-mb-1.5 md:col-span-2">
           <Textarea
             id="motto" v-model="editingProfile.motto" fluid rows="3" maxlength="300"
             :placeholder="t('ptoj.enter_motto')" auto-resize
@@ -245,6 +245,23 @@ onMounted(fetch)
             <Button
               :label="connections.CJLU ? t('ptoj.connected') : t('ptoj.connect')" :disabled="!!connections.CJLU"
               @click="connectOAuth('cjlu')"
+            />
+          </div>
+          <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
+            <div>
+              <div class="font-medium">
+                {{ t('ptoj.codeforces') }}
+              </div>
+              <div class="text-muted-color text-sm">
+                <span v-if="connections.Codeforces">
+                  {{ t('ptoj.connected_to_brief', { display: connections.Codeforces.displayName }) }}
+                </span>
+                <span v-else>{{ t('ptoj.not_connected') }}</span>
+              </div>
+            </div>
+            <Button
+              :label="connections.Codeforces ? t('ptoj.connected') : t('ptoj.connect')" :disabled="!!connections.Codeforces"
+              @click="connectOAuth('codeforces')"
             />
           </div>
         </div>

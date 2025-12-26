@@ -12,7 +12,12 @@ import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/error'
 
 const providerMap: Record<string, OAuthProvider> = {
   cjlu: OAuthProvider.CJLU,
-}
+  codeforces: OAuthProvider.Codeforces,
+} as const
+
+const loginEnabledProviders: OAuthProvider[] = [
+  OAuthProvider.CJLU,
+] as const
 
 function parseProvider (ctx: Context): OAuthProvider {
   const provider = ctx.params.provider || ctx.request.query.provider
@@ -80,6 +85,9 @@ export async function handleOAuthCallback (ctx: Context) {
     user = profile
   } else if (stateData.action === OAuthAction.LOGIN) {
     const { provider, providerId } = connection
+    if (!loginEnabledProviders.includes(provider)) {
+      return createErrorResponse(ctx, `Login via ${provider} OAuth is not enabled`)
+    }
     const connectedUser = await oauthService
       .findUserByOAuthConnection(provider, providerId)
     if (!connectedUser) {
@@ -108,6 +116,7 @@ export async function getUserOAuthConnections (ctx: Context) {
     .getUserOAuthConnections(profile._id)
   const connectionsUserView: Record<OAuthProvider, OAuthEntityUserView | null> = {
     [OAuthProvider.CJLU]: null,
+    [OAuthProvider.Codeforces]: null,
   }
   Object.keys(connections).forEach((key) => {
     if (connections[key as OAuthProvider]) {

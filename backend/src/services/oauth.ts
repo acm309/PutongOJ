@@ -2,6 +2,7 @@ import type { OAuthConnection, OAuthUserProfile } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
+import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 import { OAuthAction, OAuthProvider } from '@putongoj/shared'
 import superagent from 'superagent'
@@ -32,6 +33,7 @@ interface OAuthTokenResponse {
   expires_in: number
   refresh_token?: string
   scope?: string
+  [key: string]: any
 }
 
 abstract class OAuthClient {
@@ -47,7 +49,7 @@ abstract class OAuthClient {
 
   abstract exchangeCodeForToken (code: string): Promise<OAuthTokenResponse>
 
-  abstract fetchUserProfile (accessToken: string): Promise<OAuthUserProfile>
+  abstract fetchUserProfile (tokenResponse: OAuthTokenResponse): Promise<OAuthUserProfile>
 
   async refreshToken (_refreshToken: string): Promise<OAuthTokenResponse> {
     throw new Error('Refresh token flow not implemented for this provider')
@@ -146,14 +148,14 @@ class CjluOAuthClient extends OAuthClient {
     }
   }
 
-  async fetchUserProfile (accessToken: string): Promise<OAuthUserProfile> {
+  async fetchUserProfile (tokenResponse: OAuthTokenResponse): Promise<OAuthUserProfile> {
     try {
       const response = await superagent
         .post(`${this.config.authserverURL}/oauthApi/user/profile`)
         .set('User-Agent', 'Putong-OJ-OAuth')
         .timeout(5000)
         .type('form')
-        .send({ access_token: accessToken })
+        .send({ access_token: tokenResponse.accessToken })
 
       const profileResponse = response.body as CjluOAuthProfileResponse
 
@@ -161,6 +163,79 @@ class CjluOAuthClient extends OAuthClient {
         provider: this.providerName,
         providerId: profileResponse.id,
         displayName: profileResponse.attributes.cn,
+        raw: profileResponse,
+      }
+    } catch (error: any) {
+      throw new Error(`Failed to fetch user profile: ${error.message}`)
+    }
+  }
+}
+
+interface CodeforcesOAuthProfileResponse {
+  sub: string
+  aud: string
+  iss: string
+  handle: string
+  avatar: string
+  rating: number
+  [key: string]: any
+}
+
+class CodeforcesOAuthClient extends OAuthClient {
+  constructor (config: OAuthClientConfig) {
+    super(OAuthProvider.Codeforces, config)
+  }
+
+  generateAuthUrl (
+    state: string,
+    scopes: string[] = [ 'openid' ],
+  ): string {
+    const url = new URL(`${this.config.authserverURL}/oauth/authorize`)
+
+    url.searchParams.append('response_type', 'code')
+    url.searchParams.append('redirect_uri', this.config.redirectUri)
+    url.searchParams.append('client_id', this.config.clientId)
+    url.searchParams.append('state', state)
+
+    for (const scope of scopes) {
+      url.searchParams.append('scope', scope)
+    }
+
+    return url.toString()
+  }
+
+  async exchangeCodeForToken (code: string): Promise<OAuthTokenResponse> {
+    try {
+      const response = await superagent
+        .post(`${this.config.authserverURL}/oauth/token`)
+        .set('User-Agent', 'Putong-OJ-OAuth')
+        .timeout(10000)
+        .type('form')
+        .send({
+          grant_type: 'authorization_code',
+          client_id: this.config.clientId,
+          client_secret: this.config.clientSecret,
+          redirect_uri: this.config.redirectUri,
+          code,
+        })
+
+      return response.body as OAuthTokenResponse
+    } catch (error: any) {
+      throw new Error(`Failed to exchange code for token: ${error.message}`)
+    }
+  }
+
+  async fetchUserProfile (tokenResponse: OAuthTokenResponse): Promise<OAuthUserProfile> {
+    try {
+      const idToken = tokenResponse.id_token as string
+      const payloadBase64 = idToken.split('.')[1]
+      const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf-8')
+      const profileResponse = JSON.parse(payloadJson) as CodeforcesOAuthProfileResponse
+
+      return {
+        provider: this.providerName,
+        providerId: profileResponse.sub,
+        displayName: profileResponse.handle,
         raw: profileResponse,
       }
     } catch (error: any) {
@@ -184,6 +259,9 @@ function getOAuthClient (provider: OAuthProvider): OAuthClient {
     switch (provider) {
       case OAuthProvider.CJLU:
         oauthClients[provider] = new CjluOAuthClient(config)
+        break
+      case OAuthProvider.Codeforces:
+        oauthClients[provider] = new CodeforcesOAuthClient(config)
         break
       default:
         throw new Error(`OAuth provider ${provider} is not supported`)
@@ -210,7 +288,7 @@ export async function handleOAuthCallback (
   const client = getOAuthClient(provider)
   const stateData = await client.validateState(state)
   const tokenResponse = await client.exchangeCodeForToken(code)
-  const userProfile = await client.fetchUserProfile(tokenResponse.access_token)
+  const userProfile = await client.fetchUserProfile(tokenResponse)
 
   return {
     stateData,
@@ -239,6 +317,7 @@ export async function getUserOAuthConnections (
   const records = await OAuth.find({ user: userId }) as OAuthDocument[]
   const connections: Record<OAuthProvider, OAuthDocument | null> = {
     [OAuthProvider.CJLU]: null,
+    [OAuthProvider.Codeforces]: null,
   }
 
   for (const record of records) {

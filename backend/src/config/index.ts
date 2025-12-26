@@ -74,6 +74,14 @@ const oauthConfigs: GlobalConfig['oauthConfigs'] = {
     authserverURL: stringEnv('PTOJ_OAUTH_CJLU_AUTHSERVER_URL', ''),
     stateTTL: numberEnv('PTOJ_OAUTH_CJLU_STATE_TTL'),
   },
+  Codeforces: {
+    enabled: booleanEnv('PTOJ_OAUTH_CODEFORCES_ENABLED', false),
+    clientId: stringEnv('PTOJ_OAUTH_CODEFORCES_CLIENT_ID', ''),
+    clientSecret: stringEnv('PTOJ_OAUTH_CODEFORCES_CLIENT_SECRET', ''),
+    redirectUri: stringEnv('PTOJ_OAUTH_CODEFORCES_REDIRECT_URI', ''),
+    authserverURL: stringEnv('PTOJ_OAUTH_CODEFORCES_AUTHSERVER_URL', 'https://codeforces.com'),
+    stateTTL: numberEnv('PTOJ_OAUTH_CODEFORCES_STATE_TTL'),
+  },
 }
 
 for (const [ provider, config ] of Object.entries(oauthConfigs)) {

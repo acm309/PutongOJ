@@ -56,6 +56,7 @@ const websiteInformation = async (ctx: Context) => {
     apiPublicKey: await cryptoService.getServerPublicKey(),
     oauthEnabled: {
       CJLU: globalConfig.oauthConfigs.CJLU.enabled,
+      Codeforces: globalConfig.oauthConfigs.Codeforces.enabled,
     },
   }
   ctx.body = result

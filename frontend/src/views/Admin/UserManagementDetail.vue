@@ -41,7 +41,7 @@ const { profile, isRoot } = storeToRefs(sessionStore)
 const uid = computed(() => route.params.uid as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
 const editingUser = ref<AdminUserEditPayload>({})
-const connections = ref<AdminUserOAuthQueryResult>({ CJLU: null })
+const connections = ref<AdminUserOAuthQueryResult>({ CJLU: null, Codeforces: null })
 const loading = ref(false)
 const saving = ref(false)
 const passwordDialog = ref(false)
@@ -274,7 +274,7 @@ onRouteParamUpdate(fetch)
           <label for="avatar">{{ t('ptoj.avatar') }}</label>
         </IftaLabel>
 
-        <IftaLabel class="-mb-[5px] md:col-span-2">
+        <IftaLabel class="-mb-1.5 md:col-span-2">
           <Textarea
             id="motto" v-model="editingUser.motto" fluid rows="3" maxlength="300"
             :placeholder="t('ptoj.enter_motto')" auto-resize :readonly="!canOperate"
@@ -316,6 +316,28 @@ onRouteParamUpdate(fetch)
               v-if="connections.CJLU" :label="t('ptoj.disconnect')" severity="danger" outlined
               :disabled="!canOperate || !isRoot" class="min-w-fit"
               @click="event => disconnectOAuth(event, OAuthProvider.CJLU)"
+            />
+          </div>
+          <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
+            <div>
+              <div class="font-medium">
+                {{ t('ptoj.codeforces') }}
+              </div>
+              <div class="text-muted-color text-sm">
+                <span v-if="connections.Codeforces">
+                  {{ t('ptoj.connected_to_detail', {
+                    id: connections.Codeforces.displayName,
+                    name: connections.Codeforces.providerId.slice(0, 7),
+                    time: timePretty(connections.Codeforces.createdAt),
+                  }) }}
+                </span>
+                <span v-else>{{ t('ptoj.not_connected') }}</span>
+              </div>
+            </div>
+            <Button
+              v-if="connections.Codeforces" :label="t('ptoj.disconnect')" severity="danger" outlined
+              :disabled="!canOperate || !isRoot" class="min-w-fit"
+              @click="event => disconnectOAuth(event, OAuthProvider.Codeforces)"
             />
           </div>
         </div>
