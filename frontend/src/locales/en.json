@@ -35,7 +35,7 @@
   "confirm_password": "Confirm Password",
   "connect": "Connect",
   "connect_accounts": "Connect Accounts",
-  "connect_accounts_desc": "Connect external accounts to enabling third-party login and synchronize related information.",
+  "connect_accounts_desc": "Connect external accounts to enable third-party login and synchronize related information.",
   "connected": "Connected",
   "connected_to_brief": "Connected to {display}",
   "connected_to_detail": "Connected to {id} ({name}) at {time}",

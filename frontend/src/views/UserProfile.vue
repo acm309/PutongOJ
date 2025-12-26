@@ -171,7 +171,7 @@ onRouteParamUpdate(fetch)
             </div>
           </Fieldset>
 
-          <Fieldset v-if="user.codeforces" :legend="t('ptoj.codeforces')">
+          <Fieldset v-if="user.codeforces && user.codeforces.rating > 0 " :legend="t('ptoj.codeforces')">
             <CodeforcesProfile :handle="user.codeforces.handle" :rating="user.codeforces.rating" />
           </Fieldset>
 

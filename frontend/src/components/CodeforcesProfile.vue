@@ -26,9 +26,9 @@ const codeforcesTitle = computed(() => {
     class="font-(family-name:--font-verdana) px-3.5 py-2" :class="{
       'text-color': props.rating >= 4000,
       'text-red-500': props.rating >= 2400 && props.rating < 4000,
-      'text-amber-500': props.rating >= 2000 && props.rating < 2400,
-      'text-fuchsia-600': props.rating >= 1800 && props.rating < 2000,
-      'text-blue-600': props.rating >= 1600 && props.rating < 1800,
+      'text-amber-500': props.rating >= 2100 && props.rating < 2400,
+      'text-fuchsia-600': props.rating >= 1900 && props.rating < 2100,
+      'text-blue-600': props.rating >= 1600 && props.rating < 1900,
       'text-teal-500': props.rating >= 1400 && props.rating < 1600,
       'text-green-700': props.rating >= 1200 && props.rating < 1400,
       'text-neutral-500': props.rating < 1200,

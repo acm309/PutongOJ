@@ -10,7 +10,7 @@ import sessionService from '../services/session'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/error'
 
-const providerMap: Record<string, OAuthProvider> = {
+export const providerMap: Record<string, OAuthProvider> = {
   cjlu: OAuthProvider.CJLU,
   codeforces: OAuthProvider.Codeforces,
 } as const

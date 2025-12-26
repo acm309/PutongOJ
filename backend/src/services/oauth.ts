@@ -231,9 +231,14 @@ class CodeforcesOAuthClient extends OAuthClient {
 
   async fetchUserProfile (tokenResponse: OAuthTokenResponse): Promise<OAuthUserProfile> {
     try {
-      const idToken = tokenResponse.id_token as string
-      const payloadBase64 = idToken.split('.')[1]
-      const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf-8')
+      if (typeof tokenResponse.id_token !== 'string') {
+        throw new TypeError('ID token is missing in the token response')
+      }
+      const idToken = tokenResponse.id_token.split('.')
+      if (idToken.length !== 3) {
+        throw new Error('Invalid ID token format')
+      }
+      const payloadJson = Buffer.from(idToken[1], 'base64').toString('utf-8')
       const profileResponse = JSON.parse(payloadJson) as CodeforcesOAuthProfileResponse
 
       return {
