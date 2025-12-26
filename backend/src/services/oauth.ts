@@ -315,6 +315,14 @@ export async function findUserByOAuthConnection (
   return oauthRecord?.user as UserDocument ?? null
 }
 
+export async function getUserOAuthConnection (
+  userId: Types.ObjectId,
+  provider: OAuthProvider,
+): Promise<OAuthDocument | null> {
+  const record = await OAuth.findOne({ user: userId, provider }) as OAuthDocument | null
+  return record
+}
+
 export async function getUserOAuthConnections (
   userId: Types.ObjectId,
 ): Promise<Record<OAuthProvider, OAuthDocument | null>> {
@@ -383,6 +391,7 @@ const oauthService = {
   generateOAuthUrl,
   handleOAuthCallback,
   findUserByOAuthConnection,
+  getUserOAuthConnection,
   getUserOAuthConnections,
   isOAuthConnectedToAnotherUser,
   upsertOAuthConnection,

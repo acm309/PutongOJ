@@ -9,6 +9,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser } from '@/api/user'
+import CodeforcesProfile from '@/components/CodeforcesProfile.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
@@ -168,6 +169,10 @@ onRouteParamUpdate(fetch)
                 <Tag :value="group.title" severity="secondary" />
               </RouterLink>
             </div>
+          </Fieldset>
+
+          <Fieldset v-if="user.codeforces" :legend="t('ptoj.codeforces')">
+            <CodeforcesProfile :handle="user.codeforces.handle" :rating="user.codeforces.rating" />
           </Fieldset>
 
           <Fieldset :legend="t('ptoj.statistics')">
