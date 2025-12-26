@@ -16,6 +16,10 @@ export const UserProfileQueryResultSchema = z.object({
     gid: GroupModelSchema.shape.gid,
     title: GroupModelSchema.shape.title,
   })),
+  codeforces: z.object({
+    handle: z.string(),
+    rating: z.number(),
+  }).nullable(),
   solved: z.array(z.number()),
   attempted: z.array(z.number()),
   createdAt: UserModelSchema.shape.createdAt,

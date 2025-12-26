@@ -1,6 +1,8 @@
+import type { UserProfileQueryResult } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
 import {
+  OAuthProvider,
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
   UserRanklistExportQueryResultSchema,
@@ -15,6 +17,7 @@ import config from '../config'
 import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
+import oauthService from '../services/oauth'
 import userService from '../services/user'
 import {
   createEnvelopedResponse,
@@ -87,9 +90,19 @@ export async function getUser (ctx: Context) {
       .lean(),
   ])
 
+  let codeforces: UserProfileQueryResult['codeforces'] = null
+  const codeforcesConnection = await oauthService.getUserOAuthConnection(
+    user._id, OAuthProvider.Codeforces)
+  if (codeforcesConnection?.raw?.handle && codeforcesConnection?.raw?.rating) {
+    const { handle, rating } = codeforcesConnection.raw
+    if (typeof handle === 'string' && typeof rating === 'number') {
+      codeforces = { handle, rating }
+    }
+  }
+
   const attempted = difference(failed, solved)
   const result = UserProfileQueryResultSchema.encode({
-    ...user.toObject(), groups, solved, attempted,
+    ...user.toObject(), groups, solved, attempted, codeforces,
   })
   return createEnvelopedResponse(ctx, result)
 }

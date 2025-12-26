@@ -38,6 +38,7 @@ export async function getUserOAuthConnections (uid: string) {
 export async function removeUserOAuthConnection (uid: string, provider: OAuthProvider) {
   const providerMap: Record<OAuthProvider, string> = {
     [OAuthProvider.CJLU]: 'cjlu',
+    [OAuthProvider.Codeforces]: 'codeforces',
   }
   return instance.delete<null>(`/admin/users/${encodeURIComponent(uid)}/oauth/${providerMap[provider]}`)
 }

@@ -18,7 +18,6 @@ import {
   AdminUserListQuerySchema,
   AdminUserOAuthQueryResultSchema,
   ErrorCode,
-  OAuthProvider,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
 import contestService from '../services/contest'
@@ -37,6 +36,7 @@ import {
   isComplexPwd,
   passwordHash,
 } from '../utils'
+import { providerMap } from './oauth'
 import { loadUser } from './user'
 
 async function loadEditingUser (ctx: Context) {
@@ -154,9 +154,6 @@ export async function getUserOAuthConnections (ctx: Context) {
 }
 
 export async function removeUserOAuthConnection (ctx: Context) {
-  const providerMap: Record<string, OAuthProvider> = {
-    cjlu: OAuthProvider.CJLU,
-  }
   const providerName = ctx.params.provider
   if (typeof providerName !== 'string' || !(providerName in providerMap)) {
     return createErrorResponse(ctx,
