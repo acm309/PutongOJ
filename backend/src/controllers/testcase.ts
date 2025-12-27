@@ -193,7 +193,7 @@ export async function getTestcase (ctx: Context) {
   if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
-  const type = ctx.params.type
+  const type = String(ctx.params.type || '').trim()
   if (type !== 'in' && type !== 'out') {
     ctx.throw(400, 'Invalid type')
   }
