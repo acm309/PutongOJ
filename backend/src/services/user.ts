@@ -1,9 +1,13 @@
 import type { Paginated, UserModel } from '@putongoj/shared'
+import type { Types } from 'mongoose'
 import type { UserDocument } from '../models/User'
 import type { PaginateOption, SortOption } from '../types'
-import { EXPORT_SIZE_MAX, RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
+import { EXPORT_SIZE_MAX, OAuthProvider, RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
+import redis from '../config/redis'
+import { distributeWork } from '../jobs/helper'
 import User from '../models/User'
+import { getUserOAuthConnection } from './oauth'
 
 const reservedUsernames = new Set(
   RESERVED_KEYWORDS.flatMap(s => [ s.toLowerCase(), `${s.toLowerCase()}s` ]),
@@ -159,6 +163,53 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
   return user
 }
 
+export async function getCodeforcesProfile (
+  user: Types.ObjectId,
+): Promise<{ handle: string, rating: number } | null> {
+  const cacheKey = `user:codeforces:cache:${user.toString()}`
+  const cached = await redis.get(cacheKey)
+  if (cached) {
+    return JSON.parse(cached)
+  }
+
+  const connection = await getUserOAuthConnection(user, OAuthProvider.Codeforces)
+  if (!connection) {
+    return null
+  }
+
+  const handle = connection.displayName
+  let rating: number = 0
+  if (connection.raw && typeof connection.raw.rating === 'number') {
+    rating = connection.raw.rating
+  }
+
+  const infoStr = await redis.get(`user:codeforces:info:${handle}`)
+  let fetchAt: number = 0
+  if (infoStr) {
+    try {
+      const info = JSON.parse(infoStr)
+      if (typeof info.rating === 'number') {
+        rating = info.rating
+      }
+      if (typeof info.fetchedAt === 'number') {
+        fetchAt = info.fetchedAt
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const tasks: Promise<any>[] = []
+  if (Date.now() - fetchAt > 24 * 60 * 60 * 1000) {
+    tasks.push(distributeWork('fetchCodeforces', `userInfo:${handle}`))
+  }
+  const result = { handle, rating }
+  tasks.push(redis.set(cacheKey, JSON.stringify(result), 'EX', 60))
+
+  await Promise.all(tasks)
+  return result
+}
+
 const userService = {
   findUsers,
   suggestUsers,
@@ -169,6 +220,7 @@ const userService = {
   updateUser,
   checkUserAvailable,
   createUser,
+  getCodeforcesProfile,
 } as const
 
 export default userService
