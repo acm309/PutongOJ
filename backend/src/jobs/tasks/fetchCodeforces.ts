@@ -48,12 +48,13 @@ async function fetchCodeforcesUserInfo (handles: string[]) {
   }
   const data = res.body as CodeforcesUserInfoResponse
   if (data.status === 'FAILED') {
-    throw new Error(`Codeforces API error: ${res.body.comment || 'unknown error'}`)
+    throw new Error(`Codeforces API error: ${data.comment || 'unknown error'}`)
   }
 
   await Promise.all(data.result.map(user => redis.set(
     `user:codeforces:info:${user.handle}`,
     JSON.stringify({ ...user, fetchedAt: Date.now() }),
+    'EX', 60 * 60 * 24 * 7, // 7 days
   )))
   logger.info(`Fetched Codeforces info for handles: ${handles.join(', ')}`)
 }
