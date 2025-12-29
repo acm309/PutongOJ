@@ -159,7 +159,7 @@ class CjluOAuthClient extends OAuthClient {
         .set('User-Agent', 'Putong-OJ-OAuth')
         .timeout(this.config.timeout || DEFAULT_TIMEOUT)
         .type('form')
-        .send({ access_token: tokenResponse.accessToken })
+        .send({ access_token: tokenResponse.access_token })
 
       const profileResponse = response.body as CjluOAuthProfileResponse
 
