@@ -1,4 +1,4 @@
-# 特判（Special Judge）{#special-judge}
+# 特判 (Special Judge) {#special-judge}
 
 Special Judge（简称 SPJ）是一种灵活的评测机制，用于处理那些不唯一解或需要特殊判断的编程题目。与传统题目（仅比对固定输出）不同，SPJ 允许通过自定义程序来验证选手答案的正确性。
 

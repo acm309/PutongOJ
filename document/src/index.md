@@ -17,10 +17,17 @@ hero:
 features:
   - title: 特判
     details: 特判程序用于处理多解题目或允许误差范围的情况。
-    link: /user/special-judge
+    link: /problem/special-judge
     linkText: 了解更多
   - title: 交互题
     details: 交互题是一种特殊的编程题型，要求选手编写的程序与评测系统进行动态交互。
-    link: /user/interaction
+    link: /problem/interaction
     linkText: 了解更多
 ---
+
+<style>
+  :root {
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: -webkit-linear-gradient(120deg, oklch(60.6% 0.25 292.717), oklch(59.1% 0.293 322.896));
+  }
+</style>
