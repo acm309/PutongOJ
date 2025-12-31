@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MenuItem } from 'primevue/menuitem'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
@@ -24,6 +25,7 @@ const hasExtraHeader = computed(() => {
   )
 })
 
+const { website } = storeToRefs(rootStore)
 const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
@@ -33,15 +35,7 @@ function toggleProfileMenu (event: any) {
 }
 
 const menuItems = computed(() => {
-  const items = [] as ({
-    label: string
-    icon: string
-    items?: typeof items
-  } | {
-    label: string
-    icon: string
-    route: string
-  })[]
+  const items = [] as MenuItem[]
 
   items.push({
     label: t('oj.home'),
@@ -67,11 +61,16 @@ const menuItems = computed(() => {
     label: t('oj.discussion_list'),
     icon: 'pi pi-comments',
     route: 'Discussions',
-  // }, {
-  //   label: t('oj.faq'),
-  //   icon: 'pi pi-question-circle',
-  //   route: 'faq',
   })
+
+  if (website.value!.helpDocURL) {
+    items.push({
+      label: t('ptoj.help'),
+      icon: 'pi pi-question-circle',
+      url: website.value!.helpDocURL,
+      target: '_blank',
+    })
+  }
 
   if (isAdmin.value) {
     items.push({

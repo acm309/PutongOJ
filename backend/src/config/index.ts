@@ -63,6 +63,7 @@ interface GlobalConfig {
   disableRateLimit: boolean
   mongooseDebug: boolean
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
+  helpDocURL?: string
 }
 
 const oauthConfigs: GlobalConfig['oauthConfigs'] = {
@@ -140,6 +141,7 @@ export const globalConfig: GlobalConfig = {
     false,
   ),
   oauthConfigs,
+  helpDocURL: stringEnv('PTOJ_HELP_DOC_URL'),
 }
 
 const config = {

@@ -16,6 +16,7 @@ export interface WebsiteInformation {
   buildTime: number
   apiPublicKey: string
   oauthEnabled: Record<OAuthProvider, boolean>
+  helpDocURL?: string
 }
 
 const uploadDir = path.join(__dirname, '../../public/uploads')
@@ -58,6 +59,7 @@ const websiteInformation = async (ctx: Context) => {
       CJLU: globalConfig.oauthConfigs.CJLU.enabled,
       Codeforces: globalConfig.oauthConfigs.Codeforces.enabled,
     },
+    helpDocURL: globalConfig.helpDocURL,
   }
   ctx.body = result
 }
