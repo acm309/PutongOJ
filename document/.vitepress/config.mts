@@ -13,6 +13,12 @@ export default withMermaid({
     ],
     sidebar: [
       {
+        text: '基础', items: [
+          { text: '常见问题', link: '/faq' },
+          { text: 'Frequently Asked Questions', link: '/faq-en' },
+        ]
+      },
+      {
         text: '题目',
         items: [
           { text: '特判（Special Judge）', link: '/user/special-judge' },

@@ -6,13 +6,13 @@ hero:
   name: "Putong OJ"
   text: "Documentation"
   tagline: 一个普通的在线评判系统和她普通的文档。
-  # actions:
-  #   - theme: brand
-  #     text: Markdown Examples
-  #     link: /markdown-examples
-  #   - theme: alt
-  #     text: API Examples
-  #     link: /api-examples
+  actions:
+    - theme: brand
+      text: 常见问题
+      link: /faq
+    - theme: alt
+      text: Frequently Asked Questions
+      link: /faq-en
 
 features:
   - title: 特判

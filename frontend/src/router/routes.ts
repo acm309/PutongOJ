@@ -1,7 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 import NotFound from '@/views/404.vue'
 import AccountSettings from '@/views/AccountSettings.vue'
-import FAQ from '@/views/FAQ.vue'
 import Home from '@/views/Home.vue'
 import MySubmissions from '@/views/MySubmissions.vue'
 import OAuthCallback from '@/views/OAuthCallback.vue'
@@ -66,12 +65,6 @@ const routes: Array<RouteRecordRaw> = [
     name: 'oauthCallback',
     component: OAuthCallback,
     meta: { title: 'OAuth Callback' },
-  },
-  {
-    path: '/faq',
-    name: 'faq',
-    component: FAQ,
-    meta: { title: 'FAQ' },
   },
   {
     path: '/:pathMatch(.*)*',

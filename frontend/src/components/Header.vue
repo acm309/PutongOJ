@@ -67,10 +67,10 @@ const menuItems = computed(() => {
     label: t('oj.discussion_list'),
     icon: 'pi pi-comments',
     route: 'Discussions',
-  }, {
-    label: t('oj.faq'),
-    icon: 'pi pi-question-circle',
-    route: 'faq',
+  // }, {
+  //   label: t('oj.faq'),
+  //   icon: 'pi pi-question-circle',
+  //   route: 'faq',
   })
 
   if (isAdmin.value) {
