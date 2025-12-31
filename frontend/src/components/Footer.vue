@@ -45,37 +45,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-8 text-base/relaxed text-center">
+  <div class="flex flex-col gap-1.5 items-center p-8">
     <SelectButton
-      v-model="selectedLang" class="block" :options="langs" option-label="label" option-value="value"
+      v-model="selectedLang" class="block mb-4" :options="langs" option-label="label" option-value="value"
       :allow-empty="false" @change="onLangSelected"
     />
-    <div class="mb-4">
-      Server time: {{ serverTime }}
-    </div>
-    <div class="cursor-pointer" @click="versionDialogVisible = true">
-      <div class="font-bold mb-px text-lg">
-        Putong OJ
-      </div>
-      <div>Copyright &copy; 2017-2025 CJLU ACM Lab.</div>
-    </div>
+
+    <span class="-mb-0.5 cursor-pointer font-bold text-lg" @click="versionDialogVisible = true">
+      Putong OJ
+    </span>
+    <span>
+      &copy; 2017-2026
+      <a href="https://github.com/acm309" target="_blank" rel="noopener noreferrer">ACM&hairsp;@&hairsp;CJLU</a>
+    </span>
+    <span>Server time: {{ serverTime }}</span>
   </div>
 
-  <Dialog v-model:visible="versionDialogVisible" modal header="Info" class="mx-6">
+  <Dialog v-model:visible="versionDialogVisible" modal header="Putong OJ" class="mx-6">
     <div class="font-mono space-y-4">
       <div>
         <div class="flex justify-between">
           <span class="font-bold">Backend</span>
           <span>#{{ backend.buildSHA }}</span>
         </div>
-        <div>Built at {{ timePretty(backend.buildTime) }}</div>
+        <div>Built at {{ timePretty(backend.buildTime, 'yyyy-MM-dd\'T\'HH:mm:ssXXX') }}</div>
       </div>
       <div>
         <div class="flex justify-between">
           <span class="font-bold">Frontend</span>
           <span>#{{ frontend.buildSHA }}</span>
         </div>
-        <div>Built at {{ timePretty(frontend.buildTime) }}</div>
+        <div>Built at {{ timePretty(frontend.buildTime, 'yyyy-MM-dd\'T\'HH:mm:ssXXX') }}</div>
       </div>
     </div>
   </Dialog>
