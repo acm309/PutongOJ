@@ -65,12 +65,12 @@ graph LR
 
 题目的时空限制以及测量仅限于选手程序，交互器运行所消耗的资源不会影响评测结果。最终答案正确与否将由交互器的返回值决定：
 
-- Return 0：<span style="color: #ff0000">Accepted</span> 选手程序输出正确；
-- Return 1：<span style="color: #11b811">Wrong Answer</span> 选手程序输出错误；
-- Return 2：<span style="color: #ffa500">Presentation Error</span> 选手程序输出格式错误；
-- 其它返回值：<span style="color: #11b811">Runtime Error</span> 各种其它错误（如错误的询问格式）。
+- Return 0：<span style="color: oklch(63.7% 0.237 25.331)">Accepted</span> 选手程序输出正确；
+- Return 1：<span style="color: oklch(72.3% 0.219 149.579)">Wrong Answer</span> 选手程序输出错误；
+- Return 2：<span style="color: oklch(68.1% 0.162 75.834)">Presentation Error</span> 选手程序输出格式错误；
+- 其它返回值：<span style="color: oklch(72.3% 0.219 149.579)">Runtime Error</span> 各种其它错误（如错误的询问格式）。
 
-如果交互器本身因为各种原因未能退出（如死循环等），将会引发 <span style="color: #11b811">System Error</span>。
+如果交互器本身因为各种原因未能退出（如死循环等），将会引发 <span style="color: oklch(72.3% 0.219 149.579)">System Error</span>。
 
 ## 交互器的编写 {#writing-interactor}
 

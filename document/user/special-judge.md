@@ -29,8 +29,8 @@ graph LR
 
 SPJ 程序通过返回值确定评测结果：
 
-- Return 0：<span style="color: #ff0000">Accepted</span> 选手程序输出正确；
-- 其它返回值：<span style="color: #11b811">Wrong Answer</span> 选手程序输出错误。
+- Return 0：<span style="color: oklch(63.7% 0.237 25.331)">Accepted</span> 选手程序输出正确；
+- 其它返回值：<span style="color: oklch(72.3% 0.219 149.579)">Wrong Answer</span> 选手程序输出错误。
 
 ## SPJ 程序的编写 {#writing-checker}
 

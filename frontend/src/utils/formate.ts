@@ -144,9 +144,9 @@ export function getJudgeStatusClassname (judgeStatus: JudgeStatus) {
     case JudgeStatus.SystemError:
       return 'text-green-500'
     case JudgeStatus.CompileError:
-      return 'text-violet-600'
+      return 'text-violet-500'
     case JudgeStatus.PresentationError:
-      return 'text-yellow-500'
+      return 'text-yellow-600'
     default:
       return ''
   }
