@@ -40,7 +40,7 @@ export default withMermaid({
       { icon: 'github', link: 'https://github.com/acm309/PutongOJ' },
     ],
     editLink: {
-      pattern: 'https://github.com/acm309/PutongOJ/tree/main/document/:path'
+      pattern: 'https://github.com/acm309/PutongOJ/tree/main/document/src/:path'
     },
   },
 })

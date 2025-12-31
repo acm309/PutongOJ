@@ -18,7 +18,7 @@
 | <span style="color: oklch(72.3% 0.219 149.579)">**输出超限**<br>Output Limit Exceeded</span> | 你的程序输出了太多的信息。这通常是由于你的程序进入了一个无限循环。 |
 | <span style="color: oklch(72.3% 0.219 149.579)">**系统错误**<br>System Error</span> | 评测机发生了错误，这可能不是你的问题，请坐和放宽。 |
 
-### 评测机的编译 / 运行环境？{#compiler-runtime-environment}
+## 评测机的编译 / 运行环境？{#compiler-runtime-environment}
 
 评测机的编译器 / 运行时环境如下：
 
@@ -31,7 +31,7 @@
 | **Python 3** | Python 3.11.2 | `python -m py_compile Main.py`<br>`python Main.py` |
 | **PyPy 3** | Python 3.9.16<br>PyPy 7.3.11 | `pypy3 -m py_compile Main.py`<br>`pypy3 Main.py` |
 
-### 我的程序能知道它是在评测机上运行吗？{#detect-judge-environment}
+## 我的程序能知道它是在评测机上运行吗？{#detect-judge-environment}
 
 是的，你可以通过不同的方式来判断你的程序是否在评测机上运行。C 和 C++ 通过宏定义，Java 通过系统属性，Python 通过环境变量来得知程序是否在评测机上运行。下面给出了一些示例：
 
@@ -72,7 +72,7 @@ else:
     print("Not running on the judge")
 ```
 
-### 为什么我本地能编译通过的 C / C++ 代码在评测机上编译失败了？{#c-cpp-compile-fail}
+## 为什么我本地能编译通过的 C / C++ 代码在评测机上编译失败了？{#c-cpp-compile-fail}
 
 或许是因为 GNU 和 MS-VC++ 之间存在一些差异，例如：
 
