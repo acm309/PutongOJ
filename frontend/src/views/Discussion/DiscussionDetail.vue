@@ -8,7 +8,6 @@ import Divider from 'primevue/divider'
 import IftaLabel from 'primevue/iftalabel'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
-import Panel from 'primevue/panel'
 import Select from 'primevue/select'
 import SplitButton from 'primevue/splitbutton'
 import Tag from 'primevue/tag'
@@ -266,37 +265,33 @@ onMounted(fetchDiscussion)
       </h1>
 
       <div class="mb-6 px-6 space-y-4">
-        <Panel v-for="(comment, index) in discussion.comments" :key="index">
-          <template #header>
-            <div class="flex gap-4 items-start">
-              <UserAvatar
-                :image="comment.author.avatar" class="cursor-pointer flex-none"
-                @click="onViewAuthor(comment.author.uid)"
-              />
-              <div
-                class="cursor-pointer flex font-medium items-center min-h-8"
-                @click="onViewAuthor(comment.author.uid)"
-              >
-                <span class="flex flex-wrap gap-2 items-center">
-                  <a class="text-lg">
-                    {{ comment.author.uid }}
-                  </a>
-                  <span v-if="comment.author.nick" class="text-muted-color">
-                    {{ comment.author.nick }}
-                  </span>
+        <div
+          v-for="(comment, index) in discussion.comments" :key="index"
+          class="border border-surface flex flex-col gap-5 p-5 rounded-lg"
+        >
+          <div class="flex gap-4 items-start">
+            <UserAvatar
+              :image="comment.author.avatar" class="cursor-pointer flex-none"
+              @click="onViewAuthor(comment.author.uid)"
+            />
+            <div class="cursor-pointer flex font-medium items-center min-h-8" @click="onViewAuthor(comment.author.uid)">
+              <span class="flex flex-wrap gap-2 items-center">
+                <a class="text-lg">
+                  {{ comment.author.uid }}
+                </a>
+                <span v-if="comment.author.nick" class="text-muted-color">
+                  {{ comment.author.nick }}
                 </span>
-              </div>
+              </span>
             </div>
-          </template>
-          <template #footer>
-            <div class="text-muted-color text-sm">
-              {{ timePretty(comment.createdAt) }}
-            </div>
-          </template>
-          <div class="-mb-2 -mt-1 leading-relaxed whitespace-pre-wrap">
+          </div>
+          <div class="-mb-2 -mt-1 leading-relaxed whitespace-pre-wrap wrap-break-word">
             {{ comment.content }}
           </div>
-        </Panel>
+          <div class="-mb-0.5 text-muted-color text-sm">
+            {{ timePretty(comment.createdAt) }}
+          </div>
+        </div>
       </div>
 
       <Divider type="dashed" />
@@ -314,8 +309,7 @@ onMounted(fetchDiscussion)
         </IftaLabel>
         <div class="flex justify-end">
           <Button
-            :label="t('ptoj.submit_comment')"
-            icon="pi pi-send" :disabled="!canComment || !commentContent.trim()"
+            :label="t('ptoj.submit_comment')" icon="pi pi-send" :disabled="!canComment || !commentContent.trim()"
             :loading="creatingComment" @click="submitComment"
           />
         </div>
