@@ -181,7 +181,7 @@ export type AdminGroupMembersUpdatePayload = z.infer<typeof AdminGroupMembersUpd
 export const AdminDiscussionUpdatePayloadSchema = z.object({
   author: UserModelSchema.shape.uid.optional(),
   problem: ProblemModelSchema.shape.pid.nullable().optional(),
-  contest: ContestModelSchema.shape.cid.nullable().optional(),
+  contest: ContestModelSchema.shape.contestId.nullable().optional(),
   type: z.enum(DiscussionType).optional(),
   pinned: DiscussionModelSchema.shape.pinned.optional(),
   title: DiscussionModelSchema.shape.title.optional(),

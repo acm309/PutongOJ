@@ -31,7 +31,7 @@ export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
     pid: ProblemModelSchema.shape.pid,
   }).nullable(),
   contest: z.object({
-    cid: ContestModelSchema.shape.cid,
+    contestId: ContestModelSchema.shape.contestId,
   }).nullable(),
   type: DiscussionModelSchema.shape.type,
   pinned: DiscussionModelSchema.shape.pinned,
@@ -52,7 +52,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
     pid: ProblemModelSchema.shape.pid,
   }).nullable(),
   contest: z.object({
-    cid: ContestModelSchema.shape.cid,
+    contestId: ContestModelSchema.shape.contestId,
   }).nullable(),
   type: DiscussionModelSchema.shape.type,
   pinned: DiscussionModelSchema.shape.pinned,
@@ -79,7 +79,7 @@ export const DiscussionCreatePayloadSchema = z.object({
   type: z.enum(DiscussionType).exclude(['ArchivedDiscussion']),
   title: DiscussionModelSchema.shape.title,
   problem: ProblemModelSchema.shape.pid.optional(),
-  contest: ContestModelSchema.shape.cid.optional(),
+  contest: ContestModelSchema.shape.contestId.optional(),
   content: CommentModelSchema.shape.content,
 })
 

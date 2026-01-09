@@ -83,3 +83,20 @@ export enum DiscussionType {
   PrivateClarification = 3,
   ArchivedDiscussion = 4,
 }
+
+export const ParticipationStatus = {
+  NotApplied: 0,
+  Pending: 1,
+  Rejected: 2,
+  Suspended: 3,
+  Approved: 4,
+} as const
+
+export type ParticipationStatus = typeof ParticipationStatus[keyof typeof ParticipationStatus]
+
+export const LabelingStyle = {
+  Numeric: 1,
+  Alphabetic: 2,
+} as const
+
+export type LabelingStyle = typeof LabelingStyle[keyof typeof LabelingStyle]
