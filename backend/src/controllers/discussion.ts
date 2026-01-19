@@ -46,8 +46,8 @@ export async function loadDiscussion (
 
   let isJury: boolean = false
   if (discussion.contest) {
-    const contest = await loadContest(ctx, discussion.contest.cid)
-    if (contest.course) {
+    const { contest } = (await loadContest(ctx, discussion.contest.contestId))!
+    if (contest?.course) {
       const { role } = await loadCourse(ctx, contest.course)
       if (role.manageContest) {
         isJury = true
@@ -107,7 +107,7 @@ async function findDiscussions (ctx: Context) {
     { page, pageSize, sort, sortBy },
     { $and: filters },
     [ 'discussionId', 'author', 'problem', 'contest', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
-    { author: [ 'uid', 'avatar' ], problem: [ 'pid' ], contest: [ 'cid' ] },
+    { author: [ 'uid', 'avatar' ], problem: [ 'pid' ], contest: [ 'contestId' ] },
   )
   const result = DiscussionListQueryResultSchema.encode(discussions)
   return createEnvelopedResponse(ctx, result)
@@ -153,11 +153,16 @@ async function createDiscussion (ctx: Context) {
 
   let contest: Types.ObjectId | null = null
   if (payload.data.contest) {
-    const contestDoc = await loadContest(ctx, payload.data.contest)
+    const contestState = await loadContest(ctx, payload.data.contest)
+    if (!contestState || !contestState.accessible) {
+      return createErrorResponse(ctx,
+        'Contest not found or access denied', ErrorCode.NotFound,
+      )
+    }
 
-    contest = contestDoc._id
-    if (contestDoc.course) {
-      const { role } = await loadCourse(ctx, contestDoc.course)
+    contest = contestState.contest._id || null
+    if (contestState.contest.course) {
+      const { role } = await loadCourse(ctx, contestState.contest.course)
       if (role.manageContest) {
         isManaged = true
       }

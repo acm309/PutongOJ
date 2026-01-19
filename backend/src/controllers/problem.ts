@@ -58,8 +58,12 @@ export async function loadProblem (
 
   const contestId = Number(inputContestId || ctx.request.query.cid)
   if (Number.isInteger(contestId) && contestId > 0) {
-    const contest = await loadContest(ctx, contestId)
-    if (contest.list.includes(problemId)) {
+    const contestState = await loadContest(ctx, contestId)
+    if (!contestState || !contestState.accessible) {
+      return ctx.throw(...ERR_PERM_DENIED)
+    }
+    const { contest } = contestState
+    if (contest.problems.includes(problem._id)) {
       ctx.state.problem = problem
       return problem
     }

@@ -105,7 +105,7 @@ export async function getDiscussion (discussionId: number) {
   return getDiscussionPopulated(discussionId, {
     author: [ 'uid' ],
     problem: [ 'pid', 'owner' ],
-    contest: [ 'cid' ],
+    contest: [ 'contestId' ],
   })
 }
 

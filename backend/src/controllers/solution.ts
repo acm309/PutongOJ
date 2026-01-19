@@ -1,4 +1,5 @@
 import type { Context } from 'koa'
+import type { CourseDocument } from '../models/Course'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { ErrorCode } from '@putongoj/shared'
@@ -33,7 +34,9 @@ export async function findOne (ctx: Context) {
       return true
     }
     if (solution.mid > 0) {
-      const contest = await Contest.findOne({ cid: solution.mid }, 'course').populate('course')
+      const contest = await Contest
+        .findOne({ contestId: solution.mid }, 'course')
+        .populate<{ course: CourseDocument }>('course')
       if (contest && contest.course) {
         const { role } = await loadCourse(ctx, contest.course)
         if (role.viewSolution) {
@@ -91,26 +94,28 @@ const create = async (ctx: Context) => {
   }
 
   let course = null
+  const problem = await Problem.findOne({ pid })
+  if (!problem) {
+    ctx.throw(400, 'No such a problem')
+  }
   if (mid > 0) {
     const mid = Number.parseInt(opt.mid)
     const contest = await Contest.findOne({ cid: mid }).populate('course')
     if (!contest) {
       ctx.throw(400, 'No such a contest')
     }
-    if (contest.end < Date.now()) {
+    const now = new Date()
+    if (contest.endsAt < now) {
       ctx.throw(400, 'Contest is ended!')
     }
-    if (!contest.list.includes(pid)) {
+    if (!contest.problems.includes(problem._id)) {
       ctx.throw(400, 'No such a problem in the contest')
     }
     if (contest.course) {
       course = contest.course._id
     }
   }
-  const problem = await Problem.findOne({ pid })
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
+
   /**
    * @TODO
    */
