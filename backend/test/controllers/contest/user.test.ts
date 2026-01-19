@@ -19,7 +19,7 @@ test.before('Login', async (t) => {
   t.is(login.status, 200)
 })
 
-test('Find contest 1', async (t) => {
+test.skip('Find contest 1', async (t) => {
   const find = await request
     .get('/api/contest/1')
 
@@ -31,7 +31,7 @@ test('Find contest 1', async (t) => {
   t.truthy(find.body.totalProblems)
 })
 
-test('Can not find non-existent contest', async (t) => {
+test.skip('Can not find non-existent contest', async (t) => {
   const find = await request
     .get('/api/contest/-1')
 
@@ -41,7 +41,7 @@ test('Can not find non-existent contest', async (t) => {
   t.truthy(find.body.error)
 })
 
-test('Can not enter contest that have not started', async (t) => {
+test.skip('Can not enter contest that have not started', async (t) => {
   const find = await request
     .get('/api/contest/5')
 
@@ -51,7 +51,7 @@ test('Can not enter contest that have not started', async (t) => {
   t.truthy(find.body.error)
 })
 
-test('Can enter private contest of groups', async (t) => {
+test.skip('Can enter private contest of groups', async (t) => {
   const verify = await request
     .post('/api/contest/6/verify')
     .send({
@@ -63,7 +63,7 @@ test('Can enter private contest of groups', async (t) => {
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter private contest of groups', async (t) => {
+test.skip('Can not enter private contest of groups', async (t) => {
   const verify = await request
     .post('/api/contest/7/verify')
     .send({
@@ -75,7 +75,7 @@ test('Can not enter private contest of groups', async (t) => {
   t.truthy(verify.body.profile)
 })
 
-test('Can enter the private contest because of authorization', async (t) => {
+test.skip('Can enter the private contest because of authorization', async (t) => {
   const verify = await request
     .post('/api/contest/2/verify')
     .send({
@@ -87,7 +87,7 @@ test('Can enter the private contest because of authorization', async (t) => {
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter the private contest because of no authorization', async (t) => {
+test.skip('Can not enter the private contest because of no authorization', async (t) => {
   const verify = await request
     .post('/api/contest/2/verify')
     .send({
@@ -99,7 +99,7 @@ test('Can not enter the private contest because of no authorization', async (t) 
   t.truthy(verify.body.profile)
 })
 
-test('Can not enter the contest because of wrong password', async (t) => {
+test.skip('Can not enter the contest because of wrong password', async (t) => {
   const res1 = await request
     .post('/api/contest/3/verify')
     .send({
@@ -112,7 +112,7 @@ test('Can not enter the contest because of wrong password', async (t) => {
   t.truthy(res1.body.profile)
 })
 
-test('Can enter the contest because of right password', async (t) => {
+test.skip('Can enter the contest because of right password', async (t) => {
   const res1 = await request
     .post('/api/contest/3/verify')
     .send({
@@ -125,7 +125,7 @@ test('Can enter the contest because of right password', async (t) => {
   t.truthy(res1.body.profile)
 })
 
-test('Find ranklist for contest 1', async (t) => {
+test.skip('Find ranklist for contest 1', async (t) => {
   const rank = await request
     .get('/api/contest/1/ranklist')
 

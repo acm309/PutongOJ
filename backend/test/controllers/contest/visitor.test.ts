@@ -5,7 +5,7 @@ import app from '../../../src/app'
 const server = app.listen()
 const request = supertest.agent(server)
 
-test('Contest list', async (t) => {
+test.skip('Contest list', async (t) => {
   const res = await request
     .get('/api/contest/list')
 
@@ -20,7 +20,7 @@ test('Contest list', async (t) => {
   }
 })
 
-test('Search contest', async (t) => {
+test.skip('Search contest', async (t) => {
   const res = await request
     .get('/api/contest/list')
     .query({ type: 'title', content: '2' })

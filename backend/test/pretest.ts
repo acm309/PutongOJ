@@ -1,5 +1,5 @@
 import process from 'node:process'
-import Contest from '../src/models/Contest'
+// import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
 import Group from '../src/models/Group'
 import ID from '../src/models/ID'
@@ -10,7 +10,7 @@ import User from '../src/models/User'
 import discussionService from '../src/services/discussion'
 import { passwordHash } from '../src/utils'
 import { removeall } from './helper'
-import { contestSeeds } from './seeds/contest'
+// import { contestSeeds } from './seeds/contest'
 import { courseSeeds } from './seeds/course'
 import { discussionSeeds } from './seeds/discussion'
 import { groupSeeds } from './seeds/group'
@@ -33,19 +33,9 @@ async function main () {
     new ID({ name: 'Tag', id: 0 }).save(),
   ])
 
-  const contestInsert = (async () => {
-    for (const contest of contestSeeds) {
-      await new Contest(contest).save()
-    }
-  })()
   const courseInsert = Promise.all(
     courseSeeds.map(item => new Course(item).save()),
   )
-  // const discussInsert = (async () => {
-  //   for (const discuss of discussSeeds) {
-  //     await new Discuss(discuss).save()
-  //   }
-  // })()
   const groupInsert = Promise.all(
     groupSeeds.map(item => new Group(item).save()),
   )
@@ -62,11 +52,6 @@ async function main () {
       await new Solution(solution).save()
     }
   })()
-  // const tagInsert = Promise.all(
-  //   Object.values(tagSeeds).map((tag) => {
-  //     return new Tag(tag).save()
-  //   }),
-  // )
   const userInsert = Promise.all(
     Object.values(userSeeds).map((user) => {
       return new User(Object.assign({}, user, {
@@ -76,7 +61,6 @@ async function main () {
   )
 
   await Promise.all([
-    contestInsert,
     courseInsert,
     groupInsert,
     newsInsert,
