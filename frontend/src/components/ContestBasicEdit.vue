@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import { encrypt } from '@backend/utils/constants'
-import { storeToRefs } from 'pinia'
 import { DatePicker, Form, FormItem, Input, Message, Option, Select } from 'view-ui-plus'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useContestStore } from '@/store/modules/contest'
 
 const props = defineProps<{
-  contestId: number
+  contest: any
 }>()
+const { contest } = props
 const { t } = useI18n()
-const contestStore = useContestStore()
-const { contest } = storeToRefs(contestStore)
-const { findOne: findContest } = contestStore
 
 const startsAt = ref(new Date())
 const endsAt = ref(new Date())
@@ -49,13 +45,6 @@ async function updateDatetime (type: 'start' | 'end', time: string) {
 }
 
 onMounted(async () => {
-  if (
-    Number.isInteger(props.contestId)
-    && props.contestId > 0
-    && contest.value.cid !== props.contestId
-  ) {
-    await findContest({ cid: props.contestId })
-  }
   await syncValues()
 })
 </script>

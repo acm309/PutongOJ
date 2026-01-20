@@ -1,23 +1,19 @@
 <script setup lang="ts">
 import type { ContestEntityView } from '@backend/types/entity'
 import { encrypt, status } from '@backend/utils/constants'
-import { storeToRefs } from 'pinia'
 import { Alert, Button, Form, FormItem, Message, Space, Step, Steps } from 'view-ui-plus'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import api from '@/api'
 import ContestBasicEdit from '@/components/ContestBasicEdit.vue'
-import { useContestStore } from '@/store/modules/contest'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const contestStore = useContestStore()
-
-const { create: createContest } = contestStore
-const { contest } = storeToRefs(contestStore)
 
 const initialized = ref(false)
+const contest = ref<any>({})
 
 async function init (): Promise<void> {
   let now = new Date().getTime()
@@ -36,6 +32,9 @@ async function init (): Promise<void> {
 }
 
 async function submit (): Promise<void> {
+  if (!contest.value) {
+    return
+  }
   if (!contest.value.title.trim()) {
     Message.error(t('oj.title_is_required'))
     return
@@ -45,7 +44,7 @@ async function submit (): Promise<void> {
     return
   }
 
-  const contestId = await createContest({
+  const resp = await api.contest.create({
     ...contest.value,
     cid: undefined,
     course: route.query.course
@@ -54,7 +53,7 @@ async function submit (): Promise<void> {
   })
 
   Message.success(t('oj.create_contest_success', contest.value))
-  router.push({ name: 'contestEdit', params: { contestId } })
+  router.push({ name: 'contestEdit', params: { contestId: resp.data.cid } })
 }
 onMounted(init)
 </script>
@@ -75,7 +74,7 @@ onMounted(init)
       {{ t('oj.after_contest_created_notice') }}
     </Alert>
     <div v-if="initialized">
-      <ContestBasicEdit :contest-id="-1" />
+      <ContestBasicEdit :contest="contest" />
       <Form label-position="right" :label-width="120">
         <FormItem>
           <Button type="primary" size="large" @click="submit">

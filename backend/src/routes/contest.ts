@@ -25,10 +25,10 @@ contestRouter.get('/:contestId/ranklist',
   authnMiddleware.loginRequire,
   contestController.getRanklist,
 )
-// contestRouter.post('/',
-//   authnMiddleware.loginRequire,
-//   contestController.createContest,
-// )
+contestRouter.post('/',
+  authnMiddleware.loginRequire,
+  contestController.createContest,
+)
 contestRouter.get('/:contestId/configs',
   authnMiddleware.loginRequire,
   contestController.getConfig,

@@ -1,5 +1,6 @@
 import type {
-  ContestModel } from '@putongoj/shared'
+  ContestModel,
+} from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
 import type { ContestWithCourse } from '../services/contest'
@@ -481,9 +482,47 @@ export async function findContestDiscussions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+const createContest = async (ctx: Context) => {
+  const opt = ctx.request.body
+  const profile = await loadProfile(ctx)
+  const hasPermission = async (): Promise<boolean> => {
+    if (profile.isAdmin) {
+      return true
+    }
+    if (opt.course) {
+      const { role } = await loadCourse(ctx, opt.course)
+      return role.manageContest
+    }
+    return false
+  }
+  if (!await hasPermission()) {
+    return ctx.throw(...ERR_PERM_DENIED)
+  }
+
+  let courseDocId: Types.ObjectId | undefined
+  if (opt.course) {
+    const { course } = await loadCourse(ctx, opt.course)
+    courseDocId = course._id
+  }
+
+  try {
+    const contest = new Contest(Object.assign({}, opt, {
+      startsAt: new Date(opt.start),
+      endsAt: new Date(opt.end),
+      course: courseDocId,
+    }))
+    await contest.save()
+    ctx.auditLog.info(`<Contest:${contest.contestId}> created by <User:${profile.uid}>`)
+    ctx.body = { cid: contest.contestId }
+  } catch (e: any) {
+    ctx.throw(400, e.message)
+  }
+}
+
 const contestController = {
   loadContest,
   findContests,
+  createContest,
   getContest,
   getParticipation,
   participateContest,
