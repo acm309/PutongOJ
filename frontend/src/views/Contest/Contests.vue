@@ -147,8 +147,8 @@ onRouteQueryUpdate(fetch)
     </template>
 
     <ContestDataTable
-      v-else class="-mb-px" :value="docs" :sort-field="query.sortBy" :sort-order="query.sort"
-      :loading="loading" @sort="onSort"
+      v-else :value="docs" :sort-field="query.sortBy" :sort-order="query.sort" :loading="loading"
+      @sort="onSort"
     />
 
     <Paginator
