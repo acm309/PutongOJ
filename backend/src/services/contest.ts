@@ -1,92 +1,126 @@
-import type { Paginated } from '@putongoj/shared'
+import type { ContestModel } from '@putongoj/shared'
 import type { Types } from 'mongoose'
-import type { ContestDocument, ContestDocumentPopulated } from '../models/Contest'
-import type { PaginateOption } from '../types'
-import type { ContestEntityEditable, ContestEntityPreview, ContestRanklist, SolutionEntity } from '../types/entity'
+import type { CourseDocument } from '../models/Course'
+import type { PaginateOption, SortOption } from '../types'
+import type { ContestRanklist, SolutionEntity } from '../types/entity'
+import type { QueryFilter } from '../types/mongo'
+import { ParticipationStatus } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
 import Contest from '../models/Contest'
+import ContestParticipation from '../models/ContestParticipation'
 import Solution from '../models/Solution'
 import User from '../models/User'
-import { judge, status } from '../utils/constants'
+import { judge } from '../utils/constants'
 
 export async function findContests (
-  opt: PaginateOption & {
-    type?: string
-    content?: string
-  },
-  showAll: boolean = false,
-  course: Types.ObjectId | null = null,
-): Promise<Paginated<ContestEntityPreview>> {
-  const { page, pageSize, content, type } = opt
-  const filters: Record<string, any>[] = []
+  options: PaginateOption & SortOption,
+  filters: { title?: string, course?: Types.ObjectId },
+  showHidden: boolean = false,
+) {
+  const { page, pageSize, sort, sortBy } = options
+  const queryFilters: QueryFilter<ContestModel>[] = []
 
-  if (!showAll) {
-    filters.push({ status: status.Available })
+  if (!showHidden) {
+    queryFilters.push({ isHidden: { $ne: true } })
   }
-  if (content) {
-    switch (type) {
-      case 'title':
-        filters.push({
-          title: { $regex: new RegExp(escapeRegExp(String(content)), 'i') },
-        })
-        break
-    }
+  if (filters.title) {
+    queryFilters.push({
+      title: { $regex: new RegExp(escapeRegExp(String(filters.title)), 'i') },
+    })
   }
-  if (course) {
-    filters.push({ course })
-  } else if (!showAll) {
-    filters.push({
+  if (filters.course) {
+    queryFilters.push({ course: filters.course })
+  } else if (!showHidden) {
+    queryFilters.push({
       $or: [
         { course: { $exists: false } },
         { course: null } ],
     })
   }
 
-  const result = await Contest.paginate({ $and: filters }, {
-    sort: { cid: -1 },
-    page,
+  const fields = [ '_id', 'contestId', 'title', 'startsAt', 'endsAt', 'isPublic' ]
+  if (showHidden) {
+    fields.push('isHidden')
+  }
+  const docsPromise = Contest
+    .find({ $and: queryFilters })
+    .sort({
+      [sortBy]: sort,
+      ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
+    })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .select(fields)
+    .lean()
+  const countPromise = Contest.countDocuments({ $and: queryFilters })
+
+  const [ docs, count ] = await Promise.all([ docsPromise, countPromise ])
+  const result = {
+    docs,
     limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id cid title start end encrypt status',
-  }) as any
+    page,
+    pages: Math.ceil(count / pageSize),
+    total: count,
+  }
   return result
 }
 
-export async function getContest (
-  cid: number,
-): Promise<ContestDocumentPopulated | null> {
+export async function getContest (contestId: number) {
   const contest = await Contest
-    .findOne({ cid })
-    .populate('course')
+    .findOne({ contestId })
+    .populate<{ course: CourseDocument }>('course')
   return contest
 }
 
-export async function createContest (
-  opt: ContestEntityEditable,
-): Promise<ContestDocument> {
-  const contest = new Contest(opt)
-  await contest.save()
-  return contest
+export type ContestWithCourse = NonNullable<Awaited<ReturnType<typeof getContest>>>
+
+export async function getContestParticipation (user: Types.ObjectId, contest: Types.ObjectId): Promise<ParticipationStatus> {
+  const participation = await ContestParticipation
+    .findOne({ user, contest })
+    .lean()
+  if (!participation) {
+    return ParticipationStatus.NotApplied
+  }
+  return participation.status as ParticipationStatus
 }
 
-export async function updateContest (
-  cid: number,
-  opt: Partial<ContestEntityEditable>,
-): Promise<ContestDocument | null> {
-  const contest = await Contest
-    .findOneAndUpdate({ cid }, opt, { new: true })
-    .populate('course')
-  return contest
+export async function setContestParticipation (
+  user: Types.ObjectId,
+  contest: Types.ObjectId,
+  status: ParticipationStatus,
+): Promise<void> {
+  await ContestParticipation.findOneAndUpdate(
+    { user, contest },
+    { user, contest, status },
+    { upsert: true, new: true },
+  )
 }
 
-export async function removeContest (cid: number): Promise<boolean> {
-  const result = await Contest.deleteOne({ cid })
-  return result.deletedCount > 0
-}
+// export async function createContest (
+//   opt: ContestEntityEditable,
+// ): Promise<ContestDocument> {
+//   const contest = new Contest(opt)
+//   await contest.save()
+//   return contest
+// }
+
+// export async function updateContest (
+//   cid: number,
+//   opt: Partial<ContestEntityEditable>,
+// ): Promise<ContestDocument | null> {
+//   const contest = await Contest
+//     .findOneAndUpdate({ cid }, opt, { new: true })
+//     .populate('course')
+//   return contest
+// }
+
+// export async function removeContest (cid: number): Promise<boolean> {
+//   const result = await Contest.deleteOne({ cid })
+//   return result.deletedCount > 0
+// }
 
 export async function getRanklist (
-  cid: number,
+  contestId: number,
   isFrozen: boolean = false,
   freezeTime: number = 0,
 ): Promise<ContestRanklist> {
@@ -94,7 +128,7 @@ export async function getRanklist (
   const userIdSet = new Set<string>()
   const solutions = await Solution
     .find(
-      { mid: cid },
+      { mid: contestId },
       { _id: 0, pid: 1, uid: 1, judge: 1, createdAt: 1 },
     )
     .sort({ create: 1 })
@@ -164,9 +198,11 @@ export async function getRanklist (
 const contestService = {
   findContests,
   getContest,
-  createContest,
-  updateContest,
-  removeContest,
+  getContestParticipation,
+  setContestParticipation,
+  // createContest,
+  // updateContest,
+  // removeContest,
   getRanklist,
 } as const
 

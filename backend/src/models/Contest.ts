@@ -1,127 +1,104 @@
-import type { Document, PaginateModel, Types } from 'mongoose'
-import type { ContestEntity } from '../types/entity'
-import type { CourseDocument } from './Course'
-import mongoosePaginate from 'mongoose-paginate-v2'
+import { LabelingStyle, TITLE_LENGTH_MAX } from '@putongoj/shared'
 import mongoose from '../config/db'
-import constants from '../utils/constants'
 import ID from './ID'
 
-export interface ContestDocument extends Document<Types.ObjectId>, ContestEntity {}
-
-export interface ContestDocumentPopulated extends ContestDocument {
-  course: CourseDocument | null
-}
-
-type ContestModel = PaginateModel<ContestDocument>
-
-const contestOptionSchema = new mongoose.Schema({
-  labelingStyle: {
-    type: Number,
-    enum: Object.values(constants.contestLabelingStyle),
-    default: constants.contestLabelingStyle.numeric,
-  },
-}, {
-  _id: false,
-})
-
 const contestSchema = new mongoose.Schema({
-  cid: {
+  contestId: {
     type: Number,
-    default: -1,
-    immutable: true,
     index: {
       unique: true,
     },
+    default: -1,
   },
   title: {
     type: String,
     required: true,
     validate: {
-      validator (v: any) {
-        return v.length <= 80
-      },
-      message: 'Title is too long. It should be less than 80 characters long',
+      validator: (v: string) => v.length >= 1 && v.length <= TITLE_LENGTH_MAX,
     },
   },
-  start: {
-    type: Number,
+  startsAt: {
+    type: Date,
     required: true,
-    validate: {
-      validator (v: any) {
-        return !Number.isNaN(new Date(v).getTime())
-      },
-      message: 'Start time must be a valid date',
-    },
   },
-  end: {
-    type: Number,
+  endsAt: {
+    type: Date,
     required: true,
-    validate: {
-      validator (v: any) {
-        return !Number.isNaN(new Date(v).getTime())
-      },
-      message: 'End time must be a valid date',
-    },
   },
-  list: {
-    type: [ Number ],
-    default: [],
-    validate: {
-      validator (v: any) {
-        return Array.isArray(v)
-      },
-    },
+  scoreboardFrozenAt: {
+    type: Date,
+    default: null,
   },
-  status: {
-    type: Number,
-    enum: Object.values(constants.status),
-    default: constants.status.Available,
+  scoreboardUnfrozenAt: {
+    type: Date,
+    default: null,
   },
-  encrypt: {
-    type: Number,
-    enum: Object.values(constants.encrypt),
-    default: constants.encrypt.Public,
+  isHidden: {
+    type: Boolean,
+    default: false,
   },
-  argument: {
+  isLocked: {
+    type: Boolean,
+    default: false,
+  },
+  isPublic: {
+    type: Boolean,
+    default: false,
+  },
+  password: {
     type: String,
     default: '',
   },
-  option: {
-    type: contestOptionSchema,
-    default: () => ({}),
+  allowedUsers: [ {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  } ],
+  allowedGroups: [ {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+  } ],
+  ipWhitelist: [ {
+    cidr: {
+      type: String,
+      required: true,
+    },
+    comment: {
+      type: String,
+      default: null,
+      validate: {
+        validator: (v: string | null) => v === null || v.length <= 100,
+      },
+    },
+  } ],
+  ipWhitelistEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  problems: [ {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Problem',
+  } ],
+  labelingStyle: {
+    type: Number,
+    enum: Object.values(LabelingStyle),
+    default: LabelingStyle.Numeric,
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',
     default: null,
-    validate: {
-      validator (v: any) {
-        return v === null || mongoose.Types.ObjectId.isValid(v)
-      },
-      message: 'Invalid course ID',
-    },
   },
 }, {
   collection: 'Contest',
   timestamps: true,
 })
 
-contestSchema.plugin(mongoosePaginate)
-
-contestSchema.pre('validate', async function (this: ContestDocument) {
-  if (this.start >= this.end) {
-    throw new Error('The contest end time must be later than the start time!')
-  }
-})
-contestSchema.pre('save', async function (this: ContestDocument) {
-  if (this.cid === -1) {
-    this.cid = await ID.generateId('Contest')
+contestSchema.pre('save', async function (this) {
+  if (this.contestId === -1) {
+    this.contestId = await ID.generateId('Contest')
   }
 })
 
-const Contest
-  = mongoose.model<ContestDocument, ContestModel>(
-    'Contest', contestSchema,
-  )
+const Contest = mongoose.model('Contest', contestSchema)
 
 export default Contest

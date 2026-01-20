@@ -3,49 +3,55 @@ import contestController from '../controllers/contest'
 import authnMiddleware from '../middlewares/authn'
 
 const contestRouter = new Router({
-  prefix: '/contest',
+  prefix: '/contests',
 })
 
-contestRouter.get('/list',
+contestRouter.get('/',
   contestController.findContests,
 )
-contestRouter.get('/:cid',
+contestRouter.get('/:contestId',
   authnMiddleware.loginRequire,
   contestController.getContest,
 )
-contestRouter.get('/:cid/ranklist',
+contestRouter.get('/:contestId/participation',
+  authnMiddleware.loginRequire,
+  contestController.getParticipation,
+)
+contestRouter.post('/:contestId/participation',
+  authnMiddleware.loginRequire,
+  contestController.participateContest,
+)
+contestRouter.get('/:contestId/ranklist',
   authnMiddleware.loginRequire,
   contestController.getRanklist,
 )
-contestRouter.post('/',
+// contestRouter.post('/',
+//   authnMiddleware.loginRequire,
+//   contestController.createContest,
+// )
+contestRouter.get('/:contestId/configs',
   authnMiddleware.loginRequire,
-  contestController.createContest,
+  contestController.getConfig,
 )
-contestRouter.put('/:cid',
+contestRouter.put('/:contestId/configs',
   authnMiddleware.loginRequire,
-  contestController.updateContest,
+  contestController.updateConfig,
 )
-contestRouter.del('/:cid',
-  authnMiddleware.rootRequire,
-  contestController.removeContest,
-)
-contestRouter.post('/:cid/verify',
-  authnMiddleware.loginRequire,
-  contestController.verifyParticipant,
-)
+// contestRouter.del('/:contestId',
+//   authnMiddleware.rootRequire,
+//   contestController.removeContest,
+// )
 
-contestRouter.get('/:cid/solutions',
+contestRouter.get('/:contestId/solutions',
   authnMiddleware.loginRequire,
-  contestController.managePermRequire,
   contestController.findSolutions,
 )
-contestRouter.get('/:cid/solutions/export',
+contestRouter.get('/:contestId/solutions/export',
   authnMiddleware.loginRequire,
-  contestController.managePermRequire,
   contestController.exportSolutions,
 )
 
-contestRouter.get('/:cid/discussions',
+contestRouter.get('/:contestId/discussions',
   authnMiddleware.loginRequire,
   contestController.findContestDiscussions,
 )

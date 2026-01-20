@@ -1,6 +1,6 @@
 import type { AccountSession } from '@putongoj/shared'
 import type { CourseRole } from '.'
-import type { ContestDocumentPopulated } from '../models/Contest'
+import type { ContestState } from '../controllers/contest'
 import type { CourseDocument } from '../models/Course'
 import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { TagDocument } from '../models/Tag'
@@ -13,7 +13,7 @@ declare module 'koa' {
     clientIp: string
     requestId: string
     authnChecked?: boolean
-    contest?: ContestDocumentPopulated
+    contest?: ContestState
     course?: CourseDocument
     courseRole?: CourseRole
     problem?: ProblemDocumentPopulated

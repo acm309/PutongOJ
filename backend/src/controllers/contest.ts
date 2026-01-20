@@ -1,11 +1,17 @@
+import type {
+  ContestModel } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { ContestDocumentPopulated } from '../models/Contest'
+import type { ContestWithCourse } from '../services/contest'
 import type { DiscussionQueryFilters } from '../services/discussion'
-import type { SessionProfile } from '../types'
-import { Buffer } from 'node:buffer'
-import { md5 } from '@noble/hashes/legacy.js'
 import {
+  ContestConfigEditPayloadSchema,
+  ContestConfigQueryResultSchema,
+  ContestDetailQueryResultSchema,
+  ContestListQueryResultSchema,
+  ContestListQuerySchema,
+  ContestParticipatePayloadSchema,
+  ContestParticipationQueryResultSchema,
   ContestSolutionListExportQueryResultSchema,
   ContestSolutionListExportQuerySchema,
   ContestSolutionListQueryResultSchema,
@@ -13,13 +19,16 @@ import {
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
   ErrorCode,
+  JudgeStatus,
+  ParticipationStatus,
 } from '@putongoj/shared'
-import { pick } from 'lodash'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
+import Contest from '../models/Contest'
 import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
+import User from '../models/User'
 import contestService from '../services/contest'
 import discussionService from '../services/discussion'
 import solutionService from '../services/solution'
@@ -28,296 +37,337 @@ import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
-  parsePaginateOption,
 } from '../utils'
-import constants from '../utils/constants'
-import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
+import { ERR_PERM_DENIED } from '../utils/error'
 import { loadCourse } from './course'
 import { publicDiscussionTypes } from './discussion'
 
-const { encrypt, judge } = constants
+// const { encrypt, judge } = constants
 
-export async function loadContest (
-  ctx: Context,
-  inputId?: string | number,
-): Promise<ContestDocumentPopulated> {
-  const contestId = Number(
-    inputId || ctx.params.cid || ctx.request.query.cid,
-  )
+export interface ContestState {
+  contest: ContestWithCourse
+  accessible: boolean
+  participation: ParticipationStatus
+  isJury: boolean
+}
+
+export async function loadContest (ctx: Context, input?: number | string) {
+  const contestId = Number(input ?? ctx.params.contestId)
   if (!Number.isInteger(contestId) || contestId <= 0) {
-    return ctx.throw(...ERR_INVALID_ID)
+    return null
   }
-  if (ctx.state.contest?.cid === contestId) {
+  if (ctx.state.contest?.contest.contestId === contestId) {
     return ctx.state.contest
   }
 
   const contest = await contestService.getContest(contestId)
   if (!contest) {
-    return ctx.throw(...ERR_NOT_FOUND)
+    return null
   }
 
   const profile = await loadProfile(ctx)
+  const participation = await contestService
+    .getContestParticipation(profile._id, contest._id)
+
+  let isJury: boolean = false
   if (profile.isAdmin) {
-    ctx.state.contest = contest
-    return contest
-  }
-  if (contest.course) {
+    isJury = true
+  } else if (contest.course) {
     const { role } = await loadCourse(ctx, contest.course)
     if (!role.basic) {
-      return ctx.throw(...ERR_PERM_DENIED)
+      return null
     }
     if (role.manageContest) {
-      ctx.state.contest = contest
-      return contest
+      isJury = true
     }
   }
-  if (contest.start > Date.now()) {
-    return ctx.throw(400, 'This contest has not started yet')
-  }
 
-  const session = ctx.session.profile as SessionProfile
-  if (!session.verifyContest) {
-    session.verifyContest = []
+  const state: ContestState = {
+    contest, participation, isJury,
+    accessible: participation === ParticipationStatus.Approved || isJury,
   }
-  if (session.verifyContest.includes(contest.cid)) {
-    ctx.state.contest = contest
-    return contest
-  }
-
-  if (contest.encrypt === encrypt.Public) {
-    session.verifyContest.push(contest.cid)
-    ctx.auditLog.info(`<User:${profile.uid}> entered contest <Contest:${contest.cid}>`)
-    ctx.state.contest = contest
-    return contest
-  }
-
-  return ctx.throw(...ERR_PERM_DENIED)
+  ctx.state.contest = state
+  return state
 }
 
-const findContests = async (ctx: Context) => {
-  const opt = ctx.request.query
-  const profile = ctx.state.profile
-  let showAll: boolean = !!profile?.isAdmin
+async function findContests (ctx: Context) {
+  const query = ContestListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
+  const { profile } = ctx.state
+  const { page, pageSize, sort, sortBy, title, course: courseId } = query.data
+
+  let showHidden: boolean = !!profile?.isAdmin
   let courseDocId: Types.ObjectId | undefined
-  if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourse(ctx, opt.course)
+  if (courseId) {
+    const { course, role } = await loadCourse(ctx, courseId)
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
     if (role.manageContest) {
-      showAll = true
+      showHidden = true
     }
     courseDocId = course._id
   }
 
-  const paginateOption = parsePaginateOption(opt, 20)
-  const type = typeof opt.type === 'string' ? opt.type : undefined
-  const content = typeof opt.content === 'string' ? opt.content : undefined
-  const list = await contestService.findContests({
-    ...paginateOption, type, content,
-  }, showAll, courseDocId)
-
-  ctx.body = { list }
+  const contests = await contestService.findContests(
+    { page, pageSize, sort, sortBy },
+    { title, course: courseDocId }, showHidden)
+  const result = ContestListQueryResultSchema.encode(contests)
+  return createEnvelopedResponse(ctx, result)
 }
 
-const getContest = async (ctx: Context) => {
+async function getParticipation (ctx: Context) {
+  const state = await loadContest(ctx)
+  if (!state) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+
+  const { contest, participation, isJury } = state
   const profile = await loadProfile(ctx)
-  const contest = await loadContest(ctx)
-  const canViewMore = await (async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      return role.manageContest
-    }
-    return false
-  })()
+  let canParticipate: boolean = false
+  let canParticipateByPassword: boolean = false
 
-  const cid = contest.cid
-  const problemList = contest.list
-  const totalProblems = problemList.length
-
-  const problemListStrArr = Uint8Array.from(Buffer.from(problemList.join(',')))
-  const problemListHash = Buffer.from(md5(problemListStrArr)).toString('hex')
-
-  const cacheKey = `contest:overview:${cid}:${problemListHash}`
-  const cache = await redis.get(cacheKey)
-  let overview = null
-  if (cache) {
-    overview = JSON.parse(cache)
+  if (contest.isPublic || isJury) {
+    canParticipate = true
   } else {
-    overview = await Promise.all(problemList.map(async (pid) => {
-      const problem = await Problem.findOne({ pid }).lean().exec()
-      if (!problem) { return { pid, invalid: true } }
-      const { title } = problem
-      const [ { length: submit }, { length: solve } ] = await Promise.all([
-        Solution.distinct('uid', { pid, mid: cid }).lean().exec(),
-        Solution.distinct('uid', { pid, mid: cid, judge: judge.Accepted }).lean().exec(),
-      ])
-      return { pid, title, solve, submit }
+    if (contest.password && contest.password.length > 0) {
+      canParticipateByPassword = true
+    }
+    if (contest.allowedUsers.includes(profile._id)) {
+      canParticipate = true
+    }
+    /**
+     * @TODO allowed groups
+     */
+  }
+
+  const result = ContestParticipationQueryResultSchema.encode({
+    isJury, participation, canParticipate, canParticipateByPassword,
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
+async function participateContest (ctx: Context) {
+  const payload = ContestParticipatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const state = await loadContest(ctx)
+  if (!state) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const profile = await loadProfile(ctx)
+  const { contest, participation, isJury } = state
+
+  if (participation !== ParticipationStatus.NotApplied) {
+    return createErrorResponse(ctx,
+      'You have already participated in this contest', ErrorCode.BadRequest,
+    )
+  }
+
+  let canParticipate: boolean = false
+  if (contest.isPublic || isJury) {
+    canParticipate = true
+  } else {
+    const pwd = payload.data.password ?? ''
+    if (contest.password && contest.password.length > 0 && contest.password === pwd) {
+      canParticipate = true
+    }
+  }
+  if (!canParticipate) {
+    return createErrorResponse(ctx,
+      'You cannot participate in this contest', ErrorCode.Forbidden,
+    )
+  }
+
+  await contestService.setContestParticipation(
+    profile._id, contest._id, ParticipationStatus.Approved)
+  ctx.auditLog.info(`<User:${profile.uid}> participated in contest <Contest:${contest.contestId}>`)
+  return createEnvelopedResponse(ctx, null)
+}
+
+async function getContest (ctx: Context) {
+  const state = await loadContest(ctx)
+  if (!state || !state.accessible) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const profile = await loadProfile(ctx)
+  const { contest, isJury } = state
+
+  const [ problemsBasic, attempted, solved ] = await Promise.all([
+    Problem.find({ _id: { $in: contest.problems } })
+      .select([ '_id', 'pid', 'title' ])
+      .lean(),
+    Solution.distinct('pid', {
+      mid: contest.contestId, uid: profile.uid,
+    }).lean(),
+    Solution.distinct('pid', {
+      mid: contest.contestId, uid: profile.uid, judge: JudgeStatus.Accepted,
+    }).lean(),
+  ])
+  const extraFilters = (!isJury && contest.scoreboardFrozenAt)
+    ? {
+        createdAt: { $lt: contest.scoreboardFrozenAt },
+      }
+    : {}
+  const problems = await Promise.all(problemsBasic.map(async (problem) => {
+    const [ { length: submit }, { length: solve } ] = await Promise.all([
+      Solution.distinct('uid', {
+        mid: contest.contestId, pid: problem.pid,
+        ...extraFilters,
+      }).lean(),
+      Solution.distinct('uid', {
+        mid: contest.contestId, pid: problem.pid,
+        judge: JudgeStatus.Accepted, ...extraFilters,
+      }).lean(),
+    ])
+    return {
+      index: contest.problems.indexOf(problem._id) + 1,
+      problemId: problem.pid,
+      title: problem.title,
+      submit, solve,
+      isAttempted: attempted.includes(problem.pid),
+      isSolved: solved.includes(problem.pid),
+    }
+  }))
+
+  const result = ContestDetailQueryResultSchema.encode({
+    ...contest.toObject(), isJury, problems,
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
+async function getConfig (ctx: Context) {
+  const state = await loadContest(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const { contest } = state
+
+  const allowedUsers = (await User
+    .find({ _id: { $in: contest.allowedUsers } })
+    .select([ 'uid', 'nick' ])
+    .lean()).map(({ uid, nick }) => ({ username: uid, nickname: nick }))
+  const allowedGroups = (await Group
+    .find({ _id: { $in: contest.allowedGroups } })
+    .select([ 'gid', 'title' ])
+    .lean()).map(({ gid, title }) => ({ groupId: gid, name: title }))
+  const problems = (await Problem
+    .find({ _id: { $in: contest.problems } })
+    .select([ 'pid', 'title' ])
+    .lean()).map(({ pid, title }) => ({ problemId: pid, title }))
+
+  const ipWhitelist = (contest.ipWhitelist ?? []).map((entry: any) => ({
+    cidr: entry.cidr,
+    comment: entry.comment === undefined ? null : entry.comment,
+  }))
+  const result = ContestConfigQueryResultSchema.encode({
+    ...contest.toObject(),
+    ipWhitelist,
+    scoreboardFrozenAt: contest.scoreboardFrozenAt ?? null,
+    scoreboardUnfrozenAt: contest.scoreboardUnfrozenAt ?? null,
+    allowedUsers,
+    allowedGroups,
+    problems,
+  })
+  return createEnvelopedResponse(ctx, result)
+}
+
+async function updateConfig (ctx: Context) {
+  const payload = ContestConfigEditPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const state = await loadContest(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const profile = await loadProfile(ctx)
+  const { contest } = state
+
+  let allowedUsers: Types.ObjectId[] | undefined
+  if (payload.data.allowedUsers !== undefined) {
+    const users = await User.find({ uid: { $in: payload.data.allowedUsers } }).select([ '_id' ]).lean()
+    allowedUsers = users.map(u => u._id)
+  }
+  let allowedGroups: Types.ObjectId[] | undefined
+  if (payload.data.allowedGroups !== undefined) {
+    const groups = await Group.find({ gid: { $in: payload.data.allowedGroups } }).select([ '_id' ]).lean()
+    allowedGroups = groups.map(g => g._id)
+  }
+  let ipWhitelist: { cidr: string, comment: string | null }[] | undefined
+  if (payload.data.ipWhitelist !== undefined) {
+    ipWhitelist = payload.data.ipWhitelist.map(entry => ({
+      cidr: entry.cidr,
+      comment: entry.comment === undefined ? null : entry.comment,
     }))
-    await redis.set(cacheKey, JSON.stringify(overview), 'EX', 10)
   }
-
-  const solved = profile
-    ? await Solution
-        .find({
-          mid: cid,
-          pid: { $in: problemList },
-          uid: profile.uid,
-          judge: judge.Accepted,
-        })
-        .distinct('pid')
-        .lean()
-        .exec()
-    : []
-
-  let course = null
-  if (contest.course) {
-    const { role } = await loadCourse(ctx, contest.course)
-    course = {
-      ...pick(contest.course, [ 'courseId', 'name', 'description', 'encrypt' ]),
-      role,
-    }
+  let problems: Types.ObjectId[] | undefined
+  if (payload.data.problems !== undefined) {
+    const problemsDocs = await Problem.find({ pid: { $in: payload.data.problems } }).select([ '_id' ]).lean()
+    problems = problemsDocs.map(p => p._id)
   }
-  const contestData = pick(contest, [
-    'cid', 'title', 'start', 'end', 'encrypt', 'status', 'list', 'option' ])
-  const argument = canViewMore ? contest.argument : undefined
-  ctx.body = {
-    contest: {
-      ...contestData,
-      course,
-      argument,
-    },
-    overview,
-    totalProblems,
-    solved,
-  }
-}
-
-const createContest = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const profile = await loadProfile(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (opt.course) {
-      const { role } = await loadCourse(ctx, opt.course)
-      return role.manageContest
-    }
-    return false
-  }
-  if (!await hasPermission()) {
-    return ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  let courseDocId: Types.ObjectId | undefined
-  if (opt.course) {
-    const { course } = await loadCourse(ctx, opt.course)
-    courseDocId = course._id
-  }
-
-  try {
-    const contest = await contestService
-      .createContest(Object.assign({}, opt, {
-        start: new Date(opt.start).getTime(),
-        end: new Date(opt.end).getTime(),
-        course: courseDocId,
-      }))
-    ctx.auditLog.info(`<Contest:${contest.cid}> created by <User:${profile.uid}>`)
-    ctx.body = { cid: contest.cid }
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-}
-
-const updateContest = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const profile = await loadProfile(ctx)
-  const contest = await loadContest(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      return role.manageContest
-    }
-    return false
-  }
-  if (!await hasPermission()) {
-    return ctx.throw(...ERR_PERM_DENIED)
-  }
-
-  let courseDocId: Types.ObjectId | undefined | null
-  if (opt.course && Number.isInteger(Number(opt.course))) {
-    if (Number(opt.course) === -1) {
-      courseDocId = null
+  let course: Types.ObjectId | null | undefined
+  if (profile.isRoot && payload.data.course !== undefined) {
+    if (payload.data.course === null) {
+      course = null
     } else {
-      const { course } = await loadCourse(ctx, opt.course)
-      courseDocId = course._id
+      const courseDoc = await loadCourse(ctx, payload.data.course)
+      course = courseDoc.course._id
     }
   }
 
-  const cid = contest.cid
-  try {
-    await contestService.updateContest(cid,
-      Object.assign({}, opt, {
-        start: opt.start ? new Date(opt.start).getTime() : undefined,
-        end: opt.end ? new Date(opt.end).getTime() : undefined,
-        course: courseDocId,
-      }))
-    ctx.auditLog.info(`<Contest:${cid}> updated by <User:${profile.uid}>`)
-    ctx.body = { cid }
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
-}
-
-const removeContest = async (ctx: Context) => {
-  const cid = ctx.params.cid
-  const profile = await loadProfile(ctx)
-
-  try {
-    await contestService.removeContest(Number(cid))
-    ctx.auditLog.info(`<Contest:${cid}> removed by <User:${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
+  const data: Partial<ContestModel> = {
+    ...payload.data,
+    allowedUsers,
+    allowedGroups, ipWhitelist,
+    problems,
+    course,
   }
 
-  ctx.body = {}
+  await Contest.updateOne({ _id: contest._id }, { $set: data })
+  ctx.auditLog.info(`<Contest:${contest.contestId}> config updated`)
+  return createEnvelopedResponse(ctx, null)
 }
 
 const getRanklist = async (ctx: Context) => {
-  const profile = await loadProfile(ctx)
-  const contest = await loadContest(ctx)
-  const canViewMore = await (async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      return role.manageContest
-    }
-    return false
-  })()
+  const state = await loadContest(ctx)
+  if (!state || !state.accessible) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const { contest, isJury } = state
 
-  // 封榜时长：20% 的比赛时间（最小 10 分钟）
-  const FREEZE_DURATION_RATE = 0.2
-  const MIN_FREEZE_DURATION = 10 * 60 * 1000
+  const nowDate = new Date()
+  let isFrozen: boolean = false
+  if (!isJury && contest.scoreboardFrozenAt) {
+    if (nowDate >= contest.scoreboardFrozenAt) {
+      isFrozen = true
+    }
+    if (contest.scoreboardUnfrozenAt && nowDate >= contest.scoreboardUnfrozenAt) {
+      isFrozen = false
+    }
+  }
 
-  const freezeDuration = Math.ceil(Math.max(
-    FREEZE_DURATION_RATE * (contest.end - contest.start),
-    MIN_FREEZE_DURATION))
-  const freezeTime = contest.end - freezeDuration
-  const isEnded = Date.now() > contest.end
-  const isFrozen = !isEnded && Date.now() > freezeTime && !canViewMore
+  const isEnded: boolean = nowDate >= contest.endsAt
+  const freezeTime = contest.scoreboardFrozenAt?.getTime() ?? contest.endsAt.getTime()
   const info = { freezeTime, isFrozen, isEnded, isCache: false }
 
-  const cacheKey = `ranklist:${contest.cid}${isFrozen ? ':frozen' : ''}`
+  const cacheKey = `ranklist:${contest.contestId}${isFrozen ? ':frozen' : ''}`
   const cache = await redis.get(cacheKey)
   if (cache) {
     info.isCache = true
@@ -325,96 +375,11 @@ const getRanklist = async (ctx: Context) => {
     return
   }
 
-  const ranklist = await contestService.getRanklist(contest.cid, isFrozen, freezeTime)
+  const ranklist = await contestService.getRanklist(contest.contestId, isFrozen, freezeTime)
   const cacheTime = isEnded ? 30 : 9
   await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
-  ctx.auditLog.info(`<Contest:${contest.cid}> ranklist updated${isFrozen ? ' (frozen)' : ''}`)
+  ctx.auditLog.info(`<Contest:${contest.contestId}> ranklist updated${isFrozen ? ' (frozen)' : ''}`)
   ctx.body = { ranklist, info }
-}
-
-const verifyParticipant = async (ctx: Context) => {
-  const opt = ctx.request.body
-  const cid = Number(opt.cid)
-  if (!Number.isInteger(cid) || cid <= 0) {
-    return ctx.throw(400, 'Invalid contest ID')
-  }
-  const session = ctx.session.profile as SessionProfile
-  const profile = await loadProfile(ctx)
-  const contest = await contestService.getContest(cid)
-  if (!contest) {
-    return ctx.throw(...ERR_NOT_FOUND)
-  }
-  if (contest.course) {
-    const { role } = await loadCourse(ctx, contest.course)
-    if (!role.basic) {
-      return ctx.throw(...ERR_PERM_DENIED)
-    }
-  }
-
-  const enc = contest.encrypt
-  const arg = contest.argument
-  let isVerify = false
-  if (enc === encrypt.Private) {
-    const uid = profile.uid
-    const arr = arg.split('\r\n')
-    for (const item of arr) {
-      if (item.startsWith('gid:')) {
-        const gid = item.substring(4)
-        const group = await Group.findOne({ gid: Number.parseInt(gid) }).exec()
-        if (group != null && group.list.includes(uid)) {
-          isVerify = true
-          break
-        }
-      } else if (item === uid) {
-        isVerify = true
-        break
-      }
-    }
-  } else {
-    const pwd = opt.pwd
-    if (arg === pwd) {
-      isVerify = true
-    } else {
-      isVerify = false
-    }
-  }
-  if (!session.verifyContest) {
-    session.verifyContest = []
-  }
-  if (isVerify) {
-    session.verifyContest.push(contest.cid)
-    ctx.auditLog.info(`<User:${profile.uid}> entered contest <Contest:${contest.cid}>`)
-  }
-  ctx.body = {
-    isVerify,
-    profile: {
-      uid: profile.uid,
-      nick: profile.nick,
-      privilege: profile.privilege,
-      verifyContest: session.verifyContest,
-    },
-  }
-}
-
-export async function managePermRequire (ctx: Context, next: () => Promise<any>) {
-  const profile = await loadProfile(ctx)
-  const contest = await loadContest(ctx)
-  const hasPermission = async (): Promise<boolean> => {
-    if (profile.isAdmin) {
-      return true
-    }
-    if (contest.course) {
-      const { role } = await loadCourse(ctx, contest.course)
-      return role.manageContest
-    }
-    return false
-  }
-  if (!await hasPermission()) {
-    return createErrorResponse(ctx,
-      'You don\'t have permission to manage this contest', ErrorCode.Forbidden,
-    )
-  }
-  await next()
 }
 
 export async function findSolutions (ctx: Context) {
@@ -422,11 +387,16 @@ export async function findSolutions (ctx: Context) {
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
-
-  const contest = await loadContest(ctx)
+  const state = await loadContest(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const { contest } = state
   const solutions = await solutionService.findSolutions({
     ...query.data,
-    contest: contest.cid,
+    contest: contest.contestId,
   })
   const result = ContestSolutionListQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
@@ -437,22 +407,33 @@ export async function exportSolutions (ctx: Context) {
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
-
-  const contest = await loadContest(ctx)
+  const state = await loadContest(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const { contest } = state
   const solutions = await solutionService.exportSolutions({
     ...query.data,
-    contest: contest.cid,
+    contest: contest.contestId,
   })
   const result = ContestSolutionListExportQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
 }
 
 export async function findContestDiscussions (ctx: Context) {
-  const contest = await loadContest(ctx)
   const query = DiscussionListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
+  const state = await loadContest(ctx)
+  if (!state || !state.accessible) {
+    return createErrorResponse(ctx,
+      'Contest not found or access denied', ErrorCode.NotFound,
+    )
+  }
+  const { contest } = state
 
   const profile = await loadProfile(ctx)
   const { page, pageSize, sort, sortBy, type, author } = query.data
@@ -489,7 +470,7 @@ export async function findContestDiscussions (ctx: Context) {
   const result = DiscussionListQueryResultSchema.encode({
     ...discussions,
     docs: discussions.docs.map(discussion => ({
-      ...discussion, contest: { cid: contest.cid },
+      ...discussion, contest: { contestId: contest.contestId },
     })),
   })
   return createEnvelopedResponse(ctx, result)
@@ -499,12 +480,11 @@ const contestController = {
   loadContest,
   findContests,
   getContest,
+  getParticipation,
+  participateContest,
   getRanklist,
-  createContest,
-  updateContest,
-  removeContest,
-  verifyParticipant,
-  managePermRequire,
+  getConfig,
+  updateConfig,
   findSolutions,
   exportSolutions,
   findContestDiscussions,
