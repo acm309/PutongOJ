@@ -1,4 +1,11 @@
 import type {
+  ContestConfigEditPayload,
+  ContestConfigQueryResult,
+  ContestDetailQueryResult,
+  ContestListQuery,
+  ContestListQueryResult,
+  ContestParticipatePayload,
+  ContestParticipationQueryResult,
   ContestSolutionListExportQuery,
   ContestSolutionListExportQueryResult,
   ContestSolutionListQuery,
@@ -6,15 +13,37 @@ import type {
   DiscussionListQuery,
   DiscussionListQueryResult,
 } from '@putongoj/shared'
+
 import { instanceSafe as instance } from './instance'
 
+export async function findContests (params: ContestListQuery) {
+  return instance.get<ContestListQueryResult>('/contests', { params })
+}
+
+export async function getContest (contestId: number) {
+  return instance.get<ContestDetailQueryResult>(`/contests/${encodeURIComponent(contestId)}`)
+}
+export async function getParticipation (contestId: number) {
+  return instance.get<ContestParticipationQueryResult>(`/contests/${encodeURIComponent(contestId)}/participation`)
+}
+export async function participateContest (contestId: number, payload: ContestParticipatePayload) {
+  return instance.post<null>(`/contests/${encodeURIComponent(contestId)}/participation`, payload)
+}
+
+export async function getConfig (contestId: number) {
+  return instance.get<ContestConfigQueryResult>(`/contests/${encodeURIComponent(contestId)}/configs`)
+}
+export async function updateConfig (contestId: number, config: ContestConfigEditPayload) {
+  return instance.put<null>(`/contests/${encodeURIComponent(contestId)}/configs`, config)
+}
+
 export async function findSolutions (contestId: number, params: ContestSolutionListQuery) {
-  return instance.get<ContestSolutionListQueryResult>(`/contest/${encodeURIComponent(contestId)}/solutions`, { params })
+  return instance.get<ContestSolutionListQueryResult>(`/contests/${encodeURIComponent(contestId)}/solutions`, { params })
 }
 export async function exportSolutions (contestId: number, params: ContestSolutionListExportQuery) {
-  return instance.get<ContestSolutionListExportQueryResult>(`/contest/${encodeURIComponent(contestId)}/solutions/export`, { params })
+  return instance.get<ContestSolutionListExportQueryResult>(`/contests/${encodeURIComponent(contestId)}/solutions/export`, { params })
 }
 
 export async function findContestDiscussions (contestId: number, params: DiscussionListQuery) {
-  return instance.get<DiscussionListQueryResult>(`/contest/${encodeURIComponent(contestId)}/discussions`, { params })
+  return instance.get<DiscussionListQueryResult>(`/contests/${encodeURIComponent(contestId)}/discussions`, { params })
 }

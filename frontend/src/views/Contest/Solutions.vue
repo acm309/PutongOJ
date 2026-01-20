@@ -32,7 +32,6 @@ const message = useMessage()
 
 const {
   contestId,
-  problemMap,
   problemLabels,
   problemOptions,
 } = storeToRefs(useContestStore())
@@ -125,8 +124,8 @@ function handleViewProblem (data: any) {
   router.push({
     name: 'contestProblem',
     params: {
-      cid: contestId.value,
-      id: problemMap.value.get(data.pid)! + 1,
+      contestId: contestId.value,
+      problemId: data.pid,
     },
   })
 }
@@ -218,7 +217,8 @@ onBeforeUnmount(clearAutoRefresh)
             <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
             <Button
               v-tooltip.bottom="t('ptoj.auto_refresh')" :icon="autoRefresh ? 'pi pi-stop' : 'pi pi-play'"
-              :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading" @click="toggleAutoRefresh"
+              :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading"
+              @click="toggleAutoRefresh"
             />
           </ButtonGroup>
           <Button

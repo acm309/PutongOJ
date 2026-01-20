@@ -266,7 +266,9 @@ async function getConfig (ctx: Context) {
   const problems = (await Problem
     .find({ _id: { $in: contest.problems } })
     .select([ 'pid', 'title' ])
-    .lean()).map(({ pid, title }) => ({ problemId: pid, title }))
+    .lean()).sort((a, b) => {
+    return contest.problems.indexOf(a._id) - contest.problems.indexOf(b._id)
+  }).map(({ pid, title }) => ({ problemId: pid, title }))
 
   const ipWhitelist = (contest.ipWhitelist ?? []).map((entry: any) => ({
     cidr: entry.cidr,
@@ -317,8 +319,11 @@ async function updateConfig (ctx: Context) {
   }
   let problems: Types.ObjectId[] | undefined
   if (payload.data.problems !== undefined) {
-    const problemsDocs = await Problem.find({ pid: { $in: payload.data.problems } }).select([ '_id' ]).lean()
-    problems = problemsDocs.map(p => p._id)
+    const problemsOrder = payload.data.problems
+    const problemsDocs = await Problem.find({ pid: { $in: payload.data.problems } }).select([ '_id', 'pid' ]).lean()
+    problems = problemsDocs.sort((a, b) => {
+      return problemsOrder.indexOf(a.pid) - problemsOrder.indexOf(b.pid)
+    }).map(p => p._id)
   }
   let course: Types.ObjectId | null | undefined
   if (profile.isRoot && payload.data.course !== undefined) {

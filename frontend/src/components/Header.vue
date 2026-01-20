@@ -56,7 +56,7 @@ const menuItems = computed(() => {
   }, {
     label: t('oj.contest_list'),
     icon: 'pi pi-trophy',
-    route: 'contestList',
+    route: 'Contests',
   }, {
     label: t('oj.discussion_list'),
     icon: 'pi pi-comments',

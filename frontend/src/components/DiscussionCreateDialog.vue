@@ -108,7 +108,7 @@ async function submitDiscussion () {
             <template #option="{ option }">
               <div class="flex gap-2 items-center">
                 <DiscussionTypeTag :type="option.value" />
-                <span class="text-muted text-sm">{{ option.desc }}</span>
+                <span class="text-sm">{{ option.desc }}</span>
               </div>
             </template>
           </Select>

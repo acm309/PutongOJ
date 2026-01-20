@@ -28,7 +28,6 @@ const message = useMessage()
 
 const {
   contestId,
-  problemMap,
   problemLabels,
   problemOptions,
 } = storeToRefs(useContestStore())
@@ -122,8 +121,8 @@ function handleViewProblem (data: any) {
   router.push({
     name: 'contestProblem',
     params: {
-      cid: contestId.value,
-      id: problemMap.value.get(data.pid)! + 1,
+      contestId: contestId.value,
+      problemId: data.pid,
     },
   })
 }

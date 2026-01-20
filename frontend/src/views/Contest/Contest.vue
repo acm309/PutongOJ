@@ -1,52 +1,58 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
-import { useSessionStore } from '@/store/modules/session'
-import { onProfileUpdate, onRouteParamUpdate, purify } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
-const contestStore = useContestStore()
-const sessionStore = useSessionStore()
-const rootStore = useRootStore()
+const { t } = useI18n()
 const route = useRoute()
+const message = useMessage()
 
-const { contest } = $(storeToRefs(contestStore))
-const { findOne } = contestStore
-const { changeDomTitle } = rootStore
-const { profile } = sessionStore
+const rootStore = useRootStore()
+const contestStore = useContestStore()
+const { contest } = storeToRefs(contestStore)
 
-// eslint-disable-next-line unused-imports/no-unused-vars
-let loading = $ref(false)
+const contestId = computed(() => Number(route.params.contestId))
+const contestLoaded = computed(() => contest.value?.contestId === contestId.value)
 
 async function fetch () {
-  loading = true
-  await findOne(purify({ cid: route.params.cid, uid: profile?.uid }))
-  changeDomTitle(contest.name)
-  loading = false
+  const resp = await contestStore.loadContest(contestId.value)
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_contest'), resp.message)
+    return
+  }
+  const title = `${resp.data.title} - Contest ${resp.data.contestId}`
+  rootStore.changeDomTitle({ title })
 }
 
-fetch()
-changeDomTitle({ title: `Contest ${route.params.cid}` })
-onRouteParamUpdate(() => changeDomTitle({ title: `Contest ${route.params.cid}` }))
-onProfileUpdate(fetch)
+onMounted(fetch)
 </script>
 
 <template>
-  <div
-    class="contest-wrap" :class="{
+  <div v-if="!contestLoaded" class="max-w-6xl p-0">
+    <div class="flex font-semibold gap-4 items-center pt-6 px-6">
+      <i class="pi pi-trophy text-2xl" />
+      <h1 class="text-xl">
+        {{ t('ptoj.contest') }}
+      </h1>
+    </div>
+    <div class="flex gap-4 items-center justify-center px-6 py-24">
+      <i class="pi pi-spin pi-spinner text-2xl" />
+      <span>{{ t('ptoj.loading') }}</span>
+    </div>
+  </div>
+  <RouterView
+    v-else class="contest-wrap" :class="{
       'contest-ranklist-wrap': route.name === 'contestRanklist',
       'contest-status-wrap': route.name === 'contestStatus',
     }"
-  >
-    <RouterView v-if="contest && contest.cid" class="contest-children" />
-  </div>
+  />
 </template>
 
 <style lang="stylus">
-.contest-children
-  padding 40px 40px
-
 @media screen and (max-width: 1024px)
   .contest-children
     padding 20px 20px
@@ -54,7 +60,7 @@ onProfileUpdate(fetch)
 
 <style lang="stylus" scoped>
 .contest-wrap
-  padding 0
+  padding 40px 40px
   max-width 1024px
 .contest-ranklist-wrap
   max-width: 1920px

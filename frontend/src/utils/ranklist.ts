@@ -1,23 +1,26 @@
 import type { ContestEntityView } from '@backend/types/entity'
+import type { ContestDetailQueryResult } from '@putongoj/shared'
 import type { Cell } from 'exceljs'
 import type { Ranklist, RawRanklist } from '@/types'
 import { contestLabeling } from './formate'
 
 const PENALTY = 20 // 失败提交罚时 20 分钟
 
-export function normalize (ranklist: RawRanklist, contest: ContestEntityView): Ranklist {
+export function normalize (ranklist: RawRanklist, contest: ContestDetailQueryResult): Ranklist {
+  const startsAt = new Date(contest.startsAt).getTime()
+  const problemIds = contest.problems.map(p => p.problemId)
   const list: Ranklist = [] // 结果
 
   Object.keys(ranklist).forEach((uid) => {
     const row = ranklist[uid]
     let solved = 0 // 记录 AC 几道题
     let penalty = 0 // 罚时（分钟），仅在 AC 时计算
-    for (const pid of contest.list) {
+    for (const pid of problemIds) {
       if (row[pid] == null) continue // 这道题没有交过
       const submission = row[pid]
       if (submission.acceptedAt) {
         solved++
-        penalty += Math.max(0, Math.floor((submission.acceptedAt - contest.start) / 1000 / 60))
+        penalty += Math.max(0, Math.floor((submission.acceptedAt - startsAt) / 1000 / 60))
         penalty += submission.failed * PENALTY
       }
     }
@@ -58,12 +61,12 @@ export function normalize (ranklist: RawRanklist, contest: ContestEntityView): R
 
   // 接下来计算每道题的最早提交
   const quickest: Record<number, number> = {} // 每到题最早提交的 AC 时间
-  for (const pid of contest.list) {
+  for (const pid of problemIds) {
     quickest[pid] = Number.POSITIVE_INFINITY
   }
 
   list.forEach((row) => {
-    for (const pid of contest.list) {
+    for (const pid of problemIds) {
       if (row[pid]?.acceptedAt) {
         quickest[pid] = Math.min(
           quickest[pid],
@@ -74,7 +77,7 @@ export function normalize (ranklist: RawRanklist, contest: ContestEntityView): R
   })
 
   list.forEach((row) => {
-    for (const pid of contest.list) {
+    for (const pid of problemIds) {
       if (!row[pid]?.acceptedAt) continue
       if (quickest[pid] === row[pid].acceptedAt) { // 这就是最早提交的那个
         row[pid].isPrime = true // 打上标记

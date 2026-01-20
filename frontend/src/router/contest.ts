@@ -4,21 +4,21 @@ import ContestHeader from '@/views/Contest/ContestHeader.vue'
 import ContestOverview from '@/views/Contest/ContestOverview.vue'
 import ContestProblem from '@/views/Contest/ContestProblem.vue'
 import ContestRanklist from '@/views/Contest/ContestRanklist.vue'
+import Contests from '@/views/Contest/Contests.vue'
 import ContestSubmit from '@/views/Contest/ContestSubmit.vue'
 import ContestDiscussions from '@/views/Contest/Discussions.vue'
 import ContestMySubmissions from '@/views/Contest/MySubmissions.vue'
 import ContestSolutions from '@/views/Contest/Solutions.vue'
-import ContestList from '@/views/ContestList.vue'
 
 const ContestCreate = () => import('@/views/Admin/ContestCreate.vue')
 const ContestEdit = () => import('@/views/Contest/ContestEdit.vue')
 
 const contestRoutes: Array<RouteRecordRaw> = [
   {
-    path: '/contest',
-    name: 'contestList',
-    component: ContestList,
-    meta: { title: 'Contest List' },
+    path: '/contests',
+    name: 'Contests',
+    component: Contests,
+    meta: { title: 'Contests' },
   },
   {
     path: '/contest/create',
@@ -27,7 +27,7 @@ const contestRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'Admin', requiresLogin: true },
   },
   {
-    path: '/contests/:cid',
+    path: '/contests/:contestId',
     components: {
       default: Contest,
       extraHeader: ContestHeader,
@@ -36,18 +36,18 @@ const contestRoutes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        name: 'contestOverview',
+        name: 'ContestOverview',
         component: ContestOverview,
-        meta: { title: 'Contest Info', requiresLogin: true },
+        meta: { requiresLogin: true },
       },
       {
-        path: 'problem/:id',
+        path: 'problem/:problemId',
         name: 'contestProblem',
         component: ContestProblem,
         meta: { title: 'Contest Info', requiresLogin: true },
       },
       {
-        path: 'problem/:id/submit',
+        path: 'problem/:problemId/submit',
         name: 'contestSubmit',
         component: ContestSubmit,
         meta: { title: 'Contest Info', requiresLogin: true },

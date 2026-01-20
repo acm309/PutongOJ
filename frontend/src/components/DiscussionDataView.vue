@@ -11,7 +11,6 @@ const props = defineProps<{
   value: DiscussionListQueryResult['docs']
   query: DiscussionListQuery
   contestId?: number
-  problemMap?: Map<number, number>
   problemLabels?: Map<number, string>
   hideProblemTag?: boolean
 }>()
@@ -32,13 +31,13 @@ const { locale } = useI18n()
         <span class="flex flex-wrap-reverse gap-1 justify-end">
           <RouterLink
             v-if="!hideProblemTag && doc.contest && !props.contestId"
-            :to="{ name: 'contestOverview', params: { cid: doc.contest.cid } }"
+            :to="{ name: 'ContestOverview', params: { contestId: doc.contest.contestId } }"
           >
-            <Tag :value="doc.contest.cid" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
+            <Tag :value="doc.contest.contestId" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
           </RouterLink>
           <RouterLink
             v-if="props.contestId && doc.problem"
-            :to="{ name: 'contestProblem', params: { cid: props.contestId, id: (props.problemMap?.get(doc.problem.pid) || 0) + 1 } }"
+            :to="{ name: 'contestProblem', params: { contestId: props.contestId, problemId: doc.problem.pid } }"
           >
             <Tag
               v-if="doc.problem" :value="props.problemLabels?.get(doc.problem.pid) || doc.problem.pid"

@@ -45,20 +45,14 @@ const problem = {
 }
 
 const contest = {
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/contest/${data.cid}`, { params: data }),
-  find: (data: { [key: string]: any }) =>
-    instance.get('/contest/list', { params: data }),
   create: (data: { [key: string]: any }) =>
-    instance.post('/contest/', data),
+    instance.post('/contests/', data),
   update: (data: { [key: string]: any }) =>
-    instance.put(`/contest/${data.cid}`, data),
+    instance.put(`/contests/${data.cid}`, data),
   ranklist: (cid: number) =>
-    instance.get<RanklistResponse>(`/contest/${cid}/ranklist`),
+    instance.get<RanklistResponse>(`/contests/${cid}/ranklist`),
   delete: (data: { [key: string]: any }) =>
-    instance.delete(`/contest/${data.cid}`, data),
-  verify: (data: { [key: string]: any }) =>
-    instance.post(`/contest/${data.cid}/verify`, data),
+    instance.delete(`/contests/${data.cid}`, data),
 }
 
 const news = {

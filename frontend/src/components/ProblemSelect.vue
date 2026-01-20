@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n'
 import api from '@/api'
 
 interface Props {
-  modelValue: number | number[]
+  modelValue: number | number[] | null
   multiple?: boolean
   course?: number
 }
@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'update:modelValue': [value: number | number[]]
+  'update:modelValue': [value: number | number[] | null]
 }>()
 
 const { t } = useI18n()

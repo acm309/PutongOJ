@@ -54,7 +54,7 @@ async function submit (): Promise<void> {
   })
 
   Message.success(t('oj.create_contest_success', contest.value))
-  router.push({ name: 'contestEdit', params: { cid: contestId } })
+  router.push({ name: 'contestEdit', params: { contestId } })
 }
 onMounted(init)
 </script>

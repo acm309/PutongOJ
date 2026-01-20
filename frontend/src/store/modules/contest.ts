@@ -1,86 +1,62 @@
-import type { ContestEntityPreview, ContestEntityView } from '@backend/types/entity'
+import type { ContestDetailQueryResult } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { getContest } from '@/api/contest'
 import { contestLabeling } from '@/utils/formate'
+
+const CONTEST_CACHE_TIME = 60 * 1000 // 1 minute
 
 export const useContestStore = defineStore('contest', {
   state: () => ({
-    list: [] as ContestEntityPreview[],
-    sum: 0,
-    contest: {} as ContestEntityView,
-    overview: [] as { title: string, pid: number, invalid?: boolean, submit: number, solve: number }[],
-    totalProblems: 0,
-    solved: [] as any[],
+    contest: {} as ContestDetailQueryResult,
+    lastFetch: 0,
   }),
   getters: {
-    contestId (state): number {
-      return state.contest.cid
-    },
-    problems: state => state.contest.list,
-    problemMap (): Map<number, number> {
-      const map = new Map<number, number>()
-      this.problems.forEach((problem, index) => {
-        map.set(problem, index)
-      })
-      return map
-    },
+    contestId: state => state.contest.contestId,
+    problems: state => state.contest.problems.sort((a, b) => a.index - b.index),
     problemLabels (state): Map<number, string> {
-      const labelingStyle = state.contest.option.labelingStyle
+      const labelingStyle = state.contest.labelingStyle
       const labels = new Map<number, string>()
-      this.problemMap.forEach((index, problem) => {
-        labels.set(problem, contestLabeling(index + 1, labelingStyle))
+      this.problems.forEach(({ problemId, index }) => {
+        labels.set(problemId, contestLabeling(index, labelingStyle))
       })
       return labels
     },
-    problemTitles (state): Map<number, string> {
+    problemTitles (): Map<number, string> {
       const titles = new Map<number, string>()
-      this.problemMap.forEach((index, problem) => {
-        titles.set(problem, state.overview[index]!.title)
+      this.problems.forEach(({ problemId, title }) => {
+        titles.set(problemId, title)
       })
       return titles
     },
     problemOptions (): Array<{ label: string, value: number }> {
       const options = [] as Array<{ label: string, value: number }>
-      this.problems.forEach((problem) => {
-        const label = this.problemLabels.get(problem)!
-        const title = this.problemTitles.get(problem)!
+      this.problems.forEach(({ problemId, title }) => {
+        const label = this.problemLabels.get(problemId)!
         options.push({
           label: `${label} - ${title}`,
-          value: problem,
+          value: problemId,
         })
       })
       return options
     },
   },
   actions: {
-    async find (payload: { [key: string]: any }): Promise<void> {
-      const { data } = await api.contest.find(payload)
-      this.list = data.list.docs
-      this.sum = data.list.total
+    async loadContest (contestId: number) {
+      const resp = await getContest(contestId)
+      if (resp.success) {
+        this.contest = resp.data
+        this.lastFetch = Date.now()
+      }
+      return resp
     },
-    async findOne (payload: { [key: string]: any }): Promise<ContestEntityView> {
-      const { data } = await api.contest.findOne(payload)
-      this.contest = data.contest
-      this.overview = data.overview
-      this.totalProblems = data.totalProblems
-      this.solved = data.solved
-      return data
+    async reloadContest () {
+      return this.loadContest(this.contest.contestId)
     },
-    async create (payload: { [key: string]: any }): Promise<number> {
-      const { data } = await api.contest.create(payload)
-      return data.cid
-    },
-    async update (payload: { [key: string]: any }): Promise<number> {
-      const { data } = await api.contest.update(payload)
-      return data.cid
-    },
-    async delete (payload: { [key: string]: any }): Promise<void> {
-      await api.contest.delete(payload)
-      this.list = this.list.filter(p => p.cid !== +(payload.cid))
-    },
-    async verify (payload: { [key: string]: any }): Promise<boolean> {
-      const { data } = await api.contest.verify(payload)
-      return data.isVerify
+    async reloadContestIfNeeded () {
+      if (Date.now() - this.lastFetch < CONTEST_CACHE_TIME) {
+        return
+      }
+      await this.reloadContest()
     },
   },
 })

@@ -99,7 +99,7 @@ function handleSort (event: any) {
         </span>
       </template>
       <template #body="{ data }">
-        <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'contestOverview', params: { cid: data.mid } }">
+        <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'ContestOverview', params: { contestId: data.mid } }">
           {{ data.mid }}
         </RouterLink>
         <span v-else>

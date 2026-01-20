@@ -51,7 +51,7 @@ async function fetch () {
 
 function reload (payload = {}) {
   router.push({
-    name: 'contestList',
+    name: 'courseContests',
     query: Object.assign({}, query, payload),
   })
 }
@@ -62,15 +62,15 @@ async function visit (item) {
   if (!isLogined) {
     sessionStore.toggleAuthnDialog()
   } else if (isAdmin || role.value.manageContest || profile.verifyContest.includes(+item.cid)) {
-    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
   } else if (item.start > currentTime) {
     Message.error(t('oj.contest_not_started'))
   } else if (+item.encrypt === encrypt.Public) {
-    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
   } else if (+item.encrypt === encrypt.Private) {
     const data = await verify(only(item, 'cid'))
     if (data)
-      router.push({ name: 'contestOverview', params: { cid: item.cid } })
+      router.push({ name: 'ContestOverview', params: { cid: item.cid } })
     else
       Message.error(t('oj.not_invited_to_contest'))
   } else if (+item.encrypt === encrypt.Password) {
@@ -102,7 +102,7 @@ async function enter (item) {
   const data = await verify(opt)
   if (data) {
     profile.verifyContest.push(+item.cid)
-    router.push({ name: 'contestOverview', params: { cid: item.cid } })
+    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
   } else {
     Message.error(t('oj.wrong_password'))
   }
@@ -188,8 +188,8 @@ onRouteQueryUpdate(fetch)
               <Button type="text" class="table-button" @click="visit(item)">
                 <span class="button-text">{{ item.title }}</span>
                 <Poptip
-                  v-show="item.status === status.Reserve" trigger="hover"
-                  :content="t('oj.reserved_item_notice')" placement="top"
+                  v-show="item.status === status.Reserve" trigger="hover" :content="t('oj.reserved_item_notice')"
+                  placement="top"
                 >
                   <Tag class="contest-mark">
                     {{ t('oj.reserved') }}
@@ -199,7 +199,8 @@ onRouteQueryUpdate(fetch)
             </td>
             <td class="contest-status">
               <span v-if="item.start > currentTime" class="contest-status-ready">{{ t('oj.ready') }}</span>
-              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">{{ t('oj.running') }}</span>
+              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">{{
+                t('oj.running') }}</span>
               <span v-if="item.end < currentTime" class="contest-status-end">{{ t('oj.ended') }}</span>
             </td>
             <td class="contest-type">

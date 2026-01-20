@@ -46,7 +46,7 @@ const hasChanges = computed(() => {
     || editingForm.value.pinned !== discussion.value.pinned
     || editingForm.value.author !== discussion.value.author.uid
     || (editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)
-    || (editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)
+    || (editingForm.value.contest || null) !== (discussion.value.contest?.contestId || null)
   )
 })
 
@@ -105,7 +105,7 @@ function onEditDiscussion () {
     pinned: discussion.value.pinned,
     author: discussion.value.author.uid,
     problem: discussion.value.problem?.pid || null,
-    contest: discussion.value.contest?.cid || null,
+    contest: discussion.value.contest?.contestId || null,
   }
   editDialog.value = true
 }
@@ -132,7 +132,7 @@ async function editDiscussion () {
   if ((editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)) {
     payload.problem = editingForm.value.problem || null
   }
-  if ((editingForm.value.contest || null) !== (discussion.value.contest?.cid || null)) {
+  if ((editingForm.value.contest || null) !== (discussion.value.contest?.contestId || null)) {
     payload.contest = editingForm.value.contest || null
   }
 
@@ -193,8 +193,8 @@ function onViewAuthor (uid: string) {
 function onViewProblem (pid: number) {
   router.push({ name: 'problemInfo', params: { pid } })
 }
-function onViewContest (cid: number) {
-  router.push({ name: 'contestOverview', params: { cid } })
+function onViewContest (contestId: number) {
+  router.push({ name: 'ContestOverview', params: { contestId } })
 }
 
 onMounted(fetchDiscussion)
@@ -231,8 +231,8 @@ onMounted(fetchDiscussion)
           </span>
           <span class="flex gap-1">
             <Tag
-              v-if="discussion.contest" :value="discussion.contest.cid" severity="secondary" class="cursor-pointer"
-              icon="pi pi-trophy" @click="onViewContest(discussion.contest.cid)"
+              v-if="discussion.contest" :value="discussion.contest.contestId" severity="secondary"
+              class="cursor-pointer" icon="pi pi-trophy" @click="onViewContest(discussion.contest.contestId)"
             />
             <Tag
               v-if="discussion.problem" :value="discussion.problem.pid" severity="secondary" class="cursor-pointer"

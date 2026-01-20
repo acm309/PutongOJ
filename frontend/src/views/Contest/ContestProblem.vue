@@ -2,12 +2,12 @@
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { Spin } from 'view-ui-plus'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Problem from '@/components/Problem.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useProblemStore } from '@/store/modules/problem'
-import { contestLabeling } from '@/utils/formate'
 import { onRouteParamUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
@@ -17,15 +17,15 @@ const contestStore = useContestStore()
 
 const { findOne: findOneProblem } = problemStore
 const { problem } = $(storeToRefs(problemStore))
-const { overview, contest, totalProblems } = $(storeToRefs(contestStore))
+const { contestId, problems, problemLabels } = storeToRefs(contestStore)
 
-const proIndex = $computed(() => Number.parseInt(route.params.id as string))
+const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
 let loading = $ref(false)
 
 async function fetch () {
   loading = true
-  await findOneProblem({ pid: overview[proIndex - 1].pid, cid: contest.cid })
+  await findOneProblem({ pid: problemId.value, cid: contestId.value })
   loading = false
 }
 
@@ -37,14 +37,14 @@ onRouteParamUpdate(fetch)
   <div class="p-6">
     <div class="flex flex-wrap gap-2">
       <RouterLink
-        v-for="i in totalProblems" :key="i"
-        :to="{ name: 'contestProblem', params: { cid: contest.cid, id: i } }"
+        v-for="p in problems" :key="p.problemId"
+        :to="{ name: 'contestProblem', params: { contestId, problemId: p.problemId } }"
       >
         <Button
-          class="min-w-10" :severity="i === proIndex ? 'primary' : 'secondary'" :outlined="i !== proIndex"
-          :disabled="overview[i - 1].invalid"
+          class="min-w-10" :severity="p.problemId === problemId ? 'primary' : 'secondary'"
+          :outlined="p.problemId !== problemId"
         >
-          {{ contestLabeling(i, contest.option?.labelingStyle) }}
+          {{ problemLabels.get(p.problemId) }}
         </Button>
       </RouterLink>
     </div>
