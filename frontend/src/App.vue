@@ -92,8 +92,9 @@ watch(colorScheme, (newScheme) => {
 <style lang="stylus">
 html
   font-size: 14px !important
-  overflow-y: scroll
   text-autospace: normal
+body
+  overflow-y: scroll
 #app
   [class^="p-"], [class*=" p-"]
     line-height: normal !important
