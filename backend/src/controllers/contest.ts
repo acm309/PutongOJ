@@ -25,12 +25,11 @@ import {
 } from '@putongoj/shared'
 import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
-import Contest from '../models/Contest'
 import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import User from '../models/User'
-import contestService from '../services/contest'
+import { contestService } from '../services/contest'
 import discussionService from '../services/discussion'
 import solutionService from '../services/solution'
 import { getUser } from '../services/user'
@@ -68,7 +67,7 @@ export async function loadContest (ctx: Context, input?: number | string) {
 
   const profile = await loadProfile(ctx)
   const participation = await contestService
-    .getContestParticipation(profile._id, contest._id)
+    .getParticipation(profile._id, contest._id)
 
   let isJury: boolean = false
   if (profile.isAdmin) {
@@ -188,7 +187,7 @@ async function participateContest (ctx: Context) {
     )
   }
 
-  await contestService.setContestParticipation(
+  await contestService.updateParticipation(
     profile._id, contest._id, ParticipationStatus.Approved)
   ctx.auditLog.info(`<User:${profile.uid}> participated in contest <Contest:${contest.contestId}>`)
   return createEnvelopedResponse(ctx, null)
@@ -344,7 +343,7 @@ async function updateConfig (ctx: Context) {
     course,
   }
 
-  await Contest.updateOne({ _id: contest._id }, { $set: data })
+  await contestService.updateContest(contest.contestId, data)
   ctx.auditLog.info(`<Contest:${contest.contestId}> config updated`)
   return createEnvelopedResponse(ctx, null)
 }
@@ -506,12 +505,11 @@ const createContest = async (ctx: Context) => {
   }
 
   try {
-    const contest = new Contest(Object.assign({}, opt, {
+    const contest = await contestService.createContest({
       startsAt: new Date(opt.start),
       endsAt: new Date(opt.end),
       course: courseDocId,
-    }))
-    await contest.save()
+    })
     ctx.auditLog.info(`<Contest:${contest.contestId}> created by <User:${profile.uid}>`)
     ctx.body = { cid: contest.contestId }
   } catch (e: any) {

@@ -20,7 +20,7 @@ import {
   ErrorCode,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
-import contestService from '../services/contest'
+import { contestService } from '../services/contest'
 import cryptoService from '../services/crypto'
 import discussionService from '../services/discussion'
 import groupService from '../services/group'

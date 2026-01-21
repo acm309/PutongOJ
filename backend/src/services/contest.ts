@@ -12,7 +12,7 @@ import Solution from '../models/Solution'
 import User from '../models/User'
 import { judge } from '../utils/constants'
 
-export async function findContests (
+async function findContests (
   options: PaginateOption & SortOption,
   filters: { title?: string, course?: Types.ObjectId },
   showHidden: boolean = false,
@@ -65,7 +65,7 @@ export async function findContests (
   return result
 }
 
-export async function getContest (contestId: number) {
+async function getContest (contestId: number) {
   const contest = await Contest
     .findOne({ contestId })
     .populate<{ course: CourseDocument }>('course')
@@ -74,7 +74,24 @@ export async function getContest (contestId: number) {
 
 export type ContestWithCourse = NonNullable<Awaited<ReturnType<typeof getContest>>>
 
-export async function getContestParticipation (user: Types.ObjectId, contest: Types.ObjectId): Promise<ParticipationStatus> {
+async function createContest (contest: Partial<ContestModel>) {
+  const createdContest = new Contest(contest)
+  await createdContest.save()
+  return createdContest.toObject()
+}
+
+async function updateContest (
+  contestId: number,
+  update: Partial<ContestModel>,
+): Promise<boolean> {
+  const res = await Contest.updateOne(
+    { contestId },
+    { $set: update },
+  )
+  return res.modifiedCount > 0
+}
+
+async function getParticipation (user: Types.ObjectId, contest: Types.ObjectId): Promise<ParticipationStatus> {
   const participation = await ContestParticipation
     .findOne({ user, contest })
     .lean()
@@ -84,7 +101,7 @@ export async function getContestParticipation (user: Types.ObjectId, contest: Ty
   return participation.status as ParticipationStatus
 }
 
-export async function setContestParticipation (
+async function updateParticipation (
   user: Types.ObjectId,
   contest: Types.ObjectId,
   status: ParticipationStatus,
@@ -96,30 +113,7 @@ export async function setContestParticipation (
   )
 }
 
-// export async function createContest (
-//   opt: ContestEntityEditable,
-// ): Promise<ContestDocument> {
-//   const contest = new Contest(opt)
-//   await contest.save()
-//   return contest
-// }
-
-// export async function updateContest (
-//   cid: number,
-//   opt: Partial<ContestEntityEditable>,
-// ): Promise<ContestDocument | null> {
-//   const contest = await Contest
-//     .findOneAndUpdate({ cid }, opt, { new: true })
-//     .populate('course')
-//   return contest
-// }
-
-// export async function removeContest (cid: number): Promise<boolean> {
-//   const result = await Contest.deleteOne({ cid })
-//   return result.deletedCount > 0
-// }
-
-export async function getRanklist (
+async function getRanklist (
   contestId: number,
   isFrozen: boolean = false,
   freezeTime: number = 0,
@@ -195,15 +189,12 @@ export async function getRanklist (
   return ranklist
 }
 
-const contestService = {
+export const contestService = {
   findContests,
   getContest,
-  getContestParticipation,
-  setContestParticipation,
-  // createContest,
-  // updateContest,
-  // removeContest,
+  createContest,
+  updateContest,
+  getParticipation,
+  updateParticipation,
   getRanklist,
 } as const
-
-export default contestService
