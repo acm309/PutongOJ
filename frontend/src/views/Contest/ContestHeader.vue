@@ -61,7 +61,7 @@ const firstProblemId = computed(() => {
   return contest.value.problems.length > 0 ? contest.value.problems[0].problemId : 1
 })
 const tabItems = computed(() => {
-  const params = { cid: route.params.cid }
+  const params = { contestId: route.params.cid }
   const items = [
     { label: t('oj.overview'), value: 'ContestOverview', params },
     { label: t('ptoj.problem'), value: 'contestProblem', params: { ...params, problemId: route.params.problemId || firstProblemId.value } },

@@ -99,6 +99,12 @@ contestSchema.pre('save', async function (this) {
   }
 })
 
+contestSchema.pre('validate', function () {
+  if (this.startsAt && this.endsAt && this.endsAt <= this.startsAt) {
+    this.invalidate('endsAt', 'endsAt must be after startsAt')
+  }
+})
+
 const Contest = mongoose.model('Contest', contestSchema)
 
 export default Contest

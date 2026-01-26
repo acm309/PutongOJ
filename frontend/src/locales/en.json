@@ -116,7 +116,7 @@
   "failed_import_testcases": "Failed to import testcases",
   "failed_import_testcases_detail": "A total of {count} testcases were failed to import. Some error occurred while importing testcases",
   "failed_join_contest": "Failed to join contest",
-  "failed_join_contest_detail": "Please eusure you have entered the correct password and try again",
+  "failed_join_contest_detail": "Please ensure you have entered the correct password and try again",
   "failed_load_connect_accounts": "Failed to load connected accounts",
   "failed_load_discussion": "Failed to load discussion",
   "failed_load_group": "Failed to load group",

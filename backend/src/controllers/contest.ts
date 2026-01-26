@@ -29,6 +29,7 @@ import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import User from '../models/User'
+import { CacheKey, cacheService } from '../services/cache'
 import { contestService } from '../services/contest'
 import discussionService from '../services/discussion'
 import solutionService from '../services/solution'
@@ -324,6 +325,13 @@ async function updateConfig (ctx: Context) {
 
   await contestService.updateContest(contest.contestId, data)
   ctx.auditLog.info(`<Contest:${contest.contestId}> config updated`)
+
+  if (problems !== undefined) {
+    await Promise.all([ cacheService.remove(CacheKey.contestProblems(contest.contestId, true)),
+      cacheService.remove(CacheKey.contestProblems(contest.contestId, false)),
+    ])
+  }
+
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -485,6 +493,7 @@ const createContest = async (ctx: Context) => {
 
   try {
     const contest = await contestService.createContest({
+      title: opt.title,
       startsAt: new Date(opt.start),
       endsAt: new Date(opt.end),
       course: courseDocId,

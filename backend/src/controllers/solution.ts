@@ -99,8 +99,7 @@ const create = async (ctx: Context) => {
     ctx.throw(400, 'No such a problem')
   }
   if (mid > 0) {
-    const mid = Number.parseInt(opt.mid)
-    const contest = await Contest.findOne({ cid: mid }).populate('course')
+    const contest = await Contest.findOne({ contestId: mid }).populate('course')
     if (!contest) {
       ctx.throw(400, 'No such a contest')
     }
