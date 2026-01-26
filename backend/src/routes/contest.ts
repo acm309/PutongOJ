@@ -1,6 +1,7 @@
 import Router from '@koa/router'
 import contestController from '../controllers/contest'
 import authnMiddleware from '../middlewares/authn'
+import ratelimitMiddleware from '../middlewares/ratelimit'
 
 const contestRouter = new Router({
   prefix: '/contests',
@@ -48,6 +49,7 @@ contestRouter.get('/:contestId/solutions',
 )
 contestRouter.get('/:contestId/solutions/export',
   authnMiddleware.loginRequire,
+  ratelimitMiddleware.dataExportLimit,
   contestController.exportSolutions,
 )
 
