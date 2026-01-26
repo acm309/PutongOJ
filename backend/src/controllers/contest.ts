@@ -204,9 +204,7 @@ async function getContest (ctx: Context) {
   const { contest, isJury } = state
 
   const [ problemsBasic, attempted, solved ] = await Promise.all([
-    Problem.find({ _id: { $in: contest.problems } })
-      .select([ '_id', 'pid', 'title' ])
-      .lean(),
+    contestService.getProblemsWithStats(contest.contestId, isJury),
     Solution.distinct('pid', {
       mid: contest.contestId, uid: profile.uid,
     }).lean(),
@@ -214,30 +212,11 @@ async function getContest (ctx: Context) {
       mid: contest.contestId, uid: profile.uid, judge: JudgeStatus.Accepted,
     }).lean(),
   ])
-  const extraFilters = (!isJury && contest.scoreboardFrozenAt)
-    ? {
-        createdAt: { $lt: contest.scoreboardFrozenAt },
-      }
-    : {}
-  const problems = await Promise.all(problemsBasic.map(async (problem) => {
-    const [ { length: submit }, { length: solve } ] = await Promise.all([
-      Solution.distinct('uid', {
-        mid: contest.contestId, pid: problem.pid,
-        ...extraFilters,
-      }).lean(),
-      Solution.distinct('uid', {
-        mid: contest.contestId, pid: problem.pid,
-        judge: JudgeStatus.Accepted, ...extraFilters,
-      }).lean(),
-    ])
-    return {
-      index: contest.problems.indexOf(problem._id) + 1,
-      problemId: problem.pid,
-      title: problem.title,
-      submit, solve,
-      isAttempted: attempted.includes(problem.pid),
-      isSolved: solved.includes(problem.pid),
-    }
+
+  const problems = problemsBasic.map(problem => ({
+    ...problem,
+    isAttempted: attempted.includes(problem.problemId),
+    isSolved: solved.includes(problem.problemId),
   }))
 
   const result = ContestDetailQueryResultSchema.encode({

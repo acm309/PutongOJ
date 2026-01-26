@@ -142,4 +142,8 @@ export class CacheKey {
   public static updateLock (key: string) {
     return `cache:update_lock:${key}`
   }
+
+  public static contestProblems (contestId: number, isJury: boolean) {
+    return `cache:contest:${contestId}:problems:${isJury ? 'jury' : 'public'}`
+  }
 }

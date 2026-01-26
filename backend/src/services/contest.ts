@@ -8,9 +8,11 @@ import { ParticipationStatus } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
 import Contest from '../models/Contest'
 import ContestParticipation from '../models/ContestParticipation'
+import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import User from '../models/User'
 import { judge } from '../utils/constants'
+import { CacheKey, cacheService } from './cache'
 
 async function findContests (
   options: PaginateOption & SortOption,
@@ -113,6 +115,61 @@ async function updateParticipation (
   )
 }
 
+export type ContestProblemsWithStats = {
+  index: number
+  problemId: number
+  title: string
+  submit: number
+  solve: number
+}[]
+
+async function getProblemsWithStats (contestId: number, isJury: boolean) {
+  return await cacheService.getOrCreate<ContestProblemsWithStats>(
+    CacheKey.contestProblems(contestId, isJury),
+
+    async () => {
+      const contest = await Contest
+        .findOne({ contestId })
+        .select({ _id: 0, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
+        .lean()
+      if (!contest || !contest.problems) {
+        return []
+      }
+
+      const problems = await Problem
+        .find({ _id: { $in: contest.problems } })
+        .select({ _id: 1, pid: 1, title: 1 })
+        .lean()
+
+      const before = (contest.scoreboardFrozenAt && !isJury)
+        ? contest.scoreboardFrozenAt
+        : contest.endsAt
+
+      return await Promise.all(problems.map(async ({ _id, pid, title }) => {
+        const [ { length: submit }, { length: solve } ] = await Promise.all([
+          Solution.distinct('uid', {
+            mid: contestId,
+            pid,
+            createdAt: { $lt: before },
+          }).lean(),
+          Solution.distinct('uid', {
+            mid: contestId,
+            pid,
+            judge: judge.Accepted,
+            createdAt: { $lt: before },
+          }).lean(),
+        ])
+        const problemId = pid
+        const index = contest.problems.findIndex(p => p.equals(_id)) + 1
+
+        return { index, problemId, title, submit, solve }
+      }))
+    },
+
+    { ttl: 10 },
+  )
+}
+
 async function getRanklist (
   contestId: number,
   isFrozen: boolean = false,
@@ -196,5 +253,6 @@ export const contestService = {
   updateContest,
   getParticipation,
   updateParticipation,
+  getProblemsWithStats,
   getRanklist,
 } as const
