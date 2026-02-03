@@ -6,7 +6,7 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "@braintree/sanitize-url": "^7.1.1",
+    "@braintree/sanitize-url": "^7.1.2",
     "cytoscape": "^3.33.1",
     "cytoscape-cose-bilkent": "^4.1.0",
     "dayjs": "^1.11.19",
