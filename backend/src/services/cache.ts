@@ -1,4 +1,5 @@
 import type Redis from 'ioredis'
+import type { Types } from 'mongoose'
 import NodeCache from 'node-cache'
 import redis from '../config/redis'
 
@@ -143,7 +144,7 @@ export class CacheKey {
     return `cache:update_lock:${key}`
   }
 
-  public static contestProblems (contestId: number, isJury: boolean) {
-    return `cache:contest:${contestId}:problems:${isJury ? 'jury' : 'public'}`
+  public static contestProblems (contest: Types.ObjectId, isJury: boolean) {
+    return `cache:contest:${contest.toString()}:problems:${isJury ? 'jury' : 'public'}`
   }
 }

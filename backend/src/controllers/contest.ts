@@ -205,7 +205,7 @@ async function getContest (ctx: Context) {
   const { contest, isJury } = state
 
   const [ problemsBasic, attempted, solved ] = await Promise.all([
-    contestService.getProblemsWithStats(contest.contestId, isJury),
+    contestService.getProblemsWithStats(contest._id, isJury),
     Solution.distinct('pid', {
       mid: contest.contestId, uid: profile.uid,
     }).lean(),
@@ -327,8 +327,9 @@ async function updateConfig (ctx: Context) {
   ctx.auditLog.info(`<Contest:${contest.contestId}> config updated`)
 
   if (problems !== undefined) {
-    await Promise.all([ cacheService.remove(CacheKey.contestProblems(contest.contestId, true)),
-      cacheService.remove(CacheKey.contestProblems(contest.contestId, false)),
+    await Promise.all([
+      cacheService.remove(CacheKey.contestProblems(contest._id, true)),
+      cacheService.remove(CacheKey.contestProblems(contest._id, false)),
     ])
   }
 

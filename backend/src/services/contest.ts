@@ -123,27 +123,27 @@ export type ContestProblemsWithStats = {
   solve: number
 }[]
 
-async function getProblemsWithStats (contestId: number, isJury: boolean) {
+async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
   return await cacheService.getOrCreate<ContestProblemsWithStats>(
-    CacheKey.contestProblems(contestId, isJury),
+    CacheKey.contestProblems(contest, isJury),
 
     async () => {
-      const contest = await Contest
-        .findOne({ contestId })
-        .select({ _id: 0, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
+      const contestDoc = await Contest
+        .findById(contest)
+        .select({ _id: 0, contestId: 1, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
         .lean()
-      if (!contest || !contest.problems) {
+      if (!contestDoc || contestDoc.problems.length === 0) {
         return []
       }
 
+      const { contestId, endsAt, scoreboardFrozenAt } = contestDoc
       const problems = await Problem
-        .find({ _id: { $in: contest.problems } })
+        .find({ _id: { $in: contestDoc.problems } })
         .select({ _id: 1, pid: 1, title: 1 })
         .lean()
-
-      const before = (contest.scoreboardFrozenAt && !isJury)
-        ? contest.scoreboardFrozenAt
-        : contest.endsAt
+      const before = (scoreboardFrozenAt && !isJury)
+        ? scoreboardFrozenAt
+        : endsAt
 
       return await Promise.all(problems.map(async ({ _id, pid, title }) => {
         const [ { length: submit }, { length: solve } ] = await Promise.all([
@@ -160,7 +160,7 @@ async function getProblemsWithStats (contestId: number, isJury: boolean) {
           }).lean(),
         ])
         const problemId = pid
-        const index = contest.problems.findIndex(p => p.equals(_id)) + 1
+        const index = contestDoc.problems.findIndex(p => p.equals(_id)) + 1
 
         return { index, problemId, title, submit, solve }
       }))
