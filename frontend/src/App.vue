@@ -95,7 +95,4 @@ html
   text-autospace: normal
 body
   overflow-y: scroll
-#app
-  [class^="p-"], [class*=" p-"]
-    line-height: normal !important
 </style>

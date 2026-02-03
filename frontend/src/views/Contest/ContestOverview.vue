@@ -22,7 +22,7 @@ onMounted(contestStore.reloadContestIfNeeded)
 
 <template>
   <DataTable
-    :value="problems" class="pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single"
+    :value="problems" class="max-w-5xl pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single"
     @row-select="onRowSelect"
   >
     <Column class="pl-8 text-center w-18">
