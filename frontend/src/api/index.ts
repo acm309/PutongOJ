@@ -45,14 +45,8 @@ const problem = {
 }
 
 const contest = {
-  create: (data: { [key: string]: any }) =>
-    instance.post('/contests/', data),
-  update: (data: { [key: string]: any }) =>
-    instance.put(`/contests/${data.cid}`, data),
   ranklist: (cid: number) =>
     instance.get<RanklistResponse>(`/contests/${cid}/ranklist`),
-  delete: (data: { [key: string]: any }) =>
-    instance.delete(`/contests/${data.cid}`, data),
 }
 
 const news = {

@@ -81,10 +81,6 @@ const menuItems = computed(() => {
         icon: 'pi pi-plus',
         route: 'problemCreate',
       }, {
-        label: t('oj.create_contest'),
-        icon: 'pi pi-plus',
-        route: 'contestCreate',
-      }, {
         label: t('oj.create_news'),
         icon: 'pi pi-plus',
         route: 'newsCreate',

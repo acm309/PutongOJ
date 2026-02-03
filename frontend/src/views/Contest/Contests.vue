@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ContestListQuery, ContestListQueryResult } from '@putongoj/shared'
 import { ContestListQuerySchema } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
@@ -10,8 +11,10 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findContests } from '@/api/contest'
+import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
 import ContestDataTable from '@/components/ContestDataTable.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
+import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -19,11 +22,14 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
+const sessionStore = useSessionStore()
 
+const { isAdmin } = storeToRefs(sessionStore)
 const query = ref({} as ContestListQuery)
 const docs = ref([] as ContestListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
+const createDialog = ref(false)
 
 const hasFilter = computed(() => {
   return Boolean(query.value.title)
@@ -135,6 +141,9 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
           />
+          <Button
+            v-if="isAdmin" icon="pi pi-plus" :label="t('ptoj.create_contest')" @click="createDialog = true"
+          />
         </div>
       </div>
     </div>
@@ -157,5 +166,7 @@ onRouteQueryUpdate(fetch)
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
+
+    <ContestCreateDialog v-model:visible="createDialog" />
   </div>
 </template>

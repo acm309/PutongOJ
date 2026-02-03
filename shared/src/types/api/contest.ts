@@ -14,7 +14,7 @@ export const ContestListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'startsAt', 'endsAt']).default('createdAt'),
   title: z.string().max(30).optional(),
-  course: z.number().nonnegative().optional(),
+  course: stringToInt.pipe(z.number().nonnegative()).optional(),
 })
 
 export type ContestListQuery = z.infer<typeof ContestListQuerySchema>
@@ -70,6 +70,17 @@ export const ContestDetailQueryResultSchema = z.object({
 })
 
 export type ContestDetailQueryResult = z.input<typeof ContestDetailQueryResultSchema>
+
+export const ContestCreatePayloadSchema = z.object({
+  title: ContestModelSchema.shape.title,
+  startsAt: ContestModelSchema.shape.startsAt,
+  endsAt: ContestModelSchema.shape.endsAt,
+  isHidden: ContestModelSchema.shape.isHidden,
+  isPublic: ContestModelSchema.shape.isPublic,
+  course: z.number().nonnegative().nullable().optional(),
+})
+
+export type ContestCreatePayload = z.infer<typeof ContestCreatePayloadSchema>
 
 export const ContestConfigQueryResultSchema = z.object({
   contestId: ContestModelSchema.shape.contestId,

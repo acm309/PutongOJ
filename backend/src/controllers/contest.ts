@@ -8,6 +8,7 @@ import type { DiscussionQueryFilters } from '../services/discussion'
 import {
   ContestConfigEditPayloadSchema,
   ContestConfigQueryResultSchema,
+  ContestCreatePayloadSchema,
   ContestDetailQueryResultSchema,
   ContestListQueryResultSchema,
   ContestListQuerySchema,
@@ -469,8 +470,13 @@ export async function findContestDiscussions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-const createContest = async (ctx: Context) => {
-  const opt = ctx.request.body
+export async function createContest (ctx: Context) {
+  const payload = ContestCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  const opt = payload.data
   const profile = await loadProfile(ctx)
   const hasPermission = async (): Promise<boolean> => {
     if (profile.isAdmin) {
@@ -483,26 +489,25 @@ const createContest = async (ctx: Context) => {
     return false
   }
   if (!await hasPermission()) {
-    return ctx.throw(...ERR_PERM_DENIED)
+    return createErrorResponse(ctx,
+      'Permission denied to create contest', ErrorCode.Forbidden,
+    )
   }
 
-  let courseDocId: Types.ObjectId | undefined
+  let course: Types.ObjectId | null = null
   if (opt.course) {
-    const { course } = await loadCourse(ctx, opt.course)
-    courseDocId = course._id
+    const { course: { _id } } = await loadCourse(ctx, opt.course)
+    course = _id
   }
 
   try {
-    const contest = await contestService.createContest({
-      title: opt.title,
-      startsAt: new Date(opt.start),
-      endsAt: new Date(opt.end),
-      course: courseDocId,
-    })
+    const contest = await contestService.createContest({ ...opt, course })
     ctx.auditLog.info(`<Contest:${contest.contestId}> created by <User:${profile.uid}>`)
-    ctx.body = { cid: contest.contestId }
+    return createEnvelopedResponse(ctx, { contestId: contest.contestId })
   } catch (e: any) {
-    ctx.throw(400, e.message)
+    return createErrorResponse(ctx,
+      `Failed to create contest: ${e.message}`, ErrorCode.BadRequest,
+    )
   }
 }
 

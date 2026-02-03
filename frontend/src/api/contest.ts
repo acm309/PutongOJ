@@ -1,6 +1,7 @@
 import type {
   ContestConfigEditPayload,
   ContestConfigQueryResult,
+  ContestCreatePayload,
   ContestDetailQueryResult,
   ContestListQuery,
   ContestListQueryResult,
@@ -20,9 +21,13 @@ export async function findContests (params: ContestListQuery) {
   return instance.get<ContestListQueryResult>('/contests', { params })
 }
 
+export async function createContest (payload: ContestCreatePayload) {
+  return instance.post<{ contestId: number }>('/contests', payload)
+}
 export async function getContest (contestId: number) {
   return instance.get<ContestDetailQueryResult>(`/contests/${encodeURIComponent(contestId)}`)
 }
+
 export async function getParticipation (contestId: number) {
   return instance.get<ContestParticipationQueryResult>(`/contests/${encodeURIComponent(contestId)}/participation`)
 }

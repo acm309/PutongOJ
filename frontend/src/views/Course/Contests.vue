@@ -1,368 +1,155 @@
-<script setup>
-import only from 'only'
-import { storeToRefs } from 'pinia'
-import { Button, Icon, Input, Message, Modal, Page, Poptip, Spin, Tag } from 'view-ui-plus'
-import { computed } from 'vue'
+<script setup lang="ts">
+import type { ContestListQuery, ContestListQueryResult } from '@putongoj/shared'
+import { ContestListQuerySchema } from '@putongoj/shared'
+import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import InputText from 'primevue/inputtext'
+import Paginator from 'primevue/paginator'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useRootStore } from '@/store'
-import { useContestStore } from '@/store/modules/contest'
-import { useCourseStore } from '@/store/modules/course'
-import { useSessionStore } from '@/store/modules/session'
-import constant from '@/utils/constant'
-import { timePretty } from '@/utils/formate'
-import { onRouteQueryUpdate, purify } from '@/utils/helper'
+import { findContests } from '@/api/contest'
+import ContestDataTable from '@/components/ContestDataTable.vue'
+import SortingMenu from '@/components/SortingMenu.vue'
+import { onRouteQueryUpdate } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
-const { 'contestType': type, 'status': contestVisible } = constant
-const contestStore = useContestStore()
-const sessionStore = useSessionStore()
-const courseStore = useCourseStore()
-const rootStore = useRootStore()
 const route = useRoute()
 const router = useRouter()
+const message = useMessage()
 
-const { course } = storeToRefs(courseStore)
-const { list, sum } = $(storeToRefs(contestStore))
-const { status, encrypt, currentTime } = $(storeToRefs(rootStore))
-const { profile, isLogined, isAdmin } = $(storeToRefs(sessionStore))
-const page = $computed(() => Number.parseInt(route.query.page) || 1)
-const pageSize = $computed(() => Number.parseInt(route.query.pageSize) || 20)
-let enterPwd = $ref('')
-const courseId = $computed(() => Number.parseInt(route.params.id))
-const role = computed(() => {
-  if (course.value?.courseId !== courseId) {
-    return courseRoleNone
-  }
-  return course.value?.role ?? courseRoleNone
+const course = Number.parseInt(route.params.id as string)
+const query = ref({} as ContestListQuery)
+const docs = ref([] as ContestListQueryResult['docs'])
+const total = ref(0)
+const loading = ref(false)
+
+const hasFilter = computed(() => {
+  return Boolean(query.value.title)
 })
-const query = $computed(() => purify({ page, pageSize, course: courseId }))
-const contestTitle = $ref('')
 
-let loading = $ref(false)
-
-const { find, verify, update } = contestStore
+const sortingOptions = computed(() => [ {
+  label: t('ptoj.created_at'),
+  value: 'createdAt',
+  isTimeBased: true,
+}, {
+  label: t('ptoj.starts_at'),
+  value: 'startsAt',
+  isTimeBased: true,
+}, {
+  label: t('ptoj.ends_at'),
+  value: 'endsAt',
+  isTimeBased: true,
+} ])
 
 async function fetch () {
-  loading = true
-  await find(query)
-  loading = false
+  const parsed = ContestListQuerySchema.safeParse({ ...route.query, course })
+  if (parsed.success) {
+    query.value = parsed.data
+  } else {
+    router.replace({ query: {} })
+    return
+  }
+
+  loading.value = true
+  const resp = await findContests(query.value)
+  loading.value = false
+  if (!resp.success) {
+    message.error(t('ptoj.failed_fetch_contests'), resp.message)
+    docs.value = []
+    total.value = 0
+    return
+  }
+
+  docs.value = resp.data.docs
+  total.value = resp.data.total
 }
 
-function reload (payload = {}) {
-  router.push({
-    name: 'courseContests',
-    query: Object.assign({}, query, payload),
+function onSort (event: any) {
+  router.replace({
+    query: {
+      ...route.query,
+      sortBy: event.sortField || event.field || query.value.sortBy,
+      sort: event.sortOrder || event.order || query.value.sort,
+    },
   })
 }
 
-const pageChange = val => reload({ page: val })
-
-async function visit (item) {
-  if (!isLogined) {
-    sessionStore.toggleAuthnDialog()
-  } else if (isAdmin || role.value.manageContest || profile.verifyContest.includes(+item.cid)) {
-    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
-  } else if (item.start > currentTime) {
-    Message.error(t('oj.contest_not_started'))
-  } else if (+item.encrypt === encrypt.Public) {
-    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
-  } else if (+item.encrypt === encrypt.Private) {
-    const data = await verify(only(item, 'cid'))
-    if (data)
-      router.push({ name: 'ContestOverview', params: { cid: item.cid } })
-    else
-      Message.error(t('oj.not_invited_to_contest'))
-  } else if (+item.encrypt === encrypt.Password) {
-    document.activeElement.blur()
-    Modal.confirm({
-      render: (h) => {
-        return h(Input, {
-          placeholder: 'Please enter password.',
-          autofocus: true,
-          onChange: event => enterPwd = event.target.value,
-          onOnEnter: () => {
-            enter(item)
-            Modal.remove()
-          },
-        })
-      },
-      onOk: () => {
-        enter(item)
-      },
-    })
-  }
+function onPage (event: any) {
+  router.replace({
+    query: {
+      ...route.query,
+      page: (event.first / event.rows + 1),
+    },
+  })
 }
 
-async function enter (item) {
-  const opt = Object.assign(
-    only(item, 'cid'),
-    { pwd: enterPwd },
-  )
-  const data = await verify(opt)
-  if (data) {
-    profile.verifyContest.push(+item.cid)
-    router.push({ name: 'ContestOverview', params: { cid: item.cid } })
-  } else {
-    Message.error(t('oj.wrong_password'))
-  }
+function onSearch () {
+  router.replace({
+    query: {
+      ...route.query,
+      title: query.value.title,
+      page: undefined,
+    },
+  })
 }
 
-async function change (contest) {
-  loading = true
-  contest.status = contest.status === status.Reserve
-    ? status.Available
-    : status.Reserve
-  await update(contest)
-  find(query)
-  loading = false
+function onReset () {
+  router.replace({
+    query: {
+      ...route.query,
+      title: undefined,
+      page: undefined,
+    },
+  })
 }
 
-async function search () {
-  loading = true
-  await find(Object.assign({}, query, {
-    type: 'title',
-    content: contestTitle,
-  }))
-  loading = false
-}
-
-fetch()
+onMounted(fetch)
 onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="contest-wrap">
-    <div class="contest-header">
-      <Page
-        class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <Page
-        class="contest-page-simple" simple :model-value="page" :total="sum" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <div class="contest-filter">
-        <Input v-model="contestTitle" :placeholder="t('oj.title')" class="search-input" clearable />
-        <Button type="primary" class="contest-filter-button" @click="search">
-          {{ t('oj.search') }}
-        </Button>
+  <div class="-mt-11.5 max-w-7xl p-0">
+    <div class="border-b border-surface p-6">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+        <IconField>
+          <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
+          <InputText
+            v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="30"
+            :disabled="loading" @keypress.enter="onSearch"
+          />
+        </IconField>
+
+        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
+          <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+            @click="onReset"
+          />
+        </div>
       </div>
     </div>
-    <div class="contest-table-container">
-      <table class="contest-table">
-        <thead>
-          <tr>
-            <th class="contest-cid">
-              {{ t('oj.cid') }}
-            </th>
-            <th class="contest-title">
-              {{ t('oj.title') }}
-            </th>
-            <th class="contest-status">
-              {{ t('oj.status') }}
-            </th>
-            <th class="contest-type">
-              {{ t('oj.type') }}
-            </th>
-            <th class="contest-start-time">
-              {{ t('oj.start_time') }}
-            </th>
-            <th v-if="isAdmin" class="contest-visible">
-              {{ t('oj.visible') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="list.length === 0" class="contest-empty">
-            <td colspan="7">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="(item, index) in list" :key="index">
-            <td class="contest-cid">
-              {{ item.cid }}
-            </td>
-            <td class="contest-title">
-              <Button type="text" class="table-button" @click="visit(item)">
-                <span class="button-text">{{ item.title }}</span>
-                <Poptip
-                  v-show="item.status === status.Reserve" trigger="hover" :content="t('oj.reserved_item_notice')"
-                  placement="top"
-                >
-                  <Tag class="contest-mark">
-                    {{ t('oj.reserved') }}
-                  </Tag>
-                </Poptip>
-              </Button>
-            </td>
-            <td class="contest-status">
-              <span v-if="item.start > currentTime" class="contest-status-ready">{{ t('oj.ready') }}</span>
-              <span v-if="item.start < currentTime && item.end > currentTime" class="contest-status-run">{{
-                t('oj.running') }}</span>
-              <span v-if="item.end < currentTime" class="contest-status-end">{{ t('oj.ended') }}</span>
-            </td>
-            <td class="contest-type">
-              <span
-                :class="{
-                  'contest-type-password': +item.encrypt === encrypt.Password,
-                  'contest-type-private': +item.encrypt === encrypt.Private,
-                  'contest-type-public': +item.encrypt === encrypt.Public,
-                }"
-              >
-                {{ type[item.encrypt] }}
-              </span>
-            </td>
-            <td class="contest-start-time">
-              {{ timePretty(item.start) }}
-            </td>
-            <td v-if="isAdmin" class="contest-visible">
-              <Poptip trigger="hover" :content="t('oj.click_to_change_status')" placement="right">
-                <a @click="change(item)">{{ contestVisible[item.status] }}</a>
-              </Poptip>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="contest-footer">
-      <Page
-        class="contest-page-table" :model-value="page" :total="sum" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange"
-      />
-      <Page
-        class="contest-page-mobile" size="small" :model-value="page" :total="sum" :page-size="pageSize"
-        show-elevator show-total @on-change="pageChange"
-      />
-    </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
+
+    <template v-if="loading || docs.length === 0">
+      <div class="flex gap-4 items-center justify-center px-6 py-24">
+        <i v-if="loading" class="pi pi-spin pi-spinner text-2xl" />
+        <span>{{ loading ? t('ptoj.loading') : t('ptoj.empty_content_desc') }}</span>
+      </div>
+    </template>
+
+    <ContestDataTable
+      v-else :value="docs" :sort-field="query.sortBy" :sort-order="query.sort" :loading="loading"
+      @sort="onSort"
+    />
+
+    <Paginator
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(query.page - 1) * query.pageSize" :rows="query.pageSize" :total-records="total"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
+    />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../../styles/common'
-
-.contest-wrap
-  width 100%
-  margin 0 auto
-  padding 0 0 40px
-
-.contest-header
-  padding 0 40px
-  margin-bottom 25px
-  display flex
-  justify-content space-between
-  align-items center
-
-.contest-filter
-  display flex
-  align-items center
-  .search-input
-    width 200px
-    margin-right 8px
-
-.contest-page-simple, .contest-page-mobile
-  display none
-
-@media screen and (max-width: 1024px)
-  .contest-wrap
-    padding 20px 0
-  .contest-header
-    padding 0 20px
-    margin-bottom 5px
-    .contest-page-table
-      display none !important
-    .contest-page-simple
-      display block
-  .contest-footer
-    padding 0 20px
-    margin-top 20px !important
-
-@media screen and (max-width: 768px)
-  .contest-page-table, .contest-page-simple
-    display none !important
-  .contest-filter
-    width 100%
-    .search-input
-      width 100%
-  .contest-page-mobile
-    display block
-
-.contest-table-container
-  overflow-x auto
-  width 100%
-
-.contest-table
-  width 100%
-  min-width 1024px
-  table-layout fixed
-  th, td
-    padding 0 16px
-    text-align left
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-  .table-button
-    padding 0
-    border-width 0
-    width 100%
-    &:hover
-      background-color transparent
-
-.contest-cid
-  width 90px
-  text-align right !important
-.contest-title
-  text-align left
-  .table-button
-    text-align left
-  .contest-mark
-    margin 0px 0px 4px 8px
-.contest-status, .contest-type
-  text-align center !important
-.contest-status
-  width 90px
-.contest-type
-  width 120px
-td.contest-status
-  font-weight bold
-.contest-start-time
-  width 190px
-td.contest-type
-  font-weight 500
-.contest-visible
-  width 120px
-.contest-delete
-  width 100px
-
-.contest-status-ready
-  color blue
-.contest-status-run
-  color red
-.contest-status-end
-  color black
-
-.contest-type-password
-  color green
-.contest-type-private
-  color red
-
-.contest-footer
-  padding 0 40px
-  margin-top 40px
-  text-align center
-
-.contest-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-</style>

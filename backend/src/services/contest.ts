@@ -76,7 +76,10 @@ async function getContest (contestId: number) {
 
 export type ContestWithCourse = NonNullable<Awaited<ReturnType<typeof getContest>>>
 
-async function createContest (contest: Partial<ContestModel>) {
+type ContestCreateDto = Pick<ContestModel,
+  'title' | 'startsAt' | 'endsAt' | 'isHidden' | 'isPublic' | 'course'>
+
+async function createContest (contest: ContestCreateDto) {
   const createdContest = new Contest(contest)
   await createdContest.save()
   return createdContest.toObject()

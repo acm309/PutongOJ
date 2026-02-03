@@ -7,6 +7,7 @@ import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
 import CourseProblemAdd from '@/components/CourseProblemAdd.vue'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
@@ -42,6 +43,7 @@ const joinFormRules = $computed(() => ({
 }))
 const joining = ref(false)
 const problemAddModal = ref(false)
+const contestCreateDialog = ref(false)
 
 async function fetch () {
   loading.value = true
@@ -63,9 +65,6 @@ function handleTabClick (name: string) {
 }
 function createProblem () {
   router.push({ name: 'problemCreate', query: { course: courseId.value } })
-}
-function createContest () {
-  router.push({ name: 'contestCreate', query: { course: courseId.value } })
 }
 
 async function joinCourse () {
@@ -127,7 +126,7 @@ onProfileUpdate(fetch)
               <Icon type="md-add" />
               {{ t('oj.course_create_problem') }}
             </Button>
-            <Button v-if="role.manageContest" @click="createContest">
+            <Button v-if="role.manageContest" @click="contestCreateDialog = true">
               <Icon type="md-add" />
               {{ t('oj.course_create_contest') }}
             </Button>
@@ -180,6 +179,7 @@ onProfileUpdate(fetch)
       v-if="isAdmin" v-model="problemAddModal" :course-id="course.courseId"
       @close="(added: number) => added > 0 ? refresh() : null"
     />
+    <ContestCreateDialog v-model:visible="contestCreateDialog" :course="course.courseId" />
   </div>
 </template>
 
