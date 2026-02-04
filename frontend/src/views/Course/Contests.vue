@@ -111,7 +111,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="-mt-11.5 max-w-7xl p-0">
+  <div class="-mt-11.5 p-0">
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField>

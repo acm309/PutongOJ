@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ContestListQueryResult, ContestParticipationQueryResult } from '@putongoj/shared'
 import { ParticipationStatus } from '@putongoj/shared'
+import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -12,6 +13,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getParticipation, participateContest } from '@/api/contest'
 import router from '@/router'
+import { useRootStore } from '@/store'
 import { timePretty } from '@/utils/formate'
 import { useMessage } from '@/utils/message'
 
@@ -27,31 +29,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const message = useMessage()
-
-enum ContestStatus {
-  Upcoming,
-  Running,
-  Ended,
-}
-
-const statusLabels = computed(() => ({
-  [ContestStatus.Upcoming]: t('ptoj.upcoming'),
-  [ContestStatus.Running]: t('ptoj.running'),
-  [ContestStatus.Ended]: t('ptoj.ended'),
-} as Record<ContestStatus, string>))
-
-function contestStatus (contest: { startsAt: string, endsAt: string }): ContestStatus {
-  const now = Date.now()
-  const startsAt = new Date(contest.startsAt).getTime()
-  const endsAt = new Date(contest.endsAt).getTime()
-  if (now < startsAt) {
-    return ContestStatus.Upcoming
-  } else if (now > endsAt) {
-    return ContestStatus.Ended
-  } else {
-    return ContestStatus.Running
-  }
-}
+const rootStore = useRootStore()
+const { currentTime } = storeToRefs(rootStore)
 
 function handleSort (event: any) {
   emit('sort', event)
@@ -183,13 +162,14 @@ async function onSubmit () {
         </span>
       </template>
       <template #body="{ data }">
-        <span
-          :class="{
-            'text-blue-500': contestStatus(data) === ContestStatus.Upcoming,
-            'text-red-500': contestStatus(data) === ContestStatus.Running,
-          }" class="font-bold"
-        >
-          {{ statusLabels[contestStatus(data)] }}
+        <span v-if="new Date(currentTime) < new Date(data.startsAt)">
+          <span class="font-bold text-blue-500">{{ t('ptoj.upcoming') }}</span>
+        </span>
+        <span v-else-if="new Date(currentTime) < new Date(data.endsAt)">
+          <span class="font-bold text-red-500">{{ t('ptoj.running') }}</span>
+        </span>
+        <span v-else>
+          <span class="font-bold">{{ t('ptoj.ended') }}</span>
         </span>
       </template>
     </Column>
