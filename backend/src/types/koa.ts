@@ -1,11 +1,10 @@
 import type { AccountSession } from '@putongoj/shared'
-import type { CourseRole } from '.'
-import type { ContestState } from '../controllers/contest'
-import type { CourseDocument } from '../models/Course'
-import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { TagDocument } from '../models/Tag'
 import type { UserDocument } from '../models/User'
-import type { DiscussionDocument } from '../services/discussion'
+import type { ContestState } from '../policies/contest'
+import type { CourseState } from '../policies/course'
+import type { DiscussionState } from '../policies/discussion'
+import type { ProblemState } from '../policies/problem'
 import 'koa'
 
 declare module 'koa' {
@@ -13,15 +12,14 @@ declare module 'koa' {
     clientIp: string
     requestId: string
     authnChecked?: boolean
-    contest?: ContestState
-    course?: CourseDocument
-    courseRole?: CourseRole
-    problem?: ProblemDocumentPopulated
     profile?: UserDocument
+
+    contest?: ContestState
+    course?: CourseState
+    discussion?: DiscussionState
+    problem?: ProblemState
     tag?: TagDocument
     user?: UserDocument
-    discussion?: DiscussionDocument
-    isDiscussionJury?: boolean
   }
 
   interface DefaultContext {

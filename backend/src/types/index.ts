@@ -34,3 +34,5 @@ export interface SortOption {
 export interface DocumentId {
   _id: Types.ObjectId
 }
+
+export type WithId<T> = T & DocumentId

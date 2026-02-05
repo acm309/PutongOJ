@@ -48,7 +48,7 @@ test('Pid is not a number', async (t) => {
   const res = await request
     .get('/api/problem/xx')
 
-  t.is(res.status, 400)
+  t.is(res.status, 404)
   t.is(res.type, 'application/json')
 
   t.truthy(res.body.error)

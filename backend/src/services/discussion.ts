@@ -109,7 +109,7 @@ export async function getDiscussion (discussionId: number) {
   })
 }
 
-export type DiscussionDocument = Awaited<ReturnType<typeof getDiscussion>>
+export type DiscussionDocument = NonNullable<Awaited<ReturnType<typeof getDiscussion>>>
 
 type CommentPopulateConfig = Pick<DiscussionPopulateConfig, 'author'>
 

@@ -10,9 +10,9 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
+import { loadCourseStateOrThrow } from '../policies/course'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
 import { judgeResult } from '../utils/constants'
-import { loadCourse } from './course'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -38,7 +38,7 @@ export async function findOne (ctx: Context) {
         .findOne({ contestId: solution.mid }, 'course')
         .populate<{ course: CourseDocument }>('course')
       if (contest && contest.course) {
-        const { role } = await loadCourse(ctx, contest.course)
+        const { role } = await loadCourseStateOrThrow(ctx, contest.course.courseId)
         if (role.viewSolution) {
           return true
         }

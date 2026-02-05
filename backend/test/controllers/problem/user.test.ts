@@ -25,7 +25,7 @@ test('Normal user can not visit reserved problem', async (t) => {
   const res = await request
     .get('/api/problem/1004')
 
-  t.is(res.status, 403)
+  t.is(res.status, 404)
 })
 
 test('Query problem list', async (t) => {

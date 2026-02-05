@@ -1,9 +1,6 @@
-import type {
-  ContestModel,
-} from '@putongoj/shared'
+import type { ContestModel } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { ContestWithCourse } from '../services/contest'
 import type { DiscussionQueryFilters } from '../services/discussion'
 import {
   ContestConfigEditPayloadSchema,
@@ -30,6 +27,9 @@ import Group from '../models/Group'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import User from '../models/User'
+import { loadContestState } from '../policies/contest'
+import { loadCourseStateById, loadCourseStateOrThrow } from '../policies/course'
+import { publicDiscussionTypes } from '../policies/discussion'
 import { CacheKey, cacheService } from '../services/cache'
 import { contestService } from '../services/contest'
 import discussionService from '../services/discussion'
@@ -41,56 +41,6 @@ import {
   createZodErrorResponse,
 } from '../utils'
 import { ERR_PERM_DENIED } from '../utils/error'
-import { loadCourse } from './course'
-import { publicDiscussionTypes } from './discussion'
-
-// const { encrypt, judge } = constants
-
-export interface ContestState {
-  contest: ContestWithCourse
-  accessible: boolean
-  participation: ParticipationStatus
-  isJury: boolean
-}
-
-export async function loadContest (ctx: Context, input?: number | string) {
-  const contestId = Number(input ?? ctx.params.contestId)
-  if (!Number.isInteger(contestId) || contestId <= 0) {
-    return null
-  }
-  if (ctx.state.contest?.contest.contestId === contestId) {
-    return ctx.state.contest
-  }
-
-  const contest = await contestService.getContest(contestId)
-  if (!contest) {
-    return null
-  }
-
-  const profile = await loadProfile(ctx)
-  const participation = await contestService
-    .getParticipation(profile._id, contest._id)
-
-  let isJury: boolean = false
-  if (profile.isAdmin) {
-    isJury = true
-  } else if (contest.course) {
-    const { role } = await loadCourse(ctx, contest.course)
-    if (!role.basic) {
-      return null
-    }
-    if (role.manageContest) {
-      isJury = true
-    }
-  }
-
-  const state: ContestState = {
-    contest, participation, isJury,
-    accessible: participation === ParticipationStatus.Approved || isJury,
-  }
-  ctx.state.contest = state
-  return state
-}
 
 async function findContests (ctx: Context) {
   const query = ContestListQuerySchema.safeParse(ctx.request.query)
@@ -104,7 +54,7 @@ async function findContests (ctx: Context) {
   let showHidden: boolean = !!profile?.isAdmin
   let courseDocId: Types.ObjectId | undefined
   if (courseId) {
-    const { course, role } = await loadCourse(ctx, courseId)
+    const { course, role } = await loadCourseStateOrThrow(ctx, courseId)
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
@@ -122,7 +72,7 @@ async function findContests (ctx: Context) {
 }
 
 async function getParticipation (ctx: Context) {
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -159,7 +109,7 @@ async function participateContest (ctx: Context) {
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
   }
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -196,7 +146,7 @@ async function participateContest (ctx: Context) {
 }
 
 async function getContest (ctx: Context) {
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -221,14 +171,22 @@ async function getContest (ctx: Context) {
     isSolved: solved.includes(problem.problemId),
   }))
 
+  let course: { courseId: number, name: string } | null = null
+  if (contest.course) {
+    const courseState = await loadCourseStateById(ctx, contest.course)
+    if (courseState) {
+      const { courseId, name } = courseState.course
+      course = { courseId, name }
+    }
+  }
   const result = ContestDetailQueryResultSchema.encode({
-    ...contest.toObject(), isJury, problems,
+    ...contest, isJury, problems, course,
   })
   return createEnvelopedResponse(ctx, result)
 }
 
 async function getConfig (ctx: Context) {
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -255,14 +213,25 @@ async function getConfig (ctx: Context) {
     cidr: entry.cidr,
     comment: entry.comment === undefined ? null : entry.comment,
   }))
+
+  let course: { courseId: number, name: string } | null = null
+  if (contest.course) {
+    const courseState = await loadCourseStateById(ctx, contest.course)
+    if (courseState) {
+      const { courseId, name } = courseState.course
+      course = { courseId, name }
+    }
+  }
+
   const result = ContestConfigQueryResultSchema.encode({
-    ...contest.toObject(),
+    ...contest,
     ipWhitelist,
     scoreboardFrozenAt: contest.scoreboardFrozenAt ?? null,
     scoreboardUnfrozenAt: contest.scoreboardUnfrozenAt ?? null,
     allowedUsers,
     allowedGroups,
     problems,
+    course,
   })
   return createEnvelopedResponse(ctx, result)
 }
@@ -272,7 +241,7 @@ async function updateConfig (ctx: Context) {
   if (!payload.success) {
     return createZodErrorResponse(ctx, payload.error)
   }
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -311,7 +280,7 @@ async function updateConfig (ctx: Context) {
     if (payload.data.course === null) {
       course = null
     } else {
-      const courseDoc = await loadCourse(ctx, payload.data.course)
+      const courseDoc = await loadCourseStateOrThrow(ctx, payload.data.course)
       course = courseDoc.course._id
     }
   }
@@ -338,7 +307,7 @@ async function updateConfig (ctx: Context) {
 }
 
 const getRanklist = async (ctx: Context) => {
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -381,7 +350,7 @@ export async function findSolutions (ctx: Context) {
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -401,7 +370,7 @@ export async function exportSolutions (ctx: Context) {
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -421,7 +390,7 @@ export async function findContestDiscussions (ctx: Context) {
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
   }
-  const state = await loadContest(ctx)
+  const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
     return createErrorResponse(ctx,
       'Contest not found or access denied', ErrorCode.NotFound,
@@ -483,7 +452,7 @@ export async function createContest (ctx: Context) {
       return true
     }
     if (opt.course) {
-      const { role } = await loadCourse(ctx, opt.course)
+      const { role } = await loadCourseStateOrThrow(ctx, opt.course)
       return role.manageContest
     }
     return false
@@ -496,7 +465,7 @@ export async function createContest (ctx: Context) {
 
   let course: Types.ObjectId | null = null
   if (opt.course) {
-    const { course: { _id } } = await loadCourse(ctx, opt.course)
+    const { course: { _id } } = await loadCourseStateOrThrow(ctx, opt.course)
     course = _id
   }
 
@@ -512,7 +481,7 @@ export async function createContest (ctx: Context) {
 }
 
 const contestController = {
-  loadContest,
+  loadContestState,
   findContests,
   createContest,
   getContest,

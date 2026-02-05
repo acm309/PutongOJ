@@ -1,15 +1,17 @@
 import type { Paginated } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course'
-import type { ProblemDocumentPopulated } from '../models/Problem'
 import type { DiscussionQueryFilters } from '../services/discussion'
-import type { ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
+import type { WithId } from '../types'
+import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
 import { DiscussionListQueryResultSchema, DiscussionListQuerySchema, ProblemSolutionListQueryResultSchema, ProblemSolutionListQuerySchema } from '@putongoj/shared'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
 import User from '../models/User'
+import { loadCourseStateOrThrow } from '../policies/course'
+import { publicDiscussionTypes } from '../policies/discussion'
+import { loadProblemOrThrow } from '../policies/problem'
 import courseService from '../services/course'
 import discussionService from '../services/discussion'
 import problemService from '../services/problem'
@@ -18,74 +20,9 @@ import tagService from '../services/tag'
 import { getUser } from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
 import constants from '../utils/constants'
-import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
-import { loadContest } from './contest'
-import { loadCourse } from './course'
-import { publicDiscussionTypes } from './discussion'
+import { ERR_PERM_DENIED } from '../utils/error'
 
-const { status, judge } = constants
-
-export async function loadProblem (
-  ctx: Context,
-  inputId?: string | number,
-  inputContestId?: number,
-): Promise<ProblemDocumentPopulated> {
-  const problemId = Number(
-    inputId || ctx.params.pid || ctx.request.query.pid,
-  )
-  if (!Number.isInteger(problemId) || problemId <= 0) {
-    return ctx.throw(...ERR_INVALID_ID)
-  }
-  if (ctx.state.problem?.pid === problemId) {
-    return ctx.state.problem
-  }
-
-  const problem = await problemService.getProblem(problemId)
-  if (!problem) {
-    return ctx.throw(...ERR_NOT_FOUND)
-  }
-
-  if (problem.status === status.Available) {
-    ctx.state.problem = problem
-    return problem
-  }
-
-  const { profile } = ctx.state
-  if (profile?.isAdmin) {
-    ctx.state.problem = problem
-    return problem
-  }
-
-  const contestId = Number(inputContestId || ctx.request.query.cid)
-  if (Number.isInteger(contestId) && contestId > 0) {
-    const contestState = await loadContest(ctx, contestId)
-    if (!contestState || !contestState.accessible) {
-      return ctx.throw(...ERR_PERM_DENIED)
-    }
-    const { contest } = contestState
-    if (contest.problems.includes(problem._id)) {
-      ctx.state.problem = problem
-      return problem
-    }
-  }
-
-  if (problem.owner) {
-    const owner = await User.findById(problem.owner).lean()
-    if (owner && owner.uid === profile?.uid) {
-      ctx.state.problem = problem
-      return problem
-    }
-  }
-
-  if (profile && await courseService.hasProblemRole(
-    profile._id, problem._id, 'basic',
-  )) {
-    ctx.state.problem = problem
-    return problem
-  }
-
-  return ctx.throw(...ERR_PERM_DENIED)
-}
+const { judge } = constants
 
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
@@ -101,7 +38,7 @@ const findProblems = async (ctx: Context) => {
 
   let courseDocId: Types.ObjectId | undefined
   if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourse(ctx, opt.course)
+    const { course, role } = await loadCourseStateOrThrow(ctx, opt.course)
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
@@ -165,7 +102,7 @@ const findProblemItems = async (ctx: Context) => {
 
   let courseDocId: Types.ObjectId | undefined
   if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourse(ctx, opt.course)
+    const { course, role } = await loadCourseStateOrThrow(ctx, opt.course)
     if (!role.manageContest) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
@@ -191,7 +128,7 @@ const findProblemItems = async (ctx: Context) => {
 }
 
 const getProblem = async (ctx: Context) => {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = ctx.state.profile
 
   const isOwner = (profile?._id && problem.owner)
@@ -218,7 +155,7 @@ const createProblem = async (ctx: Context) => {
       return true
     }
     if (opt.course) {
-      const { role } = await loadCourse(ctx, opt.course)
+      const { role } = await loadCourseStateOrThrow(ctx, opt.course)
       return role.manageProblem
     }
     return false
@@ -228,9 +165,9 @@ const createProblem = async (ctx: Context) => {
   }
 
   const owner = profile._id
-  let course: CourseDocument | undefined
+  let course: WithId<CourseEntity> | undefined
   if (opt.course) {
-    course = (await loadCourse(ctx, opt.course)).course
+    course = (await loadCourseStateOrThrow(ctx, opt.course)).course
   }
 
   try {
@@ -257,7 +194,7 @@ const createProblem = async (ctx: Context) => {
 
 const updateProblem = async (ctx: Context) => {
   const opt = ctx.request.body
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   let canManage = profile?.isAdmin ?? false
   if (profile && !canManage && problem.owner) {
@@ -310,7 +247,7 @@ const removeProblem = async (ctx: Context) => {
 
 const getStatistics = async (ctx: Context) => {
   const opt = ctx.request.query
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const paginateOption = parsePaginateOption(opt, 30, 100)
 
   const result = await problemService.getStatistics(problem.pid, paginateOption)
@@ -323,7 +260,7 @@ export async function findSolutions (ctx: Context) {
     return createZodErrorResponse(ctx, query.error)
   }
 
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const solutions = await solutionService.findSolutions({
     ...query.data,
     problem: problem.pid,
@@ -333,7 +270,7 @@ export async function findSolutions (ctx: Context) {
 }
 
 export async function findProblemDiscussions (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const query = DiscussionListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
@@ -382,7 +319,6 @@ export async function findProblemDiscussions (ctx: Context) {
 }
 
 const problemController = {
-  loadProblem,
   findProblems,
   findProblemItems,
   getProblem,

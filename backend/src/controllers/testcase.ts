@@ -8,13 +8,13 @@ import send from 'koa-send'
 import remove from 'lodash/remove'
 import { v4 as uuid, validate } from 'uuid'
 import { loadProfile } from '../middlewares/authn'
+import { loadProblemOrThrow } from '../policies/problem'
 import courseService from '../services/course'
 import { createEnvelopedResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
-import { loadProblem } from './problem'
 
 export async function findTestcases (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
@@ -36,7 +36,7 @@ export async function findTestcases (ctx: Context) {
 }
 
 export async function exportTestcases (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin
@@ -102,7 +102,7 @@ export async function exportTestcases (ctx: Context) {
 }
 
 export async function createTestcase (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
@@ -145,7 +145,7 @@ export async function createTestcase (ctx: Context) {
 }
 
 export async function removeTestcase (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
     ctx.throw(...ERR_PERM_DENIED)
@@ -176,7 +176,7 @@ export async function removeTestcase (ctx: Context) {
 }
 
 export async function getTestcase (ctx: Context) {
-  const problem = await loadProblem(ctx)
+  const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin

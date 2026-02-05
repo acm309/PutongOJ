@@ -1,67 +1,15 @@
 import type { Paginated } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { CourseDocument } from '../models/Course'
 import type { CourseRole } from '../types'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
 import { pick } from 'lodash'
-import { Document } from 'mongoose'
 import { loadProfile } from '../middlewares/authn'
 import User from '../models/User'
+import { loadCourseStateOrThrow } from '../policies/course'
 import courseService from '../services/course'
 import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
-
-export async function loadCourse (
-  ctx: Context,
-  input?: CourseDocument | string | number,
-): Promise<{ course: CourseDocument, role: CourseRole }> {
-  //
-  const resolveCourse = async (): Promise<CourseDocument> => {
-    if (input instanceof Document && (input as CourseDocument).courseId) {
-      if (!ctx.state.course || ctx.state.course.courseId !== input.courseId) {
-        ctx.state.courseRole = undefined
-      }
-      return input as CourseDocument
-    }
-
-    const courseId = Number(
-      input ?? ctx.params.courseId ?? ctx.request.query.course,
-    )
-    if (!Number.isInteger(courseId) || courseId <= 0) {
-      return ctx.throw(...ERR_INVALID_ID)
-    }
-    if (!ctx.state.course || ctx.state.course.courseId !== courseId) {
-      ctx.state.courseRole = undefined
-    }
-    if (ctx.state.course?.courseId === courseId) {
-      return ctx.state.course
-    }
-
-    const course = await courseService.getCourse(courseId)
-    if (!course) {
-      return ctx.throw(...ERR_NOT_FOUND)
-    }
-    return course
-  }
-
-  const resolveRole = async (course: CourseDocument): Promise<CourseRole> => {
-    if (ctx.state.courseRole) {
-      return ctx.state.courseRole
-    }
-
-    const { profile } = ctx.state
-    return courseService.getUserRole(profile, course)
-  }
-
-  const course = await resolveCourse()
-  const role = await resolveRole(course)
-
-  ctx.state.course = course
-  ctx.state.courseRole = role
-
-  return { course, role }
-}
 
 const findCourses = async (ctx: Context) => {
   const opt = ctx.request.query
@@ -80,12 +28,11 @@ const findCourseItems = async (ctx: Context) => {
 }
 
 const getCourse = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   const response: CourseEntityViewWithRole = {
-    ...pick(course, [
-      'courseId', 'name', 'description', 'encrypt', 'canJoin',
-    ]),
+    ...pick(course, [ 'courseId', 'name', 'description', 'encrypt' ]),
     joinCode: role.manageCourse ? course.joinCode : undefined,
+    canJoin: (course.joinCode?.length ?? 0) > 0,
     role,
   }
 
@@ -94,7 +41,7 @@ const getCourse = async (ctx: Context) => {
 
 const joinCourse = async (ctx: Context) => {
   const opt = ctx.request.body
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   const joinCode = String(opt.joinCode ?? '').trim()
   if (!joinCode) {
     return ctx.throw(400, 'Missing join code')
@@ -133,7 +80,7 @@ const createCourse = async (ctx: Context) => {
 }
 
 const updateCourse = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -157,7 +104,7 @@ const updateCourse = async (ctx: Context) => {
 }
 
 const findCourseMembers = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -171,7 +118,7 @@ const findCourseMembers = async (ctx: Context) => {
 }
 
 const getCourseMember = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -191,7 +138,7 @@ const getCourseMember = async (ctx: Context) => {
 }
 
 const updateCourseMember = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -237,7 +184,7 @@ const updateCourseMember = async (ctx: Context) => {
 }
 
 const removeCourseMember = async (ctx: Context) => {
-  const { course, role } = await loadCourse(ctx)
+  const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
@@ -258,7 +205,7 @@ const removeCourseMember = async (ctx: Context) => {
 }
 
 const addCourseProblems = async (ctx: Context) => {
-  const { course } = await loadCourse(ctx)
+  const { course } = await loadCourseStateOrThrow(ctx)
   const { problemIds } = ctx.request.body
   if (!Array.isArray(problemIds) || problemIds.length === 0) {
     return ctx.throw(400, 'problemIds must be a non-empty array')
@@ -283,7 +230,7 @@ const addCourseProblems = async (ctx: Context) => {
 }
 
 const moveCourseProblem = async (ctx: Context) => {
-  const { course } = await loadCourse(ctx)
+  const { course } = await loadCourseStateOrThrow(ctx)
   const { beforePos = 1 } = ctx.request.body
   const problemId = ctx.params.problemId
   const problem = await problemService.getProblem(problemId)
@@ -297,7 +244,7 @@ const moveCourseProblem = async (ctx: Context) => {
 }
 
 const rearrangeCourseProblem = async (ctx: Context) => {
-  const { course } = await loadCourse(ctx)
+  const { course } = await loadCourseStateOrThrow(ctx)
   try {
     await courseService.rearrangeCourseProblem(course._id)
     ctx.body = { success: true }
@@ -307,7 +254,7 @@ const rearrangeCourseProblem = async (ctx: Context) => {
 }
 
 const removeCourseProblem = async (ctx: Context) => {
-  const { course } = await loadCourse(ctx)
+  const { course } = await loadCourseStateOrThrow(ctx)
   const problemId = ctx.params.problemId
   const problem = await problemService.getProblem(problemId)
   if (!problem) {
@@ -320,7 +267,6 @@ const removeCourseProblem = async (ctx: Context) => {
 }
 
 const courseController = {
-  loadCourse,
   findCourses,
   findCourseItems,
   getCourse,
