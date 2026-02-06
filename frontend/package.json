@@ -29,9 +29,9 @@
     "@vueuse/core": "^14.2.0",
     "@zip.js/zip.js": "^2.8.16",
     "axios": "^1.13.4",
+    "chart.js": "^4.5.1",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
-    "echarts": "^6.0.0",
     "exceljs": "^4.4.0",
     "highlight.js": "^11.11.1",
     "less": "4.5.1",
@@ -47,7 +47,6 @@
     "vditor": "^3.11.2",
     "view-ui-plus": "^1.3.21",
     "vue": "3.5.27",
-    "vue-echarts": "^8.0.1",
     "vue-i18n": "^11.2.8",
     "vue-router": "^5.0.2",
     "zod": "^4.3.6"
