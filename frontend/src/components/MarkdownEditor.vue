@@ -5,6 +5,7 @@ import { Icon } from 'view-ui-plus'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
+import { useThemeStore } from '@/store/theme'
 import 'vditor/dist/index.css'
 import '@/styles/vditor.styl'
 
@@ -20,7 +21,9 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const rootStore = useRootStore()
-const { vditorCDN, colorScheme } = storeToRefs(rootStore)
+const themeStore = useThemeStore()
+const { effectiveTheme } = storeToRefs(themeStore)
+const { vditorCDN } = storeToRefs(rootStore)
 
 const editor = ref<Vditor | null>(null)
 const vditor = ref<HTMLElement | null>(null)
@@ -54,7 +57,7 @@ function init () {
     placeholder: t('oj.type_something'),
     preview: {
       hljs: {
-        style: colorScheme.value === 'dark' ? 'github-dark' : 'github',
+        style: effectiveTheme.value === 'dark' ? 'github-dark' : 'github',
       },
       render: {
         media: {
@@ -62,14 +65,14 @@ function init () {
         },
       },
       theme: {
-        current: colorScheme.value,
+        current: effectiveTheme.value,
       },
     },
     resize: {
       enable: true,
       position: 'bottom',
     },
-    theme: colorScheme.value === 'dark' ? 'dark' : 'classic',
+    theme: effectiveTheme.value === 'dark' ? 'dark' : 'classic',
     toolbar: [
       'headings',
       'bold',
@@ -148,7 +151,7 @@ watch(() => props.modelValue, (value) => {
 
 watch(() => props.height, init)
 watch(locale, () => nextTick(init))
-watch(colorScheme, () => nextTick(init))
+watch(effectiveTheme, () => nextTick(init))
 </script>
 
 <template>

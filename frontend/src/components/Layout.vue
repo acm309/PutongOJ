@@ -19,6 +19,9 @@ import Footer from './Footer.vue'
 </template>
 
 <style lang="stylus">
+html
+  background: var(--p-content-hover-background)
+
 .layout-content
   position relative
   padding 40px

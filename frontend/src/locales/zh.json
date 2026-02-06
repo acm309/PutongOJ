@@ -300,6 +300,8 @@
   "testcase_cannot_both_empty": "测试用例的输入和输出不能同时为空",
   "testcase_incomplete_message": "测试用例不完整，确定要创建吗？",
   "testcases": "测试用例",
+  "theme_dark": "深色主题",
+  "theme_light": "浅色主题",
   "time": "时间",
   "title": "标题",
   "total_comments": "评论总数",

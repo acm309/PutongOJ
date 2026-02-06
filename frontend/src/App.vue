@@ -49,7 +49,6 @@ setErrorHandler((err) => {
 
 const rootStore = useRootStore()
 const { changeDomTitle, fetchTime, updateTime } = rootStore
-const { colorScheme } = storeToRefs(rootStore)
 
 setTimeout(() => fetchTime().then(updateTime), 1000)
 watch(() => route.meta, () => changeDomTitle(route.meta))
@@ -69,14 +68,6 @@ setTimeout(async () => {
   await initWebSocket()
   onProfileUpdate(() => nextTick(initWebSocket))
 }, 1000)
-
-watch(colorScheme, (newScheme) => {
-  if (newScheme === 'dark') {
-    document.documentElement.classList.add('ptoj-dark')
-  } else {
-    document.documentElement.classList.remove('ptoj-dark')
-  }
-}, { immediate: true })
 </script>
 
 <template>

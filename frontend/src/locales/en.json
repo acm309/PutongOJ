@@ -300,6 +300,8 @@
   "testcase_cannot_both_empty": "Testcase input and output cannot both be empty",
   "testcase_incomplete_message": "Testcase is incomplete. Create anyway?",
   "testcases": "Testcases",
+  "theme_dark": "Dark",
+  "theme_light": "Light",
   "time": "Time",
   "title": "Title",
   "total_comments": "Total Comments",

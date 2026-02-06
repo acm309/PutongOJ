@@ -5,6 +5,7 @@ import { Icon } from 'view-ui-plus'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
+import { useThemeStore } from '@/store/theme'
 import 'vditor/dist/index.css'
 import '@/styles/vditor.styl'
 
@@ -14,8 +15,9 @@ const props = defineProps<{
 
 const { locale } = useI18n()
 const rootStore = useRootStore()
-
-const { vditorCDN, colorScheme } = storeToRefs(rootStore)
+const themeStore = useThemeStore()
+const { effectiveTheme } = storeToRefs(themeStore)
+const { vditorCDN } = storeToRefs(rootStore)
 const preview = ref<HTMLDivElement | null>(null)
 const renderPromise = ref(Promise.resolve())
 const rendering = ref(false)
@@ -45,17 +47,17 @@ async function render () {
     {
       cdn: vditorCDN.value,
       hljs: {
-        style: colorScheme.value === 'dark' ? 'github-dark' : 'github',
+        style: effectiveTheme.value === 'dark' ? 'github-dark' : 'github',
       },
       lang: i18nLang.value,
-      mode: colorScheme.value,
+      mode: effectiveTheme.value,
       render: {
         media: {
           enable: false,
         },
       },
       theme: {
-        current: colorScheme.value,
+        current: effectiveTheme.value,
       },
       after () {
         rendering.value = false
@@ -66,7 +68,7 @@ async function render () {
 
 onMounted(() => nextTick(render))
 watch(() => props.modelValue, render)
-watch(colorScheme, render)
+watch(effectiveTheme, render)
 </script>
 
 <template>

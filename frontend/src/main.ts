@@ -6,11 +6,12 @@ import Tooltip from 'primevue/tooltip'
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 import locales from '@/locales'
+import router from '@/router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
+import { useThemeStore } from '@/store/theme'
 import { PutongAura } from '@/theme/aura'
 import App from './App.vue'
-import router from './router'
 import '@/theme/index.less'
 import 'primeicons/primeicons.css'
 
@@ -46,6 +47,7 @@ app.use(i18n)
 Promise.all([
   useSessionStore().fetchProfile(),
   useRootStore().fetchWebsiteConfig(),
+  useThemeStore(), // Initialize theme store to apply theme
 ]).then(() => {
   // Router must be loaded after session/website config is loaded
   app.use(router)

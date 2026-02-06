@@ -9,6 +9,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
+import { useThemeStore } from '@/store/theme'
 import { useMessage } from '@/utils/message'
 import UserAvatar from './UserAvatar.vue'
 
@@ -17,6 +18,7 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const rootStore = useRootStore()
+const themeStore = useThemeStore()
 const sessionStore = useSessionStore()
 
 const hasExtraHeader = computed(() => {
@@ -132,16 +134,21 @@ const profileItems = computed(() => [
   {
     separator: true,
   },
-  ...(isAdmin.value
-    ? [ {
-        label: '[Test] Toggle Dark Mode',
-        icon: 'pi pi-lightbulb',
-        command: rootStore.toggleColorScheme,
-      }, {
-        separator: true,
-      } ]
-    : []
-  ),
+  {
+    label: t('ptoj.theme_light'),
+    icon: 'pi pi-sun',
+    visible: themeStore.effectiveTheme !== 'light',
+    command: () => themeStore.setTheme('light'),
+  },
+  {
+    label: t('ptoj.theme_dark'),
+    icon: 'pi pi-moon',
+    visible: themeStore.effectiveTheme !== 'dark',
+    command: () => themeStore.setTheme('dark'),
+  },
+  {
+    separator: true,
+  },
   {
     label: t('ptoj.logout'),
     icon: 'pi pi-sign-out',
