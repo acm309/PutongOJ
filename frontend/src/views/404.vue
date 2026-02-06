@@ -1,33 +1,32 @@
 <script setup>
-import { Button, Exception } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 const router = useRouter()
+
 const home = () => router.push({ name: 'home' })
 const back = () => router.go(-1)
 </script>
 
 <template>
-  <Exception class="exception-box" type="404" desc="Not Found">
-    <template #actions>
-      <Button type="primary" size="large" @click="home">
-        {{ t('oj.go_home') }}
-      </Button>
-      <Button type="primary" size="large" @click="back">
-        {{ t('oj.go_back') }}
-      </Button>
-    </template>
-  </Exception>
-</template>
+  <div class="bg-transparent border-none flex flex-col items-center justify-center min-h-200 px-4 shadow-none">
+    <div class="max-w-md text-center w-full">
+      <div class="inline-flex items-center justify-center mb-8">
+        <div class="relative">
+          <span class="font-bold opacity-90 text-8xl text-gray-300">Nothing</span>
+          <div class="absolute flex inset-0 items-center justify-center opacity-75">
+            <i class="pi pi-exclamation-triangle text-9xl text-amber-500" />
+          </div>
+          <span class="font-bold opacity-90 text-8xl text-gray-300"><br>Found</span>
+        </div>
+      </div>
 
-<style lang="stylus" scoped>
-.exception-box
-  padding 20px
-  height 100% !important
-  max-width 1024px
-@media screen and (max-width: 576px)
-  .exception-box
-    padding-bottom 100px
-</style>
+      <div class="flex flex-row gap-4 justify-center">
+        <Button :label="t('ptoj.go_back')" icon="pi pi-arrow-left" severity="secondary" outlined @click="back" />
+        <Button :label="t('ptoj.go_home')" icon="pi pi-home" @click="home" />
+      </div>
+    </div>
+  </div>
+</template>
