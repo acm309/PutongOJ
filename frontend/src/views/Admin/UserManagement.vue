@@ -15,7 +15,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findUsers } from '@/api/admin'
 import { privilegeOptions } from '@/utils/constant'
-import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
+import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

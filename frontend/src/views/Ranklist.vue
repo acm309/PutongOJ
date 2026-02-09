@@ -21,7 +21,7 @@ import ExportDialog from '@/components/ExportDialog.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { exportDataToFile } from '@/utils/export'
-import { calculatePercentage } from '@/utils/formate'
+import { formatPercentage } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -218,7 +218,7 @@ onRouteQueryUpdate(fetch)
           <span class="font-semibold text-center w-full">{{ t('ptoj.ratio') }}</span>
         </template>
         <template #body="{ data }">
-          {{ calculatePercentage(data.solve, data.submit) }}
+          {{ formatPercentage(data.solve, data.submit) }}
         </template>
       </Column>
 

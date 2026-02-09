@@ -5,7 +5,7 @@ import Tag from 'primevue/tag'
 import { useI18n } from 'vue-i18n'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import { formatRelativeTime, timePretty } from '@/utils/formate'
+import { formatRelativeTime, timePretty } from '@/utils/format'
 
 const props = defineProps<{
   value: DiscussionListQueryResult['docs']

@@ -17,7 +17,7 @@ import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import { getJudgeStatusClassname } from '@/utils/formate'
+import { getJudgeStatusClassname } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

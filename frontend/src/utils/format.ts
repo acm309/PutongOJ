@@ -5,9 +5,14 @@ import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { enUS, zhCN } from 'date-fns/locale'
 import { toDate } from 'date-fns/toDate'
 
-export function formate (value: number) {
-  const num = value * 100
-  return `${num.toFixed(2)}%`
+export function formatPercentage (val: number): string
+export function formatPercentage (num: number, den: number): string
+export function formatPercentage (arg1: number, arg2?: number): string {
+  let val = arg2 === undefined ? arg1 : arg1 / arg2
+  if (Number.isNaN(val) || !Number.isFinite(val)) {
+    val = 0
+  }
+  return `${(val * 100).toFixed(2)}%`
 }
 
 export function timePretty (
@@ -120,12 +125,6 @@ export function getPrivilegeSeverity (privilege: any) {
     default:
       return 'contrast'
   }
-}
-
-export function calculatePercentage (num: number, den: number): string {
-  if (den === 0) return '0.00%'
-  const percentage = (num / den) * 100
-  return `${percentage.toFixed(2)}%`
 }
 
 export function thousandSeparator (num: number | string): string {

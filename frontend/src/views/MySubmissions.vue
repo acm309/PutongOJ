@@ -23,7 +23,7 @@ import {
 import emitter from '@/utils/emitter'
 import {
   getJudgeStatusClassname,
-} from '@/utils/formate'
+} from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

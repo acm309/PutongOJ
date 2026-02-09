@@ -21,7 +21,7 @@ import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()

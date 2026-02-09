@@ -11,7 +11,7 @@ import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { courseRoleFields } from '@/utils/constant'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const route = useRoute()

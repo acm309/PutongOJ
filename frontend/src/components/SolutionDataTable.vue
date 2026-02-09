@@ -11,7 +11,7 @@ import {
   getSimilarityClassname,
   thousandSeparator,
   timePretty,
-} from '@/utils/formate'
+} from '@/utils/format'
 
 const props = withDefaults(defineProps<{
   value: T[]

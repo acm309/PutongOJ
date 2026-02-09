@@ -1,7 +1,7 @@
 import type { ContestDetailQueryResult } from '@putongoj/shared'
 import { defineStore } from 'pinia'
 import { getContest } from '@/api/contest'
-import { contestLabeling } from '@/utils/formate'
+import { contestLabeling } from '@/utils/format'
 
 const CONTEST_CACHE_TIME = 60 * 1000 // 1 minute
 

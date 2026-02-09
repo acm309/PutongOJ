@@ -15,7 +15,7 @@ import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
-import { formate } from '@/utils/formate'
+import { formatPercentage } from '@/utils/format'
 import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const options = reactive([
@@ -163,7 +163,7 @@ onProfileUpdate(fetch)
               {{ data.solve }} / {{ data.submit }}
             </span>
             <span class="min-w-18 text-right">
-              {{ formate(data.solve / (data.submit + 0.000001)) }}
+              {{ formatPercentage(data.solve, data.submit) }}
             </span>
           </span>
         </template>

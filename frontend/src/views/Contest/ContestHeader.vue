@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
-import { formatRelativeTime, timeContest, timePretty } from '@/utils/formate'
+import { formatRelativeTime, timeContest, timePretty } from '@/utils/format'
 
 const { t, locale } = useI18n()
 const route = useRoute()

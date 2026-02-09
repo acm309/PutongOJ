@@ -6,7 +6,7 @@ import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
-import { contestLabeling, formate } from '@/utils/formate'
+import { contestLabeling, formatPercentage } from '@/utils/format'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -70,7 +70,7 @@ onMounted(contestStore.reloadContestIfNeeded)
             {{ data.solve }} / {{ data.submit }}
           </span>
           <span class="min-w-18 text-right">
-            {{ formate(data.solve / (data.submit + 0.000001)) }}
+            {{ formatPercentage(data.solve, data.submit) }}
           </span>
         </span>
       </template>

@@ -22,7 +22,7 @@ import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import { exportDataToFile } from '@/utils/export'
-import { getJudgeStatusClassname } from '@/utils/formate'
+import { getJudgeStatusClassname } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

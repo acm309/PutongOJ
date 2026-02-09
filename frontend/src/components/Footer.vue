@@ -5,7 +5,7 @@ import SelectButton from 'primevue/selectbutton'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
-import { timeDiffPretty, timePretty } from '@/utils/formate'
+import { timeDiffPretty, timePretty } from '@/utils/format'
 import { useHumanLanguage } from '@/utils/helper'
 
 const { locale } = useI18n()

@@ -14,7 +14,7 @@ import { useI18n } from 'vue-i18n'
 import { getParticipation, participateContest } from '@/api/contest'
 import router from '@/router'
 import { useRootStore } from '@/store'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 import { useMessage } from '@/utils/message'
 
 const props = defineProps<{

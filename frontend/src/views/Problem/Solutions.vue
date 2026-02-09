@@ -17,7 +17,7 @@ import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
-import { getJudgeStatusClassname } from '@/utils/formate'
+import { getJudgeStatusClassname } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

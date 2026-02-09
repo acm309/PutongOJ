@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStatisticsStore } from '@/store/modules/statistics'
 import { languageLabels } from '@/utils/constant'
-import { thousandSeparator, timePretty } from '@/utils/formate'
+import { thousandSeparator, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { t } = useI18n()

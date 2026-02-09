@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { locale, t } = useI18n()

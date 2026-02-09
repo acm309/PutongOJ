@@ -5,7 +5,7 @@ import { Button, Form, FormItem, Icon, Input, Message, Modal, Option, Select, Sp
 import { capitalize, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTagStore } from '@/store/modules/tag'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 
 const { t } = useI18n()
 const tagStore = useTagStore()

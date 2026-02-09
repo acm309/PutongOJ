@@ -13,7 +13,7 @@ import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
-import { formate } from '@/utils/formate'
+import { formatPercentage } from '@/utils/format'
 import { onRouteQueryUpdate, purify } from '@/utils/helper'
 
 const route = useRoute()
@@ -231,7 +231,7 @@ onRouteQueryUpdate(fetch)
               </template>
             </td>
             <td class="problem-ratio">
-              <span>{{ formate(item.solve / (item.submit + 0.000001)) }}</span>&nbsp;
+              <span>{{ formatPercentage(item.solve, item.submit) }}</span>&nbsp;
               (
               <RouterLink :to="{ name: 'ProblemSolutions', params: { pid: item.pid }, query: { judge: judge.Accepted } }">
                 {{ item.solve }}

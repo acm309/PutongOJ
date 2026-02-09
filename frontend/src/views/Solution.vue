@@ -14,7 +14,7 @@ import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import constant from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import { timePretty } from '@/utils/formate'
+import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
 import 'highlight.js/styles/atom-one-light.css'
 

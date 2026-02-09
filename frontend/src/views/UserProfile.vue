@@ -12,7 +12,7 @@ import { getUser } from '@/api/user'
 import CodeforcesProfile from '@/components/CodeforcesProfile.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
-import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
+import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteParamUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

@@ -25,7 +25,7 @@ import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { privilegeOptions } from '@/utils/constant'
 import { encryptData } from '@/utils/crypto'
-import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/formate'
+import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteParamUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
