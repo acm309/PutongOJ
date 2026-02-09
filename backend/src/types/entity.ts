@@ -169,19 +169,6 @@ export type ContestEntityView = Pick<ContestEntity,
   course: CourseEntityPreviewWithRole | null
 }
 
-// Contest Ranklist
-
-export interface ContestRanklist {
-  [uid: string]: {
-    nick: string
-    [pid: number]: {
-      acceptedAt?: number
-      failed: number
-      pending: number
-    }
-  }
-}
-
 // Solution
 
 export interface SolutionEntity extends Entity {

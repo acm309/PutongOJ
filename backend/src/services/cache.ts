@@ -147,4 +147,8 @@ export class CacheKey {
   public static contestProblems (contest: Types.ObjectId, isJury: boolean) {
     return `cache:contest:${contest.toString()}:problems:${isJury ? 'jury' : 'public'}`
   }
+
+  public static contestRanklist (contest: Types.ObjectId, isJury: boolean) {
+    return `cache:contest:${contest.toString()}:ranklist:${isJury ? 'jury' : 'public'}`
+  }
 }

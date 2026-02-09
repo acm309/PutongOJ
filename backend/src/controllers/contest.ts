@@ -11,6 +11,7 @@ import {
   ContestListQuerySchema,
   ContestParticipatePayloadSchema,
   ContestParticipationQueryResultSchema,
+  ContestRanklistQueryResultSchema,
   ContestSolutionListExportQueryResultSchema,
   ContestSolutionListExportQuerySchema,
   ContestSolutionListQueryResultSchema,
@@ -21,7 +22,6 @@ import {
   JudgeStatus,
   ParticipationStatus,
 } from '@putongoj/shared'
-import redis from '../config/redis'
 import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Problem from '../models/Problem'
@@ -306,7 +306,7 @@ async function updateConfig (ctx: Context) {
   return createEnvelopedResponse(ctx, null)
 }
 
-const getRanklist = async (ctx: Context) => {
+export async function getRanklist (ctx: Context) {
   const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
     return createErrorResponse(ctx,
@@ -315,34 +315,9 @@ const getRanklist = async (ctx: Context) => {
   }
   const { contest, isJury } = state
 
-  const nowDate = new Date()
-  let isFrozen: boolean = false
-  if (!isJury && contest.scoreboardFrozenAt) {
-    if (nowDate >= contest.scoreboardFrozenAt) {
-      isFrozen = true
-    }
-    if (contest.scoreboardUnfrozenAt && nowDate >= contest.scoreboardUnfrozenAt) {
-      isFrozen = false
-    }
-  }
-
-  const isEnded: boolean = nowDate >= contest.endsAt
-  const freezeTime = contest.scoreboardFrozenAt?.getTime() ?? contest.endsAt.getTime()
-  const info = { freezeTime, isFrozen, isEnded, isCache: false }
-
-  const cacheKey = `ranklist:${contest.contestId}${isFrozen ? ':frozen' : ''}`
-  const cache = await redis.get(cacheKey)
-  if (cache) {
-    info.isCache = true
-    ctx.body = { ranklist: JSON.parse(cache), info }
-    return
-  }
-
-  const ranklist = await contestService.getRanklist(contest.contestId, isFrozen, freezeTime)
-  const cacheTime = isEnded ? 30 : 9
-  await redis.set(cacheKey, JSON.stringify(ranklist), 'EX', cacheTime)
-  ctx.auditLog.info(`<Contest:${contest.contestId}> ranklist updated${isFrozen ? ' (frozen)' : ''}`)
-  ctx.body = { ranklist, info }
+  const ranklist = await contestService.getRanklist(contest._id, isJury)
+  const result = ContestRanklistQueryResultSchema.encode(ranklist)
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function findSolutions (ctx: Context) {

@@ -1,100 +1,164 @@
-import type { ContestEntityView } from '@backend/types/entity'
-import type { ContestDetailQueryResult } from '@putongoj/shared'
+import type { ContestDetailQueryResult, ContestRanklistProblem, ContestRanklistQueryResult } from '@putongoj/shared'
 import type { Cell } from 'exceljs'
-import type { Ranklist, RawRanklist } from '@/types'
-import { contestLabeling } from './formate'
+import { contestLabeling } from './format'
 
-const PENALTY = 20 // 失败提交罚时 20 分钟
+export type ContestRanklistCell = {
+  failedCount: number
+  pendingCount: number
+} & ({
+  isSolved: false
+} | {
+  isSolved: true
+  isFirstSolved: boolean
+  penalty: number
+  solvedAt: Date
+  solvedAfterMinutes: number
+})
 
-export function normalize (ranklist: RawRanklist, contest: ContestDetailQueryResult): Ranklist {
-  const startsAt = new Date(contest.startsAt).getTime()
-  const problemIds = contest.problems.map(p => p.problemId)
-  const list: Ranklist = [] // 结果
+export interface ContestRanklistRow {
+  username: string
+  nickname: string
+  rank: number
+  penalty: number
+  solvedCount: number
+  attemptedCount: number
+  dirt: number
+  problems: Record<number, ContestRanklistCell | undefined>
+}
 
-  Object.keys(ranklist).forEach((uid) => {
-    const row = ranklist[uid]
-    let solved = 0 // 记录 AC 几道题
-    let penalty = 0 // 罚时（分钟），仅在 AC 时计算
-    for (const pid of problemIds) {
-      if (row[pid] == null) continue // 这道题没有交过
-      const submission = row[pid]
-      if (submission.acceptedAt) {
-        solved++
-        penalty += Math.max(0, Math.floor((submission.acceptedAt - startsAt) / 1000 / 60))
-        penalty += submission.failed * PENALTY
+// every failed submission adds 20 minutes penalty
+const PENALTY = 20
+
+function buildProblemCell (p: ContestRanklistProblem, startsAt: Date): ContestRanklistCell {
+  const { failedCount, pendingCount } = p
+  if (!p.solvedAt) {
+    return { isSolved: false, failedCount, pendingCount }
+  }
+
+  const solvedAt = new Date(p.solvedAt)
+  const solvedAfterMinutes = Math.floor((solvedAt.getTime() - startsAt.getTime()) / 1000 / 60)
+
+  // contest's startsAt may be changed after a submission is made,
+  // so we need to consider that solvedAfterMinutes may be negative
+  const penalty = failedCount * PENALTY + Math.max(solvedAfterMinutes, 0)
+
+  return {
+    isSolved: true,
+    penalty,
+    solvedAt,
+    solvedAfterMinutes,
+    failedCount,
+    pendingCount,
+    isFirstSolved: false, // to be calculated later
+  }
+}
+
+function calculateDirt (solvedCount: number, attemptedCount: number): number {
+  if (solvedCount === 0) {
+    return 0
+  }
+  return (attemptedCount - solvedCount) / attemptedCount
+}
+
+export function buildRanklist (ranklist: ContestRanklistQueryResult, contest: ContestDetailQueryResult): ContestRanklistRow[] {
+  const startsAt = new Date(contest.startsAt)
+  const result: ContestRanklistRow[] = []
+  const problemIds = new Set<number>()
+
+  ranklist.forEach((u) => {
+    const problems: ContestRanklistRow['problems'] = {}
+    let attemptedCount = 0
+    let solvedCount = 0
+    let penalty = 0
+
+    u.problems.forEach((p) => {
+      const problemId = p.problemId
+      const c = buildProblemCell(p, startsAt)
+
+      if (c.isSolved) {
+        attemptedCount += c.failedCount + 1
+        solvedCount += 1
+        penalty += c.penalty
       }
-    }
-    list.push({
-      rank: -1, // 先占位，后面会重新计算排名
-      uid,
-      solved,
+      problemIds.add(problemId)
+      problems[problemId] = c
+    })
+
+    const dirt = calculateDirt(solvedCount, attemptedCount)
+    const { username, nickname } = u
+    result.push({
+      username,
+      nickname,
       penalty,
-      ...row,
+      solvedCount,
+      attemptedCount,
+      dirt,
+      problems,
+      rank: -1, // to be calculated later
     })
   })
 
-  // 排序, 先按照 solved 降序，再按照 penalty 升序，最后按照 uid 升序
-  list.sort((x, y) => {
-    if (x.solved !== y.solved) {
-      return y.solved - x.solved
+  // sort by solvedCount desc, penalty asc, username asc
+  result.sort((a, b) => {
+    if (a.solvedCount !== b.solvedCount) {
+      return b.solvedCount - a.solvedCount
     }
-    if (x.penalty !== y.penalty) {
-      return x.penalty - y.penalty
+    if (a.penalty !== b.penalty) {
+      return a.penalty - b.penalty
     }
-    return x.uid.localeCompare(y.uid)
+    return a.username.localeCompare(b.username)
   })
 
-  // 重新计算排名
+  // calculate rank
+  let accumulated = 0
   let currentRank = 0
-  let calculated = 0
-  let lastSolved = -1
+  let lastSolvedCount = -1
   let lastPenalty = -1
-  list.forEach((row) => {
-    calculated++
-    if (row.solved !== lastSolved || row.penalty !== lastPenalty) {
-      currentRank = calculated
-      lastSolved = row.solved
-      lastPenalty = row.penalty
+
+  result.forEach((r) => {
+    accumulated += 1
+    if (r.solvedCount !== lastSolvedCount || r.penalty !== lastPenalty) {
+      currentRank = accumulated
+      lastSolvedCount = r.solvedCount
+      lastPenalty = r.penalty
     }
-    row.rank = currentRank
+    r.rank = currentRank
   })
 
-  // 接下来计算每道题的最早提交
-  const quickest: Record<number, number> = {} // 每到题最早提交的 AC 时间
-  for (const pid of problemIds) {
-    quickest[pid] = Number.POSITIVE_INFINITY
-  }
+  // calculate first solved
+  Array.from(problemIds).forEach((p) => {
+    let earliestSolvedAt: Date | null = null
 
-  list.forEach((row) => {
-    for (const pid of problemIds) {
-      if (row[pid]?.acceptedAt) {
-        quickest[pid] = Math.min(
-          quickest[pid],
-          row[pid].acceptedAt,
-        )
+    result.forEach((r) => {
+      const c = r.problems[p]
+      if (c && c.isSolved && (!earliestSolvedAt || c.solvedAt < earliestSolvedAt)) {
+        earliestSolvedAt = c.solvedAt
       }
-    }
-  })
+    })
 
-  list.forEach((row) => {
-    for (const pid of problemIds) {
-      if (!row[pid]?.acceptedAt) continue
-      if (quickest[pid] === row[pid].acceptedAt) { // 这就是最早提交的那个
-        row[pid].isPrime = true // 打上标记
+    if (!earliestSolvedAt) {
+      return
+    }
+
+    result.forEach((r) => {
+      const c = r.problems[p]
+      if (c && c.isSolved && c.solvedAt.getTime() === earliestSolvedAt!.getTime()) {
+        c.isFirstSolved = true
       }
-    }
+    })
   })
 
-  return list
+  return result
 }
 
 export async function exportSheet (
-  contest: ContestEntityView,
-  ranklist: Ranklist,
+  ranklist: ContestRanklistRow[],
+  contest: ContestDetailQueryResult,
 ): Promise<void> {
   const ExcelJS = await import('exceljs')
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Ranklist')
+  const problems = contest.problems.sort((a, b) => a.index - b.index)
 
   worksheet.columns = [
     { header: 'Rank', width: 6 },
@@ -102,8 +166,8 @@ export async function exportSheet (
     { header: 'Nickname', width: 16 },
     { header: 'Solved', width: 8 },
     { header: 'Penalty', width: 8 },
-    ...contest.list.map((_, i) => ({
-      header: contestLabeling(i + 1, contest.option?.labelingStyle),
+    ...problems.map(p => ({
+      header: contestLabeling(p.index, contest.labelingStyle),
       width: 10,
     })),
   ]
@@ -154,34 +218,35 @@ export async function exportSheet (
   ranklist.forEach((row) => {
     const excelRow = worksheet.addRow([
       row.rank,
-      row.uid,
-      row.nick || '',
-      row.solved,
+      row.username,
+      row.nickname || '',
+      row.solvedCount,
       row.penalty,
-      ...contest.list.map((pid) => {
-        const status = row[pid]
-        if (!status) return '-'
-        if (!status.acceptedAt) return `-${status.failed}`
-        let time = '-'
-        if (status.acceptedAt >= contest.start) {
-          time = String(Math.floor((status.acceptedAt - contest.start) / 1000 / 60))
+      ...problems.map((p) => {
+        const c = row.problems[p.problemId]
+        if (!c) {
+          return '-'
         }
-        return `+${status.failed > 0 ? status.failed : ''} (${time})`
+        if (!c.isSolved) {
+          return c.failedCount > 0 ? `-${c.failedCount}` : '-'
+        }
+        return `${c.failedCount > 0 ? `+${c.failedCount}` : '+'} (${c.solvedAfterMinutes})`
       }),
     ])
 
-    contest.list.forEach((pid, index) => {
-      const cell = excelRow.getCell(index + 6)
-      const status = row[pid]
-
-      if (!status) return
-      if (status.acceptedAt) {
+    problems.forEach((p, i) => {
+      const cell = excelRow.getCell(i + 6)
+      const c = row.problems[p.problemId]
+      if (!c) {
+        return
+      }
+      if (c.isSolved) {
         applyStyle(cell, {
           bold: true,
-          color: status.isPrime ? '0000FF' : '008000',
+          color: c.isFirstSolved ? '0000FF' : '008000',
           border: true,
         })
-      } else if (status.failed > 0) {
+      } else if (c.failedCount > 0) {
         applyStyle(cell, { color: 'FF0000', border: true })
       }
     })

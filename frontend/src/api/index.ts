@@ -2,7 +2,7 @@ import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
-import type { FindProblemsParams, FindProblemsResponse, PaginateParams, RanklistResponse } from '../types/api'
+import type { FindProblemsParams, FindProblemsResponse, PaginateParams } from '../types/api'
 import type { TimeResp } from '@/types'
 import { instance } from './instance'
 
@@ -42,11 +42,6 @@ const problem = {
     instance.delete(`/problem/${data.pid}`, data),
   getStatistics: (pid: number, params: PaginateParams) =>
     instance.get<ProblemStatistics>(`/problem/${pid}/statistics`, { params }),
-}
-
-const contest = {
-  ranklist: (cid: number) =>
-    instance.get<RanklistResponse>(`/contests/${cid}/ranklist`),
 }
 
 const news = {
@@ -125,7 +120,6 @@ export default {
   ...utils,
   solution,
   problem,
-  contest,
   news,
   tag,
   discuss,

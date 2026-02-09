@@ -7,6 +7,7 @@ import type {
   ContestListQueryResult,
   ContestParticipatePayload,
   ContestParticipationQueryResult,
+  ContestRanklistQueryResult,
   ContestSolutionListExportQuery,
   ContestSolutionListExportQueryResult,
   ContestSolutionListQuery,
@@ -26,6 +27,10 @@ export async function createContest (payload: ContestCreatePayload) {
 }
 export async function getContest (contestId: number) {
   return instance.get<ContestDetailQueryResult>(`/contests/${encodeURIComponent(contestId)}`)
+}
+
+export async function getContestRanklist (contestId: number) {
+  return instance.get<ContestRanklistQueryResult>(`/contests/${encodeURIComponent(contestId)}/ranklist`)
 }
 
 export async function getParticipation (contestId: number) {

@@ -62,40 +62,6 @@ export interface Contest {
 /** @deprecated */
 export type ContestDetail = ContestEntityView
 
-export interface RawRanklist {
-  [uid: string]: {
-    nick: string
-    [pid: number]: {
-      acceptedAt?: number
-      failed: number
-      pending: number
-    }
-  }
-}
-
-export interface RanklistInfo {
-  freezeTime: number
-  isFrozen: boolean
-  isEnded: boolean
-  isCache: boolean
-}
-
-export interface RanklistRow {
-  rank: number
-  uid: string
-  nick: string
-  solved: number
-  penalty: number
-  [pid: number]: {
-    acceptedAt?: number
-    failed: number
-    pending: number
-    isPrime?: boolean
-  }
-}
-
-export type Ranklist = RanklistRow[]
-
 export interface SolutionModelDataTable {
   sid: SolutionModel['sid']
   uid?: SolutionModel['uid']

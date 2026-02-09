@@ -1,69 +1,76 @@
 <script setup lang="ts">
-import type { Ranklist, RanklistInfo } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Alert, BackTop, Button, Icon, Message, Poptip, Space, Spin, Switch } from 'view-ui-plus'
+import Button from 'primevue/button'
+import ScrollTop from 'primevue/scrolltop'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { useRouter } from 'vue-router'
+import { getContestRanklist } from '@/api/contest'
+import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
-import { timePretty } from '@/utils/formate'
-import { normalize } from '@/utils/ranklist'
+import { formatPercentage, timePretty } from '@/utils/format'
+import { buildRanklist, exportSheet } from '@/utils/ranklist'
 
 const { t } = useI18n()
+const router = useRouter()
+const rootStore = useRootStore()
 const contestStore = useContestStore()
 const sessionStore = useSessionStore()
-const route = useRoute()
-const router = useRouter()
 const { profile } = storeToRefs(sessionStore)
-// const { isAdmin } = storeToRefs(sessionStore)
+const { currentTime } = storeToRefs(rootStore)
+const { contest, contestId, problems, problemLabels } = storeToRefs(contestStore)
 
-const cid = $computed(() => Number.parseInt(route.params.contestId as string) || 1)
-const { contest, problems, problemLabels } = storeToRefs(contestStore)
-
-const ranklist = ref({} as Ranklist)
-const ranklistInfo = ref({} as RanklistInfo)
+const ranklist = ref([] as ReturnType<typeof buildRanklist>)
 const loading = ref(false)
 
-let autoRefresh: any = null
-const AUTO_REFRESH_GAP = 10 * 1000
+const AUTO_REFRESH_GAP = 10 * 1000 // 10 seconds
+const autoRefresh = ref(false)
+const lastUpdatedAt = ref<Date | null>(null)
+let autoRefreshInterval: ReturnType<typeof setInterval> | null = null
 
 async function getRanklist () {
   loading.value = true
-  try {
-    const { data } = await api.contest.ranklist(cid)
-    ranklist.value = normalize(data.ranklist, contest.value)
-    ranklistInfo.value = data.info
-  } finally {
-    loading.value = false
+  const resp = await getContestRanklist(contestId.value)
+  loading.value = false
+
+  if (!resp.success) {
+    return
   }
+
+  ranklist.value = buildRanklist(resp.data, contest.value)
+  lastUpdatedAt.value = new Date(currentTime.value)
 }
 
-function setAutoRefresh (enabled: boolean) {
-  if (enabled) {
-    autoRefresh = setInterval(async () => {
-      await getRanklist()
-      Message.info({
-        content: t('oj.refreshed'),
-        duration: 1,
-      })
-    }, AUTO_REFRESH_GAP)
-  } else {
-    clearAutoRefresh()
-  }
+function enableAutoRefresh () {
+  autoRefreshInterval = setInterval(async () => {
+    await getRanklist()
+  }, AUTO_REFRESH_GAP)
+  autoRefresh.value = true
 }
 
 function clearAutoRefresh () {
-  autoRefresh && clearInterval(autoRefresh)
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval)
+  }
+  autoRefreshInterval = null
+  autoRefresh.value = false
 }
 
-function formateAcceptedAt (acceptedAt: number) {
-  if (acceptedAt < 0) {
+function toggleAutoRefresh () {
+  if (autoRefresh.value) {
+    clearAutoRefresh()
+  } else {
+    enableAutoRefresh()
+  }
+}
+
+function formatMinutes (m: number) {
+  if (m < 0) {
     return '--:--'
   }
-  const hours = String(Math.floor(acceptedAt / 1000 / 60 / 60)).padStart(2, '0')
-  const minutes = String(Math.floor(acceptedAt / 1000 / 60) % 60).padStart(2, '0')
+  const hours = String(Math.floor(m / 60)).padStart(2, '0')
+  const minutes = String(m % 60).padStart(2, '0')
   return `${hours}:${minutes}`
 }
 
@@ -71,13 +78,13 @@ function onViewSolutions (user: string, problem: number) {
   if (contest.value.isJury) {
     router.push({
       name: 'ContestSolutions',
-      params: { cid },
+      params: { contestId: contestId.value },
       query: { user, problem },
     })
   } else if (profile.value?.uid === user) {
     router.push({
       name: 'ContestMySubmissions',
-      params: { cid },
+      params: { contestId: contestId.value },
       query: { problem },
     })
   }
@@ -88,226 +95,139 @@ onBeforeUnmount(clearAutoRefresh)
 </script>
 
 <template>
-  <div class="contest-children">
-    <div class="board-header">
-      <Space>
-        <Button shape="circle" type="primary" :loading="loading" icon="md-refresh" @click="getRanklist" />
-        <Switch @on-change="setAutoRefresh">
-          <template #open>
-            <Icon type="md-checkmark" />
-          </template>
-          <template #close>
-            <Icon type="md-close" />
-          </template>
-        </Switch>
-        <span>{{ t('oj.auto_refresh') }}</span>
-        <!-- <Button
-          v-if="contest.isJury" shape="circle" type="primary" icon="md-download"
-          @click="() => exportSheet(contest, ranklist)"
-        /> -->
-      </Space>
-      <Alert v-if="ranklistInfo.isFrozen" type="info" style="margin-top: 14px" show-icon>
-        {{ t('oj.ranklist_frozen', { time: timePretty(ranklistInfo.freezeTime) }) }}
-      </Alert>
+  <div class="px-0 py-4">
+    <div class="flex gap-4 items-center justify-between px-4">
+      <span class="flex gap-3 items-center">
+        <Button
+          v-if="contest.isJury " icon="pi pi-download"
+          @click="() => exportSheet(ranklist, contest)"
+        />
+        <span v-if="lastUpdatedAt" class="font-mono px-1 text-muted-color text-sm">
+          Last updated at:<br>
+          {{ timePretty(lastUpdatedAt) }}
+        </span>
+      </span>
+
+      <span class="flex gap-2 items-center">
+        <Button
+          v-tooltip.bottom="t('ptoj.auto_refresh')" :icon="autoRefresh ? 'pi pi-stop' : 'pi pi-play'"
+          :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading" @click="toggleAutoRefresh"
+        />
+        <Button shape="circle" :loading="loading" icon="pi pi-refresh" @click="getRanklist" />
+      </span>
     </div>
-    <div class="board-table-container">
-      <table class="board-table">
+
+    <div class="mt-4 overflow-x-auto">
+      <table class="font-(family-name:--font-verdana) min-w-full table-fixed">
         <thead>
-          <tr>
-            <th class="table-rank">
-              #
+          <tr class="h-16">
+            <th class="border border-l-0 min-w-20">
+              <i class="pi pi-hashtag" />
             </th>
-            <th class="table-uid">
+            <th class="border max-w-36">
               User
             </th>
-            <th class="table-nick">
-              Nick
+            <th class="border min-w-56">
+              Nickname
             </th>
-            <th class="table-solve">
-              Solve
+            <th class="border min-w-22">
+              Solved
             </th>
-            <th class="table-penalty">
+            <th class="border min-w-24">
               Penalty
             </th>
-            <th v-for="problem in problems" :key="problem.problemId" class="table-problem">
-              <Poptip trigger="hover" placement="bottom">
-                <RouterLink :to="{ name: 'contestProblem', params: { contestId: cid, problemId: problem.problemId } }">
-                  <span class="cell-pid">{{ problemLabels.get(problem.problemId) }}</span>
-                  <span class="cell-solve">{{ problem.solve }}</span>
-                </RouterLink>
-                <template #content>
-                  {{ problem.title }}
-                </template>
-              </Poptip>
+
+            <th
+              v-for="problem in problems" :key="problem.problemId" v-tooltip.bottom="problem.title"
+              class="border min-w-20"
+            >
+              <RouterLink :to="{ name: 'contestProblem', params: { contestId, problemId: problem.problemId } }">
+                <div class="text-color">
+                  {{ problemLabels.get(problem.problemId) }}
+                </div>
+                <div class="text-muted-color text-sm">
+                  {{ problem.solve }}
+                </div>
+              </RouterLink>
+            </th>
+
+            <th class="border border-r-0 min-w-20">
+              Dirt
             </th>
           </tr>
         </thead>
+
         <tbody>
-          <tr v-if="ranklist.length === 0" class="status-empty">
-            <td :colspan="5 + contest.problems.length">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
+          <tr v-if="ranklist.length === 0">
+            <td :colspan="6 + contest.problems.length" class="pb-12 pt-16">
+              <span>{{ t('ptoj.empty_content_desc') }}</span>
             </td>
           </tr>
-          <tr v-for="(item, index) in ranklist" :key="index">
-            <td class="table-rank">
+
+          <tr v-for="(item, index) in ranklist" :key="index" class="h-16 hover:bg-emphasis transition-colors">
+            <td class="border border-l-0">
               {{ item.rank }}
             </td>
-            <td class="table-uid">
-              <RouterLink :to="{ name: 'UserProfile', params: { uid: item.uid } }">
-                {{ item.uid }}
+            <td class="border font-sans overflow-hidden text-ellipsis whitespace-nowrap">
+              <RouterLink :to="{ name: 'UserProfile', params: { uid: item.username } }">
+                {{ item.username }}
               </RouterLink>
             </td>
-            <td class="table-nick">
-              {{ item.nick }}
+            <td class="border break-anywhere font-sans text-balance">
+              {{ item.nickname }}
             </td>
-            <td class="table-solve">
-              {{ item.solved }}
+            <td class="border">
+              {{ item.solvedCount }}
             </td>
-            <td class="table-penalty">
+            <td class="border">
               {{ item.penalty }}
             </td>
-            <template v-for="problem in contest.problems">
-              <td v-if="!item[problem.problemId]" :key="`${problem.problemId} ${1}`" class="table-problem" />
+
+            <template v-for="{ problemId: p } in contest.problems">
+              <td v-if="!item.problems[p]" :key="`${p}-1`" class="border" />
               <td
-                v-else-if="item[problem.problemId].acceptedAt" :key="`${problem.problemId} ${2}`"
-                class="table-problem" :class="[item[problem.problemId].isPrime ? 'prime' : 'normal']"
-                @click="() => onViewSolutions(item.uid, problem.problemId)"
+                v-else-if="item.problems[p].isSolved" :key="`${p}-2`" class="border cursor-pointer transition-colors"
+                :class="[
+                  item.problems[p].isFirstSolved
+                    ? 'bg-sky-600/90 hover:bg-sky-700/90'
+                    : 'bg-green-500/90 hover:bg-green-600/85',
+                ]" @click="() => onViewSolutions(item.username, p)"
               >
-                <span class="cell-accept">{{ item[problem.problemId].failed > 0 ? `+${item[problem.problemId].failed}`
-                  : '+' }}</span>
-                <span class="cell-time">
-                  {{ formateAcceptedAt(item[problem.problemId].acceptedAt! - new Date(contest.startsAt).getTime()) }}
+                <span class="block font-bold text-white w-full">
+                  {{ item.problems[p].failedCount > 0 ? `+${item.problems[p].failedCount}` : '+' }}
+                </span>
+                <span class="block text-sm text-white w-full">
+                  {{ formatMinutes(item.problems[p].solvedAfterMinutes) }}
                 </span>
               </td>
-              <td
-                v-else :key="`${problem.problemId} ${3}`" class="table-problem"
-                @click="() => onViewSolutions(item.uid, problem.problemId)"
-              >
-                <Space>
-                  <span v-if="item[problem.problemId].failed" class="cell-failed">-{{ item[problem.problemId].failed
-                  }}</span>
-                  <span v-if="item[problem.problemId].pending" class="cell-pending">+{{ item[problem.problemId].pending
-                  }}</span>
-                </Space>
+              <td v-else :key="`${p}-3`" class="border cursor-pointer" @click="() => onViewSolutions(item.username, p)">
+                <span class="flex flex-col leading-tight">
+                  <span v-if="item.problems[p].failedCount" class="font-bold text-red-500">
+                    -{{ item.problems[p].failedCount }}
+                  </span>
+                  <span v-if="item.problems[p].pendingCount" class="font-bold text-sky-500">
+                    +{{ item.problems[p].pendingCount }}
+                  </span>
+                </span>
               </td>
             </template>
+
+            <td class="border border-r-0">
+              {{ formatPercentage(item.dirt) }}
+            </td>
           </tr>
-          <Spin size="large" fix :show="loading" />
         </tbody>
       </table>
     </div>
-    <BackTop />
+    <ScrollTop :button-props="{ severity: 'contrast', size: 'large', raised: true }" />
   </div>
 </template>
 
-<style lang="stylus" scoped>
-@media screen and (max-width: 768px)
-  .contest-children
-    padding 0
-  .board-header
-    padding 0 16px
-  .board-table-container
-    border-radius 0 !important
-    border-bottom 0 !important
-    border-left 0 !important
-    border-right 0 !important
-
-.board-table-container
-  overflow-x auto
-  width 100%
-  margin-top 1em
-  display block
-  border 1px solid #dbdbdb
-  border-radius 4px
-
-.board-table
-  min-width 100%
-  table-layout fixed
-  border-collapse collapse
-  border-spacing 0
-  position relative
-  th, td
-    border 1px solid #dbdbdb
-    padding 8px
-    text-align center
-  tr>th:first-child, tr>td:first-child
-    border-left 0
-  tr>th:last-child, tr>td:last-child
-    border-right 0
-  &>thead>tr:first-child>th
-    border-top 0
-  &>tbody>tr:last-child>td
-    border-bottom 0
-  tr
-    height 60px
-  tbody tr
-    transition background-color 0.2s ease
-    td.table-problem
-      transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-
-.table-rank, .table-solve
-  min-width 70px
-.table-uid
-  width 140px
-  max-width 140px
-  text-align center
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
-.table-nick
-  min-width 210px
-  line-break anywhere
-td.table-nick
-  text-align left
-.table-penalty
-  min-width 105px
-  white-space nowrap
-.table-problem
-  min-width 70px
-  .cell-accept, .cell-time, .cell-solve, .cell-pid
-    display block
-    width 100%
-  .cell-accept, .cell-failed, .cell-pending
-    font-weight bold
-  .cell-time, .cell-solve
-    font-size 12px
-  .cell-pid
-    color #515a6e
-  .cell-solve
-    color #9c9fa5
-  .cell-failed
-    color red
-  .cell-pending
-    color hsl(200 80% 45%)
-
-.table-problem, .table-rank,
-td.table-solve, td.table-penalty
-  font-family var(--font-verdana)
-
-.prime
-  background-color hsl(200 80% 45%)
-  &:hover
-    background-color hsl(200 80% 40%)
-.normal
-  background-color hsl(150 80% 45%)
-  &:hover
-    background-color hsl(150 80% 40%)
-.prime, .normal
-  .cell-accept, .cell-time
-    color white
-
-.status-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
+<style scoped>
+table th,
+table td {
+  padding: 8px 12px;
+  text-align: center;
+  border-color: var(--p-content-border-color);
+}
 </style>

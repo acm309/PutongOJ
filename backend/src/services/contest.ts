@@ -1,8 +1,7 @@
-import type { ContestModel } from '@putongoj/shared'
+import type { ContestModel, ContestRanklist, ContestRanklistProblem } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { PaginateOption, SortOption } from '../types'
-import type { ContestRanklist, SolutionEntity } from '../types/entity'
 import type { QueryFilter } from '../types/mongo'
 import { ParticipationStatus } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
@@ -126,6 +125,8 @@ export type ContestProblemsWithStats = {
   solve: number
 }[]
 
+const ignoredJudges = [ judge.CompileError, judge.SystemError, judge.Skipped ] as number[]
+
 async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
   return await cacheService.getOrCreate<ContestProblemsWithStats>(
     CacheKey.contestProblems(contest, isJury),
@@ -153,6 +154,7 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
           Solution.distinct('uid', {
             mid: contestId,
             pid,
+            judge: { $nin: ignoredJudges },
             createdAt: { $lt: before },
           }).lean(),
           Solution.distinct('uid', {
@@ -173,80 +175,87 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
   )
 }
 
-async function getRanklist (
-  contestId: number,
-  isFrozen: boolean = false,
-  freezeTime: number = 0,
-): Promise<ContestRanklist> {
-  const ranklist = {} as ContestRanklist
-  const userIdSet = new Set<string>()
-  const solutions = await Solution
-    .find(
-      { mid: contestId },
-      { _id: 0, pid: 1, uid: 1, judge: 1, createdAt: 1 },
-    )
-    .sort({ create: 1 })
-    .lean()
+const pendingJudges = [ judge.Pending, judge.RejudgePending, judge.Running ] as number[]
 
-  solutions.forEach((solution: SolutionEntity) => {
-    const { pid, uid, judge: judgement, createdAt } = solution
-    if (judgement === judge.CompileError || judgement === judge.SystemError || judgement === judge.Skipped) {
-      // 如果是 Compile Error / System Error /  Skipped 视为不计入任何结果
-      return
-    }
+async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
+  return await cacheService.getOrCreate<ContestRanklist>(
+    CacheKey.contestRanklist(contest, isJury),
 
-    if (!ranklist[uid]) {
-      ranklist[uid] = { nick: '' }
-      userIdSet.add(uid)
-    }
-    if (!ranklist[uid][pid]) {
-      ranklist[uid][pid] = {
-        failed: 0, // 错误提交的计数
-        pending: 0, // 无结果的提交计数
+    async () => {
+      const contestDoc = await Contest
+        .findById(contest)
+        .select({ _id: 0, contestId: 1, endsAt: 1, scoreboardFrozenAt: 1 })
+        .lean()
+      if (!contestDoc) {
+        return []
       }
-    }
 
-    const createdTimestamp = new Date(createdAt).getTime()
-    const item = ranklist[uid][pid]
+      const { contestId, endsAt, scoreboardFrozenAt } = contestDoc
+      const ranklistRecord: Record<string, Record<number, ContestRanklistProblem>> = {}
+      const solutions = await Solution
+        .find({
+          mid: contestId,
+          judge: { $nin: ignoredJudges },
+          createdAt: { $lt: endsAt },
+        })
+        .select({ _id: 0, pid: 1, uid: 1, judge: 1, createdAt: 1 })
+        .sort({ createdAt: 1 })
+        .lean()
 
-    if (item.acceptedAt) {
-      // 已经有正确提交了则不需要再更新了
-      return
-    }
-    if (isFrozen && createdTimestamp >= freezeTime) {
-      // 封榜时间内的提交视为无结果
-      item.pending += 1
-      return
-    }
-    if (judgement === judge.Pending || judgement === judge.RejudgePending || judgement === judge.Running) {
-      // 如果是 Pending / Running 视为无结果
-      item.pending += 1
-      return
-    }
-    if (judgement === judge.Accepted) {
-      // 如果是 Accepted 视为正确提交
-      item.acceptedAt = createdTimestamp
-    } else {
-      // 否则视为错误提交
-      item.failed += 1
-    }
-  })
+      solutions.forEach((solution) => {
+        const { pid: problemId, uid: username, judge: judgement, createdAt } = solution
 
-  const users = await User
-    .find(
-      { uid: { $in: Array.from(userIdSet) } },
-      { _id: 0, uid: 1, nick: 1 },
-    )
-    .lean()
-  const userNickMap = Object
-    .fromEntries(users.map(
-      user => [ user.uid, user.nick ],
-    ))
-  Object.keys(ranklist).forEach((uid) => {
-    ranklist[uid].nick = userNickMap[uid]
-  })
+        if (!ranklistRecord[username]) {
+          ranklistRecord[username] = {}
+        }
+        const userRecord = ranklistRecord[username]
 
-  return ranklist
+        if (!userRecord[problemId]) {
+          userRecord[problemId] = { problemId, failedCount: 0, pendingCount: 0 }
+        }
+        const item = userRecord[problemId]
+
+        if (item.solvedAt) {
+          // already solved, ignore subsequent submissions
+          return
+        }
+
+        if (!isJury && scoreboardFrozenAt && createdAt >= scoreboardFrozenAt) {
+          // scoreboard is frozen, and the submission is after the freeze time, count it as pending
+          item.pendingCount += 1
+          return
+        }
+
+        if (pendingJudges.includes(judgement)) {
+          item.pendingCount += 1
+          return
+        }
+
+        if (judgement === judge.Accepted) {
+          item.solvedAt = createdAt.toISOString()
+          return
+        }
+
+        item.failedCount += 1
+      })
+
+      const users = await User
+        .find({ uid: { $in: Object.keys(ranklistRecord) } })
+        .select({ _id: 0, uid: 1, nick: 1 })
+        .lean()
+      const nicknameMap = Object.fromEntries(users.map(user => [ user.uid, user.nick ]))
+
+      return Object.entries(ranklistRecord).map(([ username, problems ]) => ({
+        username,
+        nickname: nicknameMap[username] || username,
+        problems: Object.values(problems),
+      }))
+    },
+
+    // Frontend's auto-refresh interval is 10s,
+    // so the cache TTL is set a bit shorter.
+    { ttl: 9 },
+  )
 }
 
 export const contestService = {

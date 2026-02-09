@@ -6,6 +6,7 @@ import { GroupModelSchema } from '../model/group.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
+import { ContestRanklistSchema } from '../service/contest.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const ContestListQuerySchema = z.object({
@@ -190,3 +191,7 @@ export const ContestSolutionListExportQueryResultSchema = z.array(z.object({
 }))
 
 export type ContestSolutionListExportQueryResult = z.input<typeof ContestSolutionListExportQueryResultSchema>
+
+export const ContestRanklistQueryResultSchema = ContestRanklistSchema
+
+export type ContestRanklistQueryResult = z.input<typeof ContestRanklistQueryResultSchema>
