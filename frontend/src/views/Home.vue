@@ -15,7 +15,7 @@ const zhCN = computed(() => locale.value === 'zh-CN')
 const page = computed(() => Number.parseInt(route.query.page as string) || 1)
 const pageSize = computed(() => Number.parseInt(route.query.pageSize as string) || 10)
 
-const docs = ref([] as { nid: number, title: string, create: number }[])
+const docs = ref([] as { nid: number, title: string, status: number, create: number }[])
 const total = ref(0)
 const loading = ref(false)
 
@@ -81,9 +81,15 @@ onRouteQueryUpdate(fetch)
       </template>
 
       <div v-for="doc in docs" v-else :key="doc.nid" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
-        <div class="flex gap-2 text-muted-color text-nowrap text-sm">
-          <i class="pi pi-clock text-sm" />
-          {{ timePretty(doc.create, 'yyyy-MM-dd HH:mm') }}
+        <div class="flex gap-4 text-muted-color text-nowrap text-sm">
+          <span class="flex gap-2">
+            <i class="pi pi-clock text-sm" />
+            {{ timePretty(doc.create, 'yyyy-MM-dd HH:mm') }}
+          </span>
+          <span v-if="doc.status === 0" class="flex gap-2">
+            <i class="pi pi-eye-slash text-sm" />
+            Hidden
+          </span>
         </div>
         <RouterLink
           class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"

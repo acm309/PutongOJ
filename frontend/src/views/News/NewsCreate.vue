@@ -1,12 +1,14 @@
 <script setup>
-import { Button, Message } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OjNewsEdit from '@/components/NewsEdit'
 import { useNewsStore } from '@/store/modules/news'
+import { useMessage } from '@/utils/message'
 
 const newsStore = useNewsStore()
 const { create } = newsStore
+const message = useMessage()
 const router = useRouter()
 const { t } = useI18n()
 
@@ -17,7 +19,7 @@ const addNews = $ref({
 
 async function submit () {
   const nid = await create(addNews)
-  Message.success(t('oj.create_news_success', { nid }))
+  message.success(t('oj.create_news_success', { nid }))
   router.push({ name: 'newsInfo', params: { nid } })
 }
 newsStore.setCurrentNews($$(addNews))
@@ -27,9 +29,7 @@ newsStore.setCurrentNews($$(addNews))
   <div class="news-wrap">
     <h1>{{ t('oj.add_news') }}</h1>
     <OjNewsEdit />
-    <Button type="primary" size="large" @click="submit">
-      {{ t('oj.submit') }}
-    </Button>
+    <Button :label="t('oj.submit')" class="mt-4" @click="submit" />
   </div>
 </template>
 
@@ -38,6 +38,4 @@ newsStore.setCurrentNews($$(addNews))
   max-width 1024px
 h1
   margin-bottom: 20px
-.ivu-btn
-  margin-top: 20px
 </style>

@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { Spin, TabPane, Tabs } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -16,8 +16,6 @@ const router = useRouter()
 const current = $computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
-let loading = $ref(false)
-
 function change (name) {
   return router.push({
     name,
@@ -26,34 +24,20 @@ function change (name) {
 }
 
 onBeforeMount(async () => {
-  loading = true
   await newsStore.findOne(route.params)
   rootStore.changeDomTitle({ title: `${newsStore.news.title} - News` })
-  loading = false
 })
 </script>
 
 <template>
   <div class="news-wrap">
-    <Tabs v-if="isAdmin" class="news-tabs" :model-value="current" @on-click="change">
-      <TabPane :label="t('oj.overview')" name="newsInfo" />
-      <TabPane :label="t('oj.edit')" name="newsEdit" />
-    </Tabs>
+    <div v-if="isAdmin" class="flex items-center justify-end px-8">
+      <Button v-if="current === 'newsInfo'" :label="t('oj.edit')" icon="pi pi-pencil" @click="change('newsEdit')" />
+      <Button v-else :label="t('oj.overview')" icon="pi pi-eye" @click="change('newsInfo')" />
+    </div>
     <RouterView class="news-children" />
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
-
-<style lang="stylus">
-.news-tabs
-  .ivu-tabs-nav-scroll
-    padding 0 40px
-
-@media screen and (max-width: 1024px)
-  .news-tabs
-    .ivu-tabs-nav-scroll
-      padding 0 20px
-</style>
 
 <style lang="stylus" scoped>
 .news-wrap

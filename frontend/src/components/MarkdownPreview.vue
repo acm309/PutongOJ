@@ -77,7 +77,7 @@ watch(effectiveTheme, render)
       <Icon type="ios-loading" class="card-icon" />
       <span class="card-text">Rendering...</span>
     </div>
-    <div v-show="!rendering" ref="preview" class="vditor-initialized" />
+    <div v-show="!rendering" ref="preview" class="text-color vditor-initialized" />
   </div>
 </template>
 

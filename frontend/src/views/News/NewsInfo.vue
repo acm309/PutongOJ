@@ -8,30 +8,17 @@ const { news } = $(storeToRefs(useNewsStore()))
 </script>
 
 <template>
-  <div class="news-info">
-    <div class="news-header-container">
-      <div class="news-header">
-        <h1 class="font-bold">
+  <div>
+    <div class="pb-8 pt-4">
+      <div class="max-w-xl mx-auto text-center">
+        <h1 class="font-bold mb-2 text-pretty">
           {{ news.title || '' }}
         </h1>
-        <h4>{{ timePretty(news.create, 'yyyy-MM-dd HH:mm') }}</h4>
+        <span class="text-muted-color">
+          {{ timePretty(news.create, 'yyyy-MM-dd HH:mm') }}
+        </span>
       </div>
     </div>
-    <MarkdownPreview v-model="news.content" class="news-content" />
+    <MarkdownPreview v-model="news.content" class="pb-4" />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.news-header-container
-  width 100%
-  padding 20px 0 40px
-.news-header
-  margin 0 auto
-  max-width 640px
-  text-align center
-  h1, h4
-    margin-bottom: 10px
-    color hsl(0, 0%, 20%)
-.news-content
-  padding-bottom 20px
-</style>
