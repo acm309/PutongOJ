@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { CourseRole } from '@backend/types'
-import type { User } from '@/types'
-import debounce from 'lodash.debounce'
-import { Alert, Checkbox, Form, FormItem, Message, Modal, Option, Select, Spin } from 'view-ui-plus'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Dialog from 'primevue/dialog'
+import Message from 'primevue/message'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
-import { suggestUsers } from '@/api/user'
+import UserSelect from '@/components/UserSelect.vue'
 import { courseRoleFields, privilege } from '@/utils/constant'
+import { useMessage } from '@/utils/message'
 
 const props = defineProps({
   modelValue: {
@@ -26,6 +28,7 @@ const props = defineProps({
 const emit = defineEmits([ 'update:modelValue' ])
 
 const { t } = useI18n()
+const message = useMessage()
 
 const roleConfig = computed(() => ({
   basic: t('oj.course_basic_view'),
@@ -40,13 +43,11 @@ const defaultRole = () => Object.fromEntries(courseRoleFields.map(field => [ fie
 
 const modal = ref(false)
 const loading = ref(false)
-const loadingUsers = ref(false)
-const userId = ref('')
+const selectedUserId = ref('')
 const loaded = ref(false)
 const isAdmin = ref(false)
 const role = ref(defaultRole())
 const disabled = ref(defaultRole())
-const users = ref([] as { value: string, label: string }[])
 const isEdit = computed(() => !!props.userId)
 const courseId = computed(() => props.courseId)
 
@@ -77,51 +78,25 @@ function rippleRoles () {
   })
 }
 
-function userToSelection (user: Pick<User, 'uid' | 'nick'>): { value: string, label: string } {
-  return {
-    value: user.uid,
-    label: user.uid + (user.nick ? ` (${user.nick})` : ''),
-  }
-}
-
-const fetchUsers = debounce(async (query: string) => {
-  if (query.length === 0) {
-    users.value = []
-    return
-  }
-  loadingUsers.value = true
-  try {
-    const resp = await suggestUsers({ keyword: query })
-    if (!resp.success) {
-      users.value = []
-      return
-    }
-    users.value = resp.data.map(userToSelection)
-  } finally {
-    loadingUsers.value = false
-  }
-}, 500)
-
 async function submit () {
+  if (!selectedUserId.value) return
   loading.value = true
   try {
-    await api.course.updateMember(courseId.value, userId.value, role.value)
-    Message.success(t('oj.course_member_update_success'))
+    await api.course.updateMember(courseId.value, selectedUserId.value, role.value)
+    message.success(t('oj.course_member_update_success'))
     close()
   } finally {
     loading.value = false
   }
 }
 
-async function loadUser (loadUserId: string) {
-  if (typeof loadUserId !== 'string' || loadUserId.length === 0) {
+async function loadUser () {
+  if (!selectedUserId.value) {
     return
   }
   loading.value = true
   try {
-    const { data: member } = await api.course.getMember(courseId.value, loadUserId)
-    users.value = [ userToSelection(member.user) ]
-    userId.value = loadUserId
+    const { data: member } = await api.course.getMember(courseId.value, selectedUserId.value)
     isAdmin.value = member.user.privilege > privilege.User
     loaded.value = true
     Object.assign(role.value, member.role)
@@ -132,10 +107,12 @@ async function loadUser (loadUserId: string) {
 }
 
 async function initModal () {
+  isAdmin.value = false
   if (isEdit.value) {
-    loadUser(props.userId)
+    selectedUserId.value = props.userId
+    await loadUser()
   } else {
-    userId.value = ''
+    selectedUserId.value = ''
     loaded.value = false
     Object.assign(role.value, defaultRole())
     rippleRoles()
@@ -147,38 +124,42 @@ onBeforeMount(initModal)
 </script>
 
 <template>
-  <Modal v-model="modal" :loading="true" :title="t(`oj.course_${isEdit ? 'edit' : 'add'}_member`)" :closable="false" @on-cancel="close" @on-ok="submit">
-    <Form class="role-form" :label-width="80">
-      <FormItem :label="t('oj.course_user')">
-        <Select v-model="userId" :disabled="isEdit" filterable :remote-method="fetchUsers" :loading="loadingUsers" @on-change="value => loadUser(value)">
-          <Option v-for="user in users" :key="user.value" :value="user.value" :label="user.label" />
-        </Select>
-        <Alert v-if="!loaded" class="role-alert">
+  <Dialog
+    v-model:visible="modal" modal :header="isEdit ? 'Edit Course Member' : 'Add Course Member'"
+    :style="{ width: '32rem' }" :closable="false"
+  >
+    <div class="flex flex-col gap-4 relative" :class="{ 'opacity-50 pointer-events-none': loading }">
+      <div class="flex flex-col gap-2">
+        <UserSelect v-model="selectedUserId" :disabled="isEdit" :label="t('oj.course_user')" @select="loadUser" />
+        <Message v-if="!loaded" severity="info" :closable="false">
           {{ t('oj.course_select_user_to_load') }}
-        </Alert>
-        <Alert v-if="isAdmin" class="role-alert" type="warning">
+        </Message>
+        <Message v-if="isAdmin" severity="warn" :closable="false">
           {{ t('oj.course_admin_override') }}
-        </Alert>
-      </FormItem>
-      <FormItem label="Role">
-        <Checkbox
-          v-for="(label, field) in roleConfig" :key="field" v-model="role[field]" class="role-checkbox"
-          :disabled="!loaded || disabled[field]" border @on-change="rippleRoles"
-        >
-          {{ label }}
-        </Checkbox>
-      </FormItem>
-    </Form>
-    <Spin fix :show="loading" class="modal-loading" />
-  </Modal>
-</template>
+        </Message>
+      </div>
 
-<style lang="stylus" scoped>
-.role-form
-  padding 12px
-  margin-bottom -30px
-.role-checkbox
-  margin-bottom 8px
-.role-alert
-  margin 10px 0 0
-</style>
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold">Role</label>
+        <div class="flex flex-col gap-3">
+          <div v-for="(label, field) in roleConfig" :key="field" class="flex gap-2 items-center">
+            <Checkbox
+              v-model="role[field]" :input-id="`role-${field}`" binary :disabled="!loaded || disabled[field]"
+              @change="rippleRoles"
+            />
+            <label :for="`role-${field}`" class="cursor-pointer">{{ label }}</label>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="loading" class="absolute bg-surface flex inset-0 items-center justify-center opacity-50 rounded">
+        <i class="pi pi-spin pi-spinner text-2xl" />
+      </div>
+    </div>
+
+    <template #footer>
+      <Button :label="t('oj.cancel')" severity="secondary" outlined @click="close" />
+      <Button :label="t('oj.confirm')" :disabled="loading" @click="submit" />
+    </template>
+  </Dialog>
+</template>

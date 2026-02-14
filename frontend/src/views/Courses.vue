@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { Button, Card, Col, Icon, Page, Row, Spin, Tag } from 'view-ui-plus'
-import { onBeforeMount } from 'vue'
+import Button from 'primevue/button'
+import Paginator from 'primevue/paginator'
+import Tag from 'primevue/tag'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCreate from '@/components/CourseCreate.vue'
@@ -18,188 +20,98 @@ const courseStore = useCourseStore()
 const sessionStore = useSessionStore()
 
 const { findCourses } = courseStore
-const { toggleAuthnDialog } = sessionStore
-const { encrypt } = $(storeToRefs(rootStore))
-const { courses } = $(storeToRefs(courseStore))
-const { isLogined, isRoot } = $(storeToRefs(sessionStore))
+const { encrypt } = storeToRefs(rootStore)
+const { courses } = storeToRefs(courseStore)
+const { isRoot } = storeToRefs(sessionStore)
 
-const DEFAULT_PAGE_SIZE = 5
+const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
 
-const page = $computed<number>(() =>
+const page = computed(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
-const pageSize = $computed<number>(() =>
+const pageSize = computed(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 
-let loading = $ref(false)
-const openCreate = $ref(false)
+const loading = ref(false)
+const createDialogVisible = ref(false)
 
 async function fetch () {
-  loading = true
-  await findCourses({ page, pageSize })
-  loading = false
+  loading.value = true
+  await findCourses({ page: page.value, pageSize: pageSize.value })
+  loading.value = false
 }
 
-function pageChange (page: number) {
+function onPage (event: any) {
   router.push({
     name: 'courses',
-    query: { page, pageSize },
+    query: {
+      ...route.query,
+      page: (event.first / event.rows + 1),
+    },
   })
 }
 
-function visit (id: number) {
-  if (!isLogined) {
-    return toggleAuthnDialog()
-  }
-  router.push({
-    name: 'courseProblems',
-    params: { id },
-  })
-}
-
-onBeforeMount(fetch)
+onMounted(fetch)
 onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="courses-wrap">
-    <div class="courses-header">
-      <span class="courses-title">
-        {{ t('oj.course') }}
-      </span>
-      <div v-if="isRoot" class="courses-actions">
-        <Button type="primary" icon="md-add" @click="openCreate = true">
-          {{ t('oj.course_create') }}
-        </Button>
+  <div class="max-w-4xl p-0">
+    <div class="p-6">
+      <div class="flex gap-4 items-center justify-between">
+        <div class="flex font-semibold gap-4 items-center">
+          <i class="pi pi-book text-2xl" />
+          <h1 class="text-xl">
+            {{ t('oj.course') }}
+          </h1>
+        </div>
+        <div v-if="isRoot" class="flex gap-2">
+          <Button
+            icon="pi pi-plus" :label="t('oj.course_create')" :disabled="loading"
+            @click="createDialogVisible = true"
+          />
+        </div>
       </div>
     </div>
-    <div v-if="courses.total > 0">
-      <Card
-        v-for="item in courses.docs" :key="item.courseId" class="courses-card"
-        dis-hover @click="visit(item.courseId)"
-      >
-        <Row type="flex" :gutter="16" :wrap="false">
-          <Col flex="68px" class="courses-icon">
-            <Icon type="md-filing" class="icon-course" />
-          </Col>
-          <Col flex="auto" class="courses-content">
-            <div class="courses-headline">
-              <Tag v-if="item.encrypt === encrypt.Public" class="courses-encrypt" color="purple">
-                {{ t('oj.course_public') }}
-              </Tag>
-              <Tag v-if="item.encrypt === encrypt.Private" class="courses-encrypt" color="default">
-                {{ t('oj.course_private') }}
-              </Tag>
-              <span class="courses-title">{{ item.name }}</span>
-            </div>
-            <p v-if="item.description.trim()" class="courses-description">
-              {{ item.description }}
-            </p>
-            <p v-else class="courses-description">
-              {{ t('oj.no_description') }}
-            </p>
-          </Col>
-        </Row>
-      </Card>
+
+    <template v-if="loading || courses.total === 0">
+      <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">
+        <i v-if="loading" class="pi pi-spin pi-spinner text-2xl" />
+        <span>{{ loading ? t('ptoj.loading') : t('ptoj.empty_content_desc') }}</span>
+      </div>
+    </template>
+
+    <div
+      v-for="item in courses.docs" v-else :key="item.courseId"
+      class="border-surface border-t flex flex-col gap-2 px-6 py-5 transition-colors"
+    >
+      <div class="flex flex-row gap-2 items-center justify-between">
+        <RouterLink
+          class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg"
+          :to="{ name: 'courseProblems', params: { id: item.courseId } }"
+        >
+          {{ item.name }}
+        </RouterLink>
+        <div class="flex gap-2">
+          <Tag
+            :value="item.encrypt === encrypt.Public ? t('ptoj.public') : t('ptoj.private')"
+            :severity="item.encrypt === encrypt.Public ? 'success' : 'warn'"
+          />
+        </div>
+      </div>
+      <p class="text-muted-color text-sm">
+        {{ item.description?.trim() || t('oj.no_description') }}
+      </p>
     </div>
-    <div v-else class="courses-empty">
-      <Icon type="ios-planet-outline" class="empty-icon" />
-      <span class="empty-text">{{ t('oj.empty_content') }}</span>
-    </div>
-    <div class="courses-footer">
-      <Page
-        class="courses-page-table" :model-value="page"
-        :total="courses.total" :page-size="courses.limit" show-elevator
-        @on-change="pageChange"
-      />
-      <Page
-        class="courses-page-mobile" :model-value="page" size="small"
-        :total="courses.total" :page-size="courses.limit" show-elevator
-        @on-change="pageChange"
-      />
-    </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
-    <CourseCreate v-if="isRoot" v-model="openCreate" />
+
+    <Paginator
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(page - 1) * pageSize" :rows="pageSize" :total-records="courses.total"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
+    />
+
+    <CourseCreate v-if="isRoot" v-model:visible="createDialogVisible" />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.courses-wrap
-  max-width 1024px
-
-.courses-header
-  margin-bottom 20px
-  display flex
-  justify-content space-between
-  align-items end
-  .courses-title
-    margin 0 0 -8px
-    font-size 28px
-  .courses-actions
-    flex none
-    display flex
-
-.courses-card
-  margin-bottom 20px
-  transition border-color 0.2s ease
-  &:hover
-    border-color var(--oj-primary-color) !important
-    .courses-date
-      color var(--oj-primary-color)
-
-.courses-icon
-  display flex
-  align-items center
-  justify-content center
-  color var(--oj-primary-color)
-  opacity 0.85
-  .icon-course
-    font-size 32px
-
-.courses-content
-  .courses-title
-    color var(--oj-primary-color)
-    font-size 16px
-    margin-top -2px
-  .courses-encrypt
-    float right
-    margin 0 0 0 8px
-  .courses-description
-    margin-top 7px
-    transition color 0.2s ease
-    text-align justify
-
-.courses-footer
-  margin-top 20px
-  .courses-page-table
-    display block
-  .courses-page-mobile
-    display none
-    text-align center
-
-.courses-empty
-  margin-bottom 20px
-  padding 32px
-  border 1px solid #dcdee2
-  border-radius 4px
-  display flex
-  align-items center
-  justify-content center
-  .empty-icon
-    font-size 32px
-  .empty-text
-    margin-left 32px
-
-@media screen and (max-width: 1024px)
-  .courses-header
-    padding-top 10px
-
-@media screen and (max-width: 768px)
-  .courses-page-table
-    display none !important
-  .courses-page-mobile
-    display block !important
-  .courses-icon
-    display none !important
-</style>

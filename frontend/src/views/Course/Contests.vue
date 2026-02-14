@@ -20,7 +20,6 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
-const course = Number.parseInt(route.params.id as string)
 const query = ref({} as ContestListQuery)
 const docs = ref([] as ContestListQueryResult['docs'])
 const total = ref(0)
@@ -45,7 +44,7 @@ const sortingOptions = computed(() => [ {
 } ])
 
 async function fetch () {
-  const parsed = ContestListQuerySchema.safeParse({ ...route.query, course })
+  const parsed = ContestListQuerySchema.safeParse({ ...route.query, course: route.params.id })
   if (parsed.success) {
     query.value = parsed.data
   } else {
@@ -111,7 +110,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="-mt-11.5 p-0">
+  <div class="max-w-7xl p-0">
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField>

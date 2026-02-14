@@ -1,120 +1,145 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { Button, Col, Divider, Form, FormItem, Input, Message, Poptip, Radio, RadioGroup, Row } from 'view-ui-plus'
-import { ref } from 'vue'
+import Button from 'primevue/button'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import { useConfirm } from 'primevue/useconfirm'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
+import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
+const message = useMessage()
+const confirm = useConfirm()
 const sessionStore = useSessionStore()
 const courseStore = useCourseStore()
 const { isRoot } = storeToRefs(sessionStore)
 const { course } = storeToRefs(courseStore)
 
-const submiting = ref(false)
-const courseRules = {
-  name: [
-    { required: true, message: t('oj.course_name_required'), trigger: 'change' },
-    { min: 3, message: t('oj.course_name_min_length'), trigger: 'change' },
-  ],
-  description: [ { max: 100, message: t('oj.description_max_length'), trigger: 'change' } ],
-  encrypt: [ { type: 'number', required: true, trigger: 'change' } ],
-  joinCode: [ { min: 6, max: 20, message: t('oj.join_code_length'), trigger: 'change' } ],
-}
-const courseFormRef = ref<any>(null)
+const submitting = ref(false)
 
-function updateCourse () {
-  courseFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      submiting.value = true
-      try {
-        await api.course.updateCourse(course.value.courseId, {
-          name: course.value.name,
-          description: course.value.description,
-          encrypt: course.value.encrypt,
-          joinCode: course.value.joinCode || '',
-        })
-        Message.success(t('oj.course_updated_successfully'))
-      } catch (e: any) {
-        Message.error(t('oj.failed_to_update_course', { error: e.message }))
-      } finally {
-        submiting.value = false
-      }
-    } else {
-      Message.warning(t('oj.form_invalid'))
-    }
+const isPublic = computed({
+  get: () => course.value.encrypt === 1,
+  set: (value: boolean) => {
+    course.value.encrypt = value ? 1 : 2
+  },
+})
+
+function validate () {
+  if (!course.value.name) {
+    message.warn(t('oj.course_name_required'))
+    return false
+  }
+  if (course.value.name.length < 3) {
+    message.warn(t('oj.course_name_min_length'))
+    return false
+  }
+  if (course.value.description && course.value.description.length > 100) {
+    message.warn(t('oj.description_max_length'))
+    return false
+  }
+  if (course.value.joinCode && (course.value.joinCode.length < 6 || course.value.joinCode.length > 20)) {
+    message.warn(t('oj.join_code_length'))
+    return false
+  }
+  return true
+}
+
+async function updateCourse () {
+  if (!validate()) {
+    return
+  }
+
+  submitting.value = true
+  try {
+    await api.course.updateCourse(course.value.courseId, {
+      name: course.value.name,
+      description: course.value.description,
+      encrypt: course.value.encrypt,
+      joinCode: course.value.joinCode || '',
+    })
+    message.success(t('oj.course_updated_successfully'))
+  } catch (e: any) {
+    message.error(t('oj.failed_to_update_course', { error: e.message }))
+  } finally {
+    submitting.value = false
+  }
+}
+
+function rearrangeProblems (event: any) {
+  confirm.require({
+    target: event.currentTarget,
+    message: t('oj.confirm'),
+    header: t('oj.confirm'),
+    rejectProps: {
+      label: t('oj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: t('oj.ok'),
+    },
+    accept: () => {
+      api.course.rearrangeProblems(course.value.courseId)
+      message.info(t('oj.rearrange_task_dispatched'))
+    },
   })
-}
-
-function rearrangeProblems () {
-  api.course.rearrangeProblems(course.value.courseId)
-  Message.info(t('oj.rearrange_task_dispatched'))
 }
 </script>
 
 <template>
-  <div class="course-settings">
-    <Form ref="courseFormRef" :model="course" :label-width="100" :rules="courseRules">
-      <FormItem prop="name">
-        <template #label>
-          <span style="line-height: 20px;">{{ t('oj.name') }}</span>
-        </template>
-        <Input v-model="course.name" size="large" :maxlength="30" show-word-limit :placeholder="t('oj.enter_course_name')" />
-      </FormItem>
-      <FormItem :label="t('oj.description')" prop="description">
-        <Input
-          v-model="course.description" type="textarea" :maxlength="100" show-word-limit
-          :autosize="{ minRows: 2, maxRows: 5 }" :placeholder="t('oj.enter_course_description')"
-        />
-      </FormItem>
-      <FormItem :label="t('oj.encryption')" prop="encrypt">
-        <RadioGroup v-model="course.encrypt">
-          <Radio :label="1" border>
-            {{ t('oj.public') }}
-          </Radio>
-          <Radio :label="2" border>
-            {{ t('oj.private') }}
-          </Radio>
-        </RadioGroup>
-      </FormItem>
-      <FormItem :label="t('oj.join_code')" prop="joinCode">
-        <Input
-          v-model="course.joinCode" :maxlength="20" show-word-limit :placeholder="t('oj.enter_join_code_optional')"
-          clearable
-        />
-      </FormItem>
-      <FormItem>
-        <Button type="primary" size="large" :loading="submiting" @click="updateCourse">
-          {{ t('oj.submit') }}
-        </Button>
-      </FormItem>
-    </Form>
-    <template v-if="isRoot">
-      <Divider simple>
+  <div class="max-w-4xl p-0">
+    <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
+      <h2 class="-mb-1.75 font-semibold md:col-span-2 text-lg">
+        {{ t('ptoj.basic_information') }}
+      </h2>
+
+      <IftaLabel class="md:col-span-2">
+        <InputText id="name" v-model="course.name" fluid :maxlength="30" />
+        <label for="name">{{ t('oj.name') }}</label>
+      </IftaLabel>
+
+      <IftaLabel class="md:col-span-2">
+        <Textarea id="description" v-model="course.description" :maxlength="100" :rows="3" auto-resize fluid />
+        <label for="description">{{ t('oj.description') }}</label>
+      </IftaLabel>
+
+      <div class="flex gap-3 justify-end md:col-span-2">
+        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="updateCourse" />
+      </div>
+    </div>
+
+    <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
+      <h2 class="-mb-1.75 font-semibold md:col-span-2 text-lg">
+        {{ t('ptoj.access_control') }}
+      </h2>
+
+      <LabeledSwitch v-model="isPublic" :label="t('ptoj.public')" :description="t('ptoj.anyone_can_join')" />
+
+      <IftaLabel>
+        <InputText id="joinCode" v-model="course.joinCode" fluid :maxlength="20" :disabled="isPublic" />
+        <label for="joinCode">{{ t('oj.join_code') }}</label>
+      </IftaLabel>
+
+      <div class="flex gap-3 justify-end md:col-span-2">
+        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="updateCourse" />
+      </div>
+    </div>
+
+    <div v-if="isRoot" class="gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
+      <h2 class="-mb-1.75 font-semibold md:col-span-2 text-lg">
         {{ t('oj.system_action') }}
-      </Divider>
-      <Row>
-        <Col flex="auto">
-          <span style="line-height: 32px; padding-left: 16px;">
-            {{ t('oj.problem_sort_rearrange') }}
-          </span>
-        </Col>
-        <Col>
-          <Poptip confirm :title="t('oj.confirm')" @on-ok="rearrangeProblems">
-            <Button>{{ t('oj.execute') }}</Button>
-          </Poptip>
-        </Col>
-      </Row>
-    </template>
+      </h2>
+
+      <div class="flex items-center justify-between md:col-span-2">
+        <span>{{ t('oj.problem_sort_rearrange') }}</span>
+        <Button :label="t('oj.execute')" icon="pi pi-play" @click="rearrangeProblems" />
+      </div>
+    </div>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.course-settings
-  padding 0 40px 40px !important
-@media screen and (max-width: 1024px)
-  .course-settings
-    padding 0 20px 20px
-</style>

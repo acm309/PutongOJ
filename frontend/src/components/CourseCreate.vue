@@ -1,110 +1,87 @@
 <script setup lang="ts">
-import { Form, FormItem, Input, Message, Modal, Radio, RadioGroup } from 'view-ui-plus'
-import { ref, watch } from 'vue'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useCourseStore } from '@/store/modules/course'
+import { useMessage } from '@/utils/message'
 
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false,
-  },
-})
-const emit = defineEmits([ 'update:modelValue' ])
+const visible = defineModel<boolean>('visible')
 
 const { t } = useI18n()
+const message = useMessage()
 const courseStore = useCourseStore()
-const { createCourse } = courseStore
 const router = useRouter()
 
-let modal = $ref(false)
-
-watch(() => props.modelValue, (val) => {
-  modal = val
-})
-function close () {
-  modal = false
-  emit('update:modelValue', false)
-}
-
-const courseRules = $computed(() => ({
-  name: [
-    { required: true, message: t('oj.course_name_required'), trigger: 'change' },
-    { min: 3, max: 30, message: t('oj.course_name_length'), trigger: 'change' },
-  ],
-  description: [ { max: 100, message: t('oj.course_description_length'), trigger: 'change' } ],
-  encrypt: [ { type: 'number', required: true, trigger: 'change' } ],
-}))
-const courseForm = $ref({
+const submitting = ref(false)
+const form = ref({
   name: '',
   description: '',
-  encrypt: 2,
+  isPublic: false,
 })
-const courseFormRef = ref<any>(null)
 
-function submit () {
-  courseFormRef.value.validate(async (valid: boolean) => {
-    if (valid) {
-      try {
-        const id = await createCourse(courseForm as any)
-        Message.success(t('oj.course_create_success'))
-        router.push({ name: 'courseProblems', params: { id } })
-      } catch (e: any) {
-        Message.error(t('oj.course_create_failed', { error: e.message }))
-      }
-    } else {
-      Message.warning(t('oj.form_invalid'))
-    }
-    close()
-  })
+async function submit () {
+  if (!form.value.name || form.value.name.length < 3 || form.value.name.length > 30) {
+    message.warn(t('oj.course_name_required'))
+    return
+  }
+  if (form.value.description && form.value.description.length > 100) {
+    message.warn(t('oj.course_description_length'))
+    return
+  }
+
+  submitting.value = true
+  try {
+    const id = await courseStore.createCourse({
+      name: form.value.name,
+      description: form.value.description,
+      encrypt: form.value.isPublic ? 1 : 2,
+    } as any)
+    message.success(t('oj.course_create_success'))
+    router.push({ name: 'courseProblems', params: { id } })
+    visible.value = false
+  } catch (e: any) {
+    message.error(t('oj.course_create_failed', { error: e.message }))
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
 <template>
-  <Modal
-    v-model="modal" :loading="true"
-    :title="t('oj.course_create')" :closable="false"
-    @on-cancel="close" @on-ok="submit"
+  <Dialog
+    v-model:visible="visible" modal :header="t('oj.course_create')" :closable="false"
+    class="max-w-md mx-6 w-full"
   >
-    <Form
-      ref="courseFormRef"
-      class="course-form" :label-width="80"
-      :model="courseForm" :rules="courseRules"
-    >
-      <FormItem prop="name">
-        <template #label>
-          <span style="line-height: 20px;">{{ t('oj.name') }}</span>
-        </template>
-        <Input
-          v-model="courseForm.name" size="large"
-          :maxlength="30" show-word-limit
-          :placeholder="t('oj.course_name_placeholder')"
-        />
-      </FormItem>
-      <FormItem :label="t('oj.course_description')" prop="description">
-        <Input
-          v-model="courseForm.description" type="textarea"
-          :maxlength="100" show-word-limit :autosize="{ minRows: 2, maxRows: 5 }"
-          :placeholder="t('oj.course_description_placeholder')"
-        />
-      </FormItem>
-      <FormItem :label="t('oj.course_encrypt')" prop="encrypt">
-        <RadioGroup v-model="courseForm.encrypt" type="button">
-          <Radio :label="1">
-            {{ t('oj.course_public') }}
-          </Radio>
-          <Radio :label="2">
-            {{ t('oj.course_private') }}
-          </Radio>
-        </RadioGroup>
-      </FormItem>
-    </Form>
-  </Modal>
-</template>
+    <form @submit.prevent="submit">
+      <div class="space-y-4">
+        <IftaLabel>
+          <InputText id="name" v-model="form.name" required fluid :maxlength="30" />
+          <label for="name">{{ t('oj.name') }}</label>
+        </IftaLabel>
 
-<style lang="stylus" scoped>
-.course-form
-  padding 12px
-  margin-bottom -24px
-</style>
+        <IftaLabel>
+          <Textarea
+            id="description" v-model="form.description" class="-mb-1.25" :maxlength="100" :rows="3" auto-resize
+            fluid
+          />
+          <label for="description">{{ t('oj.course_description') }}</label>
+        </IftaLabel>
+
+        <LabeledSwitch v-model="form.isPublic" :label="t('ptoj.public')" :description="t('ptoj.anyone_can_join')" />
+      </div>
+      <div class="flex gap-2 justify-end mt-5">
+        <Button
+          type="button" :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
+          @click="visible = false"
+        />
+        <Button type="submit" :label="t('ptoj.create')" icon="pi pi-check" :loading="submitting" />
+      </div>
+    </form>
+  </Dialog>
+</template>

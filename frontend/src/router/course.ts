@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import Courses from '@/views/Courses.vue'
 
 const Layout = () => import('@/views/Course/Layout.vue')
+const CourseHeader = () => import('@/views/Course/CourseHeader.vue')
 const Problems = () => import('@/views/Course/Problems.vue')
 const Contests = () => import('@/views/Course/Contests.vue')
 const Members = () => import('@/views/Course/Members.vue')
@@ -17,7 +18,10 @@ const courseRoutes: Array<RouteRecordRaw> = [
   {
     path: '/course/:id(\\d+)',
     name: 'course',
-    component: Layout,
+    components: {
+      default: Layout,
+      extraHeader: CourseHeader,
+    },
     meta: { requiresLogin: true },
     children: [
       {

@@ -2,7 +2,13 @@
 import type { CourseMemberView } from '@backend/types/entity'
 import type { UserPrivilege } from '@/types'
 import { storeToRefs } from 'pinia'
-import { Button, Checkbox, Icon, Message, Modal, Page, Poptip, Spin, Tag, Tooltip } from 'view-ui-plus'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Paginator from 'primevue/paginator'
+import PrimeTag from 'primevue/tag'
+import { useConfirm } from 'primevue/useconfirm'
 import { onBeforeMount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -10,13 +16,15 @@ import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
-import { courseRoleFields } from '@/utils/constant'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const confirm = useConfirm()
+const message = useMessage()
 const { course } = api
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
@@ -59,17 +67,24 @@ function openEditDialog (userId: string) {
   openEdit = true
 }
 
-function removeMember (userId: string) {
-  Modal.confirm({
-    title: t('oj.delete'),
-    content: t('oj.course_remove_member_confirm'),
-    okText: t('oj.ok'),
-    cancelText: t('oj.cancel'),
-    onOk () {
-      course.removeMember(id, userId).then(() => {
-        Message.success(t('oj.course_member_remove_success'))
-        fetch()
-      })
+function removeMember (event: any, userId: string) {
+  confirm.require({
+    target: event.currentTarget,
+    message: t('oj.course_remove_member_confirm'),
+    header: t('oj.delete'),
+    rejectProps: {
+      label: t('oj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: t('oj.ok'),
+      severity: 'danger',
+    },
+    accept: async () => {
+      await course.removeMember(id, userId)
+      message.success(t('oj.course_member_remove_success'))
+      fetch()
     },
   })
 }
@@ -85,235 +100,156 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div>
-    <div class="members-header">
-      <Page
-        class="members-page-table" :model-value="page" :total="total" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <Page
-        class="members-page-simple" simple :model-value="page" :total="total" :page-size="pageSize" show-elevator
-        @on-change="pageChange"
-      />
-      <div class="members-action">
-        <Button type="primary" class="filter-button" @click="openEdit = true">
-          {{ t('oj.add') }}
-        </Button>
-      </div>
+  <div class="max-w-7xl p-0">
+    <div class="border-b border-surface flex justify-end p-6">
+      <Button :label="t('oj.add')" icon="pi pi-plus" @click="openEdit = true" />
     </div>
-    <div class="members-table-container">
-      <table class="members-table">
-        <thead>
-          <tr>
-            <th class="member-username">
-              {{ t('oj.username') }}
-            </th>
-            <th class="member-nick">
-              {{ t('oj.nick') }}
-            </th>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_basic_view')" placement="top">
-                <Icon type="md-eye" class="role-icon" />
-              </Tooltip>
-            </td>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_view_testcase')" placement="top">
-                <Icon type="md-list-box" class="role-icon" />
-              </Tooltip>
-            </td>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_view_solution')" placement="top">
-                <Icon type="md-code-download" class="role-icon" />
-              </Tooltip>
-            </td>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_manage_problem')" placement="top">
-                <Icon type="md-apps" class="role-icon" />
-              </Tooltip>
-            </td>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_manage_contest')" placement="top">
-                <Icon type="md-trophy" class="role-icon" />
-              </Tooltip>
-            </td>
-            <td class="member-role">
-              <Tooltip :content="t('oj.course_manage_course')" placement="top">
-                <Icon type="md-filing" class="role-icon" />
-              </Tooltip>
-            </td>
-            <th class="member-update">
-              {{ t('oj.last_update') }}
-            </th>
-            <th class="member-action">
-              {{ t('oj.action') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="docs.length === 0" class="members-empty">
-            <td colspan="10">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="doc in docs" :key="doc.user.uid">
-            <td class="member-username">
-              <RouterLink :to="{ name: 'UserProfile', params: { uid: doc.user.uid } }">
-                {{ doc.user.uid }}
-              </RouterLink>
-            </td>
-            <td class="member-nick">
-              <span v-if="doc.user.nick?.trim()">{{ doc.user.nick }}</span>
-            </td>
-            <td
-              v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(doc.user.privilege as UserPrivilege)"
-              colspan="6"
+
+    <DataTable class="-mb-px whitespace-nowrap" :value="docs" :lazy="true" :loading="loading" scrollable>
+      <Column class="pl-8 w-52" :header="t('oj.username')">
+        <template #body="{ data }">
+          <RouterLink :to="{ name: 'UserProfile', params: { uid: data.user.uid } }">
+            {{ data.user.uid }}
+          </RouterLink>
+        </template>
+      </Column>
+
+      <Column class="w-52" :header="t('oj.nick')">
+        <template #body="{ data }">
+          <span v-if="data.user.nick?.trim()">{{ data.user.nick }}</span>
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_basic_view')" class="pi pi-eye" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <span />
+          </template>
+          <Checkbox v-else v-model="data.role.basic" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_view_testcase')" class="pi pi-list" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <span />
+          </template>
+          <Checkbox v-else v-model="data.role.viewTestcase" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_view_solution')" class="pi pi-code" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <span />
+          </template>
+          <Checkbox v-else v-model="data.role.viewSolution" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_manage_problem')" class="pi pi-th-large" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <span />
+          </template>
+          <Checkbox v-else v-model="data.role.manageProblem" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_manage_contest')" class="pi pi-trophy" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <span />
+          </template>
+          <Checkbox v-else v-model="data.role.manageContest" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="text-center w-14">
+        <template #header>
+          <i v-tooltip.top="t('oj.course_manage_course')" class="pi pi-folder" />
+        </template>
+        <template #body="{ data }">
+          <template
+            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
+          >
+            <PrimeTag
+              v-if="data.user.privilege === privilege.Admin"
+              v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
+              severity="info"
             >
-              <Poptip trigger="hover" placement="top">
-                <template #content>
-                  <p style="max-width: 256px; white-space: normal;">
-                    {{ t('oj.course_admin_override') }}
-                  </p>
-                </template>
-                <Tag v-if="doc.user.privilege === privilege.Admin" class="privilege-tag" color="cyan">
-                  Admin
-                </Tag>
-                <Tag v-else-if="doc.user.privilege === privilege.Root" class="privilege-tag" color="gold">
-                  Root
-                </Tag>
-              </Poptip>
-            </td>
-            <template v-else>
-              <td v-for="field in courseRoleFields" :key="field" class="member-role">
-                <Checkbox v-model="doc.role[field]" class="role-checkbox" disabled />
-              </td>
-            </template>
-            <td class="member-update">
-              {{ timePretty(doc.updatedAt) }}
-            </td>
-            <td class="member-action">
-              <template v-if="isAdmin || doc.user.uid !== profile?.uid">
-                <span class="role-action" @click="() => openEditDialog(doc.user.uid)">{{ t('oj.edit') }}</span>
-                <span class="role-action" @click="() => removeMember(doc.user.uid)">{{ t('oj.delete') }}</span>
-              </template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="members-footer">
-      <Page
-        class="members-page-table" :model-value="page" :total="total" :page-size="pageSize" show-elevator show-total
-        @on-change="pageChange"
-      />
-      <Page
-        class="members-page-mobile" size="small" :model-value="page" :total="total" :page-size="pageSize"
-        show-elevator show-total @on-change="pageChange"
-      />
-    </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
+              Admin
+            </PrimeTag>
+            <PrimeTag
+              v-else-if="data.user.privilege === privilege.Root"
+              v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
+              severity="warn"
+            >
+              Root
+            </PrimeTag>
+          </template>
+          <Checkbox v-else v-model="data.role.manageCourse" binary disabled />
+        </template>
+      </Column>
+
+      <Column class="w-44" :header="t('oj.last_update')">
+        <template #body="{ data }">
+          {{ timePretty(data.updatedAt) }}
+        </template>
+      </Column>
+
+      <Column class="pr-6 w-32" :header="t('oj.action')">
+        <template #body="{ data }">
+          <template v-if="isAdmin || data.user.uid !== profile?.uid">
+            <Button :label="t('oj.edit')" text size="small" @click="() => openEditDialog(data.user.uid)" />
+            <Button
+              :label="t('oj.delete')" text severity="danger" size="small"
+              @click="event => removeMember(event, data.user.uid)"
+            />
+          </template>
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('oj.empty_content') }}
+        </span>
+      </template>
+    </DataTable>
+
+    <Paginator
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(page - 1) * pageSize" :rows="pageSize" :total-records="total"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      :current-page-report-template="t('ptoj.paginator_report')"
+      @page="(event: any) => pageChange(event.first / event.rows + 1)"
+    />
+
     <CourseRoleEdit v-model="openEdit" :course-id="id" :user-id="editUserId" />
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../../styles/common'
-
-.members-header
-  padding 0 40px
-  margin-bottom 25px
-  display flex
-  justify-content space-between
-  align-items center
-.members-page-simple, .members-page-mobile
-  display none
-.members-action
-  display flex
-  align-items center
-  > *
-    margin-left 4px
-
-@media screen and (max-width: 1024px)
-  .members-header
-    padding 0 20px
-    margin-bottom 5px
-    .members-page-table
-      display none
-    .members-page-simple
-      display block
-  .members-footer
-    padding 0 20px
-    margin-top 20px !important
-
-@media screen and (max-width: 768px)
-  .members-page-table
-    display none !important
-  .members-page-mobile
-    display block
-
-.members-table-container
-  overflow-x auto
-  width 100%
-.members-table
-  width 100%
-  min-width 1022px
-  table-layout fixed
-  th, td
-    padding 0 16px
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-
-.member-username
-  padding-left 40px !important
-  width 200px
-  max-width 170px
-  text-align left
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
-.member-nick
-  white-space nowrap
-  text-overflow ellipsis
-  overflow hidden
-.member-role
-  width 48px
-  text-align center
-  .role-checkbox
-    margin 0 0 2px
-  .role-icon
-    font-size 18px
-.member-update
-  width 180px
-  text-align center
-.member-action
-  width 140px
-  text-align right
-  padding-right 40px !important
-  .role-action
-    margin-left 16px
-    color var(--oj-primary-color)
-    cursor pointer
-  .role-action:first-child
-    margin-left 0
-.privilege-tag
-  margin 0 0 4px
-
-.members-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-
-.members-footer
-  padding 0 40px
-  margin-top 40px
-  text-align center
-</style>

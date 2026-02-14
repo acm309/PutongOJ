@@ -2,8 +2,16 @@
 import type { ProblemEntityPreview } from '@backend/types/entity'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
-import { useConfirm } from 'primevue'
-import { Button, Form, FormItem, Icon, Input, InputNumber, Message, Modal, Option, Page, Select, Spin, Tag, Tooltip } from 'view-ui-plus'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
+import Paginator from 'primevue/paginator'
+import Select from 'primevue/select'
+import { useConfirm } from 'primevue/useconfirm'
+import { Tag } from 'view-ui-plus'
 import { onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -14,28 +22,30 @@ import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
-import { onRouteQueryUpdate, purify } from '@/utils/helper'
+import { onRouteQueryUpdate } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const confirm = useConfirm()
+const message = useMessage()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
 const courseStore = useCourseStore()
-const { status, judge } = $(storeToRefs(rootStore))
-const { isAdmin } = storeToRefs(sessionStore)
+const { status } = $(storeToRefs(rootStore))
+const { isAdmin } = $(storeToRefs(sessionStore))
 const { problems, solved } = $(storeToRefs(problemStore))
-const { course } = storeToRefs(courseStore)
+const { course } = $(storeToRefs(courseStore))
 const { findProblems, update } = problemStore
 
 const problemStatus = constant.status
-const searchOptions = Object.freeze([
+const searchOptions = [
   { value: 'pid', label: 'Pid' },
   { value: 'title', label: 'Title' },
   { value: 'tag', label: 'Tag' },
-])
+]
 
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
@@ -62,7 +72,7 @@ const query = $computed<FindProblemsParams>(() => {
 })
 
 function reload (payload: Partial<FindProblemsParams> = {}) {
-  const routeQuery = Object.assign(query, purify(payload))
+  const routeQuery = { ...query, ...payload }
   router.push({
     name: 'courseProblems',
     params: { id },
@@ -95,21 +105,21 @@ const newPosition = ref<number | null>(null)
 
 async function updateSorting () {
   if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.total + 1) {
-    Message.error(t('oj.invalid_position'))
+    message.error(t('oj.invalid_position'))
     return
   }
   loading = true
   try {
     await api.course.moveCourseProblem(
-      course.value.courseId,
+      course.courseId,
       sorting.value.pid,
       newPosition.value,
     )
-    Message.success(t('oj.problem_sorting_updated'))
+    message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
   } catch (e: any) {
-    Message.error(t('oj.failed_to_update_sorting', { error: e.message }))
+    message.error(t('oj.failed_to_update_sorting', { error: e.message }))
   } finally {
     loading = false
   }
@@ -129,8 +139,8 @@ function removeProblem (event: any, pid: number) {
       severity: 'danger',
     },
     accept: async () => {
-      await api.course.removeCourseProblem(course.value.courseId, pid)
-      Message.success('题目已从课程中移除')
+      await api.course.removeCourseProblem(course.courseId, pid)
+      message.success('题目已从课程中移除')
       fetch()
     },
   })
@@ -141,283 +151,170 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="problem-list-wrap">
-    <div class="problem-list-header">
-      <Page
-        class="problem-page-table" :model-value="page" :total="problems.total" :page-size="problems.limit"
-        show-elevator @on-change="pageChange"
-      />
-      <Page
-        class="problem-page-simple" :model-value="page" simple :total="problems.total" :page-size="problems.limit"
-        show-elevator @on-change="pageChange"
-      />
-      <div class="problem-list-filter">
-        <Select v-model="type" class="search-type-select">
-          <Option v-for="item in searchOptions" :key="item.value" :value="item.value">
-            {{ item.label }}
-          </Option>
-        </Select>
-        <Input v-model="content" class="search-input" clearable @keyup.enter="search" />
-        <Button type="primary" class="search-button" @click="search">
-          {{ t('oj.search') }}
-        </Button>
+  <div class="max-w-7xl p-0">
+    <div class="border-b border-surface p-6">
+      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+        <div class="flex gap-2">
+          <Select
+            v-model="type" class="w-36" fluid :options="searchOptions" option-label="label" option-value="value"
+            :disabled="loading"
+          />
+          <InputText
+            v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
+            @keypress.enter="search"
+          />
+        </div>
+
+        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <!-- <Button
+            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
+            @click="() => reload({ page: 1, type: undefined, content: undefined })"
+          /> -->
+          <Button :label="t('oj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
+        </div>
       </div>
     </div>
-    <div class="problem-table-container">
-      <table class="problem-table">
-        <thead>
-          <tr>
-            <th class="problem-status">
-              #
-            </th>
-            <th class="problem-id">
-              {{ t('oj.id') }}
-            </th>
-            <th class="problem-pid">
-              {{ t('oj.pid') }}
-            </th>
-            <th class="problem-title">
-              {{ t('oj.title') }}
-            </th>
-            <th class="problem-tags">
-              {{ t('oj.tags') }}
-            </th>
-            <th class="problem-ratio">
-              {{ t('oj.ratio') }}
-            </th>
-            <th v-if="course.role.manageProblem" class="problem-visible">
-              {{ t('oj.visible') }}
-            </th>
-            <th v-if="isAdmin" class="problem-sorting">
-              {{ t('oj.sorting') }}
-            </th>
-            <th v-if="isAdmin" class="problem-remove">
-              {{ t('oj.delete') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="problems.total === 0" class="status-empty">
-            <td :colspan="6 + (course.role.manageProblem ? 1 : 0) + (isAdmin ? 1 : 0)">
-              <Icon type="ios-planet-outline" class="empty-icon" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="(item, index) in problems.docs" :key="item.pid">
-            <td class="problem-status">
-              <Icon v-if="solved.includes(item.pid)" type="md-checkmark" />
-            </td>
-            <td class="problem-id">
-              {{ pageSize * (page - 1) + index + 1 }}
-            </td>
-            <td class="problem-pid">
-              {{ item.pid }}
-            </td>
-            <td class="problem-title">
-              <RouterLink :to="{ name: 'problemInfo', params: { pid: item.pid } }">
-                <Button type="text" class="table-button">
-                  {{ item.title }}
-                </Button>
-              </RouterLink>
-            </td>
-            <td class="problem-tags">
-              <template v-for="(tag, tagIdx) in item.tags" :key="tagIdx">
-                <Tag
-                  class="problem-tag" :color="tag.color"
-                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
-                >
-                  {{ tag.name }}
-                </Tag>
-              </template>
-            </td>
-            <td class="problem-ratio">
-              <span>{{ formatPercentage(item.solve, item.submit) }}</span>&nbsp;
-              (
-              <RouterLink :to="{ name: 'ProblemSolutions', params: { pid: item.pid }, query: { judge: judge.Accepted } }">
-                {{ item.solve }}
-              </RouterLink> /
-              <RouterLink :to="{ name: 'ProblemSolutions', params: { pid: item.pid } }">
-                {{ item.submit }}
-              </RouterLink>
-              )
-            </td>
-            <td v-if="course.role.manageProblem" class="problem-visible">
-              <Tooltip :content="t('oj.click_to_change_status')" placement="right">
-                <a :class="{ 'status-disabled': !(isAdmin || item.isOwner) }" @click="switchStatus(item)">
-                  {{ problemStatus[item.status] }}
-                </a>
-              </Tooltip>
-            </td>
-            <td v-if="isAdmin" class="problem-sorting">
-              <Button type="text" @click="sortingModal = true; sorting = item">
-                {{ t('oj.move') }}
-              </Button>
-            </td>
-            <td v-if="isAdmin" class="problem-remove">
-              <Button type="text" @click="event => removeProblem(event, item.pid)">
-                {{ t('oj.delete') }}
-              </Button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="problem-list-footer">
-      <Page
-        class="problem-page-table" :model-value="page" :total="problems.total" :page-size="problems.limit"
-        show-elevator show-total @on-change="pageChange"
-      />
-      <Page
-        class="problem-page-mobile" :model-value="page" size="small" :total="problems.total"
-        :page-size="problems.limit" show-totalshow-elevator @on-change="pageChange"
-      />
-    </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
-    <Modal v-model="sortingModal" :closable="false" :title="t('oj.update_problem_sorting')" @on-ok="updateSorting">
-      <Form label-position="top" style="margin-bottom: -16px;">
-        <FormItem :label="t('oj.move_problem')">
-          <Input v-model="sorting.title" size="large" disabled />
-        </FormItem>
-        <FormItem :label="t('oj.before_position')">
-          <InputNumber
-            v-model="newPosition" size="large" :min="1" :max="problems.total + 1"
-            :placeholder="t('oj.enter_new_position')" controls-outside style="width: 100%;"
+
+    <DataTable class="-mb-px whitespace-nowrap" :value="problems.docs" :lazy="true" :loading="loading" scrollable>
+      <Column class="pl-8 text-center w-18">
+        <template #body="{ data }">
+          <span v-if="solved.includes(data.pid)" class="text-emerald-500">
+            <i class="pi pi-check" />
+          </span>
+          <span v-else>
+            <i class="pi pi-minus text-muted-color text-sm/tight" />
+          </span>
+        </template>
+      </Column>
+
+      <Column class="px-2 text-center w-18" field="index">
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-hashtag" />
+          </span>
+        </template>
+        <template #body="{ index }">
+          {{ pageSize * (page - 1) + index + 1 }}
+        </template>
+      </Column>
+
+      <Column class="px-2 text-center w-18" field="pid">
+        <template #header>
+          <span class="text-center w-full">
+            PID
+          </span>
+        </template>
+      </Column>
+
+      <Column :header="t('oj.title')">
+        <template #body="{ data }">
+          <span class="flex gap-4 items-center justify-between">
+            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
+              {{ data.title }}
+            </RouterLink>
+            <span class="-my-2 flex gap-1 justify-end">
+              <Tag
+                v-for="(tag, tagIdx) in data.tags" :key="tagIdx" class="cursor-pointer" :color="tag.color"
+                @click="reload({ page: 1, type: 'tag', content: tag.name })"
+              >
+                {{ tag.name }}
+              </Tag>
+            </span>
+          </span>
+        </template>
+      </Column>
+
+      <Column class="pr-6 w-42">
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-chart-pie" />
+          </span>
+        </template>
+        <template #body="{ data }">
+          <span class="flex gap-2 items-center">
+            <span class="grow text-center text-muted-color text-sm">
+              {{ data.solve }} / {{ data.submit }}
+            </span>
+            <span class="min-w-18 text-right">
+              {{ formatPercentage(data.solve, data.submit) }}
+            </span>
+          </span>
+        </template>
+      </Column>
+
+      <Column v-if="course.role?.manageProblem" class="pr-6 text-center w-24">
+        <template #header>
+          {{ t('oj.visible') }}
+        </template>
+        <template #body="{ data }">
+          <a
+            v-if="isAdmin || data.isOwner" v-tooltip.left="t('oj.click_to_change_status')" class="cursor-pointer"
+            @click="switchStatus(data)"
+          >
+            {{ problemStatus[data.status as 0 | 2] }}
+          </a>
+          <span v-else class="text-muted-color">
+            {{ problemStatus[data.status as 0 | 2] }}
+          </span>
+        </template>
+      </Column>
+
+      <Column v-if="isAdmin" class="text-center w-20">
+        <template #header>
+          {{ t('oj.sorting') }}
+        </template>
+        <template #body="{ data }">
+          <Button class="-my-2" :label="t('oj.move')" text size="small" @click="sortingModal = true; sorting = data" />
+        </template>
+      </Column>
+
+      <Column v-if="isAdmin" class="pr-6 text-center w-24">
+        <template #header>
+          {{ t('oj.delete') }}
+        </template>
+        <template #body="{ data }">
+          <Button
+            class="-my-2"
+            :label="t('oj.delete')" text severity="danger" size="small"
+            @click="event => removeProblem(event, data.pid)"
           />
-        </FormItem>
-      </Form>
-    </Modal>
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('oj.empty_content') }}
+        </span>
+      </template>
+    </DataTable>
+
+    <Paginator
+      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
+      :first="(page - 1) * pageSize" :rows="pageSize" :total-records="problems.total"
+      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+      :current-page-report-template="t('ptoj.paginator_report')"
+      @page="(event: any) => pageChange(event.first / event.rows + 1)"
+    />
+
+    <Dialog v-model:visible="sortingModal" modal :header="t('oj.update_problem_sorting')" :style="{ width: '30rem' }">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold">{{ t('oj.move_problem') }}</label>
+          <InputText :model-value="sorting.title" disabled fluid />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold">{{ t('oj.before_position') }}</label>
+          <InputNumber
+            v-model="newPosition" fluid show-buttons :min="1" :max="problems.total + 1"
+            :placeholder="t('oj.enter_new_position')"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button :label="t('oj.cancel')" severity="secondary" outlined @click="sortingModal = false" />
+        <Button :label="t('oj.confirm')" @click="updateSorting" />
+      </template>
+    </Dialog>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-@import '../../styles/common'
-
-.problem-list-wrap
-  width 100%
-  margin 0 auto
-  padding 0 0 40px
-.problem-list-header
-  padding 0 40px
-  margin-bottom 25px
-  display flex
-  justify-content space-between
-  .problem-page-table
-    flex none
-    display flex
-  .problem-list-filter
-    flex none
-    display flex
-  .problem-page-simple
-    display none
-.problem-list-footer
-  padding 0 40px
-  margin-top 40px
-  text-align center
-.problem-page-mobile
-  display none
-
-@media screen and (max-width: 1024px)
-  .problem-list-wrap
-    padding 0 0 20px
-  .problem-list-header
-    padding 0 20px
-    margin-bottom 5px
-    .problem-page-table
-      display none !important
-    .problem-page-simple
-      display block
-  .problem-status
-    padding-left 20px
-  .problem-list-footer
-    padding 0 20px
-    margin-top 20px
-
-@media screen and (max-width: 768px)
-  .problem-page-table, .problem-page-simple
-    display none !important
-  .problem-list-filter
-    width 100%
-    .search-input
-      width 100%
-  .problem-page-mobile
-    display block
-
-.search-type-select, .search-input, .search-button
-  margin-left 4px
-.search-type-select, .search-button
-  width 80px
-  min-width 80px
-.search-input
-  width 160px
-
-.problem-table-container
-  overflow-x auto
-  width 100%
-.problem-table
-  width 100%
-  min-width 1024px
-  table-layout fixed
-  th, td
-    padding 0 16px
-  tbody tr
-    transition background-color 0.2s ease
-    &:hover
-      background-color #f7f7f7
-  .table-button
-    padding 0
-    border-width 0
-    width 100%
-    &:hover
-      background-color transparent
-
-.problem-status
-  width 70px
-  text-align center
-  padding-left 40px !important
-.problem-id
-  width 50px
-  text-align right
-.problem-pid
-  width 70px
-  text-align right
-.problem-title
-  width 300px
-  .table-button
-    text-align left
-.problem-tags
-  text-align right
-  white-space nowrap
-  overflow-y scroll
-  &::-webkit-scrollbar
-    display: none
-.problem-ratio
-  width 200px
-.problem-visible
-  width 90px
-.problem-sorting
-  width 80px
-  text-align center
-.problem-remove
-  width 110px
-  text-align center
-  padding-right 40px !important
-
-.problem-tag
-  margin-top: -2px
-  cursor: pointer
-.status-disabled
-  color #b0b0b0
-  cursor not-allowed
-
-.status-empty
-  &:hover
-    background-color transparent !important
-  td
-    margin-bottom 20px
-    padding 32px !important
-    border-radius 4px
-    text-align center
-    .empty-icon
-      display block
-      font-size 32px
-</style>
