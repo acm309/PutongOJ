@@ -6,6 +6,7 @@ import { nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import OjLayout from '@/components/Layout.vue'
+import LoadingBar from '@/components/LoadingBar.vue'
 import { useRootStore } from '@/store'
 import { setErrorHandler } from './api'
 import { useSessionStore } from './store/modules/session'
@@ -72,6 +73,7 @@ setTimeout(async () => {
 
 <template>
   <div id="app">
+    <LoadingBar />
     <OjLayout />
     <Toast group="global" style="top: 82px" />
     <ConfirmPopup />

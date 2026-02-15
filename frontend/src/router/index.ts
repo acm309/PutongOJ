@@ -1,5 +1,5 @@
-import { LoadingBar } from 'view-ui-plus'
 import { createRouter, createWebHistory } from 'vue-router'
+import { useLoadingBar } from '@/composables/useLoadingBar'
 import { useSessionStore } from '@/store/modules/session'
 import routes from './routes'
 
@@ -8,9 +8,11 @@ const router = createRouter({
   routes,
 })
 
+const loadingBar = useLoadingBar()
+
 // 全局身份确认
 router.beforeEach((to, from, next) => {
-  LoadingBar.start()
+  loadingBar.start()
   const session = useSessionStore()
 
   if (to.meta.requiresLogin && !session.isLogined) {
@@ -25,7 +27,7 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach(() => {
-  LoadingBar.finish()
+  loadingBar.finish()
 })
 
 export default router
