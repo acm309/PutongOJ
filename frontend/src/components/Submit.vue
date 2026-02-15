@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
-import { Alert, Form, FormItem, Input, Option, Select } from 'view-ui-plus'
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import Message from 'primevue/message'
+import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
 import { language, languagesOrder } from '@/utils/constant'
@@ -17,7 +19,7 @@ const props = defineProps({
 const { t } = useI18n()
 const solutionStore = useSolutionStore()
 const { solution } = $(storeToRefs(solutionStore))
-const solutionStorage = $ref(useSolutionStorage())
+const solutionStorage = ref(useSolutionStorage())
 
 const languages = $computed(() =>
   languagesOrder.map(key => ({
@@ -28,15 +30,15 @@ const languages = $computed(() =>
 
 async function init () {
   solutionStore.clearSavedSolution()
-  if (solutionStorage[props.pid]) {
-    Object.assign(solution, solutionStorage[props.pid])
+  if (solutionStorage.value[props.pid]) {
+    Object.assign(solution, solutionStorage.value[props.pid])
   }
 }
 
 watch(
   () => solution,
   debounce((updatedSolution) => {
-    solutionStorage[props.pid] = updatedSolution
+    solutionStorage.value[props.pid] = updatedSolution
   }, 500),
   { deep: true },
 )
@@ -47,32 +49,27 @@ onBeforeUnmount(solutionStore.clearSavedSolution)
 </script>
 
 <template>
-  <div>
-    <Form v-model="solution">
-      <FormItem label="Language" label-position="left">
-        <Select v-model="solution.language">
-          <Option v-for="option in languages" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </Option>
-        </Select>
-      </FormItem>
-      <FormItem>
-        <Alert v-if="solution.language === 3 && !solution.code?.includes('Main')" show-icon>
-          {{ t('oj.java_class_alert') }}
-        </Alert>
-        <Input
-          v-model="solution.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }"
-          :placeholder="t('oj.paste_your_code')"
-        />
-      </FormItem>
-    </Form>
+  <div class="flex flex-col gap-4">
+    <div>
+      <label class="block font-medium mb-1 text-base">Language</label>
+      <Select
+        v-model="solution.language" :options="languages" option-label="label" option-value="value"
+        class="w-full"
+      />
+    </div>
+    <div>
+      <Message v-if="solution.language === 3 && !solution.code?.includes('Main')" severity="warn" :closable="false" icon="pi pi-info-circle">
+        {{ t('oj.java_class_alert') }}
+      </Message>
+      <Textarea
+        v-model="solution.code" class="code-input" fluid auto-resize rows="15"
+        :placeholder="t('oj.paste_your_code')"
+      />
+    </div>
   </div>
 </template>
 
 <style lang="stylus" scoped>
-.ivu-form-item-label
-  font-size: 16px
-
 .code-input
   font-family var(--font-code)
 </style>

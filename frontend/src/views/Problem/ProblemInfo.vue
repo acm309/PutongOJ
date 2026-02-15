@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { Button } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Problem from '@/components/Problem.vue'
@@ -22,8 +22,6 @@ function submit () {
 <template>
   <div>
     <Problem v-model="problem" />
-    <Button shape="circle" icon="md-paper-plane" @click="submit">
-      {{ t('oj.submit') }}
-    </Button>
+    <Button rounded icon="pi pi-send" :label="t('oj.submit')" @click="submit" />
   </div>
 </template>

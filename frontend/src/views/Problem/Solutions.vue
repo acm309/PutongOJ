@@ -112,7 +112,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="-mt-6 lg:-mt-11 p-0">
+  <div class="p-0">
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />

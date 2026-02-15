@@ -52,7 +52,7 @@ watch(() => props.modelValue, (val) => {
   >
     <div class="flex flex-col gap-2">
       <label class="font-semibold">{{ t('oj.problems_to_add') }}</label>
-      <ProblemSelect v-model="selected" multiple :scope="{ courseId }" />
+      <ProblemSelect v-model="selected" :scope="{ courseId }" />
     </div>
 
     <template #footer>

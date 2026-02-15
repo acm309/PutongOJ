@@ -11,11 +11,11 @@ import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import { useConfirm } from 'primevue/useconfirm'
-import { Tag } from 'view-ui-plus'
 import { onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import ProblemTag from '@/components/ProblemTag.vue'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
@@ -214,12 +214,12 @@ onRouteQueryUpdate(fetch)
               {{ data.title }}
             </RouterLink>
             <span class="-my-2 flex gap-1 justify-end">
-              <Tag
-                v-for="(tag, tagIdx) in data.tags" :key="tagIdx" class="cursor-pointer" :color="tag.color"
-                @click="reload({ page: 1, type: 'tag', content: tag.name })"
-              >
-                {{ tag.name }}
-              </Tag>
+              <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
+                <ProblemTag
+                  class="cursor-pointer" :color="tag.color"
+                  :name="tag.name" @click="reload({ page: 1, type: 'tag', content: tag.name })"
+                />
+              </template>
             </span>
           </span>
         </template>

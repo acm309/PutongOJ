@@ -107,8 +107,8 @@ onRouteQueryUpdate(getStatistics)
 </script>
 
 <template>
-  <div class="-mt-4 p-0">
-    <Chart type="doughnut" :data="chartData" :options="chartOptions" class="h-80 mb-8" />
+  <div class="p-0">
+    <Chart type="doughnut" :data="chartData" :options="chartOptions" class="h-80 my-8" />
 
     <DataTable class="whitespace-nowrap" :value="list" data-key="sid" :lazy="true" :loading="loading" scrollable>
       <Column field="sid" class="font-medium pl-6 text-center" frozen>

@@ -218,7 +218,7 @@ fetchTestcases()
 </script>
 
 <template>
-  <div class="-mt-6 lg:-mt-11 p-0">
+  <div class="p-0">
     <div class="border-b border-surface flex flex-wrap gap-4 items-center justify-between p-6">
       <div class="flex font-semibold gap-4 items-center">
         <i class="pi pi-database text-2xl" />

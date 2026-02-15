@@ -1,6 +1,6 @@
 <script setup>
 import { storeToRefs } from 'pinia'
-import { Button, Message, Spin } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -9,8 +9,10 @@ import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
+const message = useMessage()
 const route = useRoute()
 const router = useRouter()
 
@@ -27,23 +29,19 @@ const { isLogined } = $(storeToRefs(sessionStore))
 const { solution } = $(storeToRefs(solutionStore))
 
 let title = $ref('')
-let loading = $ref(false)
-
 const pid = $computed(() => route.params.pid)
 
 async function submitSolution () {
   await create(Object.assign({}, solution, { pid }))
-  Message.info(`submit pid:${problem.pid} success!`)
+  message.info(`submit pid:${problem.pid} success!`)
   router.push({ name: 'MySubmissions', query: { problem: pid } })
 }
 
 async function init () {
-  loading = true
   if (problem.title == null)
     await findOne({ pid })
   title = problem.title
   changeDomTitle({ title })
-  loading = false
 }
 
 onBeforeMount(init)
@@ -51,17 +49,12 @@ onBeforeMount(init)
 
 <template>
   <div>
-    <h1 class="font-bold">
+    <h1 class="font-bold text-4xl">
       {{ pid }}: {{ title }}
     </h1>
     <Submit :pid="pid" />
-    <Button type="primary" :disabled="!isLogined" @click="submitSolution">
-      {{ isLogined ? t('oj.submit') : t('oj.please_login') }}
-    </Button>
-    <Button style="margin-left: 8px" @click="clearCode">
-      {{ t('oj.reset') }}
-    </Button>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
+    <Button :disabled="!isLogined" :label="isLogined ? t('oj.submit') : t('oj.please_login')" @click="submitSolution" />
+    <Button style="margin-left: 8px" :label="t('oj.reset')" severity="secondary" outlined @click="clearCode" />
   </div>
 </template>
 

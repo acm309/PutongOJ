@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import { Spin } from 'view-ui-plus'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -21,12 +20,8 @@ const { contestId, problems, problemLabels } = storeToRefs(contestStore)
 
 const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
-let loading = $ref(false)
-
 async function fetch () {
-  loading = true
   await findOneProblem({ pid: problemId.value, cid: contestId.value })
-  loading = false
 }
 
 fetch()
@@ -58,6 +53,5 @@ onRouteParamUpdate(fetch)
         <Button icon="pi pi-send" :label="t('oj.submit')" outlined />
       </RouterLink>
     </div>
-    <Spin size="large" fix :show="loading" />
   </div>
 </template>

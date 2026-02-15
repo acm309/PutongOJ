@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { tagColors } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Tag } from 'view-ui-plus'
 import { onMounted, ref, watch } from 'vue'
 import { useTagStore } from '@/store/modules/tag'
+import ProblemTag from './ProblemTag.vue'
 
 const props = defineProps<{
   modelValue: number[]
@@ -38,14 +38,13 @@ watch(selectedTags, (newVal) => {
 </script>
 
 <template>
-  <div class="problem-tags-select">
+  <div class="flex flex-wrap gap-1 problem-tags-select">
     <template v-for="color in tagColors" :key="color">
-      <Tag
-        v-for="tag of (tagItemsGroupByColor[color] || [])" :key="tag.tagId" class="problem-tag" checkable
-        :checked="selectedTags.includes(tag.tagId)" :color="color" @click="() => handleTagClick(tag.tagId)"
-      >
-        {{ tag.name }}
-      </Tag>
+      <ProblemTag
+        v-for="tag of (tagItemsGroupByColor[color] || [])" :key="tag.tagId" class="cursor-pointer problem-tag"
+        :filled="selectedTags.includes(tag.tagId)" :color="color" :name="tag.name"
+        @click="() => handleTagClick(tag.tagId)"
+      />
     </template>
   </div>
 </template>
@@ -59,6 +58,5 @@ watch(selectedTags, (newVal) => {
   padding 8px 12px 10px
 
 .problem-tag
-  margin-right 6px
   line-height 20px !important
 </style>

@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { tagColors } from '@backend/utils/constants'
 import { storeToRefs } from 'pinia'
-import { Button, Form, FormItem, Icon, Input, Message, Modal, Option, Select, Spin, Tag } from 'view-ui-plus'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import { useConfirm } from 'primevue/useconfirm'
 import { capitalize, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProblemTag from '@/components/ProblemTag.vue'
 import { useTagStore } from '@/store/modules/tag'
 import { timePretty } from '@/utils/format'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
+const message = useMessage()
+const confirm = useConfirm()
 const tagStore = useTagStore()
 const { tag, tags, tagsGroupByColor } = storeToRefs(tagStore)
 
@@ -15,7 +24,11 @@ const loadingTag = ref(false)
 const loadingTags = ref(false)
 const tagModal = ref(false)
 const isCreate = ref(false)
-const tagFormRef = ref<any>(null)
+
+const colorOptions = tagColors.map(color => ({
+  label: capitalize(color),
+  value: color,
+}))
 
 async function fetch () {
   loadingTags.value = true
@@ -49,57 +62,56 @@ const tagUpdatedAt = $computed(() => {
   return timePretty(tag.value.updatedAt)
 })
 
-const tagRules = $computed(() => ({
-  name: [
-    { required: true, trigger: 'change' },
-    { max: 30, trigger: 'change' },
-  ],
-  color: [
-    { required: true, trigger: 'change' },
-  ],
-}))
+function isFormValid () {
+  const name = tag.value.name?.trim()
+  if (!name || name.length > 30) return false
+  if (!tag.value.color) return false
+  return true
+}
 
 async function doCreateTag () {
   await tagStore.createTag()
-  Message.success('Tag created!')
+  message.success('Tag created!')
   tagModal.value = false
   await fetch()
 }
 
 function createTag () {
   tag.value.name = tag.value.name.trim()
-  tagFormRef.value.validate((valid: boolean) => {
-    if (!valid) {
-      Message.error(t('oj.form_invalid'))
-      return
-    }
-    const exists = tags.value.find(item => item.name === tag.value.name)
-    if (exists) {
-      Modal.confirm({
-        title: 'Duplicate Tag Name',
-        content: `Tag with name "${tag.value.name}" already exists. Do you want to create it anyway?`,
-        okText: 'Create',
-        cancelText: 'Cancel',
-        onOk: doCreateTag,
-      })
-    } else {
-      doCreateTag()
-    }
-  })
+  if (!isFormValid()) {
+    message.error(t('oj.form_invalid'))
+    return
+  }
+  const exists = tags.value.find(item => item.name === tag.value.name)
+  if (exists) {
+    confirm.require({
+      header: 'Duplicate Tag Name',
+      message: `Tag with name "${tag.value.name}" already exists. Do you want to create it anyway?`,
+      acceptProps: {
+        label: 'Create',
+      },
+      rejectProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      accept: doCreateTag,
+    })
+  } else {
+    doCreateTag()
+  }
 }
 
-function saveTag () {
+async function saveTag () {
   tag.value.name = tag.value.name.trim()
-  tagFormRef.value.validate(async (valid: boolean) => {
-    if (!valid) {
-      Message.error(t('oj.form_invalid'))
-      return
-    }
-    await tagStore.updateTag()
-    tagModal.value = false
-    Message.success('Tag updated!')
-    await fetch()
-  })
+  if (!isFormValid()) {
+    message.error(t('oj.form_invalid'))
+    return
+  }
+  await tagStore.updateTag()
+  tagModal.value = false
+  message.success('Tag updated!')
+  await fetch()
 }
 
 onBeforeMount(fetch)
@@ -112,13 +124,11 @@ onBeforeMount(fetch)
         Problem Tags
       </span>
       <div>
-        <Button type="primary" icon="md-add" @click="openTagCreate">
-          Create Tag
-        </Button>
+        <Button icon="pi pi-plus" label="Create Tag" @click="openTagCreate" />
       </div>
     </div>
     <div v-if="tags.length === 0" class="tags-empty">
-      <Icon type="ios-planet-outline" class="empty-icon" />
+      <i class="empty-icon pi pi-folder-open" />
       <span class="empty-text">{{ t('oj.empty_content') }}</span>
     </div>
     <template v-for="color in tagColors" v-else>
@@ -129,48 +139,48 @@ onBeforeMount(fetch)
           </span>
           <span class="tags-group-count">({{ tagsGroupByColor[color].length }})</span>
         </div>
-        <div class="tags-group-items">
-          <Tag
+        <div class="flex flex-wrap gap-2 tags-group-items">
+          <ProblemTag
             v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="tag-item" size="large"
+            :name="tagItem.name"
             :color="color" @click="openTagDetail(tagItem.tagId)"
-          >
-            {{ tagItem.name }}
-          </Tag>
+          />
         </div>
       </div>
     </template>
-    <Modal
-      v-model="tagModal"
-      :title="isCreate ? 'Create Problem Tag' : (loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`)" cancel-text="Close"
-      :ok-text="isCreate ? 'Create' : 'Save'" @on-ok="() => isCreate ? createTag() : saveTag()"
+    <Dialog
+      v-model:visible="tagModal"
+      :header="isCreate ? 'Create Problem Tag' : (loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`)"
+      modal :style="{ width: '480px' }"
     >
-      <Form ref="tagFormRef" class="tags-form" :label-width="90" :model="tag" :rules="tagRules">
-        <FormItem prop="name">
-          <template #label>
-            <span style="line-height: 20px;">{{ t('oj.name') }}</span>
-          </template>
-          <Input v-model="tag.name" size="large" :maxlength="30" show-word-limit placeholder="Enter tag name" />
-        </FormItem>
-        <FormItem label="Color" prop="color">
-          <Select v-model="tag.color">
-            <Option v-for="color in tagColors" :key="color" :value="color" :label="capitalize(color)">
-              <span>{{ capitalize(color) }}</span>
-              <Tag :color="color" style="float: right; margin-top: -1.5px">
-                {{ capitalize(color) }}
-              </Tag>
-            </Option>
+      <div class="flex flex-col gap-4 tags-form">
+        <IftaLabel>
+          <InputText id="tagName" v-model="tag.name" fluid :maxlength="30" placeholder="Enter tag name" />
+          <label for="tagName">{{ t('oj.name') }}</label>
+        </IftaLabel>
+        <IftaLabel>
+          <Select id="tagColor" v-model="tag.color" :options="colorOptions" option-label="label" option-value="value" fluid>
+            <template #option="{ option }">
+              <span>{{ option.label }}</span>
+              <ProblemTag :color="option.value" class="ml-auto" :name="option.label" />
+            </template>
           </Select>
-        </FormItem>
-        <FormItem v-if="!isCreate" label="Created At">
-          <Input v-model="tagCreatedAt" readonly />
-        </FormItem>
-        <FormItem v-if="!isCreate" label="Updated At">
-          <Input v-model="tagUpdatedAt" readonly />
-        </FormItem>
-      </Form>
-      <Spin size="large" fix :show="loadingTag" class="wrap-loading" />
-    </Modal>
-    <Spin size="large" fix :show="loadingTags" class="wrap-loading" />
+          <label for="tagColor">Color</label>
+        </IftaLabel>
+        <IftaLabel v-if="!isCreate">
+          <InputText id="tagCreatedAt" :model-value="tagCreatedAt" fluid readonly />
+          <label for="tagCreatedAt">Created At</label>
+        </IftaLabel>
+        <IftaLabel v-if="!isCreate">
+          <InputText id="tagUpdatedAt" :model-value="tagUpdatedAt" fluid readonly />
+          <label for="tagUpdatedAt">Updated At</label>
+        </IftaLabel>
+      </div>
+      <template #footer>
+        <Button :label="t('oj.cancel') || 'Close'" severity="secondary" outlined @click="tagModal = false" />
+        <Button :label="isCreate ? 'Create' : 'Save'" @click="() => isCreate ? createTag() : saveTag()" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -201,7 +211,6 @@ onBeforeMount(fetch)
 
 .tags-form
   padding 12px
-  margin-bottom -24px
 
 .tags-empty
   margin-bottom 20px

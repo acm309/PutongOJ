@@ -5,7 +5,9 @@ import cpp from 'highlight.js/lib/languages/cpp'
 import java from 'highlight.js/lib/languages/java'
 import python from 'highlight.js/lib/languages/python'
 import { storeToRefs } from 'pinia'
-import { Button, ButtonGroup, Col, Divider, Icon, Message, Modal, Numeral, Poptip, Row, Space, Spin } from 'view-ui-plus'
+import Button from 'primevue/button'
+import ButtonGroup from 'primevue/buttongroup'
+import { useConfirm } from 'primevue/useconfirm'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -14,8 +16,9 @@ import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
 import constant from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import { timePretty } from '@/utils/format'
+import { thousandSeparator, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
+import { useMessage } from '@/utils/message'
 import 'highlight.js/styles/atom-one-light.css'
 
 highlight.registerLanguage('c', cpp)
@@ -24,6 +27,7 @@ highlight.registerLanguage('java', java)
 highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
+const message = useMessage()
 const result = $ref(constant.result)
 const langHighlight = $ref(constant.languageHighlight)
 const lang = $ref(constant.language)
@@ -38,12 +42,11 @@ const { isAdmin, isRoot } = storeToRefs(session)
 const route = useRoute()
 
 const { copy } = useClipboard()
-
-let loading = $ref(false)
+const confirm = useConfirm()
 
 function onCopy (content) {
   copy(content)
-  Message.success(t('oj.copied'))
+  message.success(t('oj.copied'))
 }
 
 function prettyCode (code) {
@@ -54,10 +57,8 @@ function prettyCode (code) {
 }
 
 async function fetch () {
-  loading = true
   await findOne(route.params)
   root.changeDomTitle({ title: `Solution ${solution.pid}` })
-  loading = false
 }
 
 const showRefresh = ref(false)
@@ -66,23 +67,27 @@ async function rejudge () {
   if (!isRoot.value) {
     return
   }
-  Modal.confirm({
-    title: 'Rejudge this solution?',
-    content: 'This action will rejudge this solution using the latest problem data. '
+  confirm.require({
+    header: 'Rejudge this solution?',
+    message: 'This action will rejudge this solution using the latest problem data. '
       + 'All previous results will be truncated.',
-    onOk: async () => {
-      loading = true
+    acceptProps: {
+      label: t('oj.ok'),
+    },
+    rejectProps: {
+      label: t('oj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    accept: async () => {
       const res = await updateSolution({ judge: 11 })
       if (res.success) {
-        Message.success('Rejudge request sent')
+        message.success('Rejudge request sent')
       } else {
-        Message.error(res.message || 'Failed to send rejudge request')
+        message.error(res.message || 'Failed to send rejudge request')
       }
       showRefresh.value = true
-      loading = false
     },
-    okText: t('oj.ok'),
-    cancelText: t('oj.cancel'),
   })
 }
 
@@ -90,22 +95,26 @@ async function markAsSkipped () {
   if (!isRoot.value) {
     return
   }
-  Modal.confirm({
-    title: 'Mark this solution as Skipped?',
-    content: 'This action will mark this solution as Skipped. '
+  confirm.require({
+    header: 'Mark this solution as Skipped?',
+    message: 'This action will mark this solution as Skipped. '
       + 'All previous results will be truncated.',
-    onOk: async () => {
-      loading = true
+    acceptProps: {
+      label: t('oj.ok'),
+    },
+    rejectProps: {
+      label: t('oj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    accept: async () => {
       const res = await updateSolution({ judge: 12 })
       if (res.success) {
-        Message.success('Marked as Skipped')
+        message.success('Marked as Skipped')
       } else {
-        Message.error(res.message || 'Failed to mark as Skipped')
+        message.error(res.message || 'Failed to mark as Skipped')
       }
-      loading = false
     },
-    okText: t('oj.ok'),
-    cancelText: t('oj.cancel'),
   })
 }
 
@@ -121,13 +130,13 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="solution-wrap">
-    <Row class="solution-header" justify="end">
-      <Col flex="auto" class="solution-header-col">
+    <div class="flex justify-end solution-header">
+      <div class="flex-1 solution-header-col">
         <h1 class="solution-result">
           {{ result[solution.judge || 0] }}
         </h1>
-        <Space direction="vertical">
-          <Space class="solution-info" split wrap>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap gap-4 solution-info">
             <span>
               {{ t('oj.problem_label') }}
               <RouterLink v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
@@ -146,15 +155,15 @@ onRouteQueryUpdate(fetch)
                 {{ solution.mid }}
               </RouterLink>
             </span>
-          </Space>
-          <Space class="solution-info" split wrap>
+          </div>
+          <div class="flex flex-wrap gap-4 solution-info">
             <span>
               {{ t('oj.time_label') }}
-              <Numeral :value="solution.time" format="0,0" /> <small>ms</small>
+              {{ thousandSeparator(solution.time) }} <small>ms</small>
             </span>
             <span>
               {{ t('oj.memory_label') }}
-              <Numeral :value="solution.memory" format="0,0" /> <small>KB</small>
+              {{ thousandSeparator(solution.memory) }} <small>KB</small>
             </span>
             <span>
               {{ lang[solution.language] }}
@@ -162,25 +171,19 @@ onRouteQueryUpdate(fetch)
             <span>
               {{ timePretty(solution.create) }}
             </span>
-          </Space>
-        </Space>
-      </Col>
-      <Col v-if="isRoot" flex="none" class="solution-header-col">
-        <Space direction="vertical">
-          <ButtonGroup style="float: right;">
-            <Button v-if="showRefresh" @click="fetch">
-              <Icon type="md-refresh" /> Refresh
-            </Button>
-            <Button type="primary" @click="rejudge">
-              <Icon type="md-redo" /> Rejudge
-            </Button>
+          </div>
+        </div>
+      </div>
+      <div v-if="isRoot" class="flex-none solution-header-col">
+        <div class="flex flex-col gap-4 items-end">
+          <ButtonGroup>
+            <Button v-if="showRefresh" severity="secondary" outlined icon="pi pi-refresh" label="Refresh" @click="fetch" />
+            <Button icon="pi pi-play" label="Rejudge" @click="rejudge" />
           </ButtonGroup>
-          <Button style="float: right;" @click="markAsSkipped">
-            <Icon type="md-flag" /> Mark as Skipped
-          </Button>
-        </Space>
-      </Col>
-    </Row>
+          <Button icon="pi pi-flag" label="Mark as Skipped" severity="secondary" outlined @click="markAsSkipped" />
+        </div>
+      </div>
+    </div>
     <div class="testcase-table-container">
       <table class="testcase-table">
         <thead>
@@ -205,31 +208,25 @@ onRouteQueryUpdate(fetch)
         <tbody>
           <tr v-if="!(solution.testcases?.length > 0)" class="testcase-empty">
             <td :colspan="isAdmin ? 5 : 4">
-              <Icon type="ios-planet-outline" class="empty-icon" />
+              <i class="pi pi-folder-open" style="display: block; font-size: 32px;" />
               <span class="empty-text">{{ t('oj.empty_content') }}</span>
             </td>
           </tr>
           <tr v-for="(item, index) in solution.testcases" :key="index">
             <td class="testcase-uuid">
-              <Poptip trigger="hover" placement="right">
-                <span><code>{{ item.uuid.slice(0, 8) }}</code></span>
-                <template #content>
-                  <code>{{ item.uuid }}</code>
-                </template>
-              </Poptip>
+              <span v-tooltip.right="item.uuid"><code>{{ item.uuid.slice(0, 8) }}</code></span>
             </td>
             <td v-if="isAdmin" class="testcase-files">
-              <Space :size="4">
+              <div class="flex gap-4 items-center">
                 <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
-                <Divider type="vertical" />
                 <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
-              </Space>
+              </div>
             </td>
             <td class="testcase-time">
-              <Numeral :value="item.time" format="0,0" /> <small>ms</small>
+              {{ thousandSeparator(item.time) }} <small>ms</small>
             </td>
             <td class="testcase-memory">
-              <Numeral :value="item.memory" format="0,0" /> <small>KB</small>
+              {{ thousandSeparator(item.memory) }} <small>KB</small>
             </td>
             <td class="testcase-result" :class="[color[item.judge]]">
               {{ result[item.judge] }}
@@ -240,12 +237,10 @@ onRouteQueryUpdate(fetch)
     </div>
     <div class="solution-detail">
       <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
-      <Button shape="circle" icon="ios-document-outline" @click="onCopy(solution.code)">
-        {{ t('oj.click_to_copy_code') }}
-      </Button>
+      <Button icon="pi pi-file" severity="secondary" outlined :label="t('oj.click_to_copy_code')" @click="onCopy(solution.code)" />
       <pre><code v-html="prettyCode(solution.code)" /></pre>
       <div v-if="isAdmin && solution.sim && solution.simSolution">
-        <Space split wrap>
+        <div class="flex flex-wrap gap-4">
           <span>
             {{ t('oj.similar_to') }}
             <RouterLink :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
@@ -262,11 +257,10 @@ onRouteQueryUpdate(fetch)
             </RouterLink>
           </span>
           <span>{{ timePretty(solution.simSolution.create) }}</span>
-        </Space>
+        </div>
         <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>
       </div>
     </div>
-    <Spin size="large" fix :show="loading" class="wrap-loading" />
   </div>
 </template>
 

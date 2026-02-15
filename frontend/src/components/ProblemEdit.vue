@@ -1,5 +1,10 @@
 <script setup>
-import { Col, Form, FormItem, Input, Radio, RadioGroup, Row } from 'view-ui-plus'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
+import RadioButton from 'primevue/radiobutton'
+import Textarea from 'primevue/textarea'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
@@ -18,97 +23,71 @@ const { t } = useI18n()
 
 <template>
   <!-- eslint-disable vue/no-mutating-props -->
-  <Form v-if="typeof problem.description === 'string'" class="problem-edit-wrap" label-position="top">
-    <FormItem>
-      <Input v-model="problem.title">
-        <template #prepend>
-          {{ t('oj.title') }}
-        </template>
-      </Input>
-    </FormItem>
-    <FormItem>
-      <Row :gutter="24">
-        <Col :span="12">
-          <Input v-model="problem.time" class="form-item" type="number">
-            <template #prepend>
-              Time
-            </template>
-            <template #append>
-              ms
-            </template>
-          </Input>
-        </Col>
-        <Col :span="12">
-          <Input v-model="problem.memory" class="form-item" type="number">
-            <template #prepend>
-              Memory
-            </template>
-            <template #append>
-              KB
-            </template>
-          </Input>
-        </Col>
-      </Row>
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.description') }}</span>
-      </template>
+  <div v-if="typeof problem.description === 'string'" class="flex flex-col gap-5 problem-edit-wrap">
+    <div>
+      <InputGroup>
+        <InputGroupAddon>{{ t('oj.title') }}</InputGroupAddon>
+        <InputText v-model="problem.title" fluid />
+      </InputGroup>
+    </div>
+    <div class="flex gap-6">
+      <div class="flex-1">
+        <InputGroup>
+          <InputGroupAddon>Time</InputGroupAddon>
+          <InputNumber v-model="problem.time" fluid :use-grouping="false" />
+          <InputGroupAddon>ms</InputGroupAddon>
+        </InputGroup>
+      </div>
+      <div class="flex-1">
+        <InputGroup>
+          <InputGroupAddon>Memory</InputGroupAddon>
+          <InputNumber v-model="problem.memory" fluid :use-grouping="false" />
+          <InputGroupAddon>KB</InputGroupAddon>
+        </InputGroup>
+      </div>
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.description') }}</span>
       <MarkdownEditor v-model="problem.description" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.input') }}</span>
-      </template>
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.input') }}</span>
       <MarkdownEditor v-model="problem.input" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.output') }}</span>
-      </template>
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.output') }}</span>
       <MarkdownEditor v-model="problem.output" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.sample_input') }}</span>
-      </template>
-      <Input v-model="problem.in" class="code-input" type="textarea" :rows="8" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.sample_output') }}</span>
-      </template>
-      <Input v-model="problem.out" class="code-input" type="textarea" :rows="8" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">{{ t('oj.hint') }}</span>
-      </template>
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.sample_input') }}</span>
+      <Textarea v-model="problem.in" class="code-input" fluid rows="8" />
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.sample_output') }}</span>
+      <Textarea v-model="problem.out" class="code-input" fluid rows="8" />
+    </div>
+    <div>
+      <span class="form-label">{{ t('oj.hint') }}</span>
       <MarkdownEditor v-model="problem.hint" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">Tags</span>
-      </template>
+    </div>
+    <div>
+      <span class="form-label">Tags</span>
       <ProblemTagSelect v-model="problem.tags" />
-    </FormItem>
-    <FormItem>
-      <template #label>
-        <span class="form-label">Problem Type</span>
-      </template>
-      <RadioGroup v-model="problem.type">
-        <Radio v-for="item in problemTypeOptions" :key="item.value" :label="item.value" border>
-          {{ item.label }}
-        </Radio>
-      </RadioGroup>
-    </FormItem>
-    <FormItem v-if="[2, 3].includes(problem.type)">
-      <template #label>
-        <span class="form-label">Code of {{ problemType[problem.type] }}</span>
-      </template>
-      <Input v-model="problem.code" class="code-input" type="textarea" :autosize="{ minRows: 15, maxRows: 20 }" />
-    </FormItem>
-  </Form>
+    </div>
+    <div>
+      <span class="form-label">Problem Type</span>
+      <div class="flex flex-wrap gap-4 mt-2">
+        <div v-for="item in problemTypeOptions" :key="item.value" class="flex gap-2 items-center">
+          <RadioButton v-model="problem.type" :input-id="`type-${item.value}`" name="problemType" :value="item.value" />
+          <label :for="`type-${item.value}`">{{ item.label }}</label>
+        </div>
+      </div>
+    </div>
+    <div v-if="[2, 3].includes(problem.type)">
+      <span class="form-label">Code of {{ problemType[problem.type] }}</span>
+      <Textarea v-model="problem.code" class="code-input" fluid auto-resize rows="15" />
+    </div>
+  </div>
 </template>
 
 <style lang="stylus" scoped>
@@ -117,6 +96,8 @@ const { t } = useI18n()
   .form-label
     font-size: 16px
     font-weight: bold
+    display: block
+    margin-bottom: 6px
   .code-input
     font-family var(--font-code)
 </style>

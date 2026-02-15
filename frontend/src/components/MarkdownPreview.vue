@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import VditorMethod from 'vditor/dist/method'
-import { Icon } from 'view-ui-plus'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
@@ -74,7 +73,7 @@ watch(effectiveTheme, render)
 <template>
   <div>
     <div v-if="rendering" class="vidtor-uninitialized">
-      <Icon type="ios-loading" class="card-icon" />
+      <i class="card-icon pi pi-spin pi-spinner" />
       <span class="card-text">Rendering...</span>
     </div>
     <div v-show="!rendering" ref="preview" class="text-color vditor-initialized" />

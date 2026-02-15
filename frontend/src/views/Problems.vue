@@ -7,10 +7,10 @@ import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { Tag } from 'view-ui-plus'
 import { onBeforeMount, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import ProblemTag from '@/components/ProblemTag.vue'
 import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -140,12 +140,13 @@ onProfileUpdate(fetch)
               {{ data.title }}
             </RouterLink>
             <span class="-my-2 flex gap-1 justify-end">
-              <Tag
-                v-for="(tag, tagIdx) in data.tags" :key="tagIdx" class="cursor-pointer" :color="tag.color"
-                @click="reload({ page: 1, type: 'tag', content: tag.name })"
-              >
-                {{ tag.name }}
-              </Tag>
+              <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
+                <ProblemTag
+                  class="cursor-pointer" :color="tag.color"
+                  :name="tag.name"
+                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
+                />
+              </template>
             </span>
           </span>
         </template>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Vditor from 'vditor'
-import { Icon } from 'view-ui-plus'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
@@ -157,7 +156,7 @@ watch(effectiveTheme, () => nextTick(init))
 <template>
   <div ref="vditor">
     <div class="vidtor-uninitialized">
-      <Icon type="ios-loading" class="card-icon" />
+      <i class="card-icon pi pi-spin pi-spinner" />
       <span class="card-text">{{ t('oj.initializing') }}</span>
     </div>
   </div>

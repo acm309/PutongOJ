@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import type { ProblemEntityForm } from '@backend/types/entity'
 import { storeToRefs } from 'pinia'
-import { Button, Message, Spin } from 'view-ui-plus'
+import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import OjProblemEdit from '@/components/ProblemEdit.vue'
 import { useProblemStore } from '@/store/modules/problem'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
+const message = useMessage()
 const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
@@ -28,7 +30,7 @@ async function loadProblem () {
 
 async function submitForm () {
   const data = await updateProblem(problemForm.value)
-  Message.success(t('oj.submit_success'))
+  message.success(t('oj.submit_success'))
   router.push({ name: 'problemInfo', params: { pid: data.pid } })
 }
 
@@ -46,10 +48,7 @@ onMounted(async () => {
 <template>
   <div>
     <OjProblemEdit :problem="problemForm" />
-    <Button type="primary" size="large" @click="submitForm">
-      Submit
-    </Button>
-    <Spin size="large" fix :show="loadingProblem" class="wrap-loading" />
+    <Button label="Submit" @click="submitForm" />
   </div>
 </template>
 

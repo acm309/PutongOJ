@@ -1,33 +1,32 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
-import { Icon, Message, Space, Tooltip } from 'view-ui-plus'
 import { useI18n } from 'vue-i18n'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
+import { useMessage } from '@/utils/message'
 
 const props = defineProps([ 'modelValue' ])
 const { t } = useI18n()
+const message = useMessage()
 const { copy } = useClipboard()
 
 const problem = $computed(() => props.modelValue)
 
 function onCopy (content: string) {
   copy(content)
-  Message.success('Copied!')
+  message.success('Copied!')
 }
 </script>
 
 <template>
   <div class="proinfo-wrap">
-    <h1 class="font-bold">
+    <h1 class="font-bold text-4xl">
       <slot name="title">
         {{ problem.pid }}: {{ problem.title }}
       </slot>
     </h1>
-    <h5>
-      <Space split>
-        <span>Time Limit: {{ problem.time }}ms</span>
-        <span>Memory Limit: {{ problem.memory }}KB</span>
-      </Space>
+    <h5 class="flex flex-wrap gap-4 justify-center">
+      <span>Time Limit: {{ problem.time }}ms</span>
+      <span>Memory Limit: {{ problem.memory }}KB</span>
     </h5>
     <h2 class="font-semibold">
       {{ t('oj.description') }}
@@ -48,18 +47,14 @@ function onCopy (content: string) {
     <template v-if="problem.in?.trim()">
       <h2 class="font-semibold">
         {{ t('oj.sample_input') }}
-        <Tooltip content="Click to copy" placement="top">
-          <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.in)" />
-        </Tooltip>
+        <i v-tooltip.top="t('oj.click_to_copy_code')" class="pi pi-file" style="cursor: pointer" @click="onCopy(problem.in)" />
       </h2>
       <pre><code>{{ problem.in }}</code></pre>
     </template>
     <template v-if="problem.out?.trim()">
       <h2 class="font-semibold">
         {{ t('oj.sample_output') }}
-        <Tooltip :content="t('oj.click_to_copy_code')" placement="top">
-          <Icon type="ios-document-outline" style="cursor: pointer" @click="onCopy(problem.out)" />
-        </Tooltip>
+        <i v-tooltip.top="t('oj.click_to_copy_code')" class="pi pi-file" style="cursor: pointer" @click="onCopy(problem.out)" />
       </h2>
       <pre><code>{{ problem.out }}</code></pre>
     </template>
