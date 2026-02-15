@@ -108,7 +108,6 @@
   "rearrange_task_dispatched": "Rearrange task dispatched.",
   "register": "Register",
   "reset": "Reset",
-  "result": "Result",
   "sample_input": "Sample Input",
   "sample_input_output_empty": "Sample input and output are both empty, testcase creation skipped!",
   "sample_input_output_incomplete": "Sample input and output are incomplete, continue?",
@@ -138,6 +137,5 @@
   "unrelated_to_any_course": "Unrelated to any course",
   "update_problem_sorting": "Update Problem Sorting",
   "username": "Username",
-  "uuid": "UUID",
   "visible": "Visible"
 }

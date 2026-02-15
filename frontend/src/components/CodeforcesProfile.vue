@@ -23,7 +23,7 @@ const codeforcesTitle = computed(() => {
 
 <template>
   <div
-    class="font-(family-name:--font-verdana) px-3.5 py-2" :class="{
+    class="font-verdana px-3.5 py-2" :class="{
       'text-color': props.rating >= 4000,
       'text-red-500': props.rating >= 2400 && props.rating < 4000,
       'text-amber-500': props.rating >= 2100 && props.rating < 2400,
@@ -53,7 +53,7 @@ const codeforcesTitle = computed(() => {
     </a>
     <div class="mt-1">
       <span class="mr-1 text-color">Contest rating:</span>
-      <span class="font-(family-name:--font-verdana) font-bold"> {{ props.rating }}</span>
+      <span class="font-bold font-verdana"> {{ props.rating }}</span>
     </div>
   </div>
 </template>

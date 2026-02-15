@@ -7,6 +7,10 @@ import python from 'highlight.js/lib/languages/python'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
+import Column from 'primevue/column'
+// optional
+import DataTable from 'primevue/datatable'
+// optional
 import { useConfirm } from 'primevue/useconfirm'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -14,9 +18,13 @@ import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import constant from '@/utils/constant'
+import constant, { judgeStatusLabels } from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import { thousandSeparator, timePretty } from '@/utils/format'
+import {
+  getJudgeStatusClassname,
+  thousandSeparator,
+  timePretty,
+} from '@/utils/format'
 import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 import 'highlight.js/styles/atom-one-light.css'
@@ -31,7 +39,6 @@ const message = useMessage()
 const result = $ref(constant.result)
 const langHighlight = $ref(constant.languageHighlight)
 const lang = $ref(constant.language)
-const color = $ref(constant.color)
 
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
@@ -132,7 +139,7 @@ onRouteQueryUpdate(fetch)
   <div class="solution-wrap">
     <div class="flex justify-end solution-header">
       <div class="flex-1 solution-header-col">
-        <h1 class="solution-result">
+        <h1 class="font-verdana solution-result">
           {{ result[solution.judge || 0] }}
         </h1>
         <div class="flex flex-col gap-4">
@@ -177,67 +184,86 @@ onRouteQueryUpdate(fetch)
       <div v-if="isRoot" class="flex-none solution-header-col">
         <div class="flex flex-col gap-4 items-end">
           <ButtonGroup>
-            <Button v-if="showRefresh" severity="secondary" outlined icon="pi pi-refresh" label="Refresh" @click="fetch" />
+            <Button
+              v-if="showRefresh" severity="secondary" outlined icon="pi pi-refresh" label="Refresh"
+              @click="fetch"
+            />
             <Button icon="pi pi-play" label="Rejudge" @click="rejudge" />
           </ButtonGroup>
           <Button icon="pi pi-flag" label="Mark as Skipped" severity="secondary" outlined @click="markAsSkipped" />
         </div>
       </div>
     </div>
-    <div class="testcase-table-container">
-      <table class="testcase-table">
-        <thead>
-          <tr>
-            <th class="testcase-uuid">
-              {{ t('oj.uuid') }}
-            </th>
-            <th v-if="isAdmin" class="testcase-files">
-              {{ t('oj.files') }}
-            </th>
-            <th class="testcase-time">
-              Time
-            </th>
-            <th class="testcase-memory">
-              Memory
-            </th>
-            <th class="testcase-result">
-              {{ t('oj.result') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!(solution.testcases?.length > 0)" class="testcase-empty">
-            <td :colspan="isAdmin ? 5 : 4">
-              <i class="pi pi-folder-open" style="display: block; font-size: 32px;" />
-              <span class="empty-text">{{ t('oj.empty_content') }}</span>
-            </td>
-          </tr>
-          <tr v-for="(item, index) in solution.testcases" :key="index">
-            <td class="testcase-uuid">
-              <span v-tooltip.right="item.uuid"><code>{{ item.uuid.slice(0, 8) }}</code></span>
-            </td>
-            <td v-if="isAdmin" class="testcase-files">
-              <div class="flex gap-4 items-center">
-                <a :href="testcaseUrl(solution.pid, item.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
-                <a :href="testcaseUrl(solution.pid, item.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
-              </div>
-            </td>
-            <td class="testcase-time">
-              {{ thousandSeparator(item.time) }} <small>ms</small>
-            </td>
-            <td class="testcase-memory">
-              {{ thousandSeparator(item.memory) }} <small>KB</small>
-            </td>
-            <td class="testcase-result" :class="[color[item.judge]]">
-              {{ result[item.judge] }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+
+    <DataTable :value="solution.testcases" class="whitespace-nowrap" :lazy="true" scrollable>
+      <Column field="uuid" class="font-mono pl-6 text-center">
+        <template #header>
+          <span class="text-center w-full">
+            <i class="pi pi-hashtag" />
+          </span>
+        </template>
+        <template #body="{ data }">
+          <span v-tooltip.right="data.uuid">{{ data.uuid.slice(0, 8) }}</span>
+        </template>
+      </Column>
+
+      <Column v-if="isAdmin" field="files" :header="t('oj.files')">
+        <template #body="{ data }">
+          <div class="flex gap-4 items-center">
+            <a :href="testcaseUrl(solution.pid, data.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
+            <a :href="testcaseUrl(solution.pid, data.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
+          </div>
+        </template>
+      </Column>
+
+      <Column field="time" class="text-right">
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.time') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          {{ thousandSeparator(data.time) }} <small>ms</small>
+        </template>
+      </Column>
+
+      <Column field="memory" class="text-right">
+        <template #header>
+          <span class="font-semibold text-right w-full">
+            {{ t('ptoj.memory') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          {{ thousandSeparator(data.memory) }} <small>KB</small>
+        </template>
+      </Column>
+
+      <Column field="judge" class="pr-6 text-center">
+        <template #header>
+          <span class="font-semibold text-center w-full">
+            {{ t('ptoj.judge_status') }}
+          </span>
+        </template>
+        <template #body="{ data }">
+          <span :class="getJudgeStatusClassname(data.judge)">
+            {{ judgeStatusLabels[data.judge] }}
+          </span>
+        </template>
+      </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
+      </template>
+    </DataTable>
+
     <div class="solution-detail">
       <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
-      <Button icon="pi pi-file" severity="secondary" outlined :label="t('oj.click_to_copy_code')" @click="onCopy(solution.code)" />
+      <Button
+        icon="pi pi-file" severity="secondary" outlined :label="t('oj.click_to_copy_code')"
+        @click="onCopy(solution.code)"
+      />
       <pre><code v-html="prettyCode(solution.code)" /></pre>
       <div v-if="isAdmin && solution.sim && solution.simSolution">
         <div class="flex flex-wrap gap-4">
@@ -265,8 +291,6 @@ onRouteQueryUpdate(fetch)
 </template>
 
 <style lang="stylus" scoped>
-@import '../styles/common'
-
 .solution-wrap
   width 100%
   max-width 1024px
@@ -281,7 +305,6 @@ onRouteQueryUpdate(fetch)
     font-size 28px
     font-weight bold
     margin-bottom 12px
-    font-family var(--font-verdana)
 
 .testcase-table-container
   overflow-x auto

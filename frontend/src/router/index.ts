@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useLoadingBar } from '@/composables/useLoadingBar'
+import { useLoadingBar } from '@/composables/loadingBar'
 import { useSessionStore } from '@/store/modules/session'
 import routes from './routes'
 

@@ -62,14 +62,9 @@ onBeforeUnmount(solutionStore.clearSavedSolution)
         {{ t('oj.java_class_alert') }}
       </Message>
       <Textarea
-        v-model="solution.code" class="code-input" fluid auto-resize rows="15"
+        v-model="solution.code" class="font-mono" fluid auto-resize rows="15"
         :placeholder="t('oj.paste_your_code')"
       />
     </div>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.code-input
-  font-family var(--font-code)
-</style>

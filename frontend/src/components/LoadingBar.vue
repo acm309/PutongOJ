@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { loadingBarState } from '@/composables/useLoadingBar'
+import { loadingBarState } from '@/composables/loadingBar'
 </script>
 
 <template>

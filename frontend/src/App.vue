@@ -5,7 +5,7 @@ import Toast from 'primevue/toast'
 import { nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import OjLayout from '@/components/Layout.vue'
+import Layout from '@/components/Layout.vue'
 import LoadingBar from '@/components/LoadingBar.vue'
 import { useRootStore } from '@/store'
 import { setErrorHandler } from './api'
@@ -74,8 +74,8 @@ setTimeout(async () => {
 <template>
   <div id="app">
     <LoadingBar />
-    <OjLayout />
-    <Toast group="global" style="top: 82px" />
+    <Layout />
+    <Toast class="top-[82px]" group="global" />
     <ConfirmPopup />
   </div>
 </template>
@@ -84,8 +84,8 @@ setTimeout(async () => {
 
 <style lang="stylus">
 html
-  font-size: 14px !important
-  text-autospace: normal
+  font-size 14px
+  text-autospace normal
 body
-  overflow-y: scroll
+  overflow-y scroll
 </style>

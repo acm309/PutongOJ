@@ -85,7 +85,7 @@ const { t } = useI18n()
     </div>
     <div v-if="[2, 3].includes(problem.type)">
       <span class="form-label">Code of {{ problemType[problem.type] }}</span>
-      <Textarea v-model="problem.code" class="code-input" fluid auto-resize rows="15" />
+      <Textarea v-model="problem.code" class="font-mono" fluid auto-resize rows="15" />
     </div>
   </div>
 </template>
@@ -98,6 +98,4 @@ const { t } = useI18n()
     font-weight: bold
     display: block
     margin-bottom: 6px
-  .code-input
-    font-family var(--font-code)
 </style>

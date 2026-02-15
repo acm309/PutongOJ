@@ -1,2 +1,6 @@
 @import "tailwindcss" important;
 @import "tailwindcss-primeui";
+
+@theme {
+  --font-verdana: verdana, arial, sans-serif;
+}

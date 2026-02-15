@@ -10,17 +10,11 @@ import router from '@/router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useThemeStore } from '@/store/theme'
-import { PutongAura } from '@/theme/aura'
+import { PutongAura } from '@/styles/aura'
 import App from './App.vue'
-import '@/theme/index.less'
 import 'primeicons/primeicons.css'
 
-const pinia = createPinia()
-const app = createApp(App)
-
-app.use(pinia)
-
-app.use(PrimeVue, {
+const primeVueOptions = {
   theme: {
     preset: PutongAura,
     options: {
@@ -28,21 +22,26 @@ app.use(PrimeVue, {
       darkModeSelector: '.ptoj-dark',
     },
   },
-})
-app.use(ToastService)
-app.use(ConfirmationService)
-app.directive('tooltip', Tooltip)
-
-const i18n = createI18n({
+}
+const i18nOptions = {
   allowComposition: true,
   globalInjection: true,
   legacy: false,
   locale: 'en-US',
   fallbackLocale: 'en-US',
   messages: locales,
-})
+}
 
+const app = createApp(App)
+const pinia = createPinia()
+const i18n = createI18n(i18nOptions)
+
+app.use(pinia)
 app.use(i18n)
+app.use(PrimeVue, primeVueOptions)
+app.use(ToastService)
+app.use(ConfirmationService)
+app.directive('tooltip', Tooltip)
 
 Promise.all([
   useSessionStore().fetchProfile(),
@@ -54,6 +53,3 @@ Promise.all([
   // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
   app.mount('#app')
 })
-
-// Setup Volar for Vue3
-// https://github.com/johnsoncodehk/volar/discussions/583

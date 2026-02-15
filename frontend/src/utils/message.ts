@@ -1,4 +1,4 @@
-import { useToast } from 'primevue'
+import { useToast } from 'primevue/usetoast'
 
 const group = 'global'
 

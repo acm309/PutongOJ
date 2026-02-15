@@ -118,7 +118,7 @@ onBeforeUnmount(clearAutoRefresh)
     </div>
 
     <div class="mt-4 overflow-x-auto">
-      <table class="font-(family-name:--font-verdana) min-w-full table-fixed">
+      <table class="font-verdana min-w-full table-fixed">
         <thead>
           <tr class="h-16">
             <th class="border border-l-0 min-w-20">

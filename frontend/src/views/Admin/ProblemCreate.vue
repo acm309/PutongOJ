@@ -113,8 +113,6 @@ onMounted(() => {
 </template>
 
 <style lang="stylus" scoped>
-@import '../../styles/common'
-
 .new-problem-wrap
   max-width 1024px
 
