@@ -17,7 +17,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { contestId, problems, problemLabels, problemTitles } = storeToRefs(contestStore)
-const { solution } = $(storeToRefs(solutionStore))
+const { solution } = storeToRefs(solutionStore)
 const { clearCode: reset, create } = solutionStore
 
 const problemId = computed(() => Number(route.params.problemId))

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
 import { useMessage } from '@/utils/message'
@@ -9,7 +10,7 @@ const { t } = useI18n()
 const message = useMessage()
 const { copy } = useClipboard()
 
-const problem = $computed(() => props.modelValue)
+const problem = computed(() => props.modelValue)
 
 function onCopy (content: string) {
   copy(content)

@@ -7,7 +7,7 @@ import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { useConfirm } from 'primevue/useconfirm'
-import { capitalize, onBeforeMount, ref } from 'vue'
+import { capitalize, computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProblemTag from '@/components/ProblemTag.vue'
 import { useTagStore } from '@/store/modules/tag'
@@ -53,11 +53,11 @@ function openTagCreate () {
   tagModal.value = true
 }
 
-const tagCreatedAt = $computed(() => {
+const tagCreatedAt = computed(() => {
   if (!tag.value.createdAt) return ''
   return timePretty(tag.value.createdAt)
 })
-const tagUpdatedAt = $computed(() => {
+const tagUpdatedAt = computed(() => {
   if (!tag.value.updatedAt) return ''
   return timePretty(tag.value.updatedAt)
 })

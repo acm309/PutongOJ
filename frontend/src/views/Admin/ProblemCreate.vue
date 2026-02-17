@@ -1,7 +1,7 @@
 <script setup>
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
-import { onMounted } from 'vue'
+import { onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { createTestcase } from '@/api/problem'
@@ -15,7 +15,7 @@ const confirm = useConfirm()
 const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
-const problem = $ref({
+const problem = reactive({
   title: '',
   memory: 32768,
   time: 1000,

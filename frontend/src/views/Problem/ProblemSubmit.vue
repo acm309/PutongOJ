@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import { onBeforeMount } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Submit from '@/components/Submit'
@@ -24,24 +24,24 @@ const solutionStore = useSolutionStore()
 const { changeDomTitle } = rootStore
 const { findOne } = problemStore
 const { clearCode, create } = solutionStore
-const { problem } = $(storeToRefs(problemStore))
-const { isLogined } = $(storeToRefs(sessionStore))
-const { solution } = $(storeToRefs(solutionStore))
+const { problem } = storeToRefs(problemStore)
+const { isLogined } = storeToRefs(sessionStore)
+const { solution } = storeToRefs(solutionStore)
 
-let title = $ref('')
-const pid = $computed(() => route.params.pid)
+const title = ref('')
+const pid = computed(() => route.params.pid)
 
 async function submitSolution () {
-  await create(Object.assign({}, solution, { pid }))
-  message.info(`submit pid:${problem.pid} success!`)
-  router.push({ name: 'MySubmissions', query: { problem: pid } })
+  await create(Object.assign({}, solution.value, { pid: pid.value }))
+  message.info(`submit pid:${problem.value.pid} success!`)
+  router.push({ name: 'MySubmissions', query: { problem: pid.value } })
 }
 
 async function init () {
-  if (problem.title == null)
-    await findOne({ pid })
-  title = problem.title
-  changeDomTitle({ title })
+  if (problem.value.title == null)
+    await findOne({ pid: pid.value })
+  title.value = problem.value.title
+  changeDomTitle({ title: title.value })
 }
 
 onBeforeMount(init)

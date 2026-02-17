@@ -9,7 +9,7 @@ import { useProblemStore } from '@/store/modules/problem'
 const { t } = useI18n()
 const router = useRouter()
 const problemStore = useProblemStore()
-const { problem } = $(storeToRefs(problemStore))
+const { problem } = storeToRefs(problemStore)
 
 function submit () {
   return router.push({

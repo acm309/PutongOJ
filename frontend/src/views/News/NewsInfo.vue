@@ -4,7 +4,7 @@ import MarkdownPreview from '@/components/MarkdownPreview'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/utils/format'
 
-const { news } = $(storeToRefs(useNewsStore()))
+const { news } = storeToRefs(useNewsStore())
 </script>
 
 <template>

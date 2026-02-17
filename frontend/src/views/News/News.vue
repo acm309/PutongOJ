@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
-import { onBeforeMount } from 'vue'
+import { computed, onBeforeMount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -13,7 +13,7 @@ const newsStore = useNewsStore()
 const rootStore = useRootStore()
 const route = useRoute()
 const router = useRouter()
-const current = $computed(() => route.name || 'newsInfo')
+const current = computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
 function change (name) {

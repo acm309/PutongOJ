@@ -15,7 +15,7 @@ const problemStore = useProblemStore()
 const contestStore = useContestStore()
 
 const { findOne: findOneProblem } = problemStore
-const { problem } = $(storeToRefs(problemStore))
+const { problem } = storeToRefs(problemStore)
 const { contestId, problems, problemLabels } = storeToRefs(contestStore)
 
 const problemId = computed(() => Number.parseInt(route.params.problemId as string))

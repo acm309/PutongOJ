@@ -7,7 +7,7 @@ import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { onBeforeMount, reactive } from 'vue'
+import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import ProblemTag from '@/components/ProblemTag.vue'
@@ -31,27 +31,27 @@ const { t } = useI18n()
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
 
-const page = $computed<number>(() =>
+const page = computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
-const pageSize = $computed<number>(() =>
+const pageSize = computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 
-let type = $ref(route.query.type || 'pid')
-let content = $ref(String(route.query.content || ''))
-const problemVisible = $ref(constant.status)
-const query = $computed(() => purify({ type, content, page, pageSize }))
+const type = ref(route.query.type || 'pid')
+const content = ref(String(route.query.content || ''))
+const problemVisible = ref(constant.status)
+const query = computed(() => purify({ type: type.value, content: content.value, page: page.value, pageSize: pageSize.value }))
 
 const problemStore = useProblemStore()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 
-const { problems, solved } = $(storeToRefs(problemStore))
-const { status } = $(storeToRefs(rootStore))
-const { isAdmin } = $(storeToRefs(sessionStore))
+const { problems, solved } = storeToRefs(problemStore)
+const { status } = storeToRefs(rootStore)
+const { isAdmin } = storeToRefs(sessionStore)
 const { findProblems, update } = problemStore
 
-let loading = $ref(false)
+const loading = ref(false)
 
 function reload (payload = {}) {
   const routeQuery = purify(Object.assign({}, query, payload))
@@ -59,19 +59,19 @@ function reload (payload = {}) {
 }
 
 async function fetch () {
-  loading = true
-  type = route.query.type || 'pid'
-  content = String(route.query.content || '')
-  await findProblems(query as FindProblemsParams)
-  loading = false
+  loading.value = true
+  type.value = route.query.type || 'pid'
+  content.value = String(route.query.content || '')
+  await findProblems(query.value as FindProblemsParams)
+  loading.value = false
 }
 
-const search = () => reload({ page: 1, type, content })
+const search = () => reload({ page: 1, type: type.value, content: content.value })
 const pageChange = (val: number) => reload({ page: val })
 
 function change (problem: { pid: number, status: number }) {
-  loading = true
-  problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
+  loading.value = true
+  problem.status = problem.status === status.value.Reserve ? status.value.Available : status.value.Reserve
   update({ pid: problem.pid, status: problem.status }).then(fetch)
 }
 

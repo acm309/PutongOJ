@@ -6,7 +6,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
-import { computed, onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -35,7 +35,7 @@ const role = computed(() => {
 })
 
 const joinModal = ref(false)
-const joinForm = $ref({
+const joinForm = reactive({
   joinCode: '',
 })
 const joining = ref(false)

@@ -36,15 +36,15 @@ highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
 const message = useMessage()
-const result = $ref(constant.result)
-const langHighlight = $ref(constant.languageHighlight)
-const lang = $ref(constant.language)
+const result = ref(constant.result)
+const langHighlight = ref(constant.languageHighlight)
+const lang = ref(constant.language)
 
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
 const root = useRootStore()
 const { findOne, updateSolution } = solutionStore
-const { solution } = $(storeToRefs(solutionStore))
+const { solution } = storeToRefs(solutionStore)
 const { isAdmin, isRoot } = storeToRefs(session)
 const route = useRoute()
 
@@ -59,13 +59,13 @@ function onCopy (content) {
 function prettyCode (code) {
   if (!code) return ''
   return highlight.highlight(`${code}`, {
-    language: langHighlight[solution.language],
+    language: langHighlight.value[solution.value.language],
   }).value
 }
 
 async function fetch () {
   await findOne(route.params)
-  root.changeDomTitle({ title: `Solution ${solution.pid}` })
+  root.changeDomTitle({ title: `Solution ${solution.value.pid}` })
 }
 
 const showRefresh = ref(false)

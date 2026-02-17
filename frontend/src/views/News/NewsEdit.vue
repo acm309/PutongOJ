@@ -15,8 +15,8 @@ const sessionStore = useSessionStore()
 const router = useRouter()
 const confirm = useConfirm()
 const message = useMessage()
-const { news } = $(storeToRefs(newsStore))
-const { isRoot } = $(storeToRefs(sessionStore))
+const { news } = storeToRefs(newsStore)
+const { isRoot } = storeToRefs(sessionStore)
 
 async function submit () {
   if (news.title.length === 0) {

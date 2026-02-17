@@ -3,7 +3,6 @@ import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
-import ReactivityTransform from '@vue-macros/reactivity-transform/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig } from 'vite'
 
@@ -18,7 +17,6 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     legacy(),
-    ReactivityTransform(),
     visualizer({ gzipSize: true }),
     vue(),
   ],

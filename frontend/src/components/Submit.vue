@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import Message from 'primevue/message'
 import Select from 'primevue/select'
 import Textarea from 'primevue/textarea'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
 import { language, languagesOrder } from '@/utils/constant'
@@ -18,10 +18,10 @@ const props = defineProps({
 })
 const { t } = useI18n()
 const solutionStore = useSolutionStore()
-const { solution } = $(storeToRefs(solutionStore))
+const { solution } = storeToRefs(solutionStore)
 const solutionStorage = ref(useSolutionStorage())
 
-const languages = $computed(() =>
+const languages = computed(() =>
   languagesOrder.map(key => ({
     value: key,
     label: language[key],
@@ -31,12 +31,12 @@ const languages = $computed(() =>
 async function init () {
   solutionStore.clearSavedSolution()
   if (solutionStorage.value[props.pid]) {
-    Object.assign(solution, solutionStorage.value[props.pid])
+    Object.assign(solution.value, solutionStorage.value[props.pid])
   }
 }
 
 watch(
-  () => solution,
+  solution,
   debounce((updatedSolution) => {
     solutionStorage.value[props.pid] = updatedSolution
   }, 500),

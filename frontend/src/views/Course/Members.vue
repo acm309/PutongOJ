@@ -9,7 +9,7 @@ import DataTable from 'primevue/datatable'
 import Paginator from 'primevue/paginator'
 import PrimeTag from 'primevue/tag'
 import { useConfirm } from 'primevue/useconfirm'
-import { onBeforeMount, watch } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -28,43 +28,43 @@ const message = useMessage()
 const { course } = api
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
-const { privilege } = $(storeToRefs(rootStore))
-const { isAdmin, profile } = $(storeToRefs(sessionStore))
+const { privilege } = storeToRefs(rootStore)
+const { isAdmin, profile } = storeToRefs(sessionStore)
 
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
 
-const page = $computed<number>(() =>
+const page = computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
-const pageSize = $computed<number>(() =>
+const pageSize = computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-let docs: CourseMemberView[] = $ref([])
-let total: number = $ref(0)
-let loading: boolean = $ref(false)
-let openEdit: boolean = $ref(false)
-let editUserId: string = $ref('')
+const docs = ref<CourseMemberView[]>([])
+const total = ref<number>(0)
+const loading = ref<boolean>(false)
+const openEdit = ref<boolean>(false)
+const editUserId = ref<string>('')
 
 async function fetch () {
-  loading = true
-  const { data } = await course.findMembers(id, { page, pageSize })
-  docs = data.docs
-  total = data.total
-  loading = false
+  loading.value = true
+  const { data } = await course.findMembers(id, { page: page.value, pageSize: pageSize.value })
+  docs.value = data.docs
+  total.value = data.total
+  loading.value = false
 }
 
 function pageChange (page: number) {
   router.push({
     name: 'courseMembers',
-    query: { page, pageSize },
+    query: { page, pageSize: pageSize.value },
   })
 }
 
 function openEditDialog (userId: string) {
-  editUserId = userId
-  openEdit = true
+  editUserId.value = userId
+  openEdit.value = true
 }
 
 function removeMember (event: any, userId: string) {
@@ -89,9 +89,9 @@ function removeMember (event: any, userId: string) {
   })
 }
 
-watch(() => openEdit, (val: boolean) => {
+watch(() => openEdit.value, (val: boolean) => {
   if (val) return
-  editUserId = ''
+  editUserId.value = ''
   fetch()
 })
 

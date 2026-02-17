@@ -11,7 +11,7 @@ import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
 import { useConfirm } from 'primevue/useconfirm'
-import { onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
@@ -34,10 +34,10 @@ const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
 const courseStore = useCourseStore()
-const { status } = $(storeToRefs(rootStore))
-const { isAdmin } = $(storeToRefs(sessionStore))
-const { problems, solved } = $(storeToRefs(problemStore))
-const { course } = $(storeToRefs(courseStore))
+const { status } = storeToRefs(rootStore)
+const { isAdmin } = storeToRefs(sessionStore)
+const { problems, solved } = storeToRefs(problemStore)
+const { course } = storeToRefs(courseStore)
 const { findProblems, update } = problemStore
 
 const problemStatus = constant.status
@@ -50,29 +50,29 @@ const searchOptions = [
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
 
-const page = $computed<number>(() =>
+const page = computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
-const pageSize = $computed<number>(() =>
+const pageSize = computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-const type = $ref(String(route.query.type || 'pid'))
-const content = $ref(String(route.query.content || ''))
-let loading = $ref(false)
+const type = ref(String(route.query.type || 'pid'))
+const content = ref(String(route.query.content || ''))
+const loading = ref(false)
 
-const query = $computed<FindProblemsParams>(() => {
+const query = computed<FindProblemsParams>(() => {
   return {
-    page,
-    pageSize,
+    page: page.value,
+    pageSize: pageSize.value,
     course: id,
-    type: String(route.query.type || type),
-    content: String(route.query.content || content),
+    type: String(route.query.type || type.value),
+    content: String(route.query.content || content.value),
   }
 })
 
 function reload (payload: Partial<FindProblemsParams> = {}) {
-  const routeQuery = { ...query, ...payload }
+  const routeQuery = { ...query.value, ...payload }
   router.push({
     name: 'courseProblems',
     params: { id },
@@ -81,21 +81,21 @@ function reload (payload: Partial<FindProblemsParams> = {}) {
 }
 
 async function fetch () {
-  loading = true
-  await findProblems(query)
-  loading = false
+  loading.value = true
+  await findProblems(query.value)
+  loading.value = false
 }
 
-const search = () => reload({ page: 1, type, content })
+const search = () => reload({ page: 1, type: type.value, content: content.value })
 const pageChange = (val: number) => reload({ page: val })
 
 async function switchStatus (problem: ProblemEntityPreview) {
-  loading = true
-  const newStatus = problem.status === status.Reserve
-    ? status.Available
-    : status.Reserve
+  loading.value = true
+  const newStatus = problem.status === status.value.Reserve
+    ? status.value.Available
+    : status.value.Reserve
   await update({ pid: problem.pid, status: newStatus })
-  loading = false
+  loading.value = false
   await fetch()
 }
 
@@ -104,14 +104,14 @@ const sorting = ref({} as ProblemEntityPreview)
 const newPosition = ref<number | null>(null)
 
 async function updateSorting () {
-  if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.total + 1) {
+  if (newPosition.value === null || newPosition.value < 1 || newPosition.value > problems.value.total + 1) {
     message.error(t('oj.invalid_position'))
     return
   }
-  loading = true
+  loading.value = true
   try {
     await api.course.moveCourseProblem(
-      course.courseId,
+      course.value.courseId,
       sorting.value.pid,
       newPosition.value,
     )
@@ -121,7 +121,7 @@ async function updateSorting () {
   } catch (e: any) {
     message.error(t('oj.failed_to_update_sorting', { error: e.message }))
   } finally {
-    loading = false
+    loading.value = false
   }
 }
 
@@ -139,7 +139,7 @@ function removeProblem (event: any, pid: number) {
       severity: 'danger',
     },
     accept: async () => {
-      await api.course.removeCourseProblem(course.courseId, pid)
+      await api.course.removeCourseProblem(course.value.courseId, pid)
       message.success('题目已从课程中移除')
       fetch()
     },

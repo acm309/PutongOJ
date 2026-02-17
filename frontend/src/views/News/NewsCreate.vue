@@ -1,5 +1,6 @@
 <script setup>
 import Button from 'primevue/button'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import OjNewsEdit from '@/components/NewsEdit'
@@ -12,17 +13,17 @@ const message = useMessage()
 const router = useRouter()
 const { t } = useI18n()
 
-const addNews = $ref({
+const addNews = ref({
   title: '',
   content: '',
 })
 
 async function submit () {
-  const nid = await create(addNews)
+  const nid = await create(addNews.value)
   message.success(t('oj.create_news_success', { nid }))
   router.push({ name: 'newsInfo', params: { nid } })
 }
-newsStore.setCurrentNews($$(addNews))
+newsStore.setCurrentNews(addNews)
 </script>
 
 <template>
