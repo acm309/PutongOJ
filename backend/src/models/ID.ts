@@ -45,7 +45,7 @@ idSchema.statics.generateId = async function (field: string): Promise<number> {
     .findOneAndUpdate(
       { name: capitalize(field) },
       { $inc: { id: 1 } },
-      { new: true, upsert: true },
+      { returnDocument: 'after', upsert: true },
     )
     .exec()
 

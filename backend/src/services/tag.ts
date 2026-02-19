@@ -58,7 +58,7 @@ export async function updateTag (
   opt: Partial<TagEntity>,
 ): Promise<TagDocument | null> {
   const tag = await Tag
-    .findOneAndUpdate({ tagId }, { $set: opt }, { new: true })
+    .findOneAndUpdate({ tagId }, { $set: opt }, { returnDocument: 'after' })
   return tag as TagDocument | null
 }
 

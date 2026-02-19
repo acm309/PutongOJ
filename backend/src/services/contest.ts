@@ -113,7 +113,7 @@ async function updateParticipation (
   await ContestParticipation.findOneAndUpdate(
     { user, contest },
     { user, contest, status },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   )
 }
 

@@ -72,7 +72,7 @@ export async function updateCourse (
   opt: Partial<CourseEntityEditable>,
 ): Promise<CourseDocument | null> {
   const course = await Course
-    .findOneAndUpdate({ courseId }, opt, { new: true })
+    .findOneAndUpdate({ courseId }, opt, { returnDocument: 'after' })
   return course ?? null
 }
 
@@ -154,7 +154,7 @@ export async function updateCourseMember (
   const courseMember = await CourseMember.findOneAndUpdate(
     { user, course },
     { user, course, role: parsedRole },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   )
 
   return !!courseMember

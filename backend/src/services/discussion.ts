@@ -167,7 +167,7 @@ export async function updateComment (
   update: Partial<Pick<CommentModel, 'hidden'>>,
 ): Promise<CommentModel | null> {
   const comment = await Comment.findOneAndUpdate(
-    { commentId }, update, { new: true },
+    { commentId }, update, { returnDocument: 'after' },
   ).lean()
   return comment
 }
@@ -181,7 +181,7 @@ export async function updateDiscussion (
   update: DiscussionUpdateDto,
 ): Promise<DiscussionModel | null> {
   const discussion = await Discussion.findOneAndUpdate(
-    { discussionId }, update, { new: true },
+    { discussionId }, update, { returnDocument: 'after' },
   ).lean()
   return discussion
 }

@@ -142,7 +142,7 @@ export async function updateProblem (
   opt: Partial<ProblemEntity>,
 ): Promise<ProblemDocument | undefined> {
   const problem = await Problem
-    .findOneAndUpdate({ pid }, { $set: opt }, { new: true })
+    .findOneAndUpdate({ pid }, { $set: opt }, { returnDocument: 'after' })
   return problem ?? undefined
 }
 
