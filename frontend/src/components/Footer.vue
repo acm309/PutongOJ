@@ -51,12 +51,17 @@ onMounted(() => {
       :allow-empty="false" @change="onLangSelected"
     />
 
-    <span class="-mb-0.5 cursor-pointer font-bold text-lg" @click="versionDialogVisible = true">
+    <span
+      class="-mb-0.5 cursor-pointer font-bold hover:text-primary text-lg transition-colors"
+      @click="versionDialogVisible = true"
+    >
       Putong OJ
     </span>
     <span>
       &copy; 2017-2026
-      <a href="https://github.com/acm309" target="_blank" rel="noopener noreferrer">ACM&hairsp;@&hairsp;CJLU</a>
+      <a href="https://github.com/acm309/PutongOJ" target="_blank" rel="noopener" class="hover:underline text-primary">
+        ACM&hairsp;@&hairsp;CJLU
+      </a>
     </span>
     <span>Server time: {{ serverTime }}</span>
   </div>
