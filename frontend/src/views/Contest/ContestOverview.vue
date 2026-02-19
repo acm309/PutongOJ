@@ -1,30 +1,22 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { useContestStore } from '@/store/modules/contest'
 import { contestLabeling, formatPercentage } from '@/utils/format'
 
 const { t } = useI18n()
-const router = useRouter()
 const contestStore = useContestStore()
 const { contest, contestId, problems } = storeToRefs(contestStore)
-
-function onRowSelect (e: any) {
-  router.push({ name: 'contestProblem', params: { contestId: contestId.value, problemId: e.data.problemId } })
-}
 
 onMounted(contestStore.reloadContestIfNeeded)
 </script>
 
 <template>
-  <DataTable
-    :value="problems" class="max-w-5xl pb-4 pt-2 px-0 whitespace-nowrap" scrollable selection-mode="single"
-    @row-select="onRowSelect"
-  >
+  <DataTable :value="problems" class="max-w-5xl pb-4 pt-2 px-0 whitespace-nowrap" scrollable>
     <Column class="pl-8 text-center w-18">
       <template #body="{ data }">
         <span v-if="data.isSolved" class="text-emerald-500">
@@ -49,11 +41,8 @@ onMounted(contestStore.reloadContestIfNeeded)
 
     <Column :header="t('ptoj.problem')">
       <template #body="{ data }">
-        <RouterLink
-          :to="{ name: 'contestProblem', params: { contestId, problemId: data.problemId } }"
-          class="text-pretty"
-        >
-          {{ data.title }}
+        <RouterLink :to="{ name: 'contestProblem', params: { contestId, problemId: data.problemId } }">
+          <Button :label="data.title" link fluid class="-my-px justify-start p-0" />
         </RouterLink>
       </template>
     </Column>

@@ -132,9 +132,9 @@ async function onSubmit () {
   <DataTable
     class="-mb-px whitespace-nowrap" :value="props.value" sort-mode="single" :sort-field="props.sortField"
     :sort-order="props.sortOrder" data-key="contestId" :lazy="true" :loading="props.loading" scrollable
-    selection-mode="single" @sort="handleSort" @row-select="e => onOpenContest(e.data.contestId)"
+    @sort="handleSort"
   >
-    <Column class="pl-8 text-center w-18" field="contestId" frozen>
+    <Column class="pl-8 text-center w-18" field="contestId">
       <template #header>
         <span class="text-center w-full">
           <i class="pi pi-hashtag" />
@@ -144,12 +144,10 @@ async function onSubmit () {
 
     <Column :header="t('ptoj.contest')" class="min-w-96">
       <template #body="{ data }">
-        <span class="flex gap-4 items-center justify-between">
-          <a @click="onOpenContest(data.contestId)">
-            {{ data.title }}
-          </a>
-          <span class="-my-2 flex gap-1 justify-end">
-            <Tag v-if="data.isHidden" :value="t('ptoj.hidden')" severity="secondary" />
+        <span class="-my-1 flex gap-4 items-center justify-between">
+          <Button :label="data.title" link fluid class="justify-start p-0" @click="onOpenContest(data.contestId)" />
+          <span v-if="data.isHidden" class="flex gap-1 justify-end">
+            <Tag :value="t('ptoj.hidden')" severity="secondary" />
           </span>
         </span>
       </template>
@@ -214,7 +212,10 @@ async function onSubmit () {
       </div>
       <div v-else-if="applyStatus === ApplyStatus.NeedPassword" class="flex flex-col">
         <IftaLabel v-if="!details.canParticipate">
-          <InputText id="title" v-model="password" fluid :placeholder="t('ptoj.enter_password')" type="password" required autocomplete="off" />
+          <InputText
+            id="title" v-model="password" fluid :placeholder="t('ptoj.enter_password')" type="password"
+            required autocomplete="off"
+          />
           <label for="title">{{ t('ptoj.password') }}</label>
         </IftaLabel>
       </div>

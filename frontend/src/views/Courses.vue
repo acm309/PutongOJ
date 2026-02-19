@@ -66,12 +66,11 @@ onRouteQueryUpdate(fetch)
             {{ t('oj.course') }}
           </h1>
         </div>
-        <div v-if="isRoot" class="flex gap-2">
-          <Button
-            icon="pi pi-plus" :label="t('oj.course_create')" :disabled="loading"
-            @click="createDialogVisible = true"
-          />
-        </div>
+
+        <Button
+          v-if="isRoot" icon="pi pi-plus" :label="t('oj.course_create')" :disabled="loading"
+          @click="createDialogVisible = true"
+        />
       </div>
     </div>
 
@@ -82,28 +81,29 @@ onRouteQueryUpdate(fetch)
       </div>
     </template>
 
-    <div
-      v-for="item in courses.docs" v-else :key="item.courseId"
-      class="border-surface border-t flex flex-col gap-2 px-6 py-5 transition-colors"
-    >
-      <div class="flex flex-row gap-2 items-center justify-between">
+    <template v-else>
+      <div v-for="item in courses.docs" :key="item.courseId" class="border-surface border-t p-2">
         <RouterLink
-          class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg"
           :to="{ name: 'courseProblems', params: { id: item.courseId } }"
+          class="block group px-4 py-3 space-y-2"
         >
-          {{ item.name }}
+          <div class="flex flex-row gap-2 justify-between">
+            <p
+              class="font-medium group-hover:text-primary overflow-hidden text-ellipsis text-lg text-pretty transition-colors"
+            >
+              {{ item.name }}
+            </p>
+            <div>
+              <Tag v-if="item.encrypt === encrypt.Public" :value="t('ptoj.public')" severity="success" />
+              <Tag v-else :value="t('ptoj.private')" severity="warn" />
+            </div>
+          </div>
+          <p class="overflow-hidden text-ellipsis text-muted-color text-sm">
+            {{ item.description?.trim() || t('oj.no_description') }}
+          </p>
         </RouterLink>
-        <div class="flex gap-2">
-          <Tag
-            :value="item.encrypt === encrypt.Public ? t('ptoj.public') : t('ptoj.private')"
-            :severity="item.encrypt === encrypt.Public ? 'success' : 'warn'"
-          />
-        </div>
       </div>
-      <p class="text-muted-color text-sm">
-        {{ item.description?.trim() || t('oj.no_description') }}
-      </p>
-    </div>
+    </template>
 
     <Paginator
       class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"

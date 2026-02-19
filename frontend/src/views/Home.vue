@@ -1,17 +1,22 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import Button from 'primevue/button'
 import Paginator from 'primevue/paginator'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
+import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const zhCN = computed(() => locale.value === 'zh-CN')
+const sessionStore = useSessionStore()
+const { isAdmin } = storeToRefs(sessionStore)
 
+const zhCN = computed(() => locale.value === 'zh-CN')
 const page = computed(() => Number.parseInt(route.query.page as string) || 1)
 const pageSize = computed(() => Number.parseInt(route.query.pageSize as string) || 10)
 
@@ -64,13 +69,17 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <div class="bg-(--p-content-background) border border-surface md:rounded-xl shadow-lg">
-      <div class="p-6">
+      <div class="flex items-center justify-between p-6">
         <div class="flex font-semibold gap-4 items-center">
           <i class="pi pi-megaphone text-2xl" />
           <h1 class="text-xl">
             {{ t('ptoj.announcements') }}
           </h1>
         </div>
+
+        <RouterLink v-if="isAdmin" :to="{ name: 'newsCreate' }">
+          <Button icon="pi pi-plus" label="Create" />
+        </RouterLink>
       </div>
 
       <template v-if="loading || docs.length === 0">
@@ -80,24 +89,27 @@ onRouteQueryUpdate(fetch)
         </div>
       </template>
 
-      <div v-for="doc in docs" v-else :key="doc.nid" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
-        <div class="flex gap-4 text-muted-color text-nowrap text-sm">
-          <span class="flex gap-2">
-            <i class="pi pi-clock text-sm" />
-            {{ timePretty(doc.create, 'yyyy-MM-dd HH:mm') }}
-          </span>
-          <span v-if="doc.status === 0" class="flex gap-2">
-            <i class="pi pi-eye-slash text-sm" />
-            Hidden
-          </span>
+      <template v-else>
+        <div v-for="doc in docs" :key="doc.nid" class="border-surface border-t p-2">
+          <RouterLink :to="{ name: 'newsInfo', params: { nid: doc.nid } }" class="block group px-4 py-3 space-y-2">
+            <div class="flex gap-4 text-muted-color text-sm">
+              <span class="flex gap-2 items-center">
+                <span class="pi pi-calendar" />
+                <span>{{ timePretty(doc.create, 'yyyy-MM-dd HH:mm') }}</span>
+              </span>
+              <span v-if="doc.status === 0" class="flex gap-2 items-center text-orange-400">
+                <span class="pi pi-eye-slash" />
+                <span>{{ t('ptoj.hidden') }}</span>
+              </span>
+            </div>
+            <p
+              class="font-medium group-hover:text-primary overflow-hidden text-ellipsis text-lg text-pretty transition-colors"
+            >
+              {{ doc.title }}
+            </p>
+          </RouterLink>
         </div>
-        <RouterLink
-          class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"
-          :to="{ name: 'newsInfo', params: { nid: doc.nid } }"
-        >
-          {{ doc.title }}
-        </RouterLink>
-      </div>
+      </template>
 
       <Paginator
         class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"

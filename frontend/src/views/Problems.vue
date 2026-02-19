@@ -16,7 +16,7 @@ import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import constant from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
-import { onProfileUpdate, onRouteQueryUpdate, purify } from '@/utils/helper'
+import { onProfileUpdate, onRouteQueryUpdate } from '@/utils/helper'
 
 const options = reactive([
   { value: 'pid', label: 'Pid' },
@@ -40,7 +40,12 @@ const pageSize = computed<number>(() =>
 const type = ref(route.query.type || 'pid')
 const content = ref(String(route.query.content || ''))
 const problemVisible = ref(constant.status)
-const query = computed(() => purify({ type: type.value, content: content.value, page: page.value, pageSize: pageSize.value }))
+const query = computed(() => ({
+  type: type.value,
+  content: content.value,
+  page: page.value,
+  pageSize: pageSize.value,
+}))
 
 const problemStore = useProblemStore()
 const rootStore = useRootStore()
@@ -54,8 +59,7 @@ const { findProblems, update } = problemStore
 const loading = ref(false)
 
 function reload (payload = {}) {
-  const routeQuery = purify(Object.assign({}, query, payload))
-  router.push({ name: 'problems', query: routeQuery })
+  router.push({ name: 'problems', query: Object.assign({}, query.value, payload) })
 }
 
 async function fetch () {
@@ -135,15 +139,14 @@ onProfileUpdate(fetch)
 
       <Column :header="t('ptoj.problem')">
         <template #body="{ data }">
-          <span class="flex gap-4 items-center justify-between">
-            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
-              {{ data.title }}
+          <span class="-my-1 flex gap-4 items-center justify-between">
+            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
+              <Button variant="link" :label="data.title" fluid class="justify-start p-0" />
             </RouterLink>
-            <span class="-my-2 flex gap-1 justify-end">
+            <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
               <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
                 <ProblemTag
-                  class="cursor-pointer" :color="tag.color"
-                  :name="tag.name"
+                  class="cursor-pointer" :color="tag.color" :name="tag.name"
                   @click="reload({ page: 1, type: 'tag', content: tag.name })"
                 />
               </template>
@@ -172,9 +175,10 @@ onProfileUpdate(fetch)
 
       <Column v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="pr-6 text-center w-30">
         <template #body="{ data }">
-          <a v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" @click="change(data)">
-            {{ problemVisible[(data.status as 0 | 2)] }}
-          </a>
+          <Button
+            v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" variant="link"
+            class="-my-1 p-0" :label="problemVisible[(data.status as 0 | 2)]" @click="change(data)"
+          />
         </template>
       </Column>
 

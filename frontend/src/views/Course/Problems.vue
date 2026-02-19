@@ -199,25 +199,19 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column class="px-2 text-center w-18" field="pid">
-        <template #header>
-          <span class="text-center w-full">
-            PID
-          </span>
-        </template>
-      </Column>
+      <Column class="px-2 text-center w-18" field="pid" />
 
-      <Column :header="t('oj.title')">
+      <Column :header="t('ptoj.problem')">
         <template #body="{ data }">
-          <span class="flex gap-4 items-center justify-between">
-            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
-              {{ data.title }}
+          <span class="-my-1 flex gap-4 items-center justify-between">
+            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
+              <Button variant="link" :label="data.title" fluid class="justify-start p-0" />
             </RouterLink>
-            <span class="-my-2 flex gap-1 justify-end">
+            <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
               <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
                 <ProblemTag
-                  class="cursor-pointer" :color="tag.color"
-                  :name="tag.name" @click="reload({ page: 1, type: 'tag', content: tag.name })"
+                  class="cursor-pointer" :color="tag.color" :name="tag.name"
+                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
                 />
               </template>
             </span>
@@ -243,42 +237,17 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column v-if="course.role?.manageProblem" class="pr-6 text-center w-24">
-        <template #header>
-          {{ t('oj.visible') }}
-        </template>
+      <Column v-if="course.role.manageProblem || isAdmin" class="pr-5 text-center w-24">
         <template #body="{ data }">
-          <a
-            v-if="isAdmin || data.isOwner" v-tooltip.left="t('oj.click_to_change_status')" class="cursor-pointer"
-            @click="switchStatus(data)"
-          >
-            {{ problemStatus[data.status as 0 | 2] }}
-          </a>
-          <span v-else class="text-muted-color">
-            {{ problemStatus[data.status as 0 | 2] }}
+          <span class="-my-1 flex justify-end">
+            <Button
+              v-tooltip.left="(isAdmin || data.isOwner) ? t('oj.click_to_change_status') : null" link
+              class="grow mr-3 p-0" :disabled="!(isAdmin || data.isOwner)" :label="problemStatus[data.status as 0 | 2]"
+              @click="switchStatus(data)"
+            />
+            <Button icon="pi pi-sort" link class="p-0" @click="sortingModal = true; sorting = data" />
+            <Button icon="pi pi-trash" link class="p-0 text-red-400" @click="event => removeProblem(event, data.pid)" />
           </span>
-        </template>
-      </Column>
-
-      <Column v-if="isAdmin" class="text-center w-20">
-        <template #header>
-          {{ t('oj.sorting') }}
-        </template>
-        <template #body="{ data }">
-          <Button class="-my-2" :label="t('oj.move')" text size="small" @click="sortingModal = true; sorting = data" />
-        </template>
-      </Column>
-
-      <Column v-if="isAdmin" class="pr-6 text-center w-24">
-        <template #header>
-          {{ t('oj.delete') }}
-        </template>
-        <template #body="{ data }">
-          <Button
-            class="-my-2"
-            :label="t('oj.delete')" text severity="danger" size="small"
-            @click="event => removeProblem(event, data.pid)"
-          />
         </template>
       </Column>
 

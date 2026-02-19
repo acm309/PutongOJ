@@ -127,10 +127,6 @@ async function onExport (format: ExportFormat) {
   exportDialog.value = false
 }
 
-function onView (data: any) {
-  router.push({ name: 'UserProfile', params: { uid: data.uid } })
-}
-
 onMounted(async () => {
   await Promise.all([ fetchGroups(), fetch() ])
 })
@@ -179,15 +175,18 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column field="uid" class="font-medium" frozen>
+      <Column field="uid" frozen>
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.user') }}</span>
         </template>
         <template #body="{ data }">
-          <span class="cursor-pointer flex gap-2 items-center min-h-10" @click="onView(data)">
+          <RouterLink
+            :to="{ name: 'UserProfile', params: { uid: data.uid } }"
+            class="cursor-pointer flex gap-2.5 group items-center min-h-[40px]"
+          >
             <UserAvatar :image="data.avatar" shape="circle" class="flex-none" />
-            <a class="min-w-24">{{ data.uid }}</a>
-          </span>
+            <span class="font-medium group-hover:underline min-w-24 text-primary">{{ data.uid }}</span>
+          </RouterLink>
         </template>
       </Column>
 
@@ -195,19 +194,19 @@ onRouteQueryUpdate(fetch)
 
       <Column :header="t('ptoj.motto')" field="motto" class="min-w-96">
         <template #body="{ data }">
-          <span class="-my-px line-clamp-2">
+          <p class="-my-px line-clamp-2">
             {{ data.motto.trim() || '' }}
-          </span>
+          </p>
         </template>
       </Column>
 
-      <Column field="solve" class="text-center  whitespace-nowrap">
+      <Column field="solve" class="text-center whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
         </template>
       </Column>
 
-      <Column field="submit" class="text-center  whitespace-nowrap">
+      <Column field="submit" class="text-center whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.submitted') }}</span>
         </template>

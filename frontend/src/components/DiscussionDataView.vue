@@ -22,12 +22,12 @@ const { locale } = useI18n()
   <div v-for="doc in props.value" :key="doc.discussionId" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
     <div class="flex flex-nowrap gap-x-4 gap-y-1 justify-between">
       <RouterLink
-        class="font-medium hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty"
+        class="font-medium grow hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty transition-colors"
         :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
       >
         {{ doc.title }}
       </RouterLink>
-      <span class="grow pt-px text-nowrap">
+      <span class="pt-px text-nowrap">
         <span class="flex flex-wrap-reverse gap-1 justify-end">
           <RouterLink
             v-if="!hideProblemTag && doc.contest && !props.contestId"
@@ -54,7 +54,7 @@ const { locale } = useI18n()
     </div>
     <div class="flex flex-wrap gap-x-6 gap-y-1 items-end justify-between text-nowrap">
       <RouterLink
-        class="flex gap-2 hover:text-primary items-center text-muted-color"
+        class="flex gap-2 hover:text-primary items-center text-muted-color transition-colors"
         :to="{ name: 'UserProfile', params: { uid: doc.author.uid } }"
       >
         <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatar" />

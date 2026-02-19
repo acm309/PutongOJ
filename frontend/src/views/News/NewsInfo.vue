@@ -11,7 +11,7 @@ const { news } = storeToRefs(useNewsStore())
   <div>
     <div class="pb-8 pt-4">
       <div class="max-w-xl mx-auto text-center">
-        <h1 class="font-bold mb-2 text-pretty">
+        <h1 class="font-bold mb-2 text-4xl/snug text-pretty">
           {{ news.title || '' }}
         </h1>
         <span class="text-muted-color">
