@@ -57,6 +57,18 @@ export enum JudgeStatus {
   Skipped = 12,
 }
 
+export const JUDGE_STATUS_TERMINAL = [
+  JudgeStatus.CompileError,
+  JudgeStatus.Accepted,
+  JudgeStatus.RuntimeError,
+  JudgeStatus.WrongAnswer,
+  JudgeStatus.TimeLimitExceeded,
+  JudgeStatus.MemoryLimitExceeded,
+  JudgeStatus.OutputLimitExceeded,
+  JudgeStatus.PresentationError,
+  JudgeStatus.SystemError,
+] as const
+
 export enum Language {
   C = 1,
   Cpp11 = 2,

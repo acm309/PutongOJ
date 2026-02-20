@@ -1,4 +1,3 @@
-import type { Paginated } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { ContestOption, CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
@@ -133,13 +132,6 @@ export type ProblemEntityView = Pick<ProblemEntity,
   tags: TagEntityItem[]
 }
 
-// Problem Statistics
-
-export interface ProblemStatistics {
-  group: number[]
-  list: Paginated<Omit<SolutionEntityPreview, 'pid' | 'judge'>>
-}
-
 // Contest
 
 export interface ContestEntity extends Entity {
@@ -195,10 +187,6 @@ export interface SolutionEntity extends Entity {
     memory: number
   }[]
 }
-
-export type SolutionEntityPreview = Pick<SolutionEntity,
-  'sid' | 'pid' | 'uid' | 'judge' | 'time' | 'memory' | 'language' | 'create'
->
 
 // News
 

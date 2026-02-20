@@ -1,16 +1,18 @@
-import type { Paginated } from '@putongoj/shared'
+import type { Paginated, ProblemStatisticsQueryResult } from '@putongoj/shared'
 import type { PipelineStage } from 'mongoose'
 import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
 import type { PaginateOption } from '../types'
-import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview, ProblemStatistics, SolutionEntityPreview } from '../types/entity'
+import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
 import path from 'node:path'
+import { JUDGE_STATUS_TERMINAL, JudgeStatus } from '@putongoj/shared'
 import fse from 'fs-extra'
 import { escapeRegExp } from 'lodash'
 import mongoose, { Types } from 'mongoose'
 import CourseProblem from '../models/CourseProblem'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
-import { judge, status } from '../utils/constants'
+import { status } from '../utils/constants'
+import { CacheKey, cacheService } from './cache'
 import tagService from './tag'
 
 export async function findProblems (
@@ -151,54 +153,78 @@ export async function removeProblem (pid: number): Promise<boolean> {
   return !!problem
 }
 
-export async function getStatistics (
-  pid: number,
-  opt: PaginateOption,
-): Promise<ProblemStatistics> {
-  const { page, pageSize } = opt
+function buildDistributionBuckets (
+  values: Array<{ _id: number, count: number }>,
+  bucketCount: number,
+) {
+  if (values.length === 0) {
+    return []
+  }
 
-  const list = await Solution.paginate({
-    pid,
-    judge: judge.Accepted,
-  }, {
-    sort: { time: 1, memory: 1, length: 1, create: 1 },
-    page,
-    limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id sid uid time memory language create',
-  }) as unknown as Paginated<Omit<SolutionEntityPreview, 'pid' | 'judge'>>
+  const min = values[0]._id
+  const max = values[values.length - 1]._id
+  const width = Math.max(1, Math.ceil((max - min + 1) / bucketCount))
 
-  const groupResult = await Solution.aggregate([
-    {
-      $match: {
-        pid,
-        judge: { $gte: 2, $lte: 10 },
-      },
-    },
-    {
-      $group: {
-        _id: { judge: '$judge', uid: '$uid' },
-      },
-    },
-    {
-      $group: {
-        _id: '$_id.judge',
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $sort: { _id: 1 },
-    },
-  ])
+  const buckets = Array.from({ length: bucketCount }, (_, index) => ({
+    lowerBound: min + (index * width),
+    upperBound: min + ((index + 1) * width) - 1,
+    count: 0,
+  }))
 
-  const group = Array.from({ length: 9 }).fill(0) as number[]
-  groupResult.forEach((item) => {
-    const i = item._id - 2
-    group[i] = item.count
-  })
+  for (const value of values) {
+    const bucketIndex = Math.min(
+      Math.floor((value._id - min) / width),
+      bucketCount - 1,
+    )
+    buckets[bucketIndex].count += value.count
+  }
 
-  return { group, list }
+  return buckets
+}
+
+export async function getStatistics (problem: Types.ObjectId): Promise<ProblemStatisticsQueryResult> {
+  return await cacheService.getOrCreate<ProblemStatisticsQueryResult>(
+    CacheKey.problemStatistics(problem),
+
+    async () => {
+      const problemDoc = await Problem
+        .findById(problem)
+        .select({ _id: 0, pid: 1 })
+        .lean()
+      if (!problemDoc) {
+        return { judgeCounts: [], timeDistribution: [], memoryDistribution: [] }
+      }
+
+      const { pid } = problemDoc
+      const [ judgeCountsRaw, acceptedTimeRaw, acceptedMemoryRaw ] = await Promise.all([
+        Solution.aggregate<{ _id: number, count: number }>([
+          { $match: { pid, judge: { $in: JUDGE_STATUS_TERMINAL } } },
+          { $group: { _id: '$judge', count: { $sum: 1 } } },
+          { $sort: { _id: 1 } },
+        ]),
+
+        Solution.aggregate<{ _id: number, count: number }>([
+          { $match: { pid, judge: JudgeStatus.Accepted } },
+          { $group: { _id: '$time', count: { $sum: 1 } } },
+          { $sort: { _id: 1 } },
+        ]),
+
+        Solution.aggregate<{ _id: number, count: number }>([
+          { $match: { pid, judge: JudgeStatus.Accepted } },
+          { $group: { _id: '$memory', count: { $sum: 1 } } },
+          { $sort: { _id: 1 } },
+        ]),
+      ])
+
+      return {
+        judgeCounts: judgeCountsRaw.map(({ _id, count }) => ({ judge: _id, count })),
+        timeDistribution: buildDistributionBuckets(acceptedTimeRaw, 20),
+        memoryDistribution: buildDistributionBuckets(acceptedMemoryRaw, 20),
+      }
+    },
+
+    { ttl: 30 },
+  )
 }
 
 export async function findCourseProblems (

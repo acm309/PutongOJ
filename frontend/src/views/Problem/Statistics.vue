@@ -1,188 +1,162 @@
 <script setup lang="ts">
-import type { Language } from '@putongoj/shared'
-import { storeToRefs } from 'pinia'
+import type { ProblemStatisticsQueryResult } from '@putongoj/shared'
+import { JUDGE_STATUS_TERMINAL } from '@putongoj/shared'
 import Chart from 'primevue/chart'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
-import Paginator from 'primevue/paginator'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { useStatisticsStore } from '@/store/modules/statistics'
-import { languageLabels } from '@/utils/constant'
-import { thousandSeparator, timePretty } from '@/utils/format'
-import { onRouteQueryUpdate } from '@/utils/helper'
+import { useRoute } from 'vue-router'
+import { getProblemStatistics } from '@/api/problem'
+import { thousandSeparator } from '@/utils/format'
+import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
-const statisticsStore = useStatisticsStore()
+const message = useMessage()
 
-const { find } = statisticsStore
-const { list, countList, sumStatis } = storeToRefs(statisticsStore)
-
-const pid = computed(() => Number.parseInt(route.params.pid as string))
-const pageSize = computed(() => Number.parseInt(route.query.pageSize as string) || 20)
-const currentPage = computed(() => Number.parseInt(route.query.page as string) || 1)
+const problemId = computed(() => Number.parseInt(route.params.pid as string))
 
 const loading = ref(false)
+const judgeCounts = ref([] as ProblemStatisticsQueryResult['judgeCounts'])
+const timeDistribution = ref([] as ProblemStatisticsQueryResult['timeDistribution'])
+const memoryDistribution = ref([] as ProblemStatisticsQueryResult['memoryDistribution'])
 
-const chartData = computed(() => {
+const judgeChartData = computed(() => {
+  const judgeCountMap = new Map(judgeCounts.value.map(item => [ item.judge, item.count ]))
+  const judgeLabels = [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ]
+  const judgeColors = [
+    'oklch(70.2% 0.183 293.541)',
+    'oklch(70.4% 0.191 22.216)',
+    'oklch(70.7% 0.165 254.624)',
+    'oklch(76.5% 0.177 163.223)',
+    'oklch(85.2% 0.199 91.936)',
+    'oklch(78.9% 0.154 211.53)',
+    'oklch(85.5% 0.138 181.071)',
+    'oklch(83.7% 0.128 66.29)',
+    'oklch(86.9% 0.005 56.366)',
+  ]
+
   return {
-    labels: [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ],
+    labels: judgeLabels,
     datasets: [ {
-      data: [
-        countList.value[0] || 0,
-        countList.value[1] || 0,
-        countList.value[2] || 0,
-        countList.value[3] || 0,
-        countList.value[4] || 0,
-        countList.value[5] || 0,
-        countList.value[6] || 0,
-        countList.value[7] || 0,
-        countList.value[8] || 0,
-      ],
-      backgroundColor: [
-        'oklch(70.2% 0.183 293.541)',
-        'oklch(70.4% 0.191 22.216)',
-        'oklch(70.7% 0.165 254.624)',
-        'oklch(76.5% 0.177 163.223)',
-        'oklch(85.2% 0.199 91.936)',
-        'oklch(78.9% 0.154 211.53)',
-        'oklch(85.5% 0.138 181.071)',
-        'oklch(83.7% 0.128 66.29)',
-        'oklch(86.9% 0.005 56.366)',
-      ],
+      data: JUDGE_STATUS_TERMINAL.map(status => judgeCountMap.get(status) ?? 0),
+      backgroundColor: judgeColors,
       borderWidth: 2,
       borderRadius: 5,
     } ],
   }
 })
 
-const chartOptions = {
+const timeChartData = computed(() => {
+  const labels = timeDistribution.value.map(bucket =>
+    `${thousandSeparator(bucket.lowerBound)}-${thousandSeparator(bucket.upperBound)} ms`)
+
+  return {
+    labels,
+    datasets: [ {
+      data: timeDistribution.value.map(bucket => bucket.count),
+      backgroundColor: 'oklch(70.4% 0.191 22.216)',
+      borderColor: 'white',
+      borderWidth: 2,
+      borderRadius: 5,
+    } ],
+  }
+})
+
+const memoryChartData = computed(() => {
+  const labels = memoryDistribution.value.map(bucket =>
+    `${thousandSeparator(bucket.lowerBound)}-${thousandSeparator(bucket.upperBound)} KB`)
+
+  return {
+    labels,
+    datasets: [ {
+      data: memoryDistribution.value.map(bucket => bucket.count),
+      backgroundColor: 'oklch(78.9% 0.154 211.53)',
+      borderColor: 'white',
+      borderWidth: 2,
+      borderRadius: 5,
+    } ],
+  }
+})
+
+const tooltipCallbacks = {
+  label (context: any) {
+    const value = context.raw || 0
+    const total = context.dataset.data.reduce((acc: number, val: number) => acc + val, 0)
+    const percentage = total > 0 ? Math.round((value / total) * 100) : 0
+    return ` ${thousandSeparator(value)} (${percentage}%)`
+  },
+}
+
+const doughnutChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'top',
-      labels: {
-        boxWidth: 12,
-        padding: 15,
-      },
+      labels: { boxWidth: 12, padding: 15 },
     },
-    tooltip: {
-      callbacks: {
-        label (context: any) {
-          const value = context.raw || 0
-          const total = context.dataset.data.reduce((acc: number, val: number) => acc + val, 0)
-          const percentage = total > 0 ? Math.round((value / total) * 100) : 0
-          return ` ${value} (${percentage}%)`
-        },
-      },
-    },
+    tooltip: { callbacks: tooltipCallbacks },
+  },
+}
+
+const barChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: tooltipCallbacks },
   },
 }
 
 async function getStatistics () {
   loading.value = true
-  await find({
-    page: currentPage.value,
-    pageSize: pageSize.value,
-    pid: pid.value,
-  })
+
+  judgeCounts.value = []
+  timeDistribution.value = []
+  memoryDistribution.value = []
+
+  const resp = await getProblemStatistics(problemId.value)
+  if (resp.success) {
+    judgeCounts.value = resp.data.judgeCounts
+    timeDistribution.value = resp.data.timeDistribution
+    memoryDistribution.value = resp.data.memoryDistribution
+  } else {
+    message.error(t('ptoj.failed_fetch_data'), resp.message)
+  }
+
   loading.value = false
 }
 
-function onPage (event: any) {
-  router.replace({
-    query: {
-      ...route.query,
-      page: (event.first / event.rows + 1),
-    },
-  })
-}
-
-onMounted(getStatistics)
-onRouteQueryUpdate(getStatistics)
+watch(problemId, getStatistics, { immediate: true })
 </script>
 
 <template>
   <div class="p-0">
-    <Chart type="doughnut" :data="chartData" :options="chartOptions" class="h-80 my-8" />
+    <template v-if="loading">
+      <div class="flex gap-4 items-center justify-center px-6 py-24">
+        <i class="pi pi-spin pi-spinner text-2xl" />
+        <span>{{ t('ptoj.loading') }}</span>
+      </div>
+    </template>
 
-    <DataTable class="whitespace-nowrap" :value="list" data-key="sid" :lazy="true" :loading="loading" scrollable>
-      <Column field="sid" class="font-medium pl-6 text-center" frozen>
-        <template #header>
-          <span class="text-center w-full">
-            <i class="pi pi-hashtag" />
-          </span>
-        </template>
-        <template #body="{ data }">
-          <RouterLink :to="{ name: 'solution', params: { sid: data.sid } }">
-            {{ data.sid }}
-          </RouterLink>
-        </template>
-      </Column>
+    <template v-else>
+      <div class="border-b border-surface p-6">
+        <Chart type="doughnut" :data="judgeChartData" :options="doughnutChartOptions" class="h-80 mb-4" />
+      </div>
 
-      <Column :header="t('ptoj.user')" field="uid" class="font-medium max-w-36 md:max-w-48 min-w-36 truncate">
-        <template #body="{ data }">
-          <RouterLink :to="{ name: 'UserProfile', params: { uid: data.uid } }">
-            {{ data.uid }}
-          </RouterLink>
-        </template>
-      </Column>
+      <div class="border-b border-surface p-6">
+        <h3 class="font-semibold mb-4 text-lg">
+          {{ t('ptoj.time') }}
+        </h3>
+        <Chart type="bar" :data="timeChartData" :options="barChartOptions" class="h-80" />
+      </div>
 
-      <Column field="time" class="text-right">
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.time') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.time) }} <small>ms</small>
-        </template>
-      </Column>
-
-      <Column field="memory" class="text-right">
-        <template #header>
-          <span class="font-semibold text-right w-full">
-            {{ t('ptoj.memory') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ thousandSeparator(data.memory) }} <small>KB</small>
-        </template>
-      </Column>
-
-      <Column field="language" class="text-center">
-        <template #header>
-          <span class="font-semibold text-center w-full">
-            {{ t('ptoj.language') }}
-          </span>
-        </template>
-        <template #body="{ data }">
-          {{ languageLabels[data.language as Language] }}
-        </template>
-      </Column>
-
-      <Column :header="t('ptoj.submitted_at')" field="createdAt" class="pr-6">
-        <template #body="{ data }">
-          {{ timePretty(data.create) }}
-        </template>
-      </Column>
-
-      <template #empty>
-        <span class="px-2">
-          {{ t('ptoj.empty_content_desc') }}
-        </span>
-      </template>
-    </DataTable>
-
-    <Paginator
-      class="border-surface border-t bottom-0 md:rounded-b-xl overflow-hidden sticky z-10"
-      :first="(currentPage - 1) * pageSize" :rows="pageSize" :total-records="sumStatis"
-      :current-page-report-template="t('ptoj.paginator_report')"
-      template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink" @page="onPage"
-    />
+      <div class="p-6">
+        <h3 class="font-semibold mb-4 text-lg">
+          {{ t('ptoj.memory') }}
+        </h3>
+        <Chart type="bar" :data="memoryChartData" :options="barChartOptions" class="h-80" />
+      </div>
+    </template>
   </div>
 </template>

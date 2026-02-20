@@ -1,8 +1,25 @@
 import { z } from 'zod'
-import { JudgeStatus, Language } from '@/consts/index.js'
+import { JUDGE_STATUS_TERMINAL, JudgeStatus, Language } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+
+const ProblemStatisticsBucketSchema = z.object({
+  lowerBound: z.int().nonnegative(),
+  upperBound: z.int().nonnegative(),
+  count: z.int().nonnegative(),
+})
+
+export const ProblemStatisticsQueryResultSchema = z.object({
+  judgeCounts: z.array(z.object({
+    judge: z.union(JUDGE_STATUS_TERMINAL.map(status => z.literal(status))),
+    count: z.int().nonnegative(),
+  })),
+  timeDistribution: z.array(ProblemStatisticsBucketSchema),
+  memoryDistribution: z.array(ProblemStatisticsBucketSchema),
+})
+
+export type ProblemStatisticsQueryResult = z.input<typeof ProblemStatisticsQueryResultSchema>
 
 export const ProblemSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,

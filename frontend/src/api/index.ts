@@ -1,6 +1,6 @@
 import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { CourseRole } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, ProblemStatistics, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams } from '../types/api'
 import type { TimeResp } from '@/types'
@@ -40,8 +40,6 @@ const problem = {
     instance.put(`/problem/${data.pid}`, data),
   delete: (data: { [key: string]: any }) =>
     instance.delete(`/problem/${data.pid}`, data),
-  getStatistics: (pid: number, params: PaginateParams) =>
-    instance.get<ProblemStatistics>(`/problem/${pid}/statistics`, { params }),
 }
 
 const news = {

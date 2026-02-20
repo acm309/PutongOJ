@@ -3,8 +3,14 @@ import type { Context } from 'koa'
 import type { Types } from 'mongoose'
 import type { DiscussionQueryFilters } from '../services/discussion'
 import type { WithId } from '../types'
-import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView, ProblemStatistics } from '../types/entity'
-import { DiscussionListQueryResultSchema, DiscussionListQuerySchema, ProblemSolutionListQueryResultSchema, ProblemSolutionListQuerySchema } from '@putongoj/shared'
+import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView } from '../types/entity'
+import {
+  DiscussionListQueryResultSchema,
+  DiscussionListQuerySchema,
+  ProblemSolutionListQueryResultSchema,
+  ProblemSolutionListQuerySchema,
+  ProblemStatisticsQueryResultSchema,
+} from '@putongoj/shared'
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import Solution from '../models/Solution'
@@ -246,12 +252,10 @@ const removeProblem = async (ctx: Context) => {
 }
 
 const getStatistics = async (ctx: Context) => {
-  const opt = ctx.request.query
   const problem = await loadProblemOrThrow(ctx)
-  const paginateOption = parsePaginateOption(opt, 30, 100)
-
-  const result = await problemService.getStatistics(problem.pid, paginateOption)
-  ctx.body = result as ProblemStatistics
+  const statistics = await problemService.getStatistics(problem._id)
+  const result = ProblemStatisticsQueryResultSchema.encode(statistics)
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function findSolutions (ctx: Context) {
