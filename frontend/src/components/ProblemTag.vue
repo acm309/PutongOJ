@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import type { TagColor } from '@putongoj/shared'
 import Tag from 'primevue/tag'
-
-type TagColor = 'default' | 'purple' | 'geekblue' | 'blue' | 'cyan' | 'green' | 'lime' | 'yellow' | 'gold' | 'orange' | 'volcano' | 'red' | 'magenta'
 
 const props = withDefaults(defineProps<{
   name: string
@@ -84,23 +83,11 @@ const props = withDefaults(defineProps<{
   --ptag-color: oklch(79.5% 0.184 86.047);
 }
 
-.ptag-gold {
-  --ptag-color: oklch(76.9% 0.188 70.08);
-}
-
 .ptag-orange {
   --ptag-color: oklch(70.5% 0.213 47.604);
 }
 
-.ptag-volcano {
-  --ptag-color: oklch(66.8% 0.23 34.9);
-}
-
 .ptag-red {
   --ptag-color: oklch(63.7% 0.237 25.331);
-}
-
-.ptag-magenta {
-  --ptag-color: oklch(64.5% 0.246 16.439);
 }
 </style>

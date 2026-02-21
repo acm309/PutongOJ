@@ -112,3 +112,18 @@ export const LabelingStyle = {
 } as const
 
 export type LabelingStyle = typeof LabelingStyle[keyof typeof LabelingStyle]
+
+export const tagColors = [
+  'default',
+  'purple',
+  'geekblue',
+  'blue',
+  'cyan',
+  'green',
+  'lime',
+  'yellow',
+  'orange',
+  'red',
+] as const
+
+export type TagColor = typeof tagColors[number]

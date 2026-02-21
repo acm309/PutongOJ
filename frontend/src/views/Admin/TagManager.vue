@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { tagColors } from '@backend/utils/constants'
+import { tagColors } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'

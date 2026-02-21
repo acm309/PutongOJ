@@ -1,8 +1,9 @@
+import type { TagColor } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { ContestOption, CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { UserEntity } from '../models/User'
-import type { encrypt, problemType, status, tagColors } from '../utils/constants'
+import type { encrypt, problemType, status } from '../utils/constants'
 
 // Common
 
@@ -204,7 +205,7 @@ export interface NewsEntity extends Entity {
 export interface TagEntity extends Entity {
   tagId: number
   name: string
-  color: typeof tagColors[number]
+  color: TagColor
 }
 
 export type TagEntityForm = Pick<TagEntity,
