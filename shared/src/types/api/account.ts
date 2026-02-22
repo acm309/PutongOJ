@@ -5,15 +5,6 @@ import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
-export const AccountSessionSchema = z.object({
-  uid: UserModelSchema.shape.uid,
-  privilege: UserModelSchema.shape.privilege,
-  checksum: z.base64(),
-  verifyContest: z.array(z.number()).optional(),
-})
-
-export type AccountSession = z.infer<typeof AccountSessionSchema>
-
 export const AccountProfileQueryResultSchema = z.object({
   uid: UserModelSchema.shape.uid,
   privilege: UserModelSchema.shape.privilege,
@@ -22,7 +13,6 @@ export const AccountProfileQueryResultSchema = z.object({
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,
-  verifyContest: AccountSessionSchema.shape.verifyContest,
 })
 
 export type AccountProfileQueryResult = z.input<typeof AccountProfileQueryResultSchema>
@@ -83,3 +73,20 @@ export const AccountSubmissionListQueryResultSchema = PaginatedSchema(z.object({
 }))
 
 export type AccountSubmissionListQueryResult = z.input<typeof AccountSubmissionListQueryResultSchema>
+
+export const SessionListQueryResultSchema = z.array(z.object({
+  sessionId: z.string(),
+  current: z.boolean(),
+  lastAccessAt: z.iso.datetime(),
+  loginAt: z.iso.datetime(),
+  loginIp: z.string(),
+  userAgent: z.string(),
+}))
+
+export type SessionListQueryResult = z.input<typeof SessionListQueryResultSchema>
+
+export const SessionRevokeOthersResultSchema = z.object({
+  removed: z.number(),
+})
+
+export type SessionRevokeOthersResult = z.input<typeof SessionRevokeOthersResultSchema>

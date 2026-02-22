@@ -26,6 +26,7 @@ import discussionService from '../services/discussion'
 import groupService from '../services/group'
 import oauthService from '../services/oauth'
 import problemService from '../services/problem'
+import sessionService from '../services/session'
 import solutionService from '../services/solution'
 import userService from '../services/user'
 import websocketService from '../services/websocket'
@@ -139,7 +140,8 @@ export async function updateUserPassword (ctx: Context) {
   const profile = await loadProfile(ctx)
   try {
     await userService.updateUser(user, { pwd })
-    ctx.auditLog.info(`<User:${user.uid}> changed password by <User:${profile.uid}>`)
+    const revoked = await sessionService.revokeOtherSessions(user._id.toString(), '')
+    ctx.auditLog.info(`<User:${user.uid}> password reset by <User:${profile.uid}>, revoked ${revoked} session(s)`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

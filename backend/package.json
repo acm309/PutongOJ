@@ -12,7 +12,7 @@
     "dev:ws": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/ws.ts",
     "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.ts",
     "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r src/scripts dist/scripts",
     "start": "cross-env NODE_ENV=production node dist/app.js",
     "deploy:init": "cross-env NODE_ENV=production node setup.js",
     "deploy:start": "npx pm2 start pm2.config.json",

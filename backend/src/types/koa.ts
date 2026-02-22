@@ -1,4 +1,3 @@
-import type { AccountSession } from '@putongoj/shared'
 import type { TagDocument } from '../models/Tag'
 import type { UserDocument } from '../models/User'
 import type { ContestState } from '../policies/contest'
@@ -13,6 +12,7 @@ declare module 'koa' {
     requestId: string
     authnChecked?: boolean
     profile?: UserDocument
+    sessionId?: string
 
     contest?: ContestState
     course?: CourseState
@@ -25,7 +25,8 @@ declare module 'koa' {
   interface DefaultContext {
     state: DefaultState
     session: {
-      profile?: AccountSession
+      userId?: string
+      sessionId?: string
     }
     auditLog: {
       info: (message: string) => void

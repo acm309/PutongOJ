@@ -1,34 +1,88 @@
-import type { AccountSession } from '@putongoj/shared'
-import type { Context } from 'koa'
-import type { UserDocument } from '../models/User'
-import { passwordChecksum } from '../utils'
+import { randomBytes } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import config from '../config'
+import redis from '../config/redis'
 
-export function getSession (ctx: Context): AccountSession | null {
-  return ctx.session.profile || null
+const luaScript = readFileSync(path.join(__dirname, '..', 'scripts', 'session.lua'))
+
+export interface SessionInfo {
+  loginAt: string
+  loginIp: string
+  userAgent: string
 }
 
-export function setSession (ctx: Context, user: UserDocument): AccountSession {
-  const { uid, privilege, pwd } = user
-  const checksum = passwordChecksum(pwd)
-  const profile: AccountSession = {
-    uid,
-    privilege,
-    checksum,
-    verifyContest: [],
+export async function createSession (userId: string, ip: string, userAgent: string) {
+  const sessionId = randomBytes(16).toString('hex')
+
+  const now = new Date()
+  const info: SessionInfo = {
+    loginAt: now.toISOString(),
+    loginIp: ip,
+    userAgent,
   }
 
-  ctx.session.profile = profile
-  return profile
+  await redis.eval(
+    luaScript, 0,
+    'create', userId, sessionId,
+    JSON.stringify(info),
+    String(now.getTime()),
+    String(config.sessionMaxCount),
+  )
+  return sessionId
 }
 
-export function deleteSession (ctx: Context): void {
-  delete ctx.session.profile
+export async function accessSession (userId: string, sessionId: string) {
+  const now = new Date()
+  const result = await redis.eval(
+    luaScript, 0,
+    'access', userId, sessionId,
+    String(now.getTime()),
+  )
+
+  if (!result) {
+    return null
+  }
+  return JSON.parse(result as string) as SessionInfo
+}
+
+export async function revokeSession (userId: string, sessionId: string) {
+  await redis.eval(
+    luaScript, 0,
+    'revoke', userId, sessionId,
+  )
+}
+
+export async function revokeOtherSessions (userId: string, keepSessionId: string) {
+  return await redis.eval(
+    luaScript, 0,
+    'revoke_others', userId, keepSessionId,
+  ) as number
+}
+
+export async function listSessions (userId: string) {
+  const result = await redis.eval(
+    luaScript, 0,
+    'list', userId,
+  ) as string[]
+
+  const sessions = []
+  for (let i = 0; i < result.length; i += 3) {
+    sessions.push({
+      sessionId: result[i],
+      lastAccessAt: new Date(Number(result[i + 1])).toISOString(),
+      info: JSON.parse(result[i + 2]),
+    })
+  }
+  return sessions
 }
 
 const sessionService = {
-  getSession,
-  setSession,
-  deleteSession,
+  createSession,
+  accessSession,
+  revokeSession,
+  revokeOtherSessions,
+  listSessions,
 } as const
 
 export default sessionService

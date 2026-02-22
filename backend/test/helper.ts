@@ -1,3 +1,4 @@
+import redis from '../src/config/redis'
 import Comment from '../src/models/Comment'
 import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
@@ -25,5 +26,6 @@ export async function removeall () {
     Solution.deleteMany({}),
     Tag.deleteMany({}),
     User.deleteMany({}),
+    redis.flushdb(),
   ])
 }

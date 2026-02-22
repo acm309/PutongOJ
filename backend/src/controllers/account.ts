@@ -28,14 +28,11 @@ import {
 
 export async function getProfile (ctx: Context) {
   const profile = await checkSession(ctx)
-  const session = sessionService.getSession(ctx)
-  if (!profile || !session) {
+  if (!profile) {
     return createErrorResponse(ctx, 'Not logged in', ErrorCode.Unauthorized)
   }
 
-  const result = AccountProfileQueryResultSchema.encode({
-    ...session, ...profile.toObject(),
-  })
+  const result = AccountProfileQueryResultSchema.encode(profile.toObject())
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -71,11 +68,16 @@ export async function userLogin (ctx: Context) {
     )
   }
 
-  const session = sessionService.setSession(ctx, user)
-  const result = AccountProfileQueryResultSchema.encode({
-    ...session, ...user.toObject(),
-  })
+  const userId = user._id.toString()
+  const sessionId = await sessionService.createSession(
+    userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
+  )
+  ctx.session.userId = userId
+  ctx.session.sessionId = sessionId
+
   ctx.auditLog.info(`<User:${user.uid}> logged in successfully`)
+
+  const result = AccountProfileQueryResultSchema.encode(user.toObject())
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -115,11 +117,16 @@ export async function userRegister (ctx: Context) {
       uid: payload.data.username,
       pwd: passwordHash(password),
     })
-    const session = sessionService.setSession(ctx, user)
-    const result = AccountProfileQueryResultSchema.encode({
-      ...session, ...user.toObject(),
-    })
+    const userId = user._id.toString()
+    const sessionId = await sessionService.createSession(
+      userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
+    )
+    ctx.session.userId = userId
+    ctx.session.sessionId = sessionId
+
     ctx.auditLog.info(`<User:${user.uid}> registered successfully`)
+
+    const result = AccountProfileQueryResultSchema.encode(user.toObject())
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -127,11 +134,15 @@ export async function userRegister (ctx: Context) {
 }
 
 export async function userLogout (ctx: Context) {
-  const { profile } = ctx.state
-  if (profile) {
+  const { profile, sessionId } = ctx.state
+
+  if (profile && sessionId) {
+    await sessionService.revokeSession(profile._id.toString(), sessionId)
     ctx.auditLog.info(`<User:${profile.uid}> logged out`)
   }
-  sessionService.deleteSession(ctx)
+  delete ctx.session.userId
+  delete ctx.session.sessionId
+
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -147,10 +158,7 @@ export async function updateProfile (ctx: Context) {
     const updatedUser = await userService.updateUser(profile, {
       nick, motto, mail, school,
     })
-    const session = sessionService.getSession(ctx)
-    const result = AccountProfileQueryResultSchema.encode({
-      ...session, ...updatedUser.toObject(),
-    })
+    const result = AccountProfileQueryResultSchema.encode(updatedUser.toObject())
     ctx.auditLog.info(`<User:${profile.uid}> updated profile`)
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
@@ -189,9 +197,10 @@ export async function updatePassword (ctx: Context) {
   const pwd = passwordHash(newPassword)
 
   try {
-    const updatedUser = await userService.updateUser(profile, { pwd })
-    sessionService.setSession(ctx, updatedUser)
-    ctx.auditLog.info(`<User:${profile.uid}> changed password`)
+    await userService.updateUser(profile, { pwd })
+    const userId = profile._id.toString()
+    const revoked = await sessionService.revokeOtherSessions(userId, ctx.state.sessionId!)
+    ctx.auditLog.info(`<User:${profile.uid}> changed password, revoked ${revoked} other session(s)`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)

@@ -54,6 +54,7 @@ interface GlobalConfig {
   redisURL: string
   secretKey: string
   sessionMaxAge: number
+  sessionMaxCount: number
   reverseProxy: {
     enabled: boolean
     forwardLimit: number
@@ -113,6 +114,10 @@ export const globalConfig: GlobalConfig = {
   sessionMaxAge: numberEnv(
     'PTOJ_SESSION_MAX_AGE',
     7 * 24 * 60 * 60,
+  ),
+  sessionMaxCount: numberEnv(
+    'PTOJ_SESSION_MAX_COUNT',
+    10,
   ),
   reverseProxy: {
     enabled: booleanEnv(

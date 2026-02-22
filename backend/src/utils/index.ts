@@ -4,7 +4,6 @@ import type { ZodError } from 'zod'
 import type { PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
-import { sha256 } from '@noble/hashes/sha2.js'
 import { ErrorCode, passwordRegex } from '@putongoj/shared'
 import { pick, pickBy } from 'lodash'
 
@@ -44,12 +43,6 @@ export function passwordHashBuffer (password: string): Buffer {
 
 export function passwordHash (password: string): string {
   return Buffer.from(passwordHashBuffer(password)).toString('hex')
-}
-
-export function passwordChecksum (passwordHash: string): string {
-  const hashArr = Uint8Array.from(Buffer.from(passwordHash, 'hex'))
-  const sha256Hash = sha256(hashArr)
-  return Buffer.from(sha256Hash.slice(0, 12)).toString('base64')
 }
 
 export function isComplexPwd (pwd: string): boolean {
