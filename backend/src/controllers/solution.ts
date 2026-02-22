@@ -156,7 +156,7 @@ const create = async (ctx: Context) => {
       type, additionCode,
     }
 
-    redis.rpush('judger:task', JSON.stringify(submission))
+    await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
     ctx.body = { sid }
@@ -247,7 +247,7 @@ async function updateSolution (ctx: Context) {
       type, additionCode,
     }
 
-    redis.rpush('judger:task', JSON.stringify(submission))
+    await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)
   } catch (e: any) {
     return createErrorResponse(ctx,
