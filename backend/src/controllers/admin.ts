@@ -18,6 +18,8 @@ import {
   AdminUserListQuerySchema,
   AdminUserOAuthQueryResultSchema,
   ErrorCode,
+  SessionListQueryResultSchema,
+  SessionRevokeOthersResultSchema,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
 import { contestService } from '../services/contest'
@@ -463,6 +465,45 @@ export async function updateComment (ctx: Context) {
   }
 }
 
+export async function listUserSessions (ctx: Context) {
+  const user = await loadUser(ctx)
+  const sessions = await sessionService.listSessions(user._id.toString())
+
+  const currentSessionId = ctx.state.sessionId
+  const result = SessionListQueryResultSchema.parse(sessions.map(s => ({
+    sessionId: s.sessionId,
+    current: s.sessionId === currentSessionId,
+    lastAccessAt: s.lastAccessAt,
+    loginAt: s.info.loginAt,
+    loginIp: s.info.loginIp,
+    userAgent: s.info.userAgent,
+  })))
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function revokeUserSession (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const user = await loadUser(ctx)
+  const { sessionId } = ctx.params
+  if (!sessionId || typeof sessionId !== 'string') {
+    return createErrorResponse(ctx, 'Invalid session ID', ErrorCode.BadRequest)
+  }
+
+  await sessionService.revokeSession(user._id.toString(), sessionId)
+  ctx.auditLog.info(`<User:${profile.uid}> revoked <Session:${sessionId}> of <User:${user.uid}>`)
+  return createEnvelopedResponse(ctx, null)
+}
+
+export async function revokeUserAllSessions (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const user = await loadUser(ctx)
+
+  const removed = await sessionService.revokeOtherSessions(user._id.toString(), '')
+  ctx.auditLog.info(`<User:${profile.uid}> revoked all ${removed} session(s) of <User:${user.uid}>`)
+  const result = SessionRevokeOthersResultSchema.parse({ removed })
+  return createEnvelopedResponse(ctx, result)
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -481,6 +522,9 @@ const adminController = {
   removeGroup,
   updateDiscussion,
   updateComment,
+  listUserSessions,
+  revokeUserSession,
+  revokeUserAllSessions,
 } as const
 
 export default adminController

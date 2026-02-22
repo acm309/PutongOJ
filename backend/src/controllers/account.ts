@@ -10,6 +10,8 @@ import {
   AccountSubmissionListQueryResultSchema,
   AccountSubmissionListQuerySchema,
   ErrorCode,
+  SessionListQueryResultSchema,
+  SessionRevokeOthersResultSchema,
   UserPrivilege,
 } from '@putongoj/shared'
 import { checkSession, loadProfile } from '../middlewares/authn'
@@ -220,6 +222,55 @@ export async function findSubmissions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function listSessions (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const userId = profile._id.toString()
+  const sessions = await sessionService.listSessions(userId)
+
+  const currentSessionId = ctx.state.sessionId
+  const result = SessionListQueryResultSchema.parse(sessions.map(s => ({
+    sessionId: s.sessionId,
+    current: s.sessionId === currentSessionId,
+    lastAccessAt: s.lastAccessAt,
+    loginAt: s.info.loginAt,
+    loginIp: s.info.loginIp,
+    userAgent: s.info.userAgent,
+  })))
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function revokeSession (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const { sessionId } = ctx.params
+  if (!sessionId || typeof sessionId !== 'string') {
+    return createErrorResponse(ctx, 'Invalid session ID', ErrorCode.BadRequest)
+  }
+  if (sessionId === ctx.state.sessionId) {
+    return createErrorResponse(ctx,
+      'Cannot revoke current session, use logout instead', ErrorCode.BadRequest,
+    )
+  }
+
+  await sessionService.revokeSession(profile._id.toString(), sessionId)
+  ctx.auditLog.info(`<User:${profile.uid}> revoked <Session:${sessionId}>`)
+  return createEnvelopedResponse(ctx, null)
+}
+
+export async function revokeOtherSessions (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const currentSessionId = ctx.state.sessionId
+  if (!currentSessionId) {
+    return createErrorResponse(ctx, 'No active session', ErrorCode.BadRequest)
+  }
+
+  const removed = await sessionService.revokeOtherSessions(
+    profile._id.toString(), currentSessionId,
+  )
+  ctx.auditLog.info(`<User:${profile.uid}> revoked ${removed} other session(s)`)
+  const result = SessionRevokeOthersResultSchema.parse({ removed })
+  return createEnvelopedResponse(ctx, result)
+}
+
 const accountController = {
   getProfile,
   userLogin,
@@ -228,6 +279,9 @@ const accountController = {
   updateProfile,
   updatePassword,
   findSubmissions,
+  listSessions,
+  revokeSession,
+  revokeOtherSessions,
 } as const
 
 export default accountController

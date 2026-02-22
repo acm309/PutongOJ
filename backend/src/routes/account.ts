@@ -1,6 +1,5 @@
 import Router from '@koa/router'
 import accountController from '../controllers/account'
-import sessionController from '../controllers/session'
 import authnMiddleware from '../middlewares/authn'
 import ratelimitMiddleware from '../middlewares/ratelimit'
 
@@ -38,15 +37,15 @@ accountRouter.get('/submissions',
 
 accountRouter.get('/sessions',
   authnMiddleware.loginRequire,
-  sessionController.listSessions,
+  accountController.listSessions,
 )
 accountRouter.delete('/sessions',
   authnMiddleware.loginRequire,
-  sessionController.revokeOtherSessions,
+  accountController.revokeOtherSessions,
 )
 accountRouter.delete('/sessions/:sessionId',
   authnMiddleware.loginRequire,
-  sessionController.revokeSession,
+  accountController.revokeSession,
 )
 
 export default accountRouter

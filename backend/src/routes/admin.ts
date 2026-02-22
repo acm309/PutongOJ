@@ -27,6 +27,15 @@ adminRouter.get('/users/:uid/oauth',
 adminRouter.delete('/users/:uid/oauth/:provider',
   adminController.removeUserOAuthConnection,
 )
+adminRouter.get('/users/:uid/sessions',
+  adminController.listUserSessions,
+)
+adminRouter.delete('/users/:uid/sessions',
+  adminController.revokeUserAllSessions,
+)
+adminRouter.delete('/users/:uid/sessions/:sessionId',
+  adminController.revokeUserSession,
+)
 
 adminRouter.get('/solutions',
   adminController.findSolutions,
