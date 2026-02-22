@@ -14,6 +14,9 @@ export interface SessionInfo {
 
 export async function createSession (userId: string, ip: string, userAgent: string) {
   const sessionId = randomBytes(16).toString('hex')
+  if (userAgent.length > 500) {
+    userAgent = userAgent.slice(0, 500)
+  }
 
   const now = new Date()
   const info: SessionInfo = {
