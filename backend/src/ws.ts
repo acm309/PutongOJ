@@ -1,11 +1,12 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putongoj/shared'
+import process from 'node:process'
 import { uuidV4Regex, WebSocketDispatchType, WebSocketMessageType } from '@putongoj/shared'
 import { Redis } from 'ioredis'
 import WebSocket from 'ws'
 import { globalConfig } from './config'
+import redis from './config/redis'
 
 const wss = new WebSocket.Server({ port: globalConfig.wsPort })
-const redis = new Redis(globalConfig.redisURL)
 
 const userConnections = new Map<string, Set<WebSocket>>()
 
@@ -99,6 +100,11 @@ setInterval(() => {
 }, 300000)
 
 const subscriber = new Redis(globalConfig.redisURL)
+
+subscriber.on('error', (err) => {
+  console.error('Redis subscriber error:', err)
+})
+
 subscriber.subscribe('websocket:message', (err) => {
   if (err) {
     console.error('Failed to subscribe: ', err)
@@ -129,3 +135,14 @@ function handleMessage (json: string): void {
     console.error('Error handling message:', error)
   }
 }
+
+async function shutdown (signal: string) {
+  console.log(`Received ${signal}, shutting down WebSocket server...`)
+  wss.close()
+  await subscriber.quit()
+  await redis.quit()
+  process.exit(0)
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))

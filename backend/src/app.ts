@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { env } from 'node:process'
+import process, { env } from 'node:process'
 import Koa from 'koa'
 import { koaBody } from 'koa-body'
 import koaLogger from 'koa-logger'
@@ -7,6 +7,7 @@ import send from 'koa-send'
 import session from 'koa-session'
 import staticServe from 'koa-static'
 import config from './config'
+import redis from './config/redis'
 import { databaseSetup } from './config/setup'
 import { parseClientIp } from './middlewares'
 import authnMiddleware from './middlewares/authn'
@@ -105,6 +106,16 @@ if (env.NODE_ENV !== 'test') {
     await databaseSetup()
     logger.info(`The server is running at http://localhost:${config.port}`)
   })
+
+  async function shutdown (signal: string) {
+    logger.info(`Received ${signal}, shutting down...`)
+    await redis.quit()
+    logger.info('Redis connection closed')
+    process.exit(0)
+  }
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'))
+  process.on('SIGINT', () => shutdown('SIGINT'))
 }
 
 export default app

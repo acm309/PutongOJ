@@ -1,7 +1,6 @@
-import process from 'node:process'
 import Redis from 'ioredis'
+import config from '.'
 import logger from '../utils/logger'
-import config from './'
 
 const redis = new Redis(config.redisURL)
 
@@ -9,10 +8,12 @@ redis.on('connect', () => {
   logger.info('Redis server is connected')
 })
 
+redis.on('reconnecting', () => {
+  logger.warn('Redis is reconnecting...')
+})
+
 redis.on('error', (err) => {
-  logger.error('Redis connected fail.')
-  logger.error(err)
-  process.exit(-1)
+  logger.error('Redis error:', err)
 })
 
 export default redis
