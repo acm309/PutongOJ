@@ -14,13 +14,6 @@ export interface ContestOption {
   labelingStyle: typeof contestLabelingStyle[keyof typeof contestLabelingStyle]
 }
 
-export interface SessionProfile {
-  uid: string
-  privilege: number
-  checksum: string
-  verifyContest?: number[]
-}
-
 export interface PaginateOption {
   page: number
   pageSize: number

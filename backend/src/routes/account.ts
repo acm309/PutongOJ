@@ -35,4 +35,17 @@ accountRouter.get('/submissions',
   accountController.findSubmissions,
 )
 
+accountRouter.get('/sessions',
+  authnMiddleware.loginRequire,
+  accountController.listSessions,
+)
+accountRouter.delete('/sessions',
+  authnMiddleware.loginRequire,
+  accountController.revokeOtherSessions,
+)
+accountRouter.delete('/sessions/:sessionId',
+  authnMiddleware.loginRequire,
+  accountController.revokeSession,
+)
+
 export default accountRouter

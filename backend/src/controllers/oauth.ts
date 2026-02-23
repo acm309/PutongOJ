@@ -96,8 +96,15 @@ export async function handleOAuthCallback (ctx: Context) {
       )
     }
     user = connectedUser
+
+    const userId = user._id.toString()
+    const sessionId = await sessionService.createSession(
+      userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
+    )
+    ctx.session.userId = userId
+    ctx.session.sessionId = sessionId
+
     ctx.auditLog.info(`<User:${user.uid}> logged in via ${provider} OAuth`)
-    sessionService.setSession(ctx, user)
   } else {
     ctx.throw(400, 'Unknown OAuth action')
   }

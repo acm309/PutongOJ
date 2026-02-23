@@ -18,6 +18,8 @@ import {
   AdminUserListQuerySchema,
   AdminUserOAuthQueryResultSchema,
   ErrorCode,
+  SessionListQueryResultSchema,
+  SessionRevokeOthersResultSchema,
 } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
 import { contestService } from '../services/contest'
@@ -26,6 +28,7 @@ import discussionService from '../services/discussion'
 import groupService from '../services/group'
 import oauthService from '../services/oauth'
 import problemService from '../services/problem'
+import sessionService from '../services/session'
 import solutionService from '../services/solution'
 import userService from '../services/user'
 import websocketService from '../services/websocket'
@@ -139,7 +142,8 @@ export async function updateUserPassword (ctx: Context) {
   const profile = await loadProfile(ctx)
   try {
     await userService.updateUser(user, { pwd })
-    ctx.auditLog.info(`<User:${user.uid}> changed password by <User:${profile.uid}>`)
+    const revoked = await sessionService.revokeOtherSessions(user._id.toString(), '')
+    ctx.auditLog.info(`<User:${user.uid}> password reset by <User:${profile.uid}>, revoked ${revoked} session(s)`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
@@ -461,6 +465,51 @@ export async function updateComment (ctx: Context) {
   }
 }
 
+export async function listUserSessions (ctx: Context) {
+  const user = await loadUser(ctx)
+  const sessions = await sessionService.listSessions(user._id.toString())
+
+  const currentSessionId = ctx.state.sessionId
+  const result = SessionListQueryResultSchema.parse(sessions.map(s => ({
+    sessionId: s.sessionId,
+    current: s.sessionId === currentSessionId,
+    lastAccessAt: s.lastAccessAt,
+    loginAt: s.info.loginAt,
+    loginIp: s.info.loginIp,
+    userAgent: s.info.userAgent,
+  })))
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function revokeUserSession (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const user = await loadUser(ctx)
+  const { sessionId } = ctx.params
+  if (!sessionId || typeof sessionId !== 'string') {
+    return createErrorResponse(ctx, 'Invalid session ID', ErrorCode.BadRequest)
+  }
+  if (sessionId === ctx.state.sessionId) {
+    return createErrorResponse(ctx,
+      'Cannot revoke current session, use logout instead', ErrorCode.BadRequest,
+    )
+  }
+
+  await sessionService.revokeSession(user._id.toString(), sessionId)
+  ctx.auditLog.info(`<User:${profile.uid}> revoked <Session:${sessionId}> of <User:${user.uid}>`)
+  return createEnvelopedResponse(ctx, null)
+}
+
+export async function revokeUserAllSessions (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  const user = await loadUser(ctx)
+
+  const keepSessionId = user.uid === profile.uid ? ctx.state.sessionId : ''
+  const removed = await sessionService.revokeOtherSessions(user._id.toString(), keepSessionId || '')
+  ctx.auditLog.info(`<User:${profile.uid}> revoked all ${removed} session(s) of <User:${user.uid}>`)
+  const result = SessionRevokeOthersResultSchema.parse({ removed })
+  return createEnvelopedResponse(ctx, result)
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -479,6 +528,9 @@ const adminController = {
   removeGroup,
   updateDiscussion,
   updateComment,
+  listUserSessions,
+  revokeUserSession,
+  revokeUserAllSessions,
 } as const
 
 export default adminController

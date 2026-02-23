@@ -27,22 +27,29 @@ app.keys = [ config.secretKey ]
 app.use(parseClientIp)
 
 app.use(async (ctx, next) => {
+  const buildTraceInfo = () => {
+    const { requestId, clientIp, sessionId } = ctx.state
+    const trace = [ `Req ${requestId}`, `IP ${clientIp}` ]
+    if (sessionId) {
+      trace.push(`Sess ${sessionId}`)
+    }
+    return `[${trace.join(', ')}]`
+  }
+
   ctx.auditLog = {
     info (message: string) {
-      const { requestId, clientIp } = ctx.state
-      logger.info(`${message} [${requestId}] from ${clientIp}`)
+      logger.info(`${message} ${buildTraceInfo()}`)
     },
     error (message: string, error?: any) {
-      const { requestId, clientIp } = ctx.state
+      const trace = buildTraceInfo()
       if (error) {
-        logger.error(`${message} [${requestId}] from ${clientIp}`, error)
+        logger.error(`${message} ${trace}`, error)
       } else {
-        logger.error(`${message} [${requestId}] from ${clientIp}`)
+        logger.error(`${message} ${trace}`)
       }
     },
     warn (message: string) {
-      const { requestId, clientIp } = ctx.state
-      logger.warn(`${message} [${requestId}] from ${clientIp}`)
+      logger.warn(`${message} ${buildTraceInfo()}`)
     },
   }
   await next()
