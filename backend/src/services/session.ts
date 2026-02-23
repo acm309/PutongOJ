@@ -46,7 +46,11 @@ export async function accessSession (userId: string, sessionId: string) {
   if (!result) {
     return null
   }
-  return JSON.parse(result as string) as SessionInfo
+  try {
+    return JSON.parse(result as string) as SessionInfo
+  } catch {
+    return null
+  }
 }
 
 export async function revokeSession (userId: string, sessionId: string) {
@@ -71,11 +75,15 @@ export async function listSessions (userId: string) {
 
   const sessions = []
   for (let i = 0; i < result.length; i += 3) {
-    sessions.push({
-      sessionId: result[i],
-      lastAccessAt: new Date(Number(result[i + 1])).toISOString(),
-      info: JSON.parse(result[i + 2]),
-    })
+    try {
+      sessions.push({
+        sessionId: result[i],
+        lastAccessAt: new Date(Number(result[i + 1])).toISOString(),
+        info: JSON.parse(result[i + 2]),
+      })
+    } catch {
+      // If parsing fails, skip this session
+    }
   }
   return sessions
 }
