@@ -43,6 +43,7 @@
     "stylus": "^0.64.0",
     "tailwindcss": "^4.1.18",
     "tailwindcss-primeui": "^0.6.1",
+    "ua-parser-js": "^2.0.9",
     "vditor": "^3.11.2",
     "vue": "3.5.28",
     "vue-i18n": "^11.2.8",

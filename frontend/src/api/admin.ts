@@ -16,6 +16,8 @@ import type {
   AdminUserListQuery,
   AdminUserListQueryResult,
   AdminUserOAuthQueryResult,
+  SessionListQueryResult,
+  SessionRevokeOthersResult,
 } from '@putongoj/shared'
 import { OAuthProvider } from '@putongoj/shared'
 import { instanceSafe as instance } from './instance'
@@ -78,4 +80,14 @@ export async function updateDiscussion (discussionId: number, payload: AdminDisc
 }
 export async function updateComment (commentId: number, payload: AdminCommentUpdatePayload) {
   return instance.put<null>(`/admin/comments/${commentId}`, payload)
+}
+
+export async function listUserSessions (uid: string) {
+  return instance.get<SessionListQueryResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
+}
+export async function revokeUserSession (uid: string, sessionId: string) {
+  return instance.delete<null>(`/admin/users/${encodeURIComponent(uid)}/sessions/${encodeURIComponent(sessionId)}`)
+}
+export async function revokeUserAllSessions (uid: string) {
+  return instance.delete<SessionRevokeOthersResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
 }

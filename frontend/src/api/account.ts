@@ -6,6 +6,8 @@ import type {
   AccountRegisterPayload,
   AccountSubmissionListQuery,
   AccountSubmissionListQueryResult,
+  SessionListQueryResult,
+  SessionRevokeOthersResult,
 } from '@putongoj/shared'
 import { instanceSafe as instance } from './instance'
 
@@ -31,4 +33,14 @@ export async function updatePassword (payload: AccountChangePasswordPayload) {
 
 export async function findSubmissions (params: AccountSubmissionListQuery) {
   return instance.get<AccountSubmissionListQueryResult>('/account/submissions', { params })
+}
+
+export async function listSessions () {
+  return instance.get<SessionListQueryResult>('/account/sessions')
+}
+export async function revokeSession (sessionId: string) {
+  return instance.delete<null>(`/account/sessions/${encodeURIComponent(sessionId)}`)
+}
+export async function revokeOtherSessions () {
+  return instance.delete<SessionRevokeOthersResult>('/account/sessions')
 }
