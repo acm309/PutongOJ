@@ -74,3 +74,14 @@ export interface SolutionModelDataTable {
   language: SolutionModel['language']
   createdAt: SolutionModel['createdAt']
 }
+
+export interface SessionInfo {
+  sessionId: string
+  current: boolean
+  active: boolean
+  loginAt: string
+  loginIp: string
+  lastAccessAt: Date
+  browser: string
+  os: string
+}

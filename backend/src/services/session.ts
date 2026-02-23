@@ -6,7 +6,7 @@ import redis from '../config/redis'
 
 const luaScript = readFileSync(path.join(__dirname, '..', 'scripts', 'session.lua'))
 
-export interface SessionInfo {
+interface SessionInfo {
   loginAt: string
   loginIp: string
   userAgent: string
