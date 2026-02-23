@@ -91,7 +91,6 @@ function setEditingUser () {
 
 async function fetch () {
   loading.value = true
-  fetchSessions()
   const [ userResp, oauthResp ] = await Promise.all([
     getUser(uid.value),
     getUserOAuthConnections(uid.value),
@@ -111,6 +110,8 @@ async function fetch () {
   user.value = userResp.data
   setEditingUser()
   changeDomTitle({ title: `${user.value.uid} - User Management` })
+
+  await fetchSessions()
 }
 
 async function saveUser () {
