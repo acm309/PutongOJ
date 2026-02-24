@@ -1,4 +1,3 @@
-import type { WebsiteInformation } from '@backend/controllers/utils'
 import type { CourseRole } from '@backend/types'
 import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
@@ -9,7 +8,7 @@ import { instance } from './instance'
 export * from './instance'
 
 const utils = {
-  getWebsiteInformaton: () => instance.get<WebsiteInformation>('/website'),
+  getWebsiteInformaton: () => instance.get('/website'),
   getTime: () => instance.get<TimeResp>('/servertime'),
   getRanklist: (params: { [key: string]: any }) =>
     instance.get('/ranklist/list', { params }),

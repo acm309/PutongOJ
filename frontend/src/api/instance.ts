@@ -1,6 +1,5 @@
 import type { Enveloped } from '@putongoj/shared'
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ErrorCode } from '@putongoj/shared'
 import axios from 'axios'
 
 // 设置全局axios默认值
@@ -44,7 +43,7 @@ async function handleRequest<T> (request: Promise<AxiosResponse<Enveloped<T>>>):
     } else {
       return {
         success: false,
-        code: ErrorCode.NetworkError,
+        code: -1,
         message: err.message || 'Network error',
         data: null,
         requestId: 'N/A',

@@ -41,7 +41,7 @@ export type SuccessEnveloped<T = any> = {
 
 export type ErrorEnveloped = {
   success: false
-  code: ErrorCode
+  code: ErrorCode | -1
   message: string
   data: null
   requestId: string

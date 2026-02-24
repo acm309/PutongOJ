@@ -1,4 +1,4 @@
-import type { Paginated, ProblemBrief, RanklistInfo, RawRanklist } from '.'
+import type { Paginated, ProblemBrief } from '.'
 
 export interface PaginateParams {
   page: number
@@ -14,9 +14,4 @@ export interface FindProblemsParams extends PaginateParams {
 export interface FindProblemsResponse {
   list: Paginated<ProblemBrief>
   solved: number[]
-}
-
-export interface RanklistResponse {
-  ranklist: RawRanklist
-  info: RanklistInfo
 }

@@ -1,9 +1,18 @@
-import type { WebsiteInformation } from '@backend/controllers/utils'
+import type { OAuthProvider } from '@putongoj/shared/dist/consts'
 import { defineStore } from 'pinia'
 import vditorInfo from 'vditor/package.json'
 import api from '@/api'
 import { privilege } from '@/utils/constant'
 import { setServerPublicKey } from '@/utils/crypto'
+
+interface WebsiteInformation {
+  title: string
+  buildSHA: string
+  buildTime: number
+  apiPublicKey: string
+  oauthEnabled: Record<OAuthProvider, boolean>
+  helpDocURL?: string
+}
 
 export const useRootStore = defineStore('root', {
   state: () => ({
