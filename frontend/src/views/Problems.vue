@@ -14,7 +14,7 @@ import ProblemTag from '@/components/ProblemTag.vue'
 import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import constant from '@/utils/constant'
+import { statusLabels } from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
 import { onProfileUpdate, onRouteQueryUpdate } from '@/utils/helper'
 
@@ -39,7 +39,6 @@ const pageSize = computed<number>(() =>
 
 const type = ref(route.query.type || 'pid')
 const content = ref(String(route.query.content || ''))
-const problemVisible = ref(constant.status)
 const query = computed(() => ({
   type: type.value,
   content: content.value,
@@ -177,7 +176,7 @@ onProfileUpdate(fetch)
         <template #body="{ data }">
           <Button
             v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" variant="link"
-            class="-my-1 p-0" :label="problemVisible[(data.status as 0 | 2)]" @click="change(data)"
+            class="-my-1 p-0" :label="statusLabels[(data.status as 0 | 2)]" @click="change(data)"
           />
         </template>
       </Column>

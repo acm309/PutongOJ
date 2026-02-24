@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  DiscussionListQuery,
-  DiscussionListQueryResult,
-} from '@putongoj/shared'
+import type { DiscussionListQuery, DiscussionListQueryResult } from '@putongoj/shared'
 import { DiscussionListQuerySchema } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'

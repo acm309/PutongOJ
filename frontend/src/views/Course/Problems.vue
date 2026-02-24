@@ -20,7 +20,7 @@ import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import constant from '@/utils/constant'
+import { statusLabels } from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -40,7 +40,6 @@ const { problems, solved } = storeToRefs(problemStore)
 const { course } = storeToRefs(courseStore)
 const { findProblems, update } = problemStore
 
-const problemStatus = constant.status
 const searchOptions = [
   { value: 'pid', label: 'Pid' },
   { value: 'title', label: 'Title' },
@@ -242,7 +241,7 @@ onRouteQueryUpdate(fetch)
           <span class="-my-1 flex justify-end">
             <Button
               v-tooltip.left="(isAdmin || data.isOwner) ? t('oj.click_to_change_status') : null" link
-              class="grow mr-3 p-0" :disabled="!(isAdmin || data.isOwner)" :label="problemStatus[data.status as 0 | 2]"
+              class="grow mr-3 p-0" :disabled="!(isAdmin || data.isOwner)" :label="statusLabels[(data.status as 0 | 2)]"
               @click="switchStatus(data)"
             />
             <Button icon="pi pi-sort" link class="p-0" @click="sortingModal = true; sorting = data" />

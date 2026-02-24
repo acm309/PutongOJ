@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import InputNumber from 'primevue/inputnumber'
@@ -6,7 +6,7 @@ import InputText from 'primevue/inputtext'
 import RadioButton from 'primevue/radiobutton'
 import Textarea from 'primevue/textarea'
 import { useI18n } from 'vue-i18n'
-import MarkdownEditor from '@/components/MarkdownEditor'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
 import { problemType } from '@/utils/constant'
 
@@ -84,7 +84,7 @@ const { t } = useI18n()
       </div>
     </div>
     <div v-if="[2, 3].includes(problem.type)">
-      <span class="form-label">Code of {{ problemType[problem.type] }}</span>
+      <span class="form-label">Code of {{ problemType[problem.type as keyof typeof problemType] }}</span>
       <Textarea v-model="problem.code" class="font-mono" fluid auto-resize rows="15" />
     </div>
   </div>

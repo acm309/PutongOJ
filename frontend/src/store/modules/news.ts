@@ -3,34 +3,34 @@ import api from '@/api'
 
 export const useNewsStore = defineStore('news', {
   state: () => ({
-    list: [],
-    news: {},
+    list: [] as any[],
+    news: {} as any,
     sum: 0,
   }),
   actions: {
-    findOne (payload) {
+    async findOne (payload: any) {
       return api.news.findOne(payload).then(({ data }) => {
         this.news = data.news
       })
     },
-    find (payload) {
+    async find (payload: any) {
       return api.news.find(payload).then(({ data }) => {
         this.list = data.list.docs
         this.sum = data.list.total
       })
     },
-    update (payload) {
+    async update (payload: any) {
       return api.news.update(payload).then(({ data }) => data.nid)
     },
-    create (payload) {
+    async create (payload: any) {
       return api.news.create(payload).then(({ data }) => data.nid)
     },
-    delete (payload) {
+    async delete (payload: any) {
       return api.news.delete(payload).then(() => {
         this.list = this.list.filter(p => p.nid !== +(payload.nid))
       })
     },
-    setCurrentNews (news) {
+    setCurrentNews (news: any) {
       this.news = news
     },
   },

@@ -1,12 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Problem from '@/components/Problem.vue'
 import { useProblemStore } from '@/store/modules/problem'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
 const { problem } = storeToRefs(problemStore)
@@ -14,7 +15,7 @@ const { problem } = storeToRefs(problemStore)
 function submit () {
   return router.push({
     name: 'problemSubmit',
-    params: router.params,
+    params: route.params,
   })
 }
 </script>

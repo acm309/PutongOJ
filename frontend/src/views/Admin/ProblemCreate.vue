@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
 import { onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { createTestcase } from '@/api/problem'
-import OJProblemEdit from '@/components/ProblemEdit'
+import OJProblemEdit from '@/components/ProblemEdit.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useMessage } from '@/utils/message'
 
@@ -28,6 +28,7 @@ const problem = reactive({
   type: 1,
   code: '',
   tags: [],
+  course: null as number | null,
 })
 
 async function submit () {
@@ -75,7 +76,7 @@ async function submitCheck () {
 
 onMounted(() => {
   if (route.query.course) {
-    problem.course = Number.parseInt(route.query.course)
+    problem.course = Number.parseInt(route.query.course as string)
   }
 })
 </script>

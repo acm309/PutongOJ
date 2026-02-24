@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import MarkdownPreview from '@/components/MarkdownPreview'
+import MarkdownPreview from '@/components/MarkdownPreview.vue'
 import { useNewsStore } from '@/store/modules/news'
 import { timePretty } from '@/utils/format'
 

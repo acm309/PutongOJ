@@ -16,14 +16,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
 import SolutionDataTable from '@/components/SolutionDataTable.vue'
-import {
-  judgeStatusOptions,
-  languageOptions,
-} from '@/utils/constant'
+import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import {
-  getJudgeStatusClassname,
-} from '@/utils/format'
+import { getJudgeStatusClassname } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 

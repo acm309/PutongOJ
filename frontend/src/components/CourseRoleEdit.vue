@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CourseRole } from '@backend/types'
+import { UserPrivilege } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
@@ -8,7 +9,7 @@ import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
 import UserSelect from '@/components/UserSelect.vue'
-import { courseRoleFields, privilege } from '@/utils/constant'
+import { courseRoleFields } from '@/utils/constant'
 import { useMessage } from '@/utils/message'
 
 const props = defineProps({
@@ -97,7 +98,7 @@ async function loadUser () {
   loading.value = true
   try {
     const { data: member } = await api.course.getMember(courseId.value, selectedUserId.value)
-    isAdmin.value = member.user.privilege > privilege.User
+    isAdmin.value = member.user.privilege >= UserPrivilege.Admin
     loaded.value = true
     Object.assign(role.value, member.role)
     rippleRoles()

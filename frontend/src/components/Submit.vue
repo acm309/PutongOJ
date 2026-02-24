@@ -7,7 +7,7 @@ import Textarea from 'primevue/textarea'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSolutionStore } from '@/store/modules/solution'
-import { language, languagesOrder } from '@/utils/constant'
+import { languageLabels, languagesOrder } from '@/utils/constant'
 import { useSolutionStorage } from '@/utils/helper'
 
 const props = defineProps({
@@ -24,7 +24,7 @@ const solutionStorage = ref(useSolutionStorage())
 const languages = computed(() =>
   languagesOrder.map(key => ({
     value: key,
-    label: language[key],
+    label: languageLabels[key],
   })),
 )
 

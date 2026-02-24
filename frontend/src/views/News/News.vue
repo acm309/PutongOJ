@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed, onBeforeMount } from 'vue'
@@ -16,7 +16,7 @@ const router = useRouter()
 const current = computed(() => route.name || 'newsInfo')
 const { isAdmin } = storeToRefs(useSessionStore())
 
-function change (name) {
+function change (name: string) {
   return router.push({
     name,
     params: { nid: route.params.nid },

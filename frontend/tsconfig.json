@@ -18,8 +18,6 @@
       ]
     },
     "resolveJsonModule": true,
-    // TODO: remove after migration
-    "allowJs": true,
     "strict": true,
     "outDir": "dist",
     "sourceMap": true,

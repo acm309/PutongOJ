@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import InputText from 'primevue/inputtext'
 import { useI18n } from 'vue-i18n'
-import MarkdownEditor from '@/components/MarkdownEditor'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import { useNewsStore } from '@/store/modules/news'
 
 const newsStore = useNewsStore()

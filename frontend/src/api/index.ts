@@ -10,8 +10,6 @@ export * from './instance'
 const utils = {
   getWebsiteInformaton: () => instance.get('/website'),
   getTime: () => instance.get<TimeResp>('/servertime'),
-  getRanklist: (params: { [key: string]: any }) =>
-    instance.get('/ranklist/list', { params }),
 }
 
 const solution = {
@@ -69,19 +67,6 @@ const tag = {
     instance.delete<{ success: boolean }>(`/tag/${tagId}`),
 }
 
-const discuss = {
-  create: (data: { [key: string]: any }) =>
-    instance.post('/discuss', data),
-  find: (data: { [key: string]: any }) =>
-    instance.get('/discuss/list', { params: data }),
-  findOne: (data: { [key: string]: any }) =>
-    instance.get(`/discuss/${data.did}`, { params: data }),
-  update: (data: { [key: string]: any }) =>
-    instance.put(`/discuss/${data.did}`, data),
-  delete: (data: { [key: string]: any }) =>
-    instance.delete(`/discuss/${data.did}`, data),
-}
-
 const course = {
   findCourses: (params: PaginateParams) =>
     instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
@@ -119,6 +104,5 @@ export default {
   problem,
   news,
   tag,
-  discuss,
   course,
 }

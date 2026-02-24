@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import Button from 'primevue/button'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import OjNewsEdit from '@/components/NewsEdit'
+import OjNewsEdit from '@/components/NewsEdit.vue'
 import { useNewsStore } from '@/store/modules/news'
 import { useMessage } from '@/utils/message'
 

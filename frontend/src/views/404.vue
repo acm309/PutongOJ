@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Button from 'primevue/button'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'

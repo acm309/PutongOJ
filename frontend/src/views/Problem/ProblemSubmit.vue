@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import Submit from '@/components/Submit'
+import Submit from '@/components/Submit.vue'
 import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -29,7 +29,7 @@ const { isLogined } = storeToRefs(sessionStore)
 const { solution } = storeToRefs(solutionStore)
 
 const title = ref('')
-const pid = computed(() => route.params.pid)
+const pid = computed(() => route.params.pid as string)
 
 async function submitSolution () {
   await create(Object.assign({}, solution.value, { pid: pid.value }))
@@ -39,7 +39,7 @@ async function submitSolution () {
 
 async function init () {
   if (problem.value.title == null)
-    await findOne({ pid: pid.value })
+    await findOne({ pid: Number(pid.value) })
   title.value = problem.value.title
   changeDomTitle({ title: title.value })
 }

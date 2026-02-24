@@ -1,4 +1,3 @@
-import type { Solution } from '@/types'
 import { defineStore } from 'pinia'
 import api from '@/api'
 
@@ -7,7 +6,7 @@ export const useSolutionStore = defineStore('solution', {
     solution: {
       language: null,
       code: '',
-    } as Solution,
+    } as any,
   }),
   actions: {
     async findOne (payload: { [key: string]: any }) {

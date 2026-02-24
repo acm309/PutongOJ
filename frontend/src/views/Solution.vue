@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { JudgeStatus, Language } from '@putongoj/shared'
 import { useClipboard } from '@vueuse/core'
 import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
@@ -8,9 +9,7 @@ import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
 import Column from 'primevue/column'
-// optional
 import DataTable from 'primevue/datatable'
-// optional
 import { useConfirm } from 'primevue/useconfirm'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -18,13 +17,9 @@ import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useSolutionStore } from '@/store/modules/solution'
-import constant, { judgeStatusLabels } from '@/utils/constant'
+import { judgeStatusLabels, languageHighlight, languageLabels } from '@/utils/constant'
 import emitter from '@/utils/emitter'
-import {
-  getJudgeStatusClassname,
-  thousandSeparator,
-  timePretty,
-} from '@/utils/format'
+import { getJudgeStatusClassname, thousandSeparator, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate, testcaseUrl } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 import 'highlight.js/styles/atom-one-light.css'
@@ -36,10 +31,6 @@ highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
 const message = useMessage()
-const result = ref(constant.result)
-const langHighlight = ref(constant.languageHighlight)
-const lang = ref(constant.language)
-
 const session = useSessionStore()
 const solutionStore = useSolutionStore()
 const root = useRootStore()
@@ -51,15 +42,15 @@ const route = useRoute()
 const { copy } = useClipboard()
 const confirm = useConfirm()
 
-function onCopy (content) {
+function onCopy (content: string) {
   copy(content)
   message.success(t('oj.copied'))
 }
 
-function prettyCode (code) {
+function prettyCode (code: string) {
   if (!code) return ''
   return highlight.highlight(`${code}`, {
-    language: langHighlight.value[solution.value.language],
+    language: languageHighlight[solution.value.language as Language],
   }).value
 }
 
@@ -140,7 +131,7 @@ onRouteQueryUpdate(fetch)
     <div class="flex justify-end solution-header">
       <div class="flex-1 solution-header-col">
         <h1 class="font-verdana solution-result">
-          {{ result[solution.judge || 0] }}
+          {{ judgeStatusLabels[solution.judge as JudgeStatus] }}
         </h1>
         <div class="flex flex-col gap-4">
           <div class="flex flex-wrap gap-4 solution-info">
@@ -173,7 +164,7 @@ onRouteQueryUpdate(fetch)
               {{ thousandSeparator(solution.memory) }} <small>KB</small>
             </span>
             <span>
-              {{ lang[solution.language] }}
+              {{ languageLabels[solution.language as Language] }}
             </span>
             <span>
               {{ timePretty(solution.create) }}
@@ -246,7 +237,7 @@ onRouteQueryUpdate(fetch)
         </template>
         <template #body="{ data }">
           <span :class="getJudgeStatusClassname(data.judge)">
-            {{ judgeStatusLabels[data.judge] }}
+            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
           </span>
         </template>
       </Column>
