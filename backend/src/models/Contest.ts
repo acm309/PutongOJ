@@ -1,4 +1,4 @@
-import { LabelingStyle, TITLE_LENGTH_MAX } from '@putongoj/shared'
+import { LabelingStyle, LabelingStyleValues, TITLE_LENGTH_MAX } from '@putongoj/shared'
 import mongoose from '../config/db'
 import ID from './ID'
 
@@ -80,7 +80,7 @@ const contestSchema = new mongoose.Schema({
   } ],
   labelingStyle: {
     type: Number,
-    enum: Object.values(LabelingStyle),
+    enum: LabelingStyleValues,
     default: LabelingStyle.Numeric,
   },
   course: {

@@ -1,10 +1,11 @@
+import { JudgeStatus } from '@putongoj/shared'
 import constants from '../../src/utils/constants'
 
-const { judge, status } = constants
+const { status } = constants
 
 const solutionSeeds = [
   {
-    judge: judge.WrongAnswer,
+    judge: JudgeStatus.WrongAnswer,
     language: 2, // C++
     length: 135,
     memory: 1720,
@@ -17,7 +18,7 @@ const solutionSeeds = [
     uid: 'v6u(EYNmK!Ot7xr(O',
     create: 1529560370205,
     testcases: [ {
-      judge: judge.WrongAnswer,
+      judge: JudgeStatus.WrongAnswer,
       memory: 1720,
       time: 1,
       uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
@@ -35,7 +36,7 @@ const solutionSeeds = [
         }
       `,
   }, {
-    judge: judge.Accepted,
+    judge: JudgeStatus.Accepted,
     language: 2, // C++
     length: 138,
     memory: 1720,
@@ -48,7 +49,7 @@ const solutionSeeds = [
     uid: 'primaryuser',
     create: 1529560370305,
     testcases: [ {
-      judge: judge.Accepted,
+      judge: JudgeStatus.Accepted,
       memory: 1720,
       time: 1,
       uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
@@ -66,7 +67,7 @@ const solutionSeeds = [
           }
       `,
   }, {
-    judge: judge.RuntimeError,
+    judge: JudgeStatus.RuntimeError,
     language: 3, // Java
     length: 273,
     memory: 24836,
@@ -79,7 +80,7 @@ const solutionSeeds = [
     uid: 'v6u(EYNmK!Ot7xr(O',
     create: 1529560370405,
     testcases: [ {
-      judge: judge.RuntimeError,
+      judge: JudgeStatus.RuntimeError,
       memory: 24836,
       time: 170,
       uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',
@@ -97,7 +98,7 @@ const solutionSeeds = [
         }
       `,
   }, {
-    judge: judge.Accepted,
+    judge: JudgeStatus.Accepted,
     language: 2, // C++
     length: 138,
     memory: 1720,
@@ -110,7 +111,7 @@ const solutionSeeds = [
     uid: 'v6u(EYNmK!Ot7xr(O',
     create: 1529560371205,
     testcases: [ {
-      judge: judge.Accepted,
+      judge: JudgeStatus.Accepted,
       memory: 1720,
       time: 1,
       uuid: 'e35af796-ac32-496b-998b-3ed56809fbc2',

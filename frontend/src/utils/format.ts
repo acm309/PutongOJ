@@ -1,5 +1,4 @@
-import { contestLabelingStyle } from '@backend/utils/constants'
-import { JudgeStatus, UserPrivilege } from '@putongoj/shared'
+import { JudgeStatus, LabelingStyle, UserPrivilege } from '@putongoj/shared'
 import { format } from 'date-fns/format'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { enUS, zhCN } from 'date-fns/locale'
@@ -70,8 +69,7 @@ export function similarityColor (val: number) {
 
 export function contestLabeling (
   value: number,
-  style: typeof contestLabelingStyle[keyof typeof contestLabelingStyle]
-    = contestLabelingStyle.numeric,
+  style: LabelingStyle = LabelingStyle.Numeric,
 ): string {
   //
   function toAlphabetic (n: number): string {
@@ -88,10 +86,10 @@ export function contestLabeling (
   }
 
   switch (style) {
-    case contestLabelingStyle.alphabetic:
+    case LabelingStyle.Alphabetic:
       return toAlphabetic(value)
 
-    case contestLabelingStyle.numeric:
+    case LabelingStyle.Numeric:
     default:
       return String(value)
   }

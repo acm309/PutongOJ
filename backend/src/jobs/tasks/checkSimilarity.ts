@@ -1,6 +1,6 @@
+import { JudgeStatus } from '@putongoj/shared'
 import levenshtein from 'fast-levenshtein'
 import Solution from '../../models/Solution'
-import { judge } from '../../utils/constants'
 import logger from '../../utils/logger'
 
 function codeNormalize (code: string): string {
@@ -28,7 +28,7 @@ async function checkSimilarity (item: string) {
     pid: solution.pid,
     uid: { $ne: solution.uid },
     create: { $lt: solution.create },
-    judge: judge.Accepted,
+    judge: JudgeStatus.Accepted,
   }, {
     code: 1, sid: 1,
   }).lean().exec()

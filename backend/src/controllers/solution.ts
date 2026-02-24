@@ -2,7 +2,7 @@ import type { Context } from 'koa'
 import type { CourseDocument } from '../models/Course'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
-import { ErrorCode } from '@putongoj/shared'
+import { ErrorCode, JudgeStatus } from '@putongoj/shared'
 import fse from 'fs-extra'
 import { pick } from 'lodash'
 import redis from '../config/redis'
@@ -12,7 +12,6 @@ import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import { loadCourseStateOrThrow } from '../policies/course'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
-import { judgeResult } from '../utils/constants'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -174,7 +173,7 @@ async function updateSolution (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id')
   }
   const updatedJudge = Number(opt.judge)
-  if (updatedJudge !== judgeResult.RejudgePending && updatedJudge !== judgeResult.Skipped) {
+  if (updatedJudge !== JudgeStatus.RejudgePending && updatedJudge !== JudgeStatus.Skipped) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid judge status, only support RejudgePending and Skipped')
   }
 
@@ -203,7 +202,7 @@ async function updateSolution (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 
-  if (updatedJudge !== judgeResult.RejudgePending) {
+  if (updatedJudge !== JudgeStatus.RejudgePending) {
     return createEnvelopedResponse(ctx, solution)
   }
 

@@ -1,8 +1,9 @@
 import type { Document, PaginateModel, Types } from 'mongoose'
 import type { SolutionEntity } from '../types/entity'
+import { JudgeStatus, JudgeStatusValues } from '@putongoj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
-import { judge, status } from '../utils/constants'
+import { status } from '../utils/constants'
 import ID from './ID'
 
 export interface SolutionDocument extends Document<Types.ObjectId>, SolutionEntity {
@@ -106,8 +107,8 @@ const solutionSchema = new mongoose.Schema({
   },
   judge: {
     type: Number,
-    enum: Object.values(judge),
-    default: judge.Pending,
+    enum: JudgeStatusValues,
+    default: JudgeStatus.Pending,
     index: true,
   },
   time: {
@@ -142,10 +143,10 @@ const solutionSchema = new mongoose.Schema({
 solutionSchema.plugin(mongoosePaginate)
 
 solutionSchema.virtual('isAccepted').get(function () {
-  return this.judge === judge.Accepted
+  return this.judge === JudgeStatus.Accepted
 })
 solutionSchema.virtual('isPending').get(function () {
-  return this.judge === judge.Pending
+  return this.judge === JudgeStatus.Pending
 })
 
 solutionSchema.index({ createdAt: -1 })

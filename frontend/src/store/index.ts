@@ -2,7 +2,6 @@ import type { OAuthProvider } from '@putongoj/shared/dist/consts'
 import { defineStore } from 'pinia'
 import vditorInfo from 'vditor/package.json'
 import api from '@/api'
-import { privilege } from '@/utils/constant'
 import { setServerPublicKey } from '@/utils/crypto'
 
 interface WebsiteInformation {
@@ -21,7 +20,6 @@ export const useRootStore = defineStore('root', {
     website: {} as WebsiteInformation,
     vditorCDN: `${location.origin}/static/vditor-${vditorInfo.version}`,
     // Todo: remove
-    privilege,
     status: {
       Reserve: 0,
       Available: 2,
@@ -30,21 +28,6 @@ export const useRootStore = defineStore('root', {
       Public: 1,
       Private: 2,
       Password: 3,
-    },
-    judge: {
-      Pending: 0,
-      Running: 1,
-      CompileError: 2,
-      Accepted: 3,
-      RuntimeError: 4,
-      WrongAnswer: 5,
-      TimeLimitExceeded: 6,
-      MemoryLimitExceed: 7,
-      OutputLimitExceed: 8,
-      PresentationError: 9,
-      SystemError: 10,
-      RejudgePending: 11,
-      Skipped: 12,
     },
   }),
   actions: {

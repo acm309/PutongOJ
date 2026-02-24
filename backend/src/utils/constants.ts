@@ -8,24 +8,6 @@ export const privilege = Object.freeze({
   Root: 3,
 })
 
-export const judge = Object.freeze({
-  Pending: 0,
-  Running: 1,
-  CompileError: 2,
-  Accepted: 3,
-  RuntimeError: 4,
-  WrongAnswer: 5,
-  TimeLimitExceeded: 6,
-  MemoryLimitExceed: 7,
-  OutputLimitExceed: 8,
-  PresentationError: 9,
-  SystemError: 10,
-  RejudgePending: 11,
-  Skipped: 12,
-})
-
-export const judgeResult = judge
-
 export const limitation = Object.freeze({
   time: 10 * 1000,
   memory: 256 * 1024,
@@ -70,11 +52,6 @@ export const courseRoleEntire = Object.freeze({
   manageCourse: true,
 } as CourseRole)
 
-export const contestLabelingStyle = Object.freeze({
-  numeric: 1,
-  alphabetic: 2,
-})
-
 type ErrorTuple = Readonly<[number, string]>
 
 export const ERR_INVALID_ID: ErrorTuple = [
@@ -110,12 +87,10 @@ export const ERR_UNKNOWN: ErrorTuple = [
 export default Object.freeze({
   deploy,
   encrypt,
-  judge,
   limitation,
   privilege,
   problemType,
   status,
   courseRoleNone,
   courseRoleEntire,
-  contestLabelingStyle,
 })

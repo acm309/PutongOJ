@@ -3,14 +3,13 @@ import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { PaginateOption, SortOption } from '../types'
 import type { QueryFilter } from '../types/mongo'
-import { ParticipationStatus } from '@putongoj/shared'
+import { JudgeStatus, ParticipationStatus } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
 import Contest from '../models/Contest'
 import ContestParticipation from '../models/ContestParticipation'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
 import User from '../models/User'
-import { judge } from '../utils/constants'
 import { CacheKey, cacheService } from './cache'
 
 async function findContests (
@@ -125,7 +124,7 @@ export type ContestProblemsWithStats = {
   solve: number
 }[]
 
-const ignoredJudges = [ judge.CompileError, judge.SystemError, judge.Skipped ] as number[]
+const ignoredJudges = [ JudgeStatus.CompileError, JudgeStatus.SystemError, JudgeStatus.Skipped ] as number[]
 
 async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
   return await cacheService.getOrCreate<ContestProblemsWithStats>(
@@ -160,7 +159,7 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
           Solution.distinct('uid', {
             mid: contestId,
             pid,
-            judge: judge.Accepted,
+            judge: JudgeStatus.Accepted,
             createdAt: { $lt: before },
           }).lean(),
         ])
@@ -175,7 +174,7 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
   )
 }
 
-const pendingJudges = [ judge.Pending, judge.RejudgePending, judge.Running ] as number[]
+const pendingJudges = [ JudgeStatus.Pending, JudgeStatus.RejudgePending, JudgeStatus.RunningJudge ] as number[]
 
 async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
   return await cacheService.getOrCreate<ContestRanklist>(
@@ -231,7 +230,7 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
           return
         }
 
-        if (judgement === judge.Accepted) {
+        if (judgement === JudgeStatus.Accepted) {
           item.solvedAt = createdAt.toISOString()
           return
         }

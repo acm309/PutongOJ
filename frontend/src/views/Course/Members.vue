@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CourseMemberView } from '@backend/types/entity'
-import type { UserPrivilege } from '@/types'
+import { UserPrivilege } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -14,7 +14,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
-import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -26,13 +25,12 @@ const { t } = useI18n()
 const confirm = useConfirm()
 const message = useMessage()
 const { course } = api
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
-const { privilege } = storeToRefs(rootStore)
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
+const ADMIN_PRIVILEGE = [ UserPrivilege.Admin, UserPrivilege.Root ]
 
 const page = computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
@@ -125,9 +123,7 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_basic_view')" class="pi pi-eye" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
           <Checkbox v-else v-model="data.role.basic" binary disabled />
@@ -139,9 +135,7 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_view_testcase')" class="pi pi-list" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
           <Checkbox v-else v-model="data.role.viewTestcase" binary disabled />
@@ -153,9 +147,7 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_view_solution')" class="pi pi-code" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
           <Checkbox v-else v-model="data.role.viewSolution" binary disabled />
@@ -167,9 +159,7 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_manage_problem')" class="pi pi-th-large" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
           <Checkbox v-else v-model="data.role.manageProblem" binary disabled />
@@ -181,9 +171,7 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_manage_contest')" class="pi pi-trophy" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
           <Checkbox v-else v-model="data.role.manageContest" binary disabled />
@@ -195,18 +183,16 @@ onRouteQueryUpdate(fetch)
           <i v-tooltip.top="t('oj.course_manage_course')" class="pi pi-folder" />
         </template>
         <template #body="{ data }">
-          <template
-            v-if="([privilege.Admin, privilege.Root] as UserPrivilege[]).includes(data.user.privilege as UserPrivilege)"
-          >
+          <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <PrimeTag
-              v-if="data.user.privilege === privilege.Admin"
+              v-if="data.user.privilege === UserPrivilege.Admin"
               v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
               severity="info"
             >
               Admin
             </PrimeTag>
             <PrimeTag
-              v-else-if="data.user.privilege === privilege.Root"
+              v-else-if="data.user.privilege === UserPrivilege.Root"
               v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
               severity="warn"
             >

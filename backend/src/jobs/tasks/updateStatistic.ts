@@ -1,9 +1,9 @@
+import { JudgeStatus } from '@putongoj/shared'
 import Comment from '../../models/Comment'
 import Discussion from '../../models/Discussion'
 import Problem from '../../models/Problem'
 import Solution from '../../models/Solution'
 import User from '../../models/User'
-import { judge } from '../../utils/constants'
 import logger from '../../utils/logger'
 
 /**
@@ -14,8 +14,8 @@ async function updateUserStatistic (uid: string) {
   uid = uid.trim()
 
   const [ submitProblems, solveProblems ] = await Promise.all([
-    Solution.distinct('pid', { uid, judge: { $ne: judge.Skipped } }),
-    Solution.distinct('pid', { uid, judge: judge.Accepted }),
+    Solution.distinct('pid', { uid, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('pid', { uid, judge: JudgeStatus.Accepted }),
   ])
   await User.findOneAndUpdate(
     { uid },
@@ -40,8 +40,8 @@ async function updateProblemStatistic (pid: number | string) {
   }
 
   const [ submitUsers, acceptedUsers ] = await Promise.all([
-    Solution.distinct('uid', { pid, judge: { $ne: judge.Skipped } }),
-    Solution.distinct('uid', { pid, judge: judge.Accepted }),
+    Solution.distinct('uid', { pid, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('uid', { pid, judge: JudgeStatus.Accepted }),
   ])
   await Problem.findOneAndUpdate(
     { pid },

@@ -58,6 +58,9 @@ export enum JudgeStatus {
   Skipped = 12,
 }
 
+export const JudgeStatusValues = Object.values(JudgeStatus)
+  .filter(value => typeof value === 'number') as number[]
+
 export const JUDGE_STATUS_TERMINAL = [
   JudgeStatus.CompileError,
   JudgeStatus.Accepted,
@@ -97,22 +100,24 @@ export enum DiscussionType {
   ArchivedDiscussion = 4,
 }
 
-export const ParticipationStatus = {
-  NotApplied: 0,
-  Pending: 1,
-  Rejected: 2,
-  Suspended: 3,
-  Approved: 4,
-} as const
+export enum ParticipationStatus {
+  NotApplied = 0,
+  Pending = 1,
+  Rejected = 2,
+  Suspended = 3,
+  Approved = 4,
+}
 
-export type ParticipationStatus = typeof ParticipationStatus[keyof typeof ParticipationStatus]
+export const ParticipationStatusValues = Object.values(ParticipationStatus)
+  .filter(value => typeof value === 'number') as number[]
 
-export const LabelingStyle = {
-  Numeric: 1,
-  Alphabetic: 2,
-} as const
+export enum LabelingStyle {
+  Numeric = 1,
+  Alphabetic = 2,
+}
 
-export type LabelingStyle = typeof LabelingStyle[keyof typeof LabelingStyle]
+export const LabelingStyleValues = Object.values(LabelingStyle)
+  .filter(value => typeof value === 'number') as number[]
 
 export const tagColors = [
   'default',

@@ -7,6 +7,7 @@ import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPrevi
 import {
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
+  JudgeStatus,
   ProblemSolutionListQueryResultSchema,
   ProblemSolutionListQuerySchema,
   ProblemStatisticsQueryResultSchema,
@@ -25,9 +26,7 @@ import solutionService from '../services/solution'
 import tagService from '../services/tag'
 import { getUser } from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
-import constants, { ERR_PERM_DENIED } from '../utils/constants'
-
-const { judge } = constants
+import { ERR_PERM_DENIED } from '../utils/constants'
 
 const findProblems = async (ctx: Context) => {
   const opt = ctx.request.query
@@ -89,7 +88,7 @@ const findProblems = async (ctx: Context) => {
       .find({
         uid: profile.uid,
         pid: { $in: list.docs.map(p => p.pid) },
-        judge: judge.Accepted,
+        judge: JudgeStatus.Accepted,
       })
       .distinct('pid')
       .lean()

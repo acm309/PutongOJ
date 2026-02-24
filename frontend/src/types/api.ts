@@ -1,4 +1,5 @@
-import type { Paginated, ProblemBrief } from '.'
+import type { Paginated } from '@putongoj/shared'
+import type { ProblemBrief } from '.'
 
 export interface PaginateParams {
   page: number

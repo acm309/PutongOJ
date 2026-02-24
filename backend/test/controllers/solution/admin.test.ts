@@ -1,3 +1,4 @@
+import { JudgeStatus } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -31,7 +32,7 @@ test('Can see solution and sim of other users', async (t) => {
 test('Push solution to rejudge', async (t) => {
   const res = await request
     .put('/api/status/3')
-    .send({ judge: config.judge.RejudgePending })
+    .send({ judge: JudgeStatus.RejudgePending })
 
   t.is(res.status, 200)
 })

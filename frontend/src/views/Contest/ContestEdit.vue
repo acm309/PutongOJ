@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ContestConfigEditPayload, ContestConfigQueryResult } from '@putongoj/shared'
-import { contestLabelingStyle } from '@backend/utils/constants'
+import { LabelingStyle } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -352,8 +352,8 @@ onMounted(() => {
       <IftaLabel>
         <Select
           v-model="form.labelingStyle" :options="[
-            { label: t('ptoj.numeric_labeling'), value: contestLabelingStyle.numeric },
-            { label: t('ptoj.alphabetic_labeling'), value: contestLabelingStyle.alphabetic },
+            { label: t('ptoj.numeric_labeling'), value: LabelingStyle.Numeric },
+            { label: t('ptoj.alphabetic_labeling'), value: LabelingStyle.Alphabetic },
           ]" option-label="label" option-value="value" fluid
         />
         <label for="scoreboardUnfrozenAt">{{ t('ptoj.labeling_style') }}</label>

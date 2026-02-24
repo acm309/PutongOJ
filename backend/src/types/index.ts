@@ -1,5 +1,4 @@
 import type { Types } from 'mongoose'
-import type { contestLabelingStyle } from '../utils/constants'
 
 export interface CourseRole {
   basic: boolean
@@ -8,10 +7,6 @@ export interface CourseRole {
   manageProblem: boolean
   manageContest: boolean
   manageCourse: boolean
-}
-
-export interface ContestOption {
-  labelingStyle: typeof contestLabelingStyle[keyof typeof contestLabelingStyle]
 }
 
 export interface PaginateOption {

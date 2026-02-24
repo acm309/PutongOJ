@@ -1,5 +1,6 @@
 import type { ProblemEntityView } from '@backend/types/entity'
-import type { Paginated, ProblemBrief } from '@/types'
+import type { Paginated } from '@putongoj/shared'
+import type { ProblemBrief } from '@/types'
 import type { FindProblemsParams } from '@/types/api'
 import { defineStore } from 'pinia'
 import api from '@/api'

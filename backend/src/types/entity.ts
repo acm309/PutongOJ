@@ -1,6 +1,6 @@
 import type { TagColor } from '@putongoj/shared'
 import type { Types } from 'mongoose'
-import type { ContestOption, CourseRole } from '.'
+import type { CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
 import type { UserEntity } from '../models/User'
 import type { encrypt, problemType, status } from '../utils/constants'
@@ -133,35 +133,6 @@ export type ProblemEntityView = Pick<ProblemEntity,
   tags: TagEntityItem[]
 }
 
-// Contest
-
-export interface ContestEntity extends Entity {
-  cid: number
-  title: string
-  start: number
-  end: number
-  list: number[]
-  status: number
-  encrypt: number
-  argument: string
-  option: ContestOption
-  course: CourseDocument | null
-}
-
-export type ContestEntityEditable = Pick<ContestEntity,
-  'title' | 'start' | 'end' | 'list' | 'status' | 'encrypt' | 'argument' | 'option'
-> & { course?: Types.ObjectId | null }
-
-export type ContestEntityPreview = Pick<ContestEntity,
-  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt'
->
-
-export type ContestEntityView = Pick<ContestEntity,
-  'cid' | 'title' | 'start' | 'end' | 'status' | 'encrypt' | 'list' | 'option'
-> & Partial<Pick<ContestEntity, 'argument'>> & {
-  course: CourseEntityPreviewWithRole | null
-}
-
 // Solution
 
 export interface SolutionEntity extends Entity {
@@ -229,19 +200,4 @@ export interface GroupEntity extends Entity {
   title: string
   list: string[]
   create: number
-}
-
-// Discuss
-
-export interface DiscussEntity extends Entity {
-  did: number
-  title: string
-  uid: string
-  comments: {
-    uid: string
-    content: string
-    create: number
-  }[]
-  create: number
-  update: number
 }

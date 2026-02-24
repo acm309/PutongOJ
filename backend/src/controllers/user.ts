@@ -2,6 +2,7 @@ import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
 import {
   ErrorCode,
+  JudgeStatus,
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
   UserRanklistExportQueryResultSchema,
@@ -12,7 +13,6 @@ import {
   UserSuggestQuerySchema,
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
-import config from '../config'
 import { loadProfile } from '../middlewares/authn'
 import Group from '../models/Group'
 import Solution from '../models/Solution'
@@ -75,11 +75,11 @@ export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
   const [ solved, failed, groups ] = await Promise.all([
     Solution
-      .find({ uid: user.uid, judge: config.judge.Accepted })
+      .find({ uid: user.uid, judge: JudgeStatus.Accepted })
       .distinct('pid')
       .lean(),
     Solution
-      .find({ uid: user.uid, judge: { $nin: [ config.judge.Accepted, config.judge.Skipped ] } })
+      .find({ uid: user.uid, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
       .distinct('pid')
       .lean(),
     Group
