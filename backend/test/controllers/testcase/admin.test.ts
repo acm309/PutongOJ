@@ -82,7 +82,9 @@ test.serial('Create testcase - should fail without both input and output', async
       out: '',
     })
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.serial('Find testcases - should return created testcase', async (t) => {
@@ -118,14 +120,18 @@ test.serial('Get testcase - should fail with invalid type', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases/${testcaseUuid}.txt`)
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.serial('Get testcase - should fail with invalid UUID', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases/invalid-uuid.in`)
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.serial('Get testcase - should fail with non-existent UUID', async (t) => {
@@ -133,7 +139,9 @@ test.serial('Get testcase - should fail with non-existent UUID', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases/${nonExistentUuid}.in`)
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.serial('Export testcases - should return zip file', async (t) => {
@@ -195,7 +203,9 @@ test.serial('Remove testcase - should fail with invalid UUID format', async (t) 
   const res = await request
     .delete(`/api/problem/${testPid}/testcases/invalid-uuid`)
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.after.always('Cleanup', async (_t) => {

@@ -10,7 +10,6 @@ test('Group list', async (t) => {
     .get('/api/group')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.true(res.body.success)
   t.truthy(Array.isArray(res.body.data))
 

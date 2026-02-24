@@ -4,7 +4,7 @@ import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEnti
 import { pick } from 'lodash'
 import { loadProfile } from '../middlewares/authn'
 import tagService from '../services/tag'
-import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
+import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants'
 
 export async function loadTag (
   ctx: Context,

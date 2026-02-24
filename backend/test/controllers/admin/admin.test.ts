@@ -40,8 +40,9 @@ test.before('Login as root admin', async (t) => {
 
 test('Unauthenticated user cannot access admin endpoints', async (t) => {
   const res = await requestAnon.get('/api/admin/users')
-  // authnMiddleware returns 401 directly
-  t.is(res.status, 401)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 // ─── findUsers ─────────────────────────────────────────────────────────────
@@ -85,8 +86,9 @@ test('Get user detail', async (t) => {
 
 test('Get user - fails for non-existent uid', async (t) => {
   const res = await requestAdmin.get('/api/admin/users/____no_such_user____')
-  // loadUser sends a 404 HTTP response
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 // ─── updateUserPassword ────────────────────────────────────────────────────
@@ -128,8 +130,9 @@ test.serial('Update user password - fails for non-existent user', async (t) => {
     .put('/api/admin/users/____no_such_user____/password')
     .send({ newPassword: encryptedPwd })
 
-  // loadEditingUser → loadUser sends a 404 HTTP response
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 // ─── getUserOAuthConnections ────────────────────────────────────────────────

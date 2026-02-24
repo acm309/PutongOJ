@@ -4,8 +4,7 @@ import type { ProblemDocumentPopulated } from '../models/Problem'
 import { loadContestState } from '../policies/contest'
 import courseService from '../services/course'
 import problemService from '../services/problem'
-import constants from '../utils/constants'
-import { ERR_NOT_FOUND } from '../utils/error'
+import constants, { ERR_NOT_FOUND } from '../utils/constants'
 
 const { status } = constants
 

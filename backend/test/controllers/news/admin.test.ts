@@ -31,7 +31,9 @@ test('Delete a news', async (t) => {
   const find = await request
     .get('/api/news/7')
 
-  t.is(find.status, 400)
+  t.is(find.status, 200)
+  t.is(find.body.success, false)
+  t.is(find.body.code, 400)
 })
 
 test('fails to create a news', async (t) => {
@@ -41,7 +43,9 @@ test('fails to create a news', async (t) => {
       content: 'xx',
     })
 
-  t.is(res.status, 400)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test('Create a news', async (t) => {

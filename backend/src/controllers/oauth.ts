@@ -3,12 +3,12 @@ import type { Context } from 'koa'
 import type { OAuthEntityUserView } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
 import type { OAuthState } from '../services/oauth'
-import { OAuthAction, OAuthProvider } from '@putongoj/shared'
+import { ErrorCode, OAuthAction, OAuthProvider } from '@putongoj/shared'
 import { loadProfile } from '../middlewares/authn'
 import oauthService from '../services/oauth'
 import sessionService from '../services/session'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
-import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/error'
+import { ERR_BAD_PARAMS, ERR_NOT_FOUND } from '../utils/constants'
 
 export const providerMap: Record<string, OAuthProvider> = {
   cjlu: OAuthProvider.CJLU,
@@ -69,7 +69,7 @@ export async function handleOAuthCallback (ctx: Context) {
     stateData = result.stateData
     connection = result.connection
   } catch (error: any) {
-    return createErrorResponse(ctx, error.message)
+    return createErrorResponse(ctx, ErrorCode.BadRequest, error.message)
   }
 
   let user: UserDocument | null = null
@@ -78,22 +78,18 @@ export async function handleOAuthCallback (ctx: Context) {
     const isConnected = await oauthService
       .isOAuthConnectedToAnotherUser(profile._id, connection)
     if (isConnected) {
-      return createErrorResponse(ctx,
-        'This 3rd-party account has been connected to another user',
-      )
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'This 3rd-party account has been connected to another user')
     }
     user = profile
   } else if (stateData.action === OAuthAction.LOGIN) {
     const { provider, providerId } = connection
     if (!loginEnabledProviders.includes(provider)) {
-      return createErrorResponse(ctx, `Login via ${provider} OAuth is not enabled`)
+      return createErrorResponse(ctx, ErrorCode.BadRequest, `Login via ${provider} OAuth is not enabled`)
     }
     const connectedUser = await oauthService
       .findUserByOAuthConnection(provider, providerId)
     if (!connectedUser) {
-      return createErrorResponse(ctx,
-        'No user is connected with this 3rd-party account, please login first and bind it',
-      )
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'No user is connected with this 3rd-party account, please login first and bind it')
     }
     user = connectedUser
 

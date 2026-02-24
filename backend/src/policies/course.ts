@@ -4,7 +4,7 @@ import type { CourseRole, WithId } from '../types'
 import type { CourseEntity } from '../types/entity'
 import Course from '../models/Course'
 import courseService from '../services/course'
-import { ERR_NOT_FOUND } from '../utils/error'
+import { ERR_NOT_FOUND } from '../utils/constants'
 
 export interface CourseState {
   course: WithId<CourseEntity>

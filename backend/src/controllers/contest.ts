@@ -40,7 +40,7 @@ import {
   createErrorResponse,
   createZodErrorResponse,
 } from '../utils'
-import { ERR_PERM_DENIED } from '../utils/error'
+import { ERR_PERM_DENIED } from '../utils/constants'
 
 async function findContests (ctx: Context) {
   const query = ContestListQuerySchema.safeParse(ctx.request.query)
@@ -74,9 +74,7 @@ async function findContests (ctx: Context) {
 async function getParticipation (ctx: Context) {
   const state = await loadContestState(ctx)
   if (!state) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
 
   const { contest, participation, isJury } = state
@@ -111,17 +109,13 @@ async function participateContest (ctx: Context) {
   }
   const state = await loadContestState(ctx)
   if (!state) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const profile = await loadProfile(ctx)
   const { contest, participation, isJury } = state
 
   if (participation !== ParticipationStatus.NotApplied) {
-    return createErrorResponse(ctx,
-      'You have already participated in this contest', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'You have already participated in this contest')
   }
 
   let canParticipate: boolean = false
@@ -134,9 +128,7 @@ async function participateContest (ctx: Context) {
     }
   }
   if (!canParticipate) {
-    return createErrorResponse(ctx,
-      'You cannot participate in this contest', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'You cannot participate in this contest')
   }
 
   await contestService.updateParticipation(
@@ -148,9 +140,7 @@ async function participateContest (ctx: Context) {
 async function getContest (ctx: Context) {
   const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const profile = await loadProfile(ctx)
   const { contest, isJury } = state
@@ -188,9 +178,7 @@ async function getContest (ctx: Context) {
 async function getConfig (ctx: Context) {
   const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const { contest } = state
 
@@ -243,9 +231,7 @@ async function updateConfig (ctx: Context) {
   }
   const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const profile = await loadProfile(ctx)
   const { contest } = state
@@ -309,9 +295,7 @@ async function updateConfig (ctx: Context) {
 export async function getRanklist (ctx: Context) {
   const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const { contest, isJury } = state
 
@@ -327,9 +311,7 @@ export async function findSolutions (ctx: Context) {
   }
   const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const { contest } = state
   const solutions = await solutionService.findSolutions({
@@ -347,9 +329,7 @@ export async function exportSolutions (ctx: Context) {
   }
   const state = await loadContestState(ctx)
   if (!state || !state.isJury) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const { contest } = state
   const solutions = await solutionService.exportSolutions({
@@ -367,9 +347,7 @@ export async function findContestDiscussions (ctx: Context) {
   }
   const state = await loadContestState(ctx)
   if (!state || !state.accessible) {
-    return createErrorResponse(ctx,
-      'Contest not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
   const { contest } = state
 
@@ -433,9 +411,7 @@ export async function createContest (ctx: Context) {
     return false
   }
   if (!await hasPermission()) {
-    return createErrorResponse(ctx,
-      'Permission denied to create contest', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied to create contest')
   }
 
   let course: Types.ObjectId | null = null
@@ -449,9 +425,7 @@ export async function createContest (ctx: Context) {
     ctx.auditLog.info(`<Contest:${contest.contestId}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { contestId: contest.contestId })
   } catch (e: any) {
-    return createErrorResponse(ctx,
-      `Failed to create contest: ${e.message}`, ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, `Failed to create contest: ${e.message}`)
   }
 }
 

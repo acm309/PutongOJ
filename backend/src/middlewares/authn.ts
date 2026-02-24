@@ -2,7 +2,7 @@ import type { Context, Middleware } from 'koa'
 import type { UserDocument } from '../models/User'
 import User from '../models/User'
 import sessionService from '../services/session'
-import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/error'
+import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/constants'
 
 export async function checkSession (ctx: Context): Promise<UserDocument | undefined> {
   if (ctx.state.authnChecked) {

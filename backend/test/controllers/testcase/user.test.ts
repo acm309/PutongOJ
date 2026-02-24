@@ -53,7 +53,9 @@ test('Find testcases - should be denied for non-admin/non-owner', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases`)
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Create testcase - should be denied for non-admin/non-owner', async (t) => {
@@ -64,14 +66,18 @@ test('Create testcase - should be denied for non-admin/non-owner', async (t) => 
       out: '3\n',
     })
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Export testcases - should be denied for non-admin/non-owner', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases/export`)
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Get testcase - should be denied for non-admin/non-owner', async (t) => {
@@ -79,7 +85,9 @@ test('Get testcase - should be denied for non-admin/non-owner', async (t) => {
   const res = await request
     .get(`/api/problem/${testPid}/testcases/${dummyUuid}.in`)
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Remove testcase - should be denied for non-admin/non-owner', async (t) => {
@@ -87,7 +95,9 @@ test('Remove testcase - should be denied for non-admin/non-owner', async (t) => 
   const res = await request
     .delete(`/api/problem/${testPid}/testcases/${dummyUuid}`)
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test.after.always('Cleanup', async (_t) => {

@@ -9,7 +9,7 @@ import { loadCourseStateOrThrow } from '../policies/course'
 import courseService from '../services/course'
 import problemService from '../services/problem'
 import { parsePaginateOption } from '../utils'
-import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/error'
+import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants'
 
 const findCourses = async (ctx: Context) => {
   const opt = ctx.request.query

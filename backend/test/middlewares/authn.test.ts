@@ -3,7 +3,7 @@ import test from 'ava'
 import authnMiddleware from '../../src/middlewares/authn'
 import User from '../../src/models/User'
 import sessionService from '../../src/services/session'
-import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/error'
+import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/constants'
 import { userSeeds } from '../seeds/user'
 import '../../src/config/db'
 

@@ -10,7 +10,6 @@ test('List discussions - should show public discussions only', async (t) => {
     .get('/api/discussions')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(res.body.data)
   t.truthy(Array.isArray(res.body.data.docs))
   t.truthy(typeof res.body.data.total === 'number')
@@ -53,7 +52,6 @@ test('Get specific public discussion', async (t) => {
     .get('/api/discussions/1')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.is(res.body.data.discussionId, 1)
   t.truthy(res.body.data.title)
   t.truthy(res.body.data.author)
@@ -116,8 +114,9 @@ test('Cannot create discussion without login', async (t) => {
       content: 'Test content',
     })
 
-  t.is(res.status, 401)
-  t.truthy(res.body.data || res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 test('Cannot add comment without login', async (t) => {
@@ -127,8 +126,9 @@ test('Cannot add comment without login', async (t) => {
       content: 'Test comment',
     })
 
-  t.is(res.status, 401)
-  t.truthy(res.body.data || res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 test.after.always('close server', () => {

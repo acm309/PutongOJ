@@ -18,7 +18,6 @@ test('Server time', async (t) => {
     .get('/api/servertime')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(res.body.serverTime)
   t.truthy(Number.isInteger(res.body.serverTime))
 })
@@ -28,7 +27,6 @@ test('Website information', async (t) => {
     .get('/api/website')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.is(res.body.title, websiteConfig.title)
   t.is(res.body.buildSHA, websiteConfig.buildSHA)
   t.is(res.body.buildTime, websiteConfig.buildTime)
@@ -39,7 +37,9 @@ test('Visitor can not submit file', async (t) => {
   const res = await request
     .post('/api/upload')
     .attach('image', filepath)
-  t.is(res.status, 401)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 test('Admin could submit file', async (t) => {

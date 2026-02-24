@@ -70,19 +70,40 @@ export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
   const { requestId } = ctx.state
   ctx.body = <Enveloped<T>>{
     success: true,
-    code: ErrorCode.OK,
+    code: 200,
     message: 'OK',
     data,
     requestId,
   }
 }
 
+function getFriendlyErrorMessage (code: ErrorCode): string {
+  switch (code) {
+    case ErrorCode.BadRequest:
+      return 'Bad request, please check your parameters and try again'
+    case ErrorCode.Unauthorized:
+      return 'Unauthenticated, please login first'
+    case ErrorCode.Forbidden:
+      return 'Permission denied, you do not have the required privileges'
+    case ErrorCode.NotFound:
+      return 'Entity not found, please check the parameters'
+    case ErrorCode.Teapot:
+      return 'I\'m a Teapot'
+    case ErrorCode.NotImplemented:
+      return 'This feature is not implemented yet'
+    case ErrorCode.InternalServerError:
+    default:
+      return 'Unknown error occurred, sit back and relax, it is not your fault'
+  }
+}
+
 export function createErrorResponse (
   ctx: Context,
-  message: string,
   code: ErrorCode = ErrorCode.BadRequest,
+  msg?: string,
 ): void {
   const { requestId } = ctx.state
+  const message = msg ?? getFriendlyErrorMessage(code)
   ctx.body = <Enveloped<null>>{
     success: false,
     code,
@@ -109,7 +130,7 @@ export function createZodErrorResponse (
   error: ZodError,
 ): void {
   const message = getFriendlyZodErrorMessage(error)
-  createErrorResponse(ctx, message, ErrorCode.BadRequest)
+  createErrorResponse(ctx, ErrorCode.BadRequest, message)
 }
 
 export default {

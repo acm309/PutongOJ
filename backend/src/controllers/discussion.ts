@@ -68,9 +68,7 @@ async function findDiscussions (ctx: Context) {
 async function getDiscussion (ctx: Context) {
   const discussionState = await loadDiscussion(ctx)
   if (!discussionState) {
-    return createErrorResponse(ctx,
-      'Discussion not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Discussion not found or access denied')
   }
 
   const { profile } = ctx.state
@@ -108,9 +106,7 @@ async function createDiscussion (ctx: Context) {
   if (payload.data.contest) {
     const contestState = await loadContestState(ctx, payload.data.contest)
     if (!contestState || !contestState.accessible) {
-      return createErrorResponse(ctx,
-        'Contest not found or access denied', ErrorCode.NotFound,
-      )
+      return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
     }
 
     contest = contestState.contest._id || null
@@ -126,9 +122,7 @@ async function createDiscussion (ctx: Context) {
   const author = profile._id
 
   if (publicDiscussionTypes.includes(type) && !isManaged) {
-    return createErrorResponse(ctx,
-      'Insufficient privileges to create this type of discussion', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privileges to create this type of discussion')
   }
 
   try {
@@ -137,8 +131,9 @@ async function createDiscussion (ctx: Context) {
     })
     ctx.auditLog.info(`<Discussion:${discussion.discussionId}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { discussionId: discussion.discussionId })
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to create discussion', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -150,18 +145,14 @@ async function createComment (ctx: Context) {
 
   const discussionState = await loadDiscussion(ctx)
   if (!discussionState) {
-    return createErrorResponse(ctx,
-      'Discussion not found or access denied', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Discussion not found or access denied')
   }
 
   const { discussion, isJury } = discussionState
   const isAnnouncement = discussion.type === DiscussionType.PublicAnnouncement
   const isArchived = discussion.type === DiscussionType.ArchivedDiscussion
   if (isArchived || (isAnnouncement && !isJury)) {
-    return createErrorResponse(ctx,
-      'Comments are not allowed for this discussion', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Comments are not allowed for this discussion')
   }
 
   const profile = await loadProfile(ctx)
@@ -171,8 +162,9 @@ async function createComment (ctx: Context) {
     )
     ctx.auditLog.info(`<Comment:${comment.commentId}> created in <Discussion:${discussion.discussionId}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to create comment', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 

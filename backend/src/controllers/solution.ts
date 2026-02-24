@@ -171,33 +171,21 @@ async function updateSolution (ctx: Context) {
 
   const sid = Number(ctx.params.sid)
   if (!Number.isInteger(sid) || sid <= 0) {
-    return createErrorResponse(ctx,
-      'Invalid submission id',
-      ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id')
   }
   const updatedJudge = Number(opt.judge)
   if (updatedJudge !== judgeResult.RejudgePending && updatedJudge !== judgeResult.Skipped) {
-    return createErrorResponse(ctx,
-      'Invalid judge status, only support RejudgePending and Skipped',
-      ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid judge status, only support RejudgePending and Skipped')
   }
 
   const solution = await Solution.findOne({ sid })
   if (!solution) {
-    return createErrorResponse(ctx,
-      'Solution not found',
-      ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound)
   }
   const pid = solution.pid
   const problem = await Problem.findOne({ pid })
   if (!problem) {
-    return createErrorResponse(ctx,
-      'Problem of the solution not found',
-      ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution not found')
   }
 
   try {
@@ -210,11 +198,9 @@ async function updateSolution (ctx: Context) {
     solution.testcases = []
 
     await solution.save()
-  } catch (e: any) {
-    return createErrorResponse(ctx,
-      e.message || 'Failed to update the solution',
-      ErrorCode.InternalServerError,
-    )
+  } catch (err) {
+    ctx.auditLog.error('Failed to update solution', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 
   if (updatedJudge !== judgeResult.RejudgePending) {
@@ -249,11 +235,9 @@ async function updateSolution (ctx: Context) {
 
     await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)
-  } catch (e: any) {
-    return createErrorResponse(ctx,
-      e.message || 'Failed to push the solution to judger queue',
-      ErrorCode.InternalServerError,
-    )
+  } catch (err) {
+    ctx.auditLog.error('Failed to push solution to judger queue', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 
   return createEnvelopedResponse(ctx, solution)

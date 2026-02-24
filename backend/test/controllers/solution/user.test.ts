@@ -52,10 +52,9 @@ test('Status fails to find one', async (t) => {
   const res = await request
     .get('/api/status/87654321')
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test('Status fails to delete', async (t) => {
@@ -69,14 +68,18 @@ test('Status fails to update', async (t) => {
   const res = await request
     .put('/api/status/1000')
 
-  t.is(res.status, 403)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 403)
 })
 
 test('Can not see solution of another user', async (t) => {
   const res = await request
     .get('/api/status/1')
 
-  t.is(res.status, 403)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 403)
 })
 
 test('Code is too long', async (t) => {
@@ -99,10 +102,9 @@ test('Code is too long', async (t) => {
       language: 2, // cpp; TODO: as a constant
     })
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test('Code is too short', async (t) => {
@@ -116,10 +118,9 @@ test('Code is too short', async (t) => {
       language: 2, // cpp; TODO: as a constant
     })
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test.after.always('close server', () => {

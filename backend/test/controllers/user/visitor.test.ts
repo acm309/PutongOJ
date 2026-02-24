@@ -12,7 +12,9 @@ const pwd = 'Aa@123456'
 test('View user doesnt exist', async (t) => {
   const r = await request
     .get('/api/users/test23615')
-  t.is(r.status, 404)
+  t.is(r.status, 200)
+  t.is(r.body.success, false)
+  t.is(r.body.code, 404)
 })
 
 test.skip('Fetch user list', async (t) => {

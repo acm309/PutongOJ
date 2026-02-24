@@ -46,9 +46,7 @@ async function loadEditingUser (ctx: Context) {
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
   if (!profile.isRoot && profile.privilege <= user.privilege && profile.uid !== user.uid) {
-    createErrorResponse(ctx,
-      'Insufficient privilege to edit this user', ErrorCode.Forbidden,
-    )
+    createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to edit this user')
     return null
   }
   return user
@@ -85,20 +83,14 @@ export async function updateUser (ctx: Context) {
   const profile = await loadProfile(ctx)
   if (payload.data.privilege !== undefined) {
     if (profile.uid === user.uid) {
-      return createErrorResponse(ctx,
-        'Cannot change your own privilege', ErrorCode.Forbidden,
-      )
+      return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot change your own privilege')
     }
     if (!profile.isRoot && profile.privilege <= payload.data.privilege) {
-      return createErrorResponse(ctx,
-        'Cannot elevate user privilege to equal or higher than yourself', ErrorCode.Forbidden,
-      )
+      return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot elevate user privilege to equal or higher than yourself')
     }
   }
   if (payload.data.avatar !== undefined && !profile.isRoot) {
-    return createErrorResponse(ctx,
-      'Only root administrators can change user avatars', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Only root administrators can change user avatars')
   }
 
   try {
@@ -109,8 +101,9 @@ export async function updateUser (ctx: Context) {
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
     ctx.auditLog.info(`<User:${user.uid}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, result)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update user', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -123,14 +116,10 @@ export async function updateUserPassword (ctx: Context) {
   try {
     password = await cryptoService.decryptData(payload.data.newPassword)
   } catch {
-    return createErrorResponse(ctx,
-      'Failed to decrypt password field', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Failed to decrypt password field')
   }
   if (!isComplexPwd(password)) {
-    return createErrorResponse(ctx,
-      'Password is not complex enough', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Password is not complex enough')
   }
   const pwd = passwordHash(password)
 
@@ -145,8 +134,9 @@ export async function updateUserPassword (ctx: Context) {
     const revoked = await sessionService.revokeOtherSessions(user._id.toString(), '')
     ctx.auditLog.info(`<User:${user.uid}> password reset by <User:${profile.uid}>, revoked ${revoked} session(s)`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update user password', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -160,9 +150,7 @@ export async function getUserOAuthConnections (ctx: Context) {
 export async function removeUserOAuthConnection (ctx: Context) {
   const providerName = ctx.params.provider
   if (typeof providerName !== 'string' || !(providerName in providerMap)) {
-    return createErrorResponse(ctx,
-      'No such OAuth provider', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'No such OAuth provider')
   }
   const provider = providerMap[providerName as keyof typeof providerMap]
   const user = await loadEditingUser(ctx)
@@ -171,9 +159,7 @@ export async function removeUserOAuthConnection (ctx: Context) {
   }
   const result = await oauthService.removeOAuthConnection(user._id, provider)
   if (!result) {
-    return createErrorResponse(ctx,
-      'No such OAuth connection', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound)
   } else {
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<User:${user.uid}> removed ${provider} OAuth connection by <User:${profile.uid}>`)
@@ -215,8 +201,9 @@ export async function sendNotificationBroadcast (ctx: Context) {
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to send notification broadcast', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -227,9 +214,7 @@ export async function sendNotificationUser (ctx: Context) {
   }
   const username = String(ctx.params.username)
   if (!username || !(await userService.getUser(username))) {
-    return createErrorResponse(ctx,
-      'User not found', ErrorCode.NotFound,
-    )
+    return createErrorResponse(ctx, ErrorCode.NotFound)
   }
 
   try {
@@ -238,8 +223,9 @@ export async function sendNotificationUser (ctx: Context) {
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to send notification to user', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -248,7 +234,7 @@ function parseGroupId (ctx: Context): number | null {
   const groupId = Number(groupIdStr)
 
   if (Number.isNaN(groupId) || !Number.isInteger(groupId) || groupId < 0) {
-    createErrorResponse(ctx, 'Invalid group ID', ErrorCode.BadRequest)
+    createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid group ID')
     return null
   }
   return groupId
@@ -262,7 +248,7 @@ export async function getGroup (ctx: Context) {
 
   const group = await groupService.getGroup(groupId)
   if (!group) {
-    return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
+    return createErrorResponse(ctx, ErrorCode.NotFound)
   }
 
   const result = AdminGroupDetailQueryResultSchema.encode(group)
@@ -281,8 +267,9 @@ export async function createGroup (ctx: Context) {
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Group:${group.groupId}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, result)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to create group', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -300,13 +287,14 @@ export async function updateGroup (ctx: Context) {
   try {
     const success = await groupService.updateGroup(groupId, payload.data.name)
     if (!success) {
-      return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
+      return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Group:${groupId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update group', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -324,13 +312,14 @@ export async function updateGroupMembers (ctx: Context) {
   try {
     const modifiedCount = await groupService.updateGroupMembers(groupId, payload.data.members)
     if (modifiedCount === null) {
-      return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
+      return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Group:${groupId}> updated ${modifiedCount} members by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, { modifiedCount })
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update group members', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -343,13 +332,14 @@ export async function removeGroup (ctx: Context) {
   try {
     const result = await groupService.removeGroup(groupId)
     if (result === null) {
-      return createErrorResponse(ctx, 'Group not found', ErrorCode.NotFound)
+      return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Group:${groupId}> removed by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to remove group', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -358,7 +348,7 @@ function parseDiscussionId (ctx: Context): number | null {
   const discussionId = Number(discussionIdStr)
 
   if (Number.isNaN(discussionId) || !Number.isInteger(discussionId) || discussionId <= 0) {
-    createErrorResponse(ctx, 'Invalid discussion ID', ErrorCode.BadRequest)
+    createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid discussion ID')
     return null
   }
   return discussionId
@@ -379,7 +369,7 @@ export async function updateDiscussion (ctx: Context) {
   if (payload.data.author !== undefined) {
     const author = await userService.getUser(payload.data.author)
     if (!author) {
-      return createErrorResponse(ctx, 'Author user not found', ErrorCode.BadRequest)
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'Author user not found')
     }
     update.author = author._id
   }
@@ -389,7 +379,7 @@ export async function updateDiscussion (ctx: Context) {
     } else {
       const problem = await problemService.getProblem(payload.data.problem)
       if (!problem) {
-        return createErrorResponse(ctx, 'Problem not found', ErrorCode.BadRequest)
+        return createErrorResponse(ctx, ErrorCode.BadRequest, 'Problem not found')
       }
       update.problem = problem._id
     }
@@ -400,7 +390,7 @@ export async function updateDiscussion (ctx: Context) {
     } else {
       const contest = await contestService.getContest(payload.data.contest)
       if (!contest) {
-        return createErrorResponse(ctx, 'Contest not found', ErrorCode.BadRequest)
+        return createErrorResponse(ctx, ErrorCode.BadRequest, 'Contest not found')
       }
       update.contest = contest._id
     }
@@ -418,13 +408,14 @@ export async function updateDiscussion (ctx: Context) {
   try {
     const result = await discussionService.updateDiscussion(discussionId, update)
     if (!result) {
-      return createErrorResponse(ctx, 'Discussion not found', ErrorCode.NotFound)
+      return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Discussion:${discussionId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update discussion', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -433,7 +424,7 @@ function parseCommentId (ctx: Context): number | null {
   const commentId = Number(commentIdStr)
 
   if (Number.isNaN(commentId) || !Number.isInteger(commentId) || commentId <= 0) {
-    createErrorResponse(ctx, 'Invalid comment ID', ErrorCode.BadRequest)
+    createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid comment ID')
     return null
   }
   return commentId
@@ -455,13 +446,14 @@ export async function updateComment (ctx: Context) {
       hidden: payload.data.hidden,
     })
     if (!result) {
-      return createErrorResponse(ctx, 'Comment not found', ErrorCode.NotFound)
+      return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Comment:${commentId}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update comment', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -486,12 +478,10 @@ export async function revokeUserSession (ctx: Context) {
   const user = await loadUser(ctx)
   const { sessionId } = ctx.params
   if (!sessionId || typeof sessionId !== 'string') {
-    return createErrorResponse(ctx, 'Invalid session ID', ErrorCode.BadRequest)
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid session ID')
   }
   if (sessionId === ctx.state.sessionId) {
-    return createErrorResponse(ctx,
-      'Cannot revoke current session, use logout instead', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot revoke current session, use logout instead')
   }
 
   await sessionService.revokeSession(user._id.toString(), sessionId)

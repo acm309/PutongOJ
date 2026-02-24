@@ -3,8 +3,6 @@ export * from './limit.js'
 export * from './regex.js'
 
 export enum ErrorCode {
-  NetworkError = -1,
-  OK = 200,
   BadRequest = 400,
   Unauthorized = 401,
   Forbidden = 403,
@@ -14,6 +12,9 @@ export enum ErrorCode {
   InternalServerError = 500,
   NotImplemented = 501,
 }
+
+export const ErrorCodeValues = Object.values(ErrorCode)
+  .filter(value => typeof value === 'number') as number[]
 
 export enum QuerySort {
   Asc = 1,

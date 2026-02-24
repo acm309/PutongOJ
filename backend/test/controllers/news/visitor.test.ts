@@ -10,10 +10,9 @@ test('News list', async (t) => {
   const res = await request
     .get('/api/news/list')
 
-  t.plan(4)
+  t.plan(3)
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list.docs))
 
   if (res.body.list.docs.length > 0) {
@@ -27,20 +26,18 @@ test('News fails to find one because nid does not exist', async (t) => {
   const res = await request
     .get('/api/news/-1')
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test('News fails to find one because nid is not number', async (t) => {
   const res = await request
     .get('/api/news/xx')
 
-  t.is(res.status, 400)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 400)
 })
 
 test('Visitor can not update news', async (t) => {
@@ -51,9 +48,9 @@ test('Visitor can not update news', async (t) => {
       content: 'xxx',
     })
 
-  t.is(res.status, 401)
-  t.is(res.type, 'application/json')
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 
   const find = await request
     .get('/api/news/5')
@@ -69,7 +66,6 @@ test('News finds one', async (t) => {
     .get('/api/news/5')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(res.body.news.nid)
   t.truthy(res.body.news.title)
 

@@ -25,8 +25,7 @@ import solutionService from '../services/solution'
 import tagService from '../services/tag'
 import { getUser } from '../services/user'
 import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
-import constants from '../utils/constants'
-import { ERR_PERM_DENIED } from '../utils/error'
+import constants, { ERR_PERM_DENIED } from '../utils/constants'
 
 const { judge } = constants
 

@@ -62,7 +62,9 @@ test.serial('Delete a Problem', async (t) => {
   const find = await request
     .get(`/api/problem/${createPid}`)
 
-  t.is(find.status, 404)
+  t.is(find.status, 200)
+  t.is(find.body.success, false)
+  t.is(find.body.code, 404)
 })
 
 test.after.always('close server', () => {

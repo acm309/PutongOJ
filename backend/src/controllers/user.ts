@@ -1,6 +1,7 @@
 import type { Context } from 'koa'
 import type { UserDocument } from '../models/User'
 import {
+  ErrorCode,
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
   UserRanklistExportQueryResultSchema,
@@ -21,7 +22,7 @@ import {
   createErrorResponse,
   createZodErrorResponse,
 } from '../utils'
-import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/error'
+import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants'
 
 export async function loadUser (
   ctx: Context,
@@ -62,7 +63,7 @@ export async function exportRanklist (ctx: Context) {
   }
   const profile = await loadProfile (ctx)
   if (!query.data.group && !profile.isAdmin) {
-    return createErrorResponse(ctx, 'Insufficient privilege to export full ranklist', 403)
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to export full ranklist')
   }
 
   const users = await userService.exportRanklist(query.data)

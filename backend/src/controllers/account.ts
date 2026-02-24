@@ -31,7 +31,7 @@ import {
 export async function getProfile (ctx: Context) {
   const profile = await checkSession(ctx)
   if (!profile) {
-    return createErrorResponse(ctx, 'Not logged in', ErrorCode.Unauthorized)
+    return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Not logged in')
   }
 
   const result = AccountProfileQueryResultSchema.encode(profile.toObject())
@@ -47,27 +47,19 @@ export async function userLogin (ctx: Context) {
   try {
     password = await cryptoService.decryptData(payload.data.password)
   } catch {
-    return createErrorResponse(ctx,
-      'Failed to decrypt password field', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Failed to decrypt password field')
   }
   const pwdHash = passwordHashBuffer(password)
 
   const user = await userService.getUser(payload.data.username)
   if (!user) {
-    return createErrorResponse(ctx,
-      'Username or password is incorrect', ErrorCode.Unauthorized,
-    )
+    return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Username or password is incorrect')
   }
   if (timingSafeEqual(Buffer.from(user.pwd, 'hex'), pwdHash) === false) {
-    return createErrorResponse(ctx,
-      'Username or password is incorrect', ErrorCode.Unauthorized,
-    )
+    return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Username or password is incorrect')
   }
   if (user.privilege === UserPrivilege.Banned) {
-    return createErrorResponse(ctx,
-      'Account has been banned, please contact the administrator', ErrorCode.Forbidden,
-    )
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Account has been banned, please contact the administrator')
   }
 
   const userId = user._id.toString()
@@ -86,7 +78,7 @@ export async function userLogin (ctx: Context) {
 export async function userRegister (ctx: Context) {
   const profile = await checkSession(ctx)
   if (profile) {
-    return createErrorResponse(ctx, 'Already logged in', ErrorCode.BadRequest)
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Already logged in')
   }
 
   const payload = AccountRegisterPayloadSchema.safeParse(ctx.request.body)
@@ -97,21 +89,15 @@ export async function userRegister (ctx: Context) {
   try {
     password = await cryptoService.decryptData(payload.data.password)
   } catch {
-    return createErrorResponse(ctx,
-      'Failed to decrypt password field', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Failed to decrypt password field')
   }
 
   const available = await userService.checkUserAvailable(payload.data.username)
   if (!available) {
-    return createErrorResponse(ctx,
-      'The username has been registered or reserved', ErrorCode.Conflict,
-    )
+    return createErrorResponse(ctx, ErrorCode.Conflict, 'The username has been registered or reserved')
   }
   if (!isComplexPwd(password)) {
-    return createErrorResponse(ctx,
-      'Password is not complex enough', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Password is not complex enough')
   }
 
   try {
@@ -130,8 +116,9 @@ export async function userRegister (ctx: Context) {
 
     const result = AccountProfileQueryResultSchema.encode(user.toObject())
     return createEnvelopedResponse(ctx, result)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to register user', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -163,8 +150,9 @@ export async function updateProfile (ctx: Context) {
     const result = AccountProfileQueryResultSchema.encode(updatedUser.toObject())
     ctx.auditLog.info(`<User:${profile.uid}> updated profile`)
     return createEnvelopedResponse(ctx, result)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update profile', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -180,21 +168,15 @@ export async function updatePassword (ctx: Context) {
     oldPassword = await cryptoService.decryptData(payload.data.oldPassword)
     newPassword = await cryptoService.decryptData(payload.data.newPassword)
   } catch {
-    return createErrorResponse(ctx,
-      'Failed to decrypt password field', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Failed to decrypt password field')
   }
 
   if (!isComplexPwd(newPassword)) {
-    return createErrorResponse(ctx,
-      'New password is not complex enough', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'New password is not complex enough')
   }
   const oldPwdHash = passwordHashBuffer(oldPassword)
   if (timingSafeEqual(Buffer.from(profile.pwd, 'hex'), oldPwdHash) === false) {
-    return createErrorResponse(ctx,
-      'Old password is incorrect', ErrorCode.Unauthorized,
-    )
+    return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Old password is incorrect')
   }
   const pwd = passwordHash(newPassword)
 
@@ -204,8 +186,9 @@ export async function updatePassword (ctx: Context) {
     const revoked = await sessionService.revokeOtherSessions(userId, ctx.state.sessionId!)
     ctx.auditLog.info(`<User:${profile.uid}> changed password, revoked ${revoked} other session(s)`)
     return createEnvelopedResponse(ctx, null)
-  } catch (err: any) {
-    return createErrorResponse(ctx, err.message, ErrorCode.InternalServerError)
+  } catch (err) {
+    ctx.auditLog.error('Failed to update password', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
 
@@ -243,12 +226,10 @@ export async function revokeSession (ctx: Context) {
   const profile = await loadProfile(ctx)
   const { sessionId } = ctx.params
   if (!sessionId || typeof sessionId !== 'string') {
-    return createErrorResponse(ctx, 'Invalid session ID', ErrorCode.BadRequest)
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid session ID')
   }
   if (sessionId === ctx.state.sessionId) {
-    return createErrorResponse(ctx,
-      'Cannot revoke current session, use logout instead', ErrorCode.BadRequest,
-    )
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot revoke current session, use logout instead')
   }
 
   await sessionService.revokeSession(profile._id.toString(), sessionId)
@@ -260,7 +241,7 @@ export async function revokeOtherSessions (ctx: Context) {
   const profile = await loadProfile(ctx)
   const currentSessionId = ctx.state.sessionId
   if (!currentSessionId) {
-    return createErrorResponse(ctx, 'No active session', ErrorCode.BadRequest)
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'No active session')
   }
 
   const removed = await sessionService.revokeOtherSessions(

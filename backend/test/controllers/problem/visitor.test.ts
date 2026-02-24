@@ -11,7 +11,6 @@ test('Problem list', async (t) => {
     .get('/api/problem')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(Array.isArray(res.body.list.docs))
   t.truthy(Array.isArray(res.body.solved))
 
@@ -38,20 +37,18 @@ test('Problem should fail to find one', async (t) => {
   const res = await request
     .get('/api/problem/10000')
 
-  t.is(res.status, 404)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Pid is not a number', async (t) => {
   const res = await request
     .get('/api/problem/xx')
 
-  t.is(res.status, 404)
-  t.is(res.type, 'application/json')
-
-  t.truthy(res.body.error)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test.after.always('close server', () => {

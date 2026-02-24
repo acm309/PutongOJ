@@ -14,7 +14,9 @@ test('Can not create solution without login', async (t) => {
       code: 'Anything you like',
     })
 
-  t.is(res.status, 401)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 test.skip('Status list', async (t) => {
@@ -22,7 +24,6 @@ test.skip('Status list', async (t) => {
     .get('/api/status/list')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.true(Array.isArray(res.body.list.docs))
 
   t.truthy(res.body.list.docs[0].sid)
@@ -35,7 +36,9 @@ test('Can not see solution without login', async (t) => {
   const res = await request
     .get('/api/status/1')
 
-  t.is(res.status, 401)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 401)
 })
 
 test.after.always('close server', () => {

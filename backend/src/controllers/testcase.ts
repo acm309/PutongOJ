@@ -11,7 +11,7 @@ import { loadProfile } from '../middlewares/authn'
 import { loadProblemOrThrow } from '../policies/problem'
 import courseService from '../services/course'
 import { createEnvelopedResponse } from '../utils'
-import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/error'
+import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants'
 
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)

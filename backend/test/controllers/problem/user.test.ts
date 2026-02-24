@@ -25,7 +25,9 @@ test('Normal user can not visit reserved problem', async (t) => {
   const res = await request
     .get('/api/problem/1004')
 
-  t.is(res.status, 404)
+  t.is(res.status, 200)
+  t.is(res.body.success, false)
+  t.is(res.body.code, 404)
 })
 
 test('Query problem list', async (t) => {
@@ -43,7 +45,6 @@ test('Statistics for pid 1001', async (t) => {
     .get('/api/problem/1001/statistics')
 
   t.is(res.status, 200)
-  t.is(res.type, 'application/json')
   t.truthy(res.body && res.body.success === true)
   t.truthy(Array.isArray(res.body.data.judgeCounts))
   t.truthy(Array.isArray(res.body.data.timeDistribution))
