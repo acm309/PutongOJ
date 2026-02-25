@@ -3,6 +3,7 @@ import type { Context } from 'koa'
 import type { ZodError } from 'zod'
 import type { PaginateOption } from '../types'
 import { Buffer } from 'node:buffer'
+import { BlockList, isIPv6 } from 'node:net'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
 import { ErrorCode, passwordRegex } from '@putongoj/shared'
 import { pick, pickBy } from 'lodash'
@@ -133,6 +134,31 @@ export function createZodErrorResponse (
   createErrorResponse(ctx, ErrorCode.BadRequest, message)
 }
 
+/**
+ * Checks whether the given IP address is covered by any CIDR entry in the whitelist.
+ */
+export function isIpInWhitelist (ip: string, whitelist: { cidr: string }[]): boolean {
+  if (whitelist.length === 0) {
+    return false
+  }
+
+  const blockList = new BlockList()
+  for (const entry of whitelist) {
+    const slash = entry.cidr.lastIndexOf('/')
+    const addr = slash >= 0 ? entry.cidr.slice(0, slash) : entry.cidr
+    const prefix = slash >= 0 ? Number(entry.cidr.slice(slash + 1)) : (isIPv6(addr) ? 128 : 32)
+    const type = isIPv6(addr) ? 'ipv6' : 'ipv4'
+    try {
+      blockList.addSubnet(addr, prefix, type)
+    } catch {
+      // skip malformed CIDR entries
+    }
+  }
+
+  const type = isIPv6(ip) ? 'ipv6' : 'ipv4'
+  return blockList.check(ip, type)
+}
+
 export default {
   parsePaginateOption,
   passwordHashBuffer,
@@ -143,4 +169,5 @@ export default {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
+  isIpInWhitelist,
 }

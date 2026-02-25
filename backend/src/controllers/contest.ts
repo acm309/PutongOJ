@@ -77,27 +77,29 @@ async function getParticipation (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
 
-  const { contest, participation, isJury } = state
+  const { contest, participation, isJury, isIpBlocked } = state
   const profile = await loadProfile(ctx)
   let canParticipate: boolean = false
   let canParticipateByPassword: boolean = false
 
-  if (contest.isPublic || isJury) {
-    canParticipate = true
-  } else {
-    if (contest.password && contest.password.length > 0) {
-      canParticipateByPassword = true
-    }
-    if (contest.allowedUsers.includes(profile._id)) {
+  if (!isIpBlocked) {
+    if (contest.isPublic || isJury) {
       canParticipate = true
+    } else {
+      if (contest.password && contest.password.length > 0) {
+        canParticipateByPassword = true
+      }
+      if (contest.allowedUsers.includes(profile._id)) {
+        canParticipate = true
+      }
+      /**
+       * @TODO allowed groups
+       */
     }
-    /**
-     * @TODO allowed groups
-     */
   }
 
   const result = ContestParticipationQueryResultSchema.encode({
-    isJury, participation, canParticipate, canParticipateByPassword,
+    isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked,
   })
   return createEnvelopedResponse(ctx, result)
 }
@@ -113,6 +115,10 @@ async function participateContest (ctx: Context) {
   }
   const profile = await loadProfile(ctx)
   const { contest, participation, isJury } = state
+
+  if (state.isIpBlocked) {
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Your IP address is not in the whitelist for this contest')
+  }
 
   if (participation !== ParticipationStatus.NotApplied) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'You have already participated in this contest')

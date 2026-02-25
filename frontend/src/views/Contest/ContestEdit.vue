@@ -42,6 +42,25 @@ const savingBasicInfo = ref(false)
 const savingAccess = ref(false)
 const savingProblems = ref(false)
 
+const ipWhitelistEnabled = ref(false)
+const ipWhitelist = ref<{ _key: number, cidr: string, comment: string | null }[]>([])
+const ipWhitelistEditingRows = ref<any[]>([])
+let ipWhitelistKeyCounter = 0
+
+function makeIpEntry (cidr = '', comment: string | null = null) {
+  return { _key: ipWhitelistKeyCounter++, cidr, comment }
+}
+
+function onIpWhitelistRowEditSave (event: any) {
+  const { newData, index } = event
+  ipWhitelist.value[index] = newData
+}
+
+function onIpWhitelistAddEntry () {
+  ipWhitelist.value = [ ...ipWhitelist.value, makeIpEntry() ]
+  ipWhitelistEditingRows.value = [ ...ipWhitelistEditingRows.value, ipWhitelist.value[ipWhitelist.value.length - 1] ]
+}
+
 const basicInfoDirty = computed(() => {
   if (!form.value || !contestConfig.value) return false
   return (
@@ -59,10 +78,14 @@ const accessDirty = computed(() => {
   if (!form.value || !contestConfig.value) return false
   const originalPassword = contestConfig.value.password || null
   const currentPassword = enablePassword.value ? (form.value.password || null) : null
+  const originalIpWhitelist = JSON.stringify((contestConfig.value.ipWhitelist ?? []).map(e => ({ cidr: e.cidr, comment: e.comment })))
+  const currentIpWhitelist = JSON.stringify(ipWhitelist.value.map(e => ({ cidr: e.cidr, comment: e.comment })))
   return (
     form.value.isHidden !== contestConfig.value.isHidden
     || form.value.isPublic !== contestConfig.value.isPublic
     || currentPassword !== originalPassword
+    || ipWhitelistEnabled.value !== contestConfig.value.ipWhitelistEnabled
+    || currentIpWhitelist !== originalIpWhitelist
   )
 })
 
@@ -99,6 +122,8 @@ async function fetch () {
   }
   problems.value = resp.data.problems
   enablePassword.value = !!resp.data.password
+  ipWhitelistEnabled.value = resp.data.ipWhitelistEnabled
+  ipWhitelist.value = (resp.data.ipWhitelist ?? []).map(e => makeIpEntry(e.cidr, e.comment))
 }
 
 function onProblemReorder (event: any) {
@@ -200,6 +225,14 @@ async function onSaveAccess () {
     payload.password = currentPassword
   }
 
+  if (ipWhitelistEnabled.value !== contestConfig.value.ipWhitelistEnabled) {
+    payload.ipWhitelistEnabled = ipWhitelistEnabled.value
+  }
+  const originalIpWhitelist = JSON.stringify((contestConfig.value.ipWhitelist ?? []).map(e => ({ cidr: e.cidr, comment: e.comment })))
+  if (JSON.stringify(ipWhitelist.value.map(e => ({ cidr: e.cidr, comment: e.comment }))) !== originalIpWhitelist) {
+    payload.ipWhitelist = ipWhitelist.value.map(({ cidr, comment }) => ({ cidr, comment }))
+  }
+
   savingAccess.value = true
   await saveChanges(payload)
   savingAccess.value = false
@@ -298,6 +331,52 @@ onMounted(() => {
         <InputText id="password" v-model="form.password" fluid autocomplete="new-password" />
         <label for="password">{{ t('ptoj.password') }}</label>
       </IftaLabel>
+
+      <LabeledSwitch
+        v-model="ipWhitelistEnabled" :label="t('ptoj.enable_ip_whitelist')"
+        :description="t('ptoj.ip_whitelist_desc')"
+      />
+
+      <DataTable
+        v-if="ipWhitelistEnabled" v-model:editing-rows="ipWhitelistEditingRows" :value="ipWhitelist" edit-mode="row" scrollable
+        data-key="_key" class="-mt-3 -mx-6 md:col-span-2 whitespace-nowrap" @row-edit-save="onIpWhitelistRowEditSave"
+      >
+        <Column field="cidr" :header="t('ptoj.cidr')" class="pl-6" body-class="h-[59px]">
+          <template #editor="{ data, field }">
+            <InputText v-model="data[field]" fluid placeholder="192.168.0.0/24" />
+          </template>
+        </Column>
+
+        <Column field="comment" :header="t('ptoj.note')">
+          <template #editor="{ data, field }">
+            <InputText v-model="data[field]" fluid />
+          </template>
+        </Column>
+
+        <Column :row-editor="true" class="pr-0 text-right w-20" />
+        <Column class="-my-2 pl-0 pr-6 w-10">
+          <template #body="{ data }">
+            <Button
+              icon="pi pi-trash" rounded severity="danger" text
+              @click="ipWhitelist = ipWhitelist.filter(e => e._key !== data._key)"
+            />
+          </template>
+        </Column>
+
+        <template #footer>
+          <div class="px-2">
+            <Button :label="t('ptoj.add')" fluid icon="pi pi-plus" text @click="onIpWhitelistAddEntry" />
+          </div>
+        </template>
+
+        <template #empty>
+          <div class="px-2">
+            <div class="max-w-xl mx-auto text-balance text-center">
+              {{ t('ptoj.empty_ip_whitelist_desc') }}
+            </div>
+          </div>
+        </template>
+      </DataTable>
 
       <div class="flex gap-3 justify-end md:col-span-2">
         <Button

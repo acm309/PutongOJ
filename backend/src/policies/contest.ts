@@ -6,12 +6,14 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import { loadCourseRoleById } from '../policies/course'
 import { contestService } from '../services/contest'
+import { isIpInWhitelist } from '../utils'
 
 export interface ContestState {
   contest: WithId<ContestModel>
   accessible: boolean
   participation: ParticipationStatus
   isJury: boolean
+  isIpBlocked: boolean
 }
 
 export async function loadContestState (ctx: Context, inputId?: number | string) {
@@ -45,9 +47,13 @@ export async function loadContestState (ctx: Context, inputId?: number | string)
     }
   }
 
+  const isIpBlocked = (contest.ipWhitelistEnabled && !isJury)
+    ? !isIpInWhitelist(ctx.state.clientIp, contest.ipWhitelist ?? [])
+    : false
+
   // whether accessible to the contents of the contest
-  const accessible = participation === ParticipationStatus.Approved || isJury
-  const state: ContestState = { contest, participation, isJury, accessible }
+  const accessible = (participation === ParticipationStatus.Approved || isJury) && !isIpBlocked
+  const state: ContestState = { contest, participation, isJury, accessible, isIpBlocked }
 
   ctx.state.contest = state
   return state

@@ -36,6 +36,7 @@ export const ContestParticipationQueryResultSchema = z.object({
   participation: z.enum(ParticipationStatus),
   canParticipate: z.boolean(),
   canParticipateByPassword: z.boolean(),
+  isIpBlocked: z.boolean(),
 })
 
 export type ContestParticipationQueryResult = z.input<typeof ContestParticipationQueryResultSchema>
