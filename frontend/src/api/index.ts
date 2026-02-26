@@ -24,9 +24,6 @@ const solution = {
 const problem = {
   findOne: (params: { pid: number, [key: string]: any }) =>
     instance.get(`/problem/${params.pid}`, { params }),
-  /** @deprecated */
-  find: (data: { [key: string]: any }) =>
-    instance.get('/problem', { params: data }),
   findProblems: (params: FindProblemsParams) =>
     instance.get<FindProblemsResponse>('/problem', { params }),
   findProblemItems: (params: { keyword: string, course?: number }) =>

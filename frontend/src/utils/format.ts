@@ -59,14 +59,6 @@ export function timeDiffPretty (ms: number) {
     return `${sign}${Math.floor(ms / 1000)}.${Math.round(ms % 1000 / 100)}s`
 }
 
-export function similarityColor (val: number) {
-  if (val === 100) return 'red'
-  if (val >= 95) return 'volcano'
-  if (val >= 90) return 'orange'
-  if (val >= 85) return 'gold'
-  return 'yellow'
-}
-
 export function contestLabeling (
   value: number,
   style: LabelingStyle = LabelingStyle.Numeric,

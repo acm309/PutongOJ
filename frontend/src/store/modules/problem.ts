@@ -7,11 +7,7 @@ import api from '@/api'
 
 export const useProblemStore = defineStore('problem', {
   state: () => ({
-    /** @deprecated */
-    list: [] as ProblemBrief[],
     problem: {} as ProblemEntityView,
-    /** @deprecated */
-    sum: 0,
     solved: [] as number[],
     problems: {} as Paginated<ProblemBrief>,
   }),
@@ -26,13 +22,6 @@ export const useProblemStore = defineStore('problem', {
       this.problem = data
       return { problem: data }
     },
-    /** @deprecated */
-    async find (payload: { [key: string]: any }) {
-      const { data } = await api.problem.find(payload)
-      this.list = data.list.docs
-      this.sum = data.list.total
-      this.solved = data.solved
-    },
     async update (payload: { [key: string]: any }) {
       return api.problem.update(payload).then(({ data }) => {
         return data
@@ -42,12 +31,7 @@ export const useProblemStore = defineStore('problem', {
       return api.problem.create(payload).then(({ data }) => data.pid)
     },
     async delete (payload: { [key: string]: any }) {
-      return api.problem.delete(payload).then(() => {
-        this.list = this.list.filter(p => p.pid !== +(payload.pid))
-      })
-    },
-    clearSavedProblems () {
-      this.list = []
+      return api.problem.delete(payload)
     },
   },
 })
