@@ -204,7 +204,7 @@ onRouteQueryUpdate(fetch)
         <template #body="{ data }">
           <span class="-my-1 flex gap-4 items-center justify-between">
             <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
-              <Button variant="link" :label="data.title" fluid class="justify-start p-0" />
+              <Button class="justify-start p-0" :label="data.title" fluid link />
             </RouterLink>
             <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
               <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">

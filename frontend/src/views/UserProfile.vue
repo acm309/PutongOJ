@@ -209,7 +209,7 @@ onRouteParamUpdate(fetch)
                 v-for="problemId in user.solved" :key="problemId"
                 :to="{ name: 'problemInfo', params: { pid: problemId } }"
               >
-                <Button :label="problemId.toString()" variant="link" class="text-sm" />
+                <Button class="text-sm" :label="problemId.toString()" link />
               </RouterLink>
             </div>
           </Fieldset>
@@ -225,7 +225,7 @@ onRouteParamUpdate(fetch)
                 v-for="problemId in user.attempted" :key="problemId"
                 :to="{ name: 'problemInfo', params: { pid: problemId } }"
               >
-                <Button :label="problemId.toString()" variant="link" class="text-sm" />
+                <Button class="text-sm" :label="problemId.toString()" link />
               </RouterLink>
             </div>
           </Fieldset>

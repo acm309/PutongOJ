@@ -140,7 +140,7 @@ onProfileUpdate(fetch)
         <template #body="{ data }">
           <span class="-my-1 flex gap-4 items-center justify-between">
             <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
-              <Button variant="link" :label="data.title" fluid class="justify-start p-0" />
+              <Button class="justify-start p-0" :label="data.title" fluid link />
             </RouterLink>
             <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
               <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
@@ -175,8 +175,8 @@ onProfileUpdate(fetch)
       <Column v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="pr-6 text-center w-30">
         <template #body="{ data }">
           <Button
-            v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" variant="link"
-            class="-my-1 p-0" :label="statusLabels[(data.status as 0 | 2)]" @click="change(data)"
+            v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" class="-my-1 p-0"
+            :label="statusLabels[(data.status as 0 | 2)]" link @click="change(data)"
           />
         </template>
       </Column>
