@@ -65,6 +65,7 @@ interface GlobalConfig {
   mongooseDebug: boolean
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
   helpDocURL?: string
+  submissionHeatmapTimezone: string
 }
 
 const oauthConfigs: GlobalConfig['oauthConfigs'] = {
@@ -147,6 +148,7 @@ export const globalConfig: GlobalConfig = {
   ),
   oauthConfigs,
   helpDocURL: stringEnv('PTOJ_HELP_DOC_URL'),
+  submissionHeatmapTimezone: stringEnv('PTOJ_SUBMISSION_HEATMAP_TIMEZONE', 'Asia/Shanghai'),
 }
 
 const config = {

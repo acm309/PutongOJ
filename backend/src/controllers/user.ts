@@ -73,7 +73,7 @@ export async function exportRanklist (ctx: Context) {
 
 export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
-  const [ solved, failed, groups ] = await Promise.all([
+  const [ solved, failed, groups, submissionHeatmap ] = await Promise.all([
     Solution
       .find({ uid: user.uid, judge: JudgeStatus.Accepted })
       .distinct('pid')
@@ -86,12 +86,13 @@ export async function getUser (ctx: Context) {
       .find({ gid: { $in: user.gid } })
       .select('-_id gid title')
       .lean(),
+    userService.getSubmissionHeatmap(user.uid, user._id),
   ])
 
   const codeforces = await userService.getCodeforcesProfile(user._id)
   const attempted = difference(failed, solved)
   const result = UserProfileQueryResultSchema.encode({
-    ...user.toObject(), groups, solved, attempted, codeforces,
+    ...user.toObject(), groups, solved, attempted, codeforces, submissionHeatmap,
   })
   return createEnvelopedResponse(ctx, result)
 }

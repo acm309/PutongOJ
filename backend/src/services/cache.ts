@@ -155,4 +155,8 @@ export class CacheKey {
   public static problemStatistics (problem: Types.ObjectId) {
     return `cache:problem:${problem.toString()}:statistics`
   }
+
+  public static userSubmissionHeatmap (user: Types.ObjectId) {
+    return `cache:user:${user.toString()}:submission_heatmap`
+  }
 }

@@ -4,9 +4,12 @@ import type { UserDocument } from '../models/User'
 import type { PaginateOption, SortOption } from '../types'
 import { EXPORT_SIZE_MAX, OAuthProvider, RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
+import config from '../config'
 import redis from '../config/redis'
 import { distributeWork } from '../jobs/helper'
+import Solution from '../models/Solution'
 import User from '../models/User'
+import { CacheKey, cacheService } from './cache'
 import { getUserOAuthConnection } from './oauth'
 
 const reservedUsernames = new Set(
@@ -163,6 +166,44 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
   return user
 }
 
+const HEATMAP_DAYS = 365
+
+export async function getSubmissionHeatmap (
+  uid: string,
+  userId: Types.ObjectId,
+): Promise<Record<string, number>> {
+  return await cacheService.getOrCreate<Record<string, number>>(
+    CacheKey.userSubmissionHeatmap(userId),
+
+    async () => {
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - HEATMAP_DAYS)
+
+      const timezone = config.submissionHeatmapTimezone
+      const results = await Solution.aggregate<{ _id: string, count: number }>([
+        // Data on the day of startDate may be incomplete,
+        // not wanting to deal with it, at least for now.
+        { $match: { uid, createdAt: { $gte: startDate } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone } },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+
+      const heatmap: Record<string, number> = {}
+      for (const { _id: date, count } of results) {
+        heatmap[date] = count
+      }
+      return heatmap
+    },
+
+    { ttl: 60 * 5 }, // 5 minutes
+  )
+}
+
 export async function getCodeforcesProfile (
   user: Types.ObjectId,
 ): Promise<{ handle: string, rating: number } | null> {
@@ -220,6 +261,7 @@ const userService = {
   updateUser,
   checkUserAvailable,
   createUser,
+  getSubmissionHeatmap,
   getCodeforcesProfile,
 } as const
 

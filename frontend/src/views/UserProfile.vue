@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser } from '@/api/user'
 import CodeforcesProfile from '@/components/CodeforcesProfile.vue'
+import SubmissionHeatmap from '@/components/SubmissionHeatmap.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
@@ -70,7 +71,7 @@ onRouteParamUpdate(fetch)
 </script>
 
 <template>
-  <div class="max-w-6xl p-0">
+  <div class="max-w-7xl p-0">
     <template v-if="loading || !user">
       <div class="flex font-semibold gap-4 items-center pt-6 px-6">
         <i class="pi pi-user text-2xl" />
@@ -111,8 +112,8 @@ onRouteParamUpdate(fetch)
         </div>
       </div>
 
-      <div class="gap-x-6 gap-y-2 grid grid-cols-1 lg:grid-cols-3 pt-2">
-        <div class="lg:col-span-1 space-y-2">
+      <div class="gap-x-6 gap-y-2 grid grid-cols-1 lg:grid-cols-7 pt-2">
+        <div class="lg:col-span-2 space-y-2">
           <Fieldset :legend="t('ptoj.basic_information')">
             <div class="space-y-4">
               <div v-if="user.mail" class="flex gap-3 items-center">
@@ -171,7 +172,7 @@ onRouteParamUpdate(fetch)
             </div>
           </Fieldset>
 
-          <Fieldset v-if="user.codeforces && user.codeforces.rating > 0 " :legend="t('ptoj.codeforces')">
+          <Fieldset v-if="user.codeforces && user.codeforces.rating > 0" :legend="t('ptoj.codeforces')">
             <CodeforcesProfile :handle="user.codeforces.handle" :rating="user.codeforces.rating" />
           </Fieldset>
 
@@ -197,7 +198,14 @@ onRouteParamUpdate(fetch)
           </Fieldset>
         </div>
 
-        <div class="lg:col-span-2 space-y-2">
+        <div class="lg:col-span-5 space-y-2">
+          <Fieldset
+            :legend="t('ptoj.submission_activity')" style="min-inline-size: auto;"
+            :pt="{ contentContainer: 'block' }"
+          >
+            <SubmissionHeatmap :data="user.submissionHeatmap" />
+          </Fieldset>
+
           <Fieldset :legend="t('ptoj.solved_problems')" toggleable>
             <div v-if="user.solved.length === 0" class="px-6 py-12 text-center text-muted-color">
               <div class="text-lg">

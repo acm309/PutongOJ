@@ -22,6 +22,7 @@ export const UserProfileQueryResultSchema = z.object({
   }).nullable(),
   solved: z.array(z.number()),
   attempted: z.array(z.number()),
+  submissionHeatmap: z.record(z.string(), z.number()),
   createdAt: UserModelSchema.shape.createdAt,
 })
 
