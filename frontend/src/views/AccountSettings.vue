@@ -404,7 +404,7 @@ onMounted(() => {
 
         <div class="flex justify-end mt-6">
           <Button
-            :label="t('ptoj.logout_all_sessions')" icon="pi pi-sign-out" severity="danger" outlined
+            :label="t('ptoj.logout_other_sessions')" icon="pi pi-sign-out" severity="danger" outlined
             :disabled="sessions.length === 0" @click="confirmRevokeOthers"
           />
         </div>

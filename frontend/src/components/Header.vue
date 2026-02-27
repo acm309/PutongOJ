@@ -150,7 +150,7 @@ const profileItems = computed(() => [
     separator: true,
   },
   {
-    label: t('ptoj.logout'),
+    label: t('ptoj.header_logout'),
     icon: 'pi pi-sign-out',
     command: async () => {
       await sessionStore.userLogout()
