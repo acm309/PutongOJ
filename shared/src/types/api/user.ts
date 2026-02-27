@@ -8,6 +8,7 @@ export const UserSubmissionHeatmapSchema = z.object({
   data: z.record(z.string(), z.number()),
   startDate: z.string(),
   endDate: z.string(),
+  timezone: z.string(),
 })
 
 export type UserSubmissionHeatmap = z.infer<typeof UserSubmissionHeatmapSchema>

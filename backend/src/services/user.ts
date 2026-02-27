@@ -172,15 +172,16 @@ export async function getSubmissionHeatmap (user: Types.ObjectId) {
     CacheKey.userSubmissionHeatmap(user),
 
     async () => {
+      const timezone = config.submissionHeatmapTimezone
+
       const userDoc = await User
         .findById(user)
         .select({ _id: 0, uid: 1 })
         .lean()
       if (!userDoc) {
-        return { data: {}, startDate: '', endDate: '' }
+        return { data: {}, startDate: '', endDate: '', timezone }
       }
       const { uid } = userDoc
-      const timezone = config.submissionHeatmapTimezone
 
       const nowInTz = DateTime.now().setZone(timezone)
       const weekday = nowInTz.weekday
