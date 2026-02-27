@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/store/theme'
+import { timePretty } from '@/utils/format'
 
 const props = defineProps<{
   data: UserSubmissionHeatmap
@@ -52,13 +53,6 @@ function getLegendColor (index: number): string {
   return level.color
 }
 
-function formatDate (d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
 interface CellData {
   date: string
   count: number
@@ -67,9 +61,14 @@ interface CellData {
   inRange: boolean
 }
 
+function parseDate (s: string): Date {
+  const [ y, m, d ] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 const grid = computed(() => {
-  const startDate = new Date(props.data.startDate)
-  const endDate = new Date(props.data.endDate)
+  const startDate = parseDate(props.data.startDate)
+  const endDate = parseDate(props.data.endDate)
 
   // Align to the Monday before startDate
   const startDow = startDate.getDay() // 0=Sun
@@ -94,7 +93,7 @@ const grid = computed(() => {
     for (let d = 0; d < 7; d++) {
       const current = new Date(gridStart)
       current.setDate(current.getDate() + w * 7 + d)
-      const dateStr = formatDate(current)
+      const dateStr = timePretty(current, 'yyyy-MM-dd')
       const inRange = current >= startDate && current <= endDate
       const count = inRange ? (props.data.data[dateStr] ?? 0) : 0
 
