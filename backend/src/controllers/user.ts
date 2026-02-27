@@ -86,7 +86,7 @@ export async function getUser (ctx: Context) {
       .find({ gid: { $in: user.gid } })
       .select('-_id gid title')
       .lean(),
-    userService.getSubmissionHeatmap(user.uid, user._id),
+    userService.getSubmissionHeatmap(user._id),
   ])
 
   const codeforces = await userService.getCodeforcesProfile(user._id)

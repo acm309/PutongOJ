@@ -175,7 +175,7 @@
   "heatmap_more": "多",
   "heatmap_no_submissions": "{date} 无提交",
   "heatmap_submissions": "{date} 提交了 {count} 次",
-  "heatmap_total": "过去一年共提交 {count} 次",
+  "heatmap_total": "共提交 {count} 次",
   "hidden": "隐藏",
   "hide_from_listings": "在列表中隐藏",
   "import": "导入",

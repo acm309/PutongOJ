@@ -175,7 +175,7 @@
   "heatmap_more": "More",
   "heatmap_no_submissions": "No submissions on {date}",
   "heatmap_submissions": "{count} submission(s) on {date}",
-  "heatmap_total": "{count} submissions in the last year",
+  "heatmap_total": "{count} submissions in total",
   "hidden": "Hidden",
   "hide_from_listings": "Hide from listings",
   "import": "Import",

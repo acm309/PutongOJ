@@ -1,9 +1,10 @@
-import type { Paginated, UserModel } from '@putongoj/shared'
+import type { Paginated, UserModel, UserSubmissionHeatmap } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { UserDocument } from '../models/User'
 import type { PaginateOption, SortOption } from '../types'
 import { EXPORT_SIZE_MAX, OAuthProvider, RESERVED_KEYWORDS, UserPrivilege } from '@putongoj/shared'
 import { escapeRegExp } from 'lodash'
+import { DateTime } from 'luxon'
 import config from '../config'
 import redis from '../config/redis'
 import { distributeWork } from '../jobs/helper'
@@ -166,24 +167,38 @@ export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise
   return user
 }
 
-const HEATMAP_DAYS = 365
-
-export async function getSubmissionHeatmap (
-  uid: string,
-  userId: Types.ObjectId,
-): Promise<Record<string, number>> {
-  return await cacheService.getOrCreate<Record<string, number>>(
-    CacheKey.userSubmissionHeatmap(userId),
+export async function getSubmissionHeatmap (user: Types.ObjectId) {
+  return await cacheService.getOrCreate<UserSubmissionHeatmap>(
+    CacheKey.userSubmissionHeatmap(user),
 
     async () => {
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - HEATMAP_DAYS)
-
+      const userDoc = await User
+        .findById(user)
+        .select({ _id: 0, uid: 1 })
+        .lean()
+      if (!userDoc) {
+        return { data: {}, startDate: '', endDate: '' }
+      }
+      const { uid } = userDoc
       const timezone = config.submissionHeatmapTimezone
+
+      const nowInTz = DateTime.now().setZone(timezone)
+      const weekday = nowInTz.weekday
+
+      // Week starts on Monday,
+      // make sure the first week is always full,
+      // and at least 1 year of data is included
+      const totalDays = 52 * 7 + weekday
+      const startDateTime = nowInTz.minus({ days: totalDays - 1 })
+
+      const startDate = startDateTime.toFormat('yyyy-MM-dd')
+      const endDate = nowInTz.toFormat('yyyy-MM-dd')
+
+      const queryStart = startDateTime.startOf('day').toUTC().toJSDate()
+      const queryEnd = nowInTz.endOf('day').toUTC().toJSDate()
+
       const results = await Solution.aggregate<{ _id: string, count: number }>([
-        // Data on the day of startDate may be incomplete,
-        // not wanting to deal with it, at least for now.
-        { $match: { uid, createdAt: { $gte: startDate } } },
+        { $match: { uid, createdAt: { $gte: queryStart, $lte: queryEnd } } },
         {
           $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone } },
@@ -193,11 +208,11 @@ export async function getSubmissionHeatmap (
         { $sort: { _id: 1 } },
       ])
 
-      const heatmap: Record<string, number> = {}
+      const data: Record<string, number> = {}
       for (const { _id: date, count } of results) {
-        heatmap[date] = count
+        data[date] = count
       }
-      return heatmap
+      return { data, startDate, endDate, timezone }
     },
 
     { ttl: 60 * 5 }, // 5 minutes

@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import type { UserSubmissionHeatmap } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/store/theme'
 
 const props = defineProps<{
-  data: Record<string, number>
+  data: UserSubmissionHeatmap
 }>()
 
 const { t, locale } = useI18n()
@@ -15,7 +16,6 @@ const CELL_SIZE = 11
 const GAP = 2
 const LABEL_MARGIN_LEFT = 28
 const MONTH_LABEL_HEIGHT = 15
-const DAYS_IN_YEAR = 365
 
 const COLOR_LEVELS = [
   { min: 0, max: 0, color: 'rgba(113, 113, 123, 0.08)' },
@@ -68,12 +68,8 @@ interface CellData {
 }
 
 const grid = computed(() => {
-  // Not wanting to deal with timezone,
-  // hope someone may have a better idea.
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const startDate = new Date(today)
-  startDate.setDate(startDate.getDate() - DAYS_IN_YEAR + 1)
+  const startDate = new Date(props.data.startDate)
+  const endDate = new Date(props.data.endDate)
 
   // Align to the Monday before startDate
   const startDow = startDate.getDay() // 0=Sun
@@ -81,9 +77,9 @@ const grid = computed(() => {
   const gridStart = new Date(startDate)
   gridStart.setDate(gridStart.getDate() - daysSinceMonday)
 
-  // Align to the Sunday after today
-  const endDow = today.getDay()
-  const gridEnd = new Date(today)
+  // Align to the Sunday after endDate
+  const endDow = endDate.getDay()
+  const gridEnd = new Date(endDate)
   gridEnd.setDate(gridEnd.getDate() + (7 - endDow) % 7)
 
   const totalDays = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86400000) + 1
@@ -99,8 +95,8 @@ const grid = computed(() => {
       const current = new Date(gridStart)
       current.setDate(current.getDate() + w * 7 + d)
       const dateStr = formatDate(current)
-      const inRange = current >= startDate && current <= today
-      const count = inRange ? (props.data[dateStr] ?? 0) : 0
+      const inRange = current >= startDate && current <= endDate
+      const count = inRange ? (props.data.data[dateStr] ?? 0) : 0
 
       const x = LABEL_MARGIN_LEFT + GAP + w * (CELL_SIZE + GAP)
       const y = MONTH_LABEL_HEIGHT + GAP + d * (CELL_SIZE + GAP)
@@ -127,7 +123,7 @@ const svgHeight = computed(() => {
 })
 
 const totalSubmissions = computed(() => {
-  return Object.values(props.data).reduce((sum, c) => sum + c, 0)
+  return Object.values(props.data.data).reduce((sum, c) => sum + c, 0)
 })
 
 const dayLabelEntries = computed(() => {
@@ -164,7 +160,7 @@ function hideTooltip () {
 
 <template>
   <div class="submission-heatmap">
-    <div class="max-w-full overflow-scroll" style=" direction: rtl;">
+    <div class="max-w-full overflow-scroll" style="direction: rtl;">
       <svg
         class="mx-auto" :width="svgWidth" :height="svgHeight" xmlns="http://www.w3.org/2000/svg"
         style="direction: ltr;"
@@ -202,8 +198,8 @@ function hideTooltip () {
       <div class="flex gap-1 items-center">
         <span class="mr-1">{{ t('ptoj.heatmap_less') }}</span>
         <span
-          v-for="(level, i) in COLOR_LEVELS" :key="i" :style="{ backgroundColor: getLegendColor(i) }"
-          class="inline-block rounded-sm" style="width: 10px; height: 10px;"
+          v-for="(_, i) in COLOR_LEVELS" :key="i" class="h-3 inline-block rounded-xs w-3"
+          :style="{ backgroundColor: getLegendColor(i) }"
         />
         <span class="ml-1">{{ t('ptoj.heatmap_more') }}</span>
       </div>

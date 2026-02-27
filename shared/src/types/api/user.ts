@@ -4,6 +4,14 @@ import { GroupModelSchema } from '../model/group.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema } from './utils.js'
 
+export const UserSubmissionHeatmapSchema = z.object({
+  data: z.record(z.string(), z.number()),
+  startDate: z.string(),
+  endDate: z.string(),
+})
+
+export type UserSubmissionHeatmap = z.infer<typeof UserSubmissionHeatmapSchema>
+
 export const UserProfileQueryResultSchema = z.object({
   uid: UserModelSchema.shape.uid,
   privilege: UserModelSchema.shape.privilege,
@@ -22,7 +30,7 @@ export const UserProfileQueryResultSchema = z.object({
   }).nullable(),
   solved: z.array(z.number()),
   attempted: z.array(z.number()),
-  submissionHeatmap: z.record(z.string(), z.number()),
+  submissionHeatmap: UserSubmissionHeatmapSchema,
   createdAt: UserModelSchema.shape.createdAt,
 })
 
