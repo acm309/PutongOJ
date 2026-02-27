@@ -10,20 +10,20 @@ const router = createRouter({
 
 const loadingBar = useLoadingBar()
 
-// 全局身份确认
-router.beforeEach((to, from, next) => {
+// Global navigation guard
+router.beforeEach((to, _from) => {
   loadingBar.start()
   const session = useSessionStore()
 
   if (to.meta.requiresLogin && !session.isLogined) {
     session.toggleAuthnDialog()
-    return next({ name: 'home' })
+    return { name: 'home' }
   }
   if (to.meta.requiresAdmin && !session.isAdmin) {
-    return next({ name: 'home' })
+    return { name: 'home' }
   }
 
-  next()
+  return true
 })
 
 router.afterEach(() => {

@@ -62,7 +62,7 @@ function handleSort (event: any) {
       </template>
       <template #body="{ data }">
         <RouterLink :to="{ name: 'solution', params: { sid: data.sid } }">
-          <Button class="p-0" link fluid :label="data.sid" />
+          <Button class="-my-px p-0" link fluid :label="data.sid" />
         </RouterLink>
       </template>
     </Column>
@@ -73,7 +73,7 @@ function handleSort (event: any) {
     >
       <template #body="{ data }">
         <RouterLink :to="{ name: 'UserProfile', params: { uid: data.uid } }">
-          <Button class="justify-start p-0" link fluid :label="data.uid" />
+          <Button class="-my-px justify-start p-0" link fluid :label="data.uid" />
         </RouterLink>
       </template>
     </Column>
@@ -87,7 +87,7 @@ function handleSort (event: any) {
       <template #body="{ data }">
         <slot name="problem" :data="data">
           <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
-            <Button class="p-0" link fluid :label="data.pid" />
+            <Button class="-my-px p-0" link fluid :label="data.pid" />
           </RouterLink>
         </slot>
       </template>
@@ -101,7 +101,7 @@ function handleSort (event: any) {
       </template>
       <template #body="{ data }">
         <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'ContestOverview', params: { contestId: data.mid } }">
-          <Button class="p-0" link fluid :label="data.mid" />
+          <Button class="-my-px p-0" link fluid :label="data.mid" />
         </RouterLink>
         <span v-else>
           -

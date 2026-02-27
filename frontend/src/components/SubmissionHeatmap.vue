@@ -209,7 +209,7 @@ function hideTooltip () {
       <Transition name="heatmap-tooltip">
         <div
           v-if="tooltip.visible"
-          class="backdrop-blur-xl fixed font-medium px-2 py-1 rounded shadow-lg text-color text-nowrap text-xs z-50"
+          class="backdrop-blur-xl border border-surface fixed font-medium px-2 py-1 rounded shadow-lg text-nowrap text-xs z-50"
           :style="{ left: `${tooltip.x + 12}px`, top: `${tooltip.y - 28}px` }"
         >
           {{ tooltip.text }}

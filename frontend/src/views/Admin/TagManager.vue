@@ -118,48 +118,59 @@ onBeforeMount(fetch)
 </script>
 
 <template>
-  <div class="tags-wrap">
-    <div class="tags-header">
-      <span class="tags-header-title">
-        Problem Tags
-      </span>
-      <div>
-        <Button icon="pi pi-plus" label="Create Tag" @click="openTagCreate" />
+  <div class="max-w-4xl p-0">
+    <div class="border-b border-surface flex gap-4 items-center justify-between p-6">
+      <div class="flex font-semibold gap-4 items-center">
+        <i class="pi pi-tags text-2xl" />
+        <h1 class="text-xl">
+          Tag Management
+        </h1>
       </div>
+      <Button icon="pi pi-plus" label="Create Tag" @click="openTagCreate" />
     </div>
-    <div v-if="tags.length === 0" class="tags-empty">
-      <i class="empty-icon pi pi-folder-open" />
-      <span class="empty-text">{{ t('oj.empty_content') }}</span>
-    </div>
-    <template v-for="color in tagColors" v-else>
-      <div v-if="tagsGroupByColor[color]?.length > 0" :key="color" class="tags-group">
-        <div class="tags-group-header">
-          <span class="tags-group-title">
-            {{ capitalize(color) }}
-          </span>
-          <span class="tags-group-count">({{ tagsGroupByColor[color].length }})</span>
-        </div>
-        <div class="flex flex-wrap gap-2 tags-group-items">
-          <ProblemTag
-            v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="tag-item" size="large"
-            :name="tagItem.name"
-            :color="color" @click="openTagDetail(tagItem.tagId)"
-          />
+
+    <template v-if="tags.length === 0">
+      <div class="flex flex-col gap-4 items-center justify-center px-6 py-24 text-center">
+        <i class="pi pi-info-circle text-4xl text-muted-color" />
+        <div>
+          <h3 class="font-semibold mb-2 text-lg">
+            No Tags Found
+          </h3>
+          <p class="text-muted-color">
+            There are no tags available. Add some tags to organize your problems!
+          </p>
         </div>
       </div>
     </template>
-    <Dialog
-      v-model:visible="tagModal"
-      :header="isCreate ? 'Create Problem Tag' : (loadingTag ? 'Tag Detail' : `Tag: ${tag.name}`)"
-      modal :style="{ width: '480px' }"
-    >
+
+    <div v-else class="p-6 space-y-6">
+      <template v-for="color in tagColors">
+        <div v-if="tagsGroupByColor[color]?.length > 0" :key="color">
+          <h3 class="font-semibold mb-2 text-lg">
+            {{ capitalize(color) }}
+          </h3>
+          <div class="flex flex-wrap gap-2 tags-group-items">
+            <ProblemTag
+              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="tag-item" size="large"
+              :name="tagItem.name" :color="color" @click="openTagDetail(tagItem.tagId)"
+            />
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <Dialog v-model:visible="tagModal" :header="isCreate ? 'Create Problem Tag' : 'Edit Problem Tag'" class="max-w-md mx-6 w-full">
       <div class="flex flex-col gap-4 tags-form">
         <IftaLabel>
           <InputText id="tagName" v-model="tag.name" fluid :maxlength="30" placeholder="Enter tag name" />
           <label for="tagName">{{ t('oj.name') }}</label>
         </IftaLabel>
+
         <IftaLabel>
-          <Select id="tagColor" v-model="tag.color" :options="colorOptions" option-label="label" option-value="value" fluid>
+          <Select
+            id="tagColor" v-model="tag.color" :options="colorOptions" option-label="label" option-value="value"
+            fluid
+          >
             <template #option="{ option }">
               <span>{{ option.label }}</span>
               <ProblemTag :color="option.value" class="ml-auto" :name="option.label" />
@@ -167,67 +178,22 @@ onBeforeMount(fetch)
           </Select>
           <label for="tagColor">Color</label>
         </IftaLabel>
+
         <IftaLabel v-if="!isCreate">
           <InputText id="tagCreatedAt" :model-value="tagCreatedAt" fluid readonly />
           <label for="tagCreatedAt">Created At</label>
         </IftaLabel>
+
         <IftaLabel v-if="!isCreate">
           <InputText id="tagUpdatedAt" :model-value="tagUpdatedAt" fluid readonly />
           <label for="tagUpdatedAt">Updated At</label>
         </IftaLabel>
       </div>
+
       <template #footer>
-        <Button :label="t('oj.cancel') || 'Close'" severity="secondary" outlined @click="tagModal = false" />
+        <Button :label="t('ptoj.cancel')" severity="secondary" outlined @click="tagModal = false" />
         <Button :label="isCreate ? 'Create' : 'Save'" @click="() => isCreate ? createTag() : saveTag()" />
       </template>
     </Dialog>
   </div>
 </template>
-
-<style lang="stylus" scoped>
-.tags-wrap
-  max-width 768px
-  padding-bottom 20px
-
-.tags-header
-  margin-bottom 20px
-  display flex
-  justify-content space-between
-  .tags-header-title
-    font-size 20px
-    line-height 32px
-
-.tags-group
-  margin-bottom 20px
-  .tags-group-header
-    margin-bottom 6px
-  .tags-group-title
-    font-size 16px
-  .tags-group-count
-    margin-left 8px
-  .tags-group-items
-    .tag-item
-      cursor: pointer
-
-.tags-form
-  padding 12px
-
-.tags-empty
-  margin-bottom 20px
-  padding 32px
-  border 1px solid #dcdee2
-  border-radius 4px
-  display flex
-  align-items center
-  justify-content center
-  .empty-icon
-    font-size 32px
-  .empty-text
-    margin-left 32px
-
-@media screen and (max-width: 1024px)
-  .tags-wrap
-    padding-bottom 0
-  .tags-header
-    padding-top 10px
-</style>

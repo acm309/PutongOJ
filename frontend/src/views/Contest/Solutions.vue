@@ -235,7 +235,7 @@ onBeforeUnmount(clearAutoRefresh)
       :sort-order="query.sort" hide-contest @sort="onSort"
     >
       <template #problem="{ data }">
-        <Button class="p-0" :label="problemLabels.get(data.pid) " link fluid @click="handleViewProblem(data)" />
+        <Button class="-my-px p-0" :label="problemLabels.get(data.pid) " link fluid @click="handleViewProblem(data)" />
       </template>
     </SolutionDataTable>
 
