@@ -144,6 +144,10 @@ export class CacheKey {
     return `cache:update_lock:${key}`
   }
 
+  public static settings (key: string) {
+    return `cache:settings:${key}`
+  }
+
   public static contestProblems (contest: Types.ObjectId, isJury: boolean) {
     return `cache:contest:${contest.toString()}:problems:${isJury ? 'jury' : 'public'}`
   }
