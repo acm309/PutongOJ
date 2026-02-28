@@ -76,4 +76,9 @@ adminRouter.put('/comments/:commentId',
   adminController.updateComment,
 )
 
+adminRouter.put('/settings/avatar-presets',
+  authnMiddleware.rootRequire,
+  adminController.updateAvatarPresets,
+)
+
 export default adminRouter

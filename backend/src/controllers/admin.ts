@@ -17,6 +17,7 @@ import {
   AdminUserListQueryResultSchema,
   AdminUserListQuerySchema,
   AdminUserOAuthQueryResultSchema,
+  AvatarPresetsEditPayloadSchema,
   ErrorCode,
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
@@ -29,6 +30,7 @@ import groupService from '../services/group'
 import oauthService from '../services/oauth'
 import problemService from '../services/problem'
 import sessionService from '../services/session'
+import { settingsService } from '../services/settings'
 import solutionService from '../services/solution'
 import userService from '../services/user'
 import websocketService from '../services/websocket'
@@ -500,6 +502,18 @@ export async function revokeUserAllSessions (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function updateAvatarPresets (ctx: Context) {
+  const payload = AvatarPresetsEditPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  await settingsService.setAvatarPresets(payload.data.avatarPresets)
+  const profile = await loadProfile(ctx)
+  ctx.auditLog.info(`<User:${profile.uid}> updated avatar presets`)
+  return createEnvelopedResponse(ctx, payload.data.avatarPresets)
+}
+
 const adminController = {
   findUsers,
   getUser,
@@ -521,6 +535,7 @@ const adminController = {
   listUserSessions,
   revokeUserSession,
   revokeUserAllSessions,
+  updateAvatarPresets,
 } as const
 
 export default adminController

@@ -1,5 +1,9 @@
-import Settings from 'src/models/Settings'
+import Settings from '../models/Settings'
 import { CacheKey, cacheService } from './cache'
+
+export class SettingsKey {
+  static avatarPresets = 'avatarPresets'
+}
 
 class SettingsService {
   async set<T> (key: string, value: T) {
@@ -31,6 +35,14 @@ class SettingsService {
         return setting.value as T
       },
     )
+  }
+
+  public async getAvatarPresets () {
+    return await this.get<string[]>(SettingsKey.avatarPresets, [])
+  }
+
+  public async setAvatarPresets (avatarPresets: string[]) {
+    await this.set(SettingsKey.avatarPresets, avatarPresets)
   }
 }
 

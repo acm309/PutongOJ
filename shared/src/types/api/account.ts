@@ -33,6 +33,7 @@ export type AccountRegisterPayload = z.infer<typeof AccountRegisterPayloadSchema
 
 export const AccountEditPayloadSchema = z.object({
   nick: UserModelSchema.shape.nick.optional(),
+  avatar: UserModelSchema.shape.avatar.optional(),
   motto: UserModelSchema.shape.motto.optional(),
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school.optional(),

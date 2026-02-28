@@ -3,7 +3,7 @@ import { UserPrivilege } from '../../consts/index.js'
 import { AVATAR_URL_LENGTH_MAX } from '../../consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-const UserAvatarSchema = z.union([
+export const UserAvatarSchema = z.union([
   z.url({ protocol: /^https$/, normalize: true }).max(AVATAR_URL_LENGTH_MAX),
   z.string().startsWith('/').max(AVATAR_URL_LENGTH_MAX),
   z.literal(''),

@@ -18,5 +18,9 @@ utilsRouter.get('/websocket/token',
   authnMiddleware.loginRequire,
   utilsController.getWebSocketToken,
 )
+utilsRouter.get('/utils/avatar-presets',
+  authnMiddleware.loginRequire,
+  utilsController.getAvatarPresets,
+)
 
 export default utilsRouter

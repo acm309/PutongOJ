@@ -1,6 +1,7 @@
 import type { OAuthProvider } from '@putongoj/shared'
 import type { Context } from 'koa'
 import path from 'node:path'
+import { AvatarPresetsQueryResultSchema } from '@putongoj/shared'
 import fse from 'fs-extra'
 import { v4 } from 'uuid'
 import { globalConfig } from '../config'
@@ -8,6 +9,7 @@ import redis from '../config/redis'
 import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
+import { settingsService } from '../services/settings'
 import { createEnvelopedResponse } from '../utils'
 
 export interface WebsiteInformation {
@@ -71,11 +73,18 @@ export async function getWebSocketToken (ctx: Context) {
   return createEnvelopedResponse(ctx, { token })
 }
 
+export async function getAvatarPresets (ctx: Context) {
+  const presets = await settingsService.getAvatarPresets()
+  const result = AvatarPresetsQueryResultSchema.parse(presets)
+  return createEnvelopedResponse(ctx, result)
+}
+
 const utilsController = {
   upload,
   serverTime,
   websiteInformation,
   getWebSocketToken,
+  getAvatarPresets,
 } as const
 
 export default utilsController

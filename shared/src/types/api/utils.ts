@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { QuerySort } from '@/consts/index.js'
 import { PAGE_SIZE_MAX } from '@/consts/limit.js'
 import { stringToInt } from '../codec.js'
+import { UserAvatarSchema } from '../model/user.js'
 
 export const SortOptionSchema = z.object({
   sort: stringToInt.pipe(z.enum(QuerySort)).default(QuerySort.Desc),
@@ -48,3 +49,7 @@ export type ErrorEnveloped = {
 }
 
 export type Enveloped<T = any> = SuccessEnveloped<T> | ErrorEnveloped
+
+export const AvatarPresetsQueryResultSchema = z.array(UserAvatarSchema)
+
+export type AvatarPresetsQueryResult = z.input<typeof AvatarPresetsQueryResultSchema>

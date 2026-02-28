@@ -17,6 +17,7 @@ import {
   SolutionModelSchema,
   UserModelSchema,
 } from '../model/index.js'
+import { UserAvatarSchema } from '../model/user.js'
 import {
   PaginatedSchema,
   PaginationSchema,
@@ -194,3 +195,9 @@ export const AdminCommentUpdatePayloadSchema = z.object({
 })
 
 export type AdminCommentUpdatePayload = z.infer<typeof AdminCommentUpdatePayloadSchema>
+
+export const AvatarPresetsEditPayloadSchema = z.object({
+  avatarPresets: z.array(UserAvatarSchema),
+})
+
+export type AvatarPresetsEditPayload = z.infer<typeof AvatarPresetsEditPayloadSchema>

@@ -17,6 +17,7 @@ import {
 import { checkSession, loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import sessionService from '../services/session'
+import { settingsService } from '../services/settings'
 import solutionService from '../services/solution'
 import userService from '../services/user'
 import {
@@ -143,9 +144,20 @@ export async function updateProfile (ctx: Context) {
   }
 
   try {
-    const { nick, motto, mail, school } = payload.data
+    const { nick, avatar, motto, mail, school } = payload.data
+
+    if (avatar !== undefined && avatar !== '') {
+      // Allow keeping current avatar (e.g. admin-set custom avatar)
+      if (avatar !== profile.avatar) {
+        const presets = await settingsService.getAvatarPresets()
+        if (!presets.includes(avatar)) {
+          return createErrorResponse(ctx, ErrorCode.Forbidden, 'Avatar is not in the allowed presets')
+        }
+      }
+    }
+
     const updatedUser = await userService.updateUser(profile, {
-      nick, motto, mail, school,
+      nick, avatar, motto, mail, school,
     })
     const result = AccountProfileQueryResultSchema.encode(updatedUser.toObject())
     ctx.auditLog.info(`<User:${profile.uid}> updated profile`)
