@@ -18,6 +18,8 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { getProfile, listSessions, revokeOtherSessions, revokeSession, updatePassword, updateProfile } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
+import { getAvatarPresets } from '@/api/utils'
+import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { encryptData } from '@/utils/crypto'
 import { formatRelativeTime } from '@/utils/format'
@@ -46,6 +48,10 @@ const newPassword = ref('')
 const confirmPassword = ref('')
 const sessions = ref<SessionInfo[]>([])
 const sessionsLoading = ref(false)
+const avatarPresets = ref<string[]>([])
+const avatarDialog = ref(false)
+const selectedAvatar = ref('')
+const savingAvatar = ref(false)
 
 const hasChanges = computed(() => {
   if (!profile.value) return false
@@ -65,11 +71,38 @@ function setEditingProfile () {
   }
 }
 
+function openAvatarDialog () {
+  if (!profile.value || (avatarPresets.value.length === 0 && !profile.value.avatar)) return
+  selectedAvatar.value = profile.value.avatar
+  avatarDialog.value = true
+}
+
+async function saveAvatar () {
+  if (!profile.value || selectedAvatar.value === profile.value.avatar) {
+    avatarDialog.value = false
+    return
+  }
+
+  savingAvatar.value = true
+  const resp = await updateProfile({ avatar: selectedAvatar.value })
+  savingAvatar.value = false
+
+  if (!resp.success) {
+    message.error(t('ptoj.failed_save_changes'), resp.message)
+    return
+  }
+
+  profile.value = resp.data
+  sessionStore.setProfile(resp.data)
+  avatarDialog.value = false
+}
+
 async function fetch () {
   loading.value = true
-  const [ profileResp, oauthResp ] = await Promise.all([
+  const [ profileResp, oauthResp, presetsResp ] = await Promise.all([
     getProfile(),
     getUserOAuthConnections(),
+    getAvatarPresets(),
   ])
   loading.value = false
   if (!profileResp.success) {
@@ -79,6 +112,9 @@ async function fetch () {
 
   connections.value = oauthResp
   profile.value = profileResp.data
+  if (presetsResp.success) {
+    avatarPresets.value = presetsResp.data
+  }
   setEditingProfile()
 }
 
@@ -242,6 +278,18 @@ onMounted(() => {
 
     <template v-else>
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6 pt-5">
+        <div class="flex gap-4 items-center md:col-span-2">
+          <div class="cursor-pointer flex group relative" @click="openAvatarDialog">
+            <UserAvatar :image="profile.avatar" class="h-20 shadow-xs w-20" />
+            <div
+              v-if="avatarPresets.length > 0 || profile.avatar"
+              class="absolute bg-black/50 flex group-hover:opacity-100 inset-0 items-center justify-center opacity-0 rounded-md transition-opacity"
+            >
+              <i class="pi pi-pencil text-white" />
+            </div>
+          </div>
+        </div>
+
         <IftaLabel>
           <InputText id="username" :value="profile.uid" fluid readonly />
           <label for="username">{{ t('ptoj.username') }}</label>
@@ -448,6 +496,57 @@ onMounted(() => {
           <Button type="submit" :label="t('ptoj.change_password')" icon="pi pi-check" :loading="saving" />
         </div>
       </form>
+    </Dialog>
+
+    <Dialog v-model:visible="avatarDialog" modal :header="t('ptoj.change_avatar')" class="max-w-lg mx-6 w-full">
+      <div
+        v-if="profile && profile.avatar && !avatarPresets.includes(profile.avatar)"
+        class="mb-4 text-muted-color text-sm"
+      >
+        {{ t('ptoj.custom_avatar_hint') }}
+      </div>
+
+      <div class="flex flex-wrap gap-2 justify-center">
+        <!-- Default (empty) avatar option -->
+        <div
+          class="border-2 cursor-pointer flex p-1.5 rounded-xl transition-colors"
+          :class="selectedAvatar === '' ? 'border-primary' : 'border-transparent hover:border-surface-300'"
+          @click="selectedAvatar = ''"
+        >
+          <UserAvatar image="" shape="square" size="xlarge" />
+        </div>
+
+        <!-- Current custom avatar (admin-set, not in presets) -->
+        <div
+          v-if="profile && profile.avatar && !avatarPresets.includes(profile.avatar)"
+          class="border-2 cursor-pointer flex p-1.5 rounded-xl transition-colors"
+          :class="selectedAvatar === profile.avatar ? 'border-primary' : 'border-transparent hover:border-surface-300'"
+          @click="selectedAvatar = profile.avatar"
+        >
+          <UserAvatar :image="profile.avatar" shape="square" size="xlarge" />
+        </div>
+
+        <!-- Preset avatars -->
+        <div
+          v-for="preset in avatarPresets" :key="preset"
+          class="border-2 cursor-pointer flex p-1.5 rounded-xl transition-colors"
+          :class="selectedAvatar === preset ? 'border-primary' : 'border-transparent hover:border-surface-300'"
+          @click="selectedAvatar = preset"
+        >
+          <UserAvatar :image="preset" shape="square" size="xlarge" />
+        </div>
+      </div>
+
+      <div class="flex gap-2 justify-end mt-5">
+        <Button
+          :label="t('ptoj.cancel')" icon="pi pi-times" severity="secondary" outlined
+          @click="avatarDialog = false"
+        />
+        <Button
+          :label="t('ptoj.save_changes')" icon="pi pi-check" :loading="savingAvatar"
+          :disabled="profile !== null && selectedAvatar === profile.avatar" @click="saveAvatar"
+        />
+      </div>
     </Dialog>
   </div>
 </template>
