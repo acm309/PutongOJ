@@ -151,7 +151,7 @@ onBeforeMount(fetch)
           </h3>
           <div class="flex flex-wrap gap-2 tags-group-items">
             <ProblemTag
-              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="tag-item" size="large"
+              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="cursor-pointer" size="large"
               :name="tagItem.name" :color="color" @click="openTagDetail(tagItem.tagId)"
             />
           </div>
