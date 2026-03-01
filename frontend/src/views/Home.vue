@@ -78,7 +78,7 @@ onRouteQueryUpdate(fetch)
         </div>
 
         <RouterLink v-if="isAdmin" :to="{ name: 'newsCreate' }">
-          <Button icon="pi pi-plus" label="Create" />
+          <Button icon="pi pi-plus" :label="t('ptoj.create_announcement')" />
         </RouterLink>
       </div>
 
