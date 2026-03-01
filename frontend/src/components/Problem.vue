@@ -50,14 +50,14 @@ function onCopy (content: string) {
         {{ t('oj.sample_input') }}
         <i v-tooltip.top="t('oj.click_to_copy_code')" class="pi pi-file" style="cursor: pointer" @click="onCopy(problem.in)" />
       </h2>
-      <pre><code>{{ problem.in }}</code></pre>
+      <pre class="problem-sample-block"><code>{{ problem.in }}</code></pre>
     </template>
     <template v-if="problem.out?.trim()">
       <h2 class="font-semibold">
         {{ t('oj.sample_output') }}
         <i v-tooltip.top="t('oj.click_to_copy_code')" class="pi pi-file" style="cursor: pointer" @click="onCopy(problem.out)" />
       </h2>
-      <pre><code>{{ problem.out }}</code></pre>
+      <pre class="problem-sample-block"><code>{{ problem.out }}</code></pre>
     </template>
     <template v-if="problem.hint?.trim()">
       <h2 class="font-semibold">
@@ -82,8 +82,14 @@ h2
 .cont
   margin-top: 10px
   margin-bottom: 20px
-pre
+.problem-sample-block
   padding: 10px
   border-radius: 5px
   background-color: #ECEFF1
+  overflow-x: auto
+
+.ptoj-dark .problem-sample-block
+  color: var(--p-text-color)
+  background-color: var(--p-content-hover-background)
+  border: 1px solid var(--p-surface-border)
 </style>
