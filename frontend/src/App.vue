@@ -10,7 +10,6 @@ import LoadingBar from '@/components/LoadingBar.vue'
 import { useRootStore } from '@/store'
 import { setErrorHandler } from './api'
 import { useSessionStore } from './store/modules/session'
-import { onProfileUpdate } from './utils/helper'
 import { useMessage } from './utils/message'
 import { useWebSocket } from './utils/websocket'
 
@@ -54,7 +53,8 @@ const { changeDomTitle, fetchTime, updateTime } = rootStore
 setTimeout(() => fetchTime().then(updateTime), 1000)
 watch(() => route.meta, () => changeDomTitle(route.meta))
 
-const { isLogined } = storeToRefs(useSessionStore())
+const sessionStore = useSessionStore()
+const { isLogined, profile } = storeToRefs(sessionStore)
 const websocket = useWebSocket()
 
 async function initWebSocket () {
@@ -65,10 +65,8 @@ async function initWebSocket () {
   }
 }
 
-setTimeout(async () => {
-  await initWebSocket()
-  onProfileUpdate(() => nextTick(initWebSocket))
-}, 1000)
+watch(profile, () => nextTick(initWebSocket))
+setTimeout(initWebSocket, 1000)
 </script>
 
 <template>
