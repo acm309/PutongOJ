@@ -439,6 +439,11 @@ onRouteParamUpdate(fetch)
             <span>{{ t('ptoj.loading') }}</span>
           </div>
 
+          <div v-else-if="sessions.length === 0" class="flex gap-4 items-center justify-center p-6">
+            <i class="pi pi-info-circle text-2xl" />
+            <span>{{ t('ptoj.empty_content_desc') }}</span>
+          </div>
+
           <template v-else>
             <div
               v-for="session in sessions" :key="session.sessionId"
