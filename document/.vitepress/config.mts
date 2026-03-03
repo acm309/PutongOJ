@@ -22,6 +22,12 @@ export default withMermaid({
         ]
       },
       {
+        text: '平台',
+        items: [
+          { text: '课程系统', link: '/course' },
+        ],
+      },
+      {
         text: '题目',
         items: [
           { text: '特判 (Special Judge)', link: '/problem/special-judge' },
