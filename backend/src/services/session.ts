@@ -31,6 +31,7 @@ export async function createSession (userId: string, ip: string, userAgent: stri
     JSON.stringify(info),
     String(now.getTime()),
     String(config.sessionMaxCount),
+    String(config.sessionMaxAge),
   )
   return sessionId
 }
@@ -41,6 +42,7 @@ export async function accessSession (userId: string, sessionId: string) {
     luaScript, 0,
     'access', userId, sessionId,
     String(now.getTime()),
+    String(config.sessionMaxAge),
   )
 
   if (!result) {
