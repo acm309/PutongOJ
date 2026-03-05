@@ -145,7 +145,11 @@ const getProblem = async (ctx: Context) => {
       'description', 'input', 'output', 'in', 'out', 'hint' ]),
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
-    tags: problem.tags.map(tagService.toItem),
+    tags: problem.tags.map(tag => ({
+      tagId: tag.tagId,
+      name: tag.name,
+      color: tag.color,
+    })),
     isOwner,
   }
   ctx.body = response

@@ -15,6 +15,7 @@ import {
   OAuthModelSchema,
   ProblemModelSchema,
   SolutionModelSchema,
+  TagModelSchema,
   UserModelSchema,
 } from '../model/index.js'
 import { UserAvatarSchema } from '../model/user.js'
@@ -201,3 +202,21 @@ export const AvatarPresetsEditPayloadSchema = z.object({
 })
 
 export type AvatarPresetsEditPayload = z.infer<typeof AvatarPresetsEditPayloadSchema>
+
+export const AdminTagListQueryResultSchema = z.array(TagModelSchema)
+
+export type AdminTagListQueryResult = z.input<typeof AdminTagListQueryResultSchema>
+
+export const AdminTagCreatePayloadSchema = z.object({
+  name: TagModelSchema.shape.name,
+  color: TagModelSchema.shape.color,
+})
+
+export type AdminTagCreatePayload = z.infer<typeof AdminTagCreatePayloadSchema>
+
+export const AdminTagUpdatePayloadSchema = z.object({
+  name: TagModelSchema.shape.name.optional(),
+  color: TagModelSchema.shape.color.optional(),
+})
+
+export type AdminTagUpdatePayload = z.infer<typeof AdminTagUpdatePayloadSchema>

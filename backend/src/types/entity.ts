@@ -1,4 +1,4 @@
-import type { TagColor } from '@putongoj/shared'
+import type { TagModel } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { CourseRole } from '.'
 import type { CourseDocument } from '../models/Course'
@@ -122,7 +122,7 @@ export type ProblemEntityPreview = Pick<ProblemEntity,
   'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'
 > & {
   isOwner?: boolean
-  tags: TagEntityItem[]
+  tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
 }
 
 export type ProblemEntityView = Pick<ProblemEntity,
@@ -130,7 +130,7 @@ export type ProblemEntityView = Pick<ProblemEntity,
   | 'input' | 'output' | 'in' | 'out' | 'hint'
 > & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
   isOwner: boolean
-  tags: TagEntityItem[]
+  tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
 }
 
 // Solution
@@ -170,28 +170,6 @@ export interface NewsEntity extends Entity {
   /** @deprecated Use `createdAt` instead */
   create: number
 }
-
-// Tag
-
-export interface TagEntity extends Entity {
-  tagId: number
-  name: string
-  color: TagColor
-}
-
-export type TagEntityForm = Pick<TagEntity,
-  'name' | 'color'
->
-
-export type TagEntityItem = Pick<TagEntity,
-  'tagId' | 'name' | 'color'
->
-
-export type TagEntityPreview = Pick<TagEntity,
-  'tagId' | 'name' | 'color'
-> & View
-
-export type TagEntityView = TagEntityPreview
 
 // Group
 

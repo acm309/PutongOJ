@@ -1,5 +1,5 @@
 import type { CourseRole } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, SolutionEntity, TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview, TagEntityView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, ProblemEntityItem, SolutionEntity } from '@backend/types/entity'
 import type { Enveloped, Paginated } from '@putongoj/shared'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams } from '../types/api'
 import type { TimeResp } from '@/types'
@@ -49,21 +49,6 @@ const news = {
     instance.delete(`/news/${data.nid}`, data),
 }
 
-const tag = {
-  findTags: () =>
-    instance.get<TagEntityPreview[]>('/tag'),
-  findTagItems: () =>
-    instance.get<TagEntityItem[]>('/tag/items'),
-  getTag: (tagId: number) =>
-    instance.get<TagEntityView>(`/tag/${tagId}`),
-  createTag: (tag: TagEntityForm) =>
-    instance.post<Pick<TagEntity, 'tagId'>>('/tag', tag),
-  updateTag: (tagId: number, tag: Partial<TagEntityForm>) =>
-    instance.put<{ success: boolean }>(`/tag/${tagId}`, tag),
-  removeTag: (tagId: number) =>
-    instance.delete<{ success: boolean }>(`/tag/${tagId}`),
-}
-
 const course = {
   findCourses: (params: PaginateParams) =>
     instance.get<Paginated<CourseEntityPreview>>('/course', { params }),
@@ -100,6 +85,5 @@ export default {
   solution,
   problem,
   news,
-  tag,
   course,
 }

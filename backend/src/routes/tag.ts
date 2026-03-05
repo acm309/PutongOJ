@@ -1,33 +1,12 @@
 import Router from '@koa/router'
 import tagController from '../controllers/tag'
-import authnMiddleware from '../middlewares/authn'
 
 const tagRouter = new Router({
-  prefix: '/tag',
+  prefix: '/tags',
 })
 
 tagRouter.get('/',
-  authnMiddleware.adminRequire,
-  tagController.findTags,
-)
-tagRouter.get('/items',
   tagController.findTagItems,
-)
-tagRouter.post('/',
-  authnMiddleware.adminRequire,
-  tagController.createTag,
-)
-tagRouter.get('/:tagId',
-  authnMiddleware.adminRequire,
-  tagController.getTag,
-)
-tagRouter.put('/:tagId',
-  authnMiddleware.adminRequire,
-  tagController.updateTag,
-)
-tagRouter.delete('/:tagId',
-  authnMiddleware.rootRequire,
-  tagController.removeTag,
 )
 
 export default tagRouter

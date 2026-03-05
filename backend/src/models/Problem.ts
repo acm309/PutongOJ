@@ -1,6 +1,6 @@
+import type { TagModel } from '@putongoj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
 import type { ProblemEntity } from '../types/entity'
-import type { TagDocument } from './Tag'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import { limitation, problemType, status } from '../utils/constants'
@@ -10,7 +10,7 @@ export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
 export type ProblemDocumentPopulated = Omit<ProblemDocument,
   'tags'
 > & {
-  tags: TagDocument[]
+  tags: TagModel[]
 }
 
 type CourseModel = PaginateModel<ProblemDocument>

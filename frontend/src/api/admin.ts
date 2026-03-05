@@ -10,6 +10,8 @@ import type {
   AdminSolutionListExportQueryResult,
   AdminSolutionListQuery,
   AdminSolutionListQueryResult,
+  AdminTagCreatePayload,
+  AdminTagListQueryResult,
   AdminUserChangePasswordPayload,
   AdminUserDetailQueryResult,
   AdminUserEditPayload,
@@ -90,4 +92,14 @@ export async function revokeUserSession (uid: string, sessionId: string) {
 }
 export async function revokeUserAllSessions (uid: string) {
   return instance.delete<SessionRevokeOthersResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
+}
+
+export async function findTags () {
+  return instance.get<AdminTagListQueryResult>('/admin/tags')
+}
+export async function createTag (payload: AdminTagCreatePayload) {
+  return instance.post<null>('/admin/tags', payload)
+}
+export async function updateTag (tagId: string, payload: AdminTagCreatePayload) {
+  return instance.put<null>(`/admin/tags/${encodeURIComponent(tagId)}`, payload)
 }

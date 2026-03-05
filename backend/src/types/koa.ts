@@ -1,4 +1,3 @@
-import type { TagDocument } from '../models/Tag'
 import type { UserDocument } from '../models/User'
 import type { ContestState } from '../policies/contest'
 import type { CourseState } from '../policies/course'
@@ -18,7 +17,6 @@ declare module 'koa' {
     course?: CourseState
     discussion?: DiscussionState
     problem?: ProblemState
-    tag?: TagDocument
     user?: UserDocument
   }
 
