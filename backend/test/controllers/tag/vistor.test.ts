@@ -5,33 +5,32 @@ import app from '../../../src/app'
 const server = app.listen()
 const request = supertest.agent(server)
 
-test.skip('Tag list', async (t) => {
-  const list = await request
-    .get('/api/tag/list')
+// ─── GET /api/tags ──────────────────────────────────────────────────────────
 
-  t.is(list.status, 200)
-  t.is(list.type, 'application/json')
-  t.truthy(Array.isArray(list.body.list))
+test('GET /api/tags is accessible without authentication', async (t) => {
+  const res = await request.get('/api/tags')
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.true(Array.isArray(res.body.data))
 })
 
-test.skip('Tag find one', async (t) => {
-  const list = await request
-    .get('/api/tag/level1')
-
-  t.is(list.status, 200)
-  t.is(list.type, 'application/json')
+test('GET /api/tags response has correct content-type', async (t) => {
+  const res = await request.get('/api/tags')
+  t.is(res.status, 200)
+  t.regex(res.type, /application\/json/)
 })
 
-test.skip('Fails to create a tag -- no permission', async (t) => {
-  const create = await request
-    .post('/api/tag')
-    .send({
-      tid: '12345',
-      list: [ 1001 ],
-    })
-
-  t.is(create.status, 401)
-  t.truthy(create.body.error)
+test('GET /api/tags items have public-safe shape (no createdAt/updatedAt)', async (t) => {
+  const res = await request.get('/api/tags')
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  for (const tag of res.body.data as any[]) {
+    t.is(typeof tag.tagId, 'number')
+    t.is(typeof tag.name, 'string')
+    t.is(typeof tag.color, 'string')
+    t.false('createdAt' in tag)
+    t.false('updatedAt' in tag)
+  }
 })
 
 test.after.always('close server', () => {
