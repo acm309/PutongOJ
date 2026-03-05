@@ -1,13 +1,6 @@
 import type { CourseRole } from '../types'
 import { ErrorCode } from '@putongoj/shared'
 
-export const privilege = Object.freeze({
-  Banned: 0,
-  User: 1,
-  Admin: 2,
-  Root: 3,
-})
-
 export const limitation = Object.freeze({
   time: 10 * 1000,
   memory: 256 * 1024,
@@ -88,7 +81,6 @@ export default Object.freeze({
   deploy,
   encrypt,
   limitation,
-  privilege,
   problemType,
   status,
   courseRoleNone,

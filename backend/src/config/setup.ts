@@ -1,11 +1,11 @@
 import path from 'node:path'
+import { UserPrivilege } from '@putongoj/shared'
 import fse from 'fs-extra'
-import config from '.'
 import ID from '../models/ID'
 import Problem from '../models/Problem'
 import User from '../models/User'
 import { passwordHash } from '../utils'
-import { privilege } from '../utils/constants'
+import { deploy } from '../utils/constants'
 
 export async function databaseSetup () {
   const tasks: Promise<any>[] = []
@@ -36,8 +36,8 @@ export async function databaseSetup () {
     tasks.push(
       new User({
         uid: 'admin',
-        pwd: passwordHash(config.deploy.adminInitPwd),
-        privilege: privilege.Root,
+        pwd: passwordHash(deploy.adminInitPwd),
+        privilege: UserPrivilege.Root,
       }).save(),
     )
   }

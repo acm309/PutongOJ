@@ -1,7 +1,6 @@
 import type { UserDocument } from '../../src/models/User'
-import constants from '../../src/utils/constants'
-
-const { privilege, deploy } = constants
+import { UserPrivilege } from '@putongoj/shared'
+import { deploy } from '../../src/utils/constants'
 
 type UserSeed = Partial<Omit<UserDocument, 'pwd'>> & { pwd?: string }
 
@@ -9,7 +8,7 @@ const userSeeds: Record<string, UserSeed> = {
   admin: {
     uid: 'admin',
     nick: 'admin',
-    privilege: privilege.Root,
+    privilege: UserPrivilege.Root,
     pwd: deploy.adminInitPwd,
   },
   toelevate: {
@@ -24,7 +23,7 @@ const userSeeds: Record<string, UserSeed> = {
   banned: {
     uid: 'banned',
     pwd: ')zD1d_mh)7',
-    privilege: privilege.Banned,
+    privilege: UserPrivilege.Banned,
   },
   kevin63: {
     uid: 'kevin63',
@@ -38,27 +37,27 @@ const userSeeds: Record<string, UserSeed> = {
   MauthnBanned: {
     uid: 'MauthnBanned',
     pwd: 'Mauthn3anned',
-    privilege: privilege.Banned,
+    privilege: UserPrivilege.Banned,
   },
   MauthnNormal: {
     uid: 'MauthnNormal',
     pwd: 'MauthnNorma1',
-    privilege: privilege.User,
+    privilege: UserPrivilege.User,
   },
   MauthnAdmin: {
     uid: 'MauthnAdmin',
     pwd: 'Mauthn4dmin',
-    privilege: privilege.Admin,
+    privilege: UserPrivilege.Admin,
   },
   MauthnRoot: {
     uid: 'MauthnRoot',
     pwd: 'Mauthn5oot',
-    privilege: privilege.Root,
+    privilege: UserPrivilege.Root,
   },
   ScourseCstu: {
     uid: 'ScourseCstu',
     pwd: '5courseCstu',
-    privilege: privilege.User,
+    privilege: UserPrivilege.User,
   },
 }
 

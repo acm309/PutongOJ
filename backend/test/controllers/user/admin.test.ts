@@ -1,7 +1,7 @@
+import { UserPrivilege } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
-import config from '../../../src/config'
 import { encryptData } from '../../../src/services/crypto'
 import { userSeeds } from '../../seeds/user'
 
@@ -27,7 +27,7 @@ test.before('Login as admin', async (t) => {
   t.is(r.status, 200)
   t.true(r.body.success)
   t.is(r.body.data.uid, userRoot.uid)
-  t.is(r.body.data.privilege, config.privilege.Root)
+  t.is(r.body.data.privilege, UserPrivilege.Root)
 })
 
 test.skip('Fetch user list filter by privilege', async (t) => {
@@ -39,7 +39,7 @@ test.skip('Fetch user list filter by privilege', async (t) => {
   const u = r.body.docs[0]
   t.is(typeof u.uid, 'string')
   t.is(typeof u.privilege, 'number')
-  t.true([ config.privilege.Admin, config.privilege.Root ].includes(u.privilege))
+  t.true([ UserPrivilege.Admin, UserPrivilege.Root ].includes(u.privilege))
 })
 
 test.skip('Fetch user list filter by uid', async (t) => {
@@ -55,7 +55,7 @@ test.skip('Fetch user list filter by uid', async (t) => {
 test('Update admin self\'s privilege', async (t) => {
   const r = await requestRoot
     .put(`/api/admin/users/${userRoot.uid}`)
-    .send({ privilege: config.privilege.User })
+    .send({ privilege: UserPrivilege.User })
   t.is(r.status, 200)
   t.false(r.body.success)
 })
@@ -63,7 +63,7 @@ test('Update admin self\'s privilege', async (t) => {
 test.serial('Update user privilege to admin with root privilege', async (t) => {
   let r = await requestRoot
     .put(`/api/admin/users/${userAdmin.uid}`)
-    .send({ privilege: config.privilege.Admin })
+    .send({ privilege: UserPrivilege.Admin })
   t.is(r.status, 200)
   t.true(r.body.success)
 
@@ -80,13 +80,13 @@ test.serial('Update user privilege to admin with root privilege', async (t) => {
   t.is(r.status, 200)
   t.true(r.body.success)
   t.is(r.body.data.uid, userAdmin.uid)
-  t.is(r.body.data.privilege, config.privilege.Admin)
+  t.is(r.body.data.privilege, UserPrivilege.Admin)
 })
 
 test.serial('Update user privilege with admin privilege', async (t) => {
   const r = await requestAdmin
     .put(`/api/admin/users/${userRoot.uid}`)
-    .send({ privilege: config.privilege.User })
+    .send({ privilege: UserPrivilege.User })
   t.is(r.status, 200)
   t.false(r.body.success)
 })

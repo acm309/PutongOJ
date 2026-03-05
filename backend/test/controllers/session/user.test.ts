@@ -1,8 +1,9 @@
+import { UserPrivilege } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
-import config from '../../../src/config'
 import { encryptData } from '../../../src/services/crypto'
+import { deploy } from '../../../src/utils/constants'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -12,7 +13,7 @@ test.before(async (t) => {
     .post('/api/account/login')
     .send({
       username: 'admin',
-      password: await encryptData(config.deploy.adminInitPwd),
+      password: await encryptData(deploy.adminInitPwd),
     })
   t.is(res.status, 200)
 })
@@ -24,7 +25,7 @@ test.serial('get session profile', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.is(res.body.data.uid, 'admin')
-  t.is(res.body.data.privilege, config.privilege.Root)
+  t.is(res.body.data.privilege, UserPrivilege.Root)
 })
 
 test('User logout', async (t) => {

@@ -1,9 +1,8 @@
 import type { UserModel } from '@putongoj/shared'
 import type { Document, PaginateModel, Schema, Types } from 'mongoose'
-import { UserModelSchema } from '@putongoj/shared'
+import { UserModelSchema, UserPrivilege, UserPrivilegeValues } from '@putongoj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
-import { privilege } from '../utils/constants'
 
 export interface UserEntity extends UserModel { }
 
@@ -36,8 +35,8 @@ const userSchema: Schema = new mongoose.Schema({
   },
   privilege: {
     type: Number,
-    enum: Object.values(privilege),
-    default: privilege.User,
+    enum: UserPrivilegeValues,
+    default: UserPrivilege.User,
   },
   nick: {
     type: String,
@@ -119,13 +118,13 @@ const userSchema: Schema = new mongoose.Schema({
 userSchema.plugin(mongoosePaginate)
 
 userSchema.virtual('isBanned').get(function (this: UserDocument): boolean {
-  return this.privilege === privilege.Banned
+  return this.privilege === UserPrivilege.Banned
 })
 userSchema.virtual('isAdmin').get(function (this: UserDocument): boolean {
-  return this.privilege >= privilege.Admin
+  return this.privilege >= UserPrivilege.Admin
 })
 userSchema.virtual('isRoot').get(function (this: UserDocument): boolean {
-  return this.privilege >= privilege.Root
+  return this.privilege >= UserPrivilege.Root
 })
 
 const User = mongoose.model<UserDocument, PaginateModel<UserDocument>>(

@@ -1,8 +1,8 @@
 import type { Context } from 'koa'
-import config from '../config'
 import { loadProfile } from '../middlewares/authn'
 import News from '../models/News'
 import { only } from '../utils'
+import { status } from '../utils/constants'
 
 /**
  * 预加载通知信息
@@ -30,7 +30,7 @@ const find = async (ctx: Context) => {
 
   const filter: Record<string, any> = {}
   if (!ctx.state.profile?.isAdmin) {
-    filter.status = config.status.Available
+    filter.status = status.Available
   }
 
   const list = await News.paginate(filter, {

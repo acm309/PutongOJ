@@ -1,7 +1,7 @@
+import { UserPrivilege } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
-import config from '../../../src/config'
 import { encryptData } from '../../../src/services/crypto'
 
 const server = app.listen()
@@ -28,7 +28,7 @@ test.before('Create user and login', async (t) => {
   t.is(r.status, 200)
   t.true(r.body.success)
   t.is(r.body.data.uid, uid)
-  t.is(r.body.data.privilege, config.privilege.User)
+  t.is(r.body.data.privilege, UserPrivilege.User)
 })
 
 test('Update user with nick not valid (too long)', async (t) => {
@@ -170,21 +170,21 @@ test('Update user\'s mail then clear', async (t) => {
 test.skip('Update user with privilege remains unchanged', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: config.privilege.User })
+    .send({ privilege: UserPrivilege.User })
   t.is(r.status, 200)
 })
 
 test.skip('Update user with privilege up to admin', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: config.privilege.Admin })
+    .send({ privilege: UserPrivilege.Admin })
   t.is(r.status, 403)
 })
 
 test.skip('Update user with privilege up to root', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: config.privilege.Root })
+    .send({ privilege: UserPrivilege.Root })
   t.is(r.status, 403)
 })
 

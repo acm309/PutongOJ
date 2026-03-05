@@ -28,6 +28,9 @@ export enum UserPrivilege {
   Root = 3,
 }
 
+export const UserPrivilegeValues = Object.values(UserPrivilege)
+  .filter(value => typeof value === 'number') as number[]
+
 export const OAuthProvider = {
   CJLU: 'CJLU',
   Codeforces: 'Codeforces',

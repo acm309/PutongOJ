@@ -3,7 +3,6 @@ import type { OAuthClientConfig } from '../services/oauth'
 import { randomBytes } from 'node:crypto'
 import { env } from 'node:process'
 import dotenvFlow from 'dotenv-flow'
-import constants from '../utils/constants'
 
 dotenvFlow.config()
 
@@ -151,11 +150,4 @@ export const globalConfig: GlobalConfig = {
   submissionHeatmapTimezone: stringEnv('PTOJ_SUBMISSION_HEATMAP_TIMEZONE', 'Asia/Shanghai'),
 }
 
-const config = {
-  globalConfig,
-  ...globalConfig,
-  /** @deprecated */
-  ...constants,
-} as const
-
-export default config
+export default globalConfig

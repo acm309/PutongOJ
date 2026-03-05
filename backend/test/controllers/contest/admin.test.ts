@@ -1,8 +1,8 @@
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
-import config from '../../../src/config'
 import { encryptData } from '../../../src/services/crypto'
+import { deploy } from '../../../src/utils/constants'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -25,7 +25,7 @@ test.before('Login as admin', async (t) => {
     .post('/api/account/login')
     .send({
       username: 'admin',
-      password: await encryptData(config.deploy.adminInitPwd),
+      password: await encryptData(deploy.adminInitPwd),
     })
 
   t.is(login.status, 200)

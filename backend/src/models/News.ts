@@ -1,8 +1,8 @@
 import type { Document, PaginateModel, Types } from 'mongoose'
 import type { NewsEntity } from '../types/entity'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import config from '../config'
 import mongoose from '../config/db'
+import { status } from '../utils/constants'
 import ids from './ID'
 
 export interface NewsDocument extends Document<Types.ObjectId>, NewsEntity {}
@@ -39,7 +39,7 @@ const newsSchema = new mongoose.Schema({
   },
   status: {
     type: Number,
-    default: config.status.Available, // 默认新建的消息显示
+    default: status.Available, // 默认新建的消息显示
   },
   create: {
     type: Number,

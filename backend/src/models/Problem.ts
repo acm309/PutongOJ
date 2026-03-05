@@ -2,8 +2,8 @@ import type { Document, PaginateModel, Types } from 'mongoose'
 import type { ProblemEntity } from '../types/entity'
 import type { TagDocument } from './Tag'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import config from '../config'
 import mongoose from '../config/db'
+import { limitation, problemType, status } from '../utils/constants'
 import ID from './ID'
 
 export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
@@ -39,13 +39,13 @@ const problemSchema = new mongoose.Schema({
     type: Number,
     default: 1000,
     min: 100,
-    max: config.limitation.time,
+    max: limitation.time,
   },
   memory: {
     type: Number,
     default: 32768,
     min: 32768,
-    max: config.limitation.memory,
+    max: limitation.memory,
   },
   description: {
     type: String,
@@ -73,13 +73,13 @@ const problemSchema = new mongoose.Schema({
   },
   status: {
     type: Number,
-    enum: Object.values(config.status),
-    default: config.status.Reserve,
+    enum: Object.values(status),
+    default: status.Reserve,
   },
   type: {
     type: Number,
-    enum: Object.values(config.problemType),
-    default: config.problemType.Traditional,
+    enum: Object.values(problemType),
+    default: problemType.Traditional,
   },
   code: {
     type: String,
