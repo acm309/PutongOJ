@@ -31,6 +31,7 @@ async function loadProblem () {
 async function submitForm () {
   const data = await updateProblem(problemForm.value)
   message.success(t('oj.submit_success'))
+  await loadProblem()
   router.push({ name: 'problemInfo', params: { pid: data.pid } })
 }
 
