@@ -81,4 +81,14 @@ adminRouter.put('/settings/avatar-presets',
   adminController.updateAvatarPresets,
 )
 
+adminRouter.get('/tags',
+  adminController.findTags,
+)
+adminRouter.post('/tags',
+  adminController.createTag,
+)
+adminRouter.put('/tags/:tagId',
+  adminController.updateTag,
+)
+
 export default adminRouter

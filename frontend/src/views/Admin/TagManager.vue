@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { AdminTagCreatePayload, AdminTagListQueryResult } from '@putongoj/shared'
 import { tagColors } from '@putongoj/shared'
-import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -9,21 +9,30 @@ import Select from 'primevue/select'
 import { useConfirm } from 'primevue/useconfirm'
 import { capitalize, computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { createTag, findTags, updateTag } from '@/api/admin'
 import ProblemTag from '@/components/ProblemTag.vue'
-import { useTagStore } from '@/store/modules/tag'
 import { timePretty } from '@/utils/format'
 import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const message = useMessage()
 const confirm = useConfirm()
-const tagStore = useTagStore()
-const { tag, tags, tagsGroupByColor } = storeToRefs(tagStore)
 
-const loadingTag = ref(false)
+// Tag list
+
+const tags = ref<AdminTagListQueryResult>([])
 const loadingTags = ref(false)
-const tagModal = ref(false)
-const isCreate = ref(false)
+
+const tagsGroupByColor = computed(() => {
+  const map: Record<string, AdminTagListQueryResult> = {}
+  for (const tag of tags.value) {
+    if (!map[tag.color]) {
+      map[tag.color] = []
+    }
+    map[tag.color].push(tag)
+  }
+  return map
+})
 
 const colorOptions = tagColors.map(color => ({
   label: capitalize(color),
@@ -32,85 +41,111 @@ const colorOptions = tagColors.map(color => ({
 
 async function fetch () {
   loadingTags.value = true
-  await tagStore.findTags()
+  const resp = await findTags()
   loadingTags.value = false
+  if (!resp.success) {
+    message.error(`Failed to load tags: ${resp.message}`)
+    return
+  }
+  tags.value = resp.data
 }
 
-async function openTagDetail (tagId: number) {
-  loadingTag.value = true
-  isCreate.value = false
-  tagModal.value = true
-  await tagStore.findTag(tagId)
-  loadingTag.value = false
+// Create Form
+
+const createModal = ref(false)
+const creating = ref(false)
+const createForm = ref<AdminTagCreatePayload>({ name: '', color: 'default' })
+
+function openCreateModal () {
+  createForm.value = { name: '', color: 'default' }
+  createModal.value = true
 }
 
-function openTagCreate () {
-  tag.value = {
-    name: '',
-    color: 'default',
-  } as any
-  isCreate.value = true
-  tagModal.value = true
+function isCreateFormValid () {
+  const name = createForm.value.name.trim()
+  return name.length > 0 && name.length <= 30 && !!createForm.value.color
 }
 
-const tagCreatedAt = computed(() => {
-  if (!tag.value.createdAt) return ''
-  return timePretty(tag.value.createdAt)
-})
-const tagUpdatedAt = computed(() => {
-  if (!tag.value.updatedAt) return ''
-  return timePretty(tag.value.updatedAt)
-})
-
-function isFormValid () {
-  const name = tag.value.name?.trim()
-  if (!name || name.length > 30) return false
-  if (!tag.value.color) return false
-  return true
-}
-
-async function doCreateTag () {
-  await tagStore.createTag()
+async function doCreate () {
+  creating.value = true
+  const resp = await createTag({ ...createForm.value, name: createForm.value.name.trim() })
+  creating.value = false
+  if (!resp.success) {
+    message.error(`Failed to create tag: ${resp.message}`)
+    return
+  }
   message.success('Tag created!')
-  tagModal.value = false
+  createModal.value = false
   await fetch()
 }
 
-function createTag () {
-  tag.value.name = tag.value.name.trim()
-  if (!isFormValid()) {
+async function submitCreate () {
+  if (!isCreateFormValid()) {
     message.error(t('oj.form_invalid'))
     return
   }
-  const exists = tags.value.find(item => item.name === tag.value.name)
-  if (exists) {
+  const duplicate = tags.value.find(item => item.name === createForm.value.name.trim())
+  if (duplicate) {
     confirm.require({
       header: 'Duplicate Tag Name',
-      message: `Tag with name "${tag.value.name}" already exists. Do you want to create it anyway?`,
-      acceptProps: {
-        label: 'Create',
-      },
-      rejectProps: {
-        label: 'Cancel',
-        severity: 'secondary',
-        outlined: true,
-      },
-      accept: doCreateTag,
+      message: `Tag with name "${createForm.value.name.trim()}" already exists. Create it anyway?`,
+      acceptProps: { label: 'Create' },
+      rejectProps: { label: 'Cancel', severity: 'secondary', outlined: true },
+      accept: doCreate,
     })
   } else {
-    doCreateTag()
+    await doCreate()
   }
 }
 
-async function saveTag () {
-  tag.value.name = tag.value.name.trim()
-  if (!isFormValid()) {
+// Update Form
+
+type TagItem = AdminTagListQueryResult[number]
+
+const updateModal = ref(false)
+const updating = ref(false)
+const selectedTag = ref<TagItem | null>(null)
+const updateForm = ref<AdminTagCreatePayload>({ name: '', color: 'default' })
+
+const tagCreatedAt = computed(() => {
+  if (!selectedTag.value?.createdAt) return ''
+  return timePretty(selectedTag.value.createdAt)
+})
+const tagUpdatedAt = computed(() => {
+  if (!selectedTag.value?.updatedAt) return ''
+  return timePretty(selectedTag.value.updatedAt)
+})
+
+function openUpdateModal (tagId: number) {
+  const found = tags.value.find(item => item.tagId === tagId)
+  if (!found) return
+  selectedTag.value = found
+  updateForm.value = { name: found.name, color: found.color }
+  updateModal.value = true
+}
+
+function isUpdateFormValid () {
+  const name = updateForm.value.name.trim()
+  return name.length > 0 && name.length <= 30 && !!updateForm.value.color
+}
+
+async function submitUpdate () {
+  if (!selectedTag.value || !isUpdateFormValid()) {
     message.error(t('oj.form_invalid'))
     return
   }
-  await tagStore.updateTag()
-  tagModal.value = false
+  updating.value = true
+  const resp = await updateTag(
+    String(selectedTag.value.tagId),
+    { ...updateForm.value, name: updateForm.value.name.trim() },
+  )
+  updating.value = false
+  if (!resp.success) {
+    message.error(`Failed to update tag: ${resp.message}`)
+    return
+  }
   message.success('Tag updated!')
+  updateModal.value = false
   await fetch()
 }
 
@@ -119,6 +154,7 @@ onBeforeMount(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
+    <!-- Header -->
     <div class="border-b border-surface flex gap-4 items-center justify-between p-6">
       <div class="flex font-semibold gap-4 items-center">
         <i class="pi pi-tags text-2xl" />
@@ -126,9 +162,10 @@ onBeforeMount(fetch)
           Tag Management
         </h1>
       </div>
-      <Button icon="pi pi-plus" label="Create Tag" @click="openTagCreate" />
+      <Button icon="pi pi-plus" label="Create Tag" @click="openCreateModal" />
     </div>
 
+    <!-- Empty state -->
     <template v-if="tags.length === 0">
       <div class="flex flex-col gap-4 items-center justify-center px-6 py-24 text-center">
         <i class="pi pi-info-circle text-4xl text-muted-color" />
@@ -143,56 +180,86 @@ onBeforeMount(fetch)
       </div>
     </template>
 
+    <!-- Tag list grouped by color -->
     <div v-else class="p-6 space-y-6">
-      <template v-for="color in tagColors">
-        <div v-if="tagsGroupByColor[color]?.length > 0" :key="color">
+      <template v-for="color in tagColors" :key="color">
+        <div v-if="tagsGroupByColor[color]?.length > 0">
           <h3 class="font-semibold mb-2 text-lg">
             {{ capitalize(color) }}
           </h3>
-          <div class="flex flex-wrap gap-2 tags-group-items">
+          <div class="flex flex-wrap gap-2">
             <ProblemTag
-              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="cursor-pointer" size="large"
-              :name="tagItem.name" :color="color" @click="openTagDetail(tagItem.tagId)"
+              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="cursor-pointer"
+              size="large" :name="tagItem.name" :color="color" @click="openUpdateModal(tagItem.tagId)"
             />
           </div>
         </div>
       </template>
     </div>
 
-    <Dialog v-model:visible="tagModal" :header="isCreate ? 'Create Problem Tag' : 'Edit Problem Tag'" class="max-w-md mx-6 w-full">
-      <div class="flex flex-col gap-4 tags-form">
+    <!-- Create Dialog -->
+    <Dialog v-model:visible="createModal" header="Create Problem Tag" class="max-w-md mx-6 w-full">
+      <div class="flex flex-col gap-4">
         <IftaLabel>
-          <InputText id="tagName" v-model="tag.name" fluid :maxlength="30" placeholder="Enter tag name" />
-          <label for="tagName">{{ t('oj.name') }}</label>
+          <InputText id="createTagName" v-model="createForm.name" fluid :maxlength="30" placeholder="Enter tag name" />
+          <label for="createTagName">{{ t('oj.name') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <Select
-            id="tagColor" v-model="tag.color" :options="colorOptions" option-label="label" option-value="value"
-            fluid
+            id="createTagColor" v-model="createForm.color" :options="colorOptions" option-label="label"
+            option-value="value" fluid
           >
             <template #option="{ option }">
               <span>{{ option.label }}</span>
               <ProblemTag :color="option.value" class="ml-auto" :name="option.label" />
             </template>
           </Select>
-          <label for="tagColor">Color</label>
-        </IftaLabel>
-
-        <IftaLabel v-if="!isCreate">
-          <InputText id="tagCreatedAt" :model-value="tagCreatedAt" fluid readonly />
-          <label for="tagCreatedAt">Created At</label>
-        </IftaLabel>
-
-        <IftaLabel v-if="!isCreate">
-          <InputText id="tagUpdatedAt" :model-value="tagUpdatedAt" fluid readonly />
-          <label for="tagUpdatedAt">Updated At</label>
+          <label for="createTagColor">Color</label>
         </IftaLabel>
       </div>
 
       <template #footer>
-        <Button :label="t('ptoj.cancel')" severity="secondary" outlined @click="tagModal = false" />
-        <Button :label="isCreate ? 'Create' : 'Save'" @click="() => isCreate ? createTag() : saveTag()" />
+        <Button :label="t('ptoj.cancel')" severity="secondary" outlined @click="createModal = false" />
+        <Button label="Create" :loading="creating" @click="submitCreate" />
+      </template>
+    </Dialog>
+
+    <!-- Update Dialog -->
+    <Dialog v-model:visible="updateModal" header="Edit Problem Tag" class="max-w-md mx-6 w-full">
+      <div class="flex flex-col gap-4">
+        <IftaLabel>
+          <InputText id="updateTagName" v-model="updateForm.name" fluid :maxlength="30" placeholder="Enter tag name" />
+          <label for="updateTagName">{{ t('oj.name') }}</label>
+        </IftaLabel>
+
+        <IftaLabel>
+          <Select
+            id="updateTagColor" v-model="updateForm.color" :options="colorOptions" option-label="label"
+            option-value="value" fluid
+          >
+            <template #option="{ option }">
+              <span>{{ option.label }}</span>
+              <ProblemTag :color="option.value" class="ml-auto" :name="option.label" />
+            </template>
+          </Select>
+          <label for="updateTagColor">Color</label>
+        </IftaLabel>
+
+        <IftaLabel>
+          <InputText id="updateTagCreatedAt" :model-value="tagCreatedAt" fluid readonly />
+          <label for="updateTagCreatedAt">Created At</label>
+        </IftaLabel>
+
+        <IftaLabel>
+          <InputText id="updateTagUpdatedAt" :model-value="tagUpdatedAt" fluid readonly />
+          <label for="updateTagUpdatedAt">Updated At</label>
+        </IftaLabel>
+      </div>
+
+      <template #footer>
+        <Button :label="t('ptoj.cancel')" severity="secondary" outlined @click="updateModal = false" />
+        <Button label="Save" :loading="updating" @click="submitUpdate" />
       </template>
     </Dialog>
   </div>

@@ -1,25 +1,15 @@
+import type { TagModel } from '@putongoj/shared'
 import type { Types } from 'mongoose'
-import type { TagDocument } from '../models/Tag'
-import type { TagEntity, TagEntityForm, TagEntityItem, TagEntityPreview } from '../types/entity'
 import { escapeRegExp } from 'lodash'
 import Tag from '../models/Tag'
 
-export const toItem = Tag.toItem
-export const toPreview = Tag.toPreview
-export const toView = Tag.toView
-
-export async function getTags (): Promise<TagEntityPreview[]> {
+export async function getTags () {
   const tags = await Tag
-    .find({}, '-_id tagId name color createdAt updatedAt')
+    .find({})
+    .select({ _id: 0, tagId: 1, name: 1, color: 1, createdAt: 1, updatedAt: 1 })
     .sort({ tagId: 1 })
-  return tags.map(toPreview) as TagEntityPreview[]
-}
-
-export async function getTagItems (): Promise<TagEntityItem[]> {
-  const tags = await Tag
-    .find({}, '-_id tagId name color')
-    .sort({ tagId: 1 })
-  return tags.map(toItem) as TagEntityItem[]
+    .lean()
+  return tags
 }
 
 export async function getTagObjectIds (
@@ -30,11 +20,11 @@ export async function getTagObjectIds (
   return tags.map(t => t._id) as Types.ObjectId[]
 }
 
-export async function getTag (
-  tagId: number,
-): Promise<TagDocument | null> {
-  const tag = await Tag.findOne({ tagId })
-  return tag as TagDocument | null
+export async function getTag (tagId: number) {
+  const tag = await Tag
+    .findOne({ tagId })
+    .lean()
+  return tag
 }
 
 export async function findTagObjectIdsByQuery (
@@ -45,36 +35,25 @@ export async function findTagObjectIdsByQuery (
   return tags.map(t => t._id) as Types.ObjectId[]
 }
 
-export async function createTag (
-  opt: Partial<TagEntityForm>,
-): Promise<TagDocument> {
+export async function createTag (opt: Partial<TagModel>) {
   const tag = new Tag(opt)
   await tag.save()
-  return tag as TagDocument
+  return tag
 }
 
-export async function updateTag (
-  tagId: number,
-  opt: Partial<TagEntity>,
-): Promise<TagDocument | null> {
+export async function updateTag (tagId: number, opt: Partial<TagModel>) {
   const tag = await Tag
     .findOneAndUpdate({ tagId }, { $set: opt }, { returnDocument: 'after' })
-  return tag as TagDocument | null
+  return tag
 }
 
-export async function removeTag (
-  tagId: number,
-): Promise<boolean> {
+export async function removeTag (tagId: number): Promise<boolean> {
   const res = await Tag.deleteOne({ tagId })
   return res.deletedCount === 1
 }
 
 const tagService = {
-  toItem,
-  toPreview,
-  toView,
   getTags,
-  getTagItems,
   getTagObjectIds,
   getTag,
   findTagObjectIdsByQuery,

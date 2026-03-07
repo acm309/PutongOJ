@@ -1,17 +1,6 @@
-import type { Document, PaginateModel, Types } from 'mongoose'
-import type { TagEntity, TagEntityItem, TagEntityPreview, TagEntityView } from '../types/entity'
 import { tagColors } from '@putongoj/shared'
-import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../config/db'
 import ID from './ID'
-
-export type TagDocument = Document<Types.ObjectId> & TagEntity
-
-type TagModel = PaginateModel<TagDocument> & {
-  toItem: (tag: Partial<TagEntity>) => TagEntityItem
-  toPreview: (tag: Partial<TagEntity>) => TagEntityPreview
-  toView: (tag: Partial<TagEntity>) => TagEntityView
-}
 
 const tagSchema = new mongoose.Schema({
   tagId: {
@@ -42,39 +31,12 @@ const tagSchema = new mongoose.Schema({
   timestamps: true,
 })
 
-tagSchema.plugin(mongoosePaginate)
-
-tagSchema.pre('save', async function (this: TagDocument) {
+tagSchema.pre('save', async function (this) {
   if (this.tagId === -1) {
     this.tagId = await ID.generateId('Tag')
   }
 })
 
-const toItem = (tag: Partial<TagEntity>): TagEntityItem => {
-  return {
-    tagId: tag.tagId ?? -1,
-    name: tag.name ?? 'Unknown',
-    color: tag.color ?? 'default',
-  }
-}
-const toPreview = (tag: Partial<TagEntity>): TagEntityPreview => {
-  return {
-    ...toItem(tag),
-    createdAt: new Date(tag?.createdAt ?? Date.now()).getTime(),
-    updatedAt: new Date(tag?.updatedAt ?? Date.now()).getTime(),
-  }
-}
-const toView = (tag: Partial<TagEntity>): TagEntityView => {
-  return toPreview(tag)
-}
-
-tagSchema.statics.toItem = toItem
-tagSchema.statics.toPreview = toPreview
-tagSchema.statics.toView = toView
-
-const Tag
-  = mongoose.model<TagDocument, TagModel>(
-    'Tag', tagSchema,
-  )
+const Tag = mongoose.model('Tag', tagSchema)
 
 export default Tag
