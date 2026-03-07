@@ -6,7 +6,7 @@ const tagRouter = new Router({
 })
 
 tagRouter.get('/',
-  tagController.findTagItems,
+  tagController.findTags,
 )
 
 export default tagRouter
