@@ -5,9 +5,11 @@ import Tag from '../models/Tag'
 
 export async function getTags () {
   const tags = await Tag
-    .find({}, '-_id tagId name color createdAt updatedAt')
+    .find({})
+    .select({ _id: 0, tagId: 1, name: 1, color: 1, createdAt: 1, updatedAt: 1 })
     .sort({ tagId: 1 })
-  return tags as TagModel[]
+    .lean()
+  return tags
 }
 
 export async function getTagObjectIds (

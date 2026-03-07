@@ -12,6 +12,7 @@ import type {
   AdminSolutionListQueryResult,
   AdminTagCreatePayload,
   AdminTagListQueryResult,
+  AdminTagUpdatePayload,
   AdminUserChangePasswordPayload,
   AdminUserDetailQueryResult,
   AdminUserEditPayload,
@@ -100,6 +101,6 @@ export async function findTags () {
 export async function createTag (payload: AdminTagCreatePayload) {
   return instance.post<null>('/admin/tags', payload)
 }
-export async function updateTag (tagId: string, payload: AdminTagCreatePayload) {
+export async function updateTag (tagId: string, payload: AdminTagUpdatePayload) {
   return instance.put<null>(`/admin/tags/${encodeURIComponent(tagId)}`, payload)
 }
