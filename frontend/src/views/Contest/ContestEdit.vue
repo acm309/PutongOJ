@@ -120,7 +120,7 @@ async function fetch () {
     password: resp.data.password || '',
     labelingStyle: resp.data.labelingStyle,
   }
-  problems.value = resp.data.problems
+  problems.value = resp.data.problems.map(p => ({ ...p }))
   enablePassword.value = !!resp.data.password
   ipWhitelistEnabled.value = resp.data.ipWhitelistEnabled
   ipWhitelist.value = (resp.data.ipWhitelist ?? []).map(e => makeIpEntry(e.cidr, e.comment))
