@@ -1,5 +1,7 @@
 import type { Context } from 'koa'
+import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
+import type { ProblemState } from '../policies/problem'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import { ErrorCode, JudgeStatus } from '@putongoj/shared'
@@ -10,7 +12,9 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
+import { loadContestState } from '../policies/contest'
 import { loadCourseStateOrThrow } from '../policies/course'
+import { loadProblemState } from '../policies/problem'
 import { createEnvelopedResponse, createErrorResponse } from '../utils'
 
 export async function findOne (ctx: Context) {
@@ -92,34 +96,45 @@ const create = async (ctx: Context) => {
     ctx.throw(400, 'Code length should between 8 and 16384')
   }
 
-  let course = null
-  const problem = await Problem.findOne({ pid })
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
+  let problemState: ProblemState | null = null
   if (mid > 0) {
-    const contest = await Contest.findOne({ contestId: mid }).populate('course')
-    if (!contest) {
+    const contestState = await loadContestState(ctx, mid)
+    if (!contestState) {
       ctx.throw(400, 'No such a contest')
     }
+    const { contest, accessible, isIpBlocked, isJury } = contestState
+
+    if (isIpBlocked) {
+      ctx.throw(403, 'Your IP address is not in the whitelist for this contest')
+    }
+    if (!accessible) {
+      ctx.throw(403, 'Permission denied')
+    }
+
     const now = new Date()
-    if (contest.endsAt < now) {
+    if (!isJury && contest.startsAt > now) {
+      ctx.throw(400, 'Contest is not started yet!')
+    }
+    if (!isJury && contest.endsAt < now) {
       ctx.throw(400, 'Contest is ended!')
     }
-    if (!contest.problems.includes(problem._id)) {
+
+    problemState = await loadProblemState(ctx, pid, contest.contestId)
+    if (!problemState) {
+      ctx.throw(404, 'Problem not found or access denied')
+    }
+    const contestProblem = problemState.problem
+    if (!contest.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
       ctx.throw(400, 'No such a problem in the contest')
     }
-    if (contest.course) {
-      course = contest.course._id
+  } else {
+    problemState = await loadProblemState(ctx, pid)
+    if (!problemState) {
+      ctx.throw(404, 'Problem not found or access denied')
     }
   }
 
-  /**
-   * @TODO
-   */
-  // if (problem.course && !course) {
-  //   course = problem.course._id
-  // }
+  const { problem } = problemState
 
   try {
     const timeLimit = problem.time
@@ -142,7 +157,7 @@ const create = async (ctx: Context) => {
     })
 
     const solution = new Solution({
-      pid, mid, uid, code, language, course,
+      pid, mid, uid, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 
