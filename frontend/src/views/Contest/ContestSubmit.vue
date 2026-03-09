@@ -23,7 +23,7 @@ const { clearCode: reset, create } = solutionStore
 const problemId = computed(() => Number(route.params.problemId))
 
 async function submit () {
-  await create({ pid: problemId.value, mid: contestId.value, ...solution })
+  await create({ pid: problemId.value, mid: contestId.value, ...solution.value })
   router.push({ name: 'ContestMySubmissions', params: route.params })
   message.info(t('oj.submitSuccess', { id: problemId.value }))
 }
