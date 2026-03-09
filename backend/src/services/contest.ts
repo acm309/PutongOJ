@@ -130,26 +130,37 @@ async function findParticipants (
 
   if (filters.user) {
     const keyword = new RegExp(escapeRegExp(filters.user), 'i')
-    const participatedUsers = await ContestParticipation
-      .find({ contest })
-      .select({ user: 1 })
-      .lean()
-    const matchedUsers = await User
-      .find({
-        _id: { $in: participatedUsers.map(p => p.user) },
-        $or: [
-          { uid: { $regex: keyword } },
-          { nick: { $regex: keyword } },
-        ],
-      })
-      .select({ _id: 1 })
-      .lean()
+    const matchedUsers = await ContestParticipation
+      .aggregate<{ user: Types.ObjectId }>([ {
+        $match: {
+          contest,
+          ...(filters.status !== undefined ? { status: filters.status } : {}),
+        },
+      }, {
+        $lookup: {
+          from: User.collection.name,
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDoc',
+        },
+      }, {
+        $unwind: '$userDoc',
+      }, {
+        $match: {
+          $or: [
+            { 'userDoc.uid': { $regex: keyword } },
+            { 'userDoc.nick': { $regex: keyword } },
+          ],
+        },
+      }, {
+        $project: { _id: 0, user: 1 },
+      } ])
 
     if (matchedUsers.length === 0) {
       return { docs: [], limit: pageSize, page, pages: 0, total: 0 }
     }
 
-    queryFilters.push({ user: { $in: matchedUsers.map(user => user._id) } })
+    queryFilters.push({ user: { $in: matchedUsers.map(doc => doc.user) } })
   }
 
   const filter = { $and: queryFilters }
