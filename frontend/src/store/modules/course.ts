@@ -8,7 +8,7 @@ import api from '@/api'
 export const useCourseStore = defineStore('course', {
   state: () => ({
     course: {} as CourseEntityView & { role: CourseRole },
-    courses: {} as Paginated<CourseEntityPreview>,
+    courses: { docs: [], limit: 0, page: 1, pages: 0, total: 0 } as Paginated<CourseEntityPreview>,
   }),
   actions: {
     async createCourse (course: CourseEntityEditable): Promise<number> {

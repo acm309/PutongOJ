@@ -9,7 +9,7 @@ export const useProblemStore = defineStore('problem', {
   state: () => ({
     problem: {} as ProblemEntityView,
     solved: [] as number[],
-    problems: {} as Paginated<ProblemBrief>,
+    problems: { docs: [], limit: 0, page: 1, pages: 0, total: 0 } as Paginated<ProblemBrief>,
   }),
   actions: {
     async findProblems (params: FindProblemsParams) {
