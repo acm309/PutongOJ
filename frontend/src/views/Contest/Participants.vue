@@ -37,7 +37,7 @@ const statusOptions = computed(() => [
 ])
 
 const hasFilter = computed(() => {
-  return Boolean(query.value.user || query.value.status !== undefined)
+  return Boolean(query.value.user || Number.isInteger(query.value.status))
 })
 
 function getStatusLabel (status: ParticipationStatus) {
@@ -107,7 +107,7 @@ function onSearch () {
     query: {
       ...route.query,
       user: query.value.user || undefined,
-      status: query.value.status,
+      status: query.value.status ?? undefined,
       page: undefined,
     },
   })
@@ -218,6 +218,12 @@ onRouteQueryUpdate(fetch)
           </div>
         </template>
       </Column>
+
+      <template #empty>
+        <span class="px-2">
+          {{ t('ptoj.empty_content_desc') }}
+        </span>
+      </template>
     </DataTable>
 
     <Paginator
