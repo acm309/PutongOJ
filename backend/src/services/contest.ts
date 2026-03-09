@@ -1,4 +1,4 @@
-import type { ContestModel, ContestRanklist, ContestRanklistProblem } from '@putongoj/shared'
+import type { ContestModel, ContestParticipationModel, ContestRanklist, ContestRanklistProblem, UserModel } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { PaginateOption, SortOption } from '../types'
@@ -114,6 +114,81 @@ async function updateParticipation (
     { user, contest, status },
     { upsert: true, returnDocument: 'after' },
   )
+}
+
+async function findParticipants (
+  contest: Types.ObjectId,
+  options: PaginateOption & SortOption,
+  filters: { user?: string, status?: ParticipationStatus.Approved | ParticipationStatus.Suspended },
+) {
+  const { page, pageSize, sort, sortBy } = options
+  const queryFilters: QueryFilter<ContestParticipationModel>[] = [ { contest } ]
+
+  if (filters.status !== undefined) {
+    queryFilters.push({ status: filters.status })
+  }
+
+  if (filters.user) {
+    const keyword = new RegExp(escapeRegExp(filters.user), 'i')
+    const participatedUsers = await ContestParticipation
+      .find({ contest })
+      .select({ user: 1 })
+      .lean()
+    const matchedUsers = await User
+      .find({
+        _id: { $in: participatedUsers.map(p => p.user) },
+        $or: [
+          { uid: { $regex: keyword } },
+          { nick: { $regex: keyword } },
+        ],
+      })
+      .select({ _id: 1 })
+      .lean()
+
+    if (matchedUsers.length === 0) {
+      return { docs: [], limit: pageSize, page, pages: 0, total: 0 }
+    }
+
+    queryFilters.push({ user: { $in: matchedUsers.map(user => user._id) } })
+  }
+
+  const filter = { $and: queryFilters }
+  const [ docs, count ] = await Promise.all([
+    ContestParticipation.find(filter)
+      .sort({
+        [sortBy]: sort,
+        ...(sortBy !== 'updatedAt' ? { updatedAt: -1 } : {}),
+      })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .select({ _id: 0, user: 1, status: 1, createdAt: 1, updatedAt: 1 })
+      .populate<{ user: Pick<UserModel, 'uid' | 'nick'> }>('user', { uid: 1, nick: 1 })
+      .lean(),
+    ContestParticipation.countDocuments(filter),
+  ])
+
+  return {
+    docs: docs.map(({ user, status, createdAt, updatedAt }) => ({
+      username: user.uid, nickname: user.nick,
+      status, createdAt, updatedAt,
+    })),
+    limit: pageSize,
+    page,
+    pages: Math.ceil(count / pageSize),
+    total: count,
+  }
+}
+
+async function updateParticipantStatus (
+  user: Types.ObjectId,
+  contest: Types.ObjectId,
+  status: ParticipationStatus.Approved | ParticipationStatus.Suspended,
+) {
+  const res = await ContestParticipation.updateOne(
+    { user, contest },
+    { $set: { status } },
+  )
+  return res.matchedCount > 0
 }
 
 export type ContestProblemsWithStats = {
@@ -267,6 +342,8 @@ export const contestService = {
   updateContest,
   getParticipation,
   updateParticipation,
+  findParticipants,
+  updateParticipantStatus,
   getProblemsWithStats,
   getRanklist,
 } as const

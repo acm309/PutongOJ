@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LabelingStyle } from '@/consts/index.js'
+import { LabelingStyle, ParticipationStatus } from '@/consts/index.js'
 import { TITLE_LENGTH_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
 import { ObjectIdSchema } from '../utils.js'
@@ -53,3 +53,13 @@ export const ContestModelSchema = z.object({
 })
 
 export type ContestModel = z.infer<typeof ContestModelSchema>
+
+export const ContestParticipationModelSchema = z.object({
+  contest: ObjectIdSchema,
+  user: ObjectIdSchema,
+  status: z.enum(ParticipationStatus),
+  createdAt: isoDatetimeToDate,
+  updatedAt: isoDatetimeToDate,
+})
+
+export type ContestParticipationModel = z.infer<typeof ContestParticipationModelSchema>

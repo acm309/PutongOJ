@@ -9,6 +9,9 @@ import {
   ContestDetailQueryResultSchema,
   ContestListQueryResultSchema,
   ContestListQuerySchema,
+  ContestParticipantListQueryResultSchema,
+  ContestParticipantListQuerySchema,
+  ContestParticipantUpdatePayloadSchema,
   ContestParticipatePayloadSchema,
   ContestParticipationQueryResultSchema,
   ContestRanklistQueryResultSchema,
@@ -102,6 +105,53 @@ async function getParticipation (ctx: Context) {
     isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked,
   })
   return createEnvelopedResponse(ctx, result)
+}
+
+async function findParticipants (ctx: Context) {
+  const query = ContestParticipantListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+  const state = await loadContestState(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
+  }
+
+  const participants = await contestService.findParticipants(
+    state.contest._id, query.data,
+    { user: query.data.user, status: query.data.status },
+  )
+  const result = ContestParticipantListQueryResultSchema.encode(participants)
+  return createEnvelopedResponse(ctx, result)
+}
+
+async function updateParticipantStatus (ctx: Context) {
+  const payload = ContestParticipantUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const state = await loadContestState(ctx)
+  if (!state || !state.isJury) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
+  }
+
+  const profile = await loadProfile(ctx)
+  const user = await getUser(ctx.params.username)
+  if (!user) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'User not found')
+  }
+
+  const updated = await contestService.updateParticipantStatus(
+    user._id, state.contest._id, payload.data.status,
+  )
+  if (!updated) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Participation not found')
+  }
+
+  ctx.auditLog.info(
+    `<User:${profile.uid}> updated <User:${user.uid}> participation in <Contest:${state.contest.contestId}> to <ParticipationStatus:${payload.data.status}>`,
+  )
+  return createEnvelopedResponse(ctx, null)
 }
 
 async function participateContest (ctx: Context) {
@@ -441,6 +491,8 @@ const contestController = {
   createContest,
   getContest,
   getParticipation,
+  findParticipants,
+  updateParticipantStatus,
   participateContest,
   getRanklist,
   getConfig,
