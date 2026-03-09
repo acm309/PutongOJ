@@ -21,14 +21,5 @@ export const useSolutionStore = defineStore('solution', {
       }
       return data
     },
-    create (payload: { [key: string]: any }) {
-      return api.solution.create(payload)
-    },
-    clearSavedSolution () {
-      this.solution = { language: null, code: '' }
-    },
-    clearCode () {
-      this.solution.code = ''
-    },
   },
 })

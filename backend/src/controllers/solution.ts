@@ -1,8 +1,15 @@
 import type { Context } from 'koa'
+import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
+import type { ProblemState } from '../policies/problem'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
-import { ErrorCode, JudgeStatus } from '@putongoj/shared'
+import {
+  ErrorCode,
+  JudgeStatus,
+  SolutionSubmitPayloadSchema,
+  SolutionSubmitResultSchema,
+} from '@putongoj/shared'
 import fse from 'fs-extra'
 import { pick } from 'lodash'
 import redis from '../config/redis'
@@ -10,8 +17,10 @@ import { loadProfile } from '../middlewares/authn'
 import Contest from '../models/Contest'
 import Problem from '../models/Problem'
 import Solution from '../models/Solution'
+import { loadContestState } from '../policies/contest'
 import { loadCourseStateOrThrow } from '../policies/course'
-import { createEnvelopedResponse, createErrorResponse } from '../utils'
+import { loadProblemState } from '../policies/problem'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -71,55 +80,56 @@ export async function findOne (ctx: Context) {
  */
 const create = async (ctx: Context) => {
   const profile = await loadProfile(ctx)
-  const opt = ctx.request.body
-  const required = [ 'pid', 'code', 'language' ]
-  for (const key of required) {
-    if (!opt[key]) {
-      ctx.throw(400, `Missing parameter: ${key}`)
-    }
+  const payload = SolutionSubmitPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
   }
 
   const uid = profile.uid
-  const pid = Number.parseInt(opt.pid)
-  const code = String(opt.code)
-  const language = Number.parseInt(opt.language)
-  const mid = Number.parseInt(opt.mid) || -1
+  const pid = payload.data.problem
+  const code = payload.data.code
+  const language = payload.data.language
+  const mid = payload.data.contest ?? -1
 
-  if (language < 0 || language > 6) {
-    ctx.throw(400, 'Invalid language')
-  }
-  if (code.length < 8 || code.length > 16384) {
-    ctx.throw(400, 'Code length should between 8 and 16384')
-  }
-
-  let course = null
-  const problem = await Problem.findOne({ pid })
-  if (!problem) {
-    ctx.throw(400, 'No such a problem')
-  }
+  let problemState: ProblemState | null = null
   if (mid > 0) {
-    const contest = await Contest.findOne({ contestId: mid }).populate('course')
-    if (!contest) {
+    const contestState = await loadContestState(ctx, mid)
+    if (!contestState) {
       ctx.throw(400, 'No such a contest')
     }
+    const { contest, accessible, isIpBlocked, isJury } = contestState
+
+    if (isIpBlocked) {
+      ctx.throw(403, 'Your IP address is not in the whitelist for this contest')
+    }
+    if (!accessible) {
+      ctx.throw(403, 'Permission denied')
+    }
+
     const now = new Date()
-    if (contest.endsAt < now) {
+    if (!isJury && contest.startsAt > now) {
+      ctx.throw(400, 'Contest is not started yet!')
+    }
+    if (!isJury && contest.endsAt < now) {
       ctx.throw(400, 'Contest is ended!')
     }
-    if (!contest.problems.includes(problem._id)) {
+
+    problemState = await loadProblemState(ctx, pid, contest.contestId)
+    if (!problemState) {
+      ctx.throw(404, 'Problem not found or access denied')
+    }
+    const contestProblem = problemState.problem
+    if (!contest.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
       ctx.throw(400, 'No such a problem in the contest')
     }
-    if (contest.course) {
-      course = contest.course._id
+  } else {
+    problemState = await loadProblemState(ctx, pid)
+    if (!problemState) {
+      ctx.throw(404, 'Problem not found or access denied')
     }
   }
 
-  /**
-   * @TODO
-   */
-  // if (problem.course && !course) {
-  //   course = problem.course._id
-  // }
+  const { problem } = problemState
 
   try {
     const timeLimit = problem.time
@@ -142,7 +152,7 @@ const create = async (ctx: Context) => {
     })
 
     const solution = new Solution({
-      pid, mid, uid, code, language, course,
+      pid, mid, uid, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 
@@ -158,7 +168,8 @@ const create = async (ctx: Context) => {
     await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
-    ctx.body = { sid }
+    const result = SolutionSubmitResultSchema.encode({ solution: sid })
+    return createEnvelopedResponse(ctx, result)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }

@@ -1,3 +1,4 @@
+import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -32,15 +33,14 @@ test.serial('Submit a solution', async (t) => {
   let res = await request
     .post('/api/status/')
     .send({
-      pid: 1000,
-      uid: 'primaryuser',
+      problem: 1000,
       code,
-      language: 2, // cpp; TODO: as a constant
+      language: Language.Cpp17,
     })
 
-  sid = res.body.sid
-
   t.is(res.status, 200)
+  t.true(res.body.success)
+  sid = res.body.data.solution
 
   res = await request.get(`/api/status/${sid}`)
 
@@ -96,10 +96,9 @@ test('Code is too long', async (t) => {
   const res = await request
     .post('/api/status/')
     .send({
-      pid: 1000,
-      uid: 'primaryuser',
+      problem: 1000,
       code,
-      language: 2, // cpp; TODO: as a constant
+      language: Language.Cpp17,
     })
 
   t.is(res.status, 200)
@@ -112,10 +111,9 @@ test('Code is too short', async (t) => {
   const res = await request
     .post('/api/status/')
     .send({
-      pid: 1000,
-      uid: 'primaryuser',
+      problem: 1000,
       code,
-      language: 2, // cpp; TODO: as a constant
+      language: Language.Cpp17,
     })
 
   t.is(res.status, 200)
