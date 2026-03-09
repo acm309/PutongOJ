@@ -5,6 +5,9 @@ import type {
   ContestDetailQueryResult,
   ContestListQuery,
   ContestListQueryResult,
+  ContestParticipantListQuery,
+  ContestParticipantListQueryResult,
+  ContestParticipantUpdatePayload,
   ContestParticipatePayload,
   ContestParticipationQueryResult,
   ContestRanklistQueryResult,
@@ -38,6 +41,12 @@ export async function getParticipation (contestId: number) {
 }
 export async function participateContest (contestId: number, payload: ContestParticipatePayload) {
   return instance.post<null>(`/contests/${encodeURIComponent(contestId)}/participation`, payload)
+}
+export async function findParticipants (contestId: number, params: ContestParticipantListQuery) {
+  return instance.get<ContestParticipantListQueryResult>(`/contests/${encodeURIComponent(contestId)}/participants`, { params })
+}
+export async function updateParticipantStatus (contestId: number, username: string, payload: ContestParticipantUpdatePayload) {
+  return instance.put<null>(`/contests/${encodeURIComponent(contestId)}/participants/${encodeURIComponent(username)}`, payload)
 }
 
 export async function getConfig (contestId: number) {
