@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { JudgeStatus, Language, ParticipationStatus } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
-import { ContestModelSchema } from '../model/contest.js'
+import { ContestModelSchema, ContestParticipationModelSchema } from '../model/contest.js'
 import { GroupModelSchema } from '../model/group.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
@@ -67,8 +67,8 @@ export const ContestParticipantListQueryResultSchema = PaginatedSchema(z.object(
   username: UserModelSchema.shape.uid,
   nickname: UserModelSchema.shape.nick,
   status: z.enum(ParticipationStatus),
-  createdAt: UserModelSchema.shape.createdAt,
-  updatedAt: UserModelSchema.shape.updatedAt,
+  createdAt: ContestParticipationModelSchema.shape.createdAt,
+  updatedAt: ContestParticipationModelSchema.shape.updatedAt,
 }))
 
 export type ContestParticipantListQueryResult = z.input<typeof ContestParticipantListQueryResultSchema>
