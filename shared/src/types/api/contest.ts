@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { JudgeStatus, Language, ParticipationStatus } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
-import { ContestModelSchema } from '../model/contest.js'
+import { ContestModelSchema, ContestParticipationModelSchema } from '../model/contest.js'
 import { GroupModelSchema } from '../model/group.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
@@ -46,6 +46,38 @@ export const ContestParticipatePayloadSchema = z.object({
 })
 
 export type ContestParticipatePayload = z.infer<typeof ContestParticipatePayloadSchema>
+
+const ContestParticipationManageableStatusSchema = z.union([
+  z.literal(ParticipationStatus.Approved),
+  z.literal(ParticipationStatus.Suspended),
+])
+
+export const ContestParticipantListQuerySchema = z.object({
+  page: PaginationSchema.shape.page,
+  pageSize: PaginationSchema.shape.pageSize.default(30),
+  sort: SortOptionSchema.shape.sort,
+  sortBy: z.enum(['createdAt', 'updatedAt', 'status']).default('updatedAt'),
+  user: z.string().max(30).optional(),
+  status: stringToInt.pipe(ContestParticipationManageableStatusSchema).optional(),
+})
+
+export type ContestParticipantListQuery = z.infer<typeof ContestParticipantListQuerySchema>
+
+export const ContestParticipantListQueryResultSchema = PaginatedSchema(z.object({
+  username: UserModelSchema.shape.uid,
+  nickname: UserModelSchema.shape.nick,
+  status: z.enum(ParticipationStatus),
+  createdAt: ContestParticipationModelSchema.shape.createdAt,
+  updatedAt: ContestParticipationModelSchema.shape.updatedAt,
+}))
+
+export type ContestParticipantListQueryResult = z.input<typeof ContestParticipantListQueryResultSchema>
+
+export const ContestParticipantUpdatePayloadSchema = z.object({
+  status: ContestParticipationManageableStatusSchema,
+})
+
+export type ContestParticipantUpdatePayload = z.infer<typeof ContestParticipantUpdatePayloadSchema>
 
 export const ContestDetailQueryResultSchema = z.object({
   contestId: ContestModelSchema.shape.contestId,

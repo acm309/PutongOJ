@@ -187,3 +187,51 @@ test.serial('updateParticipation: can update status again (idempotent upsert)', 
   const status = await contestService.getParticipation(userId, contestObjectId)
   t.is(status, ParticipationStatus.NotApplied)
 })
+
+test.serial('findParticipants: returns approved participant records', async (t) => {
+  const userId = ctx.userObjectId
+  const contestObjectId = ctx.contestObjectId
+  if (!userId || !contestObjectId) { return t.fail('Missing user/contest ObjectId') }
+
+  await contestService.updateParticipation(userId, contestObjectId, ParticipationStatus.Approved)
+
+  const result = await contestService.findParticipants(
+    contestObjectId,
+    { page: 1, pageSize: 10, sort: -1, sortBy: 'updatedAt' },
+    { status: ParticipationStatus.Approved },
+  )
+
+  t.true(result.total >= 1)
+  t.true(result.docs.some(doc => doc.username === userSeeds.primaryuser.uid))
+})
+
+test.serial('findParticipants: user filter narrows results', async (t) => {
+  const contestObjectId = ctx.contestObjectId
+  if (!contestObjectId) { return t.fail('Missing contest ObjectId') }
+
+  const result = await contestService.findParticipants(
+    contestObjectId,
+    { page: 1, pageSize: 10, sort: -1, sortBy: 'updatedAt' },
+    { user: 'primary', status: ParticipationStatus.Approved },
+  )
+
+  t.true(result.docs.every(doc => doc.username.includes('primary') || doc.nickname.includes('primary')))
+})
+
+test.serial('updateParticipantStatus: updates existing record only', async (t) => {
+  const userId = ctx.userObjectId
+  const contestObjectId = ctx.contestObjectId
+  if (!userId || !contestObjectId) { return t.fail('Missing user/contest ObjectId') }
+
+  const updated = await contestService.updateParticipantStatus(
+    userId,
+    contestObjectId,
+    ParticipationStatus.Suspended,
+  )
+
+  t.true(updated)
+  t.is(
+    await contestService.getParticipation(userId, contestObjectId),
+    ParticipationStatus.Suspended,
+  )
+})

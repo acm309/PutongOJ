@@ -8,6 +8,7 @@ import Contests from '@/views/Contest/Contests.vue'
 import ContestSubmit from '@/views/Contest/ContestSubmit.vue'
 import ContestDiscussions from '@/views/Contest/Discussions.vue'
 import ContestMySubmissions from '@/views/Contest/MySubmissions.vue'
+import ContestParticipants from '@/views/Contest/Participants.vue'
 import ContestSolutions from '@/views/Contest/Solutions.vue'
 
 const ContestEdit = () => import('@/views/Contest/ContestEdit.vue')
@@ -55,6 +56,12 @@ const contestRoutes: Array<RouteRecordRaw> = [
         path: 'solutions',
         name: 'ContestSolutions',
         component: ContestSolutions,
+        meta: { requiresLogin: true },
+      },
+      {
+        path: 'participants',
+        name: 'ContestParticipants',
+        component: ContestParticipants,
         meta: { requiresLogin: true },
       },
       {

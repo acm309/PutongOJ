@@ -240,6 +240,28 @@ test.serial('Update contest config as non-jury returns 404', async (t) => {
   t.is(res.body.code, 404)
 })
 
+test.serial('List participants as non-jury returns 404', async (t) => {
+  if (!state.publicContestId) { return t.fail('No publicContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.publicContestId}/participants`)
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
+test.serial('Update participant status as non-jury returns 404', async (t) => {
+  if (!state.publicContestId) { return t.fail('No publicContestId') }
+
+  const res = await userAgent
+    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
+    .send({ status: ParticipationStatus.Suspended })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
 // ─── Participation status: Approved after joining ────────────────────────────
 
 test.serial('Participation status: Approved after joining public contest', async (t) => {
@@ -250,6 +272,36 @@ test.serial('Participation status: Approved after joining public contest', async
   t.is(res.status, 200)
   t.true(res.body.success)
   t.is(res.body.data.participation, ParticipationStatus.Approved)
+})
+
+test.serial('Suspended user cannot access contest detail or ranklist', async (t) => {
+  if (!state.publicContestId) { return t.fail('No publicContestId') }
+
+  const suspendRes = await adminAgent
+    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
+    .send({ status: ParticipationStatus.Suspended })
+  t.true(suspendRes.body.success)
+
+  const detailRes = await userAgent.get(`/api/contests/${state.publicContestId}`)
+  t.false(detailRes.body.success)
+  t.is(detailRes.body.code, 404)
+
+  const ranklistRes = await userAgent.get(`/api/contests/${state.publicContestId}/ranklist`)
+  t.false(ranklistRes.body.success)
+  t.is(ranklistRes.body.code, 404)
+})
+
+test.serial('Restored user can access contest detail again', async (t) => {
+  if (!state.publicContestId) { return t.fail('No publicContestId') }
+
+  const restoreRes = await adminAgent
+    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
+    .send({ status: ParticipationStatus.Approved })
+  t.true(restoreRes.body.success)
+
+  const detailRes = await userAgent.get(`/api/contests/${state.publicContestId}`)
+  t.true(detailRes.body.success)
+  t.is(detailRes.body.data.contestId, state.publicContestId)
 })
 
 test.after.always('close server', () => {

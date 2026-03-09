@@ -22,6 +22,14 @@ contestRouter.post('/:contestId/participation',
   authnMiddleware.loginRequire,
   contestController.participateContest,
 )
+contestRouter.get('/:contestId/participants',
+  authnMiddleware.loginRequire,
+  contestController.findParticipants,
+)
+contestRouter.put('/:contestId/participants/:username',
+  authnMiddleware.loginRequire,
+  contestController.updateParticipantStatus,
+)
 contestRouter.get('/:contestId/ranklist',
   authnMiddleware.loginRequire,
   contestController.getRanklist,

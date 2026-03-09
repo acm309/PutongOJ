@@ -3,9 +3,11 @@ import supertest from 'supertest'
 import app from '../../../src/app'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
+import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
+const userAgent = supertest.agent(server)
 
 // ─── shared state ─────────────────────────────────────────────────────────────
 
@@ -30,6 +32,16 @@ test.before('Login as admin', async (t) => {
 
   t.is(login.status, 200)
   t.true(login.body.success)
+
+  const userLogin = await userAgent
+    .post('/api/account/login')
+    .send({
+      username: userSeeds.primaryuser.uid,
+      password: await encryptData(userSeeds.primaryuser.pwd!),
+    })
+
+  t.is(userLogin.status, 200)
+  t.true(userLogin.body.success)
 })
 
 // ─── POST /api/contests ───────────────────────────────────────────────────────
@@ -268,6 +280,46 @@ test.serial('Get participation status: admin is jury, never ip-blocked', async (
   await request
     .put(`/api/contests/${contestId}/configs`)
     .send({ ipWhitelistEnabled: false, ipWhitelist: [] })
+})
+
+test.serial('List participants: jury can see approved participant', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ isPublic: true, isHidden: false, ipWhitelistEnabled: false, ipWhitelist: [] })
+
+  const joinRes = await userAgent
+    .post(`/api/contests/${contestId}/participation`)
+    .send({})
+  t.true(joinRes.body.success)
+
+  const res = await request
+    .get(`/api/contests/${contestId}/participants`)
+    .query({ status: 4 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.true(res.body.data.docs.some((doc: any) => doc.username === userSeeds.primaryuser.uid))
+})
+
+test.serial('Update participant status: jury can suspend participant', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
+    .send({ status: 3 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request
+    .get(`/api/contests/${contestId}/participants`)
+    .query({ status: 3 })
+
+  t.true(verify.body.data.docs.some((doc: any) => {
+    return doc.username === userSeeds.primaryuser.uid && doc.status === 3
+  }))
 })
 
 test.after.always('close server', () => {

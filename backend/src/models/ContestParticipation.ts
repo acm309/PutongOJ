@@ -19,7 +19,7 @@ const contestParticipationSchema = new mongoose.Schema({
   status: {
     type: Number,
     enum: ParticipationStatus,
-    default: ParticipationStatus.Pending,
+    required: true,
   },
 }, {
   collection: 'ContestParticipation',
@@ -30,6 +30,11 @@ contestParticipationSchema.index({
   contest: 1,
   user: 1,
 }, { unique: true })
+contestParticipationSchema.index({
+  contest: 1,
+  status: 1,
+  updatedAt: -1,
+})
 
 const ContestParticipation = mongoose.model(
   'ContestParticipation', contestParticipationSchema)
