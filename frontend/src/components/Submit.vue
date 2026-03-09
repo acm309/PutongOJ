@@ -151,7 +151,10 @@ watch(
 )
 watch(() => [ props.problem, props.contest ], init, { immediate: true })
 
-onBeforeUnmount(() => persistSolution.cancel())
+onBeforeUnmount(() => {
+  persistSolution.flush()
+  persistSolution.cancel()
+})
 </script>
 
 <template>
@@ -164,7 +167,10 @@ onBeforeUnmount(() => persistSolution.cancel())
       />
     </div>
     <div>
-      <Message v-if="solution.language === Language.Java && !solution.code.includes('Main')" severity="warn" :closable="false" icon="pi pi-info-circle">
+      <Message
+        v-if="solution.language === Language.Java" :severity="solution.code.includes('Main') ? 'info' : 'warn'"
+        :closable="false" icon="pi pi-info-circle"
+      >
         {{ t('ptoj.java_main_class_required') }}
       </Message>
       <Textarea
