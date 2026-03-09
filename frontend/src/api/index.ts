@@ -15,8 +15,6 @@ const utils = {
 const solution = {
   findOne: (data: { [key: string]: any }) =>
     instance.get(`/status/${data.sid}`, { params: data }),
-  create: (data: { [key: string]: any }) =>
-    instance.post<{ sid: number }>('/status', data),
   updateSolution: (solutionId: number, data: { judge: number }) =>
     instance.put<Enveloped<SolutionEntity>>(`/status/${solutionId}`, data),
 }

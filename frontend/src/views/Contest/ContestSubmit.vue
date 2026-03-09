@@ -2,30 +2,20 @@
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Submit from '@/components/Submit.vue'
 import { useContestStore } from '@/store/modules/contest'
-import { useSolutionStore } from '@/store/modules/solution'
-import { useMessage } from '@/utils/message'
 
-const { t } = useI18n()
-const message = useMessage()
 const contestStore = useContestStore()
-const solutionStore = useSolutionStore()
 const route = useRoute()
 const router = useRouter()
 
 const { contestId, problems, problemLabels, problemTitles } = storeToRefs(contestStore)
-const { solution } = storeToRefs(solutionStore)
-const { clearCode: reset, create } = solutionStore
 
 const problemId = computed(() => Number(route.params.problemId))
 
-async function submit () {
-  await create({ pid: problemId.value, mid: contestId.value, ...solution.value })
+function handleSubmitted () {
   router.push({ name: 'ContestMySubmissions', params: route.params })
-  message.info(t('oj.submitSuccess', { id: problemId.value }))
 }
 </script>
 
@@ -47,10 +37,6 @@ async function submit () {
     <h1 class="font-bold pt-4 text-4xl text-center" style="margin: 10px 0 20px;">
       {{ problemTitles.get(problemId) }}
     </h1>
-    <Submit :pid="String(problemId)" />
-    <div class="flex gap-4">
-      <Button :label="t('oj.submit')" icon="pi pi-send" @click="submit" />
-      <Button :label="t('oj.reset')" icon="pi pi-trash" severity="secondary" outlined @click="reset" />
-    </div>
+    <Submit :problem="problemId" :contest="contestId" @submitted="handleSubmitted" />
   </div>
 </template>

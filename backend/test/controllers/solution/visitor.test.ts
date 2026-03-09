@@ -9,7 +9,7 @@ test('Can not create solution without login', async (t) => {
   const res = await request
     .post('/api/status')
     .send({
-      pid: 1000,
+      problem: 1000,
       language: 1,
       code: 'Anything you like',
     })

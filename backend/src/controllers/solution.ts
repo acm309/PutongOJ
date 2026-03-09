@@ -4,7 +4,12 @@ import type { CourseDocument } from '../models/Course'
 import type { ProblemState } from '../policies/problem'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
-import { ErrorCode, JudgeStatus } from '@putongoj/shared'
+import {
+  ErrorCode,
+  JudgeStatus,
+  SolutionSubmitPayloadSchema,
+  SolutionSubmitResultSchema,
+} from '@putongoj/shared'
 import fse from 'fs-extra'
 import { pick } from 'lodash'
 import redis from '../config/redis'
@@ -15,7 +20,7 @@ import Solution from '../models/Solution'
 import { loadContestState } from '../policies/contest'
 import { loadCourseStateOrThrow } from '../policies/course'
 import { loadProblemState } from '../policies/problem'
-import { createEnvelopedResponse, createErrorResponse } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -75,26 +80,16 @@ export async function findOne (ctx: Context) {
  */
 const create = async (ctx: Context) => {
   const profile = await loadProfile(ctx)
-  const opt = ctx.request.body
-  const required = [ 'pid', 'code', 'language' ]
-  for (const key of required) {
-    if (!opt[key]) {
-      ctx.throw(400, `Missing parameter: ${key}`)
-    }
+  const payload = SolutionSubmitPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
   }
 
   const uid = profile.uid
-  const pid = Number.parseInt(opt.pid)
-  const code = String(opt.code)
-  const language = Number.parseInt(opt.language)
-  const mid = Number.parseInt(opt.mid) || -1
-
-  if (language < 0 || language > 6) {
-    ctx.throw(400, 'Invalid language')
-  }
-  if (code.length < 8 || code.length > 16384) {
-    ctx.throw(400, 'Code length should between 8 and 16384')
-  }
+  const pid = payload.data.problem
+  const code = payload.data.code
+  const language = payload.data.language
+  const mid = payload.data.contest ?? -1
 
   let problemState: ProblemState | null = null
   if (mid > 0) {
@@ -173,7 +168,8 @@ const create = async (ctx: Context) => {
     await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
-    ctx.body = { sid }
+    const result = SolutionSubmitResultSchema.encode({ solution: sid })
+    return createEnvelopedResponse(ctx, result)
   } catch (e: any) {
     ctx.throw(400, e.message)
   }
