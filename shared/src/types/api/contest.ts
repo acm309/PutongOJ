@@ -87,6 +87,7 @@ export const ContestDetailQueryResultSchema = z.object({
   isPublic: ContestModelSchema.shape.isPublic,
   isHidden: ContestModelSchema.shape.isHidden,
   isJury: z.boolean(),
+  allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   problems: z.array(z.object({
     index: z.number().positive(),
     problemId: ProblemModelSchema.shape.pid,
@@ -141,6 +142,7 @@ export const ContestConfigQueryResultSchema = z.object({
     problemId: ProblemModelSchema.shape.pid,
     title: ProblemModelSchema.shape.title,
   })),
+  allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.object({
     courseId: z.number(),
@@ -165,6 +167,7 @@ export const ContestConfigEditPayloadSchema = z.object({
   ipWhitelist: ContestModelSchema.shape.ipWhitelist,
   ipWhitelistEnabled: ContestModelSchema.shape.ipWhitelistEnabled,
   problems: z.array(ProblemModelSchema.shape.pid),
+  allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.number().nonnegative().nullable(),
 }).partial()

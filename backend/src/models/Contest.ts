@@ -1,4 +1,4 @@
-import { LabelingStyle, LabelingStyleValues, TITLE_LENGTH_MAX } from '@putongoj/shared'
+import { LabelingStyle, LabelingStyleValues, LanguageValues, TITLE_LENGTH_MAX } from '@putongoj/shared'
 import mongoose from '../config/db'
 import ID from './ID'
 
@@ -78,6 +78,16 @@ const contestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Problem',
   } ],
+  allowedLanguages: {
+    type: [ {
+      type: Number,
+      enum: LanguageValues,
+    } ],
+    default: null,
+    validate: {
+      validator: (v: number[] | null) => v === null || v.length > 0,
+    },
+  },
   labelingStyle: {
     type: Number,
     enum: LabelingStyleValues,

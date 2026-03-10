@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SolutionSubmitPayload } from '@putongoj/shared'
+import type { PropType } from 'vue'
 import type { Solution } from '@/types'
 import { Language } from '@putongoj/shared'
 import debounce from 'lodash.debounce'
@@ -25,6 +26,10 @@ const props = defineProps({
     type: Number,
     default: undefined,
   },
+  allowedLanguages: {
+    type: Array as PropType<Language[] | null>,
+    default: null,
+  },
 })
 
 const emit = defineEmits<{
@@ -45,14 +50,24 @@ const solution = reactive<Solution>({
 const storageKey = computed(() => props.contest == null ? `problem:${props.problem}` : `contest:${props.contest}:problem:${props.problem}`)
 
 const languages = computed(() =>
-  languagesOrder.map(key => ({
-    value: key,
-    label: languageLabels[key],
-  })),
+  languagesOrder
+    .filter(key => props.allowedLanguages == null || props.allowedLanguages.includes(key))
+    .map(key => ({
+      value: key,
+      label: languageLabels[key],
+    })),
 )
 
+const defaultLanguage = computed<Language | null>(() => languages.value[0]?.value ?? null)
+
+function isLanguageAllowed (language: Solution['language']) {
+  return language != null && (props.allowedLanguages == null || props.allowedLanguages.includes(language))
+}
+
 function resetSolution (nextSolution?: Partial<Solution>) {
-  solution.language = nextSolution?.language ?? null
+  solution.language = isLanguageAllowed(nextSolution?.language ?? null)
+    ? nextSolution!.language!
+    : defaultLanguage.value
   solution.code = nextSolution?.code ?? ''
 }
 
@@ -147,6 +162,15 @@ const persistSolution = debounce((updatedSolution: Solution) => {
 watch(
   solution,
   updatedSolution => persistSolution(updatedSolution),
+  { deep: true },
+)
+watch(
+  () => props.allowedLanguages,
+  () => {
+    if (solution.language != null && !isLanguageAllowed(solution.language)) {
+      solution.language = defaultLanguage.value
+    }
+  },
   { deep: true },
 )
 watch(() => [ props.problem, props.contest ], init, { immediate: true })

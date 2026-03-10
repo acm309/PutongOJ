@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LabelingStyle, ParticipationStatus } from '@/consts/index.js'
+import { LabelingStyle, Language, ParticipationStatus } from '@/consts/index.js'
 import { TITLE_LENGTH_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
 import { ObjectIdSchema } from '../utils.js'
@@ -42,6 +42,8 @@ export const ContestModelSchema = z.object({
 
   /** List of problems in the contest */
   problems: z.array(ObjectIdSchema),
+  /** Allowed submission languages, null if unrestricted */
+  allowedLanguages: z.array(z.enum(Language)).min(1).nullable(),
   /** Labeling style for problems */
   labelingStyle: z.enum(LabelingStyle),
 

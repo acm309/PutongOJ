@@ -1,3 +1,4 @@
+import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -125,6 +126,7 @@ test.serial('Get contest detail: admin is jury', async (t) => {
   t.is(res.body.data.contestId, contestId)
   t.is(res.body.data.title, baseContest.title)
   t.true(res.body.data.isJury)
+  t.is(res.body.data.allowedLanguages, null)
   t.true(Array.isArray(res.body.data.problems))
 })
 
@@ -151,8 +153,51 @@ test.serial('Get contest config: returns full config', async (t) => {
   t.true(Array.isArray(cfg.allowedUsers))
   t.true(Array.isArray(cfg.allowedGroups))
   t.true(Array.isArray(cfg.problems))
+  t.is(cfg.allowedLanguages, null)
   t.true(Array.isArray(cfg.ipWhitelist))
   t.is(typeof cfg.ipWhitelistEnabled, 'boolean')
+})
+
+test.serial('Update contest config: set allowed languages', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ allowedLanguages: [ Language.Cpp17, Language.Python ] })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request.get(`/api/contests/${contestId}/configs`)
+  t.deepEqual(verify.body.data.allowedLanguages, [ Language.Cpp17, Language.Python ])
+
+  const detail = await request.get(`/api/contests/${contestId}`)
+  t.deepEqual(detail.body.data.allowedLanguages, [ Language.Cpp17, Language.Python ])
+})
+
+test.serial('Update contest config: clear allowed languages restriction', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ allowedLanguages: null })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request.get(`/api/contests/${contestId}/configs`)
+  t.is(verify.body.data.allowedLanguages, null)
+})
+
+test.serial('Update contest config: empty allowed languages returns error', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ allowedLanguages: [] })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
 })
 
 // ─── PUT /api/contests/:contestId/configs ────────────────────────────────────

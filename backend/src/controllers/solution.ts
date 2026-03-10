@@ -122,6 +122,9 @@ const create = async (ctx: Context) => {
     if (!contest.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
       ctx.throw(400, 'No such a problem in the contest')
     }
+    if (contest.allowedLanguages && !contest.allowedLanguages.includes(language)) {
+      ctx.throw(400, 'This language is not allowed in the contest')
+    }
   } else {
     problemState = await loadProblemState(ctx, pid)
     if (!problemState) {

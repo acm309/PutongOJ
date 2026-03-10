@@ -85,6 +85,9 @@ export enum Language {
   Python = 4,
 }
 
+export const LanguageValues = Object.values(Language)
+  .filter(value => typeof value === 'number') as number[]
+
 export enum ExportFormat {
   JSON_UTF8 = 'json-utf8',
   CSV_UTF8 = 'csv-utf8',

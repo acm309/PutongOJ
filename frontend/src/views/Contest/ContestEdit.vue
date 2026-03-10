@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContestConfigEditPayload, ContestConfigQueryResult } from '@putongoj/shared'
+import type { ContestConfigEditPayload, ContestConfigQueryResult, Language } from '@putongoj/shared'
 import { LabelingStyle } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -10,6 +10,7 @@ import IftaLabel from 'primevue/iftalabel'
 import InputGroup from 'primevue/inputgroup'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
+import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -17,12 +18,15 @@ import { getConfig, updateConfig } from '@/api/contest'
 import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useProblemStore } from '@/store/modules/problem'
+import { languageOptions, languagesOrder } from '@/utils/constant'
 import { useMessage } from '@/utils/message'
 
 type ContestConfigForm = Required<Pick<ContestConfigEditPayload, 'title'
   | 'startsAt' | 'endsAt' | 'scoreboardFrozenAt' | 'scoreboardUnfrozenAt'
   | 'isHidden' | 'isPublic' | 'password'
-  | 'labelingStyle'>>
+  | 'labelingStyle'>> & {
+    allowedLanguages: Language[]
+  }
 
 const { t } = useI18n()
 const message = useMessage()
@@ -36,6 +40,7 @@ const form = ref<ContestConfigForm | null>(null)
 const problems = ref<ContestConfigQueryResult['problems']>([])
 const problemToAdd = ref<number | null>(null)
 const enablePassword = ref(false)
+const languageRestrictionEnabled = ref(false)
 
 const loading = ref(false)
 const savingBasicInfo = ref(false)
@@ -54,6 +59,14 @@ function makeIpEntry (cidr = '', comment: string | null = null) {
 function onIpWhitelistRowEditSave (event: any) {
   const { newData, index } = event
   ipWhitelist.value[index] = newData
+}
+
+function normalizeAllowedLanguages (languages: Language[] | null | undefined, enabled: boolean) {
+  if (!enabled) {
+    return null
+  }
+
+  return [ ...(languages ?? []) ].sort((a, b) => languagesOrder.indexOf(a) - languagesOrder.indexOf(b))
 }
 
 function onIpWhitelistAddEntry () {
@@ -93,8 +106,11 @@ const problemsDirty = computed(() => {
   if (!form.value || !contestConfig.value) return false
   const currentProblemIds = contestConfig.value.problems.map(p => p.problemId) || []
   const newProblemIds = problems.value.map(p => p.problemId)
+  const originalAllowedLanguages = contestConfig.value.allowedLanguages
+  const nextAllowedLanguages = normalizeAllowedLanguages(form.value.allowedLanguages, languageRestrictionEnabled.value)
   return (
     form.value.labelingStyle !== contestConfig.value.labelingStyle
+    || JSON.stringify(originalAllowedLanguages) !== JSON.stringify(nextAllowedLanguages)
     || JSON.stringify(currentProblemIds) !== JSON.stringify(newProblemIds)
   )
 })
@@ -119,9 +135,11 @@ async function fetch () {
     isPublic: resp.data.isPublic,
     password: resp.data.password || '',
     labelingStyle: resp.data.labelingStyle,
+    allowedLanguages: resp.data.allowedLanguages ? [ ...resp.data.allowedLanguages ] : [],
   }
   problems.value = resp.data.problems.map(p => ({ ...p }))
   enablePassword.value = !!resp.data.password
+  languageRestrictionEnabled.value = resp.data.allowedLanguages !== null
   ipWhitelistEnabled.value = resp.data.ipWhitelistEnabled
   ipWhitelist.value = (resp.data.ipWhitelist ?? []).map(e => makeIpEntry(e.cidr, e.comment))
 }
@@ -240,10 +258,19 @@ async function onSaveAccess () {
 
 async function onSaveProblems () {
   if (!form.value || !contestConfig.value) return
+  if (languageRestrictionEnabled.value && form.value.allowedLanguages.length === 0) {
+    message.error(t('ptoj.failed_update_contest'), t('ptoj.select_at_least_one_language'))
+    return
+  }
 
   const payload: Partial<ContestConfigEditPayload> = {}
   if (form.value.labelingStyle !== contestConfig.value.labelingStyle) {
     payload.labelingStyle = form.value.labelingStyle
+  }
+
+  const nextAllowedLanguages = normalizeAllowedLanguages(form.value.allowedLanguages, languageRestrictionEnabled.value)
+  if (JSON.stringify(contestConfig.value.allowedLanguages) !== JSON.stringify(nextAllowedLanguages)) {
+    payload.allowedLanguages = nextAllowedLanguages
   }
 
   const currentProblemIds = problems.value.map(p => p.problemId)
@@ -436,6 +463,19 @@ onMounted(() => {
           ]" option-label="label" option-value="value" fluid
         />
         <label for="scoreboardUnfrozenAt">{{ t('ptoj.labeling_style') }}</label>
+      </IftaLabel>
+
+      <LabeledSwitch
+        v-model="languageRestrictionEnabled" :label="t('ptoj.restrict_submission_languages')"
+        :description="t('ptoj.restrict_submission_languages_desc')"
+      />
+
+      <IftaLabel v-if="languageRestrictionEnabled">
+        <MultiSelect
+          v-model="form.allowedLanguages" :options="languageOptions" option-label="label"
+          option-value="value" fluid
+        />
+        <label for="allowedLanguages">{{ t('ptoj.language') }}</label>
       </IftaLabel>
 
       <div class="flex gap-3 justify-end md:col-span-2">

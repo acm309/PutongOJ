@@ -10,7 +10,7 @@ const contestStore = useContestStore()
 const route = useRoute()
 const router = useRouter()
 
-const { contestId, problems, problemLabels, problemTitles } = storeToRefs(contestStore)
+const { contest, contestId, problems, problemLabels, problemTitles } = storeToRefs(contestStore)
 
 const problemId = computed(() => Number(route.params.problemId))
 
@@ -37,6 +37,6 @@ function handleSubmitted () {
     <h1 class="font-bold pt-4 text-4xl text-center" style="margin: 10px 0 20px;">
       {{ problemTitles.get(problemId) }}
     </h1>
-    <Submit :problem="problemId" :contest="contestId" @submitted="handleSubmitted" />
+    <Submit :problem="problemId" :contest="contestId" :allowed-languages="contest.allowedLanguages" @submitted="handleSubmitted" />
   </div>
 </template>
