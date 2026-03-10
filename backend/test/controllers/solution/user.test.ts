@@ -12,6 +12,8 @@ const adminRequest = supertest.agent(server)
 
 let sid = null
 let contestId: number | null = null
+let futureContestId: number | null = null
+let endedContestId: number | null = null
 
 test.before(async (t) => {
   const adminLogin = await adminRequest
@@ -49,11 +51,61 @@ test.before(async (t) => {
   t.is(updatedContest.status, 200)
   t.true(updatedContest.body.success)
 
+  const createdFutureContest = await adminRequest
+    .post('/api/contests')
+    .send({
+      title: 'Solution Future Contest',
+      startsAt: new Date(Date.now() + 60 * 60_000).toISOString(),
+      endsAt: new Date(Date.now() + 2 * 60 * 60_000).toISOString(),
+      isHidden: false,
+      isPublic: true,
+    })
+  t.is(createdFutureContest.status, 200)
+  t.true(createdFutureContest.body.success)
+  futureContestId = createdFutureContest.body.data.contestId
+
+  const updatedFutureContest = await adminRequest
+    .put(`/api/contests/${futureContestId}/configs`)
+    .send({ problems: [ 1000 ] })
+  t.is(updatedFutureContest.status, 200)
+  t.true(updatedFutureContest.body.success)
+
+  const createdEndedContest = await adminRequest
+    .post('/api/contests')
+    .send({
+      title: 'Solution Ended Contest',
+      startsAt: new Date(Date.now() - 2 * 60 * 60_000).toISOString(),
+      endsAt: new Date(Date.now() - 60 * 60_000).toISOString(),
+      isHidden: false,
+      isPublic: true,
+    })
+  t.is(createdEndedContest.status, 200)
+  t.true(createdEndedContest.body.success)
+  endedContestId = createdEndedContest.body.data.contestId
+
+  const updatedEndedContest = await adminRequest
+    .put(`/api/contests/${endedContestId}/configs`)
+    .send({ problems: [ 1000 ] })
+  t.is(updatedEndedContest.status, 200)
+  t.true(updatedEndedContest.body.success)
+
   const participate = await request
     .post(`/api/contests/${contestId}/participation`)
     .send({})
   t.is(participate.status, 200)
   t.true(participate.body.success)
+
+  const participateFuture = await request
+    .post(`/api/contests/${futureContestId}/participation`)
+    .send({})
+  t.is(participateFuture.status, 200)
+  t.true(participateFuture.body.success)
+
+  const participateEnded = await request
+    .post(`/api/contests/${endedContestId}/participation`)
+    .send({})
+  t.is(participateEnded.status, 200)
+  t.true(participateEnded.body.success)
 })
 
 test.serial('Submit a solution', async (t) => {
@@ -216,6 +268,64 @@ test.serial('Contest submission accepts allowed language', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
+})
+
+test.serial('Contest submission is rejected before the contest starts', async (t) => {
+  if (!futureContestId) {
+    return t.fail('No futureContestId from setup')
+  }
+
+  const code = `
+    #include <iostream>
+
+    int main() {
+      std::cout << 0 << std::endl;
+      return 0;
+    }
+  `
+
+  const res = await request
+    .post('/api/status/')
+    .send({
+      problem: 1000,
+      contest: futureContestId,
+      code,
+      language: Language.Cpp17,
+    })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 403)
+  t.is(res.body.message, 'Permission denied')
+})
+
+test.serial('Contest submission is rejected after the contest ends', async (t) => {
+  if (!endedContestId) {
+    return t.fail('No endedContestId from setup')
+  }
+
+  const code = `
+    #include <iostream>
+
+    int main() {
+      std::cout << 0 << std::endl;
+      return 0;
+    }
+  `
+
+  const res = await request
+    .post('/api/status/')
+    .send({
+      problem: 1000,
+      contest: endedContestId,
+      code,
+      language: Language.Cpp17,
+    })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 400)
+  t.is(res.body.message, 'Contest is ended!')
 })
 
 test.after.always('close server', () => {

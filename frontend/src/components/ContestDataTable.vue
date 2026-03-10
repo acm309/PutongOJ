@@ -56,11 +56,19 @@ enum ApplyStatus {
   NeedPassword,
   CannotApply,
   IpBlocked,
+  WaitingStart,
 }
 
 const applyStatus = computed(() => {
   if (!details.value) {
     return ApplyStatus.CannotApply
+  }
+  if (
+    details.value.participation !== ParticipationStatus.NotApplied
+    && !details.value.isJury
+    && !details.value.hasStarted
+  ) {
+    return ApplyStatus.WaitingStart
   }
   if (details.value.participation !== ParticipationStatus.NotApplied) {
     return ApplyStatus.CannotApply
@@ -106,7 +114,7 @@ async function onOpenContest (contestId: number) {
   password.value = ''
 
   if (
-    details.value.participation === ParticipationStatus.Approved
+    (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted)
     || details.value.isJury
   ) {
     gotoContest(contestId)
@@ -128,7 +136,24 @@ async function onSubmit () {
     message.error(t('ptoj.failed_join_contest'), t('ptoj.failed_join_contest_detail'))
     return
   }
-  gotoContest(currentContestId.value!)
+
+  const refreshed = await getParticipation(currentContestId.value!)
+  if (refreshed.success) {
+    details.value = refreshed.data
+  } else {
+    details.value.participation = ParticipationStatus.Approved
+  }
+
+  if (details.value.isJury || (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted)) {
+    gotoContest(currentContestId.value!)
+    return
+  }
+
+  closeDialog()
+  message.success(
+    t('ptoj.successful_join_contest'),
+    t('ptoj.successful_join_contest_waiting_start_detail'),
+  )
 }
 </script>
 
@@ -225,6 +250,9 @@ async function onSubmit () {
       </div>
       <div v-else-if="applyStatus === ApplyStatus.IpBlocked" class="text-muted-color">
         {{ t('ptoj.participate_contest_ip_blocked') }}
+      </div>
+      <div v-else-if="applyStatus === ApplyStatus.WaitingStart" class="text-muted-color">
+        {{ t('ptoj.participate_contest_joined_waiting_start') }}
       </div>
       <div v-else class="text-muted-color">
         {{ t('ptoj.participate_contest_cannot_apply') }}

@@ -14,6 +14,14 @@ export interface ContestState {
   participation: ParticipationStatus
   isJury: boolean
   isIpBlocked: boolean
+  hasStarted: boolean
+  hasEnded: boolean
+}
+
+function getContestTimingState (contest: WithId<ContestModel>, now = new Date()) {
+  const hasStarted = contest.startsAt <= now
+  const hasEnded = contest.endsAt < now
+  return { hasStarted, hasEnded }
 }
 
 export async function loadContestState (ctx: Context, inputId?: number | string) {
@@ -52,8 +60,10 @@ export async function loadContestState (ctx: Context, inputId?: number | string)
     : false
 
   // whether accessible to the contents of the contest
-  const accessible = (participation === ParticipationStatus.Approved || isJury) && !isIpBlocked
-  const state: ContestState = { contest, participation, isJury, accessible, isIpBlocked }
+  const qualified = (participation === ParticipationStatus.Approved || isJury) && !isIpBlocked
+  const { hasStarted, hasEnded } = getContestTimingState(contest)
+  const accessible = qualified && (hasStarted || isJury)
+  const state: ContestState = { contest, participation, isJury, accessible, isIpBlocked, hasStarted, hasEnded }
 
   ctx.state.contest = state
   return state

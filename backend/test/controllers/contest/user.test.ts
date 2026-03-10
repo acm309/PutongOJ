@@ -17,6 +17,8 @@ const state = {
   publicContestId: undefined as number | undefined,
   passwordContestId: undefined as number | undefined,
   ipBlockedContestId: undefined as number | undefined,
+  futureContestId: undefined as number | undefined,
+  endedContestId: undefined as number | undefined,
 }
 
 const now = Date.now()
@@ -67,6 +69,32 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
     .put(`/api/contests/${state.ipBlockedContestId}/configs`)
     .send({ ipWhitelistEnabled: true, ipWhitelist: [] })
 
+  const futureContestRes = await adminAgent
+    .post('/api/contests')
+    .send({
+      ...makeContest({ title: 'User Future Contest', isPublic: true }),
+      startsAt: new Date(now + 60 * 60_000).toISOString(),
+      endsAt: new Date(now + 3 * 60 * 60_000).toISOString(),
+    })
+  t.true(futureContestRes.body.success)
+  state.futureContestId = futureContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.futureContestId}/configs`)
+    .send({ problems: [ 1000 ] })
+
+  const endedContestRes = await adminAgent
+    .post('/api/contests')
+    .send({
+      ...makeContest({ title: 'User Ended Contest', isPublic: true }),
+      startsAt: new Date(now - 3 * 60 * 60_000).toISOString(),
+      endsAt: new Date(now - 60 * 60_000).toISOString(),
+    })
+  t.true(endedContestRes.body.success)
+  state.endedContestId = endedContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.endedContestId}/configs`)
+    .send({ problems: [ 1000 ] })
+
   // Login as primaryuser
   const userLogin = await userAgent
     .post('/api/account/login')
@@ -103,6 +131,19 @@ test.serial('Participation status: NotApplied before joining', async (t) => {
   t.true(res.body.data.canParticipate)
   t.false(res.body.data.isJury)
   t.false(res.body.data.isIpBlocked)
+  t.true(res.body.data.hasStarted)
+})
+
+test.serial('Participation status: future contest reports hasStarted=false', async (t) => {
+  if (!state.futureContestId) { return t.fail('No futureContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.futureContestId}/participation`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.true(res.body.data.canParticipate)
+  t.false(res.body.data.hasStarted)
 })
 
 // ─── POST /api/contests/:contestId/participation ─────────────────────────────
@@ -128,6 +169,77 @@ test.serial('Participate in public contest: already participated returns error',
   t.is(res.status, 200)
   t.false(res.body.success)
   t.is(res.body.code, 400)
+})
+
+test.serial('Participate in future contest before start: succeeds', async (t) => {
+  if (!state.futureContestId) { return t.fail('No futureContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.futureContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Future contest detail remains inaccessible before start', async (t) => {
+  if (!state.futureContestId) { return t.fail('No futureContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.futureContestId}`)
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
+test.serial('Future contest ranklist remains inaccessible before start', async (t) => {
+  if (!state.futureContestId) { return t.fail('No futureContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.futureContestId}/ranklist`)
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
+test.serial('Future contest discussions remain inaccessible before start', async (t) => {
+  if (!state.futureContestId) { return t.fail('No futureContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.futureContestId}/discussions`)
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
+test.serial('Participate in ended contest after finish: succeeds', async (t) => {
+  if (!state.endedContestId) { return t.fail('No endedContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.endedContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Ended contest detail is accessible after joining', async (t) => {
+  if (!state.endedContestId) { return t.fail('No endedContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.endedContestId}`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.contestId, state.endedContestId)
+})
+
+test.serial('Ended contest ranklist is accessible after joining', async (t) => {
+  if (!state.endedContestId) { return t.fail('No endedContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.endedContestId}/ranklist`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
 })
 
 // ─── GET /api/contests/:contestId after participation ────────────────────────

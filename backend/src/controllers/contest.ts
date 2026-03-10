@@ -80,7 +80,7 @@ async function getParticipation (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
 
-  const { contest, participation, isJury, isIpBlocked } = state
+  const { contest, participation, isJury, isIpBlocked, hasStarted } = state
   const profile = await loadProfile(ctx)
   let canParticipate: boolean = false
   let canParticipateByPassword: boolean = false
@@ -102,7 +102,7 @@ async function getParticipation (ctx: Context) {
   }
 
   const result = ContestParticipationQueryResultSchema.encode({
-    isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked,
+    isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked, hasStarted,
   })
   return createEnvelopedResponse(ctx, result)
 }
