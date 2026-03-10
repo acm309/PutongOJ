@@ -238,20 +238,34 @@ async function getConfig (ctx: Context) {
   }
   const { contest } = state
 
-  const allowedUsers = (await User
-    .find({ _id: { $in: contest.allowedUsers } })
-    .select([ 'uid', 'nick' ])
-    .lean()).map(({ uid, nick }) => ({ username: uid, nickname: nick }))
-  const allowedGroups = (await Group
-    .find({ _id: { $in: contest.allowedGroups } })
-    .select([ 'gid', 'title' ])
-    .lean()).map(({ gid, title }) => ({ groupId: gid, name: title }))
-  const problems = (await Problem
-    .find({ _id: { $in: contest.problems } })
-    .select([ 'pid', 'title' ])
-    .lean()).sort((a, b) => {
-    return contest.problems.indexOf(a._id) - contest.problems.indexOf(b._id)
-  }).map(({ pid, title }) => ({ problemId: pid, title }))
+  const [ allowedUsers, allowedGroups, problems ] = await Promise.all([
+    (async () => {
+      const users = await User
+        .find({ _id: { $in: contest.allowedUsers } })
+        .select({ _id: 0, uid: 1, nick: 1 })
+        .lean()
+      return users.map(({ uid, nick }) => ({ username: uid, nickname: nick }))
+    })(),
+    (async () => {
+      const groups = await Group
+        .find({ _id: { $in: contest.allowedGroups } })
+        .select({ _id: 0, gid: 1, title: 1 })
+        .lean()
+      return groups.map(({ gid, title }) => ({ groupId: gid, name: title }))
+    })(),
+    (async () => {
+      const problems = await Problem
+        .find({ _id: { $in: contest.problems } })
+        .select({ _id: 1, pid: 1, title: 1 })
+        .lean()
+      return problems
+        .map(({ _id, pid, title }) => ({
+          index: contest.problems.findIndex((p: Types.ObjectId) => p.equals(_id)),
+          problemId: pid, title,
+        }))
+        .sort((a, b) => a.index - b.index)
+    })(),
+  ])
 
   const ipWhitelist = (contest.ipWhitelist ?? []).map((entry: any) => ({
     cidr: entry.cidr,
