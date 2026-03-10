@@ -79,13 +79,11 @@
   "input_format": "输入输出格式",
   "input_format_explanation": "一般情况下应该使输入输出保持简单",
   "invalid_position": "无效位置。请输入有效位置。",
-  "java_class_alert": "请确保你的 Java 程序的 main 函数在一个名为 \"Main\" 的类中。",
   "join_code": "邀请码",
   "join_code_length": "邀请码长度必须在 6 到 20 个字符之间",
   "last_update": "上次更新",
   "login": "登录",
   "memory_label": "内存：",
-  "move": "移动",
   "move_problem": "移动问题",
   "my_submissions": "我的提交",
   "name": "名称",
@@ -118,7 +116,6 @@
   "select_a_course": "选择课程",
   "similar_to": "相似于",
   "similarity": "相似度",
-  "sorting": "排序",
   "statistics": "统计",
   "steps_of_create_a_problem": "创建题目的步骤",
   "submit": "提交",
@@ -136,6 +133,5 @@
   "unknown_error": "发生未知错误。",
   "unrelated_to_any_course": "不属于任何课程",
   "update_problem_sorting": "更新问题排序",
-  "username": "用户名",
-  "visible": "可见"
+  "username": "用户名"
 }

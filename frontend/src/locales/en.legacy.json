@@ -79,13 +79,11 @@
   "input_format": "Input Format",
   "input_format_explanation": "The format should be easy to understand",
   "invalid_position": "Invalid position. Please enter a valid position.",
-  "java_class_alert": "Ensure your Java program's main function is within a class named \"Main\".",
   "join_code": "Join Code",
   "join_code_length": "Join code must be between 6 and 20 characters",
   "last_update": "Last Update",
   "login": "Login",
   "memory_label": "Memory:",
-  "move": "Move",
   "move_problem": "Move problem",
   "my_submissions": "My submissions",
   "name": "Name",
@@ -118,7 +116,6 @@
   "select_a_course": "Select a course",
   "similar_to": "Similar to",
   "similarity": "Similarity",
-  "sorting": "Sorting",
   "statistics": "Statistics",
   "steps_of_create_a_problem": "Steps of creating a problem",
   "submit": "Submit",
@@ -136,6 +133,5 @@
   "unknown_error": "Unknown error occurred.",
   "unrelated_to_any_course": "Unrelated to any course",
   "update_problem_sorting": "Update Problem Sorting",
-  "username": "Username",
-  "visible": "Visible"
+  "username": "Username"
 }
