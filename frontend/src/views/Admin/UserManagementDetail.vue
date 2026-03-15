@@ -486,7 +486,7 @@ onRouteParamUpdate(fetch)
 
               <Button
                 class="shrink-0" :label="t('ptoj.logout')" severity="danger" outlined
-                :disabled="session.current" @click="revokeUserSessionById(session.sessionId)"
+                :disabled="!canOperate || session.current" @click="revokeUserSessionById(session.sessionId)"
               />
             </div>
           </template>
@@ -495,7 +495,7 @@ onRouteParamUpdate(fetch)
         <div class="flex justify-end mt-6">
           <Button
             :label="t('ptoj.logout_all_sessions')" icon="pi pi-sign-out" severity="danger" outlined
-            :disabled="sessions.length === 0" @click="confirmRevokeAllUserSessions"
+            :disabled="!canOperate || sessions.length === 0" @click="confirmRevokeAllUserSessions"
           />
         </div>
       </div>

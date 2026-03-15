@@ -159,10 +159,12 @@ export async function removeUserOAuthConnection (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'No such OAuth provider')
   }
   const provider = providerMap[providerName as keyof typeof providerMap]
+
   const user = await loadEditingUser(ctx)
   if (!user) {
     return
   }
+
   const result = await oauthService.removeOAuthConnection(user._id, provider)
   if (!result) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
@@ -480,8 +482,12 @@ export async function listUserSessions (ctx: Context) {
 }
 
 export async function revokeUserSession (ctx: Context) {
+  const user = await loadEditingUser(ctx)
+  if (!user) {
+    return
+  }
+
   const profile = await loadProfile(ctx)
-  const user = await loadUser(ctx)
   const { sessionId } = ctx.params
   if (!sessionId || typeof sessionId !== 'string') {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid session ID')
@@ -496,8 +502,12 @@ export async function revokeUserSession (ctx: Context) {
 }
 
 export async function revokeUserAllSessions (ctx: Context) {
+  const user = await loadEditingUser(ctx)
+  if (!user) {
+    return
+  }
+
   const profile = await loadProfile(ctx)
-  const user = await loadUser(ctx)
 
   const keepSessionId = user.uid === profile.uid ? ctx.state.sessionId : ''
   const removed = await sessionService.revokeOtherSessions(user._id.toString(), keepSessionId || '')
