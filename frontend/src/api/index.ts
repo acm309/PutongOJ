@@ -8,7 +8,6 @@ import { instance } from './instance'
 export * from './instance'
 
 const utils = {
-  getWebsiteInformaton: () => instance.get('/website'),
   getTime: () => instance.get<TimeResp>('/servertime'),
 }
 

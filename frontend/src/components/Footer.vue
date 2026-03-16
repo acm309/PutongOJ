@@ -11,11 +11,7 @@ import { useHumanLanguage } from '@/utils/helper'
 const { locale } = useI18n()
 const rootStore = useRootStore()
 const selectedLang = useHumanLanguage()
-const {
-  website: backend,
-  currentTime,
-  timeDiff,
-} = storeToRefs(rootStore)
+const { config, currentTime, timeDiff } = storeToRefs(rootStore)
 
 const versionDialogVisible = ref(false)
 const serverTime = computed(() => {
@@ -71,9 +67,9 @@ onMounted(() => {
       <div>
         <div class="flex justify-between">
           <span class="font-bold">Backend</span>
-          <span>#{{ backend.buildSHA }}</span>
+          <span>#{{ config.backendVersion.commitHash }}</span>
         </div>
-        <div>Built at {{ timePretty(backend.buildTime, 'yyyy-MM-dd\'T\'HH:mm:ssXXX') }}</div>
+        <div>Built at {{ timePretty(config.backendVersion.buildAt, 'yyyy-MM-dd\'T\'HH:mm:ssXXX') }}</div>
       </div>
       <div>
         <div class="flex justify-between">

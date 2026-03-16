@@ -1,23 +1,15 @@
-import type { OAuthProvider } from '@putongoj/shared/dist/consts'
+import type { PublicConfigQueryResult } from '@putongoj/shared'
 import { defineStore } from 'pinia'
 import vditorInfo from 'vditor/package.json'
 import api from '@/api'
+import { getPublicConfig } from '@/api/utils'
 import { setServerPublicKey } from '@/utils/crypto'
-
-interface WebsiteInformation {
-  title: string
-  buildSHA: string
-  buildTime: number
-  apiPublicKey: string
-  oauthEnabled: Record<OAuthProvider, boolean>
-  helpDocURL?: string
-}
 
 export const useRootStore = defineStore('root', {
   state: () => ({
     currentTime: Date.now(),
     timeDiff: Number.NaN,
-    website: {} as WebsiteInformation,
+    config: {} as PublicConfigQueryResult,
     vditorCDN: `${location.origin}/static/vditor-${vditorInfo.version}`,
     // Todo: remove
     status: {
@@ -35,7 +27,7 @@ export const useRootStore = defineStore('root', {
       if (!payload?.title) {
         return
       }
-      window.document.title = `${payload.title} | ${this.website.title}`
+      window.document.title = `${payload.title} | ${this.config.name}`
     },
     async fetchTime () {
       const time1 = Date.now()
@@ -58,10 +50,14 @@ export const useRootStore = defineStore('root', {
         }, 1000)
       }, 1000 - this.currentTime % 1000)
     },
-    async fetchWebsiteConfig () {
-      const { data } = await api.getWebsiteInformaton()
-      this.website = data
-      setServerPublicKey(this.website.apiPublicKey)
+    async fetchPublicConfig () {
+      const { success, data } = await getPublicConfig()
+      if (!success) {
+        return
+      }
+
+      this.config = data
+      setServerPublicKey(data.apiPublicKey)
     },
   },
 })

@@ -11,8 +11,8 @@ utilsRouter.post('/upload',
 utilsRouter.get('/servertime',
   utilsController.serverTime,
 )
-utilsRouter.get('/website',
-  utilsController.websiteInformation,
+utilsRouter.get('/config',
+  utilsController.getPublicConfig,
 )
 utilsRouter.get('/websocket/token',
   authnMiddleware.loginRequire,

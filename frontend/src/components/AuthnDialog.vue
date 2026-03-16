@@ -24,7 +24,7 @@ const message = useMessage()
 const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 
-const { website } = storeToRefs(rootStore)
+const { config } = storeToRefs(rootStore)
 const { authnDialog } = storeToRefs(sessionStore)
 
 enum AuthnDialogTab {
@@ -37,7 +37,7 @@ const currentTab = ref(AuthnDialogTab.LOGIN)
 const authnDialogVisible = ref(false)
 
 const isLogin = computed(() => currentTab.value === AuthnDialogTab.LOGIN)
-const hasOAuthEnabled = computed(() => Object.values(website.value.oauthEnabled).includes(true))
+const hasOAuthEnabled = computed(() => Object.values(config.value.oauthEnabled).includes(true))
 
 const formData = ref({
   username: '',
@@ -194,7 +194,7 @@ watch(authnDialogVisible, (newValue) => {
 
     <div v-if="hasOAuthEnabled && isLogin">
       <Button
-        v-if="website.oauthEnabled.CJLU" severity="secondary" size="large" outlined fluid
+        v-if="config.oauthEnabled.CJLU" severity="secondary" size="large" outlined fluid
         @click="handleOAuthLogin('cjlu')"
       >
         {{ t('ptoj.cjlu_sso') }}

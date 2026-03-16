@@ -27,7 +27,7 @@ const hasExtraHeader = computed(() => {
   )
 })
 
-const { website } = storeToRefs(rootStore)
+const { config } = storeToRefs(rootStore)
 const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
@@ -65,11 +65,11 @@ const menuItems = computed(() => {
     route: 'Discussions',
   })
 
-  if (website.value!.helpDocURL) {
+  if (config.value.helpDocURL) {
     items.push({
       label: t('ptoj.help'),
       icon: 'pi pi-question-circle',
-      url: website.value!.helpDocURL,
+      url: config.value.helpDocURL,
       target: '_blank',
     })
   }

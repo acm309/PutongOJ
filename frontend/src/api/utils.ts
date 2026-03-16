@@ -1,5 +1,9 @@
-import type { AvatarPresetsQueryResult } from '@putongoj/shared'
+import type { AvatarPresetsQueryResult, PublicConfigQueryResult } from '@putongoj/shared'
 import { instanceSafe as instance } from './instance'
+
+export async function getPublicConfig () {
+  return instance.get<PublicConfigQueryResult>('/config')
+}
 
 export async function getWebSocketToken () {
   return instance.get<{ token: string }>('/websocket/token')

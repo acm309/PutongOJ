@@ -1,25 +1,30 @@
-import type { OAuthProvider } from '@putongoj/shared'
 import type { Context } from 'koa'
 import path from 'node:path'
-import { AvatarPresetsQueryResultSchema } from '@putongoj/shared'
+import { env } from 'node:process'
+import { AvatarPresetsQueryResultSchema, PublicConfigQueryResultSchema } from '@putongoj/shared'
 import fse from 'fs-extra'
 import { v4 } from 'uuid'
 import { globalConfig } from '../config'
 import redis from '../config/redis'
-import websiteConf from '../config/website'
 import { loadProfile } from '../middlewares/authn'
 import cryptoService from '../services/crypto'
 import { settingsService } from '../services/settings'
 import { createEnvelopedResponse } from '../utils'
 
-export interface WebsiteInformation {
-  title: string
-  buildSHA: string
-  buildTime: number
-  apiPublicKey: string
-  oauthEnabled: Record<OAuthProvider, boolean>
-  helpDocURL?: string
+function parseBuildTime (): Date | null {
+  const buildTimeStr = env.NODE_BUILD_TIME
+  if (!buildTimeStr) {
+    return null
+  }
+  const timestamp = Date.parse(buildTimeStr)
+  if (Number.isNaN(timestamp)) {
+    return null
+  }
+  return new Date(timestamp)
 }
+
+const commitHash = env.NODE_BUILD_SHA || 'unknown'
+const buildAt = parseBuildTime()
 
 const uploadDir = path.join(__dirname, '../../public/uploads')
 
@@ -53,17 +58,23 @@ const serverTime = (ctx: Context) => {
   }
 }
 
-const websiteInformation = async (ctx: Context) => {
-  const result: WebsiteInformation = {
-    ...websiteConf,
-    apiPublicKey: await cryptoService.getServerPublicKey(),
-    oauthEnabled: {
-      CJLU: globalConfig.oauthConfigs.CJLU.enabled,
-      Codeforces: globalConfig.oauthConfigs.Codeforces.enabled,
+export async function getPublicConfig (ctx: Context) {
+  const { helpDocURL, oauthConfigs } = globalConfig
+  const apiPublicKey = await cryptoService.getServerPublicKey()
+  const result = PublicConfigQueryResultSchema.encode({
+    name: 'Putong OJ',
+    backendVersion: {
+      commitHash,
+      buildAt: buildAt || new Date(),
     },
-    helpDocURL: globalConfig.helpDocURL,
-  }
-  ctx.body = result
+    apiPublicKey,
+    oauthEnabled: {
+      CJLU: oauthConfigs.CJLU.enabled,
+      Codeforces: oauthConfigs.Codeforces.enabled,
+    },
+    helpDocURL,
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function getWebSocketToken (ctx: Context) {
@@ -82,7 +93,7 @@ export async function getAvatarPresets (ctx: Context) {
 const utilsController = {
   upload,
   serverTime,
-  websiteInformation,
+  getPublicConfig,
   getWebSocketToken,
   getAvatarPresets,
 } as const

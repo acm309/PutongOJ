@@ -45,7 +45,7 @@ app.directive('tooltip', Tooltip)
 
 Promise.all([
   useSessionStore().fetchProfile(),
-  useRootStore().fetchWebsiteConfig(),
+  useRootStore().fetchPublicConfig(),
   useThemeStore(), // Initialize theme store to apply theme
 ]).then(() => {
   // Router must be loaded after session/website config is loaded
