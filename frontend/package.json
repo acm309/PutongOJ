@@ -19,6 +19,7 @@
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@jaseeey/vue-umami-plugin": "^1.5.0",
     "@noble/ciphers": "^2.1.1",
     "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1",

@@ -59,7 +59,7 @@ const serverTime = (ctx: Context) => {
 }
 
 export async function getPublicConfig (ctx: Context) {
-  const { helpDocURL, oauthConfigs } = globalConfig
+  const { helpDocURL, oauthConfigs, umamiAnalytics } = globalConfig
   const apiPublicKey = await cryptoService.getServerPublicKey()
   const result = PublicConfigQueryResultSchema.encode({
     name: 'Putong OJ',
@@ -73,6 +73,12 @@ export async function getPublicConfig (ctx: Context) {
       Codeforces: oauthConfigs.Codeforces.enabled,
     },
     helpDocURL,
+    umamiAnalytics: umamiAnalytics.websiteId
+      ? {
+          websiteId: umamiAnalytics.websiteId,
+          scriptURL: umamiAnalytics.scriptURL,
+        }
+      : undefined,
   })
   return createEnvelopedResponse(ctx, result)
 }

@@ -199,6 +199,9 @@ importers:
 
   frontend:
     dependencies:
+      '@jaseeey/vue-umami-plugin':
+        specifier: ^1.5.0
+        version: 1.5.0
       '@noble/ciphers':
         specifier: ^2.1.1
         version: 2.1.1
@@ -231,7 +234,7 @@ importers:
         version: 2.8.21
       axios:
         specifier: ^1.13.5
-        version: 1.13.5(debug@4.4.3)
+        version: 1.13.5
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
@@ -1230,6 +1233,9 @@ packages:
     resolution: {integrity: sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==}
     engines: {node: '>=8'}
 
+  '@jaseeey/vue-umami-plugin@1.5.0':
+    resolution: {integrity: sha512-qrbQD65dKwBWUSs6u0Yz5tZV/We5UGDbaGevsLglAkxWaScsfQYaAIKNpHxiuGPayLIi6tP6DLt+/PKfPfoD6A==}
+
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
@@ -1360,9 +1366,6 @@ packages:
   '@primevue/icons@4.5.4':
     resolution: {integrity: sha512-DxgryEc7ZmUqcEhYMcxGBRyFzdtLIoy3jLtlH1zsVSRZaG+iSAcjQ88nvfkZxGUZtZBFL7sRjF6KLq3bJZJwUw==}
     engines: {node: '>=12.11.0'}
-
-  '@putongoj/shared@file:shared':
-    resolution: {directory: shared, type: directory}
 
   '@rolldown/pluginutils@1.0.0-rc.2':
     resolution: {integrity: sha512-izyXV/v+cHiRfozX62W9htOAvwMo4/bXKDrQ+vom1L1qRuexPock/7VZDAhnpHCLNejd3NJ6hiab+tO0D44Rgw==}
@@ -7079,6 +7082,8 @@ snapshots:
 
   '@istanbuljs/schema@0.1.3': {}
 
+  '@jaseeey/vue-umami-plugin@1.5.0': {}
+
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
@@ -8319,6 +8324,14 @@ snapshots:
       - rollup
       - supports-color
 
+  axios@1.13.5:
+    dependencies:
+      follow-redirects: 1.15.11(debug@4.3.7)
+      form-data: 4.0.5
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   axios@1.13.5(debug@4.4.3):
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.3)
@@ -8326,6 +8339,7 @@ snapshots:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+    optional: true
 
   babel-plugin-polyfill-corejs2@0.4.15(@babel/core@7.29.0):
     dependencies:
@@ -9578,6 +9592,7 @@ snapshots:
   follow-redirects@1.15.11(debug@4.4.3):
     optionalDependencies:
       debug: 4.4.3(supports-color@5.5.0)
+    optional: true
 
   foreground-child@2.0.0:
     dependencies:

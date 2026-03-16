@@ -63,6 +63,10 @@ export const PublicConfigQueryResultSchema = z.object({
   apiPublicKey: z.string(),
   oauthEnabled: z.record(z.enum(OAuthProvider), z.boolean()),
   helpDocURL: z.string().optional(),
+  umamiAnalytics: z.object({
+    websiteId: z.string(),
+    scriptURL: z.string().optional(),
+  }).optional(),
 })
 
 export type PublicConfigQueryResult = z.input<typeof PublicConfigQueryResultSchema>

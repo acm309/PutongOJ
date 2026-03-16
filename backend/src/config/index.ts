@@ -65,6 +65,10 @@ interface GlobalConfig {
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
   helpDocURL?: string
   submissionHeatmapTimezone: string
+  umamiAnalytics: {
+    websiteId?: string
+    scriptURL?: string
+  }
 }
 
 const oauthConfigs: GlobalConfig['oauthConfigs'] = {
@@ -148,6 +152,10 @@ export const globalConfig: GlobalConfig = {
   oauthConfigs,
   helpDocURL: stringEnv('PTOJ_HELP_DOC_URL'),
   submissionHeatmapTimezone: stringEnv('PTOJ_SUBMISSION_HEATMAP_TIMEZONE', 'Asia/Shanghai'),
+  umamiAnalytics: {
+    websiteId: stringEnv('PTOJ_UMAMI_WEBSITE_ID'),
+    scriptURL: stringEnv('PTOJ_UMAMI_SCRIPT_URL'),
+  },
 }
 
 export default globalConfig

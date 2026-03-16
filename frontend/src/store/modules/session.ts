@@ -1,4 +1,5 @@
 import type { AccountProfileQueryResult } from '@putongoj/shared'
+import { identifyUmamiSession } from '@jaseeey/vue-umami-plugin'
 import { UserPrivilege } from '@putongoj/shared'
 import { defineStore } from 'pinia'
 import { getProfile, userLogout } from '@/api/account'
@@ -25,6 +26,7 @@ export const useSessionStore = defineStore('session', {
     },
     setProfile (profile: AccountProfileQueryResult) {
       this.profile = profile
+      identifyUmamiSession(profile.uid)
     },
     clearProfile () {
       this.profile = null

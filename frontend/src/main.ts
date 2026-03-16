@@ -1,3 +1,5 @@
+import type { App } from 'vue'
+import { VueUmamiPlugin } from '@jaseeey/vue-umami-plugin'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
@@ -11,7 +13,7 @@ import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useThemeStore } from '@/store/theme'
 import { PutongAura } from '@/styles/aura'
-import App from './App.vue'
+import rootComponent from './App.vue'
 import 'primeicons/primeicons.css'
 
 const primeVueOptions = {
@@ -32,24 +34,47 @@ const i18nOptions = {
   messages: locales,
 }
 
-const app = createApp(App)
-const pinia = createPinia()
-const i18n = createI18n(i18nOptions)
+function setupUmami (app: App) {
+  const { umamiAnalytics } = useRootStore().config
+  if (!umamiAnalytics?.websiteId) {
+    return
+  }
 
-app.use(pinia)
-app.use(i18n)
-app.use(PrimeVue, primeVueOptions)
-app.use(ToastService)
-app.use(ConfirmationService)
-app.directive('tooltip', Tooltip)
+  app.use(
+    VueUmamiPlugin({
+      websiteID: umamiAnalytics.websiteId,
+      scriptSrc: umamiAnalytics.scriptURL,
+      router,
+    }),
+  )
+}
 
-Promise.all([
-  useSessionStore().fetchProfile(),
-  useRootStore().fetchPublicConfig(),
-  useThemeStore(), // Initialize theme store to apply theme
-]).then(() => {
-  // Router must be loaded after session/website config is loaded
+async function bootstrap () {
+  const app = createApp(rootComponent)
+  const i18n = createI18n(i18nOptions)
+  const pinia = createPinia()
+
+  app.use(pinia)
+  app.use(i18n)
+  app.use(PrimeVue, primeVueOptions)
+  app.use(ToastService)
+  app.use(ConfirmationService)
+  app.directive('tooltip', Tooltip)
+
+  // Initialize theme store early so
+  // the effective theme class is applied before mount.
+  useThemeStore()
+
+  await Promise.all([
+    useSessionStore().fetchProfile(),
+    useRootStore().fetchPublicConfig(),
+  ])
+
+  // Router and Umami must be loaded after
+  // session and config are loaded.
+  setupUmami(app)
   app.use(router)
-  // https://www.mathew-paul.nz/posts/how-to-use-vue2-with-vite/
   app.mount('#app')
-})
+}
+
+bootstrap()
