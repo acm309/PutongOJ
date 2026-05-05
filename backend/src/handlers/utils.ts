@@ -1,8 +1,8 @@
 import type { Context } from 'koa'
+import { randomUUID } from 'node:crypto'
 import { env } from 'node:process'
 import Router from '@koa/router'
 import { AvatarPresetsQueryResultSchema, PublicConfigQueryResultSchema } from '@putongoj/shared'
-import { v4 } from 'uuid'
 import { globalConfig } from '../config'
 import redis from '../config/redis'
 import { loadProfile, loginRequire } from '../middlewares/authn'
@@ -58,7 +58,7 @@ export async function getPublicConfig (ctx: Context) {
 
 export async function getWebSocketToken (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const token = v4()
+  const token = randomUUID()
   await redis.setex(`websocket:token:${token}`, 10, profile.uid)
   return createEnvelopedResponse(ctx, { token })
 }

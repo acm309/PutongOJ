@@ -1,13 +1,13 @@
 import type { Context } from 'koa'
 import { Buffer } from 'node:buffer'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import Router from '@koa/router'
-import { ProblemTestcaseListQueryResultSchema } from '@putongoj/shared'
+import { ProblemTestcaseListQueryResultSchema, uuidRegex } from '@putongoj/shared'
 import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
 import remove from 'lodash/remove'
-import { v4 as uuid, validate } from 'uuid'
 import { loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
 import { loadProblemOrThrow } from '../policies/problem'
@@ -127,7 +127,7 @@ export async function createTestcase (ctx: Context) {
    */
 
   const testDir = path.resolve(__dirname, `../../data/${pid}`)
-  const id = uuid() // 快速生成RFC4122 UUID
+  const id = randomUUID() // 快速生成RFC4122 UUID
 
   // 将文件读取到meta对象
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
@@ -157,7 +157,7 @@ export async function removeTestcase (ctx: Context) {
   const { pid } = problem
   const { uid } = profile
   const uuid = String(ctx.params.uuid || '').trim()
-  if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
+  if (!uuidRegex.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
 
@@ -193,7 +193,7 @@ export async function getTestcase (ctx: Context) {
 
   const { pid } = problem
   const uuid = String(ctx.params.uuid || '').trim()
-  if (!validate(uuid) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
+  if (!uuidRegex.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
   }
   const type = String(ctx.params.type || '').trim()

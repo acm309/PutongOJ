@@ -3,3 +3,6 @@ packages:
   - "backend"
   - "shared"
   - "document"
+allowBuilds:
+  core-js: false
+  esbuild: false

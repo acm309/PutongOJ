@@ -32,7 +32,7 @@ async function migrateOAuthProviderToLowercase () {
   let modifiedTotal = 0
   for (const { from, to } of mappings) {
     const result = await OAuth.updateMany(
-      { provider: from },
+      { provider: from as unknown as OAuthProvider },
       { $set: { provider: to } },
       { overwriteImmutable: true },
     )
