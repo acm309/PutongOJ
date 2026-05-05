@@ -1,0 +1,23 @@
+# Putong OJ Minimal Docker Compose Configuration
+# Sandbox and Judger services are not included here
+# And you should mount the data, logs and uploads directories to persist data
+
+services:
+  putong-oj:
+    build:
+      context: .
+    environment:
+      - NODE_ENV=production
+      - PTOJ_MONGODB_URL=mongodb://db:27017/oj
+      - PTOJ_REDIS_URL=redis://redis:6379
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: mongo:latest
+
+  redis:
+    image: redis:latest

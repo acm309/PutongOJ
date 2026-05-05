@@ -6,3 +6,4 @@ packages:
 allowBuilds:
   core-js: false
   esbuild: false
+injectWorkspacePackages: true

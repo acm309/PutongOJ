@@ -4,6 +4,13 @@
 **/node_modules/
 backend/.nyc_output/
 backend/.env*
+backend/coverage.lcov
+backend/dist/
+backend/test/
+document/.vitepress/cache/
+document/.vitepress/dist/
+frontend/dist/
+frontend/public/static/
 
 # Data
 backend/data/
