@@ -115,6 +115,7 @@ async function onOpenContest (contestId: number) {
 
   if (
     (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted)
+    || (details.value.participation === ParticipationStatus.EarlyExit && details.value.hasEnded)
     || details.value.isJury
   ) {
     gotoContest(contestId)
@@ -144,7 +145,7 @@ async function onSubmit () {
     details.value.participation = ParticipationStatus.Approved
   }
 
-  if (details.value.isJury || (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted)) {
+  if (details.value.isJury || (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted) || (details.value.participation === ParticipationStatus.EarlyExit && details.value.hasEnded)) {
     gotoContest(currentContestId.value!)
     return
   }

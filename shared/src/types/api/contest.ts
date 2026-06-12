@@ -38,6 +38,7 @@ export const ContestParticipationQueryResultSchema = z.object({
   canParticipateByPassword: z.boolean(),
   isIpBlocked: z.boolean(),
   hasStarted: z.boolean(),
+  hasEnded: z.boolean(),
 })
 
 export type ContestParticipationQueryResult = z.input<typeof ContestParticipationQueryResultSchema>
@@ -51,7 +52,10 @@ export type ContestParticipatePayload = z.infer<typeof ContestParticipatePayload
 const ContestParticipationManageableStatusSchema = z.union([
   z.literal(ParticipationStatus.Approved),
   z.literal(ParticipationStatus.Suspended),
+  z.literal(ParticipationStatus.EarlyExit),
 ])
+
+export type ContestParticipationManageableStatus = z.infer<typeof ContestParticipationManageableStatusSchema>
 
 export const ContestParticipantListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
@@ -89,6 +93,7 @@ export const ContestDetailQueryResultSchema = z.object({
   isHidden: ContestModelSchema.shape.isHidden,
   isJury: z.boolean(),
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
+  allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
   problems: z.array(z.object({
     index: z.number().positive(),
     problemId: ProblemModelSchema.shape.pid,
@@ -128,6 +133,7 @@ export const ContestConfigQueryResultSchema = z.object({
   isHidden: ContestModelSchema.shape.isHidden,
   isLocked: ContestModelSchema.shape.isLocked,
   isPublic: ContestModelSchema.shape.isPublic,
+  allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
   password: ContestModelSchema.shape.password,
   allowedUsers: z.array(z.object({
     username: UserModelSchema.shape.uid,
@@ -162,6 +168,7 @@ export const ContestConfigEditPayloadSchema = z.object({
   isHidden: ContestModelSchema.shape.isHidden,
   isLocked: ContestModelSchema.shape.isLocked,
   isPublic: ContestModelSchema.shape.isPublic,
+  allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
   password: ContestModelSchema.shape.password,
   allowedUsers: z.array(UserModelSchema.shape.uid),
   allowedGroups: z.array(GroupModelSchema.shape.gid),

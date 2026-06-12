@@ -1,4 +1,4 @@
-import type { ContestModel, ContestParticipationModel, ContestRanklist, ContestRanklistProblem, UserModel } from '@putongoj/shared'
+import type { ContestModel, ContestParticipationManageableStatus, ContestParticipationModel, ContestRanklist, ContestRanklistProblem, UserModel } from '@putongoj/shared'
 import type { Types } from 'mongoose'
 import type { CourseDocument } from '../models/Course'
 import type { PaginateOption, SortOption } from '../types'
@@ -119,7 +119,7 @@ async function updateParticipation (
 async function findParticipants (
   contest: Types.ObjectId,
   options: PaginateOption & SortOption,
-  filters: { user?: string, status?: ParticipationStatus.Approved | ParticipationStatus.Suspended },
+  filters: { user?: string, status?: ContestParticipationManageableStatus },
 ) {
   const { page, pageSize, sort, sortBy } = options
   const queryFilters: QueryFilter<ContestParticipationModel>[] = [ { contest } ]
@@ -193,7 +193,7 @@ async function findParticipants (
 async function updateParticipantStatus (
   user: Types.ObjectId,
   contest: Types.ObjectId,
-  status: ParticipationStatus.Approved | ParticipationStatus.Suspended,
+  status: ContestParticipationManageableStatus,
 ) {
   const res = await ContestParticipation.updateOne(
     { user, contest },

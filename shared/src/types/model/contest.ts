@@ -40,6 +40,9 @@ export const ContestModelSchema = z.object({
   /** Is IP whitelist enabled */
   ipWhitelistEnabled: z.boolean(),
 
+  /** Allow participants to early exit */
+  allowEarlyExit: z.boolean(),
+
   /** List of problems in the contest */
   problems: z.array(ObjectIdSchema),
   /** Allowed submission languages, null if unrestricted */

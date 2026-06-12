@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import Button from 'primevue/button'
 import ProgressBar from 'primevue/progressbar'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
 import Tabs from 'primevue/tabs'
+import { useConfirm } from 'primevue/useconfirm'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { earlyExit } from '@/api/contest'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 import { formatRelativeTime, timeContest, timePretty } from '@/utils/format'
+import { useMessage } from '@/utils/message'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const rootStore = useRootStore()
 const contestStore = useContestStore()
+const confirm = useConfirm()
+const message = useMessage()
 
 const { contest } = storeToRefs(contestStore)
 const { currentTime } = storeToRefs(rootStore)
@@ -25,6 +31,36 @@ const contestLoaded = computed(() => contest.value?.contestId === contestId.valu
 const currentView = computed(() => String(route.name || 'contest'))
 const startsAt = computed(() => new Date(contest.value.startsAt).getTime())
 const endsAt = computed(() => new Date(contest.value.endsAt).getTime())
+
+function onEarlyExit () {
+  confirm.require({
+    message: t('ptoj.early_exit_confirm'),
+    rejectProps: {
+      label: t('ptoj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: t('oj.ok'),
+      severity: 'primary',
+    },
+    accept: async () => {
+      const resp = await earlyExit(contestId.value)
+      if (!resp.success) {
+        message.error(t('ptoj.failed_proceed'), resp.message)
+        return
+      }
+      message.success(t('ptoj.successful_proceed'))
+      router.push({ name: 'Home' })
+    },
+  })
+}
+
+const canEarlyExit = computed(() => {
+  return contest.value.allowEarlyExit === true
+    && currentTime.value < endsAt.value
+    && !contest.value.isJury
+})
 
 const timePercentage = computed(() => {
   if (currentTime.value < startsAt.value) return 100
@@ -101,13 +137,19 @@ function jumpToCourse () {
             {{ t('ptoj.starts_at') }}
           </span>
         </div>
-        <div class="flex flex-col text-right">
-          <span>
-            {{ timePretty(contest.endsAt) }}
-          </span>
-          <span class="text-muted-color text-sm">
-            {{ t('ptoj.ends_at') }}
-          </span>
+        <div class="flex flex-col gap-2 items-end">
+          <div class="flex flex-col text-right">
+            <span>
+              {{ timePretty(contest.endsAt) }}
+            </span>
+            <span class="text-muted-color text-sm">
+              {{ t('ptoj.ends_at') }}
+            </span>
+          </div>
+          <Button
+            v-if="canEarlyExit" :label="t('ptoj.early_exit')" icon="pi pi-sign-out" severity="warn"
+            outlined size="small" @click="onEarlyExit"
+          />
         </div>
       </div>
       <div class="flex justify-center pb-2 pt-6 px-4">

@@ -282,6 +282,34 @@ test.serial('Update contest config: invalid payload returns error', async (t) =>
   t.false(res.body.success)
 })
 
+test.serial('Update contest config: set allowEarlyExit to true', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ allowEarlyExit: true })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request.get(`/api/contests/${contestId}/configs`)
+  t.true(verify.body.data.allowEarlyExit)
+})
+
+test.serial('Update contest config: set allowEarlyExit to false', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  const res = await request
+    .put(`/api/contests/${contestId}/configs`)
+    .send({ allowEarlyExit: false })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request.get(`/api/contests/${contestId}/configs`)
+  t.false(verify.body.data.allowEarlyExit ?? false)
+})
+
 // ─── GET /api/contests/:contestId/ranklist ────────────────────────────────────
 
 test.serial('Get ranklist: returns array (admin/jury)', async (t) => {
@@ -364,6 +392,30 @@ test.serial('Update participant status: jury can suspend participant', async (t)
 
   t.true(verify.body.data.docs.some((doc: any) => {
     return doc.username === userSeeds.primaryuser.uid && doc.status === 3
+  }))
+})
+
+test.serial('Update participant status: jury can set participant to EarlyExit', async (t) => {
+  if (!contestId) { return t.fail('No contestId from prior test') }
+
+  // First restore user to Approved
+  await request
+    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
+    .send({ status: 4 })
+
+  const res = await request
+    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
+    .send({ status: 5 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+
+  const verify = await request
+    .get(`/api/contests/${contestId}/participants`)
+    .query({ status: 5 })
+
+  t.true(verify.body.data.docs.some((doc: any) => {
+    return doc.username === userSeeds.primaryuser.uid && doc.status === 5
   }))
 })
 

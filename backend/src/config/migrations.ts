@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { md5 } from '@noble/hashes/legacy.js'
 import { OAuthProvider } from '@putongoj/shared'
 import mongoose from '../config/db'
+import Contest from '../models/Contest'
 import OAuth from '../models/OAuth'
 import Post from '../models/Post'
 import User from '../models/User'
@@ -117,6 +118,14 @@ async function migratePostPublishedAt () {
   logger.info(`Migration Post.publishesAt completed, modified=${result.modifiedCount}`)
 }
 
+async function migrateContestAllowEarlyExit () {
+  const result = await Contest.updateMany(
+    { allowEarlyExit: { $exists: false } },
+    { $set: { allowEarlyExit: false } },
+  )
+  logger.info(`Migration Contest.allowEarlyExit completed, modified=${result.modifiedCount}`)
+}
+
 const migrationTasks: MigrationTask[] = [
   {
     key: '20260320-user-storage-quota-default',
@@ -137,6 +146,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260418-post-published-at-default',
     description: 'Backfill missing Post.publishesAt with createdAt value',
     run: migratePostPublishedAt,
+  },
+  {
+    key: '20260612-contest-allow-early-exit',
+    description: 'Backfill missing Contest.allowEarlyExit with false',
+    run: migrateContestAllowEarlyExit,
   },
 ]
 

@@ -19,6 +19,8 @@ const state = {
   ipBlockedContestId: undefined as number | undefined,
   futureContestId: undefined as number | undefined,
   endedContestId: undefined as number | undefined,
+  earlyExitContestId: undefined as number | undefined,
+  endedContestWithEarlyExitId: undefined as number | undefined,
 }
 
 const now = Date.now()
@@ -94,6 +96,30 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
   await adminAgent
     .put(`/api/contests/${state.endedContestId}/configs`)
     .send({ problems: [ 1000 ] })
+
+  // Create a contest with early exit enabled
+  const earlyExitContestRes = await adminAgent
+    .post('/api/contests')
+    .send(makeContest({ title: 'User Early Exit Contest', isPublic: true }))
+  t.true(earlyExitContestRes.body.success)
+  state.earlyExitContestId = earlyExitContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.earlyExitContestId}/configs`)
+    .send({ allowEarlyExit: true, problems: [ 1000 ] })
+
+  // Create an ended contest with early exit enabled
+  const endedEarlyExitContestRes = await adminAgent
+    .post('/api/contests')
+    .send({
+      ...makeContest({ title: 'User Ended Early Exit Contest', isPublic: true }),
+      startsAt: new Date(now - 3 * 60 * 60_000).toISOString(),
+      endsAt: new Date(now - 60 * 60_000).toISOString(),
+    })
+  t.true(endedEarlyExitContestRes.body.success)
+  state.endedContestWithEarlyExitId = endedEarlyExitContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.endedContestWithEarlyExitId}/configs`)
+    .send({ allowEarlyExit: true, problems: [ 1000 ] })
 
   // Login as primaryuser
   const userLogin = await userAgent
@@ -414,6 +440,96 @@ test.serial('Restored user can access contest detail again', async (t) => {
   const detailRes = await userAgent.get(`/api/contests/${state.publicContestId}`)
   t.true(detailRes.body.success)
   t.is(detailRes.body.data.contestId, state.publicContestId)
+})
+
+// ─── Early exit functionality ─────────────────────────────────────────────────────
+
+test.serial('Participate in early exit contest: succeeds', async (t) => {
+  if (!state.earlyExitContestId) { return t.fail('No earlyExitContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.earlyExitContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Early exit: succeeds when contest allows and user is Approved', async (t) => {
+  if (!state.earlyExitContestId) { return t.fail('No earlyExitContestId') }
+
+  const res = await userAgent
+    .put(`/api/contests/${state.earlyExitContestId}/participation/early-exit`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Early exit: participation status becomes EarlyExit after early exit', async (t) => {
+  if (!state.earlyExitContestId) { return t.fail('No earlyExitContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.earlyExitContestId}/participation`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.participation, ParticipationStatus.EarlyExit)
+})
+
+test.serial('Early exit: user cannot access contest during contest after early exit', async (t) => {
+  if (!state.earlyExitContestId) { return t.fail('No earlyExitContestId') }
+
+  const detailRes = await userAgent.get(`/api/contests/${state.earlyExitContestId}`)
+  t.false(detailRes.body.success)
+  t.is(detailRes.body.code, 404)
+
+  const ranklistRes = await userAgent.get(`/api/contests/${state.earlyExitContestId}/ranklist`)
+  t.false(ranklistRes.body.success)
+  t.is(ranklistRes.body.code, 404)
+})
+
+test.serial('Early exit: cannot early exit again when status is already EarlyExit', async (t) => {
+  if (!state.earlyExitContestId) { return t.fail('No earlyExitContestId') }
+
+  const res = await userAgent
+    .put(`/api/contests/${state.earlyExitContestId}/participation/early-exit`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 404)
+})
+
+test.serial('Early exit: cannot early exit in contest that does not allow it', async (t) => {
+  if (!state.publicContestId) { return t.fail('No publicContestId') }
+
+  const res = await userAgent
+    .put(`/api/contests/${state.publicContestId}/participation/early-exit`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 403)
+})
+
+test.serial('Early exit: cannot early exit in ended contest', async (t) => {
+  if (!state.endedContestWithEarlyExitId) { return t.fail('No endedContestWithEarlyExitId') }
+
+  // Participate in ended contest first
+  const participateRes = await userAgent
+    .post(`/api/contests/${state.endedContestWithEarlyExitId}/participation`)
+    .send({})
+  t.true(participateRes.body.success)
+
+  // Try to early exit in ended contest
+  const res = await userAgent
+    .put(`/api/contests/${state.endedContestWithEarlyExitId}/participation/early-exit`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  // Returns 403 because contest has ended
+  t.is(res.body.code, 403)
 })
 
 test.after.always('close server', () => {

@@ -108,6 +108,7 @@ export enum ParticipationStatus {
   Rejected = 2,
   Suspended = 3,
   Approved = 4,
+  EarlyExit = 5,
 }
 
 export const ParticipationStatusValues = Object.values(ParticipationStatus)

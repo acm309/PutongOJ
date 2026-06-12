@@ -82,7 +82,7 @@ async function getParticipation (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
   }
 
-  const { contest, participation, isJury, isIpBlocked, hasStarted } = state
+  const { contest, participation, isJury, isIpBlocked, hasStarted, hasEnded } = state
   const profile = await loadProfile(ctx)
   let canParticipate: boolean = false
   let canParticipateByPassword: boolean = false
@@ -104,7 +104,7 @@ async function getParticipation (ctx: Context) {
   }
 
   const result = ContestParticipationQueryResultSchema.encode({
-    isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked, hasStarted,
+    isJury, participation, canParticipate, canParticipateByPassword, isIpBlocked, hasStarted, hasEnded,
   })
   return createEnvelopedResponse(ctx, result)
 }
@@ -192,6 +192,22 @@ async function participateContest (ctx: Context) {
   await contestService.updateParticipation(
     profile._id, contest._id, ParticipationStatus.Approved)
   ctx.auditLog.info(`<User:${profile.uid}> participated in contest <Contest:${contest.contestId}>`)
+  return createEnvelopedResponse(ctx, null)
+}
+
+async function earlyExit (ctx: Context) {
+  const state = await loadContestState(ctx)
+  if (!state || !state.accessible) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Contest not found or access denied')
+  }
+  if (!state.contest.allowEarlyExit || state.hasEnded) {
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Early exit is not allowed for this contest')
+  }
+
+  const profile = await loadProfile(ctx)
+  await contestService.updateParticipation(
+    profile._id, state.contest._id, ParticipationStatus.EarlyExit)
+  ctx.auditLog.info(`<User:${profile.uid}> early exited from contest <Contest:${state.contest.contestId}>`)
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -508,6 +524,7 @@ function registerContestHandlers (router: Router) {
   contestRouter.get('/:contestId', loginRequire, getContest)
   contestRouter.get('/:contestId/participation', loginRequire, getParticipation)
   contestRouter.post('/:contestId/participation', loginRequire, participateContest)
+  contestRouter.put('/:contestId/participation/early-exit', loginRequire, earlyExit)
   contestRouter.get('/:contestId/participants', loginRequire, findParticipants)
   contestRouter.put('/:contestId/participants/:username', loginRequire, updateParticipantStatus)
   contestRouter.get('/:contestId/ranklist', loginRequire, getRanklist)

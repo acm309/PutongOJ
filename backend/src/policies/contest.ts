@@ -60,8 +60,9 @@ export async function loadContestState (ctx: Context, inputId?: number | string)
     : false
 
   // whether accessible to the contents of the contest
-  const qualified = (participation === ParticipationStatus.Approved || isJury) && !isIpBlocked
+  // EarlyExit users can only access after contest ends
   const { hasStarted, hasEnded } = getContestTimingState(contest)
+  const qualified = (participation === ParticipationStatus.Approved || (participation === ParticipationStatus.EarlyExit && hasEnded) || isJury) && !isIpBlocked
   const accessible = qualified && (hasStarted || isJury)
   const state: ContestState = { contest, participation, isJury, accessible, isIpBlocked, hasStarted, hasEnded }
 

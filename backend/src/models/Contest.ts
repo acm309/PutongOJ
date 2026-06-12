@@ -74,6 +74,10 @@ const contestSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  allowEarlyExit: {
+    type: Boolean,
+    default: false,
+  },
   problems: [ {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Problem',

@@ -23,7 +23,7 @@ import { useMessage } from '@/utils/message'
 
 type ContestConfigForm = Required<Pick<ContestConfigEditPayload, 'title'
   | 'startsAt' | 'endsAt' | 'scoreboardFrozenAt' | 'scoreboardUnfrozenAt'
-  | 'isHidden' | 'isPublic' | 'password'
+  | 'isHidden' | 'isPublic' | 'allowEarlyExit' | 'password'
   | 'labelingStyle'>> & {
     allowedLanguages: Language[]
   }
@@ -99,6 +99,7 @@ const accessDirty = computed(() => {
     || currentPassword !== originalPassword
     || ipWhitelistEnabled.value !== contestConfig.value.ipWhitelistEnabled
     || currentIpWhitelist !== originalIpWhitelist
+    || form.value.allowEarlyExit !== contestConfig.value.allowEarlyExit
   )
 })
 
@@ -135,6 +136,7 @@ async function fetch () {
     isPublic: resp.data.isPublic,
     password: resp.data.password || '',
     labelingStyle: resp.data.labelingStyle,
+    allowEarlyExit: resp.data.allowEarlyExit,
     allowedLanguages: resp.data.allowedLanguages ? [ ...resp.data.allowedLanguages ] : [],
   }
   problems.value = resp.data.problems.map(p => ({ ...p }))
@@ -235,6 +237,9 @@ async function onSaveAccess () {
   }
   if (form.value.isPublic !== contestConfig.value.isPublic) {
     payload.isPublic = form.value.isPublic
+  }
+  if (form.value.allowEarlyExit !== contestConfig.value.allowEarlyExit) {
+    payload.allowEarlyExit = form.value.allowEarlyExit
   }
 
   const currentPassword = enablePassword.value ? (form.value.password || null) : null
@@ -358,6 +363,8 @@ onMounted(() => {
         <InputText id="password" v-model="form.password" fluid autocomplete="new-password" />
         <label for="password">{{ t('ptoj.password') }}</label>
       </IftaLabel>
+
+      <LabeledSwitch v-model="form.allowEarlyExit" :label="t('ptoj.allow_early_exit')" :description="t('ptoj.allow_early_exit_desc')" />
 
       <LabeledSwitch
         v-model="ipWhitelistEnabled" :label="t('ptoj.enable_ip_whitelist')"

@@ -42,6 +42,9 @@ export async function getParticipation (contestId: number) {
 export async function participateContest (contestId: number, payload: ContestParticipatePayload) {
   return instance.post<null>(`/contests/${encodeURIComponent(contestId)}/participation`, payload)
 }
+export async function earlyExit (contestId: number) {
+  return instance.put<null>(`/contests/${encodeURIComponent(contestId)}/participation/early-exit`, {})
+}
 export async function findParticipants (contestId: number, params: ContestParticipantListQuery) {
   return instance.get<ContestParticipantListQueryResult>(`/contests/${encodeURIComponent(contestId)}/participants`, { params })
 }

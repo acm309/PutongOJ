@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContestParticipantListQuery, ContestParticipantListQueryResult } from '@putongoj/shared'
+import type { ContestParticipantListQuery, ContestParticipantListQueryResult, ContestParticipationManageableStatus } from '@putongoj/shared'
 import { ContestParticipantListQuerySchema, ParticipationStatus } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -34,6 +34,7 @@ const updatingUsername = ref('')
 const statusOptions = computed(() => [
   { label: t('ptoj.participation_status_approved'), value: ParticipationStatus.Approved },
   { label: t('ptoj.participation_status_suspended'), value: ParticipationStatus.Suspended },
+  { label: t('ptoj.participation_status_early_exit'), value: ParticipationStatus.EarlyExit },
 ])
 
 const hasFilter = computed(() => {
@@ -47,6 +48,9 @@ function getStatusLabel (status: ParticipationStatus) {
   if (status === ParticipationStatus.Suspended) {
     return t('ptoj.participation_status_suspended')
   }
+  if (status === ParticipationStatus.EarlyExit) {
+    return t('ptoj.participation_status_early_exit')
+  }
   return t('ptoj.participation_status_unknown')
 }
 
@@ -56,6 +60,9 @@ function getStatusSeverity (status: ParticipationStatus) {
   }
   if (status === ParticipationStatus.Suspended) {
     return 'danger'
+  }
+  if (status === ParticipationStatus.EarlyExit) {
+    return 'warn'
   }
   return 'secondary'
 }
@@ -124,7 +131,7 @@ function onReset () {
   })
 }
 
-async function onUpdateStatus (username: string, status: ParticipationStatus.Approved | ParticipationStatus.Suspended) {
+async function onUpdateStatus (username: string, status: ContestParticipationManageableStatus) {
   updatingUsername.value = username
   const resp = await updateParticipantStatus(contestId.value, username, { status })
   updatingUsername.value = ''
@@ -214,6 +221,11 @@ onRouteQueryUpdate(fetch)
               v-if="data.status !== ParticipationStatus.Suspended" icon="pi pi-ban" severity="danger" text
               :loading="updatingUsername === data.username && data.status !== ParticipationStatus.Suspended"
               @click="onUpdateStatus(data.username, ParticipationStatus.Suspended)"
+            />
+            <Button
+              v-if="data.status !== ParticipationStatus.EarlyExit" icon="pi pi-sign-out" severity="warn" text
+              :loading="updatingUsername === data.username && data.status !== ParticipationStatus.EarlyExit"
+              @click="onUpdateStatus(data.username, ParticipationStatus.EarlyExit)"
             />
           </div>
         </template>
