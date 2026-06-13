@@ -303,3 +303,24 @@ export const AdminPostUpdatePayloadSchema = z.object({
 })
 
 export type AdminPostUpdatePayload = z.infer<typeof AdminPostUpdatePayloadSchema>
+
+export const AdminAccountBatchRegisterPayloadSchema = z.array(z.object({
+  username: UserModelSchema.shape.uid,
+  password: z.string(),
+  nick: UserModelSchema.shape.nick.optional(),
+})).min(1).max(1000)
+
+export type AdminAccountBatchRegisterPayload = z.infer<typeof AdminAccountBatchRegisterPayloadSchema>
+
+export const AdminAccountBatchRegisterResultSchema = z.object({
+  total: z.int().nonnegative(),
+  created: z.int().nonnegative(),
+  failed: z.int().nonnegative(),
+  results: z.array(z.object({
+    username: UserModelSchema.shape.uid,
+    success: z.boolean(),
+    message: z.string().optional(),
+  })),
+})
+
+export type AdminAccountBatchRegisterResult = z.input<typeof AdminAccountBatchRegisterResultSchema>

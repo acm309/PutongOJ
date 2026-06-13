@@ -14,6 +14,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findUsers } from '@/api/admin'
+import UserBatchImportModal from '@/components/UserBatchImportModal.vue'
 import { privilegeOptions } from '@/utils/constant'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -28,6 +29,7 @@ const query = ref({} as AdminUserListQuery)
 const docs = ref([] as AdminUserListQueryResult['docs'])
 const total = ref(0)
 const loading = ref(false)
+const batchImportVisible = ref(false)
 
 async function fetch () {
   const parsed = AdminUserListQuerySchema.safeParse(route.query)
@@ -128,6 +130,7 @@ onRouteQueryUpdate(fetch)
         </Select>
 
         <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
+          <Button icon="pi pi-user-plus" severity="secondary" outlined :disabled="loading" @click="batchImportVisible = true" />
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
           <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
           <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
@@ -183,5 +186,7 @@ onRouteQueryUpdate(fetch)
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')" @page="onPage"
     />
+
+    <UserBatchImportModal v-model:visible="batchImportVisible" @refresh="fetch" />
   </div>
 </template>

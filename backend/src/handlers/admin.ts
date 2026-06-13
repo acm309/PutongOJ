@@ -1,9 +1,11 @@
-import type { PostModel } from '@putongoj/shared'
+import type { AdminAccountBatchRegisterResult, PostModel } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { DiscussionUpdateDto } from '../services/discussion'
 import type { QueryFilter } from '../types/mongo'
 import Router from '@koa/router'
 import {
+  AdminAccountBatchRegisterPayloadSchema,
+  AdminAccountBatchRegisterResultSchema,
   AdminCommentUpdatePayloadSchema,
   AdminDiscussionUpdatePayloadSchema,
   AdminFileListQueryResultSchema,
@@ -160,6 +162,72 @@ export async function updateUserPassword (ctx: Context) {
     ctx.auditLog.error('Failed to update user password', err)
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
+}
+
+export async function batchRegisterUsers (ctx: Context) {
+  const payload = AdminAccountBatchRegisterPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const users = payload.data
+
+  const results: AdminAccountBatchRegisterResult['results'] = []
+  let created = 0
+
+  for (const item of users) {
+    const username = item.username
+    const password = item.password
+
+    if (!isComplexPwd(password)) {
+      results.push({
+        username,
+        success: false,
+        message: 'Password is not complex enough',
+      })
+      continue
+    }
+
+    const available = await userService.checkUserAvailable(username)
+    if (!available) {
+      results.push({
+        username,
+        success: false,
+        message: 'The username has been registered or reserved',
+      })
+      continue
+    }
+
+    try {
+      await userService.createUser({
+        uid: username,
+        pwd: passwordHash(password),
+        nick: item.nick,
+      })
+      created += 1
+      results.push({
+        username,
+        success: true,
+      })
+    } catch (err) {
+      ctx.auditLog.error(`Failed to batch register <User:${username}>`, err)
+      results.push({
+        username,
+        success: false,
+        message: 'Failed to create user',
+      })
+    }
+  }
+
+  const profile = await loadProfile(ctx)
+  ctx.auditLog.info(`Batch register completed by <User:${profile.uid}>, created ${created}/${users.length} users`)
+
+  const result = AdminAccountBatchRegisterResultSchema.parse({
+    total: users.length,
+    created,
+    failed: users.length - created,
+    results,
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function getUserOAuthConnections (ctx: Context) {
@@ -756,6 +824,7 @@ function registerAdminHandlers (router: Router) {
   adminRouter.get('/users/:uid', getUser)
   adminRouter.put('/users/:uid', updateUser)
   adminRouter.put('/users/:uid/password', updateUserPassword)
+  adminRouter.post('/users/batch-register', rootRequire, batchRegisterUsers)
   adminRouter.get('/users/:uid/oauth', getUserOAuthConnections)
   adminRouter.delete('/users/:uid/oauth/:provider', removeUserOAuthConnection)
   adminRouter.get('/users/:uid/sessions', listUserSessions)

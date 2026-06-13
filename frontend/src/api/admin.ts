@@ -1,4 +1,6 @@
 import type {
+  AdminAccountBatchRegisterPayload,
+  AdminAccountBatchRegisterResult,
   AdminCommentUpdatePayload,
   AdminDiscussionUpdatePayload,
   AdminFileListQuery,
@@ -129,4 +131,7 @@ export async function findFiles (params: AdminFileListQuery) {
 }
 export async function removeFile (storageKey: string) {
   return instance.delete<null>(`/admin/files/${encodeURIComponent(storageKey)}`)
+}
+export async function batchRegisterUsers (payload: AdminAccountBatchRegisterPayload) {
+  return instance.post<AdminAccountBatchRegisterResult>('/admin/users/batch-register', payload)
 }

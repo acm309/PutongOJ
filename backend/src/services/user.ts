@@ -161,10 +161,13 @@ export async function checkUserAvailable (username: string): Promise<boolean> {
   return !user
 }
 
-export async function createUser (data: Pick<UserModel, 'uid' | 'pwd'>): Promise<UserDocument> {
+export async function createUser (
+  data: Pick<UserModel, 'uid' | 'pwd'> & Partial<Pick<UserModel, 'nick'>>,
+): Promise<UserDocument> {
   const user = new User({
     uid: data.uid,
     pwd: data.pwd,
+    nick: data.nick,
   })
   await user.save()
   return user
