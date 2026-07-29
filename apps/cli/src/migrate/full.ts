@@ -179,6 +179,7 @@ export type FullMigrationReport = Awaited<ReturnType<typeof migrateBaseEntities>
   contestAllowedGroups: number
   contestIpWhitelist: number
   contestProblems: number
+  removedDuplicateContestProblems: number
   contestParticipations: number
   discussions: number
   comments: number
@@ -440,13 +441,25 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(contest.createdAt),
     updatedAt: dateOrNow(contest.updatedAt),
   })))
-  const contestProblems = contests.flatMap(contest => (contest.problems ?? []).map((problem, index) => ({
-    contestId: contest.contestId,
-    problemId: requiredReference(problemIdByMongoId, problem, 'Contest.problems'),
-    position: index + 1,
-    createdAt: dateOrNow(contest.createdAt),
-    updatedAt: dateOrNow(contest.updatedAt),
-  })))
+  let removedDuplicateContestProblems = 0
+  const contestProblems = contests.flatMap((contest) => {
+    const seenProblemIds = new Set<number>()
+    return (contest.problems ?? []).flatMap((problem, index) => {
+      const problemId = requiredReference(problemIdByMongoId, problem, 'Contest.problems')
+      if (seenProblemIds.has(problemId)) {
+        removedDuplicateContestProblems += 1
+        return []
+      }
+      seenProblemIds.add(problemId)
+      return [ {
+        contestId: contest.contestId,
+        problemId,
+        position: index + 1,
+        createdAt: dateOrNow(contest.createdAt),
+        updatedAt: dateOrNow(contest.updatedAt),
+      } ]
+    })
+  })
   await Promise.all([
     inBatches(contestAllowedUsers, 5_000, async batch => {
       await target.contestAllowedUser.createMany({ data: batch, skipDuplicates: true })
@@ -683,6 +696,7 @@ export async function migrateRemainingEntities (
     contestAllowedGroups: contestAllowedGroups.length,
     contestIpWhitelist: contestIpWhitelist.length,
     contestProblems: contestProblems.length,
+    removedDuplicateContestProblems,
     contestParticipations: participationRows.length,
     discussions: discussionRows.length,
     comments: commentRows.length,

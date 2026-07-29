@@ -300,6 +300,16 @@ async function countInvalidEnumValues (
   })
 }
 
+async function countDuplicateContestProblems (database: Db): Promise<number> {
+  const result = await database.collection('Contest').aggregate([
+    { $unwind: '$problems' },
+    { $group: { _id: { contest: '$_id', problem: '$problems' }, count: { $sum: 1 } } },
+    { $match: { count: { $gt: 1 } } },
+    { $group: { _id: null, count: { $sum: { $subtract: [ '$count', 1 ] } } } },
+  ]).toArray()
+  return (result[0]?.count as number | undefined) ?? 0
+}
+
 async function countMissingField (
   database: Db,
   collection: string,
@@ -341,6 +351,16 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
             detail: `[error] ${collection} has duplicate (${fields.join(', ')}) records.`,
           } satisfies AuditIssue
     }),
+    (async () => {
+      const count = await countDuplicateContestProblems(database)
+      return count === 0
+        ? null
+        : {
+            code: 'duplicate_contest_problem',
+            count,
+            detail: '[warning] Contest.problems repeats a problem; migration keeps its first occurrence.',
+          } satisfies AuditIssue
+    })(),
     ...arrayReferenceChecks.map(async ({
       sourceCollection, sourceField, targetCollection,
     }) => {

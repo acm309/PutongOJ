@@ -6,16 +6,18 @@ import { createDatabaseClient } from '@putongoj/db'
 import { auditMongoSource } from './audit.js'
 import { migrateBaseEntities, resetTargetDatabase } from './migrate/base.js'
 import { migrateAllEntities } from './migrate/full.js'
+import { verifyPostgresTarget } from './verify.js'
 
 dotenvFlow.config({ silent: true })
 
-type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate-base' | 'migrate'
+type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate-base' | 'migrate' | 'verify-target'
 
 function usage (): never {
   console.error(`Usage:
   pnpm --filter @putongoj/cli start -- check-connections
   pnpm --filter @putongoj/cli start -- inventory
   pnpm --filter @putongoj/cli start -- audit
+  pnpm --filter @putongoj/cli start -- verify-target
   pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
   pnpm --filter @putongoj/cli start -- migrate --reset-target --confirm
 
@@ -25,6 +27,8 @@ Commands:
                      needed to finalize migration mapping rules.
   audit              Run read-only referential-integrity, duplicate, and enum
                      checks against the MongoDB source dataset.
+  verify-target      Report PostgreSQL row counts and critical referential
+                     integrity checks after an import.
   migrate-base       Import users, groups, tags, problems, and their first
                      relationship tables into an intentionally reset target.
   migrate            Run the complete MongoDB to PostgreSQL import into an
@@ -300,10 +304,26 @@ async function migrateBase (argumentsList: string[]) {
   }
 }
 
+async function verifyTarget () {
+  const databaseUrl = environment('DATABASE_URL')
+  const target = createDatabaseClient(databaseUrl)
+
+  try {
+    const report = await verifyPostgresTarget(target)
+    console.log(JSON.stringify(report, null, 2))
+    if (Object.values(report.integrity).some(value => value > 0)) {
+      process.exitCode = 2
+    }
+  }
+  finally {
+    await target.$disconnect()
+  }
+}
+
 async function main () {
   const [ command, ...argumentsList ] = process.argv.slice(2)
     .filter(argument => argument !== '--') as [Command | undefined, ...string[]]
-  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate-base', 'migrate' ].includes(command)) {
+  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate-base', 'migrate', 'verify-target' ].includes(command)) {
     usage()
   }
 
@@ -324,6 +344,11 @@ async function main () {
 
   if (command === 'migrate-base') {
     await migrateBase(argumentsList)
+    return
+  }
+
+  if (command === 'verify-target') {
+    await verifyTarget()
     return
   }
 

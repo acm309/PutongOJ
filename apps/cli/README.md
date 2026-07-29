@@ -124,8 +124,16 @@ pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
 迁移命令完成后：
 
 1. 再次运行 `inventory` 与 `audit`，留存输出；
-2. 对照 CLI 输出的各表计数；
-3. 在 PostgreSQL 中检查关键表计数与外键；
+2. 在 PostgreSQL 目标库运行：
+
+   ```sh
+   pnpm --filter @putongoj/cli start -- verify-target
+   ```
+
+   该命令输出各表计数，并检查 Submission、测试点结果、相似提交的关键
+   外键完整性。返回非零状态时不得切换运行时数据库；
+
+3. 对照源端 inventory、完整迁移 CLI 输出和 target verification 输出；
 4. 用新版 server 的集成测试和人工冒烟测试验证登录、题目、提交、比赛、
    课程、讨论、文件与 OAuth；
 5. 确认 `apps/server/data/<problemId>/` 目录与迁移后的 `Problem.id`
@@ -155,6 +163,8 @@ pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
 - 旧 `Solution.status` 不迁移；判题状态来自 `Solution.judge`。
 - 旧 `Contest.allowedLanguages` 缺失或为 `null` 时，目标写入空数组，
   表示不限语言。
+- 同一比赛中重复出现的同一题目属于历史脏数据。导入时保留第一次出现的
+  题目与位置，之后的重复项会被去除。
 - 旧备份若含 `Tag.color = gold`，导入时归一为 `YELLOW`；当前产品不再
   对外支持 `gold`。
 
