@@ -265,7 +265,7 @@ model Submission {
   contestId           Int?
   courseId            Int?
   sourceCode          String
-  language            Int
+  language            Language
   status              JudgeStatus @default(PENDING)
   timeUsedMs          Int      @default(0)
   memoryUsedKb        Int      @default(0)

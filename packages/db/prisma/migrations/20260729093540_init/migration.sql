@@ -227,7 +227,7 @@ CREATE TABLE "Submission" (
     "contestId" INTEGER,
     "courseId" INTEGER,
     "sourceCode" TEXT NOT NULL,
-    "language" INTEGER NOT NULL,
+    "language" "Language" NOT NULL,
     "status" "JudgeStatus" NOT NULL DEFAULT 'PENDING',
     "timeUsedMs" INTEGER NOT NULL DEFAULT 0,
     "memoryUsedKb" INTEGER NOT NULL DEFAULT 0,

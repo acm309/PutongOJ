@@ -108,6 +108,10 @@ function dateOrNow (value: Date | undefined): Date {
   return value ?? new Date()
 }
 
+function postgresText (value: string | undefined): string {
+  return (value ?? '').replaceAll('\0', '')
+}
+
 function requiredEnum<T> (
   mapping: Record<number, T>,
   value: number | undefined,
@@ -179,7 +183,18 @@ export async function resetTargetDatabase (database: PrismaClient) {
  * inserts are allowed to use generated IDs.
  */
 export async function synchronizeTargetSequences (database: PrismaClient) {
-  for (const table of [ 'User', 'Group', 'Tag', 'Problem' ]) {
+  for (const table of [
+    'User',
+    'Group',
+    'Tag',
+    'Problem',
+    'Course',
+    'Contest',
+    'Discussion',
+    'Comment',
+    'Submission',
+    'Post',
+  ]) {
     await database.$executeRawUnsafe(`
       SELECT setval(
         pg_get_serial_sequence('"${table}"', 'id'),
@@ -204,16 +219,16 @@ export async function migrateBaseEntities (
   await inBatches(users, 1_000, async batch => {
     await target.user.createMany({
       data: batch.map(user => ({
-        username: user.uid,
-        passwordHash: user.pwd,
+        username: postgresText(user.uid),
+        passwordHash: postgresText(user.pwd),
         privilege: requiredEnum(userPrivileges, user.privilege ?? 1, 'User.privilege'),
         storageQuota: BigInt(user.storageQuota ?? 0),
-        nickname: user.nick ?? '',
-        avatarUrl: user.avatar ?? '',
-        motto: user.motto ?? '',
-        email: user.mail ?? '',
-        school: user.school ?? '',
-        lastRequestId: user.lastRequestId,
+        nickname: postgresText(user.nick),
+        avatarUrl: postgresText(user.avatar),
+        motto: postgresText(user.motto),
+        email: postgresText(user.mail),
+        school: postgresText(user.school),
+        lastRequestId: user.lastRequestId === undefined ? undefined : postgresText(user.lastRequestId),
         lastVisitedAt: user.lastVisitedAt,
         createdAt: dateOrNow(user.createdAt),
         updatedAt: dateOrNow(user.updatedAt),
@@ -238,7 +253,7 @@ export async function migrateBaseEntities (
     await target.group.createMany({
       data: batch.map(group => ({
         id: group.gid,
-        name: group.title,
+        name: postgresText(group.title),
         createdAt: dateOrNow(group.createdAt),
         updatedAt: dateOrNow(group.updatedAt),
       })),
@@ -250,7 +265,7 @@ export async function migrateBaseEntities (
     await target.tag.createMany({
       data: batch.map(tag => ({
         id: tag.tagId,
-        name: tag.name,
+        name: postgresText(tag.name),
         color: requiredTagColor(tag.color),
         createdAt: dateOrNow(tag.createdAt),
         updatedAt: dateOrNow(tag.updatedAt),
@@ -263,18 +278,18 @@ export async function migrateBaseEntities (
     await target.problem.createMany({
       data: batch.map(problem => ({
         id: problem.pid,
-        title: problem.title,
+        title: postgresText(problem.title),
         timeLimitMs: problem.time ?? 1_000,
         memoryLimitKb: problem.memory ?? 32_768,
-        description: problem.description ?? '',
-        inputFormat: problem.input ?? '',
-        outputFormat: problem.output ?? '',
-        sampleInput: problem.in ?? '',
-        sampleOutput: problem.out ?? '',
-        hint: problem.hint ?? '',
+        description: postgresText(problem.description),
+        inputFormat: postgresText(problem.input),
+        outputFormat: postgresText(problem.output),
+        sampleInput: postgresText(problem.in),
+        sampleOutput: postgresText(problem.out),
+        hint: postgresText(problem.hint),
         visibility: requiredEnum(problemVisibilities, problem.status ?? 0, 'Problem.status'),
         judgeType: requiredEnum(problemJudgeTypes, problem.type ?? 1, 'Problem.type'),
-        judgeCode: problem.code ?? '',
+        judgeCode: postgresText(problem.code),
         ownerId: problem.owner
           ? userIdByMongoId.get(problem.owner.toHexString())
           : null,

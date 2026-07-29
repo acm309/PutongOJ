@@ -5,6 +5,7 @@ import dotenvFlow from 'dotenv-flow'
 import { createDatabaseClient } from '@putongoj/db'
 import { auditMongoSource } from './audit.js'
 import { migrateBaseEntities, resetTargetDatabase } from './migrate/base.js'
+import { migrateAllEntities } from './migrate/full.js'
 
 dotenvFlow.config({ silent: true })
 
@@ -16,7 +17,7 @@ function usage (): never {
   pnpm --filter @putongoj/cli start -- inventory
   pnpm --filter @putongoj/cli start -- audit
   pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
-  pnpm --filter @putongoj/cli start -- migrate --dry-run
+  pnpm --filter @putongoj/cli start -- migrate --reset-target --confirm
 
 Commands:
   check-connections  Verify source MongoDB and target PostgreSQL connectivity.
@@ -26,8 +27,8 @@ Commands:
                      checks against the MongoDB source dataset.
   migrate-base       Import users, groups, tags, problems, and their first
                      relationship tables into an intentionally reset target.
-  migrate            Run the MongoDB to PostgreSQL migration (currently requires
-                     completed domain migrators). Use --dry-run while developing.
+  migrate            Run the complete MongoDB to PostgreSQL import into an
+                     intentionally reset target database.
 `)
   process.exit(1)
 }
@@ -57,22 +58,32 @@ async function checkConnections () {
   }
 }
 
-async function migrate (dryRun: boolean) {
-  if (!dryRun) {
+async function migrate (argumentsList: string[]) {
+  if (!argumentsList.includes('--reset-target') || !argumentsList.includes('--confirm')) {
     throw new Error(
-      'MongoDB-to-PostgreSQL migrators have not been implemented yet. '
-      + 'Use --dry-run only until the source-to-target mapping review is complete.',
+      'migrate requires both --reset-target and --confirm because it truncates target tables.',
     )
   }
 
-  console.log([
-    'Dry-run migration plan:',
-    '1. Verify MongoDB and PostgreSQL connectivity.',
-    '2. Read and validate legacy collections without changing PostgreSQL.',
-    '3. Report source collection counts and referential-integrity findings.',
-    '4. Execute dependency-ordered migrators after their mapping contracts are approved.',
-  ].join('\n'))
-  await checkConnections()
+  const mongoUrl = environment('PTOJ_MONGODB_URL', 'mongodb://localhost:27017/oj')
+  const databaseUrl = environment('DATABASE_URL')
+  const mongo = new MongoClient(mongoUrl)
+  const target = createDatabaseClient(databaseUrl)
+
+  try {
+    await mongo.connect()
+    const auditReport = await auditMongoSource(mongo.db())
+    if (auditReport.summary.errorCount > 0) {
+      throw new Error(`Source audit failed with ${auditReport.summary.errorCount} error(s).`)
+    }
+
+    await resetTargetDatabase(target)
+    const report = await migrateAllEntities(mongo.db(), target)
+    console.log(JSON.stringify(report, null, 2))
+  }
+  finally {
+    await Promise.allSettled([ mongo.close(), target.$disconnect() ])
+  }
 }
 
 async function inventory () {
@@ -316,7 +327,7 @@ async function main () {
     return
   }
 
-  await migrate(argumentsList.includes('--dry-run'))
+  await migrate(argumentsList)
 }
 
 main().catch((error: unknown) => {
