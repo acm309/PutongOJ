@@ -9,7 +9,7 @@ import Paginator from 'primevue/paginator'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { findContests } from '@/api/contest'
+import { findCourseContests } from '@/api/contest'
 import ContestDataTable from '@/components/ContestDataTable.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -44,7 +44,7 @@ const sortingOptions = computed(() => [ {
 } ])
 
 async function fetch () {
-  const parsed = ContestListQuerySchema.safeParse({ ...route.query, course: route.params.id })
+  const parsed = ContestListQuerySchema.safeParse(route.query)
   if (parsed.success) {
     query.value = parsed.data
   } else {
@@ -53,7 +53,7 @@ async function fetch () {
   }
 
   loading.value = true
-  const resp = await findContests(query.value)
+  const resp = await findCourseContests(route.params.id as string, query.value)
   loading.value = false
   if (!resp.success) {
     message.error(t('ptoj.failed_fetch_contests'), resp.message)

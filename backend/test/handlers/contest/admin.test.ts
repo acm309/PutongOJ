@@ -2,6 +2,7 @@ import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
+import Course from '../../../src/models/Course'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
@@ -13,6 +14,7 @@ const userAgent = supertest.agent(server)
 // ─── shared state ─────────────────────────────────────────────────────────────
 
 let contestId: number | null = null
+let courseContestId: number | null = null
 
 const now = Date.now()
 const baseContest = {
@@ -59,6 +61,21 @@ test.serial('Create a contest', async (t) => {
   contestId = res.body.data.contestId
 })
 
+test.serial('Create a course contest', async (t) => {
+  const course = await Course.findOne({ courseId: 1 }).lean()
+  if (!course) {
+    return t.fail('Missing seeded course')
+  }
+
+  const res = await request
+    .post('/api/contests')
+    .send({ ...baseContest, title: 'Admin Course Test Contest', course: 1 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  courseContestId = res.body.data.contestId
+})
+
 test.serial('Create contest: missing required fields returns error', async (t) => {
   const res = await request
     .post('/api/contests')
@@ -96,14 +113,28 @@ test.serial('Create contest: title exceeding max length returns error', async (t
 
 // ─── GET /api/contests ────────────────────────────────────────────────────────
 
-test.serial('List contests: newly created contest appears', async (t) => {
+test.serial('Public list contains public contests but excludes course contests for admins', async (t) => {
   if (!contestId) { return t.fail('No contestId from prior test') }
+  if (!courseContestId) { return t.fail('No courseContestId from prior test') }
 
   const res = await request.get('/api/contests')
 
   t.is(res.status, 200)
   t.true(res.body.success)
   t.true(res.body.data.docs.some((c: any) => c.contestId === contestId))
+  t.false(res.body.data.docs.some((c: any) => c.contestId === courseContestId))
+})
+
+test.serial('Course list returns course contests through the course endpoint', async (t) => {
+  if (!courseContestId) { return t.fail('No courseContestId from prior test') }
+
+  const res = await request
+    .get('/api/course/1/contests')
+    .query({ title: 'Admin Course Test' })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.true(res.body.data.docs.some((c: any) => c.contestId === courseContestId))
 })
 
 test.serial('List contests: title filter works', async (t) => {

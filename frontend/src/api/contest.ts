@@ -15,6 +15,7 @@ import type {
   ContestSolutionListExportQueryResult,
   ContestSolutionListQuery,
   ContestSolutionListQueryResult,
+  CourseContestListQuery,
   DiscussionListQuery,
   DiscussionListQueryResult,
 } from '@putongoj/shared'
@@ -23,6 +24,10 @@ import { instanceSafe as instance } from './instance'
 
 export async function findContests (params: ContestListQuery) {
   return instance.get<ContestListQueryResult>('/contests', { params })
+}
+
+export async function findCourseContests (courseId: number | string, params: CourseContestListQuery) {
+  return instance.get<ContestListQueryResult>(`/course/${encodeURIComponent(courseId)}/contests`, { params })
 }
 
 export async function createContest (payload: ContestCreatePayload) {

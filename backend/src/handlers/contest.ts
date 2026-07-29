@@ -26,6 +26,7 @@ import {
   JudgeStatus,
   ParticipationStatus,
 } from '@putongoj/shared'
+import { escapeRegExp } from 'lodash'
 import { loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
 import Group from '../models/Group'
@@ -45,7 +46,6 @@ import {
   createErrorResponse,
   createZodErrorResponse,
 } from '../utils'
-import { ERR_PERM_DENIED } from '../utils/constants'
 
 async function findContests (ctx: Context) {
   const query = ContestListQuerySchema.safeParse(ctx.request.query)
@@ -53,25 +53,18 @@ async function findContests (ctx: Context) {
     return createZodErrorResponse(ctx, query.error)
   }
 
-  const { profile } = ctx.state
-  const { page, pageSize, sort, sortBy, title, course: courseId } = query.data
+  const { page, pageSize, sort, sortBy, title } = query.data
 
-  let showHidden: boolean = !!profile?.isAdmin
-  let courseDocId: Types.ObjectId | undefined
-  if (courseId) {
-    const { course, role } = await loadCourseStateOrThrow(ctx, courseId)
-    if (!role.basic) {
-      return ctx.throw(...ERR_PERM_DENIED)
-    }
-    if (role.manageContest) {
-      showHidden = true
-    }
-    courseDocId = course._id
+  const filters: Record<string, unknown> = {}
+  if (title) {
+    filters.title = { $regex: new RegExp(escapeRegExp(title), 'i') }
   }
+  filters.$or = [ { course: { $exists: false } }, { course: null } ]
+  filters.isHidden = { $ne: true }
 
   const contests = await contestService.findContests(
     { page, pageSize, sort, sortBy },
-    { title, course: courseDocId }, showHidden)
+    filters)
   const result = ContestListQueryResultSchema.encode(contests)
   return createEnvelopedResponse(ctx, result)
 }

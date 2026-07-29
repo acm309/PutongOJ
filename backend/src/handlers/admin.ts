@@ -1,4 +1,4 @@
-import type { AdminAccountBatchRegisterResult, PostModel } from '@putongoj/shared'
+import type { AdminAccountBatchRegisterResult, ContestModel, PostModel } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { DiscussionUpdateDto } from '../services/discussion'
 import type { QueryFilter } from '../types/mongo'
@@ -7,6 +7,8 @@ import {
   AdminAccountBatchRegisterPayloadSchema,
   AdminAccountBatchRegisterResultSchema,
   AdminCommentUpdatePayloadSchema,
+  AdminContestListQueryResultSchema,
+  AdminContestListQuerySchema,
   AdminDiscussionUpdatePayloadSchema,
   AdminFileListQueryResultSchema,
   AdminFileListQuerySchema,
@@ -43,6 +45,7 @@ import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
 import { loadPost } from '../policies/post'
 import { contestService } from '../services/contest'
+import courseService from '../services/course'
 import cryptoService from '../services/crypto'
 import discussionService from '../services/discussion'
 import fileService from '../services/file'
@@ -267,6 +270,50 @@ export async function findSolutions (ctx: Context) {
 
   const solutions = await solutionService.findSolutions(query.data)
   const result = AdminSolutionListQueryResultSchema.encode(solutions)
+  return createEnvelopedResponse(ctx, result)
+}
+
+export async function findContests (ctx: Context) {
+  const query = AdminContestListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const { page, pageSize, sort, sortBy, contestId, title, course, isHidden, isPublic, isLocked } = query.data
+  const filters: QueryFilter<ContestModel> = {}
+  if (contestId !== undefined) {
+    filters.contestId = contestId
+  }
+  if (title) {
+    filters.title = { $regex: new RegExp(escapeRegExp(title), 'i') }
+  }
+  if (course === -1) {
+    filters.$or = [ { course: { $exists: false } }, { course: null } ]
+  } else if (course !== undefined) {
+    const courseDoc = await courseService.getCourse(course)
+    if (!courseDoc) {
+      const result = AdminContestListQueryResultSchema.encode({
+        docs: [], limit: pageSize, page, pages: 0, total: 0,
+      })
+      return createEnvelopedResponse(ctx, result)
+    }
+    filters.course = courseDoc._id
+  }
+  if (isHidden !== undefined) {
+    filters.isHidden = isHidden
+  }
+  if (isPublic !== undefined) {
+    filters.isPublic = isPublic
+  }
+  if (isLocked !== undefined) {
+    filters.isLocked = isLocked
+  }
+
+  const contests = await contestService.findContests(
+    { page, pageSize, sort, sortBy },
+    filters,
+  )
+  const result = AdminContestListQueryResultSchema.encode(contests)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -833,6 +880,8 @@ function registerAdminHandlers (router: Router) {
 
   adminRouter.get('/solutions', findSolutions)
   adminRouter.get('/solutions/export', dataExportLimit, exportSolutions)
+
+  adminRouter.get('/contests', findContests)
 
   adminRouter.get('/posts', findPosts)
   adminRouter.post('/posts', createPost)

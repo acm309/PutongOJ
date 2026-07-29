@@ -15,10 +15,13 @@ export const ContestListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'startsAt', 'endsAt']).default('createdAt'),
   title: z.string().max(30).optional(),
-  course: stringToInt.pipe(z.number().nonnegative()).optional(),
 })
 
 export type ContestListQuery = z.infer<typeof ContestListQuerySchema>
+
+export const CourseContestListQuerySchema = ContestListQuerySchema
+
+export type CourseContestListQuery = z.infer<typeof CourseContestListQuerySchema>
 
 export const ContestListQueryResultSchema = PaginatedSchema(z.object({
   contestId: ContestModelSchema.shape.contestId,

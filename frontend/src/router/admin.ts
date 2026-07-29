@@ -9,8 +9,15 @@ const UserManagementDetail = () => import('@/views/Admin/UserManagementDetail.vu
 const SolutionManagement = () => import('@/views/Admin/SolutionManagement.vue')
 const NotificationCreate = () => import('@/views/Admin/NotificationCreate.vue')
 const FileManagement = () => import('@/views/Admin/FileManagement.vue')
+const ContestManagement = () => import('@/views/Admin/ContestManagement.vue')
 
 const adminRoutes: Array<RouteRecordRaw> = [
+  {
+    path: '/admin/contests',
+    name: 'ContestManagement',
+    component: ContestManagement,
+    meta: { title: 'Contest Management', requiresAdmin: true },
+  },
   {
     path: '/admin/groups',
     name: 'GroupManagement',

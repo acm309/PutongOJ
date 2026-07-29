@@ -14,36 +14,15 @@ import { CacheKey, cacheService } from './cache'
 
 async function findContests (
   options: PaginateOption & SortOption,
-  filters: { title?: string, course?: Types.ObjectId },
-  showHidden: boolean = false,
+  filters: QueryFilter<ContestModel>,
 ) {
   const { page, pageSize, sort, sortBy } = options
-  const queryFilters: QueryFilter<ContestModel>[] = []
-
-  if (!showHidden) {
-    queryFilters.push({ isHidden: { $ne: true } })
-  }
-  if (filters.title) {
-    queryFilters.push({
-      title: { $regex: new RegExp(escapeRegExp(String(filters.title)), 'i') },
-    })
-  }
-  if (filters.course) {
-    queryFilters.push({ course: filters.course })
-  } else if (!showHidden) {
-    queryFilters.push({
-      $or: [
-        { course: { $exists: false } },
-        { course: null } ],
-    })
-  }
-
-  const fields = [ '_id', 'contestId', 'title', 'startsAt', 'endsAt', 'isPublic' ]
-  if (showHidden) {
-    fields.push('isHidden')
-  }
+  const fields = [
+    '_id', 'contestId', 'title', 'startsAt', 'endsAt',
+    'isHidden', 'isLocked', 'isPublic', 'course', 'createdAt', 'updatedAt',
+  ]
   const docsPromise = Contest
-    .find({ $and: queryFilters })
+    .find(filters)
     .sort({
       [sortBy]: sort,
       ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
@@ -51,8 +30,9 @@ async function findContests (
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .select(fields)
+    .populate<{ course: Pick<CourseDocument, 'courseId' | 'name'> | null }>('course', { _id: 0, courseId: 1, name: 1 })
     .lean()
-  const countPromise = Contest.countDocuments({ $and: queryFilters })
+  const countPromise = Contest.countDocuments(filters)
 
   const [ docs, count ] = await Promise.all([ docsPromise, countPromise ])
   const result = {

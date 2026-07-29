@@ -3,13 +3,25 @@ import type { Context } from 'koa'
 import type { CourseRole } from '../types'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
 import Router from '@koa/router'
-import { pick } from 'lodash'
+import {
+  ContestListQueryResultSchema,
+  CourseContestListQuerySchema,
+  ErrorCode,
+} from '@putongoj/shared'
+import { escapeRegExp, pick } from 'lodash'
 import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
 import User from '../models/User'
-import { loadCourseStateOrThrow } from '../policies/course'
+import { loadCourseState, loadCourseStateOrThrow } from '../policies/course'
+import { contestService } from '../services/contest'
 import courseService from '../services/course'
 import problemService from '../services/problem'
-import { parsePaginateOption, toObjectRecord } from '../utils'
+import {
+  createEnvelopedResponse,
+  createErrorResponse,
+  createZodErrorResponse,
+  parsePaginateOption,
+  toObjectRecord,
+} from '../utils'
 import { encrypt, ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants'
 
 const findCourses = async (ctx: Context) => {
@@ -26,6 +38,38 @@ const findCourseItems = async (ctx: Context) => {
   const response: CourseEntityItem[]
     = await courseService.findCourseItems(keyword)
   ctx.body = response
+}
+
+const findCourseContests = async (ctx: Context) => {
+  const query = CourseContestListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const state = await loadCourseState(ctx)
+  if (!state) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Course not found')
+  }
+  const { course, role } = state
+  if (!role.basic) {
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
+  }
+
+  const { page, pageSize, sort, sortBy, title } = query.data
+  const filters: Record<string, unknown> = { course: course._id }
+  if (title) {
+    filters.title = { $regex: new RegExp(escapeRegExp(title), 'i') }
+  }
+  if (!role.manageContest) {
+    filters.isHidden = { $ne: true }
+  }
+
+  const contests = await contestService.findContests(
+    { page, pageSize, sort, sortBy },
+    filters,
+  )
+  const result = ContestListQueryResultSchema.encode(contests)
+  return createEnvelopedResponse(ctx, result)
 }
 
 const getCourse = async (ctx: Context) => {
@@ -295,6 +339,7 @@ function registerCourseHandlers (router: Router) {
   courseRouter.get('/items', loginRequire, findCourseItems)
   courseRouter.post('/', rootRequire, createCourse)
   courseRouter.get('/:courseId', loginRequire, getCourse)
+  courseRouter.get('/:courseId/contests', loginRequire, findCourseContests)
   courseRouter.post('/:courseId', loginRequire, joinCourse)
   courseRouter.put('/:courseId', loginRequire, updateCourse)
   courseRouter.get('/:courseId/member', loginRequire, findCourseMembers)

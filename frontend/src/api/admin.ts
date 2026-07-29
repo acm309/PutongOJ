@@ -2,6 +2,8 @@ import type {
   AdminAccountBatchRegisterPayload,
   AdminAccountBatchRegisterResult,
   AdminCommentUpdatePayload,
+  AdminContestListQuery,
+  AdminContestListQueryResult,
   AdminDiscussionUpdatePayload,
   AdminFileListQuery,
   AdminFileListQueryResult,
@@ -58,6 +60,10 @@ export async function findSolutions (params: AdminSolutionListQuery) {
 }
 export async function exportSolutions (params: AdminSolutionListExportQuery) {
   return instance.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
+}
+
+export async function findContests (params: AdminContestListQuery) {
+  return instance.get<AdminContestListQueryResult>('/admin/contests', { params })
 }
 
 export async function findPosts (params: AdminPostListQuery) {

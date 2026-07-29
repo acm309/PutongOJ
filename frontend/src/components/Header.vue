@@ -83,6 +83,10 @@ const menuItems = computed(() => {
         icon: 'pi pi-plus',
         route: 'problemCreate',
       }, {
+        label: t('ptoj.contest_management'),
+        icon: 'pi pi-trophy',
+        route: 'ContestManagement',
+      }, {
         label: t('ptoj.post_management'),
         icon: 'pi pi-megaphone',
         route: 'PostManagement',

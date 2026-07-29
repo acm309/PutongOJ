@@ -74,7 +74,6 @@ test.serial('findContests: returns paginated results', async (t) => {
   const result = await contestService.findContests(
     { page: 1, pageSize: 10, sort: -1, sortBy: 'createdAt' },
     {},
-    true,
   )
 
   t.truthy(result)
@@ -87,7 +86,6 @@ test.serial('findContests: title filter narrows results', async (t) => {
   const result = await contestService.findContests(
     { page: 1, pageSize: 10, sort: -1, sortBy: 'createdAt' },
     { title: 'Service Test' },
-    true,
   )
 
   t.truthy(result)
@@ -98,14 +96,13 @@ test.serial('findContests: title filter that matches nothing returns empty docs'
   const result = await contestService.findContests(
     { page: 1, pageSize: 10, sort: -1, sortBy: 'createdAt' },
     { title: 'THIS_SHOULD_NEVER_MATCH_XYZ_999' },
-    true,
   )
 
   t.is(result.total, 0)
   t.is(result.docs.length, 0)
 })
 
-test.serial('findContests: showHidden=false excludes hidden contests', async (t) => {
+test.serial('findContests: applies the explicit hidden-contest filter', async (t) => {
   // Create a hidden public contest
   const hidden = await contestService.createContest({
     ...testContest,
@@ -115,19 +112,17 @@ test.serial('findContests: showHidden=false excludes hidden contests', async (t)
 
   const visibleResult = await contestService.findContests(
     { page: 1, pageSize: 50, sort: -1, sortBy: 'createdAt' },
-    {},
-    false, // showHidden = false
+    { isHidden: { $ne: true } },
   )
 
   t.false(visibleResult.docs.some(c => c.contestId === hidden.contestId))
 
-  const hiddenResult = await contestService.findContests(
+  const allResult = await contestService.findContests(
     { page: 1, pageSize: 50, sort: -1, sortBy: 'createdAt' },
     {},
-    true, // showHidden = true
   )
 
-  t.true(hiddenResult.docs.some(c => c.contestId === hidden.contestId))
+  t.true(allResult.docs.some(c => c.contestId === hidden.contestId))
 
   // Clean up
   await Contest.deleteOne({ contestId: hidden.contestId })
