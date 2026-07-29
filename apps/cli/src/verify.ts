@@ -37,6 +37,10 @@ export async function verifyPostgresTarget (
     settings,
     submissions,
     submissionTestcaseResults,
+    userProblemStatuses,
+    userSubmissionStats,
+    problemSubmissionStats,
+    discussionCommentStats,
     integrityRows,
     duplicateContestProblemRows,
   ] = await Promise.all([
@@ -63,6 +67,10 @@ export async function verifyPostgresTarget (
     database.setting.count(),
     database.submission.count(),
     database.submissionTestcaseResult.count(),
+    database.userProblemStatus.count(),
+    database.userSubmissionStats.count(),
+    database.problemSubmissionStats.count(),
+    database.discussionCommentStats.count(),
     database.$queryRaw<Array<{
       orphanSubmissionProblem: bigint
       orphanSubmissionUser: bigint
@@ -132,6 +140,10 @@ export async function verifyPostgresTarget (
       settings,
       submissions,
       submissionTestcaseResults,
+      userProblemStatuses,
+      userSubmissionStats,
+      problemSubmissionStats,
+      discussionCommentStats,
     },
     integrity: {
       orphanSubmissionProblem: Number(integrity.orphanSubmissionProblem),

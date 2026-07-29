@@ -80,6 +80,18 @@ pnpm --filter @putongoj/cli start -- audit
 
 `audit` 返回非零状态时，不要执行迁移。应先处理输出中的 error。
 
+如需从 PostgreSQL 当前事实数据重建派生统计 projection：
+
+```sh
+pnpm --filter @putongoj/cli start -- rebuild-stats
+```
+
+可选地限制范围：
+
+```sh
+pnpm --filter @putongoj/cli start -- rebuild-stats --scope discussion
+```
+
 ### 3. 停止写入
 
 进入维护窗口后，停止旧版服务的所有进程。确认 MongoDB 没有新的用户、

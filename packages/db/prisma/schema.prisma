@@ -37,6 +37,8 @@ model User {
   files                  File[]                 @relation("file_owner")
   deletedFiles           File[]                 @relation("file_deleted_by")
   oauthConnections       OAuthConnection[]
+  submissionStats       UserSubmissionStats?
+  problemStatuses       UserProblemStatus[]
 }
 
 model Group {
@@ -96,6 +98,8 @@ model Problem {
   contestProblems ContestProblem[]
   submissions     Submission[]
   discussions     Discussion[]
+  submissionStats ProblemSubmissionStats?
+  userStatuses    UserProblemStatus[]
 
   @@index([ownerId])
 }
@@ -316,6 +320,7 @@ model Discussion {
   problem  Problem? @relation(fields: [problemId], references: [id], onDelete: SetNull)
   contest  Contest? @relation(fields: [contestId], references: [id], onDelete: SetNull)
   comments Comment[]
+  commentStats DiscussionCommentStats?
 
   @@index([authorId])
   @@index([problemId])
@@ -389,6 +394,48 @@ model Setting {
   value     Json
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model UserProblemStatus {
+  userId          Int
+  problemId       Int
+  hasSubmitted    Boolean
+  hasAccepted     Boolean
+  firstAcceptedAt DateTime?
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, problemId])
+  @@index([problemId, hasAccepted])
+}
+
+model UserSubmissionStats {
+  userId                Int      @id
+  submittedProblemCount Int      @default(0)
+  solvedProblemCount    Int      @default(0)
+  updatedAt             DateTime @updatedAt @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProblemSubmissionStats {
+  problemId       Int      @id
+  submitterCount  Int      @default(0)
+  solverCount     Int      @default(0)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model DiscussionCommentStats {
+  discussionId          Int      @id
+  visibleCommentCount   Int      @default(0)
+  lastVisibleCommentAt  DateTime @db.Timestamptz(3)
+  updatedAt             DateTime @updatedAt @db.Timestamptz(3)
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
 }
 
 enum UserPrivilege {

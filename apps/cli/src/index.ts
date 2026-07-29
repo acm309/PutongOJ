@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import type { StatisticsScope } from './stats.js'
 import process from 'node:process'
 import { createDatabaseClient } from '@putongoj/db'
 import dotenvFlow from 'dotenv-flow'
@@ -6,17 +7,19 @@ import { MongoClient } from 'mongodb'
 import { auditMongoSource } from './audit.js'
 import { migrateBaseEntities, resetTargetDatabase } from './migrate/base.js'
 import { migrateAllEntities } from './migrate/full.js'
+import { rebuildStatistics } from './stats.js'
 import { verifyPostgresTarget } from './verify.js'
 
 dotenvFlow.config({ silent: true })
 
-type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate-base' | 'migrate' | 'verify-target'
+type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate-base' | 'migrate' | 'rebuild-stats' | 'verify-target'
 
 function usage (): never {
   console.error(`Usage:
   pnpm --filter @putongoj/cli start -- check-connections
   pnpm --filter @putongoj/cli start -- inventory
   pnpm --filter @putongoj/cli start -- audit
+  pnpm --filter @putongoj/cli start -- rebuild-stats [--scope all|user|problem|discussion]
   pnpm --filter @putongoj/cli start -- verify-target
   pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
   pnpm --filter @putongoj/cli start -- migrate --reset-target --confirm
@@ -27,6 +30,8 @@ Commands:
                      needed to finalize migration mapping rules.
   audit              Run read-only referential-integrity, duplicate, and enum
                      checks against the MongoDB source dataset.
+  rebuild-stats      Rebuild PostgreSQL statistics projections from current
+                     Submission and Comment facts.
   verify-target      Report PostgreSQL row counts and critical referential
                      integrity checks after an import.
   migrate-base       Import users, groups, tags, problems, and their first
@@ -314,10 +319,30 @@ async function verifyTarget () {
   }
 }
 
+function statisticsScope (argumentsList: string[]): StatisticsScope {
+  const scopeIndex = argumentsList.indexOf('--scope')
+  const scope = scopeIndex === -1 ? 'all' : argumentsList[scopeIndex + 1]
+  if (scope === 'all' || scope === 'user' || scope === 'problem' || scope === 'discussion') {
+    return scope
+  }
+  throw new Error('Invalid --scope. Expected all, user, problem, or discussion.')
+}
+
+async function rebuildStats (argumentsList: string[]) {
+  const databaseUrl = environment('DATABASE_URL')
+  const target = createDatabaseClient(databaseUrl)
+  try {
+    const report = await rebuildStatistics(target, statisticsScope(argumentsList))
+    console.log(JSON.stringify(report, null, 2))
+  } finally {
+    await target.$disconnect()
+  }
+}
+
 async function main () {
   const [ command, ...argumentsList ] = process.argv.slice(2)
     .filter(argument => argument !== '--') as [Command | undefined, ...string[]]
-  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate-base', 'migrate', 'verify-target' ].includes(command)) {
+  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate-base', 'migrate', 'rebuild-stats', 'verify-target' ].includes(command)) {
     usage()
   }
 
@@ -343,6 +368,11 @@ async function main () {
 
   if (command === 'verify-target') {
     await verifyTarget()
+    return
+  }
+
+  if (command === 'rebuild-stats') {
+    await rebuildStats(argumentsList)
     return
   }
 

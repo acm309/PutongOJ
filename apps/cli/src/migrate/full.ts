@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@putongoj/db'
 import type { Db, ObjectId } from 'mongodb'
+import type { StatisticsRebuildReport } from '../stats.js'
 import { createHash } from 'node:crypto'
 import {
   CourseVisibility,
@@ -11,6 +12,7 @@ import {
   Prisma,
 
 } from '@putongoj/db'
+import { rebuildStatistics } from '../stats.js'
 import { migrateBaseEntities, synchronizeTargetSequences } from './base.js'
 
 interface LegacyCourse {
@@ -171,7 +173,7 @@ interface PreparedSubmission {
   userId: number
 }
 
-export type FullMigrationReport = Awaited<ReturnType<typeof migrateBaseEntities>> & {
+export type FullMigrationReport = Awaited<ReturnType<typeof migrateBaseEntities>> & StatisticsRebuildReport & {
   courses: number
   courseMembers: number
   courseProblems: number
@@ -192,6 +194,12 @@ export type FullMigrationReport = Awaited<ReturnType<typeof migrateBaseEntities>
   skippedSubmissions: number
   submissionTestcaseResults: number
 }
+
+type RemainingMigrationReport = Omit<
+  FullMigrationReport,
+  keyof Awaited<ReturnType<typeof migrateBaseEntities>>
+  | keyof StatisticsRebuildReport
+>
 
 const courseVisibilities: Record<number, CourseVisibility> = {
   1: CourseVisibility.PUBLIC,
@@ -305,7 +313,7 @@ function roleValue (
 export async function migrateRemainingEntities (
   source: Db,
   target: PrismaClient,
-): Promise<Omit<FullMigrationReport, keyof Awaited<ReturnType<typeof migrateBaseEntities>>>> {
+): Promise<RemainingMigrationReport> {
   const [
     sourceUsers,
     sourceGroups,
@@ -714,5 +722,6 @@ export async function migrateAllEntities (
 ): Promise<FullMigrationReport> {
   const base = await migrateBaseEntities(source, target)
   const remaining = await migrateRemainingEntities(source, target)
-  return { ...base, ...remaining }
+  const statistics = await rebuildStatistics(target)
+  return { ...base, ...remaining, ...statistics }
 }
