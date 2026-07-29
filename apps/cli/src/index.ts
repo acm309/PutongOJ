@@ -4,16 +4,18 @@ import { MongoClient } from 'mongodb'
 import dotenvFlow from 'dotenv-flow'
 import { createDatabaseClient } from '@putongoj/db'
 import { auditMongoSource } from './audit.js'
+import { migrateBaseEntities, resetTargetDatabase } from './migrate/base.js'
 
 dotenvFlow.config({ silent: true })
 
-type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate'
+type Command = 'audit' | 'check-connections' | 'inventory' | 'migrate-base' | 'migrate'
 
 function usage (): never {
   console.error(`Usage:
   pnpm --filter @putongoj/cli start -- check-connections
   pnpm --filter @putongoj/cli start -- inventory
   pnpm --filter @putongoj/cli start -- audit
+  pnpm --filter @putongoj/cli start -- migrate-base --reset-target --confirm
   pnpm --filter @putongoj/cli start -- migrate --dry-run
 
 Commands:
@@ -22,6 +24,8 @@ Commands:
                      needed to finalize migration mapping rules.
   audit              Run read-only referential-integrity, duplicate, and enum
                      checks against the MongoDB source dataset.
+  migrate-base       Import users, groups, tags, problems, and their first
+                     relationship tables into an intentionally reset target.
   migrate            Run the MongoDB to PostgreSQL migration (currently requires
                      completed domain migrators). Use --dry-run while developing.
 `)
@@ -257,10 +261,38 @@ async function audit () {
   }
 }
 
+async function migrateBase (argumentsList: string[]) {
+  if (!argumentsList.includes('--reset-target') || !argumentsList.includes('--confirm')) {
+    throw new Error(
+      'migrate-base requires both --reset-target and --confirm because it truncates target tables.',
+    )
+  }
+
+  const mongoUrl = environment('PTOJ_MONGODB_URL', 'mongodb://localhost:27017/oj')
+  const databaseUrl = environment('DATABASE_URL')
+  const mongo = new MongoClient(mongoUrl)
+  const target = createDatabaseClient(databaseUrl)
+
+  try {
+    await mongo.connect()
+    const auditReport = await auditMongoSource(mongo.db())
+    if (auditReport.summary.errorCount > 0) {
+      throw new Error(`Source audit failed with ${auditReport.summary.errorCount} error(s).`)
+    }
+
+    await resetTargetDatabase(target)
+    const report = await migrateBaseEntities(mongo.db(), target)
+    console.log(JSON.stringify(report, null, 2))
+  }
+  finally {
+    await Promise.allSettled([ mongo.close(), target.$disconnect() ])
+  }
+}
+
 async function main () {
   const [ command, ...argumentsList ] = process.argv.slice(2)
     .filter(argument => argument !== '--') as [Command | undefined, ...string[]]
-  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate' ].includes(command)) {
+  if (!command || ![ 'audit', 'check-connections', 'inventory', 'migrate-base', 'migrate' ].includes(command)) {
     usage()
   }
 
@@ -276,6 +308,11 @@ async function main () {
 
   if (command === 'audit') {
     await audit()
+    return
+  }
+
+  if (command === 'migrate-base') {
+    await migrateBase(argumentsList)
     return
   }
 

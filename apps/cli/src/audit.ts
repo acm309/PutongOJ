@@ -189,6 +189,10 @@ const tagColors = [
   'red',
 ]
 
+const legacyTagColorAliases: Record<string, string> = {
+  gold: 'yellow',
+}
+
 function optionalObjectIdMatch (field: string): Document {
   return {
     [field]: {
@@ -296,17 +300,6 @@ async function countInvalidEnumValues (
   })
 }
 
-async function countInvalidStringEnumValues (
-  database: Db,
-  collection: string,
-  field: string,
-  values: readonly string[],
-): Promise<number> {
-  return await database.collection(collection).countDocuments({
-    [field]: { $nin: values },
-  })
-}
-
 async function countMissingField (
   database: Db,
   collection: string,
@@ -381,7 +374,14 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
           } satisfies AuditIssue
     }),
     (async () => {
-      const count = await countInvalidStringEnumValues(database, 'Tag', 'color', tagColors)
+      const count = await database.collection('Tag').countDocuments({
+        color: {
+          $nin: [
+            ...tagColors,
+            ...Object.keys(legacyTagColorAliases),
+          ],
+        },
+      })
       return count === 0
         ? null
         : {
