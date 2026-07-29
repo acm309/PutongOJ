@@ -23,7 +23,7 @@ Putong OJ is an online judge system designed for competitive programming and alg
 
 - **One-Click Deployment** – Easily deploy with Docker.
 - **Modern Web Interface** – Built as a single-page application (SPA) using Vue.js.
-- **Scalable Architecture** – Backed by Koa.js, MongoDB, and Redis for optimal performance.
+- **Scalable Architecture** – Backed by Koa.js, MongoDB, and Redis for the current stable runtime. A PostgreSQL/Prisma migration is being prepared on the refactor branch.
 - **Multiple Testcases Support** – Run and evaluate submissions with multiple testcases.
 - **Flexible Judging System** – Supports various programming languages.
 - **Real-Time Status Updates** – Monitor submissions and results dynamically.

@@ -1,0 +1,25 @@
+{
+  "name": "@putongoj/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "putong-oj": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "pnpm --filter @putongoj/db build && tsc",
+    "dev": "tsx src/index.ts",
+    "start": "pnpm --filter @putongoj/db build && tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@putongoj/db": "workspace:*",
+    "dotenv-flow": "^4.1.0",
+    "mongodb": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~24.12.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

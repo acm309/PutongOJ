@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This schema is the target relational contract. It is intentionally not
+/// connected to the running MongoDB-backed server until the persistence
+/// replacement is completed domain by domain.
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique @db.VarChar(20)
+  passwordHash    String @db.VarChar(72)
+  privilege       UserPrivilege @default(USER)
+  storageQuota    BigInt   @default(0)
+  nickname        String   @default("") @db.VarChar(30)
+  avatarUrl       String   @default("") @db.VarChar(2048)
+  motto           String   @default("") @db.VarChar(300)
+  email           String   @default("") @db.VarChar(254)
+  school          String   @default("") @db.VarChar(30)
+  lastRequestId   String?
+  lastVisitedAt   DateTime? @db.Timestamptz(3)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  groupMemberships       GroupMember[]
+  courseMemberships      CourseMember[]
+  ownedProblems          Problem[]              @relation("problem_owner")
+  submissions            Submission[]
+  contestParticipations  ContestParticipation[]
+  allowedContests        ContestAllowedUser[]
+  discussions            Discussion[]           @relation("discussion_author")
+  comments               Comment[]              @relation("comment_author")
+  files                  File[]                 @relation("file_owner")
+  deletedFiles           File[]                 @relation("file_deleted_by")
+  oauthConnections       OAuthConnection[]
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(79)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  members         GroupMember[]
+  allowedContests ContestAllowedGroup[]
+}
+
+model GroupMember {
+  groupId Int
+  userId  Int
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@index([userId])
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(29)
+  color     TagColor @default(DEFAULT)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  problemTags ProblemTag[]
+
+  @@index([name])
+}
+
+model Problem {
+  id             Int      @id @default(autoincrement())
+  title          String   @db.VarChar(80)
+  timeLimitMs    Int      @default(1000)
+  memoryLimitKb  Int      @default(32768)
+  description    String   @default("")
+  inputFormat    String   @default("")
+  outputFormat   String   @default("")
+  sampleInput    String   @default("")
+  sampleOutput   String   @default("")
+  hint           String   @default("")
+  visibility     ProblemVisibility @default(RESERVED)
+  judgeType      ProblemJudgeType  @default(TRADITIONAL)
+  judgeCode      String   @default("")
+  ownerId        Int?
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
+
+  owner           User            ? @relation("problem_owner", fields: [ownerId], references: [id], onDelete: SetNull)
+  tags            ProblemTag[]
+  courseProblems  CourseProblem[]
+  contestProblems ContestProblem[]
+  submissions     Submission[]
+  discussions     Discussion[]
+
+  @@index([ownerId])
+}
+
+model ProblemTag {
+  problemId Int
+  tagId     Int
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, tagId])
+  @@index([tagId])
+}
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(30)
+  description String   @default("") @db.VarChar(100)
+  visibility  CourseVisibility @default(PUBLIC)
+  joinCode    String   @default("") @db.VarChar(20)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  members  CourseMember[]
+  problems CourseProblem[]
+  contests Contest[]
+  submissions Submission[]
+}
+
+model CourseMember {
+  courseId             Int
+  userId               Int
+  canAccess            Boolean  @default(false)
+  canViewTestcases     Boolean  @default(false)
+  canViewSubmissions   Boolean  @default(false)
+  canManageProblems    Boolean  @default(false)
+  canManageContests    Boolean  @default(false)
+  canManageCourse      Boolean  @default(false)
+  createdAt            DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @db.Timestamptz(3)
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, userId])
+  @@index([userId])
+}
+
+model CourseProblem {
+  courseId  Int
+  problemId Int
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, problemId])
+  @@index([courseId, position, updatedAt])
+  @@index([problemId])
+}
+
+model Contest {
+  id                   Int       @id @default(autoincrement())
+  title                String    @db.VarChar(255)
+  startsAt             DateTime
+  endsAt               DateTime
+  scoreboardFrozenAt   DateTime?
+  scoreboardUnfrozenAt DateTime?
+  isHidden             Boolean   @default(false)
+  isLocked             Boolean   @default(false)
+  isPublic             Boolean   @default(false)
+  password             String    @default("")
+  ipWhitelistEnabled   Boolean   @default(false)
+  allowEarlyExit       Boolean   @default(false)
+  allowedLanguages       Language[] @default([])
+  labelingStyle          LabelingStyle @default(NUMERIC)
+  courseId             Int?
+  createdAt            DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime  @updatedAt @db.Timestamptz(3)
+
+  course          Course                 ? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  allowedUsers    ContestAllowedUser[]
+  allowedGroups   ContestAllowedGroup[]
+  ipWhitelist     ContestIpWhitelist[]
+  problems        ContestProblem[]
+  participations  ContestParticipation[]
+  submissions     Submission[]
+  discussions     Discussion[]
+
+  @@index([courseId])
+}
+
+model ContestAllowedUser {
+  contestId Int
+  userId    Int
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([contestId, userId])
+  @@index([userId])
+}
+
+model ContestAllowedGroup {
+  contestId Int
+  groupId   Int
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([contestId, groupId])
+  @@index([groupId])
+}
+
+/// The whitelist is an independently managed ordered collection. Keeping it
+/// normalized gives each rule a stable relation for updates/auditing and avoids
+/// rewriting a JSON array for every single rule edit.
+model ContestIpWhitelist {
+  contestId Int
+  cidr      String
+  comment   String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  @@id([contestId, cidr])
+}
+
+model ContestProblem {
+  contestId Int
+  problemId Int
+  position  Int
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@id([contestId, problemId])
+  @@unique([contestId, position])
+  @@index([problemId])
+}
+
+model ContestParticipation {
+  contestId Int
+  userId    Int
+  status    ParticipationStatus
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([contestId, userId])
+  @@index([userId])
+  @@index([contestId, status, updatedAt])
+}
+
+model Submission {
+  id                  Int      @id @default(autoincrement())
+  problemId           Int
+  userId              Int
+  contestId           Int?
+  courseId            Int?
+  sourceCode          String
+  language            Int
+  status              JudgeStatus @default(PENDING)
+  timeUsedMs          Int      @default(0)
+  memoryUsedKb        Int      @default(0)
+  errorMessage        String   @default("")
+  similarity          Float    @default(0)
+  similarSubmissionId Int?
+  createdAt           DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @db.Timestamptz(3)
+
+  problem           Problem      @relation(fields: [problemId], references: [id], onDelete: Restrict)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  contest           Contest?     @relation(fields: [contestId], references: [id], onDelete: SetNull)
+  course            Course?      @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  similarSubmission Submission?  @relation("submission_similarity", fields: [similarSubmissionId], references: [id], onDelete: SetNull)
+  similarTo         Submission[] @relation("submission_similarity")
+  testcaseResults   SubmissionTestcaseResult[]
+
+  @@index([problemId, createdAt])
+  @@index([userId, createdAt])
+  @@index([contestId, problemId, createdAt])
+  @@index([status, createdAt])
+}
+
+model SubmissionTestcaseResult {
+  submissionId Int
+  testcaseId   String
+  status       JudgeStatus
+  timeUsedMs   Int
+  memoryUsedKb Int
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@id([submissionId, testcaseId])
+}
+
+model Discussion {
+  id            Int      @id @default(autoincrement())
+  authorId      Int
+  problemId     Int?
+  contestId     Int?
+  type          DiscussionType @default(PRIVATE_CLARIFICATION)
+  isPinned      Boolean  @default(false)
+  title         String   @db.VarChar(255)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+
+  author   User     @relation("discussion_author", fields: [authorId], references: [id], onDelete: Restrict)
+  problem  Problem? @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  contest  Contest? @relation(fields: [contestId], references: [id], onDelete: SetNull)
+  comments Comment[]
+
+  @@index([authorId])
+  @@index([problemId])
+  @@index([contestId])
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  discussionId Int
+  authorId     Int
+  content      String
+  isHidden     Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  discussion Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  author     User       @relation("comment_author", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([discussionId, createdAt])
+  @@index([authorId])
+}
+
+model File {
+  storageKey  String    @id
+  originalName String
+  sizeBytes   BigInt
+  ownerId     Int
+  deletedAt   DateTime? @db.Timestamptz(3)
+  deletedById Int?
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+
+  owner     User  @relation("file_owner", fields: [ownerId], references: [id], onDelete: Restrict)
+  deletedBy User? @relation("file_deleted_by", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  @@index([ownerId, deletedAt, createdAt])
+}
+
+model OAuthConnection {
+  userId       Int
+  provider     String   @db.VarChar(64)
+  providerId   String
+  displayName  String
+  accessToken  String
+  refreshToken String?
+  raw          Json?
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, provider])
+  @@unique([provider, providerId])
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique @db.VarChar(100)
+  title       String   @db.VarChar(255)
+  content     String   @default("")
+  publishesAt DateTime @db.Timestamptz(3)
+  isPublished Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  isHidden    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+enum UserPrivilege {
+  BANNED
+  USER
+  ADMIN
+  ROOT
+}
+
+enum ProblemVisibility {
+  RESERVED
+  AVAILABLE
+}
+
+enum ProblemJudgeType {
+  TRADITIONAL
+  INTERACTION
+  SPECIAL_JUDGE
+}
+
+enum CourseVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum JudgeStatus {
+  PENDING
+  RUNNING_JUDGE
+  COMPILE_ERROR
+  ACCEPTED
+  RUNTIME_ERROR
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  OUTPUT_LIMIT_EXCEEDED
+  PRESENTATION_ERROR
+  SYSTEM_ERROR
+  REJUDGE_PENDING
+  SKIPPED
+}
+
+enum Language {
+  C
+  CPP_11
+  JAVA
+  PYTHON
+  CPP_17
+  PYPY
+}
+
+enum DiscussionType {
+  OPEN_DISCUSSION
+  PUBLIC_ANNOUNCEMENT
+  PRIVATE_CLARIFICATION
+  ARCHIVED_DISCUSSION
+}
+
+enum ParticipationStatus {
+  NOT_APPLIED
+  PENDING
+  REJECTED
+  SUSPENDED
+  APPROVED
+  EARLY_EXIT
+}
+
+enum LabelingStyle {
+  NUMERIC
+  ALPHABETIC
+}
+
+enum TagColor {
+  DEFAULT
+  PURPLE
+  GEEKBLUE
+  BLUE
+  CYAN
+  GREEN
+  LIME
+  YELLOW
+  ORANGE
+  RED
+}

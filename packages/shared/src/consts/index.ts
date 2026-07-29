@@ -122,6 +122,17 @@ export enum LabelingStyle {
 export const LabelingStyleValues = Object.values(LabelingStyle)
   .filter(value => typeof value === 'number') as number[]
 
+export enum ProblemVisibility {
+  Reserved = 0,
+  Available = 2,
+}
+
+export enum ProblemJudgeType {
+  Traditional = 1,
+  Interaction = 2,
+  SpecialJudge = 3,
+}
+
 export const tagColors = [
   'default',
   'purple',
