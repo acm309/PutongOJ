@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
-import Files from '../../../src/models/Files'
+import { getDatabase } from '../../../src/config/postgres'
 import User from '../../../src/models/User'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
@@ -186,7 +186,10 @@ test.serial('Admin can delete a file uploaded by another user', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
 
-  const record = await Files.findOne({ storageKey: userStorageKey }).lean()
+  const database = await getDatabase()
+  const record = await database.file.findUnique({
+    where: { storageKey: userStorageKey! },
+  })
   t.truthy(record!.deletedAt)
 })
 
