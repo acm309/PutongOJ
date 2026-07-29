@@ -1,4 +1,5 @@
 import process from 'node:process'
+import { UserPrivilege } from '@putongoj/shared'
 // import Contest from '../src/models/Contest'
 import Course from '../src/models/Course'
 import Group from '../src/models/Group'
@@ -19,9 +20,39 @@ import { userSeeds } from './seeds/user'
 
 async function main () {
   await removeall()
-  const { createDatabaseClient } = await import('@putongoj/db')
+  const { createDatabaseClient, UserPrivilege: DatabaseUserPrivilege } = await import('@putongoj/db')
   const database = createDatabaseClient(process.env.DATABASE_URL!)
-  await database.post.deleteMany()
+  await database.$executeRawUnsafe(`
+    TRUNCATE TABLE
+      "SubmissionTestcaseResult",
+      "Submission",
+      "Comment",
+      "Discussion",
+      "ContestParticipation",
+      "ContestProblem",
+      "ContestIpWhitelist",
+      "ContestAllowedGroup",
+      "ContestAllowedUser",
+      "Contest",
+      "CourseProblem",
+      "CourseMember",
+      "Course",
+      "ProblemTag",
+      "Problem",
+      "Tag",
+      "GroupMember",
+      "Group",
+      "OAuthConnection",
+      "File",
+      "Post",
+      "Setting",
+      "UserProblemStatus",
+      "UserSubmissionStats",
+      "ProblemSubmissionStats",
+      "DiscussionCommentStats",
+      "User"
+    RESTART IDENTITY CASCADE
+  `)
   await Promise.all([
     new ID({ name: 'Comment', id: 0 }).save(),
     new ID({ name: 'Contest', id: 0 }).save(),
@@ -32,6 +63,45 @@ async function main () {
     new ID({ name: 'Solution', id: 0 }).save(),
     new ID({ name: 'Tag', id: 0 }).save(),
   ])
+
+  const postgresUsers = await database.user.createManyAndReturn({
+    data: Object.values(userSeeds).map(user => ({
+      username: user.uid!,
+      passwordHash: passwordHash(user.pwd as string),
+      privilege: [
+        DatabaseUserPrivilege.BANNED,
+        DatabaseUserPrivilege.USER,
+        DatabaseUserPrivilege.ADMIN,
+        DatabaseUserPrivilege.ROOT,
+      ][user.privilege ?? UserPrivilege.User]!,
+      nickname: user.nick ?? '',
+    })),
+  })
+  const postgresUserIds = new Map(postgresUsers.map(user => [ user.username, user.id ]))
+  const postgresGroups = await database.group.createManyAndReturn({
+    data: groupSeeds.map((group, index) => ({
+      id: index + 1,
+      name: group.title,
+    })),
+  })
+  await database.groupMember.createMany({
+    data: postgresGroups.flatMap((group, index) => {
+      return groupSeeds[index]!.list
+        .map(username => postgresUserIds.get(username))
+        .filter((userId): userId is number => userId !== undefined)
+        .map(userId => ({
+          groupId: group.id,
+          userId,
+        }))
+    }),
+  })
+  await database.$executeRawUnsafe(`
+    SELECT setval(
+      pg_get_serial_sequence('"Group"', 'id'),
+      COALESCE((SELECT MAX("id") FROM "Group"), 1),
+      true
+    )
+  `)
 
   const courseInsert = Promise.all(
     courseSeeds.map(item => new Course(item).save()),

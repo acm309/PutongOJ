@@ -14,9 +14,9 @@ import {
   UserSuggestQuerySchema,
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
+import { getDatabase } from '../config/postgres'
 import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
-import Group from '../models/Group'
 import Solution from '../models/Solution'
 import userService from '../services/user'
 import {
@@ -84,10 +84,21 @@ export async function getUser (ctx: Context) {
       .find({ uid: user.uid, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
       .distinct('pid')
       .lean(),
-    Group
-      .find({ gid: { $in: user.gid } })
-      .select('-_id gid title')
-      .lean(),
+    (async () => {
+      const database = await getDatabase()
+      const postgresUser = await database.user.findUnique({
+        where: { username: user.uid },
+        include: {
+          groupMemberships: {
+            include: { group: true },
+          },
+        },
+      })
+      return postgresUser?.groupMemberships.map(({ group }) => ({
+        gid: group.id,
+        title: group.name,
+      })) ?? []
+    })(),
     userService.getSubmissionHeatmap(user._id),
   ])
 
