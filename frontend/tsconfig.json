@@ -18,6 +18,7 @@
     },
     "resolveJsonModule": true,
     "strict": true,
+    "rootDir": "src",
     "outDir": "dist",
     "sourceMap": true,
     "esModuleInterop": true

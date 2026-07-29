@@ -15,12 +15,20 @@ RUN npm i -g pnpm@latest-11
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY backend/package.json backend/
+COPY document/package.json document/
 COPY frontend/package.json frontend/
 COPY shared/package.json shared/
-RUN pnpm install --frozen-lockfile --filter="!document"
+RUN pnpm install --frozen-lockfile
 
 COPY shared/ shared/
 RUN pnpm --filter @putongoj/shared build
+
+# Documentation builder
+FROM base_builder AS document_builder
+WORKDIR /app
+
+COPY document/ document/
+RUN pnpm --filter @putongoj/document build
 
 # Frontend builder
 FROM base_builder AS frontend_builder
@@ -58,6 +66,7 @@ COPY --from=backend_deps /app/backend_deploy/package.json ./package.json
 
 COPY --from=backend_builder /app/backend/dist ./dist
 COPY --from=frontend_builder /app/frontend/dist ./public
+COPY --from=document_builder /app/document/.vitepress/dist ./public/docs
 
 COPY --from=version_checker /app/version.txt .
 COPY --from=backend_builder /app/build_time.txt .
