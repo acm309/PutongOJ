@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2022",
+    "baseUrl": ".",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "strict": true,
     "declaration": true,
     "outDir": "./dist",
-    "skipLibCheck": true,
-    "baseUrl": "."
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts"

@@ -1,3 +1,6 @@
+import type { PrismaClient } from '@putongoj/db'
+import type { Db, ObjectId } from 'mongodb'
+import { createHash } from 'node:crypto'
 import {
   CourseVisibility,
   DiscussionType,
@@ -6,13 +9,11 @@ import {
   Language,
   ParticipationStatus,
   Prisma,
-  type PrismaClient,
+
 } from '@putongoj/db'
-import { createHash } from 'node:crypto'
-import type { Db, ObjectId } from 'mongodb'
 import { migrateBaseEntities, synchronizeTargetSequences } from './base.js'
 
-type LegacyCourse = {
+interface LegacyCourse {
   _id: ObjectId
   courseId: number
   name: string
@@ -23,7 +24,7 @@ type LegacyCourse = {
   updatedAt?: Date
 }
 
-type LegacyCourseMember = {
+interface LegacyCourseMember {
   course: ObjectId
   user: ObjectId
   role?: Partial<Record<
@@ -34,7 +35,7 @@ type LegacyCourseMember = {
   updatedAt?: Date
 }
 
-type LegacyCourseProblem = {
+interface LegacyCourseProblem {
   course: ObjectId
   problem: ObjectId
   sort?: number
@@ -42,7 +43,7 @@ type LegacyCourseProblem = {
   updatedAt?: Date
 }
 
-type LegacyContest = {
+interface LegacyContest {
   _id: ObjectId
   contestId: number
   title: string
@@ -67,7 +68,7 @@ type LegacyContest = {
   updatedAt?: Date
 }
 
-type LegacyContestParticipation = {
+interface LegacyContestParticipation {
   contest: ObjectId
   user: ObjectId
   status: number
@@ -75,7 +76,7 @@ type LegacyContestParticipation = {
   updatedAt?: Date
 }
 
-type LegacyDiscussion = {
+interface LegacyDiscussion {
   _id: ObjectId
   discussionId: number
   author: ObjectId
@@ -88,7 +89,7 @@ type LegacyDiscussion = {
   updatedAt?: Date
 }
 
-type LegacyComment = {
+interface LegacyComment {
   commentId: number
   discussion: ObjectId
   author: ObjectId
@@ -98,7 +99,7 @@ type LegacyComment = {
   updatedAt?: Date
 }
 
-type LegacyFile = {
+interface LegacyFile {
   storageKey: string
   originalName: string
   sizeBytes: number
@@ -109,7 +110,7 @@ type LegacyFile = {
   updatedAt?: Date
 }
 
-type LegacyOAuth = {
+interface LegacyOAuth {
   user: ObjectId
   provider: string
   providerId: string
@@ -121,7 +122,7 @@ type LegacyOAuth = {
   updatedAt?: Date
 }
 
-type LegacyPost = {
+interface LegacyPost {
   slug: string
   title: string
   content?: string
@@ -133,14 +134,14 @@ type LegacyPost = {
   updatedAt?: Date
 }
 
-type LegacySetting = {
+interface LegacySetting {
   key: string
   value: Prisma.InputJsonValue
   createdAt?: Date
   updatedAt?: Date
 }
 
-type LegacySubmission = {
+interface LegacySubmission {
   sid: number
   pid: number
   uid: string
@@ -165,7 +166,7 @@ type LegacySubmission = {
   updatedAt?: Date
 }
 
-type PreparedSubmission = {
+interface PreparedSubmission {
   submission: LegacySubmission
   userId: number
 }
@@ -308,7 +309,6 @@ export async function migrateRemainingEntities (
   const [
     sourceUsers,
     sourceGroups,
-    sourceTags,
     sourceProblems,
     courses,
     courseMembers,
@@ -324,7 +324,6 @@ export async function migrateRemainingEntities (
   ] = await Promise.all([
     source.collection<{ _id: ObjectId, uid: string }>('User').find({}, { projection: { _id: 1, uid: 1 } }).toArray(),
     source.collection<{ _id: ObjectId, gid: number }>('Group').find({}, { projection: { _id: 1, gid: 1 } }).toArray(),
-    source.collection<{ _id: ObjectId, tagId: number }>('Tag').find({}, { projection: { _id: 1, tagId: 1 } }).toArray(),
     source.collection<{ _id: ObjectId, pid: number }>('Problem').find({}, { projection: { _id: 1, pid: 1 } }).toArray(),
     source.collection<LegacyCourse>('Course').find({}).toArray(),
     source.collection<LegacyCourseMember>('CourseMember').find({}).toArray(),
@@ -352,10 +351,9 @@ export async function migrateRemainingEntities (
     return [ user._id.toHexString(), id ]
   }))
   const groupIdByMongoId = mongoMap(sourceGroups, group => group.gid)
-  const tagIdByMongoId = mongoMap(sourceTags, tag => tag.tagId)
   const problemIdByMongoId = mongoMap(sourceProblems, problem => problem.pid)
 
-  await inBatches(courses, 1_000, async batch => {
+  await inBatches(courses, 1_000, async (batch) => {
     await target.course.createMany({
       data: batch.map(course => ({
         id: course.courseId,
@@ -383,7 +381,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(member.createdAt),
     updatedAt: dateOrNow(member.updatedAt),
   }))
-  await inBatches(courseMemberRows, 5_000, async batch => {
+  await inBatches(courseMemberRows, 5_000, async (batch) => {
     await target.courseMember.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -394,11 +392,11 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(courseProblem.createdAt),
     updatedAt: dateOrNow(courseProblem.updatedAt),
   }))
-  await inBatches(courseProblemRows, 5_000, async batch => {
+  await inBatches(courseProblemRows, 5_000, async (batch) => {
     await target.courseProblem.createMany({ data: batch, skipDuplicates: true })
   })
 
-  await inBatches(contests, 1_000, async batch => {
+  await inBatches(contests, 1_000, async (batch) => {
     await target.contest.createMany({
       data: batch.map(contest => ({
         id: contest.contestId,
@@ -461,16 +459,16 @@ export async function migrateRemainingEntities (
     })
   })
   await Promise.all([
-    inBatches(contestAllowedUsers, 5_000, async batch => {
+    inBatches(contestAllowedUsers, 5_000, async (batch) => {
       await target.contestAllowedUser.createMany({ data: batch, skipDuplicates: true })
     }),
-    inBatches(contestAllowedGroups, 5_000, async batch => {
+    inBatches(contestAllowedGroups, 5_000, async (batch) => {
       await target.contestAllowedGroup.createMany({ data: batch, skipDuplicates: true })
     }),
-    inBatches(contestIpWhitelist, 5_000, async batch => {
+    inBatches(contestIpWhitelist, 5_000, async (batch) => {
       await target.contestIpWhitelist.createMany({ data: batch, skipDuplicates: true })
     }),
-    inBatches(contestProblems, 5_000, async batch => {
+    inBatches(contestProblems, 5_000, async (batch) => {
       await target.contestProblem.createMany({ data: batch, skipDuplicates: true })
     }),
   ])
@@ -482,7 +480,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(participation.createdAt),
     updatedAt: dateOrNow(participation.updatedAt),
   }))
-  await inBatches(participationRows, 5_000, async batch => {
+  await inBatches(participationRows, 5_000, async (batch) => {
     await target.contestParticipation.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -501,7 +499,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(discussion.createdAt),
     updatedAt: dateOrNow(discussion.updatedAt),
   }))
-  await inBatches(discussionRows, 5_000, async batch => {
+  await inBatches(discussionRows, 5_000, async (batch) => {
     await target.discussion.createMany({ data: batch, skipDuplicates: true })
   })
   const discussionIdByMongoId = mongoMap(discussions, discussion => discussion.discussionId)
@@ -515,7 +513,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(comment.createdAt),
     updatedAt: dateOrNow(comment.updatedAt),
   }))
-  await inBatches(commentRows, 5_000, async batch => {
+  await inBatches(commentRows, 5_000, async (batch) => {
     await target.comment.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -531,7 +529,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(file.createdAt),
     updatedAt: dateOrNow(file.updatedAt),
   }))
-  await inBatches(fileRows, 5_000, async batch => {
+  await inBatches(fileRows, 5_000, async (batch) => {
     await target.file.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -546,7 +544,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(connection.createdAt),
     updatedAt: dateOrNow(connection.updatedAt),
   }))
-  await inBatches(oauthRows, 5_000, async batch => {
+  await inBatches(oauthRows, 5_000, async (batch) => {
     await target.oAuthConnection.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -561,7 +559,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(post.createdAt),
     updatedAt: dateOrNow(post.updatedAt),
   }))
-  await inBatches(postRows, 5_000, async batch => {
+  await inBatches(postRows, 5_000, async (batch) => {
     await target.post.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -571,7 +569,7 @@ export async function migrateRemainingEntities (
     createdAt: dateOrNow(setting.createdAt),
     updatedAt: dateOrNow(setting.updatedAt),
   }))
-  await inBatches(settingRows, 5_000, async batch => {
+  await inBatches(settingRows, 5_000, async (batch) => {
     await target.setting.createMany({ data: batch, skipDuplicates: true })
   })
 
@@ -659,13 +657,13 @@ export async function migrateRemainingEntities (
     const testcaseRows = items
       .filter(submission => importedSubmissionIds.has(submission.sid))
       .flatMap(submission => (submission.testcases ?? []).map(testcase => ({
-      submissionId: submission.sid,
-      testcaseId: testcase.uuid,
-      status: mapped(judgeStatuses, testcase.judge, 'Solution.testcases.judge'),
-      timeUsedMs: testcase.time,
-      memoryUsedKb: testcase.memory,
+        submissionId: submission.sid,
+        testcaseId: testcase.uuid,
+        status: mapped(judgeStatuses, testcase.judge, 'Solution.testcases.judge'),
+        timeUsedMs: testcase.time,
+        memoryUsedKb: testcase.memory,
       })))
-    await inBatches(testcaseRows, 5_000, async testcaseBatch => {
+    await inBatches(testcaseRows, 5_000, async (testcaseBatch) => {
       await target.submissionTestcaseResult.createMany({
         data: testcaseBatch,
         skipDuplicates: true,

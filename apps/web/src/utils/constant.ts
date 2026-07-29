@@ -1,4 +1,5 @@
-import { type CourseRole, JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
+import type { CourseRole } from '@putongoj/shared'
+import { JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
 
 export const languageHighlight: Record<Language, string> = {
   [Language.C]: 'c',

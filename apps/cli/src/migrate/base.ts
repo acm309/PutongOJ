@@ -1,13 +1,13 @@
 import type { PrismaClient } from '@putongoj/db'
+import type { Db, ObjectId } from 'mongodb'
 import {
   ProblemJudgeType,
   ProblemVisibility,
   TagColor,
   UserPrivilege,
 } from '@putongoj/db'
-import type { Db, ObjectId } from 'mongodb'
 
-type LegacyUser = {
+interface LegacyUser {
   _id: ObjectId
   uid: string
   pwd: string
@@ -24,14 +24,14 @@ type LegacyUser = {
   updatedAt?: Date
 }
 
-type LegacyGroup = {
+interface LegacyGroup {
   gid: number
   title: string
   createdAt?: Date
   updatedAt?: Date
 }
 
-type LegacyTag = {
+interface LegacyTag {
   _id: ObjectId
   tagId: number
   name: string
@@ -40,7 +40,7 @@ type LegacyTag = {
   updatedAt?: Date
 }
 
-type LegacyProblem = {
+interface LegacyProblem {
   pid: number
   title: string
   time?: number
@@ -60,7 +60,7 @@ type LegacyProblem = {
   updatedAt?: Date
 }
 
-export type BaseMigrationReport = {
+export interface BaseMigrationReport {
   users: number
   groups: number
   groupMembers: number
@@ -216,7 +216,7 @@ export async function migrateBaseEntities (
     source.collection<LegacyProblem>('Problem').find({}).toArray(),
   ])
 
-  await inBatches(users, 1_000, async batch => {
+  await inBatches(users, 1_000, async (batch) => {
     await target.user.createMany({
       data: batch.map(user => ({
         username: postgresText(user.uid),
@@ -249,7 +249,7 @@ export async function migrateBaseEntities (
     return [ user._id.toHexString(), userId ]
   }))
 
-  await inBatches(groups, 1_000, async batch => {
+  await inBatches(groups, 1_000, async (batch) => {
     await target.group.createMany({
       data: batch.map(group => ({
         id: group.gid,
@@ -261,7 +261,7 @@ export async function migrateBaseEntities (
     })
   })
 
-  await inBatches(tags, 1_000, async batch => {
+  await inBatches(tags, 1_000, async (batch) => {
     await target.tag.createMany({
       data: batch.map(tag => ({
         id: tag.tagId,
@@ -274,7 +274,7 @@ export async function migrateBaseEntities (
     })
   })
 
-  await inBatches(problems, 1_000, async batch => {
+  await inBatches(problems, 1_000, async (batch) => {
     await target.problem.createMany({
       data: batch.map(problem => ({
         id: problem.pid,
@@ -306,26 +306,26 @@ export async function migrateBaseEntities (
     if (userId === undefined) {
       throw new Error(`Target User missing for group membership: ${user.uid}`)
     }
-    return (user as LegacyUser & { gid?: number[] }).gid?.map(groupId => {
+    return (user as LegacyUser & { gid?: number[] }).gid?.map((groupId) => {
       if (!groupIds.has(groupId)) {
         throw new Error(`Unknown Group.gid ${groupId} on User ${user.uid}`)
       }
       return { groupId, userId }
     }) ?? []
   })
-  await inBatches(groupMembers, 5_000, async batch => {
+  await inBatches(groupMembers, 5_000, async (batch) => {
     await target.groupMember.createMany({ data: batch, skipDuplicates: true })
   })
 
   const tagIdByMongoId = new Map(tags.map(tag => [ tag._id.toHexString(), tag.tagId ]))
-  const problemTags = problems.flatMap(problem => (problem.tags ?? []).map(tag => {
+  const problemTags = problems.flatMap(problem => (problem.tags ?? []).map((tag) => {
     const tagId = tagIdByMongoId.get(tag.toHexString())
     if (tagId === undefined) {
       throw new Error(`Unknown Tag reference on Problem ${problem.pid}`)
     }
     return { problemId: problem.pid, tagId }
   }))
-  await inBatches(problemTags, 5_000, async batch => {
+  await inBatches(problemTags, 5_000, async (batch) => {
     await target.problemTag.createMany({ data: batch, skipDuplicates: true })
   })
 

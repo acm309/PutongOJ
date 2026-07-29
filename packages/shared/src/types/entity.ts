@@ -1,6 +1,6 @@
 import type { TagModel } from './model/tag.js'
 
-export interface CourseRole {
+export type CourseRole = {
   basic: boolean
   viewTestcase: boolean
   viewSolution: boolean
@@ -27,7 +27,7 @@ export const courseRoleEntire: Readonly<CourseRole> = Object.freeze({
   manageCourse: true,
 })
 
-export interface CourseEntity {
+export type CourseEntity = {
   courseId: number
   name: string
   description: string
@@ -37,27 +37,21 @@ export interface CourseEntity {
   updatedAt: Date
 }
 
-export type CourseEntityEditable = Pick<CourseEntity,
-  'name' | 'description' | 'encrypt' | 'joinCode'
->
+export type CourseEntityEditable = Pick<CourseEntity, 'name' | 'description' | 'encrypt' | 'joinCode'>
 
 export type CourseEntityItem = Pick<CourseEntity, 'courseId' | 'name'>
 
-export interface CourseEntityView extends
-  Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>,
-  Partial<Pick<CourseEntity, 'joinCode'>> {
+export type CourseEntityView = {
   canJoin: boolean
-}
+} & Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'> & Partial<Pick<CourseEntity, 'joinCode'>>
 
-export interface CourseEntityViewWithRole extends CourseEntityView {
+export type CourseEntityViewWithRole = {
   role: CourseRole
-}
+} & CourseEntityView
 
-export type CourseEntityPreview = Pick<CourseEntity,
-  'courseId' | 'name' | 'description' | 'encrypt'
->
+export type CourseEntityPreview = Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>
 
-export interface CourseMemberView {
+export type CourseMemberView = {
   role: CourseRole
   user: {
     uid: string
@@ -68,7 +62,7 @@ export interface CourseMemberView {
   updatedAt: number
 }
 
-export interface ProblemEntity {
+export type ProblemEntity = {
   pid: number
   title: string
   time: number
@@ -88,32 +82,26 @@ export interface ProblemEntity {
   updatedAt: Date
 }
 
-export type ProblemEntityForm = Pick<ProblemEntity,
-  'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
-  | 'out' | 'hint' | 'status' | 'type' | 'code'
-> & {
-  owner?: string | null
-  tags?: number[]
-}
+export type ProblemEntityForm = Pick<ProblemEntity, 'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
+  | 'out' | 'hint' | 'status' | 'type' | 'code'> & {
+    owner?: string | null
+    tags?: number[]
+  }
 
 export type ProblemEntityItem = Pick<ProblemEntity, 'pid' | 'title'>
 
-export type ProblemEntityPreview = Pick<ProblemEntity,
-  'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'
-> & {
+export type ProblemEntityPreview = Pick<ProblemEntity, 'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'> & {
   isOwner?: boolean
   tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
 }
 
-export type ProblemEntityView = Pick<ProblemEntity,
-  'pid' | 'title' | 'time' | 'memory' | 'status' | 'description'
-  | 'input' | 'output' | 'in' | 'out' | 'hint'
-> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
-  isOwner: boolean
-  tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
-}
+export type ProblemEntityView = Pick<ProblemEntity, 'pid' | 'title' | 'time' | 'memory' | 'status' | 'description'
+  | 'input' | 'output' | 'in' | 'out' | 'hint'> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
+    isOwner: boolean
+    tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
+  }
 
-export interface SolutionEntity {
+export type SolutionEntity = {
   sid: number
   pid: number
   uid: string

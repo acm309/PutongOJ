@@ -1,14 +1,16 @@
 {
   "name": "@putongoj/cli",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "bin": {
     "putong-oj": "./dist/index.js"
   },
   "scripts": {
     "build": "pnpm --filter @putongoj/db build && tsc",
     "dev": "tsx src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "pnpm --filter @putongoj/db build && tsx src/index.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -18,7 +20,9 @@
     "mongodb": "^7.2.0"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^8.3.0",
     "@types/node": "~24.12.4",
+    "eslint": "^10.7.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

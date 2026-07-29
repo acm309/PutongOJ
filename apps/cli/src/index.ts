@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import process from 'node:process'
-import { MongoClient } from 'mongodb'
-import dotenvFlow from 'dotenv-flow'
 import { createDatabaseClient } from '@putongoj/db'
+import dotenvFlow from 'dotenv-flow'
+import { MongoClient } from 'mongodb'
 import { auditMongoSource } from './audit.js'
 import { migrateBaseEntities, resetTargetDatabase } from './migrate/base.js'
 import { migrateAllEntities } from './migrate/full.js'
@@ -56,8 +56,7 @@ async function checkConnections () {
     await mongo.db().command({ ping: 1 })
     await postgres.$queryRaw`SELECT 1`
     console.log('MongoDB and PostgreSQL connections are available.')
-  }
-  finally {
+  } finally {
     await Promise.allSettled([ mongo.close(), postgres.$disconnect() ])
   }
 }
@@ -84,8 +83,7 @@ async function migrate (argumentsList: string[]) {
     await resetTargetDatabase(target)
     const report = await migrateAllEntities(mongo.db(), target)
     console.log(JSON.stringify(report, null, 2))
-  }
-  finally {
+  } finally {
     await Promise.allSettled([ mongo.close(), target.$disconnect() ])
   }
 }
@@ -253,8 +251,7 @@ async function inventory () {
         submissionTestcases: submissionTestcases[0] ?? { withTestcaseResults: 0 },
       },
     }, null, 2))
-  }
-  finally {
+  } finally {
     await mongo.close()
   }
 }
@@ -270,8 +267,7 @@ async function audit () {
     if (report.summary.errorCount > 0) {
       process.exitCode = 2
     }
-  }
-  finally {
+  } finally {
     await mongo.close()
   }
 }
@@ -298,8 +294,7 @@ async function migrateBase (argumentsList: string[]) {
     await resetTargetDatabase(target)
     const report = await migrateBaseEntities(mongo.db(), target)
     console.log(JSON.stringify(report, null, 2))
-  }
-  finally {
+  } finally {
     await Promise.allSettled([ mongo.close(), target.$disconnect() ])
   }
 }
@@ -314,8 +309,7 @@ async function verifyTarget () {
     if (Object.values(report.integrity).some(value => value > 0)) {
       process.exitCode = 2
     }
-  }
-  finally {
+  } finally {
     await target.$disconnect()
   }
 }

@@ -1,5 +1,4 @@
-import type { ProblemEntityPreview } from '@putongoj/shared'
-import type { SolutionModel } from '@putongoj/shared'
+import type { ProblemEntityPreview, SolutionModel } from '@putongoj/shared'
 
 export interface TimeResp {
   serverTime: number

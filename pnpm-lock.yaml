@@ -21,9 +21,15 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(socks@2.8.9)
     devDependencies:
+      '@antfu/eslint-config':
+        specifier: ^8.3.0
+        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/utils@8.63.0(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@vue/compiler-sfc@3.5.39)(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3)
       '@types/node':
         specifier: ~24.12.4
         version: 24.12.4
+      eslint:
+        specifier: ^10.7.0
+        version: 10.7.0(jiti@2.7.0)(supports-color@8.1.1)
       tsx:
         specifier: ^4.21.0
         version: 4.23.1
@@ -336,12 +342,18 @@ importers:
         specifier: ^8.16.3
         version: 8.22.0
     devDependencies:
+      '@antfu/eslint-config':
+        specifier: ^8.3.0
+        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/utils@8.63.0(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@vue/compiler-sfc@3.5.39)(eslint@10.7.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3)
       '@types/node':
         specifier: ~24.12.4
         version: 24.12.4
       '@types/pg':
         specifier: ^8.15.5
         version: 8.20.0
+      eslint:
+        specifier: ^10.7.0
+        version: 10.7.0(jiti@2.7.0)(supports-color@8.1.1)
       prisma:
         specifier: ^7.4.0
         version: 7.9.1(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)

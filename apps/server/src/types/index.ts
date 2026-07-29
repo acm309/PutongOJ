@@ -1,5 +1,5 @@
-import type { Types } from 'mongoose'
 import type { CourseRole as SharedCourseRole } from '@putongoj/shared'
+import type { Types } from 'mongoose'
 
 export type CourseRole = SharedCourseRole
 

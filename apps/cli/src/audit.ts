@@ -14,7 +14,7 @@ export interface AuditReport {
   }
 }
 
-type RelationCheck = {
+interface RelationCheck {
   code: string
   sourceCollection: string
   sourceField: string
@@ -346,20 +346,20 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
       return count === 0
         ? null
         : {
-            code: `duplicate_${String(collection).toLowerCase()}`,
-            count,
-            detail: `[error] ${collection} has duplicate (${fields.join(', ')}) records.`,
-          } satisfies AuditIssue
+          code: `duplicate_${String(collection).toLowerCase()}`,
+          count,
+          detail: `[error] ${collection} has duplicate (${fields.join(', ')}) records.`,
+        } satisfies AuditIssue
     }),
     (async () => {
       const count = await countDuplicateContestProblems(database)
       return count === 0
         ? null
         : {
-            code: 'duplicate_contest_problem',
-            count,
-            detail: '[warning] Contest.problems repeats a problem; migration keeps its first occurrence.',
-          } satisfies AuditIssue
+          code: 'duplicate_contest_problem',
+          count,
+          detail: '[warning] Contest.problems repeats a problem; migration keeps its first occurrence.',
+        } satisfies AuditIssue
     })(),
     ...arrayReferenceChecks.map(async ({
       sourceCollection, sourceField, targetCollection,
@@ -373,10 +373,10 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
       return count === 0
         ? null
         : {
-            code: `missing_${sourceCollection.toLowerCase()}_${sourceField}`,
-            count,
-            detail: `[error] ${sourceCollection}.${sourceField} includes a missing ${targetCollection} reference.`,
-          } satisfies AuditIssue
+          code: `missing_${sourceCollection.toLowerCase()}_${sourceField}`,
+          count,
+          detail: `[error] ${sourceCollection}.${sourceField} includes a missing ${targetCollection} reference.`,
+        } satisfies AuditIssue
     }),
     ...enumChecks.map(async ({ collection, field, values }) => {
       const count = await countInvalidEnumValues(
@@ -388,10 +388,10 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
       return count === 0
         ? null
         : {
-            code: `invalid_${collection.toLowerCase()}_${field}`,
-            count,
-            detail: `[error] ${collection}.${field} has values outside the defined migration mapping.`,
-          } satisfies AuditIssue
+          code: `invalid_${collection.toLowerCase()}_${field}`,
+          count,
+          detail: `[error] ${collection}.${field} has values outside the defined migration mapping.`,
+        } satisfies AuditIssue
     }),
     (async () => {
       const count = await database.collection('Tag').countDocuments({
@@ -405,30 +405,30 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
       return count === 0
         ? null
         : {
-            code: 'invalid_tag_color',
-            count,
-            detail: '[error] Tag.color has values outside the defined migration mapping.',
-          } satisfies AuditIssue
+          code: 'invalid_tag_color',
+          count,
+          detail: '[error] Tag.color has values outside the defined migration mapping.',
+        } satisfies AuditIssue
     })(),
     (async () => {
       const count = await countMissingSimilarSubmissions(database)
       return count === 0
         ? null
         : {
-            code: 'missing_similar_submission',
-            count,
-            detail: '[warning] Solution.sim_s_id references no Solution.sid and will be migrated as null.',
-          } satisfies AuditIssue
+          code: 'missing_similar_submission',
+          count,
+          detail: '[warning] Solution.sim_s_id references no Solution.sid and will be migrated as null.',
+        } satisfies AuditIssue
     })(),
     ...[ [ 'Course', 'joinCode' ] ].map(async ([ collection, field ]) => {
       const count = await countMissingField(database, collection, field)
       return count === 0
         ? null
         : {
-            code: `missing_${collection.toLowerCase()}_${field}`,
-            count,
-            detail: `[warning] ${collection}.${field} is absent and will require a migration default.`,
-          } satisfies AuditIssue
+          code: `missing_${collection.toLowerCase()}_${field}`,
+          count,
+          detail: `[warning] ${collection}.${field} is absent and will require a migration default.`,
+        } satisfies AuditIssue
     }),
   ])).filter((issue): issue is AuditIssue => issue !== null)
 

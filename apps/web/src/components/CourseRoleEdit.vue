@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type CourseRole, UserPrivilege } from '@putongoj/shared'
+import type { CourseRole } from '@putongoj/shared'
+import { UserPrivilege } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'

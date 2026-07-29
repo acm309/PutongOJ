@@ -1,5 +1,4 @@
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, CourseRole, ProblemEntityItem, SolutionEntity } from '@putongoj/shared'
-import type { Enveloped, Paginated } from '@putongoj/shared'
+import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView, CourseRole, Enveloped, Paginated, ProblemEntityItem, SolutionEntity } from '@putongoj/shared'
 import type { FindProblemsParams, FindProblemsResponse, PaginateParams } from '../types/api'
 import type { TimeResp } from '@/types'
 import { instance } from './instance'

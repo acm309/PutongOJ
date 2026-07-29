@@ -1,5 +1,4 @@
 const antfu = require('@antfu/eslint-config').default
-const stylistic = require('@stylistic/eslint-plugin')
 
 module.exports = antfu(
   {
@@ -11,9 +10,6 @@ module.exports = antfu(
     ],
   },
   {
-    plugins: {
-      '@stylistic': stylistic,
-    },
     rules: {
       'antfu/if-newline': [ 'off' ],
       'e18e/prefer-static-regex': ['off'],

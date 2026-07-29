@@ -1,20 +1,22 @@
 {
   "name": "@putongoj/db",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist generated",
     "generate": "prisma generate",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "migrate": "prisma migrate dev",
     "deploy": "prisma migrate deploy",
     "studio": "prisma studio",
@@ -26,8 +28,10 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^8.3.0",
     "@types/node": "~24.12.4",
     "@types/pg": "^8.15.5",
+    "eslint": "^10.7.0",
     "prisma": "^7.4.0",
     "typescript": "^5.9.3"
   }
