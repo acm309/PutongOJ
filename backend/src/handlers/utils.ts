@@ -15,7 +15,7 @@ function parseBuildTime (): Date | null {
   if (!buildTimeStr) {
     return null
   }
-  const timestamp = Date.parse(buildTimeStr)
+  const timestamp = Number.parseInt(buildTimeStr)
   if (Number.isNaN(timestamp)) {
     return null
   }
