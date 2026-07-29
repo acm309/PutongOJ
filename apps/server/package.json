@@ -1,5 +1,5 @@
 {
-  "name": "@putongoj/backend",
+  "name": "@putongoj/server",
   "version": "3.0.0",
   "private": true,
   "main": "app.ts",

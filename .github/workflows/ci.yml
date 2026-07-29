@@ -11,12 +11,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  backend:
-    name: Backend Test and Build
+  server:
+    name: Server Test and Build
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: apps/server
 
     steps:
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build shared
-        run: pnpm --filter shared build
+        run: pnpm --filter @putongoj/shared build
 
       - name: Typecheck
         run: pnpm typecheck
@@ -71,12 +71,12 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  frontend:
-    name: Frontend Typecheck and Build
+  web:
+    name: Web Typecheck and Build
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: apps/web
 
     steps:
       - name: Checkout repository
@@ -97,7 +97,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build shared
-        run: pnpm --filter shared build
+        run: pnpm --filter @putongoj/shared build
 
       - name: Typecheck
         run: pnpm typecheck

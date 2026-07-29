@@ -1,5 +1,5 @@
 {
-  "name": "@putongoj/document",
+  "name": "@putongoj/docs",
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",

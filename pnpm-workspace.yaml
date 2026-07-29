@@ -1,9 +1,9 @@
 packages:
-  - "frontend"
-  - "backend"
-  - "shared"
-  - "document"
+  - "apps/*"
+  - "packages/*"
 allowBuilds:
+  '@prisma/engines': true
   core-js: false
   esbuild: false
+  prisma: true
 injectWorkspacePackages: true

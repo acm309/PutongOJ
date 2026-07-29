@@ -2,17 +2,17 @@
 .github/
 **/dist/
 **/node_modules/
-backend/.nyc_output/
-backend/.env*
-backend/coverage.lcov
-backend/dist/
-backend/test/
-document/.vitepress/cache/
-document/.vitepress/dist/
-frontend/dist/
-frontend/public/static/
+apps/server/.nyc_output/
+apps/server/.env*
+apps/server/coverage.lcov
+apps/server/dist/
+apps/server/test/
+apps/docs/.vitepress/cache/
+apps/docs/.vitepress/dist/
+apps/web/dist/
+apps/web/public/static/
 
 # Data
-backend/data/
-backend/logs/
-backend/public/uploads/
+apps/server/data/
+apps/server/logs/
+apps/server/public/uploads/

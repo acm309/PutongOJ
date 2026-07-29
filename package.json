@@ -1,0 +1,27 @@
+{
+  "name": "putong-oj",
+  "version": "3.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @putongoj/shared build && pnpm --filter @putongoj/db generate && pnpm --filter @putongoj/server build && pnpm --filter @putongoj/web build && pnpm --filter @putongoj/docs build",
+    "dev:server": "pnpm --filter @putongoj/server dev",
+    "dev:web": "pnpm --filter @putongoj/web dev",
+    "dev:docs": "pnpm --filter @putongoj/docs dev",
+    "dev": "pnpm --parallel --filter @putongoj/server --filter @putongoj/web dev",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm --filter @putongoj/shared build && pnpm --filter @putongoj/db generate && pnpm -r --if-present typecheck",
+    "test": "pnpm --filter @putongoj/server test",
+    "db:generate": "pnpm --filter @putongoj/db generate",
+    "db:migrate": "pnpm --filter @putongoj/db migrate",
+    "db:deploy": "pnpm --filter @putongoj/db deploy",
+    "db:studio": "pnpm --filter @putongoj/db studio",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d postgres redis",
+    "db:down": "docker compose -f docker-compose.dev.yml down",
+    "cli": "pnpm --filter @putongoj/cli start"
+  }
+}
