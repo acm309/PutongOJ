@@ -1,4 +1,5 @@
-import Settings from '../models/Settings'
+import type { Prisma } from '@putongoj/db'
+import { getDatabase } from '../config/postgres'
 import { CacheKey, cacheService } from './cache'
 
 export class SettingsKey {
@@ -8,11 +9,12 @@ export class SettingsKey {
 
 class SettingsService {
   async set<T> (key: string, value: T) {
-    await Settings.findOneAndUpdate(
-      { key },
-      { value },
-      { upsert: true },
-    )
+    const database = await getDatabase()
+    await database.setting.upsert({
+      where: { key },
+      create: { key, value: value as Prisma.InputJsonValue },
+      update: { value: value as Prisma.InputJsonValue },
+    })
     await cacheService.remove(CacheKey.settings(key))
   }
 
@@ -23,9 +25,8 @@ class SettingsService {
       CacheKey.settings(key),
 
       async () => {
-        const setting = await Settings
-          .findOne({ key })
-          .lean()
+        const database = await getDatabase()
+        const setting = await database.setting.findUnique({ where: { key } })
         if (!setting) {
           if (typeof defaultValue === 'function') {
             return (defaultValue as () => T)()

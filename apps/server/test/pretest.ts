@@ -19,6 +19,9 @@ import { userSeeds } from './seeds/user'
 
 async function main () {
   await removeall()
+  const { createDatabaseClient } = await import('@putongoj/db')
+  const database = createDatabaseClient(process.env.DATABASE_URL!)
+  await database.post.deleteMany()
   await Promise.all([
     new ID({ name: 'Comment', id: 0 }).save(),
     new ID({ name: 'Contest', id: 0 }).save(),
@@ -91,6 +94,7 @@ async function main () {
   })()
 
   await discussionInsert
+  await database.$disconnect()
 }
 
 main()

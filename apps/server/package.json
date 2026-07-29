@@ -30,6 +30,7 @@
     "@noble/ciphers": "^2.2.0",
     "@noble/curves": "^2.2.0",
     "@noble/hashes": "^2.2.0",
+    "@putongoj/db": "workspace:*",
     "@putongoj/shared": "workspace:*",
     "@zip.js/zip.js": "^2.8.26",
     "cross-env": "^10.1.0",

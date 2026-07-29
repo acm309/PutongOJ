@@ -1,32 +1,56 @@
 import type { Paginated, PostModel } from '@putongoj/shared'
-import type { Types } from 'mongoose'
 import type { PaginateOption, SortOption } from '../types'
-import type { QueryFilter } from '../types/mongo'
-import Post from '../models/Post'
+import { randomUUID } from 'node:crypto'
+import { getDatabase } from '../config/postgres'
 
 type PostCreateDto = Pick<PostModel, 'title'>
 
 type PostUpdateDto = Partial<Pick<PostModel, 'title' | 'content' | 'slug' | 'publishesAt' | 'isPublished' | 'isPinned' | 'isHidden'>>
 
+export interface PostFilters {
+  title?: string
+  isPublished?: boolean
+  isPinned?: boolean
+  isHidden?: boolean
+}
+
 async function findPosts (
   options: PaginateOption & SortOption,
-  filters: QueryFilter<PostModel> = {},
+  filters: PostFilters = {},
 ): Promise<Paginated<Omit<PostModel, 'content'>>> {
+  const database = await getDatabase()
   const { page, pageSize, sort, sortBy } = options
+  const orderBy = [
+    { isPinned: 'desc' as const },
+    { [sortBy]: sort === 1 ? 'asc' as const : 'desc' as const },
+    ...(sortBy === 'createdAt' ? [] : [ { createdAt: 'desc' as const } ]),
+  ]
+  const where = {
+    ...(filters.title
+      ? { title: { contains: filters.title, mode: 'insensitive' as const } }
+      : {}),
+    ...(filters.isPublished === undefined ? {} : { isPublished: filters.isPublished }),
+    ...(filters.isPinned === undefined ? {} : { isPinned: filters.isPinned }),
+    ...(filters.isHidden === undefined ? {} : { isHidden: filters.isHidden }),
+  }
 
-  const docsPromise = Post
-    .find(filters)
-    .sort({
-      isPinned: -1,
-      [sortBy]: sort,
-      ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
-    })
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .select({ content: 0 })
-    .lean()
-
-  const totalPromise = Post.countDocuments(filters)
+  const docsPromise = database.post.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    select: {
+      slug: true,
+      title: true,
+      publishesAt: true,
+      isPublished: true,
+      isPinned: true,
+      isHidden: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+  const totalPromise = database.post.count({ where })
   const [ docs, total ] = await Promise.all([ docsPromise, totalPromise ])
 
   return {
@@ -39,36 +63,46 @@ async function findPosts (
 }
 
 async function createPost (data: PostCreateDto) {
+  const database = await getDatabase()
   const now = new Date()
-  const post = new Post({
+  const post = await database.post.create({ data: {
+    slug: randomUUID(),
     title: data.title,
     content: '',
     publishesAt: now,
-  })
-  await post.save()
-  return post.toObject()
+  } })
+  return post
 }
 
-async function isSlugTaken (slug: string, excludeId?: Types.ObjectId) {
-  const filter: Record<string, any> = { slug }
-  if (excludeId) {
-    filter._id = { $ne: excludeId }
-  }
-  const existing = await Post.findOne(filter).select([ '_id' ]).lean()
+async function isSlugTaken (slug: string, excludeId?: number) {
+  const database = await getDatabase()
+  const existing = await database.post.findFirst({
+    where: {
+      slug,
+      ...(excludeId === undefined ? {} : { id: { not: excludeId } }),
+    },
+    select: { id: true },
+  })
   return Boolean(existing)
 }
 
-async function updatePostById (id: Types.ObjectId, update: PostUpdateDto) {
-  return Post.findByIdAndUpdate(
-    id,
-    { $set: update },
-    { returnDocument: 'after' },
-  ).lean()
+async function updatePostById (id: number, update: PostUpdateDto) {
+  const database = await getDatabase()
+  try {
+    return await database.post.update({ where: { id }, data: update })
+  } catch {
+    return null
+  }
 }
 
-async function deletePostById (id: Types.ObjectId): Promise<boolean> {
-  const result = await Post.deleteOne({ _id: id })
-  return result.deletedCount > 0
+async function deletePostById (id: number): Promise<boolean> {
+  const database = await getDatabase()
+  try {
+    await database.post.delete({ where: { id } })
+    return true
+  } catch {
+    return false
+  }
 }
 
 export const postService = {

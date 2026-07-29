@@ -63,6 +63,9 @@ importers:
       '@noble/hashes':
         specifier: ^2.2.0
         version: 2.2.0
+      '@putongoj/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@putongoj/shared':
         specifier: workspace:*
         version: link:../../packages/shared

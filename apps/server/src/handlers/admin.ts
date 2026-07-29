@@ -1,7 +1,6 @@
-import type { AdminAccountBatchRegisterResult, PostModel } from '@putongoj/shared'
+import type { AdminAccountBatchRegisterResult } from '@putongoj/shared'
 import type { Context } from 'koa'
 import type { DiscussionUpdateDto } from '../services/discussion'
-import type { QueryFilter } from '../types/mongo'
 import Router from '@koa/router'
 import {
   AdminAccountBatchRegisterPayloadSchema,
@@ -37,7 +36,6 @@ import {
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
 } from '@putongoj/shared'
-import { escapeRegExp } from 'lodash'
 import { distributeWork } from '../jobs/helper'
 import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
@@ -288,22 +286,9 @@ export async function findPosts (ctx: Context) {
   }
 
   const { page, pageSize, sort, sortBy, title, isPublished, isPinned, isHidden } = query.data
-  const filters: QueryFilter<PostModel> = {}
-  if (title) {
-    filters.title = { $regex: escapeRegExp(title), $options: 'i' }
-  }
-  if (isPublished !== undefined) {
-    filters.isPublished = isPublished
-  }
-  if (isPinned !== undefined) {
-    filters.isPinned = isPinned
-  }
-  if (isHidden !== undefined) {
-    filters.isHidden = isHidden
-  }
   const posts = await postService.findPosts(
     { page, pageSize, sort, sortBy },
-    filters)
+    { title, isPublished, isPinned, isHidden })
   const result = AdminPostListQueryResultSchema.encode(posts)
   return createEnvelopedResponse(ctx, result)
 }
@@ -357,13 +342,13 @@ export async function updatePost (ctx: Context) {
 
   try {
     if (slug && slug !== post.slug) {
-      const exists = await postService.isSlugTaken(slug, post._id)
+      const exists = await postService.isSlugTaken(slug, post.id)
       if (exists) {
         return createErrorResponse(ctx, ErrorCode.BadRequest, 'Slug already exists')
       }
     }
 
-    const updated = await postService.updatePostById(post._id, payload.data)
+    const updated = await postService.updatePostById(post.id, payload.data)
     if (!updated) {
       return createErrorResponse(ctx, ErrorCode.NotFound, 'Post not found')
     }
@@ -387,7 +372,7 @@ export async function deletePost (ctx: Context) {
   }
 
   try {
-    await postService.deletePostById(postState.post._id)
+    await postService.deletePostById(postState.post.id)
     ctx.auditLog.info(`<Post:${postState.post.slug}> deleted by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {

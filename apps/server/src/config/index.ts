@@ -49,6 +49,7 @@ function booleanEnv (name: string, defaultValue?: boolean): boolean | undefined 
 interface GlobalConfig {
   port: number
   wsPort: number
+  databaseURL: string
   mongodbURL: string
   redisURL: string
   secretKey: string
@@ -103,6 +104,10 @@ for (const [ provider, config ] of Object.entries(oauthConfigs)) {
 export const globalConfig: GlobalConfig = {
   port: numberEnv('PTOJ_WEB_PORT', 3000),
   wsPort: numberEnv('PTOJ_WS_PORT', 3001),
+  databaseURL: stringEnv(
+    'DATABASE_URL',
+    'postgresql://putong_oj:putong_oj@localhost:5432/putong_oj',
+  ),
   mongodbURL: stringEnv(
     'PTOJ_MONGODB_URL',
     'mongodb://localhost:27017/oj',

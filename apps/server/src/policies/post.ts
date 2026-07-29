@@ -1,13 +1,12 @@
 import type { PostModel } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { WithId } from '../types'
-import Post from '../models/Post'
+import { getDatabase } from '../config/postgres'
 
 export interface PostState {
-  post: WithId<PostModel>
+  post: PostModel & { id: number }
 }
 
-function buildPostState (ctx: Context, post: WithId<PostModel>) {
+function buildPostState (ctx: Context, post: PostModel & { id: number }) {
   const state: PostState = { post }
   ctx.state.post = state
   return state
@@ -22,7 +21,8 @@ export async function loadPost (ctx: Context, inputSlug?: string) {
     return ctx.state.post
   }
 
-  const post = await Post.findOne({ slug }).lean()
+  const database = await getDatabase()
+  const post = await database.post.findUnique({ where: { slug } })
   if (!post) {
     return null
   }
