@@ -1,14 +1,14 @@
 import type { OAuthConnection, OAuthUserProfile } from '@putongoj/shared'
 import type { Types } from 'mongoose'
-import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth'
 import type { UserDocument } from '../models/User'
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 import { OAuthAction, OAuthProvider } from '@putongoj/shared'
 import superagent from 'superagent'
 import { globalConfig } from '../config'
+import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
-import OAuth from '../models/OAuth'
+import User from '../models/User'
 
 const DEFAULT_TIMEOUT = 5000
 const DEFAULT_STATE_TTL = 600
@@ -311,30 +311,64 @@ export async function findUserByOAuthConnection (
   provider: OAuthProvider,
   providerId: string,
 ): Promise<UserDocument | null> {
-  const oauthRecord = await OAuth
-    .findOne({ provider, providerId })
-    .populate('user') as OAuthDocumentPopulated | null
-
-  return oauthRecord?.user as UserDocument ?? null
+  const database = await getDatabase()
+  const record = await database.oAuthConnection.findUnique({
+    where: { provider_providerId: { provider, providerId } },
+    include: {
+      user: {
+        select: { username: true },
+      },
+    },
+  })
+  if (!record) {
+    return null
+  }
+  return await User.findOne({ uid: record.user.username })
 }
 
 export async function getUserOAuthConnection (
   userId: Types.ObjectId,
   provider: OAuthProvider,
-): Promise<OAuthDocument | null> {
-  const record = await OAuth.findOne({ user: userId, provider }) as OAuthDocument | null
-  return record
+) {
+  const user = await User.findById(userId).select({ uid: 1 }).lean()
+  if (!user) {
+    return null
+  }
+  const database = await getDatabase()
+  const databaseUser = await database.user.findUnique({
+    where: { username: user.uid },
+    select: { id: true },
+  })
+  if (!databaseUser) {
+    return null
+  }
+  return await database.oAuthConnection.findUnique({
+    where: { userId_provider: { userId: databaseUser.id, provider } },
+  })
 }
 
 export async function getUserOAuthConnections (
   userId: Types.ObjectId,
-): Promise<Record<OAuthProvider, OAuthDocument | null>> {
-  const records = await OAuth.find({ user: userId }) as OAuthDocument[]
-  const connections: Record<OAuthProvider, OAuthDocument | null> = {
+) {
+  const user = await User.findById(userId).select({ uid: 1 }).lean()
+  const connections: Record<OAuthProvider, Awaited<ReturnType<typeof getUserOAuthConnection>> | null> = {
     [OAuthProvider.CJLU]: null,
     [OAuthProvider.Codeforces]: null,
   }
-
+  if (!user) {
+    return connections
+  }
+  const database = await getDatabase()
+  const databaseUser = await database.user.findUnique({
+    where: { username: user.uid },
+    select: { id: true },
+  })
+  if (!databaseUser) {
+    return connections
+  }
+  const records = await database.oAuthConnection.findMany({
+    where: { userId: databaseUser.id },
+  })
   for (const record of records) {
     connections[record.provider as OAuthProvider] = record
   }
@@ -345,9 +379,25 @@ export async function isOAuthConnectedToAnotherUser (
   userId: Types.ObjectId,
   connectionData: OAuthConnection,
 ): Promise<boolean> {
+  const user = await User.findById(userId).select({ uid: 1 }).lean()
+  if (!user) {
+    return false
+  }
+  const database = await getDatabase()
+  const databaseUser = await database.user.findUnique({
+    where: { username: user.uid },
+    select: { id: true },
+  })
+  if (!databaseUser) {
+    return false
+  }
   const { provider, providerId } = connectionData
-  const count = await OAuth.countDocuments({
-    provider, providerId, user: { $ne: userId },
+  const count = await database.oAuthConnection.count({
+    where: {
+      provider,
+      providerId,
+      userId: { not: databaseUser.id },
+    },
   })
   return count > 0
 }
@@ -355,38 +405,76 @@ export async function isOAuthConnectedToAnotherUser (
 export async function upsertOAuthConnection (
   userId: Types.ObjectId,
   connectionData: OAuthConnection,
-): Promise<OAuthDocument> {
+) {
+  const user = await User.findById(userId).select({ uid: 1 }).lean()
+  if (!user) {
+    throw new Error('User not found')
+  }
+  const database = await getDatabase()
+  const databaseUser = await database.user.findUnique({
+    where: { username: user.uid },
+    select: { id: true },
+  })
+  if (!databaseUser) {
+    throw new Error('PostgreSQL user not found')
+  }
   const { provider, providerId, displayName, accessToken, refreshToken, raw } = connectionData
 
-  let oauthRecord = await OAuth.findOne({ provider, providerId })
-
-  if (oauthRecord) {
-    oauthRecord.displayName = displayName
-    oauthRecord.accessToken = accessToken
-    oauthRecord.refreshToken = refreshToken
-    oauthRecord.raw = raw
-  } else {
-    oauthRecord = new OAuth({
-      user: userId,
+  return await database.oAuthConnection.upsert({
+    where: {
+      userId_provider: {
+        userId: databaseUser.id,
+        provider,
+      },
+    },
+    create: {
+      userId: databaseUser.id,
       provider,
       providerId,
       displayName,
       accessToken,
-      refreshToken,
-      raw,
-    })
-  }
-
-  await oauthRecord.save()
-  return oauthRecord
+      refreshToken: refreshToken ?? null,
+      raw: raw ?? undefined,
+    },
+    update: {
+      providerId,
+      displayName,
+      accessToken,
+      refreshToken: refreshToken ?? null,
+      raw: raw ?? undefined,
+    },
+  })
 }
 
 export async function removeOAuthConnection (
   userId: Types.ObjectId,
   provider: OAuthProvider,
 ): Promise<boolean> {
-  const result = await OAuth.deleteOne({ user: userId, provider })
-  return result.deletedCount > 0
+  const user = await User.findById(userId).select({ uid: 1 }).lean()
+  if (!user) {
+    return false
+  }
+  const database = await getDatabase()
+  const databaseUser = await database.user.findUnique({
+    where: { username: user.uid },
+    select: { id: true },
+  })
+  if (!databaseUser) {
+    return false
+  }
+  try {
+    await database.oAuthConnection.delete({
+      where: {
+        userId_provider: {
+          userId: databaseUser.id,
+          provider,
+        },
+      },
+    })
+    return true
+  } catch {
+    return false
+  }
 }
 
 const oauthService = {

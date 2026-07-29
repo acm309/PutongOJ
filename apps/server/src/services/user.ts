@@ -242,7 +242,12 @@ export async function getCodeforcesProfile (
 
   const handle = connection.displayName
   let rating: number = 0
-  if (connection.raw && typeof connection.raw.rating === 'number') {
+  if (
+    connection.raw
+    && typeof connection.raw === 'object'
+    && !Array.isArray(connection.raw)
+    && typeof connection.raw.rating === 'number'
+  ) {
     rating = connection.raw.rating
   }
 
