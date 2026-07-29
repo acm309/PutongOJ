@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseMemberView } from '@backend/types/entity'
+import type { CourseMemberView } from '@putongoj/shared'
 import { UserPrivilege } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'

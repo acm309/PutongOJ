@@ -1,5 +1,4 @@
-import type { CourseRole } from '@backend/types'
-import type { CourseEntityEditable, CourseEntityPreview, CourseEntityView } from '@backend/types/entity'
+import type { CourseEntityEditable, CourseEntityPreview, CourseEntityView, CourseRole } from '@putongoj/shared'
 import type { Paginated } from '@putongoj/shared'
 import type { PaginateParams } from '@/types/api'
 import { defineStore } from 'pinia'

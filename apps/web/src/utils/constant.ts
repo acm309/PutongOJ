@@ -1,5 +1,4 @@
-import type { CourseRole } from '@backend/types'
-import { JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
+import { type CourseRole, JudgeStatus, Language, UserPrivilege } from '@putongoj/shared'
 
 export const languageHighlight: Record<Language, string> = {
   [Language.C]: 'c',

@@ -10,7 +10,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@backend': path.resolve(__dirname, '../server/src'),
     },
     extensions: [ '.mjs', '.js', '.ts', '.json', '.vue' ],
   },

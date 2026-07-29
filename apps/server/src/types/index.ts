@@ -1,13 +1,7 @@
 import type { Types } from 'mongoose'
+import type { CourseRole as SharedCourseRole } from '@putongoj/shared'
 
-export interface CourseRole {
-  basic: boolean
-  viewTestcase: boolean
-  viewSolution: boolean
-  manageProblem: boolean
-  manageContest: boolean
-  manageCourse: boolean
-}
+export type CourseRole = SharedCourseRole
 
 export interface PaginateOption {
   page: number

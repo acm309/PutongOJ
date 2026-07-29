@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseEntityItem } from '@backend/types/entity'
+import type { CourseEntityItem } from '@putongoj/shared'
 import debounce from 'lodash.debounce'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'

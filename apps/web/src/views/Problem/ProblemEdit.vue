@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemEntityForm } from '@backend/types/entity'
+import type { ProblemEntityForm } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'

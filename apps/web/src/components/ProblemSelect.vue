@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemEntityItem } from '@backend/types/entity'
+import type { ProblemEntityItem } from '@putongoj/shared'
 import AutoComplete from 'primevue/autocomplete'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

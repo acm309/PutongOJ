@@ -1,4 +1,4 @@
-import type { ProblemEntityView } from '@backend/types/entity'
+import type { ProblemEntityView } from '@putongoj/shared'
 import type { Paginated } from '@putongoj/shared'
 import type { ProblemBrief } from '@/types'
 import type { FindProblemsParams } from '@/types/api'

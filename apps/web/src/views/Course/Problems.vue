@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { ProblemEntityPreview } from '@putongoj/shared'
 import type { FindProblemsParams } from '@/types/api'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'

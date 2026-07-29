@@ -1,4 +1,4 @@
-import type { ProblemEntityPreview } from '@backend/types/entity'
+import type { ProblemEntityPreview } from '@putongoj/shared'
 import type { SolutionModel } from '@putongoj/shared'
 
 export interface TimeResp {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { courseRoleNone } from '@backend/utils/constants'
+import { courseRoleNone } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'

@@ -1,5 +1,4 @@
-import type { CourseRole } from '../types'
-import { ErrorCode } from '@putongoj/shared'
+import { courseRoleEntire, courseRoleNone, ErrorCode } from '@putongoj/shared'
 
 export const limitation = Object.freeze({
   time: 10 * 1000,
@@ -27,23 +26,7 @@ export const deploy = Object.freeze({
   adminInitPwd: 'kplkplkpl',
 })
 
-export const courseRoleNone = Object.freeze({
-  basic: false,
-  viewTestcase: false,
-  viewSolution: false,
-  manageProblem: false,
-  manageContest: false,
-  manageCourse: false,
-} as CourseRole)
-
-export const courseRoleEntire = Object.freeze({
-  basic: true,
-  viewTestcase: true,
-  viewSolution: true,
-  manageProblem: true,
-  manageContest: true,
-  manageCourse: true,
-} as CourseRole)
+export { courseRoleEntire, courseRoleNone }
 
 type ErrorTuple = Readonly<[number, string]>
 
