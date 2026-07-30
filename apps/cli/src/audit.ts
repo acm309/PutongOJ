@@ -337,6 +337,34 @@ async function countMissingSimilarSubmissions (database: Db): Promise<number> {
   return (result[0]?.count as number | undefined) ?? 0
 }
 
+async function countInvalidSubmissionIdentifiers (database: Db): Promise<number> {
+  return await database.collection('Solution').countDocuments({
+    $or: [
+      { sid: { $not: { $type: 'number' } } },
+      { sid: { $lte: 0 } },
+      { pid: { $not: { $type: 'number' } } },
+      { pid: { $lte: 0 } },
+    ],
+  })
+}
+
+async function countMissingSubmissionContests (database: Db): Promise<number> {
+  const result = await database.collection('Solution').aggregate([
+    { $match: { mid: { $gt: 0 } } },
+    {
+      $lookup: {
+        from: 'Contest',
+        localField: 'mid',
+        foreignField: 'contestId',
+        as: 'contest',
+      },
+    },
+    { $match: { contest: { $eq: [] } } },
+    { $count: 'count' },
+  ]).toArray()
+  return (result[0]?.count as number | undefined) ?? 0
+}
+
 export async function auditMongoSource (database: Db): Promise<AuditReport> {
   const issues = (await Promise.all([
     ...relationChecks.map(check => countDanglingObjectIdRelation(database, check)),
@@ -418,6 +446,26 @@ export async function auditMongoSource (database: Db): Promise<AuditReport> {
           code: 'missing_similar_submission',
           count,
           detail: '[warning] Solution.sim_s_id references no Solution.sid and will be migrated as null.',
+        } satisfies AuditIssue
+    })(),
+    (async () => {
+      const count = await countInvalidSubmissionIdentifiers(database)
+      return count === 0
+        ? null
+        : {
+          code: 'invalid_submission_identifier',
+          count,
+          detail: '[warning] Solution.sid or Solution.pid is not a positive integer and will be skipped.',
+        } satisfies AuditIssue
+    })(),
+    (async () => {
+      const count = await countMissingSubmissionContests(database)
+      return count === 0
+        ? null
+        : {
+          code: 'missing_submission_contest',
+          count,
+          detail: '[warning] Solution.mid references no Contest.contestId; migration preserves the submission with a null contestId.',
         } satisfies AuditIssue
     })(),
     ...[ [ 'Course', 'joinCode' ] ].map(async ([ collection, field ]) => {

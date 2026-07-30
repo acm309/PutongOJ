@@ -354,9 +354,9 @@ export async function migrateRemainingEntities (
 
   const targetUsers = await target.user.findMany({ select: { id: true, username: true } })
   const targetUserIdByUsername = new Map(targetUsers.map(user => [ user.username, user.id ]))
-  const targetContestIds = new Set(
-    (await target.contest.findMany({ select: { id: true } })).map(contest => contest.id),
-  )
+  // Contests are created below. Derive this lookup from the source snapshot
+  // rather than querying the still-empty target database before that step.
+  const sourceContestIds = new Set(contests.map(contest => contest.contestId))
   const userIdByMongoId = new Map(sourceUsers.map((user) => {
     const id = targetUserIdByUsername.get(user.uid)
     if (id === undefined) {
@@ -402,7 +402,7 @@ export async function migrateRemainingEntities (
   const courseProblemRows = courseProblems.map(courseProblem => ({
     courseId: requiredReference(courseIdByMongoId, courseProblem.course, 'CourseProblem.course'),
     problemId: requiredReference(problemIdByMongoId, courseProblem.problem, 'CourseProblem.problem'),
-    position: courseProblem.sort ?? 0,
+    sort: courseProblem.sort ?? 0,
     createdAt: dateOrNow(courseProblem.createdAt),
     updatedAt: dateOrNow(courseProblem.updatedAt),
   }))
@@ -588,6 +588,7 @@ export async function migrateRemainingEntities (
   })
 
   let submissions = 0
+  let skippedSubmissions = 0
   let submissionTestcaseResults = 0
   const cursor = source.collection<LegacySubmission>('Solution').find({}).batchSize(1_000)
   let batch: LegacySubmission[] = []
@@ -599,6 +600,16 @@ export async function migrateRemainingEntities (
 
     const rows: PreparedSubmission[] = []
     for (const submission of items) {
+      if (
+        !Number.isSafeInteger(submission.sid)
+        || submission.sid <= 0
+        || !Number.isSafeInteger(submission.pid)
+        || submission.pid <= 0
+      ) {
+        skippedSubmissions += 1
+        continue
+      }
+
       let userId = targetUserIdByUsername.get(submission.uid)
       if (userId === undefined) {
         const archivedUser = await target.user.upsert({
@@ -623,7 +634,7 @@ export async function migrateRemainingEntities (
         id: submission.sid,
         problemId: submission.pid,
         userId,
-        contestId: submission.mid && submission.mid > 0 && targetContestIds.has(submission.mid)
+        contestId: submission.mid && submission.mid > 0 && sourceContestIds.has(submission.mid)
           ? submission.mid
           : null,
         courseId: submission.course
@@ -717,7 +728,7 @@ export async function migrateRemainingEntities (
     posts: postRows.length,
     settings: settingRows.length,
     submissions,
-    skippedSubmissions: 0,
+    skippedSubmissions,
     submissionTestcaseResults,
   }
 }
