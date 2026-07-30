@@ -13,7 +13,7 @@ test.before('Login', async (t) => {
   const login = await request
     .post('/api/account/login')
     .send({
-      username: user.uid,
+      username: user.username,
       password: await encryptData(user.pwd!),
     })
 
@@ -26,11 +26,11 @@ test('List discussions - logged in user sees more', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  t.truthy(Array.isArray(res.body.data.docs))
+  t.truthy(Array.isArray(res.body.data.items))
 
   // User should see public discussions and their own private ones
-  for (const doc of res.body.data.docs) {
-    t.truthy(doc.discussionId)
+  for (const doc of res.body.data.items) {
+    t.truthy(doc.id)
     t.truthy(doc.title)
   }
 })
@@ -41,7 +41,7 @@ test('Can access own private discussion', async (t) => {
     .get('/api/discussions/3')
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 3)
+  t.is(res.body.data.id, 3)
   t.truthy(res.body.data.title)
 })
 
@@ -50,7 +50,7 @@ test('Cannot create open discussion as normal user', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1, // OpenDiscussion
+      type: 'OPEN_DISCUSSION', // OpenDiscussion
       title: 'Test Discussion from User',
       content: 'This is a test discussion content',
     })
@@ -64,13 +64,13 @@ test('Create private clarification', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 3, // PrivateClarification
+      type: 'PRIVATE_CLARIFICATION', // PrivateClarification
       title: 'Private Question',
       content: 'This is a private question',
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Cannot create discussion with problem reference as normal user', async (t) => {
@@ -78,9 +78,9 @@ test('Cannot create discussion with problem reference as normal user', async (t)
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1, // OpenDiscussion
+      type: 'OPEN_DISCUSSION', // OpenDiscussion
       title: 'Question about Problem 1000',
-      problem: 1000,
+      problemId: 1000,
       content: 'I have a question about this problem',
     })
 
@@ -93,7 +93,7 @@ test('Cannot create public announcement as normal user', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 2, // PublicAnnouncement
+      type: 'PUBLIC_ANNOUNCEMENT', // PublicAnnouncement
       title: 'Trying to create announcement',
       content: 'Should fail',
     })
@@ -107,7 +107,7 @@ test('Create discussion with missing title', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1,
+      type: 'OPEN_DISCUSSION',
       content: 'Content without title',
     })
 
@@ -120,7 +120,7 @@ test('Create discussion with missing content', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1,
+      type: 'OPEN_DISCUSSION',
       title: 'Title without content',
     })
 
@@ -146,7 +146,7 @@ test('Add comment to open discussion', async (t) => {
   const comments = getRes.body.data.comments
   const lastComment = comments.at(-1)
   t.is(lastComment.content, 'This is a test comment')
-  t.is(lastComment.author.uid, user.uid)
+  t.is(lastComment.author.username, user.username)
 })
 
 test('Cannot add comment to announcement as normal user', async (t) => {
@@ -186,26 +186,26 @@ test('Add comment to non-existent discussion', async (t) => {
 test('Filter discussions by type', async (t) => {
   const res = await request
     .get('/api/discussions')
-    .query({ type: 1 }) // OpenDiscussion only
+    .query({ type: 'OPEN_DISCUSSION' }) // OpenDiscussion only
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
 
-  for (const doc of res.body.data.docs) {
-    t.is(doc.type, 1)
+  for (const doc of res.body.data.items) {
+    t.is(doc.type, 'OPEN_DISCUSSION')
   }
 })
 
 test('Filter discussions by author', async (t) => {
   const res = await request
     .get('/api/discussions')
-    .query({ author: 'admin' })
+    .query({ authorId: 1 })
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
 
-  for (const doc of res.body.data.docs) {
-    t.is(doc.author.uid, 'admin')
+  for (const doc of res.body.data.items) {
+    t.is(doc.author.username, 'admin')
   }
 })
 

@@ -21,10 +21,10 @@ test.skip('Fetch user list', async (t) => {
   const r = await request
     .get('/api/users/list')
   t.is(r.status, 200)
-  t.true(Array.isArray(r.body.docs))
-  t.true(r.body.docs.length > 0)
-  const u = r.body.docs[0]
-  t.is(typeof u.uid, 'string')
+  t.true(Array.isArray(r.body.items))
+  t.true(r.body.items.length > 0)
+  const u = r.body.items[0]
+  t.is(typeof u.username, 'string')
   t.is(typeof u.privilege, 'number')
 })
 
@@ -32,15 +32,15 @@ test.skip('Fetch entire user list', async (t) => {
   const r = await request
     .get('/api/users/list?page=-1')
   t.is(r.status, 200)
-  t.true(Array.isArray(r.body.docs))
-  t.true(r.body.docs.length > 0)
+  t.true(Array.isArray(r.body.items))
+  t.true(r.body.items.length > 0)
   t.is(typeof r.body.total, 'number')
 })
 
 test('Create user already exists', async (t) => {
   const res = await request
     .post('/api/account/register')
-    .send({ username: userSeeds.admin.uid, password: await encryptData(pwd) })
+    .send({ username: userSeeds.admin.username, password: await encryptData(pwd) })
   t.is(res.status, 200)
   t.is(res.body.success, false)
   t.is(res.body.data, null)

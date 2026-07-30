@@ -1,4 +1,4 @@
-import type { UserDocument } from '../models/User'
+import type { AuthenticatedUser } from '../persistence/types'
 import type { ContestState } from '../policies/contest'
 import type { CourseState } from '../policies/course'
 import type { DiscussionState } from '../policies/discussion'
@@ -11,27 +11,18 @@ declare module 'koa' {
     clientIp: string
     requestId: string
     authnChecked?: boolean
-    profile?: UserDocument
+    profile?: AuthenticatedUser
     sessionId?: string
-
     contest?: ContestState
     course?: CourseState
     discussion?: DiscussionState
     post?: PostState
     problem?: ProblemState
-    user?: UserDocument
+    user?: AuthenticatedUser
   }
-
   interface DefaultContext {
     state: DefaultState
-    session: {
-      userId?: string
-      sessionId?: string
-    }
-    auditLog: {
-      info: (message: string) => void
-      error: (message: string, error?: any) => void
-      warn: (message: string) => void
-    }
+    session: { userId?: string, sessionId?: string }
+    auditLog: { info: (message: string) => void, error: (message: string, error?: any) => void, warn: (message: string) => void }
   }
 }

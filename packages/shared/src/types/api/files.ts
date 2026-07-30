@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { FileModelSchema, UserModelSchema } from '../model/index.js'
-import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const FileListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
@@ -12,7 +12,7 @@ export const FileListQuerySchema = z.object({
 export type FileListQuery = z.infer<typeof FileListQuerySchema>
 
 export const FileListQueryResultSchema = z.object({
-  files: PaginatedSchema(z.object({
+  files: PaginatedResultSchema(z.object({
     storageKey: FileModelSchema.shape.storageKey,
     originalName: FileModelSchema.shape.originalName,
     sizeBytes: FileModelSchema.shape.sizeBytes,

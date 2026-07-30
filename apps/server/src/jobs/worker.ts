@@ -4,7 +4,6 @@ import checkSimilarity from './tasks/checkSimilarity'
 import fetchCodeforces from './tasks/fetchCodeforces'
 import scanUploadsFolder from './tasks/scanUploadsFolder'
 import updateStatistic from './tasks/updateStatistic'
-import '../config/db'
 
 async function main () {
   logger.info('Worker is running...')

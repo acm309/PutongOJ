@@ -13,7 +13,6 @@ import {
   ErrorCode,
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
-  UserPrivilege,
 } from '@putongoj/shared'
 import { checkSession, loadProfile, loginRequire } from '../middlewares/authn'
 import { userLoginLimit, userRegisterLimit } from '../middlewares/ratelimit'
@@ -37,7 +36,7 @@ export async function getProfile (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Not logged in')
   }
 
-  const result = AccountProfileQueryResultSchema.encode(profile.toObject())
+  const result = AccountProfileQueryResultSchema.encode(profile)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -58,23 +57,23 @@ export async function userLogin (ctx: Context) {
   if (!user) {
     return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Username or password is incorrect')
   }
-  if (timingSafeEqual(Buffer.from(user.pwd, 'hex'), pwdHash) === false) {
+  if (timingSafeEqual(Buffer.from(user.passwordHash, 'hex'), pwdHash) === false) {
     return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Username or password is incorrect')
   }
-  if (user.privilege === UserPrivilege.Banned) {
+  if (user.isBanned) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Account has been banned, please contact the administrator')
   }
 
-  const userId = user._id.toString()
+  const userId = String(user.id)
   const sessionId = await sessionService.createSession(
     userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
   )
   ctx.session.userId = userId
   ctx.session.sessionId = sessionId
 
-  ctx.auditLog.info(`<User:${user.uid}> logged in successfully`)
+  ctx.auditLog.info(`<User:${user.username}> logged in successfully`)
 
-  const result = AccountProfileQueryResultSchema.encode(user.toObject())
+  const result = AccountProfileQueryResultSchema.encode(user)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -105,19 +104,19 @@ export async function userRegister (ctx: Context) {
 
   try {
     const user = await userService.createUser({
-      uid: payload.data.username,
-      pwd: passwordHash(password),
+      username: payload.data.username,
+      passwordHash: passwordHash(password),
     })
-    const userId = user._id.toString()
+    const userId = String(user.id)
     const sessionId = await sessionService.createSession(
       userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
     )
     ctx.session.userId = userId
     ctx.session.sessionId = sessionId
 
-    ctx.auditLog.info(`<User:${user.uid}> registered successfully`)
+    ctx.auditLog.info(`<User:${user.username}> registered successfully`)
 
-    const result = AccountProfileQueryResultSchema.encode(user.toObject())
+    const result = AccountProfileQueryResultSchema.encode(user)
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to register user', err)
@@ -129,8 +128,8 @@ export async function userLogout (ctx: Context) {
   const { profile, sessionId } = ctx.state
 
   if (profile && sessionId) {
-    await sessionService.revokeSession(profile._id.toString(), sessionId)
-    ctx.auditLog.info(`<User:${profile.uid}> logged out`)
+    await sessionService.revokeSession(String(profile.id), sessionId)
+    ctx.auditLog.info(`<User:${profile.username}> logged out`)
   }
   delete ctx.session.userId
   delete ctx.session.sessionId
@@ -146,23 +145,23 @@ export async function updateProfile (ctx: Context) {
   }
 
   try {
-    const { nick, avatar, motto, mail, school } = payload.data
+    const { nickname, avatarUrl, motto, email, school } = payload.data
 
-    if (avatar !== undefined && avatar !== '') {
+    if (avatarUrl !== undefined && avatarUrl !== '') {
       // Allow keeping current avatar (e.g. admin-set custom avatar)
-      if (avatar !== profile.avatar) {
+      if (avatarUrl !== profile.avatarUrl) {
         const presets = await settingsService.getAvatarPresets()
-        if (!presets.includes(avatar)) {
+        if (!presets.includes(avatarUrl)) {
           return createErrorResponse(ctx, ErrorCode.Forbidden, 'Avatar is not in the allowed presets')
         }
       }
     }
 
-    const updatedUser = await userService.updateUser(profile, {
-      nick, avatar, motto, mail, school,
+    const updatedUser = await userService.updateUser(profile.id, {
+      nickname, avatarUrl, motto, email, school,
     })
-    const result = AccountProfileQueryResultSchema.encode(updatedUser.toObject())
-    ctx.auditLog.info(`<User:${profile.uid}> updated profile`)
+    const result = AccountProfileQueryResultSchema.encode(updatedUser)
+    ctx.auditLog.info(`<User:${profile.username}> updated profile`)
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to update profile', err)
@@ -189,16 +188,16 @@ export async function updatePassword (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'New password is not complex enough')
   }
   const oldPwdHash = passwordHashBuffer(oldPassword)
-  if (timingSafeEqual(Buffer.from(profile.pwd, 'hex'), oldPwdHash) === false) {
+  if (timingSafeEqual(Buffer.from(profile.passwordHash, 'hex'), oldPwdHash) === false) {
     return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Old password is incorrect')
   }
   const pwd = passwordHash(newPassword)
 
   try {
-    await userService.updateUser(profile, { pwd })
-    const userId = profile._id.toString()
+    await userService.updateUser(profile.id, { passwordHash: pwd })
+    const userId = String(profile.id)
     const revoked = await sessionService.revokeOtherSessions(userId, ctx.state.sessionId!)
-    ctx.auditLog.info(`<User:${profile.uid}> changed password, revoked ${revoked} other session(s)`)
+    ctx.auditLog.info(`<User:${profile.username}> changed password, revoked ${revoked} other session(s)`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update password', err)
@@ -214,14 +213,14 @@ export async function findSubmissions (ctx: Context) {
   }
 
   const solutions = await solutionService
-    .findSolutions({ ...query.data, user: profile.uid })
+    .findSolutions({ ...query.data, username: profile.username })
   const result = AccountSubmissionListQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
 }
 
 export async function listSessions (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const userId = profile._id.toString()
+  const userId = String(profile.id)
   const sessions = await sessionService.listSessions(userId)
 
   const currentSessionId = ctx.state.sessionId
@@ -246,8 +245,8 @@ export async function revokeSession (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot revoke current session, use logout instead')
   }
 
-  await sessionService.revokeSession(profile._id.toString(), sessionId)
-  ctx.auditLog.info(`<User:${profile.uid}> revoked <Session:${sessionId}>`)
+  await sessionService.revokeSession(String(profile.id), sessionId)
+  ctx.auditLog.info(`<User:${profile.username}> revoked <Session:${sessionId}>`)
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -259,9 +258,9 @@ export async function revokeOtherSessions (ctx: Context) {
   }
 
   const removed = await sessionService.revokeOtherSessions(
-    profile._id.toString(), currentSessionId,
+    String(profile.id), currentSessionId,
   )
-  ctx.auditLog.info(`<User:${profile.uid}> revoked ${removed} other session(s)`)
+  ctx.auditLog.info(`<User:${profile.username}> revoked ${removed} other session(s)`)
   const result = SessionRevokeOthersResultSchema.parse({ removed })
   return createEnvelopedResponse(ctx, result)
 }

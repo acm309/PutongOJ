@@ -2,11 +2,9 @@ import { z } from 'zod'
 import { LabelingStyle, Language, ParticipationStatus } from '@/consts/index.js'
 import { TITLE_LENGTH_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
-import { ObjectIdSchema } from '../utils.js'
 
 export const ContestModelSchema = z.object({
-  /** Contest Id */
-  contestId: z.number(),
+  id: z.int().positive(),
   /** Contest title */
   title: z.string().min(1).max(TITLE_LENGTH_MAX),
 
@@ -26,32 +24,11 @@ export const ContestModelSchema = z.object({
   /** Is the contest public, everyone can participate */
   isPublic: z.boolean(),
 
-  /** Password for accessing the contest, null if unable */
-  password: z.string().nullable(),
-  /** List of users allowed to access the contest */
-  allowedUsers: z.array(ObjectIdSchema),
-  /** List of groups allowed to access the contest */
-  allowedGroups: z.array(ObjectIdSchema),
-  /** IP whitelist for accessing the contest */
-  ipWhitelist: z.array(z.object({
-    cidr: z.union([z.cidrv4(), z.cidrv6()]),
-    comment: z.string().max(100).nullable(),
-  })),
-  /** Is IP whitelist enabled */
   ipWhitelistEnabled: z.boolean(),
-
-  /** Allow participants to early exit */
   allowEarlyExit: z.boolean(),
-
-  /** List of problems in the contest */
-  problems: z.array(ObjectIdSchema),
-  /** Allowed submission languages, null if unrestricted */
-  allowedLanguages: z.array(z.enum(Language)).min(1).nullable(),
-  /** Labeling style for problems */
+  allowedLanguages: z.array(z.enum(Language)),
   labelingStyle: z.enum(LabelingStyle),
-
-  /** Associated course, null if none */
-  course: ObjectIdSchema.nullable(),
+  courseId: z.int().positive().nullable(),
 
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
@@ -60,8 +37,8 @@ export const ContestModelSchema = z.object({
 export type ContestModel = z.infer<typeof ContestModelSchema>
 
 export const ContestParticipationModelSchema = z.object({
-  contest: ObjectIdSchema,
-  user: ObjectIdSchema,
+  contestId: z.int().positive(),
+  userId: z.int().positive(),
   status: z.enum(ParticipationStatus),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,

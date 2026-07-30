@@ -1,5 +1,4 @@
 import type Redis from 'ioredis'
-import type { Types } from 'mongoose'
 import { randomUUID } from 'node:crypto'
 import NodeCache from 'node-cache'
 import redis from '../config/redis'
@@ -168,19 +167,19 @@ export class CacheKey {
     return `cache:settings:${key}`
   }
 
-  public static contestProblems (contest: Types.ObjectId, isJury: boolean) {
-    return `cache:contest:${contest.toString()}:problems:${isJury ? 'jury' : 'public'}`
+  public static contestProblems (contestId: number, isJury: boolean) {
+    return `cache:contest:${contestId}:problems:${isJury ? 'jury' : 'public'}`
   }
 
-  public static contestRanklist (contest: Types.ObjectId, isJury: boolean) {
-    return `cache:contest:${contest.toString()}:ranklist:${isJury ? 'jury' : 'public'}`
+  public static contestRanklist (contestId: number, isJury: boolean) {
+    return `cache:contest:${contestId}:ranklist:${isJury ? 'jury' : 'public'}`
   }
 
-  public static problemStatistics (problem: Types.ObjectId) {
-    return `cache:problem:${problem.toString()}:statistics`
+  public static problemStatistics (problemId: number) {
+    return `cache:problem:${problemId}:statistics`
   }
 
-  public static userSubmissionHeatmap (user: Types.ObjectId) {
-    return `cache:user:${user.toString()}:submission_heatmap`
+  public static userSubmissionHeatmap (userId: number) {
+    return `cache:user:${userId}:submission_heatmap`
   }
 }

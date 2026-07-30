@@ -50,7 +50,6 @@ interface GlobalConfig {
   port: number
   wsPort: number
   databaseURL: string
-  mongodbURL: string
   redisURL: string
   secretKey: string
   sessionMaxAge: number
@@ -62,7 +61,6 @@ interface GlobalConfig {
     trustedProxies: string[]
   }
   disableRateLimit: boolean
-  mongooseDebug: boolean
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
   helpDocURL?: string
   submissionHeatmapTimezone: string
@@ -108,10 +106,6 @@ export const globalConfig: GlobalConfig = {
     'DATABASE_URL',
     'postgresql://putong_oj:putong_oj@localhost:5432/putong_oj',
   ),
-  mongodbURL: stringEnv(
-    'PTOJ_MONGODB_URL',
-    'mongodb://localhost:27017/oj',
-  ),
   redisURL: stringEnv(
     'PTOJ_REDIS_URL',
     'redis://localhost:6379',
@@ -148,10 +142,6 @@ export const globalConfig: GlobalConfig = {
   },
   disableRateLimit: booleanEnv(
     'PTOJ_DISABLE_RATE_LIMIT',
-    false,
-  ),
-  mongooseDebug: booleanEnv(
-    'PTOJ_MONGOOSE_DEBUG',
     false,
   ),
   oauthConfigs,

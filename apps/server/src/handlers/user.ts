@@ -1,9 +1,7 @@
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User'
 import Router from '@koa/router'
 import {
   ErrorCode,
-  JudgeStatus,
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
   UserRanklistExportQueryResultSchema,
@@ -17,126 +15,79 @@ import difference from 'lodash/difference'
 import { getDatabase } from '../config/postgres'
 import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
-import Solution from '../models/Solution'
 import userService from '../services/user'
-import {
-  createEnvelopedResponse,
-  createErrorResponse,
-  createZodErrorResponse,
-} from '../utils'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants'
 
-export async function loadUser (
-  ctx: Context,
-  input?: string,
-): Promise<UserDocument> {
-  const uid = String(ctx.params.uid || input || '').trim()
-  if (!uid) {
-    ctx.throw(...ERR_INVALID_ID)
-  }
-  if (ctx.state.user?.uid === uid) {
-    return ctx.state.user
-  }
+export async function loadUser (ctx: Context, input?: string) {
+  const username = String(ctx.params.username || input || '').trim()
+  if (!username) { ctx.throw(...ERR_INVALID_ID) }
+  if (ctx.state.user?.username.toLowerCase() === username.toLowerCase()) { return ctx.state.user }
 
-  const user = await userService.getUser(uid)
-  if (!user) {
-    ctx.throw(...ERR_NOT_FOUND)
-  }
-
+  const user = await userService.getUser(username)
+  if (!user) { ctx.throw(...ERR_NOT_FOUND) }
   ctx.state.user = user
   return user
 }
 
 export async function findRanklist (ctx: Context) {
   const query = UserRanklistQuerySchema.safeParse(ctx.request.query)
-  if (!query.success) {
-    return createZodErrorResponse(ctx, query.error)
-  }
-
-  const users = await userService.findRanklist(query.data)
-  const result = UserRanklistQueryResultSchema.encode(users)
-  return createEnvelopedResponse(ctx, result)
+  if (!query.success) { return createZodErrorResponse(ctx, query.error) }
+  const result = await userService.findRanklist(query.data)
+  return createEnvelopedResponse(ctx, UserRanklistQueryResultSchema.encode(result))
 }
 
 export async function exportRanklist (ctx: Context) {
   const query = UserRanklistExportQuerySchema.safeParse(ctx.request.query)
-  if (!query.success) {
-    return createZodErrorResponse(ctx, query.error)
-  }
-  const profile = await loadProfile (ctx)
-  if (!query.data.group && !profile.isAdmin) {
+  if (!query.success) { return createZodErrorResponse(ctx, query.error) }
+
+  const profile = await loadProfile(ctx)
+  if (!query.data.groupId && !profile.isAdmin) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to export full ranklist')
   }
-
-  const users = await userService.exportRanklist(query.data)
-  const result = UserRanklistExportQueryResultSchema.encode(users)
-  return createEnvelopedResponse(ctx, result)
+  const result = await userService.exportRanklist(query.data)
+  return createEnvelopedResponse(ctx, UserRanklistExportQueryResultSchema.encode(result))
 }
 
 export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
-  const [ solved, failed, groups, submissionHeatmap ] = await Promise.all([
-    Solution
-      .find({ uid: user.uid, judge: JudgeStatus.Accepted })
-      .distinct('pid')
-      .lean(),
-    Solution
-      .find({ uid: user.uid, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
-      .distinct('pid')
-      .lean(),
-    (async () => {
-      const database = await getDatabase()
-      const postgresUser = await database.user.findUnique({
-        where: { username: user.uid },
-        include: {
-          groupMemberships: {
-            include: { group: true },
-          },
-        },
-      })
-      return postgresUser?.groupMemberships.map(({ group }) => ({
-        gid: group.id,
-        title: group.name,
-      })) ?? []
-    })(),
-    userService.getSubmissionHeatmap(user._id),
+  const database = await getDatabase()
+  const [ statuses, groups, heatmap, codeforces ] = await Promise.all([
+    database.userProblemStatus.findMany({ where: { userId: user.id }, select: { problemId: true, hasAccepted: true } }),
+    database.groupMember.findMany({ where: { userId: user.id }, include: { group: true } }),
+    userService.getSubmissionHeatmap(user.id),
+    userService.getCodeforcesProfile(user.id),
   ])
-
-  const codeforces = await userService.getCodeforcesProfile(user._id)
-  const attempted = difference(failed, solved)
-  const result = UserProfileQueryResultSchema.encode({
-    ...user.toObject(), groups, solved, attempted, codeforces, submissionHeatmap,
-  })
-  return createEnvelopedResponse(ctx, result)
+  const solved = statuses.filter(status => status.hasAccepted).map(status => status.problemId)
+  const attempted = difference(statuses.map(status => status.problemId), solved)
+  return createEnvelopedResponse(ctx, UserProfileQueryResultSchema.encode({
+    ...user,
+    groups: groups.map(({ group }) => ({ id: group.id, name: group.name })),
+    solved,
+    attempted,
+    codeforces,
+    submissionHeatmap: heatmap,
+  }))
 }
 
 export async function suggestUsers (ctx: Context) {
   const query = UserSuggestQuerySchema.safeParse(ctx.request.query)
-  if (!query.success) {
-    return createZodErrorResponse(ctx, query.error)
-  }
-
-  const users = await userService.suggestUsers(query.data.keyword, 10)
-  const result = UserSuggestQueryResultSchema.encode(users)
-  return createEnvelopedResponse(ctx, result)
+  if (!query.success) { return createZodErrorResponse(ctx, query.error) }
+  const result = await userService.suggestUsers(query.data.keyword, 10)
+  return createEnvelopedResponse(ctx, UserSuggestQueryResultSchema.encode(result))
 }
 
 export async function getAllUserItems (ctx: Context) {
-  const users = await userService.getAllUserItems()
-  const result = UserItemListQueryResultSchema.encode(users)
-  return createEnvelopedResponse(ctx, result)
+  const result = await userService.getAllUserItems()
+  return createEnvelopedResponse(ctx, UserItemListQueryResultSchema.encode(result))
 }
 
-function registerUserHandlers (router: Router) {
+export default function registerUserHandlers (router: Router) {
   const userRouter = new Router({ prefix: '/users' })
-
   userRouter.get('/items', adminRequire, getAllUserItems)
   userRouter.get('/suggest', loginRequire, suggestUsers)
   userRouter.get('/ranklist', findRanklist)
   userRouter.get('/ranklist/export', loginRequire, dataExportLimit, exportRanklist)
-  userRouter.get('/:uid', getUser)
-
+  userRouter.get('/:username', getUser)
   router.use(userRouter.routes(), userRouter.allowedMethods())
 }
-
-export default registerUserHandlers

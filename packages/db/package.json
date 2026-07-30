@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/generated/client/browser.d.ts",
+      "import": "./dist/generated/client/browser.js"
     }
   },
   "main": "./dist/index.js",

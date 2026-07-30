@@ -1,7 +1,7 @@
-import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
+import { getDatabase } from '../../../src/config/postgres'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
@@ -13,6 +13,13 @@ const userAgent = supertest.agent(server)
 // ─── shared state ─────────────────────────────────────────────────────────────
 
 let contestId: number | null = null
+
+async function primaryUserId (): Promise<number> {
+  const database = await getDatabase()
+  return (await database.user.findUniqueOrThrow({
+    where: { username: userSeeds.primaryuser.username },
+  })).id
+}
 
 const now = Date.now()
 const baseContest = {
@@ -37,7 +44,7 @@ test.before('Login as admin', async (t) => {
   const userLogin = await userAgent
     .post('/api/account/login')
     .send({
-      username: userSeeds.primaryuser.uid,
+      username: userSeeds.primaryuser.username,
       password: await encryptData(userSeeds.primaryuser.pwd!),
     })
 
@@ -54,9 +61,9 @@ test.serial('Create a contest', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(typeof res.body.data.contestId, 'number')
+  t.is(typeof res.body.data.id, 'number')
 
-  contestId = res.body.data.contestId
+  contestId = res.body.data.id
 })
 
 test.serial('Create contest: missing required fields returns error', async (t) => {
@@ -103,7 +110,7 @@ test.serial('List contests: newly created contest appears', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(res.body.data.docs.some((c: any) => c.contestId === contestId))
+  t.true(res.body.data.items.some((c: any) => c.id === contestId))
 })
 
 test.serial('List contests: title filter works', async (t) => {
@@ -111,7 +118,7 @@ test.serial('List contests: title filter works', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(res.body.data.docs.every((c: any) => c.title.includes('Admin Test')))
+  t.true(res.body.data.items.every((c: any) => c.title.includes('Admin Test')))
 })
 
 // ─── GET /api/contests/:contestId ────────────────────────────────────────────
@@ -123,10 +130,10 @@ test.serial('Get contest detail: admin is jury', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.contestId, contestId)
+  t.is(res.body.data.id, contestId)
   t.is(res.body.data.title, baseContest.title)
   t.true(res.body.data.isJury)
-  t.is(res.body.data.allowedLanguages, null)
+  t.deepEqual(res.body.data.allowedLanguages, [])
   t.true(Array.isArray(res.body.data.problems))
 })
 
@@ -148,12 +155,12 @@ test.serial('Get contest config: returns full config', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   const cfg = res.body.data
-  t.is(cfg.contestId, contestId)
+  t.is(cfg.id, contestId)
   t.is(typeof cfg.title, 'string')
   t.true(Array.isArray(cfg.allowedUsers))
   t.true(Array.isArray(cfg.allowedGroups))
   t.true(Array.isArray(cfg.problems))
-  t.is(cfg.allowedLanguages, null)
+  t.deepEqual(cfg.allowedLanguages, [])
   t.true(Array.isArray(cfg.ipWhitelist))
   t.is(typeof cfg.ipWhitelistEnabled, 'boolean')
 })
@@ -163,16 +170,16 @@ test.serial('Update contest config: set allowed languages', async (t) => {
 
   const res = await request
     .put(`/api/contests/${contestId}/configs`)
-    .send({ allowedLanguages: [ Language.Cpp17, Language.Python ] })
+    .send({ allowedLanguages: [ 'CPP_17', 'PYTHON' ] })
 
   t.is(res.status, 200)
   t.true(res.body.success)
 
   const verify = await request.get(`/api/contests/${contestId}/configs`)
-  t.deepEqual(verify.body.data.allowedLanguages, [ Language.Cpp17, Language.Python ])
+  t.deepEqual(verify.body.data.allowedLanguages, [ 'CPP_17', 'PYTHON' ])
 
   const detail = await request.get(`/api/contests/${contestId}`)
-  t.deepEqual(detail.body.data.allowedLanguages, [ Language.Cpp17, Language.Python ])
+  t.deepEqual(detail.body.data.allowedLanguages, [ 'CPP_17', 'PYTHON' ])
 })
 
 test.serial('Update contest config: clear allowed languages restriction', async (t) => {
@@ -180,16 +187,16 @@ test.serial('Update contest config: clear allowed languages restriction', async 
 
   const res = await request
     .put(`/api/contests/${contestId}/configs`)
-    .send({ allowedLanguages: null })
+    .send({ allowedLanguages: [] })
 
   t.is(res.status, 200)
   t.true(res.body.success)
 
   const verify = await request.get(`/api/contests/${contestId}/configs`)
-  t.is(verify.body.data.allowedLanguages, null)
+  t.deepEqual(verify.body.data.allowedLanguages, [])
 })
 
-test.serial('Update contest config: empty allowed languages returns error', async (t) => {
+test.serial('Update contest config: an empty allowed-language list means unrestricted', async (t) => {
   if (!contestId) { return t.fail('No contestId from prior test') }
 
   const res = await request
@@ -197,7 +204,7 @@ test.serial('Update contest config: empty allowed languages returns error', asyn
     .send({ allowedLanguages: [] })
 
   t.is(res.status, 200)
-  t.false(res.body.success)
+  t.true(res.body.success)
 })
 
 // ─── PUT /api/contests/:contestId/configs ────────────────────────────────────
@@ -331,7 +338,7 @@ test.serial('Find solutions (jury): returns paginated result', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(Array.isArray(res.body.data.docs))
+  t.true(Array.isArray(res.body.data.items))
 })
 
 // ─── Contest participation status: admin is never blocked by IP ───────────────
@@ -369,29 +376,29 @@ test.serial('List participants: jury can see approved participant', async (t) =>
 
   const res = await request
     .get(`/api/contests/${contestId}/participants`)
-    .query({ status: 4 })
+    .query({ status: 'APPROVED' })
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(res.body.data.docs.some((doc: any) => doc.username === userSeeds.primaryuser.uid))
+  t.true(res.body.data.items.some((doc: any) => doc.username === userSeeds.primaryuser.username))
 })
 
 test.serial('Update participant status: jury can suspend participant', async (t) => {
   if (!contestId) { return t.fail('No contestId from prior test') }
 
   const res = await request
-    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
-    .send({ status: 3 })
+    .put(`/api/contests/${contestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'SUSPENDED' })
 
   t.is(res.status, 200)
   t.true(res.body.success)
 
   const verify = await request
     .get(`/api/contests/${contestId}/participants`)
-    .query({ status: 3 })
+    .query({ status: 'SUSPENDED' })
 
-  t.true(verify.body.data.docs.some((doc: any) => {
-    return doc.username === userSeeds.primaryuser.uid && doc.status === 3
+  t.true(verify.body.data.items.some((doc: any) => {
+    return doc.username === userSeeds.primaryuser.username && doc.status === 'SUSPENDED'
   }))
 })
 
@@ -400,22 +407,22 @@ test.serial('Update participant status: jury can set participant to EarlyExit', 
 
   // First restore user to Approved
   await request
-    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
-    .send({ status: 4 })
+    .put(`/api/contests/${contestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'APPROVED' })
 
   const res = await request
-    .put(`/api/contests/${contestId}/participants/${userSeeds.primaryuser.uid}`)
-    .send({ status: 5 })
+    .put(`/api/contests/${contestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'EARLY_EXIT' })
 
   t.is(res.status, 200)
   t.true(res.body.success)
 
   const verify = await request
     .get(`/api/contests/${contestId}/participants`)
-    .query({ status: 5 })
+    .query({ status: 'EARLY_EXIT' })
 
-  t.true(verify.body.data.docs.some((doc: any) => {
-    return doc.username === userSeeds.primaryuser.uid && doc.status === 5
+  t.true(verify.body.data.items.some((doc: any) => {
+    return doc.username === userSeeds.primaryuser.username && doc.status === 'EARLY_EXIT'
   }))
 })
 

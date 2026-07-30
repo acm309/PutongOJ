@@ -14,8 +14,8 @@ test('Group list', async (t) => {
   t.truthy(Array.isArray(res.body.data))
 
   const item = res.body.data[0]
-  t.is(typeof item.gid, 'number')
-  t.is(typeof item.title, 'string')
+  t.is(typeof item.id, 'number')
+  t.is(typeof item.name, 'string')
 })
 
 test.after.always('close server', () => {

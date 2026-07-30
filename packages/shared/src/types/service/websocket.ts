@@ -1,4 +1,4 @@
-import type { JudgeStatus } from '@/consts/index.js'
+import type { JudgeStatus } from '@putongoj/db/browser'
 
 export enum WebSocketMessageType {
   Connect = 'connect',
@@ -25,8 +25,8 @@ type WebSocketMessageNotification = {
 type WebSocketMessageSubmissionResult = {
   type: WebSocketMessageType.SubmissionResult
   data: {
-    solutionId: number
-    judgeStatus: JudgeStatus
+    submissionId: number
+    status: JudgeStatus
   }
 }
 

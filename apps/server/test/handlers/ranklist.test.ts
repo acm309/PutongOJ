@@ -11,9 +11,9 @@ test('Fetch ranklist', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.truthy(res.body.data.docs)
+  t.truthy(res.body.data.items)
 
-  const list = res.body.data.docs
+  const list = res.body.data.items
   for (let i = 1; i < list.length; i++) {
     if (
       list[i].solve > list[i - 1].solve
@@ -33,5 +33,5 @@ test('Fetch ranklist filtered by group', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.truthy(res.body.data.docs)
+  t.truthy(res.body.data.items)
 })

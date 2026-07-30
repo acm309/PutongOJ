@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { ProblemModelSchema, UserModelSchema } from '../model/index.js'
 
 export const ContestRanklistProblemSchema = z.object({
-  problemId: ProblemModelSchema.shape.pid,
+  problemId: ProblemModelSchema.shape.id,
   failedCount: z.number(),
   pendingCount: z.number(),
   solvedAt: z.iso.datetime().optional(),
@@ -11,8 +11,8 @@ export const ContestRanklistProblemSchema = z.object({
 export type ContestRanklistProblem = z.input<typeof ContestRanklistProblemSchema>
 
 export const ContestRanklistSchema = z.array(z.object({
-  username: UserModelSchema.shape.uid,
-  nickname: UserModelSchema.shape.nick,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname,
   problems: z.array(ContestRanklistProblemSchema),
 }))
 

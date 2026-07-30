@@ -1,12 +1,12 @@
 import type { ErrorCode } from '@/consts/index.js'
 import { z } from 'zod'
-import { OAuthProvider, QuerySort } from '@/consts/index.js'
+import { OAuthProvider } from '@/consts/index.js'
 import { PAGE_SIZE_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate, stringToInt } from '../codec.js'
 import { UserAvatarSchema } from '../model/user.js'
 
 export const SortOptionSchema = z.object({
-  sort: stringToInt.pipe(z.enum(QuerySort)).default(QuerySort.Desc),
+  sort: z.enum(['asc', 'desc']).default('desc'),
 })
 
 export const PaginationSchema = z.object({
@@ -14,21 +14,19 @@ export const PaginationSchema = z.object({
   pageSize: stringToInt.pipe(z.int().positive().max(PAGE_SIZE_MAX)).optional(),
 })
 
-export function PaginatedSchema<T extends z.ZodType>(schema: T) {
+export function PaginatedResultSchema<T extends z.ZodType>(schema: T) {
   return z.object({
-    docs: z.array(schema),
-    limit: z.number(),
+    items: z.array(schema),
     page: z.number(),
-    pages: z.number(),
+    pageSize: z.number(),
     total: z.number(),
   })
 }
 
-export type Paginated<T> = {
-  docs: T[]
-  limit: number
+export type PaginatedResult<T> = {
+  items: T[]
   page: number
-  pages: number
+  pageSize: number
   total: number
 }
 

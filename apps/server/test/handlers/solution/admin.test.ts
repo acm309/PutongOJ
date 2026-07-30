@@ -1,4 +1,3 @@
-import { JudgeStatus } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -21,18 +20,18 @@ test.before('Login', async (t) => {
 
 test('Can see solution and sim of other users', async (t) => {
   const res = await request
-    .get('/api/status/4')
+    .get('/api/submissions/4')
 
   t.is(res.status, 200)
-  t.truthy(res.body.solution.sim)
-  t.truthy(res.body.solution.sim_s_id)
-  t.truthy(res.body.solution.code)
+  t.truthy(res.body.submission.similarity)
+  t.truthy(res.body.submission.similarSubmissionId)
+  t.truthy(res.body.submission.sourceCode)
 })
 
 test('Push solution to rejudge', async (t) => {
   const res = await request
-    .put('/api/status/3')
-    .send({ judge: JudgeStatus.RejudgePending })
+    .put('/api/submissions/3')
+    .send({ status: 'REJUDGE_PENDING' })
 
   t.is(res.status, 200)
 })

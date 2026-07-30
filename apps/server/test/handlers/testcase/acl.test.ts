@@ -4,7 +4,7 @@ import fse from 'fs-extra'
 import supertest from 'supertest'
 import app from '../../../src/app'
 import { encryptData } from '../../../src/services/crypto'
-import { deploy, status } from '../../../src/utils/constants'
+import { deploy } from '../../../src/utils/constants'
 
 const server = app.listen()
 const adminRequest = supertest.agent(server)
@@ -29,7 +29,7 @@ test.before('login as admin and regular user', async (t) => {
 })
 
 test.before('create reserved and available problems', async (t) => {
-  const reserved = await adminRequest.post('/api/problem').send({
+  const reserved = await adminRequest.post('/api/problems').send({
     title: 'Testcase Authorization Reserved Problem',
     description: 'Used for hidden problem authorization checks.',
     input: 'Input',
@@ -39,25 +39,25 @@ test.before('create reserved and available problems', async (t) => {
   })
 
   t.is(reserved.status, 200)
-  t.truthy(reserved.body.pid)
-  reservedPid = reserved.body.pid
+  t.truthy(reserved.body.id)
+  reservedPid = reserved.body.id
 
-  const available = await adminRequest.post('/api/problem').send({
+  const available = await adminRequest.post('/api/problems').send({
     title: 'Testcase Authorization Available Problem',
     description: 'Used for non-owner authorization checks.',
     input: 'Input',
     output: 'Output',
     in: '1 2',
     out: '3',
-    status: status.Available,
+    visibility: 'AVAILABLE',
   })
 
   t.is(available.status, 200)
-  t.truthy(available.body.pid)
-  availablePid = available.body.pid
+  t.truthy(available.body.id)
+  availablePid = available.body.id
 
   const created = await adminRequest
-    .post(`/api/problem/${availablePid}/testcases`)
+    .post(`/api/problems/${availablePid}/testcases`)
     .send({ in: 'secret input data', out: 'secret output data' })
 
   t.is(created.status, 200)
@@ -67,14 +67,14 @@ test.before('create reserved and available problems', async (t) => {
 })
 
 test('Regular user can view available problem metadata', async (t) => {
-  const res = await userRequest.get(`/api/problem/${availablePid}`)
+  const res = await userRequest.get(`/api/problems/${availablePid}`)
 
   t.is(res.status, 200)
-  t.truthy(res.body.pid ?? res.body.title)
+  t.truthy(res.body.id ?? res.body.title)
 })
 
 test('List testcases on reserved problem is denied with 404', async (t) => {
-  const res = await userRequest.get(`/api/problem/${reservedPid}/testcases`)
+  const res = await userRequest.get(`/api/problems/${reservedPid}/testcases`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -83,7 +83,7 @@ test('List testcases on reserved problem is denied with 404', async (t) => {
 
 test('Create testcase on reserved problem is denied with 404', async (t) => {
   const res = await userRequest
-    .post(`/api/problem/${reservedPid}/testcases`)
+    .post(`/api/problems/${reservedPid}/testcases`)
     .send({ in: '1 2\n', out: '3\n' })
 
   t.is(res.status, 200)
@@ -92,7 +92,7 @@ test('Create testcase on reserved problem is denied with 404', async (t) => {
 })
 
 test('Export testcases on reserved problem is denied with 404', async (t) => {
-  const res = await userRequest.get(`/api/problem/${reservedPid}/testcases/export`)
+  const res = await userRequest.get(`/api/problems/${reservedPid}/testcases/export`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -102,7 +102,7 @@ test('Export testcases on reserved problem is denied with 404', async (t) => {
 test('Get testcase content on reserved problem is denied with 404', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await userRequest.get(
-    `/api/problem/${reservedPid}/testcases/${availableTestcaseUuid}.in`,
+    `/api/problems/${reservedPid}/testcases/${availableTestcaseUuid}.in`,
   )
 
   t.is(res.status, 200)
@@ -113,7 +113,7 @@ test('Get testcase content on reserved problem is denied with 404', async (t) =>
 test('Remove testcase on reserved problem is denied with 404', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await userRequest.delete(
-    `/api/problem/${reservedPid}/testcases/${availableTestcaseUuid}`,
+    `/api/problems/${reservedPid}/testcases/${availableTestcaseUuid}`,
   )
 
   t.is(res.status, 200)
@@ -122,7 +122,7 @@ test('Remove testcase on reserved problem is denied with 404', async (t) => {
 })
 
 test('List testcases on available problem is denied with 403 for non-owner', async (t) => {
-  const res = await userRequest.get(`/api/problem/${availablePid}/testcases`)
+  const res = await userRequest.get(`/api/problems/${availablePid}/testcases`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -131,7 +131,7 @@ test('List testcases on available problem is denied with 403 for non-owner', asy
 
 test('Create testcase on available problem is denied with 403 for non-owner', async (t) => {
   const res = await userRequest
-    .post(`/api/problem/${availablePid}/testcases`)
+    .post(`/api/problems/${availablePid}/testcases`)
     .send({ in: 'foo\n', out: 'bar\n' })
 
   t.is(res.status, 200)
@@ -140,7 +140,7 @@ test('Create testcase on available problem is denied with 403 for non-owner', as
 })
 
 test('Export testcases on available problem is denied with 403 for non-owner', async (t) => {
-  const res = await userRequest.get(`/api/problem/${availablePid}/testcases/export`)
+  const res = await userRequest.get(`/api/problems/${availablePid}/testcases/export`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -150,7 +150,7 @@ test('Export testcases on available problem is denied with 403 for non-owner', a
 test('Get testcase content on available problem is denied with 403 for non-owner', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await userRequest.get(
-    `/api/problem/${availablePid}/testcases/${availableTestcaseUuid}.in`,
+    `/api/problems/${availablePid}/testcases/${availableTestcaseUuid}.in`,
   )
 
   t.is(res.status, 200)
@@ -161,7 +161,7 @@ test('Get testcase content on available problem is denied with 403 for non-owner
 test('Get testcase output on available problem is denied with 403 for non-owner', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await userRequest.get(
-    `/api/problem/${availablePid}/testcases/${availableTestcaseUuid}.out`,
+    `/api/problems/${availablePid}/testcases/${availableTestcaseUuid}.out`,
   )
 
   t.is(res.status, 200)
@@ -172,7 +172,7 @@ test('Get testcase output on available problem is denied with 403 for non-owner'
 test('Remove testcase on available problem is denied with 403 for non-owner', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await userRequest.delete(
-    `/api/problem/${availablePid}/testcases/${availableTestcaseUuid}`,
+    `/api/problems/${availablePid}/testcases/${availableTestcaseUuid}`,
   )
 
   t.is(res.status, 200)
@@ -181,7 +181,7 @@ test('Remove testcase on available problem is denied with 403 for non-owner', as
 })
 
 test('Admin can still export testcases', async (t) => {
-  const res = await adminRequest.get(`/api/problem/${availablePid}/testcases/export`)
+  const res = await adminRequest.get(`/api/problems/${availablePid}/testcases/export`)
 
   t.is(res.status, 200)
   t.is(res.type, 'application/zip')
@@ -190,7 +190,7 @@ test('Admin can still export testcases', async (t) => {
 test('Admin can still get testcase content', async (t) => {
   t.truthy(availableTestcaseUuid)
   const res = await adminRequest.get(
-    `/api/problem/${availablePid}/testcases/${availableTestcaseUuid}.in`,
+    `/api/problems/${availablePid}/testcases/${availableTestcaseUuid}.in`,
   )
 
   t.is(res.status, 200)
@@ -200,7 +200,7 @@ test('Admin can still get testcase content', async (t) => {
 
 test.after.always('cleanup', async () => {
   if (reservedPid) {
-    await adminRequest.delete(`/api/problem/${reservedPid}`)
+    await adminRequest.delete(`/api/problems/${reservedPid}`)
 
     const reservedDir = path.resolve(__dirname, `../../../data/${reservedPid}`)
     if (fse.existsSync(reservedDir)) {
@@ -208,7 +208,7 @@ test.after.always('cleanup', async () => {
     }
   }
   if (availablePid) {
-    await adminRequest.delete(`/api/problem/${availablePid}`)
+    await adminRequest.delete(`/api/problems/${availablePid}`)
 
     const testDir = path.resolve(__dirname, `../../../data/${availablePid}`)
     if (fse.existsSync(testDir)) {

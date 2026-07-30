@@ -29,7 +29,7 @@ export function limitByIp (prefixKey: string, duration: number, max: number) {
 
 export function limitByUser (prefixKey: string, duration: number, max: number) {
   return createRatelimitMiddleware(duration, max, (ctx) => {
-    const username = ctx.state.profile?.uid || 'anonymous'
+    const username = ctx.state.profile?.username || 'anonymous'
     return `${prefixKey}:${username}`
   })
 }

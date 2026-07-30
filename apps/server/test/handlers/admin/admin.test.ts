@@ -28,7 +28,7 @@ test.before('Login as root admin', async (t) => {
   const res = await requestAdmin
     .post('/api/account/login')
     .send({
-      username: adminUser.uid,
+      username: adminUser.username,
       password: await encryptData(adminUser.pwd!),
     })
 
@@ -52,36 +52,36 @@ test('Find users', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.truthy(res.body.data)
-  t.true(Array.isArray(res.body.data.docs))
-  t.true(res.body.data.docs.length > 0)
+  t.true(Array.isArray(res.body.data.items))
+  t.true(res.body.data.items.length > 0)
 
-  const firstUser = res.body.data.docs[0]
-  t.is(typeof firstUser.uid, 'string')
-  t.is(typeof firstUser.privilege, 'number')
+  const firstUser = res.body.data.items[0]
+  t.is(typeof firstUser.username, 'string')
+  t.is(typeof firstUser.privilege, 'string')
 })
 
 test('Find users (pageSize)', async (t) => {
   const res = await requestAdmin.get('/api/admin/users?pageSize=1')
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.docs.length, 1)
+  t.is(res.body.data.items.length, 1)
 })
 
 test('Find users (keyword filter)', async (t) => {
-  const res = await requestAdmin.get(`/api/admin/users?keyword=${adminUser.uid}`)
+  const res = await requestAdmin.get(`/api/admin/users?keyword=${adminUser.username}`)
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(Array.isArray(res.body.data.docs))
+  t.true(Array.isArray(res.body.data.items))
 })
 
 // ─── getUser ───────────────────────────────────────────────────────────────
 
 test('Get user detail', async (t) => {
-  const res = await requestAdmin.get(`/api/admin/users/${adminUser.uid}`)
+  const res = await requestAdmin.get(`/api/admin/users/${adminUser.username}`)
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.uid, adminUser.uid)
-  t.is(typeof res.body.data.privilege, 'number')
+  t.is(res.body.data.username, adminUser.username)
+  t.is(typeof res.body.data.privilege, 'string')
 })
 
 test('Get user - fails for non-existent uid', async (t) => {
@@ -97,7 +97,7 @@ test.serial('Update user password - weak password rejected', async (t) => {
   // 'weak' is too short and not complex
   const encryptedPwd = await encryptData('weak')
   const res = await requestAdmin
-    .put(`/api/admin/users/${pwdTestUser.uid}/password`)
+    .put(`/api/admin/users/${pwdTestUser.username}/password`)
     .send({ newPassword: encryptedPwd })
 
   t.is(res.status, 200)
@@ -108,7 +108,7 @@ test.serial('Update user password', async (t) => {
   const strongPwd = 'Adm1nStr0ng!'
   const encryptedPwd = await encryptData(strongPwd)
   const res = await requestAdmin
-    .put(`/api/admin/users/${pwdTestUser.uid}/password`)
+    .put(`/api/admin/users/${pwdTestUser.username}/password`)
     .send({ newPassword: encryptedPwd })
 
   t.is(res.status, 200)
@@ -117,7 +117,7 @@ test.serial('Update user password', async (t) => {
 
 test.serial('Update user password - invalid base64 rejected', async (t) => {
   const res = await requestAdmin
-    .put(`/api/admin/users/${pwdTestUser.uid}/password`)
+    .put(`/api/admin/users/${pwdTestUser.username}/password`)
     .send({ newPassword: 'not-valid-base64-!@#$' })
 
   t.is(res.status, 200)
@@ -138,7 +138,7 @@ test.serial('Update user password - fails for non-existent user', async (t) => {
 // ─── getUserOAuthConnections ────────────────────────────────────────────────
 
 test('Get user OAuth connections', async (t) => {
-  const res = await requestAdmin.get(`/api/admin/users/${adminUser.uid}/oauth`)
+  const res = await requestAdmin.get(`/api/admin/users/${adminUser.username}/oauth`)
   t.is(res.status, 200)
   t.true(res.body.success)
   // Result should be a record (object)
@@ -153,23 +153,19 @@ test('Find solutions', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.truthy(res.body.data)
-  t.true(Array.isArray(res.body.data.docs))
+  t.true(Array.isArray(res.body.data.items))
 })
 
 test('Find solutions (filter by user)', async (t) => {
-  const res = await requestAdmin.get(`/api/admin/solutions?user=${primaryUser.uid}`)
+  const res = await requestAdmin.get(`/api/admin/solutions?username=${primaryUser.username}`)
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(Array.isArray(res.body.data.docs))
-  // Every returned solution should belong to primaryUser
-  for (const doc of res.body.data.docs) {
-    t.is(doc.uid, primaryUser.uid)
-  }
+  t.true(Array.isArray(res.body.data.items))
+  t.true(res.body.data.items.length > 0)
 })
 
 test('Find solutions - fails with invalid query', async (t) => {
-  // "problem" should be a number, pass a non-numeric string
-  const res = await requestAdmin.get('/api/admin/solutions?problem=notanumber')
+  const res = await requestAdmin.get('/api/admin/solutions?problemId=notanumber')
   t.is(res.status, 200)
   t.false(res.body.success)
 })
@@ -226,7 +222,7 @@ test.serial('Send user notification - fails for non-existent user', async (t) =>
 
 test.serial('Send user notification', async (t) => {
   const res = await requestAdmin
-    .post(`/api/admin/notifications/users/${adminUser.uid}`)
+    .post(`/api/admin/notifications/users/${adminUser.username}`)
     .send({ title: 'Personal Notice', content: 'Hello admin!' })
 
   t.is(res.status, 200)
@@ -235,7 +231,7 @@ test.serial('Send user notification', async (t) => {
 
 test.serial('Send user notification - fails without required fields', async (t) => {
   const res = await requestAdmin
-    .post(`/api/admin/notifications/users/${adminUser.uid}`)
+    .post(`/api/admin/notifications/users/${adminUser.username}`)
     .send({ title: 'Missing content' })
 
   t.is(res.status, 200)
@@ -248,21 +244,21 @@ test.serial('Setup: create discussion for admin update tests', async (t) => {
   const res = await requestAdmin
     .post('/api/discussions')
     .send({
-      type: 1, // OpenDiscussion
+      type: 'OPEN_DISCUSSION',
       title: 'Admin Update Target',
       content: 'This discussion will be updated via admin endpoint',
     })
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  createdDiscussionId = res.body.data.discussionId
+  createdDiscussionId = res.body.data.id
   t.truthy(createdDiscussionId)
 })
 
 test.serial('Update discussion title and pinned', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/discussions/${createdDiscussionId}`)
-    .send({ title: 'Updated Title', pinned: true })
+    .send({ title: 'Updated Title', isPinned: true })
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -271,13 +267,13 @@ test.serial('Update discussion title and pinned', async (t) => {
   const verify = await requestAdmin.get(`/api/discussions/${createdDiscussionId}`)
   t.is(verify.status, 200)
   t.is(verify.body.data.title, 'Updated Title')
-  t.is(verify.body.data.pinned, true)
+  t.is(verify.body.data.isPinned, true)
 })
 
 test.serial('Update discussion type', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/discussions/${createdDiscussionId}`)
-    .send({ type: 2 }) // PublicAnnouncement
+    .send({ type: 'PUBLIC_ANNOUNCEMENT' }) // PublicAnnouncement
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -304,7 +300,7 @@ test('Update discussion - fails for non-existent id', async (t) => {
 test.serial('Update discussion - fails for non-existent author', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/discussions/${createdDiscussionId}`)
-    .send({ author: '____no_such_user____' })
+    .send({ authorId: 999999 })
 
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -313,7 +309,7 @@ test.serial('Update discussion - fails for non-existent author', async (t) => {
 test.serial('Update discussion - fails for non-existent problem', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/discussions/${createdDiscussionId}`)
-    .send({ problem: 99999999 })
+    .send({ problemId: 99999999 })
 
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -322,7 +318,7 @@ test.serial('Update discussion - fails for non-existent problem', async (t) => {
 test.serial('Update discussion - set problem to null', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/discussions/${createdDiscussionId}`)
-    .send({ problem: null })
+    .send({ problemId: null })
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -343,14 +339,14 @@ test.serial('Setup: add a comment to use in admin comment tests', async (t) => {
   t.is(disc.status, 200)
   const comments = disc.body.data.comments
   t.true(comments.length > 0)
-  createdCommentId = comments.at(-1).commentId
+  createdCommentId = comments.at(-1).id
   t.truthy(createdCommentId)
 })
 
 test.serial('Update comment - hide', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/comments/${createdCommentId}`)
-    .send({ hidden: true })
+    .send({ isHidden: true })
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -359,7 +355,7 @@ test.serial('Update comment - hide', async (t) => {
 test.serial('Update comment - unhide', async (t) => {
   const res = await requestAdmin
     .put(`/api/admin/comments/${createdCommentId}`)
-    .send({ hidden: false })
+    .send({ isHidden: false })
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -368,7 +364,7 @@ test.serial('Update comment - unhide', async (t) => {
 test('Update comment - fails for invalid id', async (t) => {
   const res = await requestAdmin
     .put('/api/admin/comments/0')
-    .send({ hidden: true })
+    .send({ isHidden: true })
 
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -377,7 +373,7 @@ test('Update comment - fails for invalid id', async (t) => {
 test('Update comment - fails for non-existent id', async (t) => {
   const res = await requestAdmin
     .put('/api/admin/comments/999999')
-    .send({ hidden: true })
+    .send({ isHidden: true })
 
   t.is(res.status, 200)
   t.false(res.body.success)

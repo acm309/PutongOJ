@@ -22,7 +22,7 @@ test.before('Login as root admin', async (t) => {
   const res = await requestAdmin
     .post('/api/account/login')
     .send({
-      username: adminUser.uid,
+      username: adminUser.username,
       password: await encryptData(adminUser.pwd!),
     })
 
@@ -42,7 +42,7 @@ test('Unauthenticated user cannot GET /api/admin/tags', async (t) => {
 test('Unauthenticated user cannot POST /api/admin/tags', async (t) => {
   const res = await requestAnon
     .post('/api/admin/tags')
-    .send({ name: 'unauthorized', color: 'default' })
+    .send({ name: 'unauthorized', color: 'DEFAULT' })
   t.is(res.status, 200)
   t.false(res.body.success)
   t.is(res.body.code, 401)
@@ -72,7 +72,7 @@ test('GET /api/admin/tags items include admin fields', async (t) => {
   t.true(res.body.success)
   // If any tags exist, verify shape; otherwise just confirm the response
   for (const tag of res.body.data as any[]) {
-    t.is(typeof tag.tagId, 'number')
+    t.is(typeof tag.id, 'number')
     t.is(typeof tag.name, 'string')
     t.is(typeof tag.color, 'string')
   }
@@ -83,7 +83,7 @@ test('GET /api/admin/tags items include admin fields', async (t) => {
 test('POST /api/admin/tags fails with missing name', async (t) => {
   const res = await requestAdmin
     .post('/api/admin/tags')
-    .send({ color: 'default' })
+    .send({ color: 'DEFAULT' })
   t.is(res.status, 200)
   t.false(res.body.success)
   t.is(res.body.code, 400)
@@ -110,7 +110,7 @@ test('POST /api/admin/tags fails with invalid color', async (t) => {
 test('POST /api/admin/tags fails when name is too long', async (t) => {
   const res = await requestAdmin
     .post('/api/admin/tags')
-    .send({ name: 'a'.repeat(31), color: 'default' })
+    .send({ name: 'a'.repeat(31), color: 'DEFAULT' })
   t.is(res.status, 200)
   t.false(res.body.success)
   t.is(res.body.code, 400)
@@ -119,7 +119,7 @@ test('POST /api/admin/tags fails when name is too long', async (t) => {
 test.serial('POST /api/admin/tags creates a tag successfully', async (t) => {
   const res = await requestAdmin
     .post('/api/admin/tags')
-    .send({ name: 'ava-test-tag', color: 'blue' })
+    .send({ name: 'ava-test-tag', color: 'BLUE' })
   t.is(res.status, 200)
   t.true(res.body.success)
   t.is(res.body.data, null)
@@ -129,8 +129,8 @@ test.serial('POST /api/admin/tags creates a tag successfully', async (t) => {
   t.true(list.body.success)
   const created = (list.body.data as any[]).find((tag: any) => tag.name === 'ava-test-tag')
   t.truthy(created)
-  t.is(created.color, 'blue')
-  createdTagId = created.tagId
+  t.is(created.color, 'BLUE')
+  createdTagId = created.id
 })
 
 // ─── updateTag ──────────────────────────────────────────────────────────────
@@ -176,17 +176,17 @@ test.serial('PUT /api/admin/tags/:tagId updates name and color', async (t) => {
 
   const res = await requestAdmin
     .put(`/api/admin/tags/${createdTagId}`)
-    .send({ name: 'ava-test-tag-updated', color: 'red' })
+    .send({ name: 'ava-test-tag-updated', color: 'RED' })
   t.is(res.status, 200)
   t.true(res.body.success)
   t.is(res.body.data, null)
 
   // Confirm mutation in list
   const list = await requestAdmin.get('/api/admin/tags')
-  const updated = (list.body.data as any[]).find((tag: any) => tag.tagId === createdTagId)
+  const updated = (list.body.data as any[]).find((tag: any) => tag.id === createdTagId)
   t.truthy(updated)
   t.is(updated.name, 'ava-test-tag-updated')
-  t.is(updated.color, 'red')
+  t.is(updated.color, 'RED')
 })
 
 test.serial('PUT /api/admin/tags/:tagId can update name only', async (t) => {
@@ -204,7 +204,7 @@ test.serial('PUT /api/admin/tags/:tagId can update color only', async (t) => {
 
   const res = await requestAdmin
     .put(`/api/admin/tags/${createdTagId}`)
-    .send({ color: 'green' })
+    .send({ color: 'GREEN' })
   t.is(res.status, 200)
   t.true(res.body.success)
 })

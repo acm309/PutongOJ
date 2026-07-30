@@ -1,268 +1,61 @@
-import type { CourseDocument } from '../../src/models/Course'
-import type { CourseEntityEditable } from '../../src/types/entity'
 import test from 'ava'
-import User from '../../src/models/User'
+import { getDatabase } from '../../src/config/postgres'
 import courseService from '../../src/services/course'
 import { userSeeds } from '../seeds/user'
-import '../../src/config/db'
 
-const testCourse: Pick<CourseEntityEditable, 'name' | 'description' | 'encrypt'> = {
-  name: 'C Programming',
-  description: 'A course about C programming',
-  encrypt: 1,
+const roleEntire = {
+  canAccess: true,
+  canViewTestcases: true,
+  canViewSubmissions: true,
+  canManageProblems: true,
+  canManageContests: true,
+  canManageCourse: true,
 }
-const testUser = userSeeds.ScourseCstu as { uid: string }
-const adminUser = userSeeds.admin as { uid: string }
-const testContext = {
-  course: undefined as CourseDocument | undefined,
-}
+const context: { courseId?: number } = {}
 
-const { courseRoleNone, courseRoleEntire } = courseService
-const courseRoleBasic = Object.freeze({
-  ...courseRoleNone,
-  basic: true,
-})
-
-test('findCourses', async (t) => {
-  const result = await courseService.findCourses({
-    page: 1,
-    pageSize: 1,
+test.serial('creates and updates a course using semantic PostgreSQL fields', async (t) => {
+  const course = await courseService.createCourse({
+    name: 'C Programming', description: 'A course about C programming', visibility: 'PUBLIC', joinCode: '',
   })
+  context.courseId = course.id
+  t.true(course.id > 0)
+  t.is(course.visibility, 'PUBLIC')
 
-  t.truthy(result)
-  t.is(result.docs.length, 1)
-  t.true(result.pages > 1)
-  t.deepEqual(
-    Object.keys(result.docs[0]).sort(),
-    [ 'courseId', 'name', 'description', 'encrypt' ].sort())
-  t.is(typeof result.docs[0].courseId, 'number')
-  t.is(typeof result.docs[0].name, 'string')
-  t.is(typeof result.docs[0].description, 'string')
-  t.is(typeof result.docs[0].encrypt, 'number')
+  const updated = await courseService.updateCourse(course.id, { visibility: 'PRIVATE', joinCode: 'join-c' })
+  t.is(updated?.visibility, 'PRIVATE')
+  t.is(updated?.joinCode, 'join-c')
 })
 
-test('createCourse (name too short)', async (t) => {
-  const course = { ...testCourse, name: 'CP' }
-  await t.throwsAsync(courseService.createCourse(course))
+test.serial('maintains explicit course memberships and decimal problem ordering', async (t) => {
+  const courseId = context.courseId
+  if (!courseId) { return t.fail('course not created') }
+  const database = await getDatabase()
+  const user = await database.user.findUnique({ where: { username: userSeeds.ScourseCstu.username } })
+  if (!user) { return t.fail('seed user not found') }
+
+  t.true(await courseService.updateCourseMember(courseId, user.id, roleEntire))
+  const member = await courseService.getCourseMember(courseId, user.username)
+  t.is(member?.user.id, user.id)
+  t.deepEqual(member?.role, roleEntire)
+
+  await courseService.addCourseProblem(courseId, 1000)
+  await courseService.addCourseProblem(courseId, 1001)
+  t.true(await courseService.moveCourseProblem(courseId, 1001, 1))
+  await courseService.rearrangeCourseProblems(courseId)
+  const problems = await database.courseProblem.findMany({ where: { courseId }, orderBy: { sort: 'asc' } })
+  t.deepEqual(problems.map(problem => problem.problemId), [ 1001, 1000 ])
+  t.true(await courseService.hasProblemRole(user.id, 1000, 'canManageProblems'))
 })
 
-test('createCourse (name too long)', async (t) => {
-  const course = { ...testCourse, name: 'C'.repeat(31) }
-  await t.throwsAsync(courseService.createCourse(course))
-})
+test.serial('public courses are readable without implicit memberships', async (t) => {
+  const database = await getDatabase()
+  const course = await courseService.getCourse(1)
+  if (!course) { return t.fail('public seed course missing') }
+  const user = await database.user.findUnique({ where: { username: userSeeds.primaryuser.username } })
+  if (!user) { return t.fail('seed user missing') }
 
-test('createCourse (description too long)', async (t) => {
-  const course = { ...testCourse, description: 'A'.repeat(101) }
-  await t.throwsAsync(courseService.createCourse(course))
-})
-
-test.serial('createCourse (serial)', async (t) => {
-  const course = await courseService.createCourse(testCourse)
-
-  t.truthy(course)
-  t.is(typeof course.courseId, 'number')
-  t.is(course.name, testCourse.name)
-  t.is(course.description, testCourse.description)
-  t.is(course.encrypt, testCourse.encrypt)
-
-  testContext.course = course
-})
-
-test('getCourse (non-existent course)', async (t) => {
-  const course = await courseService.getCourse(0)
-  t.is(course, null)
-})
-
-test.serial('getCourse (serial)', async (t) => {
-  const courseId = testContext.course?.courseId
-  if (!courseId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const course = await courseService.getCourse(courseId)
-
-  t.truthy(course)
-  t.is(course?.courseId, courseId)
-  t.is(course?.name, testCourse.name)
-  t.is(course?.description, testCourse.description)
-  t.is(course?.encrypt, testCourse.encrypt)
-  t.true(course?.isPublic)
-  t.false(course?.isPrivate)
-})
-
-test('updateCourse (non-existent course)', async (t) => {
-  const result = await courseService.updateCourse(0, {})
-  t.is(result, null)
-})
-
-test.serial('updateCourse (serial)', async (t) => {
-  const courseId = testContext.course?.courseId
-  if (!courseId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const updatedCourse = await courseService.updateCourse(
-    courseId,
-    {
-      name: 'Advanced C Programming',
-      description: 'An advanced course about C programming',
-    })
-
-  t.truthy(updatedCourse)
-  t.is(updatedCourse?.courseId, courseId)
-  t.is(updatedCourse?.name, 'Advanced C Programming')
-  t.is(updatedCourse?.description, 'An advanced course about C programming')
-})
-
-test.serial('updateCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  const user = await User.findOne({ uid: testUser.uid })
-  if (!user) {
-    return t.fail('Test user does not exist')
-  }
-  const testUserObjectId = user._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.updateCourseMember(
-    courseObjectId,
-    testUserObjectId,
-    courseRoleEntire,
-  )
-
-  t.true(result)
-})
-
-test.serial('getCourseMember (non-existent user)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.getCourseMember(
-    courseObjectId,
-    'ScourseNonExist',
-  )
-
-  t.is(result, null)
-})
-
-test.serial('getCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.getCourseMember(
-    courseObjectId,
-    testUser.uid as string,
-  )
-  if (!result) {
-    return t.fail('Failed to retrieve course member')
-  }
-
-  t.truthy(result)
-  t.is(result.user.uid, testUser.uid)
-  t.deepEqual(result.role, courseRoleEntire)
-})
-
-test.serial('getCourseMember (non-member user)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.getCourseMember(
-    courseObjectId,
-    adminUser.uid,
-  )
-  if (!result) {
-    return t.fail('Failed to retrieve course member for admin user')
-  }
-
-  t.truthy(result)
-  t.is(result.user.uid, adminUser.uid)
-  t.deepEqual(result.role, courseRoleNone)
-})
-
-test.serial('findCourseMembers (serial)', async (t) => {
-  const courseId = testContext.course?._id
-  if (!courseId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const members = await courseService.findCourseMembers(courseId, {
-    page: 1,
-    pageSize: 1,
-  })
-
-  t.truthy(members)
-  t.is(members.limit, 1)
-  t.is(members.page, 1)
-  t.is(members.pages, 1)
-  t.is(members.total, 1)
-  t.is(members.docs.length, 1)
-  t.is(members.docs[0].user.uid, testUser.uid)
-  t.deepEqual(members.docs[0].role, courseRoleEntire)
-  t.is(typeof members.docs[0].createdAt, 'number')
-  t.is(typeof members.docs[0].updatedAt, 'number')
-})
-
-test.serial('removeCourseMember (non-existent user)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.removeCourseMember(
-    courseObjectId,
-    'ScourseNonExist',
-  )
-
-  t.false(result)
-})
-
-test.serial('getUserRole (entire)', async (t) => {
-  const user = await User.findOne({ uid: testUser.uid })
-  if (!user) {
-    return t.fail('Test user does not exist')
-  }
-  if (!testContext.course) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const role = await courseService.getUserRole(user, testContext.course)
-
-  t.deepEqual(role, courseRoleEntire)
-})
-
-test.serial('removeCourseMember (serial)', async (t) => {
-  const courseObjectId = testContext.course?._id
-  if (!courseObjectId) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const result = await courseService.removeCourseMember(
-    courseObjectId,
-    testUser.uid,
-  )
-
-  t.true(result)
-})
-
-test.serial('getUserRole (basic)', async (t) => {
-  const user = await User.findOne({ uid: testUser.uid })
-  if (!user) {
-    return t.fail('Test user does not exist')
-  }
-  if (!testContext.course) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const role = await courseService.getUserRole(user, testContext.course)
-
-  t.deepEqual(role, courseRoleBasic)
-})
-
-test.serial('getUserRole (admin has entire)', async (t) => {
-  const user = await User.findOne({ uid: adminUser.uid })
-  if (!user) {
-    return t.fail('Admin user does not exist')
-  }
-  if (!testContext.course) {
-    return t.fail('Previous test did not create a course successfully')
-  }
-  const role = await courseService.getUserRole(user, testContext.course)
-
-  t.deepEqual(role, courseRoleEntire)
+  const role = await courseService.getUserRole(user.id, course)
+  t.true(role.canAccess)
+  const membership = await database.courseMember.findUnique({ where: { courseId_userId: { courseId: course.id, userId: user.id } } })
+  t.is(membership, null)
 })

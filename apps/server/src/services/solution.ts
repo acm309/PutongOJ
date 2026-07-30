@@ -1,87 +1,82 @@
-import type {
-  JudgeStatus,
-  Language,
-  Paginated,
-  SolutionModel,
-} from '@putongoj/shared'
+import type { Submission } from '@putongoj/db'
+import type { PaginatedResult } from '@putongoj/shared'
 import type { PaginateOption, SortOption } from '../types'
 import { EXPORT_SIZE_MAX } from '@putongoj/shared'
-import Solution from '../models/Solution'
+import { getDatabase } from '../config/postgres'
 
-interface SolutionFilterOption {
-  user?: string
-  problem?: number
-  contest?: number
-  judge?: JudgeStatus
-  language?: Language
+interface SubmissionFilterOption {
+  username?: string
+  problemId?: number
+  contestId?: number
+  status?: Submission['status']
+  language?: Submission['language']
 }
 
-function constructSolutionFilter (opt: SolutionFilterOption) {
-  const { user, problem, contest, judge, language } = opt
-  const filter: Record<string, any> = {}
+type ExportedSubmission = Pick<Submission,
+  'id' | 'problemId' | 'userId' | 'contestId' | 'language' | 'status'
+  | 'timeUsedMs' | 'memoryUsedKb' | 'similarity' | 'similarSubmissionId' | 'createdAt'
+>
 
-  if (typeof user === 'string') {
-    filter.uid = user
+function buildWhere (opt: SubmissionFilterOption) {
+  return {
+    ...(opt.username === undefined ? {} : { user: { username: opt.username } }),
+    ...(opt.problemId === undefined ? {} : { problemId: opt.problemId }),
+    ...(opt.contestId === undefined ? {} : { contestId: opt.contestId }),
+    ...(opt.status === undefined ? {} : { status: opt.status }),
+    ...(opt.language === undefined ? {} : { language: opt.language }),
   }
-  if (typeof problem === 'number') {
-    filter.pid = problem
-  }
-  if (typeof contest === 'number') {
-    filter.mid = contest
-  }
-  if (typeof judge === 'number') {
-    filter.judge = judge
-  }
-  if (typeof language === 'number') {
-    filter.language = language
-  }
-  return filter
+}
+
+function orderBy (sortBy: string, sort: 'asc' | 'desc') {
+  const supported = new Set([
+    'id',
+    'createdAt',
+    'updatedAt',
+    'timeUsedMs',
+    'memoryUsedKb',
+    'similarity',
+  ])
+  const field = supported.has(sortBy) ? sortBy : 'createdAt'
+  return [
+    { [field]: sort },
+    ...(field === 'createdAt' ? [] : [ { createdAt: 'desc' as const } ]),
+  ]
 }
 
 export async function findSolutions (
-  opt: PaginateOption & SortOption & SolutionFilterOption,
-): Promise<Paginated<SolutionModel>> {
-  const { page, pageSize, sort, sortBy } = opt
-  const filter = constructSolutionFilter(opt)
+  opt: PaginateOption & SortOption & SubmissionFilterOption,
+): Promise<PaginatedResult<Submission>> {
+  const database = await getDatabase()
+  const where = buildWhere(opt)
+  const [ rows, total ] = await Promise.all([
+    database.submission.findMany({
+      where,
+      orderBy: orderBy(opt.sortBy, opt.sort),
+      skip: (opt.page - 1) * opt.pageSize,
+      take: opt.pageSize,
+    }),
+    database.submission.count({ where }),
+  ])
 
-  const query = {
-    sort: {
-      [sortBy]: sort,
-      ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
-    },
-    page,
-    limit: pageSize,
-    lean: true,
-    leanWithId: false,
+  return {
+    items: rows,
+    page: opt.page,
+    pageSize: opt.pageSize,
+    total,
   }
-  return await Solution.paginate(filter, query) as any
 }
 
 export async function exportSolutions (
-  opt: SortOption & SolutionFilterOption,
-): Promise<Pick<SolutionModel,
-'sid' | 'pid' | 'uid' | 'mid' | 'language' | 'judge'
-| 'time' | 'memory' | 'sim' | 'sim_s_id' | 'createdAt'>[]
-> {
-  const { sort, sortBy } = opt
-  const filter = constructSolutionFilter(opt)
-
-  return await Solution.find(filter)
-    .select({
-      _id: 0, sid: 1, pid: 1, uid: 1, mid: 1, language: 1, judge: 1,
-      time: 1, memory: 1, sim: 1, sim_s_id: 1, createdAt: 1,
-    })
-    .sort({
-      [sortBy]: sort,
-      ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
-    })
-    .limit(EXPORT_SIZE_MAX)
-    .lean()
+  opt: SortOption & SubmissionFilterOption,
+): Promise<ExportedSubmission[]> {
+  const database = await getDatabase()
+  const rows = await database.submission.findMany({
+    where: buildWhere(opt),
+    orderBy: orderBy(opt.sortBy, opt.sort),
+    take: EXPORT_SIZE_MAX,
+  })
+  return rows
 }
 
-const solutionService = {
-  findSolutions,
-  exportSolutions,
-} as const
-
+const solutionService = { findSolutions, exportSolutions } as const
 export default solutionService

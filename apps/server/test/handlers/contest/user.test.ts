@@ -1,7 +1,7 @@
-import { ParticipationStatus } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
+import { getDatabase } from '../../../src/config/postgres'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
@@ -9,7 +9,14 @@ import { userSeeds } from '../../seeds/user'
 const server = app.listen()
 const adminAgent = supertest.agent(server)
 const userAgent = supertest.agent(server)
-const user = userSeeds.primaryuser as { uid: string, pwd: string }
+const user = userSeeds.primaryuser
+
+async function primaryUserId (): Promise<number> {
+  const database = await getDatabase()
+  return (await database.user.findUniqueOrThrow({
+    where: { username: user.username },
+  })).id
+}
 
 // ─── shared state ─────────────────────────────────────────────────────────────
 
@@ -49,14 +56,14 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
     .post('/api/contests')
     .send(makeContest({ title: 'User Public Contest', isPublic: true }))
   t.true(pub.body.success, `Create public contest failed: ${pub.body.message}`)
-  state.publicContestId = pub.body.data.contestId
+  state.publicContestId = pub.body.data.id
 
   // Create a password-protected contest
   const passwordContestRes = await adminAgent
     .post('/api/contests')
     .send(makeContest({ title: 'User Password Contest' }))
   t.true(passwordContestRes.body.success)
-  state.passwordContestId = passwordContestRes.body.data.contestId
+  state.passwordContestId = passwordContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.passwordContestId}/configs`)
     .send({ password: 'secret123' })
@@ -66,7 +73,7 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
     .post('/api/contests')
     .send(makeContest({ title: 'User IP Blocked Contest', isPublic: true }))
   t.true(ipContestRes.body.success)
-  state.ipBlockedContestId = ipContestRes.body.data.contestId
+  state.ipBlockedContestId = ipContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.ipBlockedContestId}/configs`)
     .send({ ipWhitelistEnabled: true, ipWhitelist: [] })
@@ -79,10 +86,10 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
       endsAt: new Date(now + 3 * 60 * 60_000).toISOString(),
     })
   t.true(futureContestRes.body.success)
-  state.futureContestId = futureContestRes.body.data.contestId
+  state.futureContestId = futureContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.futureContestId}/configs`)
-    .send({ problems: [ 1000 ] })
+    .send({ problemIds: [ 1000 ] })
 
   const endedContestRes = await adminAgent
     .post('/api/contests')
@@ -92,20 +99,20 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
       endsAt: new Date(now - 60 * 60_000).toISOString(),
     })
   t.true(endedContestRes.body.success)
-  state.endedContestId = endedContestRes.body.data.contestId
+  state.endedContestId = endedContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.endedContestId}/configs`)
-    .send({ problems: [ 1000 ] })
+    .send({ problemIds: [ 1000 ] })
 
   // Create a contest with early exit enabled
   const earlyExitContestRes = await adminAgent
     .post('/api/contests')
     .send(makeContest({ title: 'User Early Exit Contest', isPublic: true }))
   t.true(earlyExitContestRes.body.success)
-  state.earlyExitContestId = earlyExitContestRes.body.data.contestId
+  state.earlyExitContestId = earlyExitContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.earlyExitContestId}/configs`)
-    .send({ allowEarlyExit: true, problems: [ 1000 ] })
+    .send({ allowEarlyExit: true, problemIds: [ 1000 ] })
 
   // Create an ended contest with early exit enabled
   const endedEarlyExitContestRes = await adminAgent
@@ -116,17 +123,17 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
       endsAt: new Date(now - 60 * 60_000).toISOString(),
     })
   t.true(endedEarlyExitContestRes.body.success)
-  state.endedContestWithEarlyExitId = endedEarlyExitContestRes.body.data.contestId
+  state.endedContestWithEarlyExitId = endedEarlyExitContestRes.body.data.id
   await adminAgent
     .put(`/api/contests/${state.endedContestWithEarlyExitId}/configs`)
-    .send({ allowEarlyExit: true, problems: [ 1000 ] })
+    .send({ allowEarlyExit: true, problemIds: [ 1000 ] })
 
   // Login as primaryuser
   const userLogin = await userAgent
     .post('/api/account/login')
     .send({
-      username: user.uid,
-      password: await encryptData(user.pwd),
+      username: user.username,
+      password: await encryptData(user.pwd!),
     })
   t.is(userLogin.status, 200)
   t.true(userLogin.body.success)
@@ -153,7 +160,7 @@ test.serial('Participation status: NotApplied before joining', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.is(res.body.data.participationStatus, 'NOT_APPLIED')
   t.true(res.body.data.canParticipate)
   t.false(res.body.data.isJury)
   t.false(res.body.data.isIpBlocked)
@@ -167,7 +174,7 @@ test.serial('Participation status: future contest reports hasStarted=false', asy
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.is(res.body.data.participationStatus, 'NOT_APPLIED')
   t.true(res.body.data.canParticipate)
   t.false(res.body.data.hasStarted)
 })
@@ -256,7 +263,7 @@ test.serial('Ended contest detail is accessible after joining', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.contestId, state.endedContestId)
+  t.is(res.body.data.id, state.endedContestId)
 })
 
 test.serial('Ended contest ranklist is accessible after joining', async (t) => {
@@ -277,7 +284,7 @@ test.serial('Get public contest detail after participation: accessible', async (
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.contestId, state.publicContestId)
+  t.is(res.body.data.id, state.publicContestId)
   t.false(res.body.data.isJury)
   t.true(Array.isArray(res.body.data.problems))
 })
@@ -301,7 +308,7 @@ test.serial('Participation status: password contest shows canParticipateByPasswo
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.is(res.body.data.participationStatus, 'NOT_APPLIED')
   t.false(res.body.data.canParticipate)
   t.true(res.body.data.canParticipateByPassword)
 })
@@ -392,8 +399,8 @@ test.serial('Update participant status as non-jury returns 404', async (t) => {
   if (!state.publicContestId) { return t.fail('No publicContestId') }
 
   const res = await userAgent
-    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
-    .send({ status: ParticipationStatus.Suspended })
+    .put(`/api/contests/${state.publicContestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'SUSPENDED' })
 
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -409,15 +416,15 @@ test.serial('Participation status: Approved after joining public contest', async
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.participation, ParticipationStatus.Approved)
+  t.is(res.body.data.participationStatus, 'APPROVED')
 })
 
 test.serial('Suspended user cannot access contest detail or ranklist', async (t) => {
   if (!state.publicContestId) { return t.fail('No publicContestId') }
 
   const suspendRes = await adminAgent
-    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
-    .send({ status: ParticipationStatus.Suspended })
+    .put(`/api/contests/${state.publicContestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'SUSPENDED' })
   t.true(suspendRes.body.success)
 
   const detailRes = await userAgent.get(`/api/contests/${state.publicContestId}`)
@@ -433,13 +440,13 @@ test.serial('Restored user can access contest detail again', async (t) => {
   if (!state.publicContestId) { return t.fail('No publicContestId') }
 
   const restoreRes = await adminAgent
-    .put(`/api/contests/${state.publicContestId}/participants/${user.uid}`)
-    .send({ status: ParticipationStatus.Approved })
+    .put(`/api/contests/${state.publicContestId}/participants/${await primaryUserId()}`)
+    .send({ status: 'APPROVED' })
   t.true(restoreRes.body.success)
 
   const detailRes = await userAgent.get(`/api/contests/${state.publicContestId}`)
   t.true(detailRes.body.success)
-  t.is(detailRes.body.data.contestId, state.publicContestId)
+  t.is(detailRes.body.data.id, state.publicContestId)
 })
 
 // ─── Early exit functionality ─────────────────────────────────────────────────────
@@ -473,7 +480,7 @@ test.serial('Early exit: participation status becomes EarlyExit after early exit
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.participation, ParticipationStatus.EarlyExit)
+  t.is(res.body.data.participationStatus, 'EARLY_EXIT')
 })
 
 test.serial('Early exit: user cannot access contest during contest after early exit', async (t) => {

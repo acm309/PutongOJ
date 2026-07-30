@@ -15,7 +15,7 @@ model User {
   username        String   @unique @db.VarChar(20)
   passwordHash    String @db.VarChar(72)
   privilege       UserPrivilege @default(USER)
-  storageQuota    BigInt   @default(0)
+  storageQuota    Int      @default(0)
   nickname        String   @default("") @db.VarChar(30)
   avatarUrl       String   @default("") @db.VarChar(2048)
   motto           String   @default("") @db.VarChar(300)
@@ -152,7 +152,7 @@ model CourseMember {
 model CourseProblem {
   courseId  Int
   problemId Int
-  position  Int      @default(0)
+  sort      Decimal  @default(0) @db.Decimal(30, 12)
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
@@ -160,7 +160,7 @@ model CourseProblem {
   problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@id([courseId, problemId])
-  @@index([courseId, position, updatedAt])
+  @@index([courseId, sort, updatedAt])
   @@index([problemId])
 }
 
@@ -346,7 +346,7 @@ model Comment {
 model File {
   storageKey  String    @id
   originalName String
-  sizeBytes   BigInt
+  sizeBytes   Int
   ownerId     Int
   deletedAt   DateTime? @db.Timestamptz(3)
   deletedById Int?

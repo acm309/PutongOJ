@@ -1,26 +1,22 @@
 import { z } from 'zod'
+import { ProblemJudgeType, ProblemVisibility } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
-import { ObjectIdSchema } from '../utils.js'
 
-// TODO: Complete the definition of ProblemModel
 export const ProblemModelSchema = z.object({
-  pid: z.number(),
+  id: z.int().positive(),
   title: z.string(),
-  time: z.number(),
-  memory: z.number(),
+  timeLimitMs: z.int().positive(),
+  memoryLimitKb: z.int().positive(),
   description: z.string(),
-  input: z.string(),
-  output: z.string(),
-  in: z.string(),
-  out: z.string(),
+  inputFormat: z.string(),
+  outputFormat: z.string(),
+  sampleInput: z.string(),
+  sampleOutput: z.string(),
   hint: z.string(),
-  status: z.number(),
-  type: z.number(),
-  code: z.string(),
-  tags: z.array(ObjectIdSchema),
-  owner: ObjectIdSchema.nullable(),
-  submit: z.number(),
-  solve: z.number(),
+  visibility: z.enum(ProblemVisibility),
+  judgeType: z.enum(ProblemJudgeType),
+  judgeCode: z.string(),
+  ownerId: z.int().positive().nullable(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

@@ -1,4 +1,3 @@
-import { UserPrivilege } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -24,8 +23,8 @@ test.serial('get session profile', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.uid, 'admin')
-  t.is(res.body.data.privilege, UserPrivilege.Root)
+  t.is(res.body.data.username, 'admin')
+  t.is(res.body.data.privilege, 'ROOT')
 })
 
 test('User logout', async (t) => {

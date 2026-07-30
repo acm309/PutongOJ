@@ -1,418 +1,335 @@
-import type { Paginated, ProblemStatisticsQueryResult } from '@putongoj/shared'
-import type { PipelineStage } from 'mongoose'
-import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
+import type { Prisma, ProblemJudgeType, ProblemVisibility } from '@putongoj/db'
+import type { PaginatedResult, ProblemStatisticsQueryResult } from '@putongoj/shared'
 import type { PaginateOption } from '../types'
-import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
 import path from 'node:path'
-import { JUDGE_STATUS_TERMINAL, JudgeStatus } from '@putongoj/shared'
+import { JUDGE_STATUS_TERMINAL, JudgeStatus, ProblemVisibility as ProblemVisibilityEnum } from '@putongoj/shared'
 import fse from 'fs-extra'
-import { escapeRegExp } from 'lodash'
-import mongoose, { Types } from 'mongoose'
-import CourseProblem from '../models/CourseProblem'
-import Problem from '../models/Problem'
-import Solution from '../models/Solution'
-import { status } from '../utils/constants'
+import { getDatabase } from '../config/postgres'
+import logger from '../utils/logger'
 import { CacheKey, cacheService } from './cache'
 import tagService from './tag'
+
+export interface ProblemListItem {
+  id: number
+  title: string
+  timeLimitMs: number
+  memoryLimitKb: number
+  visibility: string
+  judgeType: string
+  ownerId: number | null
+  submitterCount: number
+  solverCount: number
+  tags: Array<{ id: number, name: string, color: string }>
+}
+
+function buildProblemSearchWhere (opt: {
+  type?: string
+  content?: string
+  showReserved?: boolean
+  ownerId?: number | null
+}): Prisma.ProblemWhereInput {
+  const clauses: Prisma.ProblemWhereInput[] = []
+  if (!opt.showReserved) {
+    clauses.push({
+      OR: [
+        { visibility: ProblemVisibilityEnum.AVAILABLE },
+        ...(opt.ownerId === undefined || opt.ownerId === null ? [] : [ { ownerId: opt.ownerId } ]),
+      ],
+    })
+  }
+  if (opt.content) {
+    switch (opt.type) {
+      case 'title':
+        clauses.push({ title: { contains: opt.content, mode: 'insensitive' } })
+        break
+      case 'tag':
+        clauses.push({ tags: { some: { tag: { name: { contains: opt.content, mode: 'insensitive' } } } } })
+        break
+      case 'pid': {
+        const prefix = Number(opt.content)
+        if (Number.isInteger(prefix)) {
+          clauses.push({ id: { gte: prefix, lt: prefix + 1 } })
+        }
+        break
+      }
+    }
+  }
+  return clauses.length === 0 ? {} : { AND: clauses }
+}
+
+function toListItem (problem: {
+  id: number
+  title: string
+  timeLimitMs: number
+  memoryLimitKb: number
+  visibility: string
+  judgeType: string
+  ownerId: number | null
+  tags: Array<{ tag: { id: number, name: string, color: string } }>
+  submissionStats: { submitterCount: number, solverCount: number } | null
+}): ProblemListItem {
+  return {
+    id: problem.id,
+    title: problem.title,
+    timeLimitMs: problem.timeLimitMs,
+    memoryLimitKb: problem.memoryLimitKb,
+    visibility: problem.visibility,
+    judgeType: problem.judgeType,
+    ownerId: problem.ownerId,
+    submitterCount: problem.submissionStats?.submitterCount ?? 0,
+    solverCount: problem.submissionStats?.solverCount ?? 0,
+    tags: problem.tags.map(({ tag }) => ({ id: tag.id, name: tag.name, color: tag.color })),
+  }
+}
 
 export async function findProblems (
   opt: PaginateOption & {
     type?: string
     content?: string
     showReserved?: boolean
-    includeOwner?: Types.ObjectId | string | null
+    ownerId?: number | null
   },
-): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
-  const { page, pageSize, content, type, showReserved, includeOwner } = opt
-  const filters: Record<string, any>[] = []
-
-  if (!(showReserved === true)) {
-    const statusFilters: Record<string, any>[]
-      = [ { status: status.Available } ]
-    if (includeOwner) {
-      statusFilters.push({
-        owner: new Types.ObjectId(includeOwner.toString()),
-      })
-    }
-    filters.push({ $or: statusFilters })
+): Promise<PaginatedResult<ProblemListItem>> {
+  const database = await getDatabase()
+  const where = buildProblemSearchWhere(opt)
+  const [ items, total ] = await Promise.all([
+    database.problem.findMany({
+      where,
+      include: { tags: { include: { tag: true } }, submissionStats: true },
+      orderBy: { id: 'asc' },
+      skip: (opt.page - 1) * opt.pageSize,
+      take: opt.pageSize,
+    }),
+    database.problem.count({ where }),
+  ])
+  return {
+    items: items.map(toListItem),
+    page: opt.page,
+    pageSize: opt.pageSize,
+    total,
   }
-  if (content) {
-    switch (type) {
-      case 'title':
-        filters.push({
-          title: { $regex: new RegExp(escapeRegExp(String(content)), 'i') },
-        })
-        break
-      case 'tag':
-        filters.push({
-          tags: { $in: await tagService.findTagObjectIdsByQuery(String(content)) },
-        })
-        break
-      case 'pid':
-        filters.push({
-          $expr: {
-            $regexMatch: {
-              input: { $toString: '$pid' },
-              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
-            },
-          },
-        })
-        break
-    }
-  }
-
-  const result = await Problem.paginate({ $and: filters }, {
-    sort: { pid: 1 },
-    page,
-    populate: { path: 'tags', select: '-_id tagId name color' },
-    limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id pid title status type tags submit solve owner',
-  }) as unknown as Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>
-  return result
 }
 
-export async function findProblemItems (
-  keyword: string,
-  limit: number = 10,
-): Promise<ProblemEntityItem[]> {
-  const result: ProblemEntityItem[] = []
-  if (Number.isInteger(Number(keyword))) {
-    result.push(...await Problem.find(
-      {
-        $expr: {
-          $regexMatch: {
-            input: { $toString: '$pid' },
-            regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
-          },
-        },
-      },
-      { _id: 0, pid: 1, title: 1 },
-      { sort: { pid: 1 }, limit },
-    ).lean(),
-    )
-  }
-  if (result.length < limit) {
-    result.push(...await Problem.find(
-      {
-        pid: { $nin: result.map(p => p.pid) },
-        title: { $regex: new RegExp(escapeRegExp(keyword), 'i') },
-      },
-      { _id: 0, pid: 1, title: 1 },
-      { sort: { updatedAt: -1 }, limit: limit - result.length },
-    ).lean(),
-    )
-  }
-  return result
+export async function findProblemItems (keyword: string, limit: number = 10) {
+  const database = await getDatabase()
+  const numericId = Number(keyword)
+  const problems = await database.problem.findMany({
+    where: {
+      OR: [
+        { title: { contains: keyword, mode: 'insensitive' } },
+        ...(Number.isInteger(numericId) ? [ { id: { gte: numericId, lt: numericId + 1 } } ] : []),
+      ],
+    },
+    select: { id: true, title: true },
+    orderBy: [ { updatedAt: 'desc' }, { id: 'asc' } ],
+    take: limit,
+  })
+  return problems
 }
 
-export async function getProblemItems (): Promise<ProblemEntityItem[]> {
-  const result = await Problem
-    .find({}, { _id: 0, title: 1, pid: 1 })
-    .lean()
-  return result
+export async function getProblemItems () {
+  const database = await getDatabase()
+  return await database.problem.findMany({ select: { id: true, title: true }, orderBy: { id: 'asc' } })
 }
 
-export async function getProblem (
-  pid: number,
-): Promise<ProblemDocumentPopulated | undefined> {
-  const problem = await Problem
-    .findOne({ pid })
-    .populate('tags')
-  return (problem ?? undefined) as ProblemDocumentPopulated | undefined
+export async function getProblem (problemId: number) {
+  const database = await getDatabase()
+  return await database.problem.findUnique({
+    where: { id: problemId },
+    include: {
+      tags: { include: { tag: true } },
+      owner: { select: { id: true, username: true, nickname: true, privilege: true } },
+      submissionStats: true,
+    },
+  })
 }
 
-export async function createProblem (
-  opt: ProblemEntityForm,
-): Promise<ProblemDocument> {
-  const problem = new Problem(opt)
-  await problem.save()
-
-  const dir = path.resolve(__dirname, '../../data', String(problem.pid))
-  await fse.ensureDir(dir)
-  await fse.outputJson(
-    path.resolve(dir, 'meta.json'),
-    { testcases: [] },
-    { spaces: 2 })
-
+export async function createProblem (data: {
+  title: string
+  timeLimitMs?: number
+  memoryLimitKb?: number
+  description?: string
+  inputFormat?: string
+  outputFormat?: string
+  sampleInput?: string
+  sampleOutput?: string
+  hint?: string
+  visibility?: ProblemVisibility
+  judgeType?: ProblemJudgeType
+  judgeCode?: string
+  ownerId?: number | null
+  tagIds?: number[]
+}) {
+  const database = await getDatabase()
+  const tagIds = [ ...new Set(data.tagIds ?? []) ]
+  const problem = await database.problem.create({
+    data: {
+      title: data.title,
+      timeLimitMs: data.timeLimitMs,
+      memoryLimitKb: data.memoryLimitKb,
+      description: data.description,
+      inputFormat: data.inputFormat,
+      outputFormat: data.outputFormat,
+      sampleInput: data.sampleInput,
+      sampleOutput: data.sampleOutput,
+      hint: data.hint,
+      visibility: data.visibility,
+      judgeType: data.judgeType,
+      judgeCode: data.judgeCode,
+      ownerId: data.ownerId ?? null,
+      ...(tagIds.length === 0 ? {} : { tags: { createMany: { data: tagIds.map(tagId => ({ tagId })) } } }),
+    },
+  })
+  const directory = path.resolve(__dirname, '../../data', String(problem.id))
+  await fse.ensureDir(directory)
+  await fse.outputJson(path.resolve(directory, 'meta.json'), { testcases: [] }, { spaces: 2 })
   return problem
 }
 
-export async function updateProblem (
-  pid: number,
-  opt: Partial<ProblemEntity>,
-): Promise<ProblemDocument | undefined> {
-  const problem = await Problem
-    .findOneAndUpdate({ pid }, { $set: opt }, { returnDocument: 'after' })
-  return problem ?? undefined
-}
-
-export async function removeProblem (pid: number): Promise<boolean> {
-  const problem = await Problem.deleteOne({ pid })
-  return !!problem
-}
-
-function buildDistributionBuckets (
-  values: Array<{ _id: number, count: number }>,
-  bucketCount: number,
-) {
-  if (values.length === 0) {
-    return []
+export async function updateProblem (problemId: number, data: Partial<{
+  title: string
+  timeLimitMs: number
+  memoryLimitKb: number
+  description: string
+  inputFormat: string
+  outputFormat: string
+  sampleInput: string
+  sampleOutput: string
+  hint: string
+  visibility: ProblemVisibility
+  judgeType: ProblemJudgeType
+  judgeCode: string
+  ownerId: number | null
+  tagIds: number[]
+}>) {
+  const database = await getDatabase()
+  try {
+    return await database.$transaction(async (transaction) => {
+      const { tagIds, ...problemData } = data
+      if (tagIds !== undefined) {
+        await transaction.problemTag.deleteMany({ where: { problemId } })
+        if (tagIds.length > 0) {
+          await transaction.problemTag.createMany({
+            data: [ ...new Set(tagIds) ].map(tagId => ({ problemId, tagId })),
+          })
+        }
+      }
+      return await transaction.problem.update({ where: { id: problemId }, data: problemData })
+    })
+  } catch (error) {
+    logger.warn(`Failed to update problem <Problem:${problemId}>: ${String(error)}`)
+    return null
   }
+}
 
-  const min = values[0]._id
-  const max = values.at(-1)!._id
+export async function removeProblem (problemId: number): Promise<boolean> {
+  const database = await getDatabase()
+  try {
+    await database.problem.delete({ where: { id: problemId } })
+    return true
+  } catch (error) {
+    logger.warn(`Failed to remove problem <Problem:${problemId}>: ${String(error)}`)
+    return false
+  }
+}
+
+function buildDistributionBuckets (values: Array<{ value: number, count: number }>, bucketCount: number) {
+  if (values.length === 0) { return [] }
+  const min = values[0]!.value
+  const max = values.at(-1)!.value
   const width = Math.max(1, Math.ceil((max - min + 1) / bucketCount))
-
   const buckets = Array.from({ length: bucketCount }, (_, index) => ({
     lowerBound: min + (index * width),
     upperBound: min + ((index + 1) * width) - 1,
     count: 0,
   }))
-
   for (const value of values) {
-    const bucketIndex = Math.min(
-      Math.floor((value._id - min) / width),
-      bucketCount - 1,
-    )
-    buckets[bucketIndex].count += value.count
+    buckets[Math.min(Math.floor((value.value - min) / width), bucketCount - 1)]!.count += value.count
   }
-
   return buckets
 }
 
-export async function getStatistics (problem: Types.ObjectId): Promise<ProblemStatisticsQueryResult> {
-  return await cacheService.getOrCreate<ProblemStatisticsQueryResult>(
-    CacheKey.problemStatistics(problem),
-
-    async () => {
-      const problemDoc = await Problem
-        .findById(problem)
-        .select({ _id: 0, pid: 1 })
-        .lean()
-      if (!problemDoc) {
-        return { judgeCounts: [], timeDistribution: [], memoryDistribution: [] }
-      }
-
-      const { pid } = problemDoc
-      const [ judgeCountsRaw, acceptedTimeRaw, acceptedMemoryRaw ] = await Promise.all([
-        Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: { $in: JUDGE_STATUS_TERMINAL } } },
-          { $group: { _id: '$judge', count: { $sum: 1 } } },
-          { $sort: { _id: 1 } },
-        ]),
-
-        Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: JudgeStatus.Accepted } },
-          { $group: { _id: '$time', count: { $sum: 1 } } },
-          { $sort: { _id: 1 } },
-        ]),
-
-        Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: JudgeStatus.Accepted } },
-          { $group: { _id: '$memory', count: { $sum: 1 } } },
-          { $sort: { _id: 1 } },
-        ]),
-      ])
-
-      return {
-        judgeCounts: judgeCountsRaw.map(({ _id, count }) => ({ judge: _id, count })),
-        timeDistribution: buildDistributionBuckets(acceptedTimeRaw, 20),
-        memoryDistribution: buildDistributionBuckets(acceptedMemoryRaw, 20),
-      }
-    },
-
-    { redisTtl: 30 },
-  )
-}
-
-export async function findCourseProblems (
-  course: Types.ObjectId | string,
-  opt: PaginateOption & {
-    type?: string
-    content?: string
-  },
-): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
-  const { page, pageSize, type, content } = opt
-  const filters: Record<string, any>[] = []
-
-  if (content && type) {
-    switch (type) {
-      case 'title':
-        filters.push({
-          'problem.title': {
-            $regex: new RegExp(escapeRegExp(String(content)), 'i'),
-          },
-        })
-        break
-      case 'tag':
-        filters.push({
-          'problem.tags': {
-            $in: await tagService.findTagObjectIdsByQuery(String(content)),
-          },
-        })
-        break
-      case 'pid':
-        filters.push({
-          $expr: {
-            $regexMatch: {
-              input: { $toString: '$problem.pid' },
-              regex: new RegExp(`^${escapeRegExp(String(content))}`, 'i'),
-            },
-          },
-        })
-        break
+export async function getStatistics (problemId: number): Promise<ProblemStatisticsQueryResult> {
+  return await cacheService.getOrCreate(CacheKey.problemStatistics(problemId), async () => {
+    const database = await getDatabase()
+    const terminalStatuses = [ ...JUDGE_STATUS_TERMINAL ] as Array<typeof JUDGE_STATUS_TERMINAL[number]>
+    const [ judgeCounts, accepted ] = await Promise.all([
+      database.submission.groupBy({
+        by: [ 'status' ],
+        where: { problemId, status: { in: terminalStatuses } },
+        _count: { _all: true },
+        orderBy: { status: 'asc' },
+      }),
+      database.submission.findMany({
+        where: { problemId, status: JudgeStatus.ACCEPTED },
+        select: { timeUsedMs: true, memoryUsedKb: true },
+      }),
+    ])
+    const timeCounts = new Map<number, number>()
+    const memoryCounts = new Map<number, number>()
+    for (const submission of accepted) {
+      timeCounts.set(submission.timeUsedMs, (timeCounts.get(submission.timeUsedMs) ?? 0) + 1)
+      memoryCounts.set(submission.memoryUsedKb, (memoryCounts.get(submission.memoryUsedKb) ?? 0) + 1)
     }
-  }
+    const judgeStatusCounts = judgeCounts.map(row => ({
+      status: row.status as typeof JUDGE_STATUS_TERMINAL[number],
+      count: row._count._all,
+    }))
+    const timeValues = [ ...timeCounts ]
+      .map(([ value, count ]) => ({ value, count }))
+      .sort((first, second) => first.value - second.value)
+    const memoryValues = [ ...memoryCounts ]
+      .map(([ value, count ]) => ({ value, count }))
+      .sort((first, second) => first.value - second.value)
 
-  const aggregationPipeline = [
-    {
-      $match: {
-        course: new mongoose.Types.ObjectId(course.toString()),
-      },
-    },
-    {
-      $lookup: {
-        from: 'Problem',
-        localField: 'problem',
-        foreignField: '_id',
-        as: 'problem',
-      },
-    },
-    {
-      $unwind: '$problem',
-    },
-    ...(filters.length > 0 ? [ { $match: { $and: filters } } ] : []),
-    {
-      $lookup: {
-        from: 'Tag',
-        localField: 'problem.tags',
-        foreignField: '_id',
-        as: 'problem.tagsInfo',
-      },
-    },
-    {
-      $sort: { sort: 1, updatedAt: -1 },
-    },
-    {
-      $facet: {
-        paginatedResults: [
-          { $skip: (page - 1) * pageSize },
-          { $limit: pageSize },
-          {
-            $project: {
-              _id: 0,
-              problem: {
-                pid: '$problem.pid',
-                title: '$problem.title',
-                status: '$problem.status',
-                type: '$problem.type',
-                tags: {
-                  $map: {
-                    input: '$problem.tagsInfo',
-                    as: 'tag',
-                    in: {
-                      tagId: '$$tag.tagId',
-                      name: '$$tag.name',
-                      color: '$$tag.color',
-                    },
-                  },
-                },
-                submit: '$problem.submit',
-                solve: '$problem.solve',
-                owner: '$problem.owner',
-              },
-            },
-          },
-        ],
-        totalCount: [
-          { $count: 'count' },
-        ],
-      },
-    },
-    {
-      $project: {
-        docs: '$paginatedResults.problem',
-        total: {
-          $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ],
-        },
-        pages: {
-          $ceil: {
-            $divide: [
-              { $ifNull: [ { $arrayElemAt: [ '$totalCount.count', 0 ] }, 0 ] },
-              pageSize,
-            ],
-          },
-        },
-        page: { $literal: page },
-        limit: { $literal: pageSize },
-      },
-    },
-  ] as PipelineStage[]
-
-  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result[0] as Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>
+    return {
+      judgeCounts: judgeStatusCounts,
+      timeDistribution: buildDistributionBuckets(timeValues, 20),
+      memoryDistribution: buildDistributionBuckets(memoryValues, 20),
+    }
+  }, { redisTtl: 30 })
 }
 
-export async function findCourseProblemItems (
-  course: Types.ObjectId | string,
-  keyword: string,
-  limit: number = 10,
-): Promise<ProblemEntityItem[]> {
-  const filters: Record<string, any>[] = []
-
-  if (Number.isInteger(Number(keyword))) {
-    filters.push({
-      $expr: {
-        $regexMatch: {
-          input: { $toString: '$problem.pid' },
-          regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
-        },
-      },
-    })
+export async function findCourseProblems (courseId: number, opt: PaginateOption & { type?: string, content?: string }) {
+  const database = await getDatabase()
+  const problemWhere = buildProblemSearchWhere({ type: opt.type, content: opt.content, showReserved: true })
+  const where = { courseId, problem: problemWhere }
+  const [ items, total ] = await Promise.all([
+    database.courseProblem.findMany({
+      where,
+      include: { problem: { include: { tags: { include: { tag: true } }, submissionStats: true } } },
+      orderBy: [ { sort: 'asc' }, { updatedAt: 'desc' } ],
+      skip: (opt.page - 1) * opt.pageSize,
+      take: opt.pageSize,
+    }),
+    database.courseProblem.count({ where }),
+  ])
+  return {
+    items: items.map(({ problem }) => toListItem(problem)),
+    page: opt.page,
+    pageSize: opt.pageSize,
+    total,
   }
-  filters.push({
-    'problem.title': { $regex: new RegExp(escapeRegExp(keyword), 'i') },
+}
+
+export async function findCourseProblemItems (courseId: number, keyword: string, limit: number = 10) {
+  const database = await getDatabase()
+  const numericId = Number(keyword)
+  const rows = await database.courseProblem.findMany({
+    where: {
+      courseId,
+      problem: {
+        OR: [
+          { title: { contains: keyword, mode: 'insensitive' } },
+          ...(Number.isInteger(numericId) ? [ { id: { gte: numericId, lt: numericId + 1 } } ] : []),
+        ],
+      },
+    },
+    include: { problem: { select: { id: true, title: true } } },
+    orderBy: [ { sort: 'asc' }, { updatedAt: 'desc' } ],
+    take: limit,
   })
-
-  const aggregationPipeline = [
-    {
-      $match: {
-        course: new mongoose.Types.ObjectId(course.toString()),
-      },
-    },
-    {
-      $lookup: {
-        from: 'Problem',
-        localField: 'problem',
-        foreignField: '_id',
-        as: 'problem',
-      },
-    },
-    {
-      $unwind: '$problem',
-    },
-    {
-      $match: { $or: filters },
-    },
-    {
-      $sort: { sort: 1, updatedAt: -1 },
-    },
-    {
-      $limit: limit,
-    },
-    {
-      $project: {
-        _id: 0,
-        pid: '$problem.pid',
-        title: '$problem.title',
-      },
-    },
-  ] as PipelineStage[]
-
-  const result = await CourseProblem.aggregate(aggregationPipeline).exec()
-  return result as ProblemEntityItem[]
+  return rows.map(({ problem }) => problem)
 }
 
 const problemService = {
@@ -426,6 +343,7 @@ const problemService = {
   getStatistics,
   findCourseProblems,
   findCourseProblemItems,
+  getTagIds: tagService.getTagIds,
 } as const
 
 export default problemService

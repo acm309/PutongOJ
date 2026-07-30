@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PostModelSchema } from '../model/index.js'
-import { PaginatedSchema, PaginationSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema } from './utils.js'
 
 export const PostListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
@@ -9,7 +9,8 @@ export const PostListQuerySchema = z.object({
 
 export type PostListQuery = z.infer<typeof PostListQuerySchema>
 
-export const PostListQueryResultSchema = PaginatedSchema(z.object({
+export const PostListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: PostModelSchema.shape.id,
   slug: PostModelSchema.shape.slug,
   title: PostModelSchema.shape.title,
   publishesAt: PostModelSchema.shape.publishesAt,

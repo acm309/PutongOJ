@@ -13,7 +13,7 @@ test.before('Login', async (t) => {
   const login = await request
     .post('/api/account/login')
     .send({
-      username: user.uid,
+      username: user.username,
       password: await encryptData(user.pwd!),
     })
 
@@ -23,7 +23,7 @@ test.before('Login', async (t) => {
 // 1004: reserved
 test('Normal user can not visit reserved problem', async (t) => {
   const res = await request
-    .get('/api/problem/1004')
+    .get('/api/problems/1004')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -32,17 +32,17 @@ test('Normal user can not visit reserved problem', async (t) => {
 
 test('Query problem list', async (t) => {
   const res = await request
-    .get('/api/problem')
+    .get('/api/problems')
 
   t.is(res.status, 200)
-  t.true(Array.isArray(res.body.list.docs))
-  t.is(res.body.list.docs.length, res.body.list.total)
-  t.truthy(Array.isArray(res.body.solved))
+  t.true(Array.isArray(res.body.list.items))
+  t.is(res.body.list.items.length, res.body.list.total)
+  t.truthy(Array.isArray(res.body.solvedProblemIds))
 })
 
 test('Statistics for pid 1001', async (t) => {
   const res = await request
-    .get('/api/problem/1001/statistics')
+    .get('/api/problems/1001/statistics')
 
   t.is(res.status, 200)
   t.truthy(res.body && res.body.success === true)

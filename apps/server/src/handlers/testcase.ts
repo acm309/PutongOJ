@@ -18,11 +18,11 @@ import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants'
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
+  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const { pid } = problem
+  const pid = problem.id
   let meta = { testcases: [] }
   const dir = path.resolve(__dirname, `../../data/${pid}`)
   const file = path.resolve(dir, 'meta.json')
@@ -42,15 +42,15 @@ export async function exportTestcases (ctx: Context) {
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin
-    || (problem.owner && problem.owner.equals(profile._id))
+    || (problem.ownerId === profile.id)
     || await courseService.hasProblemRole(
-      profile._id, problem._id, 'viewTestcase',
+      profile.id, problem.id, 'canViewTestcases',
     )
   )) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const { pid } = problem
+  const pid = problem.id
   const testDir = path.resolve(__dirname, `../../data/${pid}`)
 
   if (!fse.existsSync(testDir)) {
@@ -96,7 +96,7 @@ export async function exportTestcases (ctx: Context) {
     ctx.set('Cache-Control', 'no-cache')
 
     ctx.body = Buffer.from(await zipBlob.arrayBuffer())
-    ctx.auditLog.info(`Testcases for <Problem:${pid}> exported by user <User:${profile.uid}>`)
+    ctx.auditLog.info(`Testcases for <Problem:${pid}> exported by user <User:${profile.username}>`)
   } catch (error) {
     ctx.auditLog.error(`Failed to export testcases for <Problem:${pid}>:`, error)
     ctx.throw(500, 'Failed to export testcases')
@@ -106,12 +106,12 @@ export async function exportTestcases (ctx: Context) {
 export async function createTestcase (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
+  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const { pid } = problem
-  const { uid } = profile
+  const pid = problem.id
+  const uid = profile.username
 
   const body = toObjectRecord(ctx.request.body)
   const testin = String(body.in || '')
@@ -150,12 +150,12 @@ export async function createTestcase (ctx: Context) {
 export async function removeTestcase (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.owner && problem.owner.equals(profile._id)))) {
+  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const { pid } = problem
-  const { uid } = profile
+  const pid = problem.id
+  const uid = profile.username
   const uuid = String(ctx.params.uuid || '').trim()
   if (!uuidRegex.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
@@ -183,15 +183,15 @@ export async function getTestcase (ctx: Context) {
   const profile = await loadProfile(ctx)
   if (!(
     profile.isAdmin
-    || (problem.owner && problem.owner.equals(profile._id))
+    || (problem.ownerId === profile.id)
     || await courseService.hasProblemRole(
-      profile._id, problem._id, 'viewTestcase',
+      profile.id, problem.id, 'canViewTestcases',
     )
   )) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const { pid } = problem
+  const pid = problem.id
   const uuid = String(ctx.params.uuid || '').trim()
   if (!uuidRegex.test(uuid)) {
     ctx.throw(...ERR_INVALID_ID)
@@ -210,7 +210,7 @@ export async function getTestcase (ctx: Context) {
 }
 
 function registerTestcaseHandlers (router: Router) {
-  const testcaseRouter = new Router({ prefix: '/problem/:pid/testcases' })
+  const testcaseRouter = new Router({ prefix: '/problems/:problemId/testcases' })
 
   testcaseRouter.get('/', loginRequire, findTestcases)
   testcaseRouter.post('/', loginRequire, createTestcase)

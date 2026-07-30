@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import { tagColors } from '@/consts/index.js'
+import { TagColor } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
 
 export const TagModelSchema = z.object({
-  tagId: z.number().int().nonnegative(),
+  id: z.int().positive(),
   name: z.string().min(1).max(30),
-  color: z.enum(tagColors),
+  color: z.enum(TagColor),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

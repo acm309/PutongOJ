@@ -17,7 +17,6 @@ import {
 } from './middlewares'
 import router from './routes'
 import logger from './utils/logger'
-import './config/db'
 
 const app = new Koa()
 

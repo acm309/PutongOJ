@@ -11,17 +11,17 @@ test('List discussions - should show public discussions only', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  t.truthy(Array.isArray(res.body.data.docs))
+  t.truthy(Array.isArray(res.body.data.items))
   t.truthy(typeof res.body.data.total === 'number')
 
   // Visitors should only see OpenDiscussion and PublicAnnouncement
-  const visibleTypes = [ 1, 2 ] // OpenDiscussion, PublicAnnouncement
-  for (const doc of res.body.data.docs) {
+  const visibleTypes = [ 'OPEN_DISCUSSION', 'PUBLIC_ANNOUNCEMENT' ] // OpenDiscussion, PublicAnnouncement
+  for (const doc of res.body.data.items) {
     t.true(visibleTypes.includes(doc.type))
-    t.truthy(doc.discussionId)
+    t.truthy(doc.id)
     t.truthy(doc.title)
     t.truthy(doc.author)
-    t.truthy(doc.author.uid)
+    t.truthy(doc.author.username)
   }
 })
 
@@ -32,18 +32,18 @@ test('List discussions with pagination', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  t.is(res.body.data.docs.length, 1)
+  t.is(res.body.data.items.length, 1)
   t.truthy(res.body.data.page === 1)
 })
 
 test('List discussions with sorting', async (t) => {
   const res = await request
     .get('/api/discussions')
-    .query({ sortBy: 'createdAt', sort: -1 })
+    .query({ sortBy: 'createdAt', sort: 'desc' })
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  t.truthy(Array.isArray(res.body.data.docs))
+  t.truthy(Array.isArray(res.body.data.items))
 })
 
 test('Get specific public discussion', async (t) => {
@@ -52,7 +52,7 @@ test('Get specific public discussion', async (t) => {
     .get('/api/discussions/1')
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 1)
+  t.is(res.body.data.id, 1)
   t.truthy(res.body.data.title)
   t.truthy(res.body.data.author)
   t.truthy(Array.isArray(res.body.data.comments))
@@ -70,7 +70,7 @@ test('Get public announcement discussion', async (t) => {
     .get('/api/discussions/2')
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 2)
+  t.is(res.body.data.id, 2)
   t.truthy(res.body.data.title)
 })
 
@@ -109,7 +109,7 @@ test('Cannot create discussion without login', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1,
+      type: 'OPEN_DISCUSSION',
       title: 'Test Discussion',
       content: 'Test content',
     })

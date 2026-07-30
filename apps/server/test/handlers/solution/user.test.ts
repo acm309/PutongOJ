@@ -1,4 +1,3 @@
-import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -43,11 +42,11 @@ test.before(async (t) => {
     })
   t.is(createdContest.status, 200)
   t.true(createdContest.body.success)
-  contestId = createdContest.body.data.contestId
+  contestId = createdContest.body.data.id
 
   const updatedContest = await adminRequest
     .put(`/api/contests/${contestId}/configs`)
-    .send({ problems: [ 1000 ] })
+    .send({ problemIds: [ 1000 ] })
   t.is(updatedContest.status, 200)
   t.true(updatedContest.body.success)
 
@@ -62,11 +61,11 @@ test.before(async (t) => {
     })
   t.is(createdFutureContest.status, 200)
   t.true(createdFutureContest.body.success)
-  futureContestId = createdFutureContest.body.data.contestId
+  futureContestId = createdFutureContest.body.data.id
 
   const updatedFutureContest = await adminRequest
     .put(`/api/contests/${futureContestId}/configs`)
-    .send({ problems: [ 1000 ] })
+    .send({ problemIds: [ 1000 ] })
   t.is(updatedFutureContest.status, 200)
   t.true(updatedFutureContest.body.success)
 
@@ -81,11 +80,11 @@ test.before(async (t) => {
     })
   t.is(createdEndedContest.status, 200)
   t.true(createdEndedContest.body.success)
-  endedContestId = createdEndedContest.body.data.contestId
+  endedContestId = createdEndedContest.body.data.id
 
   const updatedEndedContest = await adminRequest
     .put(`/api/contests/${endedContestId}/configs`)
-    .send({ problems: [ 1000 ] })
+    .send({ problemIds: [ 1000 ] })
   t.is(updatedEndedContest.status, 200)
   t.true(updatedEndedContest.body.success)
 
@@ -119,26 +118,26 @@ test.serial('Submit a solution', async (t) => {
     }
   `
   let res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  sid = res.body.data.solution
+  sid = res.body.data.submissionId
 
-  res = await request.get(`/api/status/${sid}`)
+  res = await request.get(`/api/submissions/${sid}`)
 
   t.is(res.status, 200)
-  t.is(res.body.solution.code, code)
+  t.is(res.body.submission.sourceCode, code)
 })
 
 test('Status fails to find one', async (t) => {
   const res = await request
-    .get('/api/status/87654321')
+    .get('/api/submissions/87654321')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -147,14 +146,14 @@ test('Status fails to find one', async (t) => {
 
 test('Status fails to delete', async (t) => {
   const res = await request
-    .del('/api/status/1000')
+    .del('/api/submissions/1000')
 
   t.is(res.status, 405)
 })
 
 test('Status fails to update', async (t) => {
   const res = await request
-    .put('/api/status/1000')
+    .put('/api/submissions/1000')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -163,7 +162,7 @@ test('Status fails to update', async (t) => {
 
 test('Can not see solution of another user', async (t) => {
   const res = await request
-    .get('/api/status/1')
+    .get('/api/submissions/1')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -182,11 +181,11 @@ test('Code is too long', async (t) => {
     }
   `
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)
@@ -197,11 +196,11 @@ test('Code is too long', async (t) => {
 test('Code is too short', async (t) => {
   const code = '1;'
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)
@@ -216,7 +215,7 @@ test.serial('Contest submission rejects disallowed language', async (t) => {
 
   const configRes = await adminRequest
     .put(`/api/contests/${contestId}/configs`)
-    .send({ allowedLanguages: [ Language.Cpp17 ] })
+    .send({ allowedLanguages: [ 'CPP_17' ] })
 
   t.is(configRes.status, 200)
   t.true(configRes.body.success)
@@ -230,12 +229,12 @@ test.serial('Contest submission rejects disallowed language', async (t) => {
   `
 
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      contest: contestId,
-      code: javaCode,
-      language: Language.Java,
+      problemId: 1000,
+      contestId,
+      sourceCode: javaCode,
+      language: 'JAVA',
     })
 
   t.is(res.status, 200)
@@ -258,12 +257,12 @@ test.serial('Contest submission accepts allowed language', async (t) => {
   `
 
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      contest: contestId,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      contestId,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)
@@ -285,12 +284,12 @@ test.serial('Contest submission is rejected before the contest starts', async (t
   `
 
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      contest: futureContestId,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      contestId: futureContestId,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)
@@ -314,12 +313,12 @@ test.serial('Contest submission is rejected after the contest ends', async (t) =
   `
 
   const res = await request
-    .post('/api/status/')
+    .post('/api/submissions/')
     .send({
-      problem: 1000,
-      contest: endedContestId,
-      code,
-      language: Language.Cpp17,
+      problemId: 1000,
+      contestId: endedContestId,
+      sourceCode: code,
+      language: 'CPP_17',
     })
 
   t.is(res.status, 200)

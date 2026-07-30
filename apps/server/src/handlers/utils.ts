@@ -59,7 +59,7 @@ export async function getPublicConfig (ctx: Context) {
 export async function getWebSocketToken (ctx: Context) {
   const profile = await loadProfile(ctx)
   const token = randomUUID()
-  await redis.setex(`websocket:token:${token}`, 10, profile.uid)
+  await redis.setex(`websocket:token:${token}`, 10, profile.username)
   return createEnvelopedResponse(ctx, { token })
 }
 

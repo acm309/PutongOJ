@@ -1,13 +1,38 @@
 import { z } from 'zod'
-import { JudgeStatus, Language, ParticipationStatus } from '@/consts/index.js'
-import { stringToInt } from '../codec.js'
+import { ParticipationStatus } from '@/consts/index.js'
 import { ContestModelSchema, ContestParticipationModelSchema } from '../model/contest.js'
 import { GroupModelSchema } from '../model/group.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
 import { ContestRanklistSchema } from '../service/contest.js'
-import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+
+const ContestIpWhitelistEntrySchema = z.object({
+  cidr: z.union([z.cidrv4(), z.cidrv6()]),
+  comment: z.string().max(100).nullable(),
+})
+
+const ContestParticipationManageableStatusSchema = z.enum(ParticipationStatus)
+  .exclude([
+    ParticipationStatus.NOT_APPLIED,
+    ParticipationStatus.PENDING,
+    ParticipationStatus.REJECTED,
+  ])
+
+const SubmissionListItemSchema = z.object({
+  id: SolutionModelSchema.shape.id,
+  problemId: SolutionModelSchema.shape.problemId,
+  userId: SolutionModelSchema.shape.userId,
+  contestId: SolutionModelSchema.shape.contestId,
+  language: SolutionModelSchema.shape.language,
+  status: SolutionModelSchema.shape.status,
+  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
+  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
+  similarity: SolutionModelSchema.shape.similarity,
+  similarSubmissionId: SolutionModelSchema.shape.similarSubmissionId,
+  createdAt: SolutionModelSchema.shape.createdAt,
+})
 
 export const ContestListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
@@ -15,13 +40,13 @@ export const ContestListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'startsAt', 'endsAt']).default('createdAt'),
   title: z.string().max(30).optional(),
-  course: stringToInt.pipe(z.number().nonnegative()).optional(),
+  courseId: z.coerce.number().int().positive().optional(),
 })
 
 export type ContestListQuery = z.infer<typeof ContestListQuerySchema>
 
-export const ContestListQueryResultSchema = PaginatedSchema(z.object({
-  contestId: ContestModelSchema.shape.contestId,
+export const ContestListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: ContestModelSchema.shape.id,
   title: ContestModelSchema.shape.title,
   startsAt: ContestModelSchema.shape.startsAt,
   endsAt: ContestModelSchema.shape.endsAt,
@@ -33,7 +58,8 @@ export type ContestListQueryResult = z.input<typeof ContestListQueryResultSchema
 
 export const ContestParticipationQueryResultSchema = z.object({
   isJury: z.boolean(),
-  participation: z.enum(ParticipationStatus),
+  participationStatus: ContestParticipationModelSchema.shape.status
+    .or(z.literal(ParticipationStatus.NOT_APPLIED)),
   canParticipate: z.boolean(),
   canParticipateByPassword: z.boolean(),
   isIpBlocked: z.boolean(),
@@ -49,12 +75,6 @@ export const ContestParticipatePayloadSchema = z.object({
 
 export type ContestParticipatePayload = z.infer<typeof ContestParticipatePayloadSchema>
 
-const ContestParticipationManageableStatusSchema = z.union([
-  z.literal(ParticipationStatus.Approved),
-  z.literal(ParticipationStatus.Suspended),
-  z.literal(ParticipationStatus.EarlyExit),
-])
-
 export type ContestParticipationManageableStatus = z.infer<typeof ContestParticipationManageableStatusSchema>
 
 export const ContestParticipantListQuerySchema = z.object({
@@ -62,16 +82,17 @@ export const ContestParticipantListQuerySchema = z.object({
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'updatedAt', 'status']).default('updatedAt'),
-  user: z.string().max(30).optional(),
-  status: stringToInt.pipe(ContestParticipationManageableStatusSchema).optional(),
+  username: z.string().max(30).optional(),
+  status: ContestParticipationManageableStatusSchema.optional(),
 })
 
 export type ContestParticipantListQuery = z.infer<typeof ContestParticipantListQuerySchema>
 
-export const ContestParticipantListQueryResultSchema = PaginatedSchema(z.object({
-  username: UserModelSchema.shape.uid,
-  nickname: UserModelSchema.shape.nick,
-  status: z.enum(ParticipationStatus),
+export const ContestParticipantListQueryResultSchema = PaginatedResultSchema(z.object({
+  userId: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname,
+  status: ContestParticipationModelSchema.shape.status,
   createdAt: ContestParticipationModelSchema.shape.createdAt,
   updatedAt: ContestParticipationModelSchema.shape.updatedAt,
 }))
@@ -85,7 +106,7 @@ export const ContestParticipantUpdatePayloadSchema = z.object({
 export type ContestParticipantUpdatePayload = z.infer<typeof ContestParticipantUpdatePayloadSchema>
 
 export const ContestDetailQueryResultSchema = z.object({
-  contestId: ContestModelSchema.shape.contestId,
+  id: ContestModelSchema.shape.id,
   title: ContestModelSchema.shape.title,
   startsAt: ContestModelSchema.shape.startsAt,
   endsAt: ContestModelSchema.shape.endsAt,
@@ -95,17 +116,17 @@ export const ContestDetailQueryResultSchema = z.object({
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
   problems: z.array(z.object({
-    index: z.number().positive(),
-    problemId: ProblemModelSchema.shape.pid,
+    position: z.int().positive(),
+    problemId: ProblemModelSchema.shape.id,
     title: ProblemModelSchema.shape.title,
-    submit: z.number().nonnegative(),
-    solve: z.number().nonnegative(),
+    submitterCount: z.int().nonnegative(),
+    solverCount: z.int().nonnegative(),
     isAttempted: z.boolean(),
     isSolved: z.boolean(),
   })),
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.object({
-    courseId: z.number(),
+    id: z.int().positive(),
     name: z.string(),
   }).nullable(),
 })
@@ -118,13 +139,13 @@ export const ContestCreatePayloadSchema = z.object({
   endsAt: ContestModelSchema.shape.endsAt,
   isHidden: ContestModelSchema.shape.isHidden,
   isPublic: ContestModelSchema.shape.isPublic,
-  course: z.number().nonnegative().nullable().optional(),
+  courseId: ContestModelSchema.shape.courseId.optional(),
 })
 
 export type ContestCreatePayload = z.infer<typeof ContestCreatePayloadSchema>
 
 export const ContestConfigQueryResultSchema = z.object({
-  contestId: ContestModelSchema.shape.contestId,
+  id: ContestModelSchema.shape.id,
   title: ContestModelSchema.shape.title,
   startsAt: ContestModelSchema.shape.startsAt,
   endsAt: ContestModelSchema.shape.endsAt,
@@ -134,25 +155,27 @@ export const ContestConfigQueryResultSchema = z.object({
   isLocked: ContestModelSchema.shape.isLocked,
   isPublic: ContestModelSchema.shape.isPublic,
   allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
-  password: ContestModelSchema.shape.password,
+  password: z.string().nullable(),
   allowedUsers: z.array(z.object({
-    username: UserModelSchema.shape.uid,
-    nickname: UserModelSchema.shape.nick,
+    id: UserModelSchema.shape.id,
+    username: UserModelSchema.shape.username,
+    nickname: UserModelSchema.shape.nickname,
   })),
   allowedGroups: z.array(z.object({
-    groupId: GroupModelSchema.shape.gid,
-    name: GroupModelSchema.shape.title,
+    id: GroupModelSchema.shape.id,
+    name: GroupModelSchema.shape.name,
   })),
-  ipWhitelist: ContestModelSchema.shape.ipWhitelist,
+  ipWhitelist: z.array(ContestIpWhitelistEntrySchema),
   ipWhitelistEnabled: ContestModelSchema.shape.ipWhitelistEnabled,
   problems: z.array(z.object({
-    problemId: ProblemModelSchema.shape.pid,
+    position: z.int().positive(),
+    problemId: ProblemModelSchema.shape.id,
     title: ProblemModelSchema.shape.title,
   })),
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.object({
-    courseId: z.number(),
+    id: z.int().positive(),
     name: z.string(),
   }).nullable(),
 })
@@ -169,15 +192,15 @@ export const ContestConfigEditPayloadSchema = z.object({
   isLocked: ContestModelSchema.shape.isLocked,
   isPublic: ContestModelSchema.shape.isPublic,
   allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
-  password: ContestModelSchema.shape.password,
-  allowedUsers: z.array(UserModelSchema.shape.uid),
-  allowedGroups: z.array(GroupModelSchema.shape.gid),
-  ipWhitelist: ContestModelSchema.shape.ipWhitelist,
+  password: z.string().nullable(),
+  allowedUserIds: z.array(UserModelSchema.shape.id),
+  allowedGroupIds: z.array(GroupModelSchema.shape.id),
+  ipWhitelist: z.array(ContestIpWhitelistEntrySchema),
   ipWhitelistEnabled: ContestModelSchema.shape.ipWhitelistEnabled,
-  problems: z.array(ProblemModelSchema.shape.pid),
+  problemIds: z.array(ProblemModelSchema.shape.id),
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
-  course: z.number().nonnegative().nullable(),
+  courseId: ContestModelSchema.shape.courseId,
 }).partial()
 
 export type ContestConfigEditPayload = z.infer<typeof ContestConfigEditPayloadSchema>
@@ -186,53 +209,27 @@ export const ContestSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
-  user: z.string().max(30).optional(),
-  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+  sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
+  username: z.string().max(30).optional(),
+  problemId: z.coerce.number().int().positive().optional(),
+  status: SolutionModelSchema.shape.status.optional(),
+  language: SolutionModelSchema.shape.language.optional(),
 })
 
 export type ContestSolutionListQuery = z.infer<typeof ContestSolutionListQuerySchema>
 
-export const ContestSolutionListQueryResultSchema = PaginatedSchema(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
-  language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
-  createdAt: SolutionModelSchema.shape.createdAt,
-}))
+export const ContestSolutionListQueryResultSchema = PaginatedResultSchema(SubmissionListItemSchema)
 
 export type ContestSolutionListQueryResult = z.input<typeof ContestSolutionListQueryResultSchema>
 
-export const ContestSolutionListExportQuerySchema = z.object({
-  sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
-  user: z.string().max(30).optional(),
-  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+export const ContestSolutionListExportQuerySchema = ContestSolutionListQuerySchema.omit({
+  page: true,
+  pageSize: true,
 })
 
 export type ContestSolutionListExportQuery = z.infer<typeof ContestSolutionListExportQuerySchema>
 
-export const ContestSolutionListExportQueryResultSchema = z.array(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
-  language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
-  createdAt: SolutionModelSchema.shape.createdAt,
-}))
+export const ContestSolutionListExportQueryResultSchema = z.array(SubmissionListItemSchema)
 
 export type ContestSolutionListExportQueryResult = z.input<typeof ContestSolutionListExportQueryResultSchema>
 

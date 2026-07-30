@@ -1,6 +1,4 @@
 import type { OAuthConnection, OAuthUserProfile } from '@putongoj/shared'
-import type { Types } from 'mongoose'
-import type { UserDocument } from '../models/User'
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 import { OAuthAction, OAuthProvider } from '@putongoj/shared'
@@ -8,7 +6,8 @@ import superagent from 'superagent'
 import { globalConfig } from '../config'
 import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
-import User from '../models/User'
+import { toAuthenticatedUser } from '../persistence/mappers'
+import logger from '../utils/logger'
 
 const DEFAULT_TIMEOUT = 5000
 const DEFAULT_STATE_TTL = 600
@@ -165,7 +164,7 @@ class CjluOAuthClient extends OAuthClient {
         provider: this.providerName,
         providerId: profileResponse.id,
         displayName: profileResponse.attributes.cn,
-        raw: profileResponse,
+        raw: profileResponse as unknown as Record<string, unknown>,
       }
     } catch (error: any) {
       throw new Error(`Failed to fetch user profile: ${error.message}`)
@@ -302,7 +301,7 @@ export async function handleOAuthCallback (
     connection: {
       ...userProfile,
       accessToken: tokenResponse.access_token,
-      refreshToken: tokenResponse.refresh_token,
+      refreshToken: tokenResponse.refresh_token ?? null,
     },
   }
 }
@@ -310,125 +309,54 @@ export async function handleOAuthCallback (
 export async function findUserByOAuthConnection (
   provider: OAuthProvider,
   providerId: string,
-): Promise<UserDocument | null> {
+) {
   const database = await getDatabase()
   const record = await database.oAuthConnection.findUnique({
     where: { provider_providerId: { provider, providerId } },
-    include: {
-      user: {
-        select: { username: true },
-      },
-    },
+    include: { user: true },
   })
-  if (!record) {
-    return null
-  }
-  return await User.findOne({ uid: record.user.username })
+  return record ? toAuthenticatedUser(record.user) : null
 }
 
-export async function getUserOAuthConnection (
-  userId: Types.ObjectId,
-  provider: OAuthProvider,
-) {
-  const user = await User.findById(userId).select({ uid: 1 }).lean()
-  if (!user) {
-    return null
-  }
+export async function getUserOAuthConnection (userId: number, provider: OAuthProvider) {
   const database = await getDatabase()
-  const databaseUser = await database.user.findUnique({
-    where: { username: user.uid },
-    select: { id: true },
-  })
-  if (!databaseUser) {
-    return null
-  }
   return await database.oAuthConnection.findUnique({
-    where: { userId_provider: { userId: databaseUser.id, provider } },
+    where: { userId_provider: { userId, provider } },
   })
 }
 
-export async function getUserOAuthConnections (
-  userId: Types.ObjectId,
-) {
-  const user = await User.findById(userId).select({ uid: 1 }).lean()
+export async function getUserOAuthConnections (userId: number) {
+  const database = await getDatabase()
+  const records = await database.oAuthConnection.findMany({ where: { userId } })
   const connections: Record<OAuthProvider, Awaited<ReturnType<typeof getUserOAuthConnection>> | null> = {
     [OAuthProvider.CJLU]: null,
     [OAuthProvider.Codeforces]: null,
   }
-  if (!user) {
-    return connections
-  }
-  const database = await getDatabase()
-  const databaseUser = await database.user.findUnique({
-    where: { username: user.uid },
-    select: { id: true },
-  })
-  if (!databaseUser) {
-    return connections
-  }
-  const records = await database.oAuthConnection.findMany({
-    where: { userId: databaseUser.id },
-  })
-  for (const record of records) {
-    connections[record.provider as OAuthProvider] = record
-  }
+  for (const record of records) { connections[record.provider as OAuthProvider] = record }
   return connections
 }
 
 export async function isOAuthConnectedToAnotherUser (
-  userId: Types.ObjectId,
+  userId: number,
   connectionData: OAuthConnection,
 ): Promise<boolean> {
-  const user = await User.findById(userId).select({ uid: 1 }).lean()
-  if (!user) {
-    return false
-  }
   const database = await getDatabase()
-  const databaseUser = await database.user.findUnique({
-    where: { username: user.uid },
-    select: { id: true },
-  })
-  if (!databaseUser) {
-    return false
-  }
-  const { provider, providerId } = connectionData
-  const count = await database.oAuthConnection.count({
+  return await database.oAuthConnection.count({
     where: {
-      provider,
-      providerId,
-      userId: { not: databaseUser.id },
+      provider: connectionData.provider,
+      providerId: connectionData.providerId,
+      userId: { not: userId },
     },
-  })
-  return count > 0
+  }) > 0
 }
 
-export async function upsertOAuthConnection (
-  userId: Types.ObjectId,
-  connectionData: OAuthConnection,
-) {
-  const user = await User.findById(userId).select({ uid: 1 }).lean()
-  if (!user) {
-    throw new Error('User not found')
-  }
+export async function upsertOAuthConnection (userId: number, connectionData: OAuthConnection) {
   const database = await getDatabase()
-  const databaseUser = await database.user.findUnique({
-    where: { username: user.uid },
-    select: { id: true },
-  })
-  if (!databaseUser) {
-    throw new Error('PostgreSQL user not found')
-  }
   const { provider, providerId, displayName, accessToken, refreshToken, raw } = connectionData
-
   return await database.oAuthConnection.upsert({
-    where: {
-      userId_provider: {
-        userId: databaseUser.id,
-        provider,
-      },
-    },
+    where: { userId_provider: { userId, provider } },
     create: {
-      userId: databaseUser.id,
+      userId,
       provider,
       providerId,
       displayName,
@@ -446,33 +374,13 @@ export async function upsertOAuthConnection (
   })
 }
 
-export async function removeOAuthConnection (
-  userId: Types.ObjectId,
-  provider: OAuthProvider,
-): Promise<boolean> {
-  const user = await User.findById(userId).select({ uid: 1 }).lean()
-  if (!user) {
-    return false
-  }
+export async function removeOAuthConnection (userId: number, provider: OAuthProvider): Promise<boolean> {
   const database = await getDatabase()
-  const databaseUser = await database.user.findUnique({
-    where: { username: user.uid },
-    select: { id: true },
-  })
-  if (!databaseUser) {
-    return false
-  }
   try {
-    await database.oAuthConnection.delete({
-      where: {
-        userId_provider: {
-          userId: databaseUser.id,
-          provider,
-        },
-      },
-    })
+    await database.oAuthConnection.delete({ where: { userId_provider: { userId, provider } } })
     return true
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to remove ${provider} OAuth connection for <User:${userId}>: ${String(error)}`)
     return false
   }
 }

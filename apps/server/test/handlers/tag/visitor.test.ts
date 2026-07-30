@@ -25,7 +25,7 @@ test('GET /api/tags items have public-safe shape (no createdAt/updatedAt)', asyn
   t.is(res.status, 200)
   t.true(res.body.success)
   for (const tag of res.body.data as any[]) {
-    t.is(typeof tag.tagId, 'number')
+    t.is(typeof tag.id, 'number')
     t.is(typeof tag.name, 'string')
     t.is(typeof tag.color, 'string')
     t.false('createdAt' in tag)

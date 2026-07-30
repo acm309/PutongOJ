@@ -5,7 +5,6 @@ import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
 import { getDatabase } from '../../../src/config/postgres'
-import User from '../../../src/models/User'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
@@ -20,10 +19,8 @@ const content = fs.readFileSync(filepath, 'utf8')
 let uploadedStorageKey: string | null = null
 
 test.before('Set storage quota and login as primary user', async (t) => {
-  const user = await User.findOne({ uid: 'primaryuser' })
-  t.truthy(user)
-  user!.storageQuota = 2 * 1024 * 1024
-  await user!.save()
+  const database = await getDatabase()
+  await database.user.update({ where: { username: 'primaryuser' }, data: { storageQuota: 2 * 1024 * 1024 } })
 
   const login = await request
     .post('/api/account/login')
@@ -58,10 +55,8 @@ test.serial('Upload fails when no file is attached', async (t) => {
 })
 
 test.serial('Upload fails when storage quota is 0', async (t) => {
-  const user = await User.findOne({ uid: 'primaryuser' })
-  t.truthy(user)
-  user!.storageQuota = 0
-  await user!.save()
+  const database = await getDatabase()
+  await database.user.update({ where: { username: 'primaryuser' }, data: { storageQuota: 0 } })
 
   const res = await request
     .post('/api/upload')
@@ -72,8 +67,7 @@ test.serial('Upload fails when storage quota is 0', async (t) => {
   t.is(res.body.code, 403)
 
   // Restore quota
-  user!.storageQuota = 2 * 1024 * 1024
-  await user!.save()
+  await database.user.update({ where: { username: 'primaryuser' }, data: { storageQuota: 2 * 1024 * 1024 } })
 })
 
 test.serial('Upload succeeds with sufficient storage quota', async (t) => {
@@ -108,10 +102,10 @@ test.serial('List files returns user\'s uploaded files', async (t) => {
 
   const { files, usage } = res.body.data
   t.truthy(files)
-  t.true(Array.isArray(files.docs))
-  t.true(files.docs.length > 0)
+  t.true(Array.isArray(files.items))
+  t.true(files.items.length > 0)
 
-  const uploaded = files.docs.find((f: any) => f.storageKey === uploadedStorageKey)
+  const uploaded = files.items.find((f: any) => f.storageKey === uploadedStorageKey)
   t.truthy(uploaded)
   t.is(uploaded.storageKey, uploadedStorageKey)
   t.is(typeof uploaded.sizeBytes, 'number')
@@ -128,8 +122,8 @@ test.serial('List files supports pagination', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.files.docs.length, 1)
-  t.is(res.body.data.files.limit, 1)
+  t.is(res.body.data.files.items.length, 1)
+  t.is(res.body.data.files.pageSize, 1)
 })
 
 test.serial('List files fails with invalid query parameters', async (t) => {
@@ -194,7 +188,7 @@ test.serial('Deleted file no longer appears in listing', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
 
-  const found = res.body.data.files.docs.find((f: any) => f.storageKey === uploadedStorageKey)
+  const found = res.body.data.files.items.find((f: any) => f.storageKey === uploadedStorageKey)
   t.falsy(found)
 })
 

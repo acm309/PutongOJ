@@ -32,7 +32,7 @@ export async function upload (ctx: Context) {
     url: uploaded.url,
     sizeBytes: uploaded.sizeBytes,
   })
-  ctx.auditLog.info(`<File:${uploaded.record.storageKey}> uploaded by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<File:${uploaded.record.storageKey}> uploaded by <User:${profile.username}>`)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -44,7 +44,10 @@ export async function findFiles (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   const result = await fileService.findFiles(profile, query.data)
-  const encoded = FileListQueryResultSchema.encode(result)
+  const encoded = FileListQueryResultSchema.encode({
+    ...result,
+    usage: result.usage,
+  })
   return createEnvelopedResponse(ctx, encoded)
 }
 
@@ -63,7 +66,7 @@ export async function removeFile (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'File not found')
   }
 
-  ctx.auditLog.info(`<File:${file.storageKey}> deleted by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<File:${file.storageKey}> deleted by <User:${profile.username}>`)
   return createEnvelopedResponse(ctx, null)
 }
 

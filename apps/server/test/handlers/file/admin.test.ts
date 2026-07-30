@@ -3,7 +3,6 @@ import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
 import { getDatabase } from '../../../src/config/postgres'
-import User from '../../../src/models/User'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
@@ -20,6 +19,7 @@ const filepath = resolve(__dirname, '../utils.test.ts')
 
 let userStorageKey: string | null = null
 let adminStorageKey: string | null = null
+let primaryUserId: number | null = null
 
 // ─── Setup ─────────────────────────────────────────────────────────────────
 
@@ -36,10 +36,12 @@ test.before('Login as admin', async (t) => {
 })
 
 test.before('Set storage quota and login as primary user', async (t) => {
-  const user = await User.findOne({ uid: 'primaryuser' })
-  t.truthy(user)
-  user!.storageQuota = 2 * 1024 * 1024
-  await user!.save()
+  const database = await getDatabase()
+  await database.user.update({ where: { username: 'primaryuser' }, data: { storageQuota: 2 * 1024 * 1024 } })
+  primaryUserId = (await database.user.findUniqueOrThrow({
+    where: { username: 'primaryuser' },
+    select: { id: true },
+  })).id
 
   const login = await requestUser
     .post('/api/account/login')
@@ -101,8 +103,8 @@ test.serial('Admin can list all files', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.truthy(res.body.data)
-  t.true(Array.isArray(res.body.data.docs))
-  t.true(res.body.data.docs.length > 0)
+  t.true(Array.isArray(res.body.data.items))
+  t.true(res.body.data.items.length > 0)
   t.is(typeof res.body.data.total, 'number')
 })
 
@@ -112,38 +114,38 @@ test.serial('Admin file listing includes files from all users', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
 
-  const storageKeys = res.body.data.docs.map((f: any) => f.storageKey)
+  const storageKeys = res.body.data.items.map((f: any) => f.storageKey)
   t.true(storageKeys.includes(userStorageKey))
   t.true(storageKeys.includes(adminStorageKey))
 })
 
 test.serial('Admin can filter files by uploader', async (t) => {
-  const res = await requestAdmin.get('/api/admin/files?uploader=primaryuser')
+  const res = await requestAdmin.get(`/api/admin/files?ownerId=${primaryUserId}`)
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(Array.isArray(res.body.data.docs))
+  t.true(Array.isArray(res.body.data.items))
 
-  const storageKeys = res.body.data.docs.map((f: any) => f.storageKey)
+  const storageKeys = res.body.data.items.map((f: any) => f.storageKey)
   t.true(storageKeys.includes(userStorageKey))
   // Admin's file should not appear in primaryuser's listing
   t.false(storageKeys.includes(adminStorageKey))
 })
 
 test.serial('Admin file filter returns uploader uid in each document', async (t) => {
-  const res = await requestAdmin.get('/api/admin/files?uploader=primaryuser')
+  const res = await requestAdmin.get(`/api/admin/files?ownerId=${primaryUserId}`)
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(res.body.data.docs.length > 0)
+  t.true(res.body.data.items.length > 0)
 
-  for (const doc of res.body.data.docs) {
-    t.is(doc.owner, 'primaryuser')
+  for (const doc of res.body.data.items) {
+    t.is(doc.ownerId, primaryUserId)
   }
 })
 
-test.serial('Admin file filter by non-existent uploader returns 404', async (t) => {
-  const res = await requestAdmin.get('/api/admin/files?uploader=____no_such_user____')
+test.serial('Admin file filter by non-existent owner returns 404', async (t) => {
+  const res = await requestAdmin.get('/api/admin/files?ownerId=999999')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -155,8 +157,8 @@ test.serial('Admin file listing supports pagination', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.is(res.body.data.docs.length, 1)
-  t.is(res.body.data.limit, 1)
+  t.is(res.body.data.items.length, 1)
+  t.is(res.body.data.pageSize, 1)
 })
 
 test.serial('Admin file listing fails with invalid query parameters', async (t) => {
@@ -210,7 +212,7 @@ test.serial('Deleted file no longer appears in admin listing', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
 
-  const found = res.body.data.docs.find((f: any) => f.storageKey === userStorageKey)
+  const found = res.body.data.items.find((f: any) => f.storageKey === userStorageKey)
   t.falsy(found)
 })
 

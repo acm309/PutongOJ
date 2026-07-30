@@ -10,7 +10,6 @@ import {
   Language,
   ParticipationStatus,
   Prisma,
-
 } from '@putongoj/db'
 import { rebuildStatistics } from '../stats.js'
 import { migrateBaseEntities, synchronizeTargetSequences } from './base.js'
@@ -110,6 +109,13 @@ interface LegacyFile {
   deletedBy?: ObjectId | null
   createdAt?: Date
   updatedAt?: Date
+}
+
+function postgresInt (value: number, field: string): number {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 2_147_483_647) {
+    throw new Error(`${field} must be an integer between 0 and 2147483647, received ${String(value)}`)
+  }
+  return value
 }
 
 interface LegacyOAuth {
@@ -528,7 +534,7 @@ export async function migrateRemainingEntities (
   const fileRows = files.map(file => ({
     storageKey: file.storageKey,
     originalName: postgresText(file.originalName),
-    sizeBytes: BigInt(file.sizeBytes),
+    sizeBytes: postgresInt(file.sizeBytes, 'Files.sizeBytes'),
     ownerId: requiredReference(userIdByMongoId, file.owner, 'Files.owner'),
     deletedAt: file.deletedAt ?? null,
     deletedById: file.deletedBy

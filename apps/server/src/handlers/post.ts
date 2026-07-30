@@ -22,7 +22,7 @@ async function findPosts (ctx: Context) {
 
   const { page, pageSize } = query.data
   const posts = await postService.findPosts(
-    { page, pageSize, sortBy: 'publishesAt', sort: -1 },
+    { page, pageSize, sortBy: 'publishesAt', sort: 'desc' },
     { isPublished: true, isHidden: false })
   const result = PostListQueryResultSchema.encode(posts)
   return createEnvelopedResponse(ctx, result)

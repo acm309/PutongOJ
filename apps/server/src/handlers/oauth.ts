@@ -1,6 +1,6 @@
 import type { OAuthConnection } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User'
+import type { AuthenticatedUser } from '../persistence/types'
 import type { OAuthState } from '../services/oauth'
 import Router from '@koa/router'
 import {
@@ -68,11 +68,11 @@ export async function handleOAuthCallback (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, error.message)
   }
 
-  let user: UserDocument | null = null
+  let user: AuthenticatedUser | null = null
   if (stateData.action === OAuthAction.CONNECT) {
     const profile = await loadProfile(ctx)
     const isConnected = await oauthService
-      .isOAuthConnectedToAnotherUser(profile._id, connection)
+      .isOAuthConnectedToAnotherUser(profile.id, connection)
     if (isConnected) {
       return createErrorResponse(ctx, ErrorCode.BadRequest, 'This 3rd-party account has been connected to another user')
     }
@@ -85,23 +85,27 @@ export async function handleOAuthCallback (ctx: Context) {
     const connectedUser = await oauthService
       .findUserByOAuthConnection(provider, providerId)
     if (!connectedUser) {
-      return createErrorResponse(ctx, ErrorCode.BadRequest, 'No user is connected with this 3rd-party account, please login first and bind it')
+      return createErrorResponse(
+        ctx,
+        ErrorCode.BadRequest,
+        'No user is connected with this 3rd-party account, please login first and bind it',
+      )
     }
     user = connectedUser
 
-    const userId = user._id.toString()
+    const userId = String(user.id)
     const sessionId = await sessionService.createSession(
       userId, ctx.state.clientIp, ctx.get('User-Agent') || '',
     )
     ctx.session.userId = userId
     ctx.session.sessionId = sessionId
 
-    ctx.auditLog.info(`<User:${user.uid}> logged in via ${provider} OAuth`)
+    ctx.auditLog.info(`<User:${user.username}> logged in via ${provider} OAuth`)
   } else {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid OAuth action')
   }
   const updatedConnection = await oauthService
-    .upsertOAuthConnection(user._id, connection)
+    .upsertOAuthConnection(user.id, connection)
   const response = OAuthCallbackQueryResultSchema.encode({
     action: stateData.action,
     connection: updatedConnection,
@@ -111,7 +115,7 @@ export async function handleOAuthCallback (ctx: Context) {
 
 export async function getUserOAuthConnections (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const connections = await oauthService.getUserOAuthConnections(profile._id)
+  const connections = await oauthService.getUserOAuthConnections(profile.id)
   const result = OAuthUserConnectionsQueryResultSchema.encode(connections)
   return createEnvelopedResponse(ctx, result)
 }

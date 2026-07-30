@@ -1,12 +1,18 @@
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
+import { getDatabase } from '../../../src/config/postgres'
 import { encryptData } from '../../../src/services/crypto'
 import { deploy } from '../../../src/utils/constants'
 import { userSeeds } from '../../seeds/user'
 
 const server = app.listen()
 const request = supertest.agent(server)
+
+async function getUserId (username: string): Promise<number> {
+  const database = await getDatabase()
+  return (await database.user.findUniqueOrThrow({ where: { username } })).id
+}
 
 test.before('Login', async (t) => {
   const login = await request
@@ -40,7 +46,7 @@ test.serial('Update Group 2', async (t) => {
   const updateMembers = await request
     .put('/api/admin/groups/2/members')
     .send({
-      members: [ 'admin' ],
+      memberIds: [ await getUserId('admin') ],
     })
   t.is(updateMembers.status, 200)
 
@@ -49,12 +55,12 @@ test.serial('Update Group 2', async (t) => {
 
   t.is(find.status, 200)
   t.is(find.body.data.name, '测试组更新2')
-  t.deepEqual(find.body.data.members, [ 'admin' ])
+  t.deepEqual(find.body.data.memberIds, [ await getUserId('admin') ])
 
   const user = await request
     .get('/api/users/admin')
 
-  t.true(user.body.data.groups.some((group: any) => group.gid === 2))
+  t.true(user.body.data.groups.some((group: any) => group.id === 2))
 })
 
 test.serial('Update Group 2 -- update members', async (t) => {
@@ -62,7 +68,7 @@ test.serial('Update Group 2 -- update members', async (t) => {
   const update = await request
     .put('/api/admin/groups/2/members')
     .send({
-      members: [ user.uid ],
+      memberIds: [ await getUserId(user.username) ],
     })
   t.is(update.status, 200)
 
@@ -71,17 +77,17 @@ test.serial('Update Group 2 -- update members', async (t) => {
 
   t.is(find.status, 200)
   t.is(find.body.data.name, '测试组更新2')
-  t.deepEqual(find.body.data.members, [ user.uid ])
+  t.deepEqual(find.body.data.memberIds, [ await getUserId(user.username) ])
 
   let r = await request
     .get('/api/users/admin')
 
-  t.false(r.body.data.groups.some((group: any) => group.gid === 2))
+  t.false(r.body.data.groups.some((group: any) => group.id === 2))
 
   r = await request
-    .get(`/api/users/${user.uid}`)
+    .get(`/api/users/${user.username}`)
 
-  t.true(r.body.data.groups.some((group: any) => group.gid === 2))
+  t.true(r.body.data.groups.some((group: any) => group.id === 2))
 })
 
 test.serial.skip('Delete Group 2', async (t) => {
@@ -97,7 +103,7 @@ test.serial.skip('Delete Group 2', async (t) => {
   const user = await request
     .get('/api/users/admin')
 
-  t.false(user.body.data.groups.some((group: any) => group.gid === 2))
+  t.false(user.body.data.groups.some((group: any) => group.id === 2))
 })
 
 test('The length of group title should be greater than 3', async (t) => {

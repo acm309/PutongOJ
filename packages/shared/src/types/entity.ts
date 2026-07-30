@@ -1,119 +1,51 @@
-import type { TagModel } from './model/tag.js'
+/**
+ * Persistence types are generated from the Prisma schema. Shared code only
+ * defines business value objects that do not correspond to a database model.
+ */
+export type {
+  Comment as CommentEntity,
+  Contest as ContestEntity,
+  Course as CourseEntity,
+  CourseMember as CourseMemberEntity,
+  CourseProblem as CourseProblemEntity,
+  DiscussionCommentStats as DiscussionCommentStatsEntity,
+  Discussion as DiscussionEntity,
+  File as FileEntity,
+  Group as GroupEntity,
+  OAuthConnection as OAuthConnectionEntity,
+  Post as PostEntity,
+  Problem as ProblemEntity,
+  ProblemSubmissionStats as ProblemSubmissionStatsEntity,
+  Submission as SubmissionEntity,
+  Tag as TagEntity,
+  User as UserEntity,
+  UserProblemStatus as UserProblemStatusEntity,
+  UserSubmissionStats as UserSubmissionStatsEntity,
+} from '@putongoj/db/browser'
 
 export type CourseRole = {
-  basic: boolean
-  viewTestcase: boolean
-  viewSolution: boolean
-  manageProblem: boolean
-  manageContest: boolean
-  manageCourse: boolean
+  canAccess: boolean
+  canViewTestcases: boolean
+  canViewSubmissions: boolean
+  canManageProblems: boolean
+  canManageContests: boolean
+  canManageCourse: boolean
 }
 
 export const courseRoleNone: Readonly<CourseRole> = Object.freeze({
-  basic: false,
-  viewTestcase: false,
-  viewSolution: false,
-  manageProblem: false,
-  manageContest: false,
-  manageCourse: false,
+  canAccess: false,
+  canViewTestcases: false,
+  canViewSubmissions: false,
+  canManageProblems: false,
+  canManageContests: false,
+  canManageCourse: false,
 })
 
 export const courseRoleEntire: Readonly<CourseRole> = Object.freeze({
-  basic: true,
-  viewTestcase: true,
-  viewSolution: true,
-  manageProblem: true,
-  manageContest: true,
-  manageCourse: true,
+  canAccess: true,
+  canViewTestcases: true,
+  canViewSubmissions: true,
+  canManageProblems: true,
+  canManageContests: true,
+  canManageCourse: true,
 })
-
-export type CourseEntity = {
-  courseId: number
-  name: string
-  description: string
-  encrypt: 1 | 2
-  joinCode: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type CourseEntityEditable = Pick<CourseEntity, 'name' | 'description' | 'encrypt' | 'joinCode'>
-
-export type CourseEntityItem = Pick<CourseEntity, 'courseId' | 'name'>
-
-export type CourseEntityView = {
-  canJoin: boolean
-} & Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'> & Partial<Pick<CourseEntity, 'joinCode'>>
-
-export type CourseEntityViewWithRole = {
-  role: CourseRole
-} & CourseEntityView
-
-export type CourseEntityPreview = Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>
-
-export type CourseMemberView = {
-  role: CourseRole
-  user: {
-    uid: string
-    nick: string
-    privilege: number
-  }
-  createdAt: number
-  updatedAt: number
-}
-
-export type ProblemEntity = {
-  pid: number
-  title: string
-  time: number
-  memory: number
-  description: string
-  input: string
-  output: string
-  in: string
-  out: string
-  hint: string
-  status: 0 | 2
-  type: 1 | 2 | 3
-  code: string
-  submit: number
-  solve: number
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type ProblemEntityForm = Pick<ProblemEntity, 'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
-  | 'out' | 'hint' | 'status' | 'type' | 'code'> & {
-    owner?: string | null
-    tags?: number[]
-  }
-
-export type ProblemEntityItem = Pick<ProblemEntity, 'pid' | 'title'>
-
-export type ProblemEntityPreview = Pick<ProblemEntity, 'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'> & {
-  isOwner?: boolean
-  tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
-}
-
-export type ProblemEntityView = Pick<ProblemEntity, 'pid' | 'title' | 'time' | 'memory' | 'status' | 'description'
-  | 'input' | 'output' | 'in' | 'out' | 'hint'> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
-    isOwner: boolean
-    tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
-  }
-
-export type SolutionEntity = {
-  sid: number
-  pid: number
-  uid: string
-  mid: number
-  code: string
-  language: number
-  judge: number
-  time: number
-  memory: number
-  error: string
-  sim: number
-  sim_s_id: number
-  createdAt: Date
-  updatedAt: Date
-}

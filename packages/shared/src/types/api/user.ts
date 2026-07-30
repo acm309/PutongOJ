@@ -1,8 +1,7 @@
 import { z } from 'zod'
-import { stringToInt } from '../codec.js'
 import { GroupModelSchema } from '../model/group.js'
 import { UserModelSchema } from '../model/user.js'
-import { PaginatedSchema, PaginationSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema } from './utils.js'
 
 export const UserSubmissionHeatmapSchema = z.object({
   data: z.record(z.string(), z.number()),
@@ -14,16 +13,17 @@ export const UserSubmissionHeatmapSchema = z.object({
 export type UserSubmissionHeatmap = z.infer<typeof UserSubmissionHeatmapSchema>
 
 export const UserProfileQueryResultSchema = z.object({
-  uid: UserModelSchema.shape.uid,
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
   privilege: UserModelSchema.shape.privilege,
-  nick: UserModelSchema.shape.nick,
-  avatar: UserModelSchema.shape.avatar,
+  nickname: UserModelSchema.shape.nickname,
+  avatarUrl: UserModelSchema.shape.avatarUrl,
   motto: UserModelSchema.shape.motto,
-  mail: UserModelSchema.shape.mail.optional(),
+  email: UserModelSchema.shape.email.optional(),
   school: UserModelSchema.shape.school,
   groups: z.array(z.object({
-    gid: GroupModelSchema.shape.gid,
-    title: GroupModelSchema.shape.title,
+    id: GroupModelSchema.shape.id,
+    name: GroupModelSchema.shape.name,
   })),
   codeforces: z.object({
     handle: z.string(),
@@ -40,33 +40,35 @@ export type UserProfileQueryResult = z.input<typeof UserProfileQueryResultSchema
 export const UserRanklistQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
-  group: stringToInt.pipe(GroupModelSchema.shape.gid).optional(),
+  groupId: z.coerce.number().int().positive().optional(),
 })
 
 export type UserRanklistQuery = z.infer<typeof UserRanklistQuerySchema>
 
-export const UserRanklistQueryResultSchema = PaginatedSchema(z.object({
-  uid: UserModelSchema.shape.uid,
-  nick: UserModelSchema.shape.nick,
-  avatar: UserModelSchema.shape.avatar,
+export const UserRanklistQueryResultSchema = PaginatedResultSchema(z.object({
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname,
+  avatarUrl: UserModelSchema.shape.avatarUrl,
   motto: UserModelSchema.shape.motto,
-  solve: UserModelSchema.shape.solve,
-  submit: UserModelSchema.shape.submit,
+  solvedProblemCount: z.int().nonnegative(),
+  submittedProblemCount: z.int().nonnegative(),
 }))
 
 export type UserRanklistQueryResult = z.input<typeof UserRanklistQueryResultSchema>
 
 export const UserRanklistExportQuerySchema = z.object({
-  group: stringToInt.pipe(GroupModelSchema.shape.gid).optional(),
+  groupId: z.coerce.number().int().positive().optional(),
 })
 
 export type UserRanklistExportQuery = z.infer<typeof UserRanklistExportQuerySchema>
 
 export const UserRanklistExportQueryResultSchema = z.array(z.object({
-  uid: UserModelSchema.shape.uid,
-  nick: UserModelSchema.shape.nick,
-  solve: UserModelSchema.shape.solve,
-  submit: UserModelSchema.shape.submit,
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname,
+  solvedProblemCount: z.int().nonnegative(),
+  submittedProblemCount: z.int().nonnegative(),
 }))
 
 export type UserRanklistExportQueryResult = z.input<typeof UserRanklistExportQueryResultSchema>
@@ -78,15 +80,17 @@ export const UserSuggestQuerySchema = z.object({
 export type UserSuggestQuery = z.infer<typeof UserSuggestQuerySchema>
 
 export const UserSuggestQueryResultSchema = z.array(z.object({
-  uid: UserModelSchema.shape.uid,
-  nick: UserModelSchema.shape.nick.optional(),
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname.optional(),
 }))
 
 export type UserSuggestQueryResult = z.input<typeof UserSuggestQueryResultSchema>
 
 export const UserItemListQueryResultSchema = z.array(z.object({
-  uid: UserModelSchema.shape.uid,
-  nick: UserModelSchema.shape.nick.optional(),
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
+  nickname: UserModelSchema.shape.nickname.optional(),
 }))
 
 export type UserItemListQueryResult = z.input<typeof UserItemListQueryResultSchema>

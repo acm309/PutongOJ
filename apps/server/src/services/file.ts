@@ -1,20 +1,11 @@
 import type { AdminFileListQuery, FileListQuery } from '@putongoj/shared'
-import type { UserDocument } from '../models/User'
+import type { AuthenticatedUser } from '../persistence/types'
 import path from 'node:path'
 import fse from 'fs-extra'
 import { getDatabase } from '../config/postgres'
 import logger from '../utils/logger'
 
 const uploadDir = path.join(__dirname, '../../public/uploads')
-
-async function getPostgresUserId (username: string) {
-  const database = await getDatabase()
-  const user = await database.user.findUnique({
-    where: { username },
-    select: { id: true },
-  })
-  return user?.id ?? null
-}
 
 async function queryFiles (
   where: {
@@ -28,7 +19,7 @@ async function queryFiles (
   const { page, pageSize, sort, sortBy } = options
   const docsPromise = database.file.findMany({
     where,
-    orderBy: { [sortBy]: sort === 1 ? 'asc' : 'desc' },
+    orderBy: { [sortBy]: sort },
     skip: (page - 1) * pageSize,
     take: pageSize,
     include: populateOwner
@@ -42,29 +33,25 @@ async function queryFiles (
 }
 
 export async function createFileRecord (
-  ownerUsername: string,
+  ownerId: number,
   data: {
     storageKey: string
     originalName: string
     sizeBytes: number
   },
 ) {
-  const ownerId = await getPostgresUserId(ownerUsername)
-  if (ownerId === null) {
-    throw new Error(`PostgreSQL user not found: ${ownerUsername}`)
-  }
   const database = await getDatabase()
   return await database.file.create({
     data: {
       ...data,
-      sizeBytes: BigInt(data.sizeBytes),
+      sizeBytes: data.sizeBytes,
       ownerId,
     },
   })
 }
 
 export async function uploadFile (
-  profile: UserDocument,
+  profile: AuthenticatedUser,
   file: {
     filepath: string
     originalFilename?: string | null
@@ -83,7 +70,7 @@ export async function uploadFile (
 
   try {
     await fse.move(file.filepath, destination)
-    const record = await createFileRecord(profile.uid, {
+    const record = await createFileRecord(profile.id, {
       storageKey: filename,
       originalName,
       sizeBytes,
@@ -101,11 +88,7 @@ export async function uploadFile (
   }
 }
 
-export async function getUsedBytes (ownerUsername: string) {
-  const ownerId = await getPostgresUserId(ownerUsername)
-  if (ownerId === null) {
-    return 0
-  }
+export async function getUsedBytes (ownerId: number) {
   const database = await getDatabase()
   const result = await database.file.aggregate({
     where: { ownerId, deletedAt: null },
@@ -115,19 +98,19 @@ export async function getUsedBytes (ownerUsername: string) {
 }
 
 export async function checkQuota (
-  profile: UserDocument,
+  profile: AuthenticatedUser,
   incomingSizeBytes: number,
 ): Promise<{ allowed: boolean, usedBytes: number, storageQuota: number }> {
   if (profile.isAdmin) {
     return {
       allowed: true,
       usedBytes: 0,
-      storageQuota: profile.storageQuota,
+      storageQuota: Number(profile.storageQuota),
     }
   }
 
-  const usedBytes = await getUsedBytes(profile.uid)
-  const storageQuota = profile.storageQuota
+  const usedBytes = await getUsedBytes(profile.id)
+  const storageQuota = Number(profile.storageQuota)
   const allowed = usedBytes + incomingSizeBytes <= storageQuota
 
   return {
@@ -138,12 +121,12 @@ export async function checkQuota (
 }
 
 export async function findFiles (
-  profile: UserDocument,
+  profile: AuthenticatedUser,
   query: FileListQuery,
 ) {
   const queryFilter: Record<string, any> = {
     deletedAt: null,
-    ownerId: (await getPostgresUserId(profile.uid)) ?? -1,
+    ownerId: profile.id,
   }
 
   const [ { docs, total }, usedBytes ] = await Promise.all([
@@ -153,20 +136,19 @@ export async function findFiles (
       sort: query.sort,
       sortBy: query.sortBy,
     }, false),
-    getUsedBytes(profile.uid),
+    getUsedBytes(profile.id),
   ])
 
   return {
     files: {
-      docs: docs.map(doc => ({
+      items: docs.map(doc => ({
         storageKey: doc.storageKey,
         originalName: doc.originalName,
         sizeBytes: Number(doc.sizeBytes),
         createdAt: doc.createdAt,
       })),
-      limit: query.pageSize,
       page: query.page,
-      pages: Math.ceil(total / query.pageSize),
+      pageSize: query.pageSize,
       total,
     },
     usage: {
@@ -178,12 +160,14 @@ export async function findFiles (
 
 export async function findAdminFiles (query: AdminFileListQuery) {
   let ownerId: number | undefined
-  if (query.uploader) {
-    const resolvedOwnerId = await getPostgresUserId(query.uploader)
-    if (resolvedOwnerId === null) {
-      return null
-    }
-    ownerId = resolvedOwnerId
+  if (query.ownerId) {
+    const database = await getDatabase()
+    const user = await database.user.findFirst({
+      where: { id: query.ownerId },
+      select: { id: true },
+    })
+    if (!user) { return null }
+    ownerId = user.id
   }
 
   const queryFilter: {
@@ -204,25 +188,26 @@ export async function findAdminFiles (query: AdminFileListQuery) {
   }, true)
 
   return {
-    docs: docs.map(doc => ({
-      ...doc,
-      owner: (doc as typeof doc & { owner?: { username: string } }).owner?.username || 'ghost',
-      sizeBytes: Number(doc.sizeBytes),
+    items: docs.map(doc => ({
+      ownerId: doc.ownerId,
+      storageKey: doc.storageKey,
+      originalName: doc.originalName,
+      sizeBytes: doc.sizeBytes,
+      createdAt: doc.createdAt,
     })),
-    limit: query.pageSize,
     page: query.page,
-    pages: Math.ceil(total / query.pageSize),
+    pageSize: query.pageSize,
     total,
   }
 }
 
-export async function removeFile (profile: UserDocument, storageKey: string) {
+export async function removeFile (profile: AuthenticatedUser, storageKey: string) {
   const database = await getDatabase()
   const file = await database.file.findUnique({ where: { storageKey } })
   if (!file || file.deletedAt) {
     return null
   }
-  const profileId = await getPostgresUserId(profile.uid)
+  const profileId = profile.id
   if (!profile.isAdmin && file.ownerId !== profileId) {
     return false
   }

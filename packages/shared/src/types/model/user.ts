@@ -10,20 +10,17 @@ export const UserAvatarSchema = z.union([
 ])
 
 export const UserModelSchema = z.object({
-  uid: z.string().min(3).max(20).regex(/^[\w-]+$/),
-  pwd: z.hex().length(72),
+  id: z.int().positive(),
+  username: z.string().min(3).max(20).regex(/^[\w-]+$/),
   privilege: z.enum(UserPrivilege),
-  nick: z.string().max(30),
-  avatar: UserAvatarSchema,
+  nickname: z.string().max(30),
+  avatarUrl: UserAvatarSchema,
   motto: z.string().max(300),
-  mail: z.union([z.email(), z.literal('')]),
+  email: z.union([z.email(), z.literal('')]),
   school: z.string().max(30),
-  gid: z.array(z.int().nonnegative()),
   storageQuota: z.int().nonnegative(),
-  submit: z.int().nonnegative(),
-  solve: z.int().nonnegative(),
-  lastRequestId: z.string().optional(),
-  lastVisitedAt: isoDatetimeToDate.optional(),
+  lastRequestId: z.string().nullable(),
+  lastVisitedAt: isoDatetimeToDate.nullable(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

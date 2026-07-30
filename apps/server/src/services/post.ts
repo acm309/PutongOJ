@@ -1,7 +1,8 @@
-import type { Paginated, PostModel } from '@putongoj/shared'
+import type { PaginatedResult, PostModel } from '@putongoj/shared'
 import type { PaginateOption, SortOption } from '../types'
 import { randomUUID } from 'node:crypto'
 import { getDatabase } from '../config/postgres'
+import logger from '../utils/logger'
 
 type PostCreateDto = Pick<PostModel, 'title'>
 
@@ -17,12 +18,12 @@ export interface PostFilters {
 async function findPosts (
   options: PaginateOption & SortOption,
   filters: PostFilters = {},
-): Promise<Paginated<Omit<PostModel, 'content'>>> {
+): Promise<PaginatedResult<Omit<PostModel, 'content'>>> {
   const database = await getDatabase()
   const { page, pageSize, sort, sortBy } = options
   const orderBy = [
     { isPinned: 'desc' as const },
-    { [sortBy]: sort === 1 ? 'asc' as const : 'desc' as const },
+    { [sortBy]: sort },
     ...(sortBy === 'createdAt' ? [] : [ { createdAt: 'desc' as const } ]),
   ]
   const where = {
@@ -34,12 +35,13 @@ async function findPosts (
     ...(filters.isHidden === undefined ? {} : { isHidden: filters.isHidden }),
   }
 
-  const docsPromise = database.post.findMany({
+  const itemsPromise = database.post.findMany({
     where,
     orderBy,
     skip: (page - 1) * pageSize,
     take: pageSize,
     select: {
+      id: true,
       slug: true,
       title: true,
       publishesAt: true,
@@ -51,13 +53,12 @@ async function findPosts (
     },
   })
   const totalPromise = database.post.count({ where })
-  const [ docs, total ] = await Promise.all([ docsPromise, totalPromise ])
+  const [ items, total ] = await Promise.all([ itemsPromise, totalPromise ])
 
   return {
-    docs,
-    limit: pageSize,
+    items,
     page,
-    pages: Math.ceil(total / pageSize),
+    pageSize,
     total,
   }
 }
@@ -90,7 +91,8 @@ async function updatePostById (id: number, update: PostUpdateDto) {
   const database = await getDatabase()
   try {
     return await database.post.update({ where: { id }, data: update })
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to update post <Post:${id}>: ${String(error)}`)
     return null
   }
 }
@@ -100,7 +102,8 @@ async function deletePostById (id: number): Promise<boolean> {
   try {
     await database.post.delete({ where: { id } })
     return true
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to remove post <Post:${id}>: ${String(error)}`)
     return false
   }
 }

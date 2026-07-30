@@ -1,16 +1,8 @@
+import type { DiscussionType, JudgeStatus } from '@putongoj/db'
 import process from 'node:process'
-import { UserPrivilege } from '@putongoj/shared'
-// import Contest from '../src/models/Contest'
-import Course from '../src/models/Course'
-import Group from '../src/models/Group'
-import ID from '../src/models/ID'
-import Problem from '../src/models/Problem'
-import Solution from '../src/models/Solution'
-import User from '../src/models/User'
-import discussionService from '../src/services/discussion'
 import { passwordHash } from '../src/utils'
-import { removeall } from './helper'
-// import { contestSeeds } from './seeds/contest'
+import { resetDatabase } from './helper'
+import { contestSeeds } from './seeds/contest'
 import { courseSeeds } from './seeds/course'
 import { discussionSeeds } from './seeds/discussion'
 import { groupSeeds } from './seeds/group'
@@ -18,156 +10,130 @@ import { problemSeeds } from './seeds/problem'
 import { solutionSeeds } from './seeds/solution'
 import { userSeeds } from './seeds/user'
 
+const languageMap = [ 'C', 'CPP_11', 'JAVA', 'PYTHON', 'CPP_17', 'PYPY' ] as const
+
 async function main () {
-  await removeall()
-  const { createDatabaseClient, UserPrivilege: DatabaseUserPrivilege } = await import('@putongoj/db')
+  await resetDatabase()
+  const { createDatabaseClient } = await import('@putongoj/db')
   const database = createDatabaseClient(process.env.DATABASE_URL!)
-  await database.$executeRawUnsafe(`
-    TRUNCATE TABLE
-      "SubmissionTestcaseResult",
-      "Submission",
-      "Comment",
-      "Discussion",
-      "ContestParticipation",
-      "ContestProblem",
-      "ContestIpWhitelist",
-      "ContestAllowedGroup",
-      "ContestAllowedUser",
-      "Contest",
-      "CourseProblem",
-      "CourseMember",
-      "Course",
-      "ProblemTag",
-      "Problem",
-      "Tag",
-      "GroupMember",
-      "Group",
-      "OAuthConnection",
-      "File",
-      "Post",
-      "Setting",
-      "UserProblemStatus",
-      "UserSubmissionStats",
-      "ProblemSubmissionStats",
-      "DiscussionCommentStats",
-      "User"
-    RESTART IDENTITY CASCADE
-  `)
-  await Promise.all([
-    new ID({ name: 'Comment', id: 0 }).save(),
-    new ID({ name: 'Contest', id: 0 }).save(),
-    new ID({ name: 'Course', id: 2 }).save(),
-    new ID({ name: 'Discussion', id: 0 }).save(),
-    new ID({ name: 'Group', id: 0 }).save(),
-    new ID({ name: 'Problem', id: 999 }).save(),
-    new ID({ name: 'Solution', id: 0 }).save(),
-    new ID({ name: 'Tag', id: 0 }).save(),
-  ])
+  try {
+    const users = await database.user.createManyAndReturn({
+      data: Object.values(userSeeds).map(user => ({
+        username: user.username,
+        passwordHash: passwordHash(user.pwd ?? ''),
+        privilege: user.privilege ?? 'USER',
+        nickname: user.nickname ?? '',
+      })),
+    })
+    const userIdByName = new Map(users.map(user => [ user.username, user.id ]))
 
-  const postgresUsers = await database.user.createManyAndReturn({
-    data: Object.values(userSeeds).map(user => ({
-      username: user.uid!,
-      passwordHash: passwordHash(user.pwd as string),
-      privilege: [
-        DatabaseUserPrivilege.BANNED,
-        DatabaseUserPrivilege.USER,
-        DatabaseUserPrivilege.ADMIN,
-        DatabaseUserPrivilege.ROOT,
-      ][user.privilege ?? UserPrivilege.User]!,
-      nickname: user.nick ?? '',
-    })),
-  })
-  const postgresUserIds = new Map(postgresUsers.map(user => [ user.username, user.id ]))
-  const postgresGroups = await database.group.createManyAndReturn({
-    data: groupSeeds.map((group, index) => ({
-      id: index + 1,
-      name: group.title,
-    })),
-  })
-  await database.groupMember.createMany({
-    data: postgresGroups.flatMap((group, index) => {
-      return groupSeeds[index]!.list
-        .map(username => postgresUserIds.get(username))
-        .filter((userId): userId is number => userId !== undefined)
-        .map(userId => ({
-          groupId: group.id,
+    const groups = await database.group.createManyAndReturn({
+      data: groupSeeds.map((group, index) => ({ id: index + 1, name: group.name })),
+    })
+    await database.groupMember.createMany({
+      data: groups.flatMap((group, index) => groupSeeds[index]!.usernames
+        .map(username => userIdByName.get(username))
+        .filter((id): id is number => id !== undefined)
+        .map(userId => ({ groupId: group.id, userId }))),
+    })
+    await database.course.createMany({ data: courseSeeds })
+
+    const problems = await database.problem.createManyAndReturn({
+      data: problemSeeds.map((problem, index) => ({
+        id: 1000 + index,
+        title: problem.title,
+        description: problem.description,
+        inputFormat: problem.input,
+        outputFormat: problem.output,
+        sampleInput: problem.in,
+        sampleOutput: problem.out,
+        visibility: problem.visibility,
+      })),
+    })
+    const problemIdByLegacyId = new Map(problems.map(problem => [ problem.id, problem.id ]))
+
+    const createdSubmissions = []
+    for (const seed of solutionSeeds) {
+      const userId = userIdByName.get(seed.username)
+      const problemId = problemIdByLegacyId.get(seed.problemId)
+      if (!userId || !problemId) { continue }
+      createdSubmissions.push(await database.submission.create({
+        data: {
           userId,
-        }))
-    }),
-  })
-  await database.$executeRawUnsafe(`
-    SELECT setval(
-      pg_get_serial_sequence('"Group"', 'id'),
-      COALESCE((SELECT MAX("id") FROM "Group"), 1),
-      true
-    )
-  `)
-
-  const courseInsert = Promise.all(
-    courseSeeds.map(item => new Course(item).save()),
-  )
-  const groupInsert = Promise.all(
-    groupSeeds.map(item => new Group(item).save()),
-  )
-  const problemInsert = (async () => {
-    for (const problem of problemSeeds) {
-      await new Problem(problem).save()
+          problemId,
+          sourceCode: seed.sourceCode,
+          language: languageMap[seed.language - 1] ?? 'CPP_11',
+          status: seed.status as JudgeStatus,
+          timeUsedMs: seed.timeUsedMs,
+          memoryUsedKb: seed.memoryUsedKb,
+          similarity: seed.similarity,
+          createdAt: new Date(seed.createdAt),
+        },
+      }))
     }
-  })()
-  const solutionInsert = (async () => {
-    for (const solution of solutionSeeds) {
-      await new Solution(solution).save()
-    }
-  })()
-  const userInsert = Promise.all(
-    Object.values(userSeeds).map((user) => {
-      return new User(Object.assign({}, user, {
-        pwd: passwordHash(user.pwd as string),
-      })).save()
-    }),
-  )
-
-  await Promise.all([
-    courseInsert,
-    groupInsert,
-    problemInsert,
-    solutionInsert,
-    userInsert,
-  ])
-
-  // Seed discussions - must be done after users and problems
-  const discussionInsert = (async () => {
-    for (const discussionSeed of discussionSeeds) {
-      const author = await User.findOne({ uid: discussionSeed.authorUid })
-      if (!author) {
-        console.error(`Author ${discussionSeed.authorUid} not found`)
-        continue
-      }
-
-      let problem = null
-      if (discussionSeed.problemPid) {
-        problem = await Problem.findOne({ pid: discussionSeed.problemPid })
-        if (!problem) {
-          console.error(`Problem ${discussionSeed.problemPid} not found`)
-        }
-      }
-
-      await discussionService.createDiscussion({
-        author: author._id,
-        problem: problem?._id || null,
-        contest: null,
-        type: discussionSeed.type,
-        title: discussionSeed.title,
-        content: discussionSeed.content,
+    for (let index = 0; index < solutionSeeds.length; index++) {
+      const seed = solutionSeeds[index]!
+      const submission = createdSubmissions[index]
+      if (!submission) { continue }
+      await database.submissionTestcaseResult.createMany({
+        data: seed.testcases.map(testcase => ({
+          submissionId: submission.id,
+          testcaseId: testcase.uuid,
+          status: testcase.status as JudgeStatus,
+          timeUsedMs: testcase.timeUsedMs,
+          memoryUsedKb: testcase.memoryUsedKb,
+        })),
       })
     }
-  })()
 
-  await discussionInsert
-  await database.$disconnect()
+    const submissionByLegacyIndex = new Map(createdSubmissions.map((submission, index) => [ index + 1, submission.id ]))
+    for (const seed of solutionSeeds) {
+      const target = createdSubmissions[solutionSeeds.indexOf(seed)]
+      const similarSubmissionId = submissionByLegacyIndex.get(seed.similarSubmissionIndex)
+      if (target && similarSubmissionId) {
+        await database.submission.update({ where: { id: target.id }, data: { similarSubmissionId } })
+      }
+    }
+
+    for (const seed of contestSeeds) {
+      const contest = await database.contest.create({
+        data: {
+          title: seed.title,
+          startsAt: new Date(seed.start),
+          endsAt: new Date(seed.end),
+          isPublic: seed.isPublic,
+          password: seed.password,
+          isHidden: false,
+        },
+      })
+      await database.contestProblem.createMany({
+        data: seed.problemIds.map((problemId, index) => ({ contestId: contest.id, problemId, position: index + 1 })),
+        skipDuplicates: true,
+      })
+    }
+
+    await database.$executeRawUnsafe(`
+      SELECT setval(pg_get_serial_sequence('"Course"', 'id'), COALESCE((SELECT MAX("id") FROM "Course"), 1), true);
+      SELECT setval(pg_get_serial_sequence('"Problem"', 'id'), COALESCE((SELECT MAX("id") FROM "Problem"), 1), true);
+      SELECT setval(pg_get_serial_sequence('"Group"', 'id'), COALESCE((SELECT MAX("id") FROM "Group"), 1), true);
+    `)
+
+    for (const seed of discussionSeeds) {
+      const authorId = userIdByName.get(seed.authorUid)
+      if (!authorId) { continue }
+      const discussion = await database.discussion.create({
+        data: {
+          authorId,
+          problemId: seed.problemPid ?? null,
+          type: seed.type as DiscussionType,
+          title: seed.title,
+        },
+      })
+      await database.comment.create({ data: { discussionId: discussion.id, authorId, content: seed.content } })
+    }
+  } finally {
+    await database.$disconnect()
+  }
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
+void main().then(() => process.exit(0))

@@ -1,5 +1,6 @@
 import type { GroupModel } from '@putongoj/shared'
 import { getDatabase } from '../config/postgres'
+import logger from '../utils/logger'
 
 export async function findGroups (): Promise<GroupModel[]> {
   const database = await getDatabase()
@@ -7,8 +8,8 @@ export async function findGroups (): Promise<GroupModel[]> {
     orderBy: { id: 'desc' },
   })
   return groups.map(group => ({
-    gid: group.id,
-    title: group.name,
+    id: group.id,
+    name: group.name,
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,
   }))
@@ -22,7 +23,7 @@ export async function getGroup (groupId: number) {
       members: {
         include: {
           user: {
-            select: { username: true },
+            select: { id: true },
           },
         },
       },
@@ -33,9 +34,9 @@ export async function getGroup (groupId: number) {
   }
 
   return {
-    groupId: group.id,
+    id: group.id,
     name: group.name,
-    members: group.members.map(member => member.user.username),
+    memberIds: group.members.map(member => member.user.id),
   }
 }
 
@@ -43,9 +44,9 @@ export async function createGroup (name: string) {
   const database = await getDatabase()
   const group = await database.group.create({ data: { name } })
   return {
-    groupId: group.id,
+    id: group.id,
     name: group.name,
-    members: [] as string[],
+    memberIds: [] as number[],
   }
 }
 
@@ -57,19 +58,20 @@ export async function updateGroup (groupId: number, name: string) {
       data: { name },
     })
     return true
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to update group <Group:${groupId}>: ${String(error)}`)
     return false
   }
 }
 
-export async function updateGroupMembers (groupId: number, members: string[]) {
+export async function updateGroupMembers (groupId: number, memberIds: number[]) {
   const database = await getDatabase()
-  const uniqueMembers = [ ...new Set(members) ]
+  const uniqueMemberIds = [ ...new Set(memberIds) ]
   const users = await database.user.findMany({
-    where: { username: { in: uniqueMembers } },
-    select: { id: true, username: true },
+    where: { id: { in: uniqueMemberIds } },
+    select: { id: true },
   })
-  if (users.length !== uniqueMembers.length) {
+  if (users.length !== uniqueMemberIds.length) {
     return null
   }
 
@@ -99,7 +101,8 @@ export async function updateGroupMembers (groupId: number, members: string[]) {
       return addIds.length + removeIds.length
     })
     return result
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to update members of <Group:${groupId}>: ${String(error)}`)
     return null
   }
 }
@@ -109,7 +112,8 @@ export async function removeGroup (groupId: number) {
   try {
     await database.group.delete({ where: { id: groupId } })
     return true
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to remove group <Group:${groupId}>: ${String(error)}`)
     return null
   }
 }

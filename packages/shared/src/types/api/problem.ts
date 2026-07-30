@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { JUDGE_STATUS_TERMINAL, JudgeStatus, Language } from '@/consts/index.js'
-import { stringToInt } from '../codec.js'
+import { JUDGE_STATUS_TERMINAL } from '@/consts/index.js'
+import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
-import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 const ProblemStatisticsBucketSchema = z.object({
   lowerBound: z.int().nonnegative(),
@@ -12,7 +12,7 @@ const ProblemStatisticsBucketSchema = z.object({
 
 export const ProblemStatisticsQueryResultSchema = z.object({
   judgeCounts: z.array(z.object({
-    judge: z.union(JUDGE_STATUS_TERMINAL.map(status => z.literal(status))),
+    status: z.enum(JUDGE_STATUS_TERMINAL),
     count: z.int().nonnegative(),
   })),
   timeDistribution: z.array(ProblemStatisticsBucketSchema),
@@ -21,26 +21,66 @@ export const ProblemStatisticsQueryResultSchema = z.object({
 
 export type ProblemStatisticsQueryResult = z.input<typeof ProblemStatisticsQueryResultSchema>
 
+const ProblemEditorFieldsSchema = z.object({
+  title: ProblemModelSchema.shape.title,
+  timeLimitMs: ProblemModelSchema.shape.timeLimitMs,
+  memoryLimitKb: ProblemModelSchema.shape.memoryLimitKb,
+  description: ProblemModelSchema.shape.description,
+  inputFormat: ProblemModelSchema.shape.inputFormat,
+  outputFormat: ProblemModelSchema.shape.outputFormat,
+  sampleInput: ProblemModelSchema.shape.sampleInput,
+  sampleOutput: ProblemModelSchema.shape.sampleOutput,
+  hint: ProblemModelSchema.shape.hint,
+  visibility: ProblemModelSchema.shape.visibility,
+  judgeType: ProblemModelSchema.shape.judgeType,
+  judgeCode: ProblemModelSchema.shape.judgeCode,
+  tagIds: z.array(z.int().positive()),
+})
+
+export const ProblemCreatePayloadSchema = ProblemEditorFieldsSchema.extend({
+  courseId: z.int().positive().optional(),
+}).partial().extend({
+  title: ProblemModelSchema.shape.title,
+  timeLimitMs: ProblemModelSchema.shape.timeLimitMs.default(1000),
+  memoryLimitKb: ProblemModelSchema.shape.memoryLimitKb.default(32768),
+  description: ProblemModelSchema.shape.description.default(''),
+  inputFormat: ProblemModelSchema.shape.inputFormat.default(''),
+  outputFormat: ProblemModelSchema.shape.outputFormat.default(''),
+  sampleInput: ProblemModelSchema.shape.sampleInput.default(''),
+  sampleOutput: ProblemModelSchema.shape.sampleOutput.default(''),
+  hint: ProblemModelSchema.shape.hint.default(''),
+  visibility: ProblemModelSchema.shape.visibility.default('RESERVED'),
+  judgeType: ProblemModelSchema.shape.judgeType.default('TRADITIONAL'),
+  judgeCode: ProblemModelSchema.shape.judgeCode.default(''),
+  tagIds: z.array(z.int().positive()).default([]),
+})
+
+export type ProblemCreatePayload = z.infer<typeof ProblemCreatePayloadSchema>
+
+export const ProblemUpdatePayloadSchema = ProblemEditorFieldsSchema.partial()
+
+export type ProblemUpdatePayload = z.infer<typeof ProblemUpdatePayloadSchema>
+
 export const ProblemSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
   user: z.string().max(30).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+  status: SolutionModelSchema.shape.status.optional(),
+  language: SolutionModelSchema.shape.language.optional(),
 })
 
 export type ProblemSolutionListQuery = z.infer<typeof ProblemSolutionListQuerySchema>
 
-export const ProblemSolutionListQueryResultSchema = PaginatedSchema(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  uid: SolutionModelSchema.shape.uid,
+export const ProblemSolutionListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: SolutionModelSchema.shape.id,
+  userId: SolutionModelSchema.shape.userId,
   language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
+  status: SolutionModelSchema.shape.status,
+  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
+  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
+  similarity: SolutionModelSchema.shape.similarity,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 
@@ -53,8 +93,8 @@ export const ProblemTestcaseListQueryResultSchema = z.array(z.object({
 export type ProblemTestcaseListQueryResult = z.input<typeof ProblemTestcaseListQueryResultSchema>
 
 export const ProblemTestcaseCreatePayloadSchema = z.object({
-  in: z.string(),
-  out: z.string(),
+  input: z.string(),
+  output: z.string(),
 })
 
 export type ProblemTestcaseCreatePayload = z.infer<typeof ProblemTestcaseCreatePayloadSchema>

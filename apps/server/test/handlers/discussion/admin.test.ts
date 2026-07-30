@@ -13,7 +13,7 @@ test.before('Login as admin', async (t) => {
   const login = await request
     .post('/api/account/login')
     .send({
-      username: admin.uid,
+      username: admin.username,
       password: await encryptData(admin.pwd!),
     })
 
@@ -26,14 +26,14 @@ test('Admin can see all discussions including private ones', async (t) => {
 
   t.is(res.status, 200)
   t.truthy(res.body.data)
-  t.truthy(Array.isArray(res.body.data.docs))
+  t.truthy(Array.isArray(res.body.data.items))
 
   // Admin should see all types including private clarifications
-  const types = res.body.data.docs.map((d: any) => d.type)
+  const types = res.body.data.items.map((d: any) => d.type)
   // Should include at least OpenDiscussion (1), PublicAnnouncement (2), and PrivateClarification (3)
-  t.true(types.includes(1))
-  t.true(types.includes(2))
-  t.true(types.includes(3))
+  t.true(types.includes('OPEN_DISCUSSION'))
+  t.true(types.includes('PUBLIC_ANNOUNCEMENT'))
+  t.true(types.includes('PRIVATE_CLARIFICATION'))
 })
 
 test('Admin can access any private discussion', async (t) => {
@@ -42,7 +42,7 @@ test('Admin can access any private discussion', async (t) => {
     .get('/api/discussions/3')
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 3)
+  t.is(res.body.data.id, 3)
   t.truthy(res.body.data.title)
   t.is(res.body.data.isJury, true) // Admin should be marked as jury
 })
@@ -51,20 +51,20 @@ test('Admin can create public announcement', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 2, // PublicAnnouncement
+      type: 'PUBLIC_ANNOUNCEMENT', // PublicAnnouncement
       title: 'Admin Announcement',
       content: 'This is an important announcement',
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 
   // Verify the created announcement
   const getRes = await request
-    .get(`/api/discussions/${res.body.data.discussionId}`)
+    .get(`/api/discussions/${res.body.data.id}`)
 
   t.is(getRes.status, 200)
-  t.is(getRes.body.data.type, 2)
+  t.is(getRes.body.data.type, 'PUBLIC_ANNOUNCEMENT')
   t.is(getRes.body.data.title, 'Admin Announcement')
 })
 
@@ -91,47 +91,47 @@ test('Admin can create open discussion', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1, // OpenDiscussion
+      type: 'OPEN_DISCUSSION', // OpenDiscussion
       title: 'Admin Discussion',
       content: 'Discussion created by admin',
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Admin can create private clarification', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 3, // PrivateClarification
+      type: 'PRIVATE_CLARIFICATION', // PrivateClarification
       title: 'Admin Private Question',
       content: 'Private question from admin',
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Admin can create discussion with problem reference', async (t) => {
   const res = await request
     .post('/api/discussions')
     .send({
-      type: 1,
+      type: 'OPEN_DISCUSSION',
       title: 'Admin Question about Problem',
-      problem: 1001,
+      problemId: 1001,
       content: 'Question about problem 1001',
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 
   const getRes = await request
-    .get(`/api/discussions/${res.body.data.discussionId}`)
+    .get(`/api/discussions/${res.body.data.id}`)
 
   t.is(getRes.status, 200)
   t.truthy(getRes.body.data.problem)
-  t.is(getRes.body.data.problem.pid, 1001)
+  t.is(getRes.body.data.problem.id, 1001)
 })
 
 test('Admin sees isJury=true for discussions', async (t) => {

@@ -1,14 +1,13 @@
 import { z } from 'zod'
 import { COMMENT_LENGTH_MAX } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
-import { ObjectIdSchema } from '../utils.js'
 
 export const CommentModelSchema = z.object({
-  commentId: z.int().nonnegative(),
-  discussion: ObjectIdSchema,
-  author: ObjectIdSchema,
+  id: z.int().positive(),
+  discussionId: z.int().positive(),
+  authorId: z.int().positive(),
   content: z.string().min(1).max(COMMENT_LENGTH_MAX),
-  hidden: z.boolean(),
+  isHidden: z.boolean(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

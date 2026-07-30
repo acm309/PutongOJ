@@ -1,6 +1,5 @@
 import redis from '../config/redis'
 import logger from '../utils/logger'
-import '../config/db'
 
 export async function distributeWork (task: string, id: string | number) {
   const taskList = `worker:${task}`

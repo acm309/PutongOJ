@@ -1,14 +1,13 @@
 import { z } from 'zod'
 import { isoDatetimeToDate } from '../codec.js'
-import { ObjectIdSchema } from '../utils.js'
 
 export const FileModelSchema = z.object({
   storageKey: z.string().min(1),
   originalName: z.string().min(1),
   sizeBytes: z.int().nonnegative(),
-  owner: ObjectIdSchema,
+  ownerId: z.int().positive(),
   deletedAt: isoDatetimeToDate.nullable(),
-  deletedBy: ObjectIdSchema.nullable(),
+  deletedById: z.int().positive().nullable(),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })

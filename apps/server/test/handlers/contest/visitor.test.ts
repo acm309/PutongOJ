@@ -13,11 +13,10 @@ test('List contests (unauthenticated)', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.truthy(res.body.data)
-  t.true(Array.isArray(res.body.data.docs))
+  t.true(Array.isArray(res.body.data.items))
   t.is(typeof res.body.data.total, 'number')
   t.is(typeof res.body.data.page, 'number')
-  t.is(typeof res.body.data.pages, 'number')
-  t.is(typeof res.body.data.limit, 'number')
+  t.is(typeof res.body.data.pageSize, 'number')
 })
 
 test('List contests with title filter that matches nothing', async (t) => {
@@ -26,7 +25,7 @@ test('List contests with title filter that matches nothing', async (t) => {
   t.is(res.status, 200)
   t.true(res.body.success)
   t.is(res.body.data.total, 0)
-  t.is(res.body.data.docs.length, 0)
+  t.is(res.body.data.items.length, 0)
 })
 
 test('List contests with pagination', async (t) => {
@@ -34,7 +33,7 @@ test('List contests with pagination', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  t.true(res.body.data.docs.length <= 2)
+  t.true(res.body.data.items.length <= 2)
 })
 
 test('List contests with invalid sortBy is rejected', async (t) => {

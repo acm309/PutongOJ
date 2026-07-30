@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "mongodb": "^7.2.0",
+    "@putongoj/db": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

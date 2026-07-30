@@ -107,7 +107,7 @@ test.serial('Admin list includes hidden and unpublished posts', async (t) => {
   t.is(list.status, 200)
   t.true(list.body.success)
 
-  const docs = list.body.data.docs as Array<{ slug: string, isPublished: boolean, isPinned: boolean, isHidden: boolean }>
+  const docs = list.body.data.items as Array<{ slug: string, isPublished: boolean, isPinned: boolean, isHidden: boolean }>
   const bySlug = new Map(docs.map(doc => [ doc.slug, doc ]))
 
   t.truthy(bySlug.get(visiblePublishedSlug))
@@ -127,14 +127,14 @@ test.serial('Admin list includes hidden and unpublished posts', async (t) => {
   const hiddenOnly = await request.get('/api/admin/posts').query({ isHidden: true })
   t.is(hiddenOnly.status, 200)
   t.true(hiddenOnly.body.success)
-  const hiddenDocs = hiddenOnly.body.data.docs as Array<{ slug: string }>
+  const hiddenDocs = hiddenOnly.body.data.items as Array<{ slug: string }>
   t.true(hiddenDocs.some(doc => doc.slug === hiddenPublishedSlug))
   t.false(hiddenDocs.some(doc => doc.slug === visiblePublishedSlug))
 
   const titleSearch = await request.get('/api/admin/posts').query({ title: 'Visible Draft' })
   t.is(titleSearch.status, 200)
   t.true(titleSearch.body.success)
-  const titleDocs = titleSearch.body.data.docs as Array<{ slug: string }>
+  const titleDocs = titleSearch.body.data.items as Array<{ slug: string }>
   t.true(titleDocs.some(doc => doc.slug === visibleDraftSlug))
 })
 

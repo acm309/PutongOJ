@@ -10,7 +10,7 @@ const testPid = 1000
 const dummyUuid = '00000000-0000-0000-0000-000000000000'
 
 test('List testcases requires login', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases`)
+  const res = await request.get(`/api/problems/${testPid}/testcases`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -19,7 +19,7 @@ test('List testcases requires login', async (t) => {
 
 test('Create testcase requires login', async (t) => {
   const res = await request
-    .post(`/api/problem/${testPid}/testcases`)
+    .post(`/api/problems/${testPid}/testcases`)
     .send({ in: '1 2\n', out: '3\n' })
 
   t.is(res.status, 200)
@@ -28,7 +28,7 @@ test('Create testcase requires login', async (t) => {
 })
 
 test('Export testcases requires login', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/export`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/export`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -36,7 +36,7 @@ test('Export testcases requires login', async (t) => {
 })
 
 test('Get testcase content requires login', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/${dummyUuid}.in`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/${dummyUuid}.in`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -44,7 +44,7 @@ test('Get testcase content requires login', async (t) => {
 })
 
 test('Remove testcase requires login', async (t) => {
-  const res = await request.delete(`/api/problem/${testPid}/testcases/${dummyUuid}`)
+  const res = await request.delete(`/api/problems/${testPid}/testcases/${dummyUuid}`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)

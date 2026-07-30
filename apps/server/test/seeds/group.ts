@@ -1,7 +1,7 @@
 const groupSeeds = [
   {
-    title: '测试组1',
-    list: [
+    name: '测试组1',
+    usernames: [
       'admin',
       'pu',
       'primaryuser',

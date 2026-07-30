@@ -35,6 +35,7 @@ import {
   ErrorCode,
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
+  UserPrivilege,
 } from '@putongoj/shared'
 import { distributeWork } from '../jobs/helper'
 import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn'
@@ -67,7 +68,15 @@ import { loadUser } from './user'
 async function loadEditingUser (ctx: Context) {
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
-  if (!profile.isRoot && profile.privilege <= user.privilege && profile.uid !== user.uid) {
+  const privilegeRank: Record<UserPrivilege, number> = {
+    [UserPrivilege.BANNED]: 0,
+    [UserPrivilege.USER]: 1,
+    [UserPrivilege.ADMIN]: 2,
+    [UserPrivilege.ROOT]: 3,
+  }
+  const profilePrivilege = profile.privilege as UserPrivilege
+  const userPrivilege = user.privilege as UserPrivilege
+  if (!profile.isRoot && privilegeRank[profilePrivilege] <= privilegeRank[userPrivilege] && profile.id !== user.id) {
     createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to edit this user')
     return null
   }
@@ -104,24 +113,27 @@ export async function updateUser (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   if (payload.data.privilege !== undefined) {
-    if (profile.uid === user.uid) {
+    if (profile.id === user.id) {
       return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot change your own privilege')
     }
-    if (!profile.isRoot && profile.privilege <= payload.data.privilege) {
+    if (!profile.isRoot && (
+      payload.data.privilege === UserPrivilege.ADMIN
+      || payload.data.privilege === UserPrivilege.ROOT
+    )) {
       return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot elevate user privilege to equal or higher than yourself')
     }
   }
-  if (payload.data.avatar !== undefined && !profile.isRoot) {
+  if (payload.data.avatarUrl !== undefined && !profile.isRoot) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Only root administrators can change user avatars')
   }
 
   try {
-    const { privilege, nick, avatar, motto, school, mail, storageQuota } = payload.data
-    const updatedUser = await userService.updateUser(user, {
-      privilege, nick, avatar, motto, school, mail, storageQuota,
+    const { privilege, nickname, avatarUrl, motto, school, email, storageQuota } = payload.data
+    const updatedUser = await userService.updateUser(user.id, {
+      privilege, nickname, avatarUrl, motto, school, email, storageQuota,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
-    ctx.auditLog.info(`<User:${user.uid}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<User:${user.username}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to update user', err)
@@ -152,9 +164,9 @@ export async function updateUserPassword (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   try {
-    await userService.updateUser(user, { pwd })
-    const revoked = await sessionService.revokeOtherSessions(user._id.toString(), '')
-    ctx.auditLog.info(`<User:${user.uid}> password reset by <User:${profile.uid}>, revoked ${revoked} session(s)`)
+    await userService.updateUser(user.id, { passwordHash: pwd })
+    const revoked = await sessionService.revokeOtherSessions(String(user.id), '')
+    ctx.auditLog.info(`<User:${user.username}> password reset by <User:${profile.username}>, revoked ${revoked} session(s)`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update user password', err)
@@ -197,9 +209,9 @@ export async function batchRegisterUsers (ctx: Context) {
 
     try {
       await userService.createUser({
-        uid: username,
-        pwd: passwordHash(password),
-        nick: item.nick,
+        username,
+        passwordHash: passwordHash(password),
+        nickname: item.nickname,
       })
       created += 1
       results.push({
@@ -217,7 +229,7 @@ export async function batchRegisterUsers (ctx: Context) {
   }
 
   const profile = await loadProfile(ctx)
-  ctx.auditLog.info(`Batch register completed by <User:${profile.uid}>, created ${created}/${users.length} users`)
+  ctx.auditLog.info(`Batch register completed by <User:${profile.username}>, created ${created}/${users.length} users`)
 
   const result = AdminAccountBatchRegisterResultSchema.parse({
     total: users.length,
@@ -230,7 +242,7 @@ export async function batchRegisterUsers (ctx: Context) {
 
 export async function getUserOAuthConnections (ctx: Context) {
   const user = await loadUser(ctx)
-  const connections = await oauthService.getUserOAuthConnections(user._id)
+  const connections = await oauthService.getUserOAuthConnections(user.id)
   const result = AdminUserOAuthQueryResultSchema.encode(connections)
   return createEnvelopedResponse(ctx, result)
 }
@@ -247,12 +259,12 @@ export async function removeUserOAuthConnection (ctx: Context) {
     return
   }
 
-  const result = await oauthService.removeOAuthConnection(user._id, provider)
+  const result = await oauthService.removeOAuthConnection(user.id, provider)
   if (!result) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
   } else {
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<User:${user.uid}> removed ${provider} OAuth connection by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<User:${user.username}> removed ${provider} OAuth connection by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   }
 }
@@ -315,7 +327,7 @@ export async function createPost (ctx: Context) {
 
   try {
     const post = await postService.createPost({ title })
-    ctx.auditLog.info(`<Post:${post.slug}> created by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Post:${post.slug}> created by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, { slug: post.slug })
   } catch (err: any) {
     ctx.auditLog.error('Failed to create post', err)
@@ -353,7 +365,7 @@ export async function updatePost (ctx: Context) {
       return createErrorResponse(ctx, ErrorCode.NotFound, 'Post not found')
     }
 
-    ctx.auditLog.info(`<Post:${updated.slug}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Post:${updated.slug}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, { slug: updated.slug })
   } catch (err: any) {
     ctx.auditLog.error('Failed to update post', err)
@@ -373,7 +385,7 @@ export async function deletePost (ctx: Context) {
 
   try {
     await postService.deletePostById(postState.post.id)
-    ctx.auditLog.info(`<Post:${postState.post.slug}> deleted by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Post:${postState.post.slug}> deleted by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err: any) {
     ctx.auditLog.error('Failed to delete post', err)
@@ -391,7 +403,7 @@ export async function sendNotificationBroadcast (ctx: Context) {
     const { title, content } = payload.data
     await websocketService.sendBroadcastNotification(title, content)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
+    ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to send notification broadcast', err)
@@ -413,7 +425,7 @@ export async function sendNotificationUser (ctx: Context) {
     const { title, content } = payload.data
     await websocketService.sendUserNotification(username, title, content)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.uid}>`)
+    ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to send notification to user', err)
@@ -457,7 +469,7 @@ export async function createGroup (ctx: Context) {
     const group = await groupService.createGroup(payload.data.name)
     const result = AdminGroupDetailQueryResultSchema.encode(group)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Group:${group.groupId}> created by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Group:${group.id}> created by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to create group', err)
@@ -482,7 +494,7 @@ export async function updateGroup (ctx: Context) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Group:${groupId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Group:${groupId}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update group', err)
@@ -502,12 +514,12 @@ export async function updateGroupMembers (ctx: Context) {
   }
 
   try {
-    const modifiedCount = await groupService.updateGroupMembers(groupId, payload.data.members)
+    const modifiedCount = await groupService.updateGroupMembers(groupId, payload.data.memberIds)
     if (modifiedCount === null) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Group:${groupId}> updated ${modifiedCount} members by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Group:${groupId}> updated ${modifiedCount} members by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, { modifiedCount })
   } catch (err) {
     ctx.auditLog.error('Failed to update group members', err)
@@ -527,7 +539,7 @@ export async function removeGroup (ctx: Context) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Group:${groupId}> removed by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Group:${groupId}> removed by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to remove group', err)
@@ -558,40 +570,40 @@ export async function updateDiscussion (ctx: Context) {
   }
 
   const update = {} as DiscussionUpdateDto
-  if (payload.data.author !== undefined) {
-    const author = await userService.getUser(payload.data.author)
+  if (payload.data.authorId !== undefined) {
+    const author = await userService.getUserById(payload.data.authorId)
     if (!author) {
       return createErrorResponse(ctx, ErrorCode.BadRequest, 'Author user not found')
     }
-    update.author = author._id
+    update.authorId = author.id
   }
-  if (payload.data.problem !== undefined) {
-    if (payload.data.problem === null) {
-      update.problem = null
+  if (payload.data.problemId !== undefined) {
+    if (payload.data.problemId === null) {
+      update.problemId = null
     } else {
-      const problem = await problemService.getProblem(payload.data.problem)
+      const problem = await problemService.getProblem(payload.data.problemId)
       if (!problem) {
         return createErrorResponse(ctx, ErrorCode.BadRequest, 'Problem not found')
       }
-      update.problem = problem._id
+      update.problemId = problem.id
     }
   }
-  if (payload.data.contest !== undefined) {
-    if (payload.data.contest === null) {
-      update.contest = null
+  if (payload.data.contestId !== undefined) {
+    if (payload.data.contestId === null) {
+      update.contestId = null
     } else {
-      const contest = await contestService.getContest(payload.data.contest)
+      const contest = await contestService.getContest(payload.data.contestId)
       if (!contest) {
         return createErrorResponse(ctx, ErrorCode.BadRequest, 'Contest not found')
       }
-      update.contest = contest._id
+      update.contestId = contest.id
     }
   }
   if (payload.data.type !== undefined) {
     update.type = payload.data.type
   }
-  if (payload.data.pinned !== undefined) {
-    update.pinned = payload.data.pinned
+  if (payload.data.isPinned !== undefined) {
+    update.isPinned = payload.data.isPinned
   }
   if (payload.data.title !== undefined) {
     update.title = payload.data.title
@@ -603,7 +615,7 @@ export async function updateDiscussion (ctx: Context) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Discussion:${discussionId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Discussion:${discussionId}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update discussion', err)
@@ -635,13 +647,13 @@ export async function updateComment (ctx: Context) {
 
   try {
     const result = await discussionService.updateComment(commentId, {
-      hidden: payload.data.hidden,
+      isHidden: payload.data.isHidden,
     })
     if (!result) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Comment:${commentId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Comment:${commentId}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update comment', err)
@@ -651,7 +663,7 @@ export async function updateComment (ctx: Context) {
 
 export async function listUserSessions (ctx: Context) {
   const user = await loadUser(ctx)
-  const sessions = await sessionService.listSessions(user._id.toString())
+  const sessions = await sessionService.listSessions(String(user.id))
 
   const currentSessionId = ctx.state.sessionId
   const result = SessionListQueryResultSchema.parse(sessions.map(s => ({
@@ -680,8 +692,8 @@ export async function revokeUserSession (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot revoke current session, use logout instead')
   }
 
-  await sessionService.revokeSession(user._id.toString(), sessionId)
-  ctx.auditLog.info(`<User:${profile.uid}> revoked <Session:${sessionId}> of <User:${user.uid}>`)
+  await sessionService.revokeSession(String(user.id), sessionId)
+  ctx.auditLog.info(`<User:${profile.username}> revoked <Session:${sessionId}> of <User:${user.username}>`)
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -693,9 +705,9 @@ export async function revokeUserAllSessions (ctx: Context) {
 
   const profile = await loadProfile(ctx)
 
-  const keepSessionId = user.uid === profile.uid ? ctx.state.sessionId : ''
-  const removed = await sessionService.revokeOtherSessions(user._id.toString(), keepSessionId || '')
-  ctx.auditLog.info(`<User:${profile.uid}> revoked all ${removed} session(s) of <User:${user.uid}>`)
+  const keepSessionId = user.username === profile.username ? ctx.state.sessionId : ''
+  const removed = await sessionService.revokeOtherSessions(String(user.id), keepSessionId || '')
+  ctx.auditLog.info(`<User:${profile.username}> revoked all ${removed} session(s) of <User:${user.username}>`)
   const result = SessionRevokeOthersResultSchema.parse({ removed })
   return createEnvelopedResponse(ctx, result)
 }
@@ -708,7 +720,7 @@ export async function updateAvatarPresets (ctx: Context) {
 
   await settingsService.setAvatarPresets(payload.data.avatarPresets)
   const profile = await loadProfile(ctx)
-  ctx.auditLog.info(`<User:${profile.uid}> updated avatar presets`)
+  ctx.auditLog.info(`<User:${profile.username}> updated avatar presets`)
   return createEnvelopedResponse(ctx, payload.data.avatarPresets)
 }
 
@@ -727,7 +739,7 @@ export async function createTag (ctx: Context) {
   try {
     const tag = await tagService.createTag(payload.data)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Tag:${tag.tagId}> created by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tag.id}> created by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to create tag', err)
@@ -753,7 +765,7 @@ export async function updateTag (ctx: Context) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Tag:${tagId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tagId}> updated by <User:${profile.username}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update tag', err)
@@ -765,7 +777,7 @@ export async function triggerScanUploadsFolder (ctx: Context) {
   const task = 'scanUploadsFolder'
   const profile = await loadProfile(ctx)
   await distributeWork(task, '')
-  ctx.auditLog.info(`Action <${task}> requested by <User:${profile.uid}>`)
+  ctx.auditLog.info(`Action <${task}> requested by <User:${profile.username}>`)
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -796,7 +808,7 @@ export async function removeFile (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
   }
 
-  ctx.auditLog.info(`<File:${file.storageKey}> deleted by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<File:${file.storageKey}> deleted by <User:${profile.username}>`)
   return createEnvelopedResponse(ctx, null)
 }
 
@@ -806,15 +818,15 @@ function registerAdminHandlers (router: Router) {
   adminRouter.use(adminRequire)
 
   adminRouter.get('/users', findUsers)
-  adminRouter.get('/users/:uid', getUser)
-  adminRouter.put('/users/:uid', updateUser)
-  adminRouter.put('/users/:uid/password', updateUserPassword)
+  adminRouter.get('/users/:username', getUser)
+  adminRouter.put('/users/:username', updateUser)
+  adminRouter.put('/users/:username/password', updateUserPassword)
   adminRouter.post('/users/batch-register', rootRequire, batchRegisterUsers)
-  adminRouter.get('/users/:uid/oauth', getUserOAuthConnections)
-  adminRouter.delete('/users/:uid/oauth/:provider', removeUserOAuthConnection)
-  adminRouter.get('/users/:uid/sessions', listUserSessions)
-  adminRouter.delete('/users/:uid/sessions', revokeUserAllSessions)
-  adminRouter.delete('/users/:uid/sessions/:sessionId', revokeUserSession)
+  adminRouter.get('/users/:username/oauth', getUserOAuthConnections)
+  adminRouter.delete('/users/:username/oauth/:provider', removeUserOAuthConnection)
+  adminRouter.get('/users/:username/sessions', listUserSessions)
+  adminRouter.delete('/users/:username/sessions', revokeUserAllSessions)
+  adminRouter.delete('/users/:username/sessions/:sessionId', revokeUserSession)
 
   adminRouter.get('/solutions', findSolutions)
   adminRouter.get('/solutions/export', dataExportLimit, exportSolutions)

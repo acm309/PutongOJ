@@ -49,7 +49,7 @@ test.serial('Visitor list only shows published and non-hidden posts', async (t) 
   t.is(list.status, 200)
   t.true(list.body.success)
 
-  const docs = list.body.data.docs as Array<{ slug: string, isPublished: boolean, isPinned: boolean, isHidden: boolean }>
+  const docs = list.body.data.items as Array<{ slug: string, isPublished: boolean, isPinned: boolean, isHidden: boolean }>
   const bySlug = new Map(docs.map(doc => [ doc.slug, doc ]))
 
   t.truthy(bySlug.get(visiblePublishedSlug))

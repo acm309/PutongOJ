@@ -1,13 +1,8 @@
 import { z } from 'zod'
 import {
-  DiscussionType,
-  JudgeStatus,
-  Language,
   OAuthProvider,
   TITLE_LENGTH_MAX,
-  UserPrivilege,
 } from '@/consts/index.js'
-import { stringToInt } from '../codec.js'
 import {
   CommentModelSchema,
   ContestModelSchema,
@@ -23,7 +18,7 @@ import {
 } from '../model/index.js'
 import { UserAvatarSchema } from '../model/user.js'
 import {
-  PaginatedSchema,
+  PaginatedResultSchema,
   PaginationSchema,
   SortOptionSchema,
 } from './utils.js'
@@ -32,17 +27,18 @@ export const AdminUserListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['uid', 'createdAt', 'lastVisitedAt']).default('lastVisitedAt'),
+  sortBy: z.enum(['username', 'createdAt', 'lastVisitedAt']).default('lastVisitedAt'),
   keyword: z.string().max(30).optional(),
-  privilege: stringToInt.pipe(z.enum(UserPrivilege)).optional(),
+  privilege: UserModelSchema.shape.privilege.optional(),
 })
 
 export type AdminUserListQuery = z.infer<typeof AdminUserListQuerySchema>
 
-export const AdminUserListQueryResultSchema = PaginatedSchema(z.object({
-  uid: UserModelSchema.shape.uid,
+export const AdminUserListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
   privilege: UserModelSchema.shape.privilege,
-  nick: UserModelSchema.shape.nick.optional(),
+  nickname: UserModelSchema.shape.nickname.optional(),
   createdAt: UserModelSchema.shape.createdAt,
   lastVisitedAt: UserModelSchema.shape.lastVisitedAt.optional(),
 }))
@@ -50,12 +46,13 @@ export const AdminUserListQueryResultSchema = PaginatedSchema(z.object({
 export type AdminUserListQueryResult = z.input<typeof AdminUserListQueryResultSchema>
 
 export const AdminUserDetailQueryResultSchema = z.object({
-  uid: UserModelSchema.shape.uid,
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
   privilege: UserModelSchema.shape.privilege,
-  nick: UserModelSchema.shape.nick,
-  avatar: UserModelSchema.shape.avatar,
+  nickname: UserModelSchema.shape.nickname,
+  avatarUrl: UserModelSchema.shape.avatarUrl,
   motto: UserModelSchema.shape.motto,
-  mail: UserModelSchema.shape.mail,
+  email: UserModelSchema.shape.email,
   school: UserModelSchema.shape.school,
   storageQuota: UserModelSchema.shape.storageQuota,
   lastRequestId: UserModelSchema.shape.lastRequestId,
@@ -66,11 +63,11 @@ export const AdminUserDetailQueryResultSchema = z.object({
 export type AdminUserDetailQueryResult = z.input<typeof AdminUserDetailQueryResultSchema>
 
 export const AdminUserEditPayloadSchema = z.object({
-  privilege: z.enum(UserPrivilege).optional(),
-  nick: UserModelSchema.shape.nick.optional(),
-  avatar: UserModelSchema.shape.avatar.optional(),
+  privilege: UserModelSchema.shape.privilege.optional(),
+  nickname: UserModelSchema.shape.nickname.optional(),
+  avatarUrl: UserModelSchema.shape.avatarUrl.optional(),
   motto: UserModelSchema.shape.motto.optional(),
-  mail: UserModelSchema.shape.mail.optional(),
+  email: UserModelSchema.shape.email.optional(),
   school: UserModelSchema.shape.school.optional(),
   storageQuota: UserModelSchema.shape.storageQuota.optional(),
 })
@@ -98,27 +95,27 @@ export const AdminSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
-  user: z.string().max(30).optional(),
-  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+  sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
+  username: z.string().max(30).optional(),
+  problemId: z.coerce.number().int().positive().optional(),
+  contestId: z.coerce.number().int().positive().optional(),
+  status: SolutionModelSchema.shape.status.optional(),
+  language: SolutionModelSchema.shape.language.optional(),
 })
 
 export type AdminSolutionListQuery = z.infer<typeof AdminSolutionListQuerySchema>
 
-export const AdminSolutionListQueryResultSchema = PaginatedSchema(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
-  mid: SolutionModelSchema.shape.mid,
+export const AdminSolutionListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: SolutionModelSchema.shape.id,
+  problemId: SolutionModelSchema.shape.problemId,
+  userId: SolutionModelSchema.shape.userId,
+  contestId: SolutionModelSchema.shape.contestId,
   language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
+  status: SolutionModelSchema.shape.status,
+  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
+  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
+  similarity: SolutionModelSchema.shape.similarity,
+  similarSubmissionId: SolutionModelSchema.shape.similarSubmissionId,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 
@@ -126,27 +123,27 @@ export type AdminSolutionListQueryResult = z.input<typeof AdminSolutionListQuery
 
 export const AdminSolutionListExportQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
-  user: z.string().max(30).optional(),
-  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+  sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
+  username: z.string().max(30).optional(),
+  problemId: z.coerce.number().int().positive().optional(),
+  contestId: z.coerce.number().int().positive().optional(),
+  status: SolutionModelSchema.shape.status.optional(),
+  language: SolutionModelSchema.shape.language.optional(),
 })
 
 export type AdminSolutionListExportQuery = z.infer<typeof AdminSolutionListExportQuerySchema>
 
 export const AdminSolutionListExportQueryResultSchema = z.array(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
-  mid: SolutionModelSchema.shape.mid,
+  id: SolutionModelSchema.shape.id,
+  problemId: SolutionModelSchema.shape.problemId,
+  userId: SolutionModelSchema.shape.userId,
+  contestId: SolutionModelSchema.shape.contestId,
   language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
+  status: SolutionModelSchema.shape.status,
+  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
+  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
+  similarity: SolutionModelSchema.shape.similarity,
+  similarSubmissionId: SolutionModelSchema.shape.similarSubmissionId,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 
@@ -160,44 +157,44 @@ export const AdminNotificationCreatePayloadSchema = z.object({
 export type AdminNotificationCreatePayload = z.infer<typeof AdminNotificationCreatePayloadSchema>
 
 export const AdminGroupDetailQueryResultSchema = z.object({
-  groupId: GroupModelSchema.shape.gid,
-  name: GroupModelSchema.shape.title,
-  members: z.array(UserModelSchema.shape.uid),
+  id: GroupModelSchema.shape.id,
+  name: GroupModelSchema.shape.name,
+  memberIds: z.array(UserModelSchema.shape.id),
 })
 
 export type AdminGroupDetailQueryResult = z.input<typeof AdminGroupDetailQueryResultSchema>
 
 export const AdminGroupCreatePayloadSchema = z.object({
-  name: GroupModelSchema.shape.title,
+  name: GroupModelSchema.shape.name,
 })
 
 export type AdminGroupCreatePayload = z.infer<typeof AdminGroupCreatePayloadSchema>
 
 export const AdminGroupUpdatePayloadSchema = z.object({
-  name: GroupModelSchema.shape.title,
+  name: GroupModelSchema.shape.name,
 })
 
 export type AdminGroupUpdatePayload = z.infer<typeof AdminGroupUpdatePayloadSchema>
 
 export const AdminGroupMembersUpdatePayloadSchema = z.object({
-  members: z.array(UserModelSchema.shape.uid),
+  memberIds: z.array(UserModelSchema.shape.id),
 })
 
 export type AdminGroupMembersUpdatePayload = z.infer<typeof AdminGroupMembersUpdatePayloadSchema>
 
 export const AdminDiscussionUpdatePayloadSchema = z.object({
-  author: UserModelSchema.shape.uid.optional(),
-  problem: ProblemModelSchema.shape.pid.nullable().optional(),
-  contest: ContestModelSchema.shape.contestId.nullable().optional(),
-  type: z.enum(DiscussionType).optional(),
-  pinned: DiscussionModelSchema.shape.pinned.optional(),
+  authorId: UserModelSchema.shape.id.optional(),
+  problemId: ProblemModelSchema.shape.id.nullable().optional(),
+  contestId: ContestModelSchema.shape.id.nullable().optional(),
+  type: DiscussionModelSchema.shape.type.optional(),
+  isPinned: DiscussionModelSchema.shape.isPinned.optional(),
   title: DiscussionModelSchema.shape.title.optional(),
 })
 
 export type AdminDiscussionUpdatePayload = z.infer<typeof AdminDiscussionUpdatePayloadSchema>
 
 export const AdminCommentUpdatePayloadSchema = z.object({
-  hidden: CommentModelSchema.shape.hidden.optional(),
+  isHidden: CommentModelSchema.shape.isHidden.optional(),
 })
 
 export type AdminCommentUpdatePayload = z.infer<typeof AdminCommentUpdatePayloadSchema>
@@ -231,13 +228,13 @@ export const AdminFileListQuerySchema = z.object({
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'sizeBytes']).default('createdAt'),
-  uploader: UserModelSchema.shape.uid.optional(),
+  ownerId: z.coerce.number().int().positive().optional(),
 })
 
 export type AdminFileListQuery = z.infer<typeof AdminFileListQuerySchema>
 
-export const AdminFileListQueryResultSchema = PaginatedSchema(z.object({
-  owner: UserModelSchema.shape.uid,
+export const AdminFileListQueryResultSchema = PaginatedResultSchema(z.object({
+  ownerId: UserModelSchema.shape.id,
   storageKey: z.string().min(1),
   originalName: z.string().min(1),
   sizeBytes: z.int().nonnegative(),
@@ -259,7 +256,8 @@ export const AdminPostListQuerySchema = z.object({
 
 export type AdminPostListQuery = z.infer<typeof AdminPostListQuerySchema>
 
-export const AdminPostListQueryResultSchema = PaginatedSchema(z.object({
+export const AdminPostListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: PostModelSchema.shape.id,
   slug: PostModelSchema.shape.slug,
   title: PostModelSchema.shape.title,
   publishesAt: PostModelSchema.shape.publishesAt,
@@ -273,6 +271,7 @@ export const AdminPostListQueryResultSchema = PaginatedSchema(z.object({
 export type AdminPostListQueryResult = z.input<typeof AdminPostListQueryResultSchema>
 
 export const AdminPostDetailQueryResultSchema = z.object({
+  id: PostModelSchema.shape.id,
   slug: PostModelSchema.shape.slug,
   title: PostModelSchema.shape.title,
   content: PostModelSchema.shape.content,
@@ -305,9 +304,9 @@ export const AdminPostUpdatePayloadSchema = z.object({
 export type AdminPostUpdatePayload = z.infer<typeof AdminPostUpdatePayloadSchema>
 
 export const AdminAccountBatchRegisterPayloadSchema = z.array(z.object({
-  username: UserModelSchema.shape.uid,
+  username: UserModelSchema.shape.username,
   password: z.string(),
-  nick: UserModelSchema.shape.nick.optional(),
+  nickname: UserModelSchema.shape.nickname.optional(),
 })).min(1).max(1000)
 
 export type AdminAccountBatchRegisterPayload = z.infer<typeof AdminAccountBatchRegisterPayloadSchema>
@@ -317,7 +316,7 @@ export const AdminAccountBatchRegisterResultSchema = z.object({
   created: z.int().nonnegative(),
   failed: z.int().nonnegative(),
   results: z.array(z.object({
-    username: UserModelSchema.shape.uid,
+    username: UserModelSchema.shape.username,
     success: z.boolean(),
     message: z.string().optional(),
   })),

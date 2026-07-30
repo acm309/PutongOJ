@@ -11,7 +11,7 @@ test('Bannded user login', async (t) => {
   const res = await request
     .post('/api/account/login')
     .send({
-      username: userSeeds.banned.uid,
+      username: userSeeds.banned.username,
       password: await encryptData(userSeeds.banned.pwd!),
     })
 
@@ -37,7 +37,7 @@ test('Wrong password login', async (t) => {
   const res = await request
     .post('/api/account/login')
     .send({
-      username: userSeeds.admin.uid,
+      username: userSeeds.admin.username,
       password: await encryptData('wrong-password'),
     })
 

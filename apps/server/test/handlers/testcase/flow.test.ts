@@ -23,7 +23,7 @@ test.before('login as admin', async (t) => {
 })
 
 test.before('create test problem', async (t) => {
-  const created = await request.post('/api/problem').send({
+  const created = await request.post('/api/problems').send({
     title: 'Testcase Lifecycle Problem',
     description: 'Used to validate testcase CRUD and file behaviors.',
     input: 'Input description',
@@ -33,12 +33,12 @@ test.before('create test problem', async (t) => {
   })
 
   t.is(created.status, 200)
-  t.truthy(created.body.pid)
-  testPid = created.body.pid
+  t.truthy(created.body.id)
+  testPid = created.body.id
 })
 
 test.serial('List is empty initially', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases`)
+  const res = await request.get(`/api/problems/${testPid}/testcases`)
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -48,7 +48,7 @@ test.serial('List is empty initially', async (t) => {
 
 test.serial('Create testcase succeeds with valid in/out', async (t) => {
   const res = await request
-    .post(`/api/problem/${testPid}/testcases`)
+    .post(`/api/problems/${testPid}/testcases`)
     .send({ in: '1 2\n', out: '3\n' })
 
   t.is(res.status, 200)
@@ -66,7 +66,7 @@ test.serial('Create testcase succeeds with valid in/out', async (t) => {
 
 test.serial('Create testcase fails with empty in/out', async (t) => {
   const res = await request
-    .post(`/api/problem/${testPid}/testcases`)
+    .post(`/api/problems/${testPid}/testcases`)
     .send({ in: '', out: '' })
 
   t.is(res.status, 200)
@@ -75,7 +75,7 @@ test.serial('Create testcase fails with empty in/out', async (t) => {
 })
 
 test.serial('List returns created testcase', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases`)
+  const res = await request.get(`/api/problems/${testPid}/testcases`)
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -85,7 +85,7 @@ test.serial('List returns created testcase', async (t) => {
 })
 
 test.serial('Get testcase input content', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/${testcaseUuid}.in`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/${testcaseUuid}.in`)
 
   t.is(res.status, 200)
   t.is(res.type, 'text/plain')
@@ -93,7 +93,7 @@ test.serial('Get testcase input content', async (t) => {
 })
 
 test.serial('Get testcase output content', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/${testcaseUuid}.out`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/${testcaseUuid}.out`)
 
   t.is(res.status, 200)
   t.is(res.type, 'text/plain')
@@ -101,7 +101,7 @@ test.serial('Get testcase output content', async (t) => {
 })
 
 test.serial('Get testcase fails with invalid file type', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/${testcaseUuid}.txt`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/${testcaseUuid}.txt`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -109,7 +109,7 @@ test.serial('Get testcase fails with invalid file type', async (t) => {
 })
 
 test.serial('Get testcase fails with invalid uuid format', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/invalid-uuid.in`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/invalid-uuid.in`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -119,7 +119,7 @@ test.serial('Get testcase fails with invalid uuid format', async (t) => {
 test.serial('Get testcase fails with non-existent uuid', async (t) => {
   const nonExistentUuid = randomUUID()
   const res = await request
-    .get(`/api/problem/${testPid}/testcases/${nonExistentUuid}.in`)
+    .get(`/api/problems/${testPid}/testcases/${nonExistentUuid}.in`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -127,7 +127,7 @@ test.serial('Get testcase fails with non-existent uuid', async (t) => {
 })
 
 test.serial('Export returns zip archive', async (t) => {
-  const res = await request.get(`/api/problem/${testPid}/testcases/export`)
+  const res = await request.get(`/api/problems/${testPid}/testcases/export`)
 
   t.is(res.status, 200)
   t.is(res.type, 'application/zip')
@@ -139,7 +139,7 @@ test.serial('Export returns zip archive', async (t) => {
 
 test.serial('Creating multiple testcases returns cumulative list', async (t) => {
   const res1 = await request
-    .post(`/api/problem/${testPid}/testcases`)
+    .post(`/api/problems/${testPid}/testcases`)
     .send({ in: '5 10\n', out: '15\n' })
 
   t.is(res1.status, 200)
@@ -147,7 +147,7 @@ test.serial('Creating multiple testcases returns cumulative list', async (t) => 
   t.is(res1.body.data.length, 2)
 
   const res2 = await request
-    .post(`/api/problem/${testPid}/testcases`)
+    .post(`/api/problems/${testPid}/testcases`)
     .send({ in: '100 200\n', out: '300\n' })
 
   t.is(res2.status, 200)
@@ -156,7 +156,7 @@ test.serial('Creating multiple testcases returns cumulative list', async (t) => 
 })
 
 test.serial('Remove testcase succeeds with valid uuid', async (t) => {
-  const res = await request.delete(`/api/problem/${testPid}/testcases/${testcaseUuid}`)
+  const res = await request.delete(`/api/problems/${testPid}/testcases/${testcaseUuid}`)
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -172,7 +172,7 @@ test.serial('Remove testcase succeeds with valid uuid', async (t) => {
 })
 
 test.serial('Remove testcase fails with invalid uuid format', async (t) => {
-  const res = await request.delete(`/api/problem/${testPid}/testcases/invalid-uuid`)
+  const res = await request.delete(`/api/problems/${testPid}/testcases/invalid-uuid`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -181,7 +181,7 @@ test.serial('Remove testcase fails with invalid uuid format', async (t) => {
 
 test.after.always('cleanup', async () => {
   if (testPid) {
-    await request.delete(`/api/problem/${testPid}`)
+    await request.delete(`/api/problems/${testPid}`)
 
     const testDir = path.resolve(__dirname, `../../../data/${testPid}`)
     if (fse.existsSync(testDir)) {

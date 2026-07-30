@@ -8,34 +8,34 @@ const request = supertest.agent(server)
 
 test('Problem list', async (t) => {
   const res = await request
-    .get('/api/problem')
+    .get('/api/problems')
 
   t.is(res.status, 200)
-  t.truthy(Array.isArray(res.body.list.docs))
-  t.truthy(Array.isArray(res.body.solved))
+  t.truthy(Array.isArray(res.body.list.items))
+  t.truthy(Array.isArray(res.body.solvedProblemIds))
 
-  if (res.body.list.docs.length > 0) {
-    t.truthy(res.body.list.docs[0].title)
-    t.truthy(res.body.list.docs[0].pid)
+  if (res.body.list.items.length > 0) {
+    t.truthy(res.body.list.items[0].title)
+    t.truthy(res.body.list.items[0].id)
   }
 })
 
 test('Problem find one', async (t) => {
-  const res = await request
-    .get('/api/problem/1001')
+  const res = await request.get('/api/problems/1001')
 
   t.is(res.status, 200)
-
-  const n = problemSeeds.find(item => item.title === res.body.title)!
-
-  for (const [ key, value ] of Object.entries(n)) {
-    t.deepEqual(res.body[key], value)
-  }
+  t.is(res.body.id, 1001)
+  t.is(res.body.title, problemSeeds[1]!.title)
+  t.is(res.body.description, problemSeeds[1]!.description)
+  t.is(res.body.inputFormat, problemSeeds[1]!.input)
+  t.is(res.body.outputFormat, problemSeeds[1]!.output)
+  t.is(res.body.sampleInput, problemSeeds[1]!.in)
+  t.is(res.body.sampleOutput, problemSeeds[1]!.out)
 })
 
 test('Problem should fail to find one', async (t) => {
   const res = await request
-    .get('/api/problem/10000')
+    .get('/api/problems/10000')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -44,7 +44,7 @@ test('Problem should fail to find one', async (t) => {
 
 test('Pid is not a number', async (t) => {
   const res = await request
-    .get('/api/problem/xx')
+    .get('/api/problems/xx')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)

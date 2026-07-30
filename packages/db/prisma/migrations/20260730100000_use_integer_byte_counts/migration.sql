@@ -1,0 +1,7 @@
+ALTER TABLE "User"
+  ALTER COLUMN "storageQuota" TYPE INTEGER
+  USING "storageQuota"::INTEGER;
+
+ALTER TABLE "File"
+  ALTER COLUMN "sizeBytes" TYPE INTEGER
+  USING "sizeBytes"::INTEGER;

@@ -1,271 +1,150 @@
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course'
-import type { ProblemState } from '../policies/problem'
-import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import Router from '@koa/router'
-import {
-  ErrorCode,
-  JudgeStatus,
-  SolutionSubmitPayloadSchema,
-  SolutionSubmitResultSchema,
-} from '@putongoj/shared'
+import { ErrorCode, JudgeStatus, SolutionSubmitPayloadSchema, SolutionSubmitResultSchema } from '@putongoj/shared'
 import fse from 'fs-extra'
-import { pick } from 'lodash'
+import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
 import { solutionCreateLimit } from '../middlewares/ratelimit'
-import Contest from '../models/Contest'
-import Problem from '../models/Problem'
-import Solution from '../models/Solution'
 import { loadContestState } from '../policies/contest'
-import { loadCourseStateOrThrow } from '../policies/course'
+import { loadCourseRoleById } from '../policies/course'
 import { loadProblemState } from '../policies/problem'
 import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse, toObjectRecord } from '../utils'
 
-export async function findOne (ctx: Context) {
-  const opt = Number.parseInt(ctx.params.sid, 10)
-  if (!Number.isInteger(opt) || opt <= 0) {
-    ctx.throw(400, 'Invalid submission id')
+async function buildJudgeTask (
+  problem: { id: number, timeLimitMs: number, memoryLimitKb: number, judgeType: string, judgeCode: string },
+  submission: { id: number, language: string, sourceCode: string },
+) {
+  const file = path.resolve(__dirname, `../../data/${problem.id}/meta.json`)
+  const meta = fse.existsSync(file) ? await fse.readJson(file) : { testcases: [] }
+  return {
+    submissionId: submission.id,
+    timeLimit: problem.timeLimitMs,
+    memoryLimit: problem.memoryLimitKb,
+    testcases: meta.testcases.map((testcase: { uuid: string }) => ({
+      uuid: testcase.uuid,
+      input: { src: `/app/data/${problem.id}/${testcase.uuid}.in` },
+      output: { src: `/app/data/${problem.id}/${testcase.uuid}.out` },
+    })),
+    language: submission.language,
+    code: submission.sourceCode,
+    type: problem.judgeType,
+    additionCode: problem.judgeCode,
   }
+}
 
-  const solution = await Solution.findOne({ sid: opt }).lean()
-  if (!solution) {
-    ctx.throw(400, 'No such a solution')
-  }
+export async function findOne (ctx: Context) {
+  const id = Number(ctx.params.submissionId)
+  if (!Number.isInteger(id) || id <= 0) { return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id') }
+
+  const database = await getDatabase()
+  const submission = await database.submission.findUnique({
+    where: { id },
+    include: { user: true, problem: true, course: true, similarSubmission: { include: { user: true } } },
+  })
+  if (!submission) { return createErrorResponse(ctx, ErrorCode.BadRequest, 'No such a submission') }
 
   const profile = await loadProfile(ctx)
-  const hasPermission = await (async () => {
-    if (solution.uid === profile.uid) {
-      return true
-    }
-    if (profile.isAdmin) {
-      return true
-    }
-    if (solution.mid > 0) {
-      const contest = await Contest
-        .findOne({ contestId: solution.mid }, 'course')
-        .populate<{ course: CourseDocument }>('course')
-      if (contest && contest.course) {
-        const { role } = await loadCourseStateOrThrow(ctx, contest.course.courseId)
-        if (role.viewSolution) {
-          return true
-        }
-      }
-    }
-    return false
-  })()
-  if (!hasPermission) {
-    ctx.throw(403, 'Permission denied')
+  const role = await loadCourseRoleById(ctx, submission.courseId)
+  if (submission.userId !== profile.id && !profile.isAdmin && !role?.canViewSubmissions) {
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
   }
 
-  // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
-  let simSolution
-  if (profile.isAdmin && solution.sim) {
-    simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
-  }
-
-  ctx.body = {
-    solution: {
-      ...pick(solution, [ 'sid', 'pid', 'uid', 'mid', 'course', 'code', 'language',
-        'create', 'status', 'judge', 'time', 'memory', 'error', 'sim', 'sim_s_id', 'testcases' ]),
-      simSolution: simSolution
-        ? pick(simSolution, [ 'sid', 'uid', 'code', 'create' ])
+  const response = {
+    submission: {
+      ...submission,
+      testcaseResults: await database.submissionTestcaseResult.findMany({ where: { submissionId: id } }),
+      similarSubmission: profile.isAdmin && submission.similarSubmission
+        ? {
+            id: submission.similarSubmission.id,
+            userId: submission.similarSubmission.userId,
+            sourceCode: submission.similarSubmission.sourceCode,
+            createdAt: submission.similarSubmission.createdAt,
+          }
         : undefined,
     },
   }
+  ctx.body = response
 }
 
-/**
- * 创建一个提交
- */
-const create = async (ctx: Context) => {
-  const profile = await loadProfile(ctx)
+async function create (ctx: Context) {
   const payload = SolutionSubmitPayloadSchema.safeParse(ctx.request.body)
-  if (!payload.success) {
-    return createZodErrorResponse(ctx, payload.error)
-  }
+  if (!payload.success) { return createZodErrorResponse(ctx, payload.error) }
 
-  const uid = profile.uid
-  const pid = payload.data.problem
-  const code = payload.data.code
-  const language = payload.data.language
-  const mid = payload.data.contest ?? -1
+  const profile = await loadProfile(ctx)
+  const contestId = payload.data.contestId ?? null
+  const problemState = await loadProblemState(ctx, payload.data.problemId, contestId ?? undefined)
+  if (!problemState) { return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem not found or access denied') }
 
-  let problemState: ProblemState | null = null
-  if (mid > 0) {
-    const contestState = await loadContestState(ctx, mid)
-    if (!contestState) {
-      ctx.throw(400, 'No such a contest')
+  if (contestId) {
+    const contestState = await loadContestState(ctx, contestId)
+    if (!contestState?.accessible || contestState.isIpBlocked) {
+      return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
     }
-    const { contest, accessible, isIpBlocked, isJury } = contestState
-
-    if (isIpBlocked) {
-      ctx.throw(403, 'Your IP address is not in the whitelist for this contest')
+    if (!contestState.isJury && !contestState.hasStarted) {
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'Contest has not started yet!')
     }
-    if (!accessible) {
-      ctx.throw(403, 'Permission denied')
+    if (!contestState.isJury && contestState.hasEnded) {
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'Contest is ended!')
+    }
+    if (!contestState.contest.problems.some(problem => problem.problemId === problemState.problem.id)) {
+      return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
     }
 
-    const now = new Date()
-    if (!isJury && contest.startsAt > now) {
-      ctx.throw(400, 'Contest is not started yet!')
-    }
-    if (!isJury && contest.endsAt < now) {
-      ctx.throw(400, 'Contest is ended!')
-    }
-
-    problemState = await loadProblemState(ctx, pid, contest.contestId)
-    if (!problemState) {
-      ctx.throw(404, 'Problem not found or access denied')
-    }
-    const contestProblem = problemState.problem
-    if (!contest.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
-      ctx.throw(400, 'No such a problem in the contest')
-    }
-    if (contest.allowedLanguages && !contest.allowedLanguages.includes(language)) {
-      ctx.throw(400, 'This language is not allowed in the contest')
-    }
-  } else {
-    problemState = await loadProblemState(ctx, pid)
-    if (!problemState) {
-      ctx.throw(404, 'Problem not found or access denied')
+    const languageAllowed = contestState.contest.allowedLanguages.length === 0
+      || contestState.contest.allowedLanguages.includes(payload.data.language)
+    if (!languageAllowed) {
+      return createErrorResponse(ctx, ErrorCode.BadRequest, 'This language is not allowed in the contest')
     }
   }
 
-  const { problem } = problemState
-
-  try {
-    const timeLimit = problem.time
-    const memoryLimit = problem.memory
-    const type = problem.type
-    const additionCode = problem.code
-
-    let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../../data/${pid}`)
-    const file = path.resolve(dir, 'meta.json')
-    if (fse.existsSync(file)) {
-      meta = await fse.readJson(file)
-    }
-    const testcases = meta.testcases.map((item: { uuid: string }) => {
-      return {
-        uuid: item.uuid,
-        input: { src: `/app/data/${pid}/${item.uuid}.in` },
-        output: { src: `/app/data/${pid}/${item.uuid}.out` },
-      }
-    })
-
-    const solution = new Solution({
-      pid, mid, uid, code, language,
-      length: Buffer.from(code).length, // 这个属性是不是没啥用？
-    })
-
-    await solution.save()
-
-    const sid = solution.sid
-    const submission = {
-      sid, timeLimit, memoryLimit,
-      testcases, language, code,
-      type, additionCode,
-    }
-
-    await redis.rpush('judger:task', JSON.stringify(submission))
-    ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
-
-    const result = SolutionSubmitResultSchema.encode({ solution: sid })
-    return createEnvelopedResponse(ctx, result)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
-  }
+  const database = await getDatabase()
+  const submission = await database.submission.create({
+    data: {
+      problemId: problemState.problem.id,
+      userId: profile.id,
+      contestId,
+      courseId: null,
+      sourceCode: payload.data.sourceCode,
+      language: payload.data.language,
+    },
+  })
+  await redis.rpush('judger:task', JSON.stringify(await buildJudgeTask(problemState.problem, submission)))
+  return createEnvelopedResponse(ctx, SolutionSubmitResultSchema.encode({ submissionId: submission.id }))
 }
 
 async function updateSolution (ctx: Context) {
-  const profile = await loadProfile(ctx)
-  const opt = toObjectRecord(ctx.request.body)
-
-  const sid = Number(ctx.params.sid)
-  if (!Number.isInteger(sid) || sid <= 0) {
-    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id')
-  }
-  const updatedJudge = Number(opt.judge)
-  if (updatedJudge !== JudgeStatus.RejudgePending && updatedJudge !== JudgeStatus.Skipped) {
-    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid judge status, only support RejudgePending and Skipped')
+  const id = Number(ctx.params.submissionId)
+  const status = toObjectRecord(ctx.request.body).status
+  if (!Number.isInteger(id) || !(status === JudgeStatus.REJUDGE_PENDING || status === JudgeStatus.SKIPPED)) {
+    return createErrorResponse(ctx, ErrorCode.BadRequest)
   }
 
-  const solution = await Solution.findOne({ sid })
-  if (!solution) {
-    return createErrorResponse(ctx, ErrorCode.NotFound)
+  const database = await getDatabase()
+  const submission = await database.submission.update({
+    where: { id },
+    data: {
+      status,
+      timeUsedMs: 0,
+      memoryUsedKb: 0,
+      errorMessage: '',
+      similarity: 0,
+      similarSubmissionId: null,
+      testcaseResults: { deleteMany: {} },
+    },
+    include: { problem: true, user: true },
+  })
+  if (status === JudgeStatus.REJUDGE_PENDING) {
+    await redis.rpush('judger:task', JSON.stringify(await buildJudgeTask(submission.problem, submission)))
   }
-  const pid = solution.pid
-  const problem = await Problem.findOne({ pid })
-  if (!problem) {
-    return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution not found')
-  }
-
-  try {
-    solution.judge = updatedJudge
-    solution.time = 0
-    solution.memory = 0
-    solution.error = ''
-    solution.sim = 0
-    solution.sim_s_id = 0
-    solution.testcases = []
-
-    await solution.save()
-  } catch (err) {
-    ctx.auditLog.error('Failed to update solution', err)
-    return createErrorResponse(ctx, ErrorCode.InternalServerError)
-  }
-
-  if (updatedJudge !== JudgeStatus.RejudgePending) {
-    return createEnvelopedResponse(ctx, solution)
-  }
-
-  try {
-    const timeLimit = problem.time
-    const memoryLimit = problem.memory
-    const type = problem.type
-    const additionCode = problem.code
-
-    let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../../data/${pid}`)
-    const file = path.resolve(dir, 'meta.json')
-    if (fse.existsSync(file)) {
-      meta = await fse.readJson(file)
-    }
-    const testcases = meta.testcases.map((item: { uuid: string }) => {
-      return {
-        uuid: item.uuid,
-        input: { src: `/app/data/${pid}/${item.uuid}.in` },
-        output: { src: `/app/data/${pid}/${item.uuid}.out` },
-      }
-    })
-    const submission = {
-      sid, timeLimit, memoryLimit, testcases,
-      language: solution.language,
-      code: solution.code,
-      type, additionCode,
-    }
-
-    await redis.rpush('judger:task', JSON.stringify(submission))
-    ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)
-  } catch (err) {
-    ctx.auditLog.error('Failed to push solution to judger queue', err)
-    return createErrorResponse(ctx, ErrorCode.InternalServerError)
-  }
-
-  return createEnvelopedResponse(ctx, solution)
+  return createEnvelopedResponse(ctx, submission)
 }
 
-function registerSolutionHandlers (router: Router) {
-  const solutionRouter = new Router({ prefix: '/status' })
-
-  solutionRouter.get('/:sid', loginRequire, findOne)
-  solutionRouter.put('/:sid', rootRequire, updateSolution)
+export default function registerSolutionHandlers (router: Router) {
+  const solutionRouter = new Router({ prefix: '/submissions' })
+  solutionRouter.get('/:submissionId', loginRequire, findOne)
+  solutionRouter.put('/:submissionId', rootRequire, updateSolution)
   solutionRouter.post('/', loginRequire, solutionCreateLimit, create)
-
   router.use(solutionRouter.routes(), solutionRouter.allowedMethods())
 }
-
-export default registerSolutionHandlers

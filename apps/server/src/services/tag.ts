@@ -1,62 +1,81 @@
-import type { TagModel } from '@putongoj/shared'
-import type { Types } from 'mongoose'
-import { escapeRegExp } from 'lodash'
-import Tag from '../models/Tag'
+import type { TagColor } from '@putongoj/db'
+import { getDatabase } from '../config/postgres'
+import logger from '../utils/logger'
 
 export async function getTags () {
-  const tags = await Tag
-    .find({})
-    .select({ _id: 0, tagId: 1, name: 1, color: 1, createdAt: 1, updatedAt: 1 })
-    .sort({ tagId: 1 })
-    .lean()
+  const database = await getDatabase()
+  const tags = await database.tag.findMany({ orderBy: { id: 'asc' } })
   return tags
 }
 
-export async function getTagObjectIds (
-  tagIds: number[],
-): Promise<Types.ObjectId[]> {
-  const tags = await Tag
-    .find({ tagId: { $in: tagIds } }, '_id')
-  return tags.map(t => t._id) as Types.ObjectId[]
+export async function getTagIds (tagIds: number[]): Promise<number[]> {
+  const database = await getDatabase()
+  const tags = await database.tag.findMany({
+    where: { id: { in: [ ...new Set(tagIds) ] } },
+    select: { id: true },
+  })
+  return tags.map(tag => tag.id)
 }
 
 export async function getTag (tagId: number) {
-  const tag = await Tag
-    .findOne({ tagId })
-    .lean()
+  const database = await getDatabase()
+  const tag = await database.tag.findUnique({ where: { id: tagId } })
   return tag
 }
 
-export async function findTagObjectIdsByQuery (
-  query: string,
-): Promise<Types.ObjectId[]> {
-  const tags = await Tag
-    .find({ name: { $regex: escapeRegExp(query), $options: 'i' } }, '_id')
-  return tags.map(t => t._id) as Types.ObjectId[]
+export async function findTagIdsByQuery (query: string): Promise<number[]> {
+  const database = await getDatabase()
+  const tags = await database.tag.findMany({
+    where: { name: { contains: query, mode: 'insensitive' } },
+    select: { id: true },
+  })
+  return tags.map(tag => tag.id)
 }
 
-export async function createTag (opt: Partial<TagModel>) {
-  const tag = new Tag(opt)
-  await tag.save()
+export async function createTag (opt: { name: string, color: TagColor }) {
+  const database = await getDatabase()
+  const tag = await database.tag.create({
+    data: {
+      name: opt.name,
+      color: opt.color,
+    },
+  })
   return tag
 }
 
-export async function updateTag (tagId: number, opt: Partial<TagModel>) {
-  const tag = await Tag
-    .findOneAndUpdate({ tagId }, { $set: opt }, { returnDocument: 'after' })
-  return tag
+export async function updateTag (tagId: number, opt: Partial<{ name: string, color: TagColor }>) {
+  const database = await getDatabase()
+  try {
+    const tag = await database.tag.update({
+      where: { id: tagId },
+      data: {
+        ...(opt.name === undefined ? {} : { name: opt.name }),
+        ...(opt.color === undefined ? {} : { color: opt.color }),
+      },
+    })
+    return tag
+  } catch (error) {
+    logger.warn(`Failed to update tag <Tag:${tagId}>: ${String(error)}`)
+    return null
+  }
 }
 
 export async function removeTag (tagId: number): Promise<boolean> {
-  const res = await Tag.deleteOne({ tagId })
-  return res.deletedCount === 1
+  const database = await getDatabase()
+  try {
+    await database.tag.delete({ where: { id: tagId } })
+    return true
+  } catch (error) {
+    logger.warn(`Failed to remove tag <Tag:${tagId}>: ${String(error)}`)
+    return false
+  }
 }
 
 const tagService = {
   getTags,
-  getTagObjectIds,
+  getTagIds,
   getTag,
-  findTagObjectIdsByQuery,
+  findTagIdsByQuery,
   createTag,
   updateTag,
   removeTag,

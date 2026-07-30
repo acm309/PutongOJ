@@ -1,4 +1,3 @@
-import { UserPrivilege } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -27,14 +26,14 @@ test.before('Create user and login', async (t) => {
     .get('/api/account/profile')
   t.is(r.status, 200)
   t.true(r.body.success)
-  t.is(r.body.data.uid, uid)
-  t.is(r.body.data.privilege, UserPrivilege.User)
+  t.is(r.body.data.username, uid)
+  t.is(r.body.data.privilege, 'USER')
 })
 
 test('Update user with nick not valid (too long)', async (t) => {
   const r = await request
     .put('/api/account/profile')
-    .send({ nick: 'a'.repeat(31) })
+    .send({ nickname: 'a'.repeat(31) })
   t.is(r.status, 200)
   t.false(r.body.success)
 })
@@ -42,25 +41,25 @@ test('Update user with nick not valid (too long)', async (t) => {
 test('Update user\'s nick then clear', async (t) => {
   let r = await request
     .put('/api/account/profile')
-    .send({ nick: 'test20424' })
+    .send({ nickname: 'test20424' })
   t.is(r.status, 200)
   t.true(r.body.success)
 
   r = await request
     .get(`/api/users/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.data.nick, 'test20424')
+  t.is(r.body.data.nickname, 'test20424')
 
   r = await request
     .put('/api/account/profile')
-    .send({ nick: '' })
+    .send({ nickname: '' })
   t.is(r.status, 200)
   t.true(r.body.success)
 
   r = await request
     .get(`/api/users/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.data.nick, '')
+  t.is(r.body.data.nickname, '')
 })
 
 test('Update user with motto not valid (too long)', async (t) => {
@@ -130,7 +129,7 @@ test('Update user\'s school then clear', async (t) => {
 test('Update user with mail not valid (too long)', async (t) => {
   const r = await request
     .put('/api/account/profile')
-    .send({ mail: 'a'.repeat(255) })
+    .send({ email: 'a'.repeat(255) })
   t.is(r.status, 200)
   t.false(r.body.success)
 })
@@ -138,7 +137,7 @@ test('Update user with mail not valid (too long)', async (t) => {
 test('Update user with mail not valid (invalid email)', async (t) => {
   const r = await request
     .put('/api/account/profile')
-    .send({ mail: 'test' })
+    .send({ email: 'test' })
   t.is(r.status, 200)
   t.false(r.body.success)
 })
@@ -146,45 +145,45 @@ test('Update user with mail not valid (invalid email)', async (t) => {
 test('Update user\'s mail then clear', async (t) => {
   let r = await request
     .put('/api/account/profile')
-    .send({ mail })
+    .send({ email: mail })
   t.is(r.status, 200)
   t.true(r.body.success)
 
   r = await request
     .get(`/api/users/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.data.mail, mail)
+  t.is(r.body.data.email, mail)
 
   r = await request
     .put('/api/account/profile')
-    .send({ mail: '' })
+    .send({ email: '' })
   t.is(r.status, 200)
   t.true(r.body.success)
 
   r = await request
     .get(`/api/users/${uid}`)
   t.is(r.status, 200)
-  t.is(r.body.data.mail, '')
+  t.is(r.body.data.email, '')
 })
 
 test.skip('Update user with privilege remains unchanged', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: UserPrivilege.User })
+    .send({ privilege: 'USER' })
   t.is(r.status, 200)
 })
 
 test.skip('Update user with privilege up to admin', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: UserPrivilege.Admin })
+    .send({ privilege: 'ADMIN' })
   t.is(r.status, 403)
 })
 
 test.skip('Update user with privilege up to root', async (t) => {
   const r = await request
     .put(`/api/users/${uid}`)
-    .send({ privilege: UserPrivilege.Root })
+    .send({ privilege: 'ROOT' })
   t.is(r.status, 403)
 })
 
@@ -228,7 +227,7 @@ test.after.skip('Update user\'s pwd then check', async (t) => {
     .get('/api/account/profile')
   t.is(r.status, 200)
   t.true(r.body.success)
-  t.is(r.body.data.uid, uid)
+  t.is(r.body.data.username, uid)
 })
 
 test.after.always('close server', () => {

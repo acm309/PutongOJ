@@ -1,41 +1,40 @@
 import { z } from 'zod'
-import { JudgeStatus, Language } from '@/consts/index.js'
-import { stringToInt } from '../codec.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
-import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
+import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const AccountProfileQueryResultSchema = z.object({
-  uid: UserModelSchema.shape.uid,
+  id: UserModelSchema.shape.id,
+  username: UserModelSchema.shape.username,
   privilege: UserModelSchema.shape.privilege,
-  nick: UserModelSchema.shape.nick,
-  avatar: UserModelSchema.shape.avatar,
+  nickname: UserModelSchema.shape.nickname,
+  avatarUrl: UserModelSchema.shape.avatarUrl,
   motto: UserModelSchema.shape.motto,
-  mail: UserModelSchema.shape.mail,
+  email: UserModelSchema.shape.email,
   school: UserModelSchema.shape.school,
 })
 
 export type AccountProfileQueryResult = z.input<typeof AccountProfileQueryResultSchema>
 
 export const AccountLoginPayloadSchema = z.object({
-  username: UserModelSchema.shape.uid,
+  username: UserModelSchema.shape.username,
   password: z.base64(),
 })
 
 export type AccountLoginPayload = z.infer<typeof AccountLoginPayloadSchema>
 
 export const AccountRegisterPayloadSchema = z.object({
-  username: UserModelSchema.shape.uid,
+  username: UserModelSchema.shape.username,
   password: z.base64(),
 })
 
 export type AccountRegisterPayload = z.infer<typeof AccountRegisterPayloadSchema>
 
 export const AccountEditPayloadSchema = z.object({
-  nick: UserModelSchema.shape.nick.optional(),
-  avatar: UserModelSchema.shape.avatar.optional(),
+  nickname: UserModelSchema.shape.nickname.optional(),
+  avatarUrl: UserModelSchema.shape.avatarUrl.optional(),
   motto: UserModelSchema.shape.motto.optional(),
-  mail: UserModelSchema.shape.mail.optional(),
+  email: UserModelSchema.shape.email.optional(),
   school: UserModelSchema.shape.school.optional(),
 })
 
@@ -52,24 +51,24 @@ export const AccountSubmissionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
-  problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
-  judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
-  language: stringToInt.pipe(z.enum(Language)).optional(),
+  sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
+  problemId: z.coerce.number().int().positive().optional(),
+  contestId: z.coerce.number().int().positive().optional(),
+  status: SolutionModelSchema.shape.status.optional(),
+  language: SolutionModelSchema.shape.language.optional(),
 })
 
 export type AccountSubmissionListQuery = z.infer<typeof AccountSubmissionListQuerySchema>
 
-export const AccountSubmissionListQueryResultSchema = PaginatedSchema(z.object({
-  sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
-  mid: SolutionModelSchema.shape.mid,
+export const AccountSubmissionListQueryResultSchema = PaginatedResultSchema(z.object({
+  id: SolutionModelSchema.shape.id,
+  problemId: SolutionModelSchema.shape.problemId,
+  contestId: SolutionModelSchema.shape.contestId,
   language: SolutionModelSchema.shape.language,
-  judge: SolutionModelSchema.shape.judge,
-  time: SolutionModelSchema.shape.time,
-  memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
+  status: SolutionModelSchema.shape.status,
+  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
+  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
+  similarity: SolutionModelSchema.shape.similarity,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 

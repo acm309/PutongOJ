@@ -112,6 +112,14 @@ function postgresText (value: string | undefined): string {
   return (value ?? '').replaceAll('\0', '')
 }
 
+function postgresInt (value: number | undefined, field: string): number {
+  const result = value ?? 0
+  if (!Number.isSafeInteger(result) || result < 0 || result > 2_147_483_647) {
+    throw new Error(`${field} must be an integer between 0 and 2147483647, received ${String(value)}`)
+  }
+  return result
+}
+
 function requiredEnum<T> (
   mapping: Record<number, T>,
   value: number | undefined,
@@ -222,7 +230,7 @@ export async function migrateBaseEntities (
         username: postgresText(user.uid),
         passwordHash: postgresText(user.pwd),
         privilege: requiredEnum(userPrivileges, user.privilege ?? 1, 'User.privilege'),
-        storageQuota: BigInt(user.storageQuota ?? 0),
+        storageQuota: postgresInt(user.storageQuota, 'User.storageQuota'),
         nickname: postgresText(user.nick),
         avatarUrl: postgresText(user.avatar),
         motto: postgresText(user.motto),
