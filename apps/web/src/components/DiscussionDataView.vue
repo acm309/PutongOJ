@@ -8,7 +8,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import { formatRelativeTime, timePretty } from '@/utils/format'
 
 const props = defineProps<{
-  value: DiscussionListQueryResult['docs']
+  value: DiscussionListQueryResult['items']
   query: DiscussionListQuery
   contestId?: number
   problemLabels?: Map<number, string>
@@ -19,11 +19,11 @@ const { locale } = useI18n()
 </script>
 
 <template>
-  <div v-for="doc in props.value" :key="doc.discussionId" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
+  <div v-for="doc in props.value" :key="doc.id" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
     <div class="flex flex-nowrap gap-x-4 gap-y-1 justify-between">
       <RouterLink
         class="font-medium grow hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty transition-colors"
-        :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
+        :to="{ name: 'DiscussionDetail', params: { discussionId: doc.id } }"
       >
         {{ doc.title }}
       </RouterLink>
@@ -31,23 +31,23 @@ const { locale } = useI18n()
         <span class="flex flex-wrap-reverse gap-1 justify-end">
           <RouterLink
             v-if="!hideProblemTag && doc.contest && !props.contestId"
-            :to="{ name: 'ContestOverview', params: { contestId: doc.contest.contestId } }"
+            :to="{ name: 'ContestOverview', params: { contestId: doc.contest.id } }"
           >
-            <Tag :value="doc.contest.contestId" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
+            <Tag :value="doc.contest.id" severity="secondary" class="cursor-pointer" icon="pi pi-trophy" />
           </RouterLink>
           <RouterLink
             v-if="props.contestId && doc.problem"
-            :to="{ name: 'contestProblem', params: { contestId: props.contestId, problemId: doc.problem.pid } }"
+            :to="{ name: 'contestProblem', params: { contestId: props.contestId, problemId: doc.problem.id } }"
           >
             <Tag
-              v-if="doc.problem" :value="props.problemLabels?.get(doc.problem.pid) || doc.problem.pid"
+              v-if="doc.problem" :value="props.problemLabels?.get(doc.problem.id) || doc.problem.id"
               severity="secondary" class="cursor-pointer" icon="pi pi-flag"
             />
           </RouterLink>
-          <RouterLink v-else-if="doc.problem" :to="{ name: 'problemInfo', params: { pid: doc.problem.pid } }">
-            <Tag :value="doc.problem.pid" severity="secondary" class="cursor-pointer" icon="pi pi-flag" />
+          <RouterLink v-else-if="doc.problem" :to="{ name: 'problemInfo', params: { problemId: doc.problem.id } }">
+            <Tag :value="doc.problem.id" severity="secondary" class="cursor-pointer" icon="pi pi-flag" />
           </RouterLink>
-          <Tag v-if="doc.pinned" class="min-h-[22px]" icon="pi pi-thumbtack" />
+          <Tag v-if="doc.isPinned" class="min-h-[22px]" icon="pi pi-thumbtack" />
           <DiscussionTypeTag :type="doc.type" />
         </span>
       </span>
@@ -55,10 +55,10 @@ const { locale } = useI18n()
     <div class="flex flex-wrap gap-x-6 gap-y-1 items-end justify-between text-nowrap">
       <RouterLink
         class="flex gap-2 hover:text-primary items-center text-muted-color transition-colors"
-        :to="{ name: 'UserProfile', params: { uid: doc.author.uid } }"
+        :to="{ name: 'UserProfile', params: { username: doc.author.username } }"
       >
-        <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatar" />
-        {{ doc.author.uid }}
+        <UserAvatar class="h-6 w-6" shape="circle" :image="doc.author.avatarUrl" />
+        {{ doc.author.username }}
       </RouterLink>
       <div class="flex gap-4 grow justify-end text-muted-color text-sm">
         <span class="flex gap-2">

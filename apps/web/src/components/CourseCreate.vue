@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CourseVisibility } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -37,13 +38,17 @@ async function submit () {
 
   submitting.value = true
   try {
-    const id = await courseStore.createCourse({
+    const response = await courseStore.createCourse({
       name: form.value.name,
       description: form.value.description,
-      encrypt: form.value.isPublic ? 1 : 2,
-    } as any)
+      visibility: form.value.isPublic ? CourseVisibility.PUBLIC : CourseVisibility.PRIVATE,
+    })
+    if (!response.success) {
+      message.error(t('oj.course_create_failed', { error: response.message }))
+      return
+    }
     message.success(t('oj.course_create_success'))
-    router.push({ name: 'courseProblems', params: { id } })
+    router.push({ name: 'courseProblems', params: { id: response.data.id } })
     visible.value = false
   } catch (e: any) {
     message.error(t('oj.course_create_failed', { error: e.message }))

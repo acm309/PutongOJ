@@ -22,7 +22,7 @@ const message = useMessage()
 const { t } = useI18n()
 
 const query = ref({} as FileListQuery)
-const docs = ref([] as FileListQueryResult['files']['docs'])
+const docs = ref([] as FileListQueryResult['files']['items'])
 const usage = ref({ usedBytes: 0, storageQuota: 0 })
 const total = ref(0)
 const loading = ref(false)
@@ -53,7 +53,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.files.docs
+  docs.value = resp.data.files.items
   total.value = resp.data.files.total
   usage.value = resp.data.usage
 }
@@ -63,7 +63,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -115,7 +115,7 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <FileDataTable
-      :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort"
+      :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort === 'asc' ? 1 : -1"
       :deleting-id="deletingId" :hide-user="true" @sort="onSort" @delete="onDelete"
     />
 

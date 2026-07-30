@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CourseVisibility } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Paginator from 'primevue/paginator'
@@ -7,7 +8,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCreate from '@/components/CourseCreate.vue'
-import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -15,12 +15,10 @@ import { onRouteQueryUpdate } from '@/utils/helper'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const rootStore = useRootStore()
 const courseStore = useCourseStore()
 const sessionStore = useSessionStore()
 
 const { findCourses } = courseStore
-const { encrypt } = storeToRefs(rootStore)
 const { courses } = storeToRefs(courseStore)
 const { isRoot } = storeToRefs(sessionStore)
 
@@ -82,9 +80,9 @@ onRouteQueryUpdate(fetch)
     </template>
 
     <template v-else>
-      <div v-for="item in courses.docs" :key="item.courseId" class="border-surface border-t p-2">
+      <div v-for="item in courses.items" :key="item.id" class="border-surface border-t p-2">
         <RouterLink
-          :to="{ name: 'courseProblems', params: { id: item.courseId } }"
+          :to="{ name: 'courseProblems', params: { id: item.id } }"
           class="block group px-4 py-3 space-y-2"
         >
           <div class="flex flex-row gap-2 justify-between">
@@ -94,7 +92,7 @@ onRouteQueryUpdate(fetch)
               {{ item.name }}
             </p>
             <div>
-              <Tag v-if="item.encrypt === encrypt.Public" :value="t('ptoj.public')" severity="success" />
+              <Tag v-if="item.visibility === CourseVisibility.PUBLIC" :value="t('ptoj.public')" severity="success" />
               <Tag v-else :value="t('ptoj.private')" severity="warn" />
             </div>
           </div>

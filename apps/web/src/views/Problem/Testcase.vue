@@ -26,7 +26,7 @@ const confirm = useConfirm()
 const { problem } = storeToRefs(useProblemStore())
 
 const docs = ref<ProblemTestcaseListQueryResult>([])
-const testcase = ref({ in: '', out: '' } as Record<TestcaseFileType, string>)
+const testcase = ref({ input: '', output: '' })
 const testcaseInputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const testcaseOutputRef = ref<InstanceType<typeof TestcaseInput> | null>(null)
 const loading = ref(false)
@@ -36,12 +36,13 @@ const parsedTestcases = ref<TestcasePair[]>([])
 const fileInputRef = ref<HTMLInputElement>()
 
 const testcaseExportUrl = computed(() => {
-  return `/api/problem/${encodeURIComponent(problem.value.pid)}/testcases/export`
+  return `/api/problems/${encodeURIComponent(problem.value?.id ?? 0)}/testcases/export`
 })
 
 async function fetchTestcases () {
   loading.value = true
-  const resp = await findTestcases(problem.value.pid)
+  if (!problem.value) return
+  const resp = await findTestcases(problem.value.id)
   loading.value = false
   if (!resp.success) {
     message.error(t('ptoj.failed_fetch_testcases'), resp.message)
@@ -64,7 +65,8 @@ function handleDeleteTestcase (item: ProblemTestcaseListQueryResult[number]) {
     },
     accept: async () => {
       loading.value = true
-      const resp = await removeTestcase(problem.value.pid, item.uuid)
+      if (!problem.value) return
+      const resp = await removeTestcase(problem.value.id, item.uuid)
       loading.value = false
 
       if (!resp.success) {
@@ -82,11 +84,11 @@ function handleDeleteTestcase (item: ProblemTestcaseListQueryResult[number]) {
 }
 
 async function handleCreateTestcase () {
-  if (!testcase.value.in.trim() && !testcase.value.out.trim()) {
+  if (!testcase.value.input.trim() && !testcase.value.output.trim()) {
     message.error(t('ptoj.failed_create_testcase'), t('ptoj.testcase_cannot_both_empty'))
     return
   }
-  if (!testcase.value.in.trim() || !testcase.value.out.trim()) {
+  if (!testcase.value.input.trim() || !testcase.value.output.trim()) {
     confirm.require({
       message: t('ptoj.testcase_incomplete_message'),
       rejectProps: {
@@ -106,9 +108,10 @@ async function handleCreateTestcase () {
 
 async function createTestcaseRequest (testcase: ProblemTestcaseCreatePayload) {
   loading.value = true
-  const resp = await createTestcase(problem.value.pid, {
-    in: testcase.in.replace(/\r\n/g, '\n'),
-    out: testcase.out.replace(/\r\n/g, '\n'),
+  if (!problem.value) return
+  const resp = await createTestcase(problem.value.id, {
+    input: testcase.input.replace(/\r\n/g, '\n'),
+    output: testcase.output.replace(/\r\n/g, '\n'),
   })
   loading.value = false
 
@@ -173,9 +176,10 @@ async function confirmImport () {
 
   for (const testcase of parsedTestcases.value) {
     try {
-      const resp = await createTestcase(problem.value.pid, {
-        in: testcase.inputContent.replace(/\r\n/g, '\n'),
-        out: testcase.outputContent.replace(/\r\n/g, '\n'),
+      if (!problem.value) break
+      const resp = await createTestcase(problem.value.id, {
+        input: testcase.inputContent.replace(/\r\n/g, '\n'),
+        output: testcase.outputContent.replace(/\r\n/g, '\n'),
       })
 
       if (resp.success) {
@@ -218,7 +222,7 @@ fetchTestcases()
 </script>
 
 <template>
-  <div class="p-0">
+  <div v-if="problem" class="p-0">
     <div class="border-b border-surface flex flex-wrap gap-4 items-center justify-between p-6">
       <div class="flex font-semibold gap-4 items-center">
         <i class="p-[4.5px] pi pi-database text-2xl" />
@@ -251,11 +255,11 @@ fetchTestcases()
       <Column :header="t('ptoj.files')">
         <template #body="{ data }">
           <div class="flex gap-2 items-center">
-            <a :href="testcaseUrl(problem.pid, data.uuid, 'in')" target="_blank" class="text-primary">
+            <a :href="testcaseUrl(problem.id, data.uuid, 'in')" target="_blank" class="text-primary">
               {{ t('ptoj.input') }}
             </a>
             <Divider layout="vertical" />
-            <a :href="testcaseUrl(problem.pid, data.uuid, 'out')" target="_blank" class="text-primary">
+            <a :href="testcaseUrl(problem.id, data.uuid, 'out')" target="_blank" class="text-primary">
               {{ t('ptoj.output') }}
             </a>
           </div>
@@ -280,8 +284,8 @@ fetchTestcases()
         {{ t('ptoj.create_testcase') }}
       </div>
 
-      <TestcaseInput ref="testcaseInputRef" v-model="testcase.in" :type="TestcaseFileType.Input" />
-      <TestcaseInput ref="testcaseOutputRef" v-model="testcase.out" :type="TestcaseFileType.Output" />
+      <TestcaseInput ref="testcaseInputRef" v-model="testcase.input" :type="TestcaseFileType.Input" />
+      <TestcaseInput ref="testcaseOutputRef" v-model="testcase.output" :type="TestcaseFileType.Output" />
 
       <div class="flex justify-end">
         <Button icon="pi pi-plus" :label="t('ptoj.create')" :loading="loading" @click="handleCreateTestcase" />

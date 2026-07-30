@@ -114,9 +114,9 @@ async function handleAuthSubmit () {
       })
 
       if (result.success) {
-        const { uid } = result.data
+        const { username } = result.data
 
-        message.success(t('ptoj.successful_login'), t('ptoj.welcome_back', { username: uid }))
+        message.success(t('ptoj.successful_login'), t('ptoj.welcome_back', { username }))
         sessionStore.setProfile(result.data)
         closeModal()
 

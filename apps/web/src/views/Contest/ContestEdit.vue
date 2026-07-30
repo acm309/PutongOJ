@@ -63,7 +63,7 @@ function onIpWhitelistRowEditSave (event: any) {
 
 function normalizeAllowedLanguages (languages: Language[] | null | undefined, enabled: boolean) {
   if (!enabled) {
-    return null
+    return []
   }
 
   return [ ...(languages ?? []) ].sort((a, b) => languagesOrder.indexOf(a) - languagesOrder.indexOf(b))
@@ -166,10 +166,15 @@ async function addProblem () {
   }
 
   try {
-    const { problem } = await problemStore.findOne({ pid: problemToAdd.value })
+    const response = await problemStore.findOne(problemToAdd.value)
+    if (!response.success) {
+      message.error(t('ptoj.failed_add_problem'), response.message)
+      return
+    }
     problems.value.push({
-      problemId: (problem as any).problemId ?? problem.pid,
-      title: problem.title,
+      position: problems.value.length + 1,
+      problemId: response.data.id,
+      title: response.data.title,
     })
   } catch (error: any) {
     message.error(t('ptoj.failed_proceed'), error?.message)
@@ -281,7 +286,7 @@ async function onSaveProblems () {
   const currentProblemIds = problems.value.map(p => p.problemId)
   const originalProblemIds = contestConfig.value.problems.map(p => p.problemId) || []
   if (JSON.stringify(currentProblemIds) !== JSON.stringify(originalProblemIds)) {
-    payload.problems = currentProblemIds
+    payload.problemIds = currentProblemIds
   }
 
   savingProblems.value = true
@@ -350,7 +355,7 @@ onMounted(() => {
         {{ t('ptoj.access_control') }}
       </h2>
 
-      <LabeledSwitch v-model="form.isHidden" :label="t('ptoj.hidden')" :description="t('ptoj.hide_from_listings')" />
+      <LabeledSwitch v-model="form.isHidden" :label="t('ptoj.isHidden')" :description="t('ptoj.hide_from_listings')" />
 
       <LabeledSwitch v-model="form.isPublic" :label="t('ptoj.public')" :description="t('ptoj.anyone_can_join')" />
 
@@ -465,8 +470,8 @@ onMounted(() => {
       <IftaLabel>
         <Select
           v-model="form.labelingStyle" :options="[
-            { label: t('ptoj.numeric_labeling'), value: LabelingStyle.Numeric },
-            { label: t('ptoj.alphabetic_labeling'), value: LabelingStyle.Alphabetic },
+            { label: t('ptoj.numeric_labeling'), value: LabelingStyle.NUMERIC },
+            { label: t('ptoj.alphabetic_labeling'), value: LabelingStyle.ALPHABETIC },
           ]" option-label="label" option-value="value" fluid
         />
         <label for="scoreboardUnfrozenAt">{{ t('ptoj.labeling_style') }}</label>

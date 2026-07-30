@@ -22,7 +22,7 @@ function onCopy (content: string) {
   <div class="proinfo-wrap">
     <h1 class="font-bold text-4xl">
       <slot name="title">
-        {{ problem.pid }}: {{ problem.title }}
+        {{ problem.id }}: {{ problem.title }}
       </slot>
     </h1>
     <h5 class="flex flex-wrap gap-4 justify-center">

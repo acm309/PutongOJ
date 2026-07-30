@@ -118,7 +118,7 @@ const profileItems = computed(() => [
     label: t('ptoj.header_profile'),
     icon: 'pi pi-user',
     command: () => {
-      router.push({ name: 'UserProfile', params: { uid: profile.value!.uid } })
+      router.push({ name: 'UserProfile', params: { username: profile.value!.username } })
     },
   },
   {
@@ -202,8 +202,8 @@ const profileItems = computed(() => [
             text plain class="flex gap-2 items-center p-2 rounded-lg transition-colors"
             @click="toggleProfileMenu"
           >
-            <UserAvatar :image="profile!.avatar" shape="circle" />
-            <span class="font-medium hidden sm:block">{{ profile!.uid }}</span>
+            <UserAvatar :image="profile!.avatarUrl" shape="circle" />
+            <span class="font-medium hidden sm:block">{{ profile!.username }}</span>
             <i class="pi pi-chevron-down text-xs" />
           </Button>
 

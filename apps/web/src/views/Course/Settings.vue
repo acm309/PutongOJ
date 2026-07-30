@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CourseVisibility } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import IftaLabel from 'primevue/iftalabel'
@@ -7,7 +8,7 @@ import Textarea from 'primevue/textarea'
 import { useConfirm } from 'primevue/useconfirm'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { rearrangeCourseProblems, updateCourse as requestUpdateCourse } from '@/api/course'
 import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
@@ -24,14 +25,16 @@ const { course } = storeToRefs(courseStore)
 const submitting = ref(false)
 
 const isPublic = computed({
-  get: () => course.value.encrypt === 1,
+  get: () => course.value?.visibility === CourseVisibility.PUBLIC,
   set: (value: boolean) => {
-    course.value.encrypt = value ? 1 : 2
+    if (course.value) {
+      course.value.visibility = value ? CourseVisibility.PUBLIC : CourseVisibility.PRIVATE
+    }
   },
 })
 
 function validate () {
-  if (!course.value.name) {
+  if (!course.value?.name) {
     message.warn(t('oj.course_name_required'))
     return false
   }
@@ -57,10 +60,11 @@ async function updateCourse () {
 
   submitting.value = true
   try {
-    await api.course.updateCourse(course.value.courseId, {
+    if (!course.value) return
+    await requestUpdateCourse(course.value.id, {
       name: course.value.name,
       description: course.value.description,
-      encrypt: course.value.encrypt,
+      visibility: course.value.visibility,
       joinCode: course.value.joinCode || '',
     })
     message.success(t('oj.course_updated_successfully'))
@@ -73,7 +77,7 @@ async function updateCourse () {
 
 function rearrangeProblems (event: any) {
   confirm.require({
-    target: event.currentTarget,
+    target: event.currentTarget as HTMLElement,
     message: t('oj.confirm'),
     header: t('oj.confirm'),
     rejectProps: {
@@ -85,7 +89,9 @@ function rearrangeProblems (event: any) {
       label: t('oj.ok'),
     },
     accept: () => {
-      api.course.rearrangeProblems(course.value.courseId)
+      if (course.value) {
+        rearrangeCourseProblems(course.value.id)
+      }
       message.info(t('oj.rearrange_task_dispatched'))
     },
   })
@@ -93,7 +99,7 @@ function rearrangeProblems (event: any) {
 </script>
 
 <template>
-  <div class="max-w-4xl p-0">
+  <div v-if="course" class="max-w-4xl p-0">
     <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6">
       <h2 class="-mb-1.75 font-semibold md:col-span-2 text-lg">
         {{ t('ptoj.basic_information') }}

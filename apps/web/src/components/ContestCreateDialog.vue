@@ -13,7 +13,7 @@ import { useMessage } from '@/utils/message'
 import LabeledSwitch from './LabeledSwitch.vue'
 
 const props = defineProps<{
-  course?: number
+  courseId?: number
 }>()
 const visible = defineModel<boolean>('visible')
 
@@ -37,7 +37,7 @@ async function submit () {
   submitting.value = true
   const resp = await createContest({
     ...form.value,
-    course: props.course,
+    courseId: props.courseId,
   })
   submitting.value = false
 
@@ -46,8 +46,7 @@ async function submit () {
     return
   }
 
-  const { contestId } = resp.data
-  router.push({ name: 'ContestOverview', params: { contestId } })
+  router.push({ name: 'ContestOverview', params: { contestId: resp.data.id } })
 }
 </script>
 
@@ -78,7 +77,7 @@ async function submit () {
           <label for="endsAt">{{ t('ptoj.ends_at') }}</label>
         </IftaLabel>
 
-        <LabeledSwitch v-model="form.isHidden" :label="t('ptoj.hidden')" :description="t('ptoj.hide_from_listings')" />
+        <LabeledSwitch v-model="form.isHidden" :label="t('ptoj.isHidden')" :description="t('ptoj.hide_from_listings')" />
 
         <LabeledSwitch v-model="form.isPublic" :label="t('ptoj.public')" :description="t('ptoj.anyone_can_join')" />
       </div>

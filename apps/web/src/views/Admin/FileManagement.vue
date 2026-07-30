@@ -4,7 +4,7 @@ import { AdminFileListQuerySchema } from '@putongoj/shared'
 import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
-import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
 import Paginator from 'primevue/paginator'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -20,7 +20,7 @@ const message = useMessage()
 const { t } = useI18n()
 
 const query = ref({} as AdminFileListQuery)
-const docs = ref([] as AdminFileListQueryResult['docs'])
+const docs = ref([] as AdminFileListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const deletingId = ref('')
@@ -44,7 +44,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -53,7 +53,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -71,7 +71,7 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      uploader: query.value.uploader || undefined,
+      ownerId: query.value.ownerId || undefined,
       page: undefined,
     },
   })
@@ -107,8 +107,8 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField>
           <InputIcon class="pi pi-user text-(--p-text-secondary-color)" />
-          <InputText
-            v-model="query.uploader" fluid :placeholder="t('ptoj.filter_by_user')" maxlength="30"
+          <InputNumber
+            v-model="query.ownerId" fluid :placeholder="t('ptoj.filter_by_user')" mode="decimal" :min="1" :use-grouping="false"
             :disabled="loading" @keypress.enter="onSearch"
           />
         </IconField>
@@ -121,7 +121,7 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <FileDataTable
-      :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort"
+      :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort === 'asc' ? 1 : -1"
       :deleting-id="deletingId" :enable-download="true" @sort="onSort" @delete="onDelete"
     />
 

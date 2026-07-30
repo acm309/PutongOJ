@@ -11,7 +11,7 @@ import { findDiscussions } from '@/api/discussion'
 import DiscussionCreateDialog from '@/components/DiscussionCreateDialog.vue'
 import DiscussionDataView from '@/components/DiscussionDataView.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
-import UserFilter from '@/components/UserFilter.vue'
+import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -23,13 +23,13 @@ const message = useMessage()
 
 const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as DiscussionListQuery)
-const docs = ref([] as DiscussionListQueryResult['docs'])
+const docs = ref([] as DiscussionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const createDialog = ref(false)
 
 const hasFilter = computed(() => {
-  return Boolean(query.value.author)
+  return Boolean(query.value.authorId)
 })
 
 const sortingOptions = computed(() => [ {
@@ -64,11 +64,11 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
-function onSort (event: { field?: string, order?: number }) {
+function onSort (event: { field?: string, order?: 'asc' | 'desc' }) {
   router.replace({
     query: {
       ...route.query,
@@ -92,7 +92,7 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      author: query.value.author,
+      authorId: query.value.authorId,
       page: undefined,
     },
   })
@@ -102,7 +102,7 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      author: undefined,
+      authorId: undefined,
       page: undefined,
     },
   })
@@ -127,8 +127,8 @@ onRouteQueryUpdate(fetch)
       </div>
 
       <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
-        <UserFilter
-          v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')" force-selection
+        <UserSelect
+          v-model="query.authorId" :disabled="loading" :placeholder="t('ptoj.filter_by_author')"
           @select="onSearch"
         />
 

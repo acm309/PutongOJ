@@ -23,7 +23,8 @@ const { isAdmin, isLogined } = storeToRefs(sessionStore)
 const { problem } = storeToRefs(problemStore)
 const route = useRoute()
 const display = computed(() => route.name as string || '')
-const isLoaded = computed(() => problem.value?.pid === Number(route.params.pid))
+const problemId = computed(() => Number(route.params.problemId))
+const isLoaded = computed(() => problem.value?.id === problemId.value)
 const isEditable = computed(() => {
   if (!isLoaded.value) {
     return false
@@ -35,7 +36,7 @@ const isEditable = computed(() => {
 })
 
 const tabItems = computed(() => {
-  const params = { pid: route.params.pid }
+  const params = { problemId: route.params.problemId }
   const items: Array<{ label: string, value: string, params?: RouteLocationNormalized['params'], route?: string }> = [
     { label: t('oj.description'), value: 'problemInfo', params },
     { label: t('oj.submit'), value: 'problemSubmit', params },
@@ -58,8 +59,7 @@ const tabItems = computed(() => {
 })
 
 async function init () {
-  const pid = Number.parseInt(route.params.pid as string)
-  await findOne({ pid })
+  await findOne(problemId.value)
   if (problem.value?.title) {
     changeDomTitle({ title: problem.value.title })
   }
@@ -75,7 +75,7 @@ onMounted(init)
         <TabList :pt="{ prevButton: 'hidden', nextButton: 'hidden' }">
           <RouterLink
             v-for="tab in tabItems" :key="tab.label"
-            :to="{ name: tab.value, params: tab.params, query: tab.value === 'MySubmissions' ? { problem: route.params.pid } : undefined }"
+            :to="{ name: tab.value, params: tab.params, query: tab.value === 'MySubmissions' ? { problemId: route.params.problemId } : undefined }"
           >
             <Tab :value="tab.value" class="font-normal text-color">
               <span :class="{ 'text-primary': display === tab.value, 'font-semibold': display === tab.value }">

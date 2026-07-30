@@ -51,27 +51,27 @@ const newGroupName = ref('')
 const editGroupName = ref('')
 const sourceSearch = ref('')
 const targetSearch = ref('')
-const selectedSourceUsers = ref<Set<string>>(new Set())
-const selectedTargetUsers = ref<Set<string>>(new Set())
+const selectedSourceUsers = ref<Set<number>>(new Set())
+const selectedTargetUsers = ref<Set<number>>(new Set())
 
 const userMap = computed(() => {
-  const map = new Map<string, UserItemListQueryResult[number]>()
+  const map = new Map<number, UserItemListQueryResult[number]>()
   allUsers.value.forEach((user) => {
-    map.set(user.uid, user)
+    map.set(user.id, user)
   })
   return map
 })
 
 const filteredSourceUsers = computed(() => {
   let users = allUsers.value
-    .filter(user => !currentGroup.value?.members.includes(user.uid))
-    .map(user => userMap.value.get(user.uid)!)
+    .filter(user => !currentGroup.value?.memberIds.includes(user.id))
+    .map(user => userMap.value.get(user.id)!)
 
   if (sourceSearch.value.trim()) {
     const searchTerm = sourceSearch.value.toLowerCase()
     users = users.filter(user =>
-      user.uid.toLowerCase().includes(searchTerm)
-      || user.nick?.toLowerCase().includes(searchTerm),
+      user.username.toLowerCase().includes(searchTerm)
+      || user.nickname?.toLowerCase().includes(searchTerm),
     )
   }
   return users
@@ -81,14 +81,14 @@ const filteredTargetUsers = computed(() => {
   if (!currentGroup.value) return []
 
   let users = allUsers.value
-    .filter(user => currentGroup.value?.members.includes(user.uid))
-    .map(user => userMap.value.get(user.uid)!)
+    .filter(user => currentGroup.value?.memberIds.includes(user.id))
+    .map(user => userMap.value.get(user.id)!)
 
   if (targetSearch.value.trim()) {
     const searchTerm = targetSearch.value.toLowerCase()
     users = users.filter(user =>
-      user.uid.toLowerCase().includes(searchTerm)
-      || user.nick?.toLowerCase().includes(searchTerm),
+      user.username.toLowerCase().includes(searchTerm)
+      || user.nickname?.toLowerCase().includes(searchTerm),
     )
   }
   return users
@@ -99,19 +99,19 @@ function resetSelections () {
   selectedTargetUsers.value.clear()
 }
 
-function toggleSourceSelection (uid: string) {
-  if (selectedSourceUsers.value.has(uid)) {
-    selectedSourceUsers.value.delete(uid)
+function toggleSourceSelection (userId: number) {
+  if (selectedSourceUsers.value.has(userId)) {
+    selectedSourceUsers.value.delete(userId)
   } else {
-    selectedSourceUsers.value.add(uid)
+    selectedSourceUsers.value.add(userId)
   }
 }
 
-function toggleTargetSelection (uid: string) {
-  if (selectedTargetUsers.value.has(uid)) {
-    selectedTargetUsers.value.delete(uid)
+function toggleTargetSelection (userId: number) {
+  if (selectedTargetUsers.value.has(userId)) {
+    selectedTargetUsers.value.delete(userId)
   } else {
-    selectedTargetUsers.value.add(uid)
+    selectedTargetUsers.value.add(userId)
   }
 }
 
@@ -119,7 +119,7 @@ function selectAllSource () {
   if (selectedSourceUsers.value.size === filteredSourceUsers.value.length) {
     selectedSourceUsers.value.clear()
   } else {
-    selectedSourceUsers.value = new Set(filteredSourceUsers.value.map(user => user.uid))
+    selectedSourceUsers.value = new Set(filteredSourceUsers.value.map(user => user.id))
   }
 }
 
@@ -127,7 +127,7 @@ function selectAllTarget () {
   if (selectedTargetUsers.value.size === filteredTargetUsers.value.length) {
     selectedTargetUsers.value.clear()
   } else {
-    selectedTargetUsers.value = new Set(filteredTargetUsers.value.map(user => user.uid))
+    selectedTargetUsers.value = new Set(filteredTargetUsers.value.map(user => user.id))
   }
 }
 
@@ -135,12 +135,12 @@ function moveToTarget () {
   if (selectedSourceUsers.value.size === 0) return
 
   const updatedMembers = [
-    ...(currentGroup.value?.members || []),
+    ...(currentGroup.value?.memberIds || []),
     ...Array.from(selectedSourceUsers.value),
   ]
 
   if (currentGroup.value) {
-    currentGroup.value.members = updatedMembers
+    currentGroup.value.memberIds = updatedMembers
   }
   resetSelections()
 }
@@ -148,12 +148,12 @@ function moveToTarget () {
 function moveToSource () {
   if (selectedTargetUsers.value.size === 0) return
 
-  const updatedMembers = (currentGroup.value?.members || []).filter(
-    uid => !selectedTargetUsers.value.has(uid),
+  const updatedMembers = (currentGroup.value?.memberIds || []).filter(
+    userId => !selectedTargetUsers.value.has(userId),
   )
 
   if (currentGroup.value) {
-    currentGroup.value.members = updatedMembers
+    currentGroup.value.memberIds = updatedMembers
   }
   resetSelections()
 }
@@ -199,13 +199,13 @@ async function fetchGroupDetail () {
 }
 
 async function fetch () {
-  if (route.query.group) {
-    const id = Number(route.query.group)
+  if (route.query.groupId) {
+    const id = Number(route.query.groupId)
     if (Number.isNaN(id) || !Number.isInteger(id) || id < 0) {
       return onReset()
     }
     groupId.value = id
-    if (!groups.value.some(g => g.gid === groupId.value)) {
+    if (!groups.value.some(g => g.id === groupId.value)) {
       return onReset()
     }
     await fetchGroupDetail()
@@ -219,13 +219,13 @@ async function fetch () {
 function onReset () {
   sourceSearch.value = ''
   targetSearch.value = ''
-  router.replace({ query: { group: undefined } })
+  router.replace({ query: { groupId: undefined } })
 }
 
 function onSelect () {
   router.replace({
     query: {
-      group: groupId.value?.toString() || undefined,
+      groupId: groupId.value?.toString() || undefined,
     },
   })
 }
@@ -254,7 +254,7 @@ async function handleCreateGroup () {
   newGroupName.value = ''
   await fetchGroups()
 
-  groupId.value = resp.data.groupId
+  groupId.value = resp.data.id
   onSelect()
 }
 
@@ -272,7 +272,7 @@ async function handleUpdateGroupName () {
   }
 
   loading.value = true
-  const resp = await updateGroup(currentGroup.value.groupId.toString(), { name })
+  const resp = await updateGroup(currentGroup.value.id.toString(), { name })
   loading.value = false
 
   if (!resp.success) {
@@ -293,10 +293,10 @@ async function handleSaveMembers () {
 
   loading.value = true
   const payload: AdminGroupMembersUpdatePayload = {
-    members: currentGroup.value.members,
+    memberIds: currentGroup.value.memberIds,
   }
 
-  const resp = await updateGroupMembers(currentGroup.value.groupId.toString(), payload)
+  const resp = await updateGroupMembers(currentGroup.value.id.toString(), payload)
   loading.value = false
 
   if (!resp.success) {
@@ -329,7 +329,7 @@ async function handleDeleteGroup (event: Event) {
     },
     accept: async () => {
       loading.value = true
-      const resp = await removeGroup(currentGroup.value!.groupId.toString())
+      const resp = await removeGroup(currentGroup.value!.id.toString())
       loading.value = false
 
       if (!resp.success) {
@@ -371,7 +371,7 @@ watch([ sourceSearch, targetSearch ], resetSelections)
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
-          v-model="groupId" fluid :options="groups" option-label="title" option-value="gid" show-clear
+          v-model="groupId" fluid :options="groups" option-label="name" option-value="id" show-clear
           :placeholder="t('ptoj.select_group')" :loading="loadingGroups" :disabled="loading" @change="onSelect"
         />
 
@@ -445,15 +445,15 @@ watch([ sourceSearch, targetSearch ], resetSelections)
               <template #item="{ item }">
                 <div
                   class="cursor-pointer flex gap-3 hover:bg-emphasis items-center p-3 text-nowrap transition w-full"
-                  @click="toggleSourceSelection(item.uid)"
+                  @click="toggleSourceSelection(item.id)"
                 >
                   <Checkbox
-                    :model-value="selectedSourceUsers.has(item.uid)" :binary="true" @click.stop
-                    @change="toggleSourceSelection(item.uid)"
+                    :model-value="selectedSourceUsers.has(item.id)" :binary="true" @click.stop
+                    @change="toggleSourceSelection(item.id)"
                   />
                   <div>
-                    {{ item.uid }}
-                    <span v-if="item.nick" class="ml-2 text-muted-color">({{ item.nick }})</span>
+                    {{ item.username }}
+                    <span v-if="item.nickname" class="ml-2 text-muted-color">({{ item.nickname }})</span>
                   </div>
                 </div>
               </template>
@@ -502,15 +502,15 @@ watch([ sourceSearch, targetSearch ], resetSelections)
               <template #item="{ item }">
                 <div
                   class="cursor-pointer flex gap-3 hover:bg-emphasis items-center p-3 text-nowrap transition w-full"
-                  @click="toggleTargetSelection(item.uid)"
+                  @click="toggleTargetSelection(item.id)"
                 >
                   <Checkbox
-                    :model-value="selectedTargetUsers.has(item.uid)" :binary="true" @click.stop
-                    @change="toggleTargetSelection(item.uid)"
+                    :model-value="selectedTargetUsers.has(item.id)" :binary="true" @click.stop
+                    @change="toggleTargetSelection(item.id)"
                   />
                   <div>
-                    {{ item.uid }}
-                    <span v-if="item.nick" class="ml-2 text-muted-color">({{ item.nick }})</span>
+                    {{ item.username }}
+                    <span v-if="item.nickname" class="ml-2 text-muted-color">({{ item.nickname }})</span>
                   </div>
                 </div>
               </template>

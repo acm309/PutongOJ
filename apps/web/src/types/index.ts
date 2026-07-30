@@ -1,39 +1,15 @@
-import type { ProblemEntityPreview, SolutionModel } from '@putongoj/shared'
+import type { Language, ProblemListQueryResult } from '@putongoj/shared'
 
 export interface TimeResp {
   serverTime: number
 }
 
-export interface Problem {
-  pid: number
-  title: string
-}
-
-export type ProblemBrief = ProblemEntityPreview
-
-export interface ProblemDetail extends Problem {
-  description: string
-  input: string
-  output: string
-}
-
 export interface Solution {
-  language: number | null
-  code: string
+  language: Language | null
+  sourceCode: string
 }
 
-export interface SolutionModelDataTable {
-  sid: SolutionModel['sid']
-  uid?: SolutionModel['uid']
-  pid?: SolutionModel['pid']
-  mid?: SolutionModel['mid']
-  judge: SolutionModel['judge']
-  sim: SolutionModel['sim']
-  time: SolutionModel['time']
-  memory: SolutionModel['memory']
-  language: SolutionModel['language']
-  createdAt: SolutionModel['createdAt']
-}
+export type ProblemBrief = ProblemListQueryResult['items'][number]
 
 export interface SessionInfo {
   sessionId: string

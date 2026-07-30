@@ -29,14 +29,14 @@ const message = useMessage()
 const { problem } = storeToRefs(useProblemStore())
 
 const query = ref({} as ProblemSolutionListQuery)
-const docs = ref([] as ProblemSolutionListQueryResult['docs'])
+const docs = ref([] as ProblemSolutionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 
 const hasFilter = computed(() => {
   return Boolean(
     query.value.user
-    || Number.isInteger(query.value.judge)
+    || query.value.status !== undefined
     || query.value.language,
   )
 })
@@ -51,7 +51,8 @@ async function fetch () {
   }
 
   loading.value = true
-  const resp = await findSolutions(problem.value.pid, query.value)
+  if (!problem.value) return
+  const resp = await findSolutions(problem.value.id, query.value)
   loading.value = false
   if (!resp.success) {
     message.error(t('ptoj.failed_fetch_solutions'), resp.message)
@@ -60,7 +61,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -69,7 +70,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -88,7 +89,7 @@ function onSearch () {
     query: {
       ...route.query,
       user: query.value.user || undefined,
-      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      status: query.value.status ?? undefined,
       language: query.value.language || undefined,
       page: undefined,
     },
@@ -100,7 +101,7 @@ function onReset () {
     query: {
       ...route.query,
       user: undefined,
-      judge: undefined,
+      status: undefined,
       language: undefined,
       page: undefined,
     },
@@ -118,7 +119,7 @@ onRouteQueryUpdate(fetch)
         <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
 
         <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          v-model="query.status" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
@@ -153,7 +154,7 @@ onRouteQueryUpdate(fetch)
 
     <SolutionDataTable
       class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"
-      :sort-order="query.sort" hide-problem hide-contest @sort="onSort"
+      :sort-order="query.sort === 'asc' ? 1 : -1" hide-problem hide-contest @sort="onSort"
     />
 
     <Paginator

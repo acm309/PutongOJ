@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AdminTagCreatePayload, AdminTagListQueryResult } from '@putongoj/shared'
-import { tagColors } from '@putongoj/shared'
+import { TagColor } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import IftaLabel from 'primevue/iftalabel'
@@ -34,8 +34,10 @@ const tagsGroupByColor = computed(() => {
   return map
 })
 
+const tagColors = Object.values(TagColor)
+
 const colorOptions = tagColors.map(color => ({
-  label: capitalize(color),
+  label: capitalize(color.toLowerCase()),
   value: color,
 }))
 
@@ -54,10 +56,10 @@ async function fetch () {
 
 const createModal = ref(false)
 const creating = ref(false)
-const createForm = ref<AdminTagCreatePayload>({ name: '', color: 'default' })
+const createForm = ref<AdminTagCreatePayload>({ name: '', color: TagColor.DEFAULT })
 
 function openCreateModal () {
-  createForm.value = { name: '', color: 'default' }
+  createForm.value = { name: '', color: TagColor.DEFAULT }
   createModal.value = true
 }
 
@@ -105,7 +107,7 @@ type TagItem = AdminTagListQueryResult[number]
 const updateModal = ref(false)
 const updating = ref(false)
 const selectedTag = ref<TagItem | null>(null)
-const updateForm = ref<AdminTagCreatePayload>({ name: '', color: 'default' })
+const updateForm = ref<AdminTagCreatePayload>({ name: '', color: TagColor.DEFAULT })
 
 const tagCreatedAt = computed(() => {
   if (!selectedTag.value?.createdAt) return ''
@@ -117,7 +119,7 @@ const tagUpdatedAt = computed(() => {
 })
 
 function openUpdateModal (tagId: number) {
-  const found = tags.value.find(item => item.tagId === tagId)
+  const found = tags.value.find(item => item.id === tagId)
   if (!found) return
   selectedTag.value = found
   updateForm.value = { name: found.name, color: found.color }
@@ -136,7 +138,7 @@ async function submitUpdate () {
   }
   updating.value = true
   const resp = await updateTag(
-    String(selectedTag.value.tagId),
+    String(selectedTag.value.id),
     { ...updateForm.value, name: updateForm.value.name.trim() },
   )
   updating.value = false
@@ -185,12 +187,12 @@ onBeforeMount(fetch)
       <template v-for="color in tagColors" :key="color">
         <div v-if="tagsGroupByColor[color]?.length > 0">
           <h3 class="font-semibold mb-2 text-lg">
-            {{ capitalize(color) }}
+            {{ capitalize(color.toLowerCase()) }}
           </h3>
           <div class="flex flex-wrap gap-2">
             <ProblemTag
-              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="cursor-pointer"
-              size="large" :name="tagItem.name" :color="color" @click="openUpdateModal(tagItem.tagId)"
+              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.id" class="cursor-pointer"
+              size="large" :name="tagItem.name" :color="color" @click="openUpdateModal(tagItem.id)"
             />
           </div>
         </div>

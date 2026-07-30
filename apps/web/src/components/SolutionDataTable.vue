@@ -1,6 +1,5 @@
-<script setup lang="ts" generic="T extends SolutionModelDataTable">
+<script setup lang="ts">
 import type { JudgeStatus, Language } from '@putongoj/shared'
-import type { SolutionModelDataTable } from '@/types'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -14,8 +13,21 @@ import {
   timePretty,
 } from '@/utils/format'
 
+interface SolutionListItem {
+  id: number
+  user: { id: number, username: string, nickname: string }
+  problemId?: number
+  contestId?: number | null
+  language: Language
+  status: JudgeStatus
+  timeUsedMs: number
+  memoryUsedKb: number
+  similarity: number
+  createdAt: string
+}
+
 const props = withDefaults(defineProps<{
-  value: T[]
+  value: SolutionListItem[]
   sortField?: string
   sortOrder?: number
   loading?: boolean
@@ -35,7 +47,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'sort', event: any): void
 }>()
-const selection = defineModel<T[]>('selection', {
+const selection = defineModel<SolutionListItem[]>('selection', {
   default: () => [],
 })
 
@@ -49,36 +61,36 @@ function handleSort (event: any) {
 <template>
   <DataTable
     v-model:selection="selection" class="whitespace-nowrap" :value="props.value" sort-mode="single"
-    :sort-field="props.sortField" :sort-order="props.sortOrder" data-key="sid" :lazy="true" :loading="props.loading"
+    :sort-field="props.sortField" :sort-order="props.sortOrder" data-key="id" :lazy="true" :loading="props.loading"
     scrollable :selection-mode="props.selectable ? 'multiple' : undefined" @sort="handleSort"
   >
     <Column v-if="props.selectable" selection-mode="multiple" class="pl-6 w-10" frozen />
 
-    <Column field="sid" class="font-medium text-center" :class="{ 'pl-6': !props.selectable }" frozen>
+    <Column field="id" class="font-medium text-center" :class="{ 'pl-6': !props.selectable }" frozen>
       <template #header>
         <span class="text-center w-full">
           <i class="pi pi-hashtag" />
         </span>
       </template>
       <template #body="{ data }">
-        <RouterLink :to="{ name: 'solution', params: { sid: data.sid } }">
-          <Button class="-my-px p-0" link fluid :label="String(data.sid)" />
+        <RouterLink :to="{ name: 'solution', params: { submissionId: data.id } }">
+          <Button class="-my-px p-0" link fluid :label="String(data.id)" />
         </RouterLink>
       </template>
     </Column>
 
     <Column
-      v-if="!props.hideUser" :header="t('ptoj.user')" field="uid"
+      v-if="!props.hideUser" :header="t('ptoj.user')" field="user.username"
       class="font-medium max-w-36 md:max-w-48 min-w-36 truncate"
     >
       <template #body="{ data }">
-        <RouterLink :to="{ name: 'UserProfile', params: { uid: data.uid } }">
-          <Button class="-my-px justify-start p-0" link fluid :label="String(data.uid ?? '')" />
+        <RouterLink :to="{ name: 'UserProfile', params: { username: data.user.username } }">
+          <Button class="-my-px justify-start p-0" link fluid :label="data.user.username" />
         </RouterLink>
       </template>
     </Column>
 
-    <Column v-if="!props.hideProblem" field="pid" class="text-center">
+    <Column v-if="!props.hideProblem" field="problemId" class="text-center">
       <template #header>
         <span class="font-semibold text-center w-full">
           {{ t('ptoj.problem') }}
@@ -86,22 +98,22 @@ function handleSort (event: any) {
       </template>
       <template #body="{ data }">
         <slot name="problem" :data="data">
-          <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
-            <Button class="-my-px p-0" link fluid :label="String(data.pid ?? '')" />
+          <RouterLink :to="{ name: 'problemInfo', params: { problemId: data.problemId } }">
+            <Button class="-my-px p-0" link fluid :label="String(data.problemId)" />
           </RouterLink>
         </slot>
       </template>
     </Column>
 
-    <Column v-if="!props.hideContest" field="mid" class="text-center">
+    <Column v-if="!props.hideContest" field="contestId" class="text-center">
       <template #header>
         <span class="font-semibold text-center w-full">
           {{ t('ptoj.contest') }}
         </span>
       </template>
       <template #body="{ data }">
-        <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'ContestOverview', params: { contestId: data.mid } }">
-          <Button class="-my-px p-0" link fluid :label="String(data.mid)" />
+        <RouterLink v-if="data.contestId && data.contestId > 0" :to="{ name: 'ContestOverview', params: { contestId: data.contestId } }">
+          <Button class="-my-px p-0" link fluid :label="String(data.contestId)" />
         </RouterLink>
         <span v-else>
           -
@@ -109,41 +121,41 @@ function handleSort (event: any) {
       </template>
     </Column>
 
-    <Column :header="t('ptoj.judge_status')" field="judge" class="py-1">
+    <Column :header="t('ptoj.judge_status')" field="status" class="py-1">
       <template #body="{ data }">
         <div class="flex items-center">
-          <span :class="getJudgeStatusClassname(data.judge as JudgeStatus)">
-            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
+          <span :class="getJudgeStatusClassname(data.status as JudgeStatus)">
+            {{ judgeStatusLabels[data.status as JudgeStatus] }}
           </span>
           <Tag
-            v-if="data.sim" v-tooltip.top="t('ptoj.similarity_detected')" :class="getSimilarityClassname(data.sim)"
+            v-if="data.similarity" v-tooltip.top="t('ptoj.similarity_detected')" :class="getSimilarityClassname(data.similarity)"
             severity="secondary" class="ml-2 text-xs"
           >
-            {{ data.sim }}%
+            {{ data.similarity }}%
           </Tag>
         </div>
       </template>
     </Column>
 
-    <Column field="time" class="text-right" sortable>
+    <Column field="timeUsedMs" class="text-right" sortable>
       <template #header>
         <span class="font-semibold text-right w-full">
           {{ t('ptoj.time') }}
         </span>
       </template>
       <template #body="{ data }">
-        {{ thousandSeparator(data.time) }} <small>ms</small>
+        {{ thousandSeparator(data.timeUsedMs) }} <small>ms</small>
       </template>
     </Column>
 
-    <Column field="memory" class="text-right" sortable>
+    <Column field="memoryUsedKb" class="text-right" sortable>
       <template #header>
         <span class="font-semibold text-right w-full">
           {{ t('ptoj.memory') }}
         </span>
       </template>
       <template #body="{ data }">
-        {{ thousandSeparator(data.memory) }} <small>KB</small>
+        {{ thousandSeparator(data.memoryUsedKb) }} <small>KB</small>
       </template>
     </Column>
 
@@ -171,3 +183,4 @@ function handleSort (event: any) {
     </template>
   </DataTable>
 </template>
+type SolutionListItem = AccountSubmissionListQueryResult['items'][number]

@@ -24,9 +24,9 @@ const { isAdmin } = storeToRefs(sessionStore)
 
 const displayTab = computed(() => route.name as string || 'courseProblems')
 const courseId = computed(() => Number.parseInt(route.params.id as string))
-const courseLoaded = computed(() => course.value?.courseId === courseId.value)
+const courseLoaded = computed(() => course.value?.id === courseId.value)
 const role = computed(() => {
-  if (course.value?.courseId !== courseId.value) {
+  if (course.value?.id !== courseId.value) {
     return courseRoleNone
   }
   return course.value?.role ?? courseRoleNone
@@ -43,11 +43,11 @@ const tabItems = computed(() => {
     { label: t('oj.course_member'), value: 'courseMembers', params, managerRequire: true },
     { label: t('oj.course_setting'), value: 'courseSettings', params, managerRequire: true },
   ]
-  return items.filter(item => !item.managerRequire || role.value.manageCourse)
+  return items.filter(item => !item.managerRequire || role.value.canManageCourse)
 })
 
 function createProblem () {
-  router.push({ name: 'problemCreate', query: { course: courseId.value } })
+  router.push({ name: 'problemCreate', query: { courseId: courseId.value } })
 }
 
 function refresh () {
@@ -60,7 +60,7 @@ function refresh () {
 </script>
 
 <template>
-  <template v-if="courseLoaded">
+  <template v-if="courseLoaded && course">
     <div class="bg-(--p-content-background) border-b border-surface shadow-lg">
       <div class="flex flex-col gap-6 items-start justify-between max-w-7xl md:flex-row mx-auto p-8">
         <div class="flex-1">
@@ -74,13 +74,13 @@ function refresh () {
             {{ t('oj.no_description') }}
           </p>
         </div>
-        <div v-if="isAdmin || role.manageProblem || role.manageContest" class="flex flex-col gap-2">
-          <ButtonGroup v-if="role.manageProblem || role.manageContest">
-            <Button v-if="role.manageProblem" severity="secondary" outlined @click="createProblem">
+        <div v-if="isAdmin || role.canManageProblems || role.canManageContests" class="flex flex-col gap-2">
+          <ButtonGroup v-if="role.canManageProblems || role.canManageContests">
+            <Button v-if="role.canManageProblems" severity="secondary" outlined @click="createProblem">
               <i class="pi pi-plus" />
               {{ t('oj.course_create_problem') }}
             </Button>
-            <Button v-if="role.manageContest" severity="secondary" outlined @click="contestCreateDialog = true">
+            <Button v-if="role.canManageContests" severity="secondary" outlined @click="contestCreateDialog = true">
               <i class="pi pi-plus" />
               {{ t('oj.course_create_contest') }}
             </Button>
@@ -96,7 +96,7 @@ function refresh () {
     </div>
 
     <div
-      v-if="role.basic"
+      v-if="role.canAccess"
       class="-mt-px bg-(--p-content-background) border-b border-surface pt-px shadow-lg sticky top-0 z-10"
     >
       <Tabs :value="displayTab" class="-mb-px max-w-full mx-auto w-fit">
@@ -113,9 +113,9 @@ function refresh () {
     </div>
 
     <CourseProblemAdd
-      v-if="isAdmin" v-model="problemAddModal" :course-id="course.courseId"
+      v-if="isAdmin" v-model="problemAddModal" :course-id="course.id"
       @close="(added: number) => added > 0 ? refresh() : null"
     />
-    <ContestCreateDialog v-model:visible="contestCreateDialog" :course="course.courseId" />
+    <ContestCreateDialog v-model:visible="contestCreateDialog" :course-id="course.id" />
   </template>
 </template>

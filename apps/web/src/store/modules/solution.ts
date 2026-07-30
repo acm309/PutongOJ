@@ -1,25 +1,21 @@
+import type { SubmissionDetailQueryResult, SubmissionStatusUpdatePayload } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { getSubmission, updateSubmissionStatus } from '@/api/solution'
 
 export const useSolutionStore = defineStore('solution', {
   state: () => ({
-    solution: {
-      language: null,
-      code: '',
-    } as any,
+    submission: null as SubmissionDetailQueryResult | null,
   }),
   actions: {
-    async findOne (payload: { [key: string]: any }) {
-      const { data } = await api.solution.findOne(payload)
-      this.solution = data.solution
-    },
-    async updateSolution (payload: { judge: number }) {
-      const solutionId = (this.solution as any).sid!
-      const { data } = await api.solution.updateSolution(solutionId, payload)
-      if (data.success && data.data) {
-        this.solution = data.data
+    async findOne (submissionId: number) {
+      const response = await getSubmission(submissionId)
+      if (response.success) {
+        this.submission = response.data
       }
-      return data
+      return response
+    },
+    async updateStatus (submissionId: number, status: SubmissionStatusUpdatePayload['status']) {
+      return updateSubmissionStatus(submissionId, status)
     },
   },
 })

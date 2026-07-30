@@ -8,7 +8,7 @@ const statusRoutes: Array<RouteRecordRaw> = [
     redirect: { name: 'MySubmissions' },
   },
   {
-    path: '/solution/:sid',
+    path: '/submissions/:submissionId',
     name: 'solution',
     component: Solution,
     meta: { title: 'Solution Detail' },

@@ -26,7 +26,7 @@ const router = useRouter()
 const message = useMessage()
 
 const query = ref({} as AdminUserListQuery)
-const docs = ref([] as AdminUserListQueryResult['docs'])
+const docs = ref([] as AdminUserListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const batchImportVisible = ref(false)
@@ -50,7 +50,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -58,7 +58,7 @@ function onSort (event: any) {
   router.replace({ query: {
     ...route.query,
     sortBy: event.sortField,
-    sort: event.sortOrder,
+    sort: event.sortOrder === 1 ? 'asc' : 'desc',
   } })
 }
 
@@ -88,11 +88,11 @@ function onReset () {
 }
 
 function onView (data: any) {
-  router.push({ name: 'UserProfile', params: { uid: data.uid } })
+  router.push({ name: 'UserProfile', params: { username: data.username } })
 }
 
 function onEdit (data: any) {
-  router.push({ name: 'UserManagementDetail', params: { uid: data.uid } })
+  router.push({ name: 'UserManagementDetail', params: { username: data.username } })
 }
 
 onMounted(fetch)
@@ -140,11 +140,11 @@ onRouteQueryUpdate(fetch)
 
     <DataTable
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"
-      :sort-order="query.sort" :lazy="true" :loading="loading" scrollable @sort="onSort"
+      :sort-order="query.sort === 'asc' ? 1 : -1" :lazy="true" :loading="loading" scrollable @sort="onSort"
     >
-      <Column :header="t('ptoj.username')" field="uid" class="font-medium max-w-36 md:max-w-48 pl-6 truncate" sortable frozen />
+      <Column :header="t('ptoj.username')" field="username" class="font-medium max-w-36 md:max-w-48 pl-6 truncate" sortable frozen />
 
-      <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
+      <Column :header="t('ptoj.nickname')" field="nickname" class="max-w-48 truncate" />
 
       <Column :header="t('ptoj.privilege')" field="privilege">
         <template #body="{ data }">

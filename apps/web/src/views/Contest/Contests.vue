@@ -26,7 +26,7 @@ const sessionStore = useSessionStore()
 
 const { isAdmin } = storeToRefs(sessionStore)
 const query = ref({} as ContestListQuery)
-const docs = ref([] as ContestListQueryResult['docs'])
+const docs = ref([] as ContestListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const createDialog = ref(false)
@@ -68,7 +68,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -77,7 +77,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField || event.field || query.value.sortBy,
-      sort: event.sortOrder || event.order || query.value.sort,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -156,7 +156,7 @@ onRouteQueryUpdate(fetch)
     </template>
 
     <ContestDataTable
-      v-else :value="docs" :sort-field="query.sortBy" :sort-order="query.sort" :loading="loading"
+      v-else :value="docs" :sort-field="query.sortBy" :sort-order="query.sort === 'asc' ? 1 : -1" :loading="loading"
       @sort="onSort"
     />
 

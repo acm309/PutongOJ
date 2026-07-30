@@ -1,25 +1,34 @@
-import type { CourseEntityEditable, CourseEntityPreview, CourseEntityView, CourseRole, Paginated } from '@putongoj/shared'
-import type { PaginateParams } from '@/types/api'
+import type { CourseCreatePayload, CourseDetailQueryResult, CourseListQueryResult } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { createCourse, findCourses, getCourse } from '@/api/course'
 
 export const useCourseStore = defineStore('course', {
   state: () => ({
-    course: {} as CourseEntityView & { role: CourseRole },
-    courses: { docs: [], limit: 0, page: 1, pages: 0, total: 0 } as Paginated<CourseEntityPreview>,
+    course: null as CourseDetailQueryResult | null,
+    courses: {
+      items: [],
+      page: 1,
+      pageSize: 30,
+      total: 0,
+    } as CourseListQueryResult,
   }),
   actions: {
-    async createCourse (course: CourseEntityEditable): Promise<number> {
-      const { data } = await api.course.createCourse(course)
-      return data.courseId
+    async createCourse (payload: CourseCreatePayload) {
+      return createCourse(payload)
     },
-    async findCourses (params: PaginateParams) {
-      const { data } = await api.course.findCourses(params)
-      this.courses = data
+    async findCourses (params: { page: number, pageSize: number }) {
+      const response = await findCourses(params)
+      if (response.success) {
+        this.courses = response.data
+      }
+      return response
     },
-    async findCourse (courseId: number) {
-      const { data } = await api.course.getCourse(courseId)
-      this.course = data
+    async getCourse (courseId: number) {
+      const response = await getCourse(courseId)
+      if (response.success) {
+        this.course = response.data
+      }
+      return response
     },
   },
 })

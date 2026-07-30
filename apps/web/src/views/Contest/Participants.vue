@@ -26,42 +26,42 @@ const message = useMessage()
 const { contestId } = storeToRefs(useContestStore())
 
 const query = ref({} as ContestParticipantListQuery)
-const docs = ref([] as ContestParticipantListQueryResult['docs'])
+const docs = ref([] as ContestParticipantListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
-const updatingUsername = ref('')
+const updatingUserId = ref<number | null>(null)
 
 const statusOptions = computed(() => [
-  { label: t('ptoj.participation_status_approved'), value: ParticipationStatus.Approved },
-  { label: t('ptoj.participation_status_suspended'), value: ParticipationStatus.Suspended },
-  { label: t('ptoj.participation_status_early_exit'), value: ParticipationStatus.EarlyExit },
+  { label: t('ptoj.participation_status_approved'), value: ParticipationStatus.APPROVED },
+  { label: t('ptoj.participation_status_suspended'), value: ParticipationStatus.SUSPENDED },
+  { label: t('ptoj.participation_status_early_exit'), value: ParticipationStatus.EARLY_EXIT },
 ])
 
 const hasFilter = computed(() => {
-  return Boolean(query.value.user || Number.isInteger(query.value.status))
+  return Boolean(query.value.username || query.value.status !== undefined)
 })
 
 function getStatusLabel (status: ParticipationStatus) {
-  if (status === ParticipationStatus.Approved) {
+  if (status === ParticipationStatus.APPROVED) {
     return t('ptoj.participation_status_approved')
   }
-  if (status === ParticipationStatus.Suspended) {
+  if (status === ParticipationStatus.SUSPENDED) {
     return t('ptoj.participation_status_suspended')
   }
-  if (status === ParticipationStatus.EarlyExit) {
+  if (status === ParticipationStatus.EARLY_EXIT) {
     return t('ptoj.participation_status_early_exit')
   }
   return t('ptoj.participation_status_unknown')
 }
 
 function getStatusSeverity (status: ParticipationStatus) {
-  if (status === ParticipationStatus.Approved) {
+  if (status === ParticipationStatus.APPROVED) {
     return 'success'
   }
-  if (status === ParticipationStatus.Suspended) {
+  if (status === ParticipationStatus.SUSPENDED) {
     return 'danger'
   }
-  if (status === ParticipationStatus.EarlyExit) {
+  if (status === ParticipationStatus.EARLY_EXIT) {
     return 'warn'
   }
   return 'secondary'
@@ -86,7 +86,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -104,7 +104,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -113,7 +113,7 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      user: query.value.user || undefined,
+      username: query.value.username || undefined,
       status: query.value.status ?? undefined,
       page: undefined,
     },
@@ -124,17 +124,17 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      user: undefined,
+      username: undefined,
       status: undefined,
       page: undefined,
     },
   })
 }
 
-async function onUpdateStatus (username: string, status: ContestParticipationManageableStatus) {
-  updatingUsername.value = username
-  const resp = await updateParticipantStatus(contestId.value, username, { status })
-  updatingUsername.value = ''
+async function onUpdateStatus (userId: number, status: ContestParticipationManageableStatus) {
+  updatingUserId.value = userId
+  const resp = await updateParticipantStatus(contestId.value, userId, { status })
+  updatingUserId.value = null
   if (!resp.success) {
     message.error(t('ptoj.failed_update_participation_status'), resp.message)
     return
@@ -153,7 +153,7 @@ onRouteQueryUpdate(fetch)
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <InputText
-          v-model="query.user" fluid :placeholder="t('ptoj.filter_by_username_or_nickname')" maxlength="30"
+          v-model="query.username" fluid :placeholder="t('ptoj.filter_by_username_or_nickname')" maxlength="30"
           :disabled="loading" @keypress.enter="onSearch"
         />
 
@@ -178,12 +178,12 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <DataTable
-      class="-mb-px whitespace-nowrap" :value="docs" :loading="loading" data-key="username" lazy scrollable
-      :sort-field="query.sortBy" :sort-order="query.sort" @sort="onSort"
+      class="-mb-px whitespace-nowrap" :value="docs" :loading="loading" data-key="userId" lazy scrollable
+      :sort-field="query.sortBy" :sort-order="query.sort === 'asc' ? 1 : -1" @sort="onSort"
     >
       <Column field="username" :header="t('ptoj.username')" class="pl-7">
         <template #body="{ data }">
-          <RouterLink :to="{ name: 'UserProfile', params: { uid: data.username } }">
+          <RouterLink :to="{ name: 'UserProfile', params: { username: data.username } }">
             <Button class="border-0 justify-start p-0" link fluid :label="data.username" />
           </RouterLink>
         </template>
@@ -213,19 +213,19 @@ onRouteQueryUpdate(fetch)
         <template #body="{ data }">
           <div class="-my-2 flex gap-2 justify-end">
             <Button
-              v-if="data.status !== ParticipationStatus.Approved" icon="pi pi-check" severity="success" text
-              :loading="updatingUsername === data.username && data.status !== ParticipationStatus.Approved"
-              @click="onUpdateStatus(data.username, ParticipationStatus.Approved)"
+              v-if="data.status !== ParticipationStatus.APPROVED" icon="pi pi-check" severity="success" text
+              :loading="updatingUserId === data.userId && data.status !== ParticipationStatus.APPROVED"
+              @click="onUpdateStatus(data.userId, ParticipationStatus.APPROVED)"
             />
             <Button
-              v-if="data.status !== ParticipationStatus.Suspended" icon="pi pi-ban" severity="danger" text
-              :loading="updatingUsername === data.username && data.status !== ParticipationStatus.Suspended"
-              @click="onUpdateStatus(data.username, ParticipationStatus.Suspended)"
+              v-if="data.status !== ParticipationStatus.SUSPENDED" icon="pi pi-ban" severity="danger" text
+              :loading="updatingUserId === data.userId && data.status !== ParticipationStatus.SUSPENDED"
+              @click="onUpdateStatus(data.userId, ParticipationStatus.SUSPENDED)"
             />
             <Button
-              v-if="data.status !== ParticipationStatus.EarlyExit" icon="pi pi-sign-out" severity="warn" text
-              :loading="updatingUsername === data.username && data.status !== ParticipationStatus.EarlyExit"
-              @click="onUpdateStatus(data.username, ParticipationStatus.EarlyExit)"
+              v-if="data.status !== ParticipationStatus.EARLY_EXIT" icon="pi pi-sign-out" severity="warn" text
+              :loading="updatingUserId === data.userId && data.status !== ParticipationStatus.EARLY_EXIT"
+              @click="onUpdateStatus(data.userId, ParticipationStatus.EARLY_EXIT)"
             />
           </div>
         </template>

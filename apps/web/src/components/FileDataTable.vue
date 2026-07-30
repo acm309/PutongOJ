@@ -89,7 +89,7 @@ function confirmDelete (event: Event, storageKey: string) {
       class="font-medium max-w-36 md:max-w-48 min-w-36 pl-7 truncate"
     >
       <template #body="{ data }">
-        <RouterLink :to="{ name: 'UserProfile', params: { uid: data.owner } }">
+        <RouterLink :to="{ name: 'UserProfile', params: { username: data.owner } }">
           <Button class="-my-px justify-start p-0" link fluid :label="String(data.owner ?? '')" />
         </RouterLink>
       </template>

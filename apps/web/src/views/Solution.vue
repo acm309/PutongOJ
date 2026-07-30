@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { JudgeStatus, Language } from '@putongoj/shared'
+import type { Language, SubmissionStatusUpdatePayload } from '@putongoj/shared'
+import { JudgeStatus } from '@putongoj/shared'
 import { useClipboard } from '@vueuse/core'
 import highlight from 'highlight.js/lib/core'
 import cpp from 'highlight.js/lib/languages/cpp'
@@ -11,7 +12,7 @@ import ButtonGroup from 'primevue/buttongroup'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import { useConfirm } from 'primevue/useconfirm'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
@@ -30,94 +31,79 @@ highlight.registerLanguage('java', java)
 highlight.registerLanguage('python', python)
 
 const { t } = useI18n()
-const message = useMessage()
-const session = useSessionStore()
-const solutionStore = useSolutionStore()
-const root = useRootStore()
-const { findOne, updateSolution } = solutionStore
-const { solution } = storeToRefs(solutionStore)
-const { isAdmin, isRoot } = storeToRefs(session)
 const route = useRoute()
-
-const { copy } = useClipboard()
+const message = useMessage()
 const confirm = useConfirm()
+const rootStore = useRootStore()
+const sessionStore = useSessionStore()
+const solutionStore = useSolutionStore()
+
+const { submission } = storeToRefs(solutionStore)
+const { isAdmin, isRoot } = storeToRefs(sessionStore)
+const { copy } = useClipboard()
+const showRefresh = ref(false)
+
+const submissionId = computed(() => Number(route.params.submissionId))
 
 function onCopy (content: string) {
   copy(content)
   message.success(t('oj.copied'))
 }
 
-function prettyCode (code: string) {
-  if (!code) return ''
-  return highlight.highlight(`${code}`, {
-    language: languageHighlight[solution.value.language as Language],
+function prettyCode (code: string, language: Language) {
+  return highlight.highlight(code, {
+    language: languageHighlight[language],
   }).value
 }
 
-async function fetch () {
-  await findOne(route.params)
-  root.changeDomTitle({ title: `Solution ${solution.value.pid}` })
+function getJudgeStatusLabel (status: JudgeStatus) {
+  return judgeStatusLabels[status]
 }
 
-const showRefresh = ref(false)
-
-async function rejudge () {
-  if (!isRoot.value) {
+async function fetch () {
+  if (!Number.isInteger(submissionId.value) || submissionId.value <= 0) {
     return
   }
+
+  const response = await solutionStore.findOne(submissionId.value)
+  if (!response.success || !response.data) {
+    message.error(t('ptoj.failed_fetch_data'), response.message)
+    return
+  }
+
+  rootStore.changeDomTitle({ title: `Submission ${response.data.id}` })
+}
+
+function updateStatus (status: SubmissionStatusUpdatePayload['status'], successMessage: string) {
+  if (!submission.value || !isRoot.value) {
+    return
+  }
+
   confirm.require({
-    header: 'Rejudge this solution?',
-    message: 'This action will rejudge this solution using the latest problem data. '
-      + 'All previous results will be truncated.',
-    acceptProps: {
-      label: t('oj.ok'),
-    },
+    header: status === JudgeStatus.REJUDGE_PENDING ? 'Rejudge this submission?' : 'Mark this submission as skipped?',
+    message: status === JudgeStatus.REJUDGE_PENDING
+      ? 'This action will rejudge this submission using the latest problem data.'
+      : 'This action will mark this submission as skipped.',
+    acceptProps: { label: t('oj.ok') },
     rejectProps: {
       label: t('oj.cancel'),
       severity: 'secondary',
       outlined: true,
     },
     accept: async () => {
-      const res = await updateSolution({ judge: 11 })
-      if (res.success) {
-        message.success('Rejudge request sent')
-      } else {
-        message.error(res.message || 'Failed to send rejudge request')
+      const response = await solutionStore.updateStatus(submission.value!.id, status)
+      if (!response.success) {
+        message.error(t('ptoj.failed_proceed'), response.message)
+        return
       }
+      message.success(successMessage)
       showRefresh.value = true
     },
   })
 }
 
-async function markAsSkipped () {
-  if (!isRoot.value) {
-    return
-  }
-  confirm.require({
-    header: 'Mark this solution as Skipped?',
-    message: 'This action will mark this solution as Skipped. '
-      + 'All previous results will be truncated.',
-    acceptProps: {
-      label: t('oj.ok'),
-    },
-    rejectProps: {
-      label: t('oj.cancel'),
-      severity: 'secondary',
-      outlined: true,
-    },
-    accept: async () => {
-      const res = await updateSolution({ judge: 12 })
-      if (res.success) {
-        message.success('Marked as Skipped')
-      } else {
-        message.error(res.message || 'Failed to mark as Skipped')
-      }
-    },
-  })
-}
-
-emitter.on('submission-updated', (sid) => {
-  if (Number(route.params.sid) === sid) {
+emitter.on('submission-updated', (updatedSubmissionId) => {
+  if (submissionId.value === updatedSubmissionId) {
     fetch()
   }
 })
@@ -127,51 +113,42 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="solution-wrap">
+  <div v-if="submission" class="solution-wrap">
     <div class="flex justify-end solution-header">
       <div class="flex-1 solution-header-col">
         <h1 class="font-verdana solution-result">
-          {{ judgeStatusLabels[solution.judge as JudgeStatus] }}
+          {{ judgeStatusLabels[submission.status] }}
         </h1>
         <div class="flex flex-col gap-4">
           <div class="flex flex-wrap gap-4 solution-info">
             <span>
               {{ t('oj.problem_label') }}
-              <RouterLink v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
-                {{ solution.pid }}
+              <RouterLink :to="{ name: 'problemInfo', params: { problemId: submission.problemId } }">
+                {{ submission.problemId }}
               </RouterLink>
             </span>
             <span>
               {{ t('oj.author_label') }}
-              <RouterLink v-if="solution.uid" :to="{ name: 'UserProfile', params: { uid: solution.uid } }">
-                {{ solution.uid }}
+              <RouterLink :to="{ name: 'UserProfile', params: { username: submission.user.username } }">
+                {{ submission.user.username }}
               </RouterLink>
             </span>
-            <span v-if="solution.mid > 0">
+            <span v-if="submission.contestId">
               {{ t('oj.contest_label') }}
-              <RouterLink :to="{ name: 'ContestOverview', params: { contestId: solution.mid } }">
-                {{ solution.mid }}
+              <RouterLink :to="{ name: 'ContestOverview', params: { contestId: submission.contestId } }">
+                {{ submission.contestId }}
               </RouterLink>
             </span>
           </div>
           <div class="flex flex-wrap gap-4 solution-info">
-            <span>
-              {{ t('oj.time_label') }}
-              {{ thousandSeparator(solution.time) }} <small>ms</small>
-            </span>
-            <span>
-              {{ t('oj.memory_label') }}
-              {{ thousandSeparator(solution.memory) }} <small>KB</small>
-            </span>
-            <span>
-              {{ languageLabels[solution.language as Language] }}
-            </span>
-            <span>
-              {{ timePretty(solution.create) }}
-            </span>
+            <span>{{ t('oj.time_label') }} {{ thousandSeparator(submission.timeUsedMs) }} <small>ms</small></span>
+            <span>{{ t('oj.memory_label') }} {{ thousandSeparator(submission.memoryUsedKb) }} <small>KB</small></span>
+            <span>{{ languageLabels[submission.language] }}</span>
+            <span>{{ timePretty(submission.createdAt) }}</span>
           </div>
         </div>
       </div>
+
       <div v-if="isRoot" class="flex-none solution-header-col">
         <div class="flex flex-col gap-4 items-end">
           <ButtonGroup>
@@ -179,65 +156,71 @@ onRouteQueryUpdate(fetch)
               v-if="showRefresh" severity="secondary" outlined icon="pi pi-refresh" label="Refresh"
               @click="fetch"
             />
-            <Button icon="pi pi-play" label="Rejudge" @click="rejudge" />
+            <Button
+              icon="pi pi-play" label="Rejudge"
+              @click="updateStatus(JudgeStatus.REJUDGE_PENDING, 'Rejudge request sent')"
+            />
           </ButtonGroup>
-          <Button icon="pi pi-flag" label="Mark as Skipped" severity="secondary" outlined @click="markAsSkipped" />
+          <Button
+            icon="pi pi-flag" label="Mark as Skipped" severity="secondary" outlined
+            @click="updateStatus(JudgeStatus.SKIPPED, 'Marked as skipped')"
+          />
         </div>
       </div>
     </div>
 
-    <DataTable :value="solution.testcases" class="whitespace-nowrap" :lazy="true" scrollable>
-      <Column field="uuid" class="font-mono pl-6 text-center">
+    <DataTable :value="submission.testcaseResults" class="whitespace-nowrap" :lazy="true" scrollable>
+      <Column field="testcaseId" class="font-mono pl-6 text-center">
         <template #header>
           <span class="text-center w-full">
             <i class="pi pi-hashtag" />
           </span>
         </template>
         <template #body="{ data }">
-          <span v-tooltip.right="data.uuid">{{ data.uuid.slice(0, 8) }}</span>
+          <span v-tooltip.right="data.testcaseId">{{ data.testcaseId.slice(0, 8) }}</span>
         </template>
       </Column>
 
       <Column v-if="isAdmin" field="files" :header="t('oj.files')">
         <template #body="{ data }">
           <div class="flex gap-4 items-center">
-            <a :href="testcaseUrl(solution.pid, data.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
-            <a :href="testcaseUrl(solution.pid, data.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
+            <a :href="testcaseUrl(submission.problemId, data.testcaseId, 'in')" target="_blank">{{ t('oj.input') }}</a>
+            <a :href="testcaseUrl(submission.problemId, data.testcaseId, 'out')" target="_blank">{{ t('oj.output') }}</a>
           </div>
         </template>
       </Column>
 
-      <Column field="time" class="text-right">
+      <Column field="timeUsedMs" class="text-right">
         <template #header>
           <span class="font-semibold text-right w-full">
             {{ t('ptoj.time') }}
           </span>
         </template>
         <template #body="{ data }">
-          {{ thousandSeparator(data.time) }} <small>ms</small>
+          {{ thousandSeparator(data.timeUsedMs) }} <small>ms</small>
         </template>
       </Column>
 
-      <Column field="memory" class="text-right">
+      <Column field="memoryUsedKb" class="text-right">
         <template #header>
           <span class="font-semibold text-right w-full">
             {{ t('ptoj.memory') }}
           </span>
         </template>
         <template #body="{ data }">
-          {{ thousandSeparator(data.memory) }} <small>KB</small>
+          {{ thousandSeparator(data.memoryUsedKb) }} <small>KB</small>
         </template>
       </Column>
 
-      <Column field="judge" class="pr-6 text-center">
+      <Column field="status" class="pr-6 text-center">
         <template #header>
           <span class="font-semibold text-center w-full">
             {{ t('ptoj.judge_status') }}
           </span>
         </template>
         <template #body="{ data }">
-          <span :class="getJudgeStatusClassname(data.judge)">
-            {{ judgeStatusLabels[data.judge as JudgeStatus] }}
+          <span :class="getJudgeStatusClassname(data.status)">
+            {{ getJudgeStatusLabel(data.status) }}
           </span>
         </template>
       </Column>
@@ -250,32 +233,31 @@ onRouteQueryUpdate(fetch)
     </DataTable>
 
     <div class="solution-detail">
-      <pre v-if="solution.error" class="error"><code>{{ solution.error }}</code></pre>
+      <pre v-if="submission.errorMessage" class="error"><code>{{ submission.errorMessage }}</code></pre>
       <Button
         icon="pi pi-file" severity="secondary" outlined :label="t('oj.click_to_copy_code')"
-        @click="onCopy(solution.code)"
+        @click="onCopy(submission.sourceCode)"
       />
-      <pre><code v-html="prettyCode(solution.code)" /></pre>
-      <div v-if="isAdmin && solution.sim && solution.simSolution">
+      <pre><code v-html="prettyCode(submission.sourceCode, submission.language)" /></pre>
+
+      <div v-if="isAdmin && submission.similarity > 0 && submission.similarSubmission">
         <div class="flex flex-wrap gap-4">
           <span>
             {{ t('oj.similar_to') }}
-            <RouterLink :to="{ name: 'solution', params: { sid: solution.simSolution.sid } }">
-              {{ solution.simSolution.sid }}
+            <RouterLink :to="{ name: 'solution', params: { submissionId: submission.similarSubmission.id } }">
+              {{ submission.similarSubmission.id }}
             </RouterLink>
           </span>
-          <span>
-            {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
-          </span>
+          <span>{{ t('oj.similarity') }}: {{ submission.similarity }}%</span>
           <span>
             Author:
-            <RouterLink :to="{ name: 'UserProfile', params: { uid: solution.simSolution.uid } }">
-              {{ solution.simSolution.uid }}
+            <RouterLink :to="{ name: 'UserProfile', params: { username: submission.similarSubmission.user.username } }">
+              {{ submission.similarSubmission.user.username }}
             </RouterLink>
           </span>
-          <span>{{ timePretty(solution.simSolution.create) }}</span>
+          <span>{{ timePretty(submission.similarSubmission.createdAt) }}</span>
         </div>
-        <pre><code v-html="prettyCode(solution.simSolution.code)" /></pre>
+        <pre><code v-html="prettyCode(submission.similarSubmission.sourceCode, submission.language)" /></pre>
       </div>
     </div>
   </div>

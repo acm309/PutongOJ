@@ -47,36 +47,36 @@ const savingAvatar = ref(false)
 
 const hasChanges = computed(() => {
   if (!profile.value) return false
-  return editingProfile.value.nick !== profile.value.nick
+  return editingProfile.value.nickname !== profile.value.nickname
     || editingProfile.value.motto !== profile.value.motto
-    || editingProfile.value.mail !== profile.value.mail
+    || editingProfile.value.email !== profile.value.email
     || editingProfile.value.school !== profile.value.school
 })
 
 function setEditingProfile () {
   if (!profile.value) return
   editingProfile.value = {
-    nick: profile.value.nick,
+    nickname: profile.value.nickname,
     motto: profile.value.motto,
-    mail: profile.value.mail,
+    email: profile.value.email,
     school: profile.value.school,
   }
 }
 
 function openAvatarDialog () {
-  if (!profile.value || (avatarPresets.value.length === 0 && !profile.value.avatar)) return
-  selectedAvatar.value = profile.value.avatar
+  if (!profile.value || (avatarPresets.value.length === 0 && !profile.value.avatarUrl)) return
+  selectedAvatar.value = profile.value.avatarUrl
   avatarDialog.value = true
 }
 
 async function saveAvatar () {
-  if (!profile.value || selectedAvatar.value === profile.value.avatar) {
+  if (!profile.value || selectedAvatar.value === profile.value.avatarUrl) {
     avatarDialog.value = false
     return
   }
 
   savingAvatar.value = true
-  const resp = await updateProfile({ avatar: selectedAvatar.value })
+  const resp = await updateProfile({ avatarUrl: selectedAvatar.value })
   savingAvatar.value = false
 
   if (!resp.success) {
@@ -119,14 +119,14 @@ async function saveProfile () {
   if (!profile.value) return
 
   const payload: AccountEditPayload = {}
-  if (editingProfile.value.nick !== profile.value.nick) {
-    payload.nick = editingProfile.value.nick
+  if (editingProfile.value.nickname !== profile.value.nickname) {
+    payload.nickname = editingProfile.value.nickname
   }
   if (editingProfile.value.motto !== profile.value.motto) {
     payload.motto = editingProfile.value.motto
   }
-  if (editingProfile.value.mail !== profile.value.mail) {
-    payload.mail = editingProfile.value.mail
+  if (editingProfile.value.email !== profile.value.email) {
+    payload.email = editingProfile.value.email
   }
   if (editingProfile.value.school !== profile.value.school) {
     payload.school = editingProfile.value.school
@@ -195,7 +195,7 @@ async function connectOAuth (provider: OAuthProvider) {
 
 function gotoUserManagement () {
   if (!isAdmin.value || !profile.value) return
-  router.push({ name: 'UserManagementDetail', params: { uid: profile.value.uid } })
+  router.push({ name: 'UserManagementDetail', params: { username: profile.value.username } })
 }
 
 async function fetchSessions () {
@@ -281,9 +281,9 @@ onMounted(() => {
       <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6 pt-5">
         <div class="flex gap-4 items-center md:col-span-2">
           <div class="cursor-pointer flex group relative" @click="openAvatarDialog">
-            <UserAvatar :image="profile.avatar" class="h-20 shadow-xs w-20" />
+            <UserAvatar :image="profile.avatarUrl" class="h-20 shadow-xs w-20" />
             <div
-              v-if="avatarPresets.length > 0 || profile.avatar"
+              v-if="avatarPresets.length > 0 || profile.avatarUrl"
               class="absolute bg-black/50 flex group-hover:opacity-100 inset-0 items-center justify-center opacity-0 rounded-md transition-opacity"
             >
               <i class="pi pi-pencil text-white" />
@@ -292,13 +292,13 @@ onMounted(() => {
         </div>
 
         <IftaLabel>
-          <InputText id="username" :value="profile.uid" fluid readonly />
+          <InputText id="username" :value="profile.username" fluid readonly />
           <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingProfile.nick" fluid maxlength="30"
+            id="nickname" v-model="editingProfile.nickname" fluid maxlength="30"
             :placeholder="t('ptoj.enter_nickname')"
           />
           <label for="nickname">{{ t('ptoj.nickname') }}</label>
@@ -306,7 +306,7 @@ onMounted(() => {
 
         <IftaLabel>
           <InputText
-            id="email" v-model="editingProfile.mail" fluid type="email" maxlength="254"
+            id="email" v-model="editingProfile.email" fluid type="email" maxlength="254"
             :placeholder="t('ptoj.enter_email')"
           />
           <label for="email">{{ t('ptoj.email') }}</label>
@@ -501,7 +501,7 @@ onMounted(() => {
 
     <Dialog v-model:visible="avatarDialog" modal :header="t('ptoj.change_avatar')" class="max-w-lg mx-6 w-full">
       <div
-        v-if="profile && profile.avatar && !avatarPresets.includes(profile.avatar)"
+        v-if="profile && profile.avatarUrl && !avatarPresets.includes(profile.avatarUrl)"
         class="mb-4 text-muted-color text-sm"
       >
         {{ t('ptoj.custom_avatar_hint') }}
@@ -519,12 +519,12 @@ onMounted(() => {
 
         <!-- Current custom avatar (admin-set, not in presets) -->
         <div
-          v-if="profile && profile.avatar && !avatarPresets.includes(profile.avatar)"
+          v-if="profile && profile.avatarUrl && !avatarPresets.includes(profile.avatarUrl)"
           class="border-2 cursor-pointer flex p-1.5 rounded-xl transition-colors"
-          :class="selectedAvatar === profile.avatar ? 'border-primary' : 'border-transparent hover:border-surface-300'"
-          @click="selectedAvatar = profile.avatar"
+          :class="selectedAvatar === profile.avatarUrl ? 'border-primary' : 'border-transparent hover:border-surface-300'"
+          @click="selectedAvatar = profile.avatarUrl"
         >
-          <UserAvatar :image="profile.avatar" shape="square" size="xlarge" />
+          <UserAvatar :image="profile.avatarUrl" shape="square" size="xlarge" />
         </div>
 
         <!-- Preset avatars -->
@@ -545,7 +545,7 @@ onMounted(() => {
         />
         <Button
           :label="t('ptoj.save_changes')" icon="pi pi-check" :loading="savingAvatar"
-          :disabled="profile !== null && selectedAvatar === profile.avatar" @click="saveAvatar"
+          :disabled="profile !== null && selectedAvatar === profile.avatarUrl" @click="saveAvatar"
         />
       </div>
     </Dialog>

@@ -28,15 +28,15 @@ const router = useRouter()
 const message = useMessage()
 
 const query = ref({} as AccountSubmissionListQuery)
-const docs = ref([] as AccountSubmissionListQueryResult['docs'])
+const docs = ref([] as AccountSubmissionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 
 const hasFilter = computed(() => {
   return Boolean(
-    query.value.problem
-    || query.value.contest
-    || Number.isInteger(query.value.judge)
+    query.value.problemId
+    || query.value.contestId
+    || query.value.status !== undefined
     || query.value.language,
   )
 })
@@ -60,7 +60,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -69,7 +69,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -87,9 +87,9 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      problem: query.value.problem || undefined,
-      contest: query.value.contest || undefined,
-      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      problemId: query.value.problemId || undefined,
+      contestId: query.value.contestId || undefined,
+      status: query.value.status ?? undefined,
       language: query.value.language || undefined,
       page: undefined,
     },
@@ -100,10 +100,10 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      user: undefined,
-      problem: undefined,
-      contest: undefined,
-      judge: undefined,
+      username: undefined,
+      problemId: undefined,
+      contestId: undefined,
+      status: undefined,
       language: undefined,
       page: undefined,
     },
@@ -111,7 +111,7 @@ function onReset () {
 }
 
 emitter.on('submission-updated', (sid) => {
-  if (docs.value.some(item => item.sid === sid)) {
+  if (docs.value.some(item => item.id === sid)) {
     fetch()
   }
 })
@@ -132,7 +132,7 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <IconField>
           <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" :use-grouping="false" fluid
+            v-model="query.problemId" mode="decimal" :min="1" :use-grouping="false" fluid
             :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-flag" />
@@ -140,14 +140,14 @@ onRouteQueryUpdate(fetch)
 
         <IconField>
           <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" :use-grouping="false" fluid
+            v-model="query.contestId" mode="decimal" :min="1" :use-grouping="false" fluid
             :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-trophy" />
         </IconField>
 
         <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          v-model="query.status" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
@@ -182,7 +182,7 @@ onRouteQueryUpdate(fetch)
 
     <SolutionDataTable
       class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"
-      :sort-order="query.sort" hide-user @sort="onSort"
+      :sort-order="query.sort === 'asc' ? 1 : -1" hide-user @sort="onSort"
     />
 
     <Paginator

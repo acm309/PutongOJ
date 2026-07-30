@@ -37,7 +37,7 @@ const {
 } = storeToRefs(useContestStore())
 
 const query = ref({} as ContestSolutionListQuery)
-const docs = ref([] as ContestSolutionListQueryResult['docs'])
+const docs = ref([] as ContestSolutionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const exportDialog = ref(false)
@@ -45,9 +45,9 @@ const autoRefresh = ref<number | null>(null)
 
 const hasFilter = computed(() => {
   return Boolean(
-    query.value.user
-    || query.value.problem
-    || Number.isInteger(query.value.judge)
+    query.value.username
+    || query.value.problemId
+    || query.value.status !== undefined
     || query.value.language,
   )
 })
@@ -71,7 +71,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -80,7 +80,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -98,9 +98,9 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      user: query.value.user || undefined,
-      problem: query.value.problem || undefined,
-      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      username: query.value.username || undefined,
+      problemId: query.value.problemId || undefined,
+      status: query.value.status ?? undefined,
       language: query.value.language || undefined,
       page: undefined,
     },
@@ -111,21 +111,21 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      user: undefined,
-      problem: undefined,
-      judge: undefined,
+      username: undefined,
+      problemId: undefined,
+      status: undefined,
       language: undefined,
       page: undefined,
     },
   })
 }
 
-function handleViewProblem (data: any) {
+function handleViewProblem (problemId: number) {
   router.push({
     name: 'contestProblem',
     params: {
       contestId: contestId.value,
-      problemId: data.pid,
+      problemId,
     },
   })
 }
@@ -174,10 +174,10 @@ onBeforeUnmount(clearAutoRefresh)
   <div class="p-0">
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
+        <UserFilter v-model="query.username" :disabled="loading" @select="onSearch" />
 
         <Select
-          v-model="query.problem" fluid :options="problemOptions" option-label="label" option-value="value"
+          v-model="query.problemId" fluid :options="problemOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @change="onSearch"
         >
           <template #dropdownicon>
@@ -186,7 +186,7 @@ onBeforeUnmount(clearAutoRefresh)
         </Select>
 
         <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          v-model="query.status" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
@@ -232,10 +232,13 @@ onBeforeUnmount(clearAutoRefresh)
 
     <SolutionDataTable
       class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"
-      :sort-order="query.sort" hide-contest @sort="onSort"
+      :sort-order="query.sort === 'asc' ? 1 : -1" hide-contest @sort="onSort"
     >
       <template #problem="{ data }">
-        <Button class="-my-px p-0" :label="problemLabels.get(data.pid) " link fluid @click="handleViewProblem(data)" />
+        <Button
+          class="-my-px p-0" :label="problemLabels.get(data.problemId)" link fluid
+          @click="handleViewProblem(data.problemId)"
+        />
       </template>
     </SolutionDataTable>
 

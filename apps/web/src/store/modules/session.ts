@@ -14,10 +14,10 @@ export const useSessionStore = defineStore('session', {
       return this.profile !== null
     },
     isAdmin (): boolean {
-      return this.profile?.privilege === UserPrivilege.Admin || this.isRoot
+      return this.profile?.privilege === UserPrivilege.ADMIN || this.isRoot
     },
     isRoot (): boolean {
-      return this.profile?.privilege === UserPrivilege.Root
+      return this.profile?.privilege === UserPrivilege.ROOT
     },
   },
   actions: {
@@ -26,7 +26,7 @@ export const useSessionStore = defineStore('session', {
     },
     setProfile (profile: AccountProfileQueryResult) {
       this.profile = profile
-      identifyUmamiSession(profile.uid)
+      identifyUmamiSession(profile.username)
     },
     clearProfile () {
       this.profile = null

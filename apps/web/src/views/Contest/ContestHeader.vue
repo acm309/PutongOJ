@@ -27,7 +27,7 @@ const { contest } = storeToRefs(contestStore)
 const { currentTime } = storeToRefs(rootStore)
 
 const contestId = computed(() => Number(route.params.contestId))
-const contestLoaded = computed(() => contest.value?.contestId === contestId.value)
+const contestLoaded = computed(() => contest.value?.id === contestId.value)
 const currentView = computed(() => String(route.name || 'contest'))
 const startsAt = computed(() => new Date(contest.value.startsAt).getTime())
 const endsAt = computed(() => new Date(contest.value.endsAt).getTime())
@@ -114,7 +114,7 @@ const tabItems = computed(() => {
 
 function jumpToCourse () {
   if (!contest.value.course) return
-  router.push({ name: 'courseContests', params: { id: contest.value.course.courseId } })
+  router.push({ name: 'courseContests', params: { id: contest.value.course.id } })
 }
 </script>
 

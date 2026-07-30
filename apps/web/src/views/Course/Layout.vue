@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { courseRoleNone } from '@putongoj/shared'
-import { AxiosError } from 'axios'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -9,7 +8,7 @@ import InputText from 'primevue/inputtext'
 import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { joinCourse as requestJoinCourse } from '@/api/course'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { onProfileUpdate } from '@/utils/helper'
@@ -21,14 +20,14 @@ const route = useRoute()
 const router = useRouter()
 const rootStore = useRootStore()
 const courseStore = useCourseStore()
-const { findCourse } = courseStore
+const { getCourse: loadCourse } = courseStore
 const { course } = storeToRefs(courseStore)
 
 const displayTab = computed(() => route.name as string || 'courseProblems')
 const courseId = computed(() => Number.parseInt(route.params.id as string))
-const courseLoaded = computed(() => course.value?.courseId === courseId.value)
+const courseLoaded = computed(() => course.value?.id === courseId.value)
 const role = computed(() => {
-  if (course.value?.courseId !== courseId.value) {
+  if (course.value?.id !== courseId.value) {
     return courseRoleNone
   }
   return course.value?.role ?? courseRoleNone
@@ -41,13 +40,13 @@ const joinForm = reactive({
 const joining = ref(false)
 
 async function fetch () {
-  await findCourse(courseId.value)
+  await loadCourse(courseId.value)
   if (courseLoaded.value && course.value) {
     const title = `${course.value.name} - ${t('oj.course')}`
     rootStore.changeDomTitle({ title })
   }
   if (
-    !role.value.manageCourse
+    !role.value.canManageCourse
     && [ 'courseMembers', 'courseSettings' ].includes(displayTab.value)
   ) {
     router.push({ name: 'courseProblems', params: { id: courseId.value } })
@@ -62,14 +61,12 @@ async function joinCourse () {
 
   joining.value = true
   try {
-    const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
-    if (result.data?.success === true) {
+    const result = await requestJoinCourse(courseId.value, joinForm.joinCode)
+    if (result.success) {
       message.success(t('oj.course_join_success'))
-      await findCourse(courseId.value)
-    } else if (result instanceof AxiosError) {
-      message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
+      await loadCourse(courseId.value)
     } else {
-      message.error(t('join_failed', { error: t('oj.unknown_error') }))
+      message.error(t('join_failed', { error: result.message }))
     }
     joinModal.value = false
   } catch (e: any) {
@@ -97,9 +94,9 @@ onProfileUpdate(fetch)
     </div>
   </div>
 
-  <RouterView v-else-if="role.basic" />
+  <RouterView v-else-if="course && role.canAccess" />
 
-  <div v-else class="max-w-4xl">
+  <div v-else-if="course" class="max-w-4xl">
     <div class="flex flex-col gap-6 items-center justify-center max-w-2xl mx-auto p-8 pb-25 sm:pb-8 text-center">
       <i class="pi pi-lock text-6xl text-muted-color" />
       <h2 class="font-semibold text-xl">

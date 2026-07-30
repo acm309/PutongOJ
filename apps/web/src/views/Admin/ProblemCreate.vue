@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ProblemJudgeType, ProblemVisibility } from '@putongoj/shared'
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
 import { onMounted, reactive } from 'vue'
@@ -17,30 +18,36 @@ const router = useRouter()
 const problemStore = useProblemStore()
 const problem = reactive({
   title: '',
-  memory: 32768,
-  time: 1000,
+  memoryLimitKb: 32768,
+  timeLimitMs: 1000,
   description: '',
-  input: '',
-  output: '',
+  inputFormat: '',
+  outputFormat: '',
   hint: '',
-  in: '',
-  out: '',
-  type: 1,
-  code: '',
-  tags: [],
-  course: null as number | null,
+  sampleInput: '',
+  sampleOutput: '',
+  judgeType: ProblemJudgeType.TRADITIONAL,
+  judgeCode: '',
+  tagIds: [] as number[],
+  visibility: ProblemVisibility.RESERVED,
+  courseId: undefined as number | undefined,
 })
 
 async function submit () {
-  const pid = await problemStore.create(problem)
-  message.success(t('oj.create_problem_success', { pid }))
-  if (!problem.in && !problem.out) {
+  const response = await problemStore.create(problem)
+  if (!response.success) {
+    message.error(t('oj.failed_proceed'), response.message)
+    return
+  }
+  const problemId = response.data.id
+  message.success(t('oj.create_problem_success', { pid: problemId }))
+  if (!problem.sampleInput && !problem.sampleOutput) {
     message.info(t('oj.sample_input_output_empty'))
   } else {
-    await createTestcase(pid, { in: problem.in, out: problem.out })
+    await createTestcase(problemId, { input: problem.sampleInput, output: problem.sampleOutput })
     message.success(t('oj.sample_testcase_created'))
   }
-  router.push({ name: 'problemInfo', params: { pid } })
+  router.push({ name: 'problemInfo', params: { problemId } })
 }
 
 async function submitCheck () {
@@ -49,7 +56,7 @@ async function submitCheck () {
   } else if (!problem.description.trim()) {
     message.error(t('oj.description_is_required'))
   } else {
-    if (!problem.in || !problem.out) {
+    if (!problem.sampleInput || !problem.sampleOutput) {
       confirm.require({
         header: t('oj.notice'),
         message: t('oj.sample_input_output_incomplete'),
@@ -75,8 +82,8 @@ async function submitCheck () {
 }
 
 onMounted(() => {
-  if (route.query.course) {
-    problem.course = Number.parseInt(route.query.course as string)
+  if (route.query.courseId) {
+    problem.courseId = Number.parseInt(route.query.courseId as string)
   }
 })
 </script>

@@ -30,7 +30,7 @@ const adminRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'User Management', requiresAdmin: true },
   },
   {
-    path: '/admin/users/:uid',
+    path: '/admin/users/:username',
     name: 'UserManagementDetail',
     component: UserManagementDetail,
     meta: { title: 'User Management', requiresAdmin: true },

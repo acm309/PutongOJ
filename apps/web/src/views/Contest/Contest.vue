@@ -16,7 +16,7 @@ const contestStore = useContestStore()
 const { contest } = storeToRefs(contestStore)
 
 const contestId = computed(() => Number(route.params.contestId))
-const contestLoaded = computed(() => contest.value?.contestId === contestId.value)
+const contestLoaded = computed(() => contest.value?.id === contestId.value)
 
 async function fetch () {
   const resp = await contestStore.loadContest(contestId.value)
@@ -24,7 +24,7 @@ async function fetch () {
     message.error(t('ptoj.failed_fetch_contest'), resp.message)
     return
   }
-  const title = `${resp.data.title} - Contest ${resp.data.contestId}`
+  const title = `${resp.data.title} - Contest ${resp.data.id}`
   rootStore.changeDomTitle({ title })
 }
 

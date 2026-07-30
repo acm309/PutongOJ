@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AdminAccountBatchRegisterPayload } from '@putongoj/shared'
-import { passwordRegex, UserModelSchema } from '@putongoj/shared'
+import { passwordRegex, UserFieldsSchema } from '@putongoj/shared'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -20,7 +20,7 @@ interface ImportRow {
   sourceRow: number
   username: string
   password: string
-  nick: string
+  nickname: string
   validationStatus: ValidationStatus
   validationMessage: string
   duplicate: boolean
@@ -164,7 +164,7 @@ function validateRows () {
 
     const errors: string[] = []
 
-    if (!UserModelSchema.shape.uid.safeParse(row.username).success) {
+    if (!UserFieldsSchema.shape.username.safeParse(row.username).success) {
       errors.push(t('ptoj.username_invalid_detail'))
     }
 
@@ -172,7 +172,7 @@ function validateRows () {
       errors.push(t('ptoj.password_weak'))
     }
 
-    if (!UserModelSchema.shape.nick.safeParse(row.nick).success) {
+    if (!UserFieldsSchema.shape.nickname.safeParse(row.nickname).success) {
       errors.push(t('ptoj.nickname_invalid'))
     }
 
@@ -227,9 +227,9 @@ async function parseExcelFile (file: File) {
         const row = sheet.getRow(rowNumber)
         const username = getCellText(row, 1)
         const password = getCellText(row, 2)
-        const nick = getCellText(row, 3)
+        const nickname = getCellText(row, 3)
 
-        if ([ username, password, nick ].every(value => value.trim().length === 0)) {
+        if ([ username, password, nickname ].every(value => value.trim().length === 0)) {
           continue
         }
 
@@ -239,7 +239,7 @@ async function parseExcelFile (file: File) {
           sourceRow: rowNumber,
           username,
           password,
-          nick,
+          nickname,
           validationStatus: 'pending',
           validationMessage: '',
           duplicate: false,
@@ -290,8 +290,8 @@ function toPayloadItem (row: ImportRow): AdminAccountBatchRegisterPayload[number
     password: row.password,
   }
 
-  if (row.nick) {
-    item.nick = row.nick
+  if (row.nickname) {
+    item.nickname = row.nickname
   }
 
   return item
@@ -458,7 +458,7 @@ function emitRefresh () {
           </template>
         </Column>
 
-        <Column field="nick" :header="t('ptoj.nickname')" class="min-w-36" />
+        <Column field="nickname" :header="t('ptoj.nickname')" class="min-w-36" />
 
         <Column :header="t('ptoj.status')" class="w-28">
           <template #body="{ data }">

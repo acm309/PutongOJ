@@ -13,7 +13,7 @@ const { t } = useI18n()
 const route = useRoute()
 const message = useMessage()
 
-const problemId = computed(() => Number.parseInt(route.params.pid as string))
+const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
 const loading = ref(false)
 const judgeCounts = ref([] as ProblemStatisticsQueryResult['judgeCounts'])
@@ -21,7 +21,7 @@ const timeDistribution = ref([] as ProblemStatisticsQueryResult['timeDistributio
 const memoryDistribution = ref([] as ProblemStatisticsQueryResult['memoryDistribution'])
 
 const judgeChartData = computed(() => {
-  const judgeCountMap = new Map(judgeCounts.value.map(item => [ item.judge, item.count ]))
+  const judgeCountMap = new Map(judgeCounts.value.map(item => [ item.status, item.count ]))
   const judgeLabels = [ 'CE', 'AC', 'RE', 'WA', 'TLE', 'MLE', 'OLE', 'PE', 'SE' ]
   const judgeColors = [
     'oklch(70.2% 0.183 293.541)',

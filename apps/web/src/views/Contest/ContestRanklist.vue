@@ -81,7 +81,7 @@ function onViewSolutions (user: string, problem: number) {
       params: { contestId: contestId.value },
       query: { user, problem },
     })
-  } else if (profile.value?.uid === user) {
+  } else if (profile.value?.username === user) {
     router.push({
       name: 'ContestMySubmissions',
       params: { contestId: contestId.value },
@@ -146,7 +146,7 @@ onBeforeUnmount(clearAutoRefresh)
                   {{ problemLabels.get(problem.problemId) }}
                 </div>
                 <div class="text-muted-color text-sm">
-                  {{ problem.solve }}
+                  {{ problem.solverCount }}
                 </div>
               </RouterLink>
             </th>
@@ -169,7 +169,7 @@ onBeforeUnmount(clearAutoRefresh)
               {{ item.rank }}
             </td>
             <td class="border font-sans overflow-hidden text-ellipsis whitespace-nowrap">
-              <RouterLink :to="{ name: 'UserProfile', params: { uid: item.username } }">
+              <RouterLink :to="{ name: 'UserProfile', params: { username: item.username } }">
                 {{ item.username }}
               </RouterLink>
             </td>

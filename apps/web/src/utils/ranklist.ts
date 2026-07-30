@@ -158,7 +158,7 @@ export async function exportSheet (
   const ExcelJS = await import('exceljs')
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Ranklist')
-  const problems = contest.problems.sort((a, b) => a.index - b.index)
+  const problems = contest.problems.sort((a, b) => a.position - b.position)
 
   worksheet.columns = [
     { header: 'Rank', width: 6 },
@@ -167,7 +167,7 @@ export async function exportSheet (
     { header: 'Solved', width: 8 },
     { header: 'Penalty', width: 8 },
     ...problems.map(p => ({
-      header: contestLabeling(p.index, contest.labelingStyle),
+      header: contestLabeling(p.position, contest.labelingStyle),
       width: 10,
     })),
   ]

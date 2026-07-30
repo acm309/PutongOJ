@@ -7,7 +7,7 @@ import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { getCourseMember, updateCourseMember } from '@/api/course'
 import UserSelect from '@/components/UserSelect.vue'
 import { courseRoleFields } from '@/utils/constant'
 import { useMessage } from '@/utils/message'
@@ -22,8 +22,8 @@ const props = defineProps({
     required: true,
   },
   userId: {
-    type: String,
-    default: '',
+    type: Number,
+    default: null,
   },
 })
 const emit = defineEmits([ 'update:modelValue' ])
@@ -32,24 +32,24 @@ const { t } = useI18n()
 const message = useMessage()
 
 const roleConfig = computed(() => ({
-  basic: t('oj.course_basic_view'),
-  viewTestcase: t('oj.course_view_testcase'),
-  viewSolution: t('oj.course_view_solution'),
-  manageProblem: t('oj.course_manage_problem'),
-  manageContest: t('oj.course_manage_contest'),
-  manageCourse: t('oj.course_manage_course'),
+  canAccess: t('oj.course_basic_view'),
+  canViewTestcases: t('oj.course_view_testcase'),
+  canViewSubmissions: t('oj.course_view_solution'),
+  canManageProblems: t('oj.course_manage_problem'),
+  canManageContests: t('oj.course_manage_contest'),
+  canManageCourse: t('oj.course_manage_course'),
 }))
 
 const defaultRole = () => Object.fromEntries(courseRoleFields.map(field => [ field, false ])) as unknown as CourseRole
 
 const modal = ref(false)
 const loading = ref(false)
-const selectedUserId = ref('')
+const selectedUserId = ref<number | null>(null)
 const loaded = ref(false)
 const isAdmin = ref(false)
 const role = ref(defaultRole())
 const disabled = ref(defaultRole())
-const isEdit = computed(() => !!props.userId)
+const isEdit = computed(() => props.userId !== null)
 const courseId = computed(() => props.courseId)
 
 watch(() => props.modelValue, val => modal.value = val)
@@ -60,30 +60,44 @@ function close () {
 }
 
 function rippleRoles () {
-  let { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse } = role.value
+  let {
+    canAccess,
+    canViewTestcases,
+    canViewSubmissions,
+    canManageProblems,
+    canManageContests,
+    canManageCourse,
+  } = role.value
 
-  basic = true
-  manageContest ||= manageCourse
-  manageProblem ||= manageCourse
-  viewSolution ||= manageCourse
-  viewTestcase ||= manageProblem || manageCourse
+  canAccess = true
+  canManageContests ||= canManageCourse
+  canManageProblems ||= canManageCourse
+  canViewSubmissions ||= canManageCourse
+  canViewTestcases ||= canManageProblems || canManageCourse
 
-  Object.assign(role.value, { basic, viewTestcase, viewSolution, manageProblem, manageContest, manageCourse })
+  Object.assign(role.value, {
+    canAccess,
+    canViewTestcases,
+    canViewSubmissions,
+    canManageProblems,
+    canManageContests,
+    canManageCourse,
+  })
   Object.assign(disabled.value, {
-    basic: true,
-    viewTestcase: manageProblem || manageCourse,
-    viewSolution: manageCourse,
-    manageProblem: manageCourse,
-    manageContest: manageCourse,
-    manageCourse: false,
+    canAccess: true,
+    canViewTestcases: canManageProblems || canManageCourse,
+    canViewSubmissions: canManageCourse,
+    canManageProblems: canManageCourse,
+    canManageContests: canManageCourse,
+    canManageCourse: false,
   })
 }
 
 async function submit () {
-  if (!selectedUserId.value) return
+  if (selectedUserId.value === null) return
   loading.value = true
   try {
-    await api.course.updateMember(courseId.value, selectedUserId.value, role.value)
+    await updateCourseMember(courseId.value, selectedUserId.value, role.value)
     message.success(t('oj.course_member_update_success'))
     close()
   } finally {
@@ -92,13 +106,15 @@ async function submit () {
 }
 
 async function loadUser () {
-  if (!selectedUserId.value) {
+  if (selectedUserId.value === null) {
     return
   }
   loading.value = true
   try {
-    const { data: member } = await api.course.getMember(courseId.value, selectedUserId.value)
-    isAdmin.value = member.user.privilege >= UserPrivilege.Admin
+    const response = await getCourseMember(courseId.value, selectedUserId.value)
+    if (!response.success) return
+    const member = response.data
+    isAdmin.value = member.user.privilege === UserPrivilege.ADMIN || member.user.privilege === UserPrivilege.ROOT
     loaded.value = true
     Object.assign(role.value, member.role)
     rippleRoles()
@@ -110,10 +126,10 @@ async function loadUser () {
 async function initModal () {
   isAdmin.value = false
   if (isEdit.value) {
-    selectedUserId.value = props.userId
+    selectedUserId.value = Number(props.userId)
     await loadUser()
   } else {
-    selectedUserId.value = ''
+    selectedUserId.value = null
     loaded.value = false
     Object.assign(role.value, defaultRole())
     rippleRoles()

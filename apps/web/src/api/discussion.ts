@@ -1,6 +1,7 @@
 import type {
   CommentCreatePayload,
   DiscussionCreatePayload,
+  DiscussionCreateResult,
   DiscussionDetailQueryResult,
   DiscussionListQuery,
   DiscussionListQueryResult,
@@ -12,7 +13,7 @@ export async function findDiscussions (params: DiscussionListQuery) {
 }
 
 export async function createDiscussion (payload: DiscussionCreatePayload) {
-  return instance.post<{ discussionId: number }>('/discussions', payload)
+  return instance.post<DiscussionCreateResult>('/discussions', payload)
 }
 export async function getDiscussion (discussionId: number | string) {
   return instance.get<DiscussionDetailQueryResult>(`/discussions/${encodeURIComponent(discussionId)}`)

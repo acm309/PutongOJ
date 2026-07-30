@@ -26,7 +26,7 @@ const problemRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'Create Problem', requiresLogin: true },
   },
   {
-    path: '/problem/:pid',
+    path: '/problems/:problemId',
     component: Problem,
     children: [
       {

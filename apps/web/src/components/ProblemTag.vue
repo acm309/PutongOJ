@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TagColor } from '@putongoj/shared'
+import { TagColor } from '@putongoj/shared'
 import Tag from 'primevue/tag'
 
 const props = withDefaults(defineProps<{
@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<{
   size?: 'normal' | 'large'
   filled?: boolean
 }>(), {
-  color: 'default',
+  color: TagColor.DEFAULT,
   size: 'normal',
   filled: true,
 })
@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
 <template>
   <Tag
     :value="props.name" class="ptag" :class="[
-      `ptag-${props.color}`,
+      `ptag-${props.color.toLowerCase()}`,
       {
         'ptag-filled': props.filled,
         'ptag-large': props.size === 'large',

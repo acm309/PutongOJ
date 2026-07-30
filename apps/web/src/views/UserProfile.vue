@@ -25,21 +25,24 @@ const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
-const uid = computed(() => route.params.uid as string)
+const uid = computed(() => route.params.username as string)
 const user = ref<UserProfileQueryResult | null>(null)
 const loading = ref(false)
 
 const nickname = computed(() => {
   if (!user.value) return ''
-  return user.value.nick || user.value.uid
+  return user.value.nickname || user.value.username
 })
 const username = computed(() => {
-  if (!user.value || !user.value.nick || user.value.nick === user.value.uid) return ''
-  return user.value.uid
+  if (!user.value || !user.value.nickname || user.value.nickname === user.value.username) return ''
+  return user.value.username
 })
 const isSelf = computed(() => {
   if (!profile.value || !user.value) return false
-  return profile.value.uid === user.value.uid
+  return profile.value.username === user.value.username
+})
+const isPrivileged = computed(() => {
+  return user.value?.privilege === UserPrivilege.ADMIN || user.value?.privilege === UserPrivilege.ROOT
 })
 
 async function fetch () {
@@ -52,17 +55,17 @@ async function fetch () {
   }
 
   user.value = resp.data
-  changeDomTitle({ title: `${user.value.uid} - User Profile` })
+  changeDomTitle({ title: `${user.value.username} - User Profile` })
 }
 
 function gotoUserManagement () {
   if (!isAdmin.value || !user.value) return
-  router.push({ name: 'UserManagementDetail', params: { uid: user.value.uid } })
+  router.push({ name: 'UserManagementDetail', params: { username: user.value.username } })
 }
 
 function gotoAccountSettings () {
   if (!profile.value || !user.value) return
-  if (profile.value.uid !== user.value.uid) return
+  if (profile.value.username !== user.value.username) return
   router.push({ name: 'AccountSettings' })
 }
 
@@ -94,7 +97,7 @@ onRouteParamUpdate(fetch)
       <div class="gap-6 items-end md:flex mt-18">
         <div class="md:flex-none">
           <img
-            v-if="user.avatar" :src="user.avatar" :alt="`${nickname}'s Avatar`"
+            v-if="user.avatarUrl" :src="user.avatarUrl" :alt="`${nickname}'s Avatar`"
             class="aspect-square border border-surface h-32 rounded-lg w-32"
           >
           <img v-else src="@/assets/logo.jpg" alt="Default Avatar" class="border border-surface h-32 rounded-lg w-32">
@@ -116,14 +119,14 @@ onRouteParamUpdate(fetch)
         <div class="lg:col-span-2 space-y-2">
           <Fieldset :legend="t('ptoj.basic_information')">
             <div class="space-y-4">
-              <div v-if="user.mail" class="flex gap-3 items-center">
+              <div v-if="user.email" class="flex gap-3 items-center">
                 <i class="m-2 pi pi-envelope text-lg text-muted-color" />
                 <div>
                   <div class="text-muted-color text-sm">
                     {{ t('ptoj.email') }}
                   </div>
                   <div class="font-medium">
-                    {{ user.mail }}
+                    {{ user.email }}
                   </div>
                 </div>
               </div>
@@ -155,19 +158,19 @@ onRouteParamUpdate(fetch)
           </Fieldset>
 
           <Fieldset
-            v-if="user.groups?.length > 0 || user.privilege > UserPrivilege.User"
+            v-if="user.groups?.length > 0 || isPrivileged"
             :legend="t('ptoj.profile_groups')"
           >
             <div class="flex flex-wrap gap-2 p-2">
               <Tag
-                v-if="user.privilege > UserPrivilege.User" :value="getPrivilegeLabel(user.privilege)"
+                v-if="isPrivileged" :value="getPrivilegeLabel(user.privilege)"
                 :severity="getPrivilegeSeverity(user.privilege)"
               />
               <RouterLink
-                v-for="group in user.groups" :key="group.gid"
-                :to="{ name: 'Ranklist', query: { group: group.gid } }"
+                v-for="group in user.groups" :key="group.id"
+                :to="{ name: 'Ranklist', query: { groupId: group.id } }"
               >
-                <Tag :value="group.title" severity="secondary" />
+                <Tag :value="group.name" severity="secondary" />
               </RouterLink>
             </div>
           </Fieldset>
@@ -215,7 +218,7 @@ onRouteParamUpdate(fetch)
             <div v-else class="flex flex-wrap justify-evenly">
               <RouterLink
                 v-for="problemId in user.solved" :key="problemId"
-                :to="{ name: 'problemInfo', params: { pid: problemId } }"
+                :to="{ name: 'problemInfo', params: { problemId } }"
               >
                 <Button class="text-sm" :label="problemId.toString()" link />
               </RouterLink>
@@ -231,7 +234,7 @@ onRouteParamUpdate(fetch)
             <div v-else class="flex flex-wrap justify-evenly">
               <RouterLink
                 v-for="problemId in user.attempted" :key="problemId"
-                :to="{ name: 'problemInfo', params: { pid: problemId } }"
+                :to="{ name: 'problemInfo', params: { problemId } }"
               >
                 <Button class="text-sm" :label="problemId.toString()" link />
               </RouterLink>

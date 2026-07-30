@@ -17,7 +17,7 @@ const message = useMessage()
 const confirm = useConfirm()
 
 const selectedDispatchMethod = ref('broadcast')
-const targetUser = ref('')
+const targetUser = ref<number | null>(null)
 const notification = ref({
   title: '',
   content: '',
@@ -32,7 +32,7 @@ const formValid = computed(() => {
   if (notification.value.title.trim() === '' || notification.value.content.trim() === '') {
     return false
   }
-  if (selectedDispatchMethod.value === 'user' && targetUser.value.trim() === '') {
+  if (selectedDispatchMethod.value === 'user' && targetUser.value === null) {
     return false
   }
   return true
@@ -48,7 +48,7 @@ async function sendNotification () {
   if (selectedDispatchMethod.value === 'broadcast') {
     resp = await sendNotificationBroadcast(notification.value)
   } else {
-    resp = await sendNotificationUser(targetUser.value, notification.value)
+    resp = await sendNotificationUser(targetUser.value!.toString(), notification.value)
   }
   sending.value = false
   if (!resp.success) {
@@ -61,7 +61,7 @@ async function sendNotification () {
     title: '',
     content: '',
   }
-  targetUser.value = ''
+  targetUser.value = null
 }
 
 function onSendNotification (event: Event) {

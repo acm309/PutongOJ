@@ -11,24 +11,24 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const discussionTypeLabels = computed(() => ({
-  [DiscussionType.OpenDiscussion]: t('ptoj.discussion'),
-  [DiscussionType.PublicAnnouncement]: t('ptoj.announcement'),
-  [DiscussionType.PrivateClarification]: t('ptoj.clarification'),
-  [DiscussionType.ArchivedDiscussion]: t('ptoj.archived'),
+  [DiscussionType.OPEN_DISCUSSION]: t('ptoj.discussion'),
+  [DiscussionType.PUBLIC_ANNOUNCEMENT]: t('ptoj.announcement'),
+  [DiscussionType.PRIVATE_CLARIFICATION]: t('ptoj.clarification'),
+  [DiscussionType.ARCHIVED_DISCUSSION]: t('ptoj.archived'),
 } as Record<DiscussionType, string>))
 
 const discussionTypeSeverities = {
-  [DiscussionType.OpenDiscussion]: 'success',
-  [DiscussionType.PublicAnnouncement]: 'primary',
-  [DiscussionType.PrivateClarification]: 'info',
-  [DiscussionType.ArchivedDiscussion]: 'warn',
+  [DiscussionType.OPEN_DISCUSSION]: 'success',
+  [DiscussionType.PUBLIC_ANNOUNCEMENT]: 'primary',
+  [DiscussionType.PRIVATE_CLARIFICATION]: 'info',
+  [DiscussionType.ARCHIVED_DISCUSSION]: 'warn',
 } as Record<DiscussionType, string>
 
 const discussionTypeIcons = {
-  [DiscussionType.OpenDiscussion]: 'pi pi-comments',
-  [DiscussionType.PublicAnnouncement]: 'pi pi-megaphone',
-  [DiscussionType.PrivateClarification]: 'pi pi-info-circle',
-  [DiscussionType.ArchivedDiscussion]: 'pi pi-lock',
+  [DiscussionType.OPEN_DISCUSSION]: 'pi pi-comments',
+  [DiscussionType.PUBLIC_ANNOUNCEMENT]: 'pi pi-megaphone',
+  [DiscussionType.PRIVATE_CLARIFICATION]: 'pi pi-info-circle',
+  [DiscussionType.ARCHIVED_DISCUSSION]: 'pi pi-lock',
 } as Record<DiscussionType, string>
 </script>
 

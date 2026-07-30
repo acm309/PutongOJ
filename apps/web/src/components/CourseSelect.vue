@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { CourseEntityItem } from '@putongoj/shared'
 import debounce from 'lodash.debounce'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { findCourseItems } from '@/api/course'
 import { useMessage } from '@/utils/message'
 
 const props = defineProps({
@@ -30,13 +29,15 @@ const findCourseOptions = debounce(async (query: string) => {
   }
   loading.value = true
   try {
-    const { data } = await api.course.findCourseItems(query)
+    const response = await findCourseItems({ keyword: query })
+    if (!response.success) return
+    const { data } = response
     courseOptions.value.length = 0
-    data.forEach((item: CourseEntityItem) => {
+    data.forEach((item) => {
       courseOptions.value.push({
-        value: item.courseId,
+        value: item.id,
         label: item.name,
-        disabled: item.courseId === props.current,
+        disabled: item.id === props.current,
       })
     })
     courseOptions.value.push({

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ProblemJudgeType } from '@putongoj/shared'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import InputNumber from 'primevue/inputnumber'
@@ -8,15 +9,12 @@ import Textarea from 'primevue/textarea'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
-import { problemType } from '@/utils/constant'
+import { problemJudgeTypeLabels } from '@/utils/constant'
 
 defineProps([ 'problem' ])
 
-const problemTypeOptions = Object.entries(problemType)
-  .map(([ value, label ]) => ({
-    value: Number(value),
-    label,
-  }))
+const problemJudgeTypeOptions = Object.entries(problemJudgeTypeLabels)
+  .map(([ value, label ]) => ({ value, label }))
 
 const { t } = useI18n()
 </script>
@@ -34,14 +32,14 @@ const { t } = useI18n()
       <div class="flex-1">
         <InputGroup>
           <InputGroupAddon>Time</InputGroupAddon>
-          <InputNumber v-model="problem.time" fluid :use-grouping="false" />
+          <InputNumber v-model="problem.timeLimitMs" fluid :use-grouping="false" />
           <InputGroupAddon>ms</InputGroupAddon>
         </InputGroup>
       </div>
       <div class="flex-1">
         <InputGroup>
           <InputGroupAddon>Memory</InputGroupAddon>
-          <InputNumber v-model="problem.memory" fluid :use-grouping="false" />
+          <InputNumber v-model="problem.memoryLimitKb" fluid :use-grouping="false" />
           <InputGroupAddon>KB</InputGroupAddon>
         </InputGroup>
       </div>
@@ -52,19 +50,19 @@ const { t } = useI18n()
     </div>
     <div>
       <span class="form-label">{{ t('oj.input') }}</span>
-      <MarkdownEditor v-model="problem.input" />
+      <MarkdownEditor v-model="problem.inputFormat" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.output') }}</span>
-      <MarkdownEditor v-model="problem.output" />
+      <MarkdownEditor v-model="problem.outputFormat" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.sample_input') }}</span>
-      <Textarea v-model="problem.in" class="code-input" fluid rows="8" />
+      <Textarea v-model="problem.sampleInput" class="code-input" fluid rows="8" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.sample_output') }}</span>
-      <Textarea v-model="problem.out" class="code-input" fluid rows="8" />
+      <Textarea v-model="problem.sampleOutput" class="code-input" fluid rows="8" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.hint') }}</span>
@@ -72,20 +70,20 @@ const { t } = useI18n()
     </div>
     <div>
       <span class="form-label">Tags</span>
-      <ProblemTagSelect v-model="problem.tags" />
+      <ProblemTagSelect v-model="problem.tagIds" />
     </div>
     <div>
       <span class="form-label">Problem Type</span>
       <div class="flex flex-wrap gap-4 mt-2">
-        <div v-for="item in problemTypeOptions" :key="item.value" class="flex gap-2 items-center">
-          <RadioButton v-model="problem.type" :input-id="`type-${item.value}`" name="problemType" :value="item.value" />
+        <div v-for="item in problemJudgeTypeOptions" :key="item.value" class="flex gap-2 items-center">
+          <RadioButton v-model="problem.judgeType" :input-id="`type-${item.value}`" name="problemType" :value="item.value" />
           <label :for="`type-${item.value}`">{{ item.label }}</label>
         </div>
       </div>
     </div>
-    <div v-if="[2, 3].includes(problem.type)">
-      <span class="form-label">Code of {{ problemType[problem.type as keyof typeof problemType] }}</span>
-      <Textarea v-model="problem.code" class="font-mono" fluid auto-resize rows="15" />
+    <div v-if="problem.judgeType !== ProblemJudgeType.TRADITIONAL">
+      <span class="form-label">Judge Code</span>
+      <Textarea v-model="problem.judgeCode" class="font-mono" fluid auto-resize rows="15" />
     </div>
   </div>
 </template>

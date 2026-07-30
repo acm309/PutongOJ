@@ -43,42 +43,42 @@ const hasChanges = computed(() => {
   return (
     editingForm.value.title !== discussion.value.title
     || editingForm.value.type !== discussion.value.type
-    || editingForm.value.pinned !== discussion.value.pinned
-    || editingForm.value.author !== discussion.value.author.uid
-    || (editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)
-    || (editingForm.value.contest || null) !== (discussion.value.contest?.contestId || null)
+    || editingForm.value.isPinned !== discussion.value.isPinned
+    || editingForm.value.authorId !== discussion.value.author.id
+    || (editingForm.value.problemId || null) !== (discussion.value.problem?.id || null)
+    || (editingForm.value.contestId || null) !== (discussion.value.contest?.id || null)
   )
 })
 
 const canComment = computed(() => {
   if (!discussion.value) return false
   if (!isLogined.value) return false
-  if (discussion.value.type === DiscussionType.ArchivedDiscussion) return false
-  if (discussion.value.type === DiscussionType.PublicAnnouncement && !discussion.value.isJury) return false
+  if (discussion.value.type === DiscussionType.ARCHIVED_DISCUSSION) return false
+  if (discussion.value.type === DiscussionType.PUBLIC_ANNOUNCEMENT && !discussion.value.isJury) return false
   return true
 })
 
 const commentPlaceholder = computed(() => {
   if (!isLogined.value) return t('ptoj.login_to_comment')
-  if (discussion.value?.type === DiscussionType.ArchivedDiscussion) return t('ptoj.cannot_comment_archived_discussion')
-  if (discussion.value?.type === DiscussionType.PublicAnnouncement && !discussion.value.isJury) return t('ptoj.cannot_comment_announcement')
+  if (discussion.value?.type === DiscussionType.ARCHIVED_DISCUSSION) return t('ptoj.cannot_comment_archived_discussion')
+  if (discussion.value?.type === DiscussionType.PUBLIC_ANNOUNCEMENT && !discussion.value.isJury) return t('ptoj.cannot_comment_announcement')
   return t('ptoj.enter_your_comment_here')
 })
 
 const discussionTypeOptions = computed(() => [ {
-  value: DiscussionType.OpenDiscussion,
+  value: DiscussionType.OPEN_DISCUSSION,
   label: t('ptoj.discussion'),
   desc: t('ptoj.discussion_type_desc'),
 }, {
-  value: DiscussionType.PublicAnnouncement,
+  value: DiscussionType.PUBLIC_ANNOUNCEMENT,
   label: t('ptoj.announcement'),
   desc: t('ptoj.announcement_type_desc'),
 }, {
-  value: DiscussionType.PrivateClarification,
+  value: DiscussionType.PRIVATE_CLARIFICATION,
   label: t('ptoj.clarification'),
   desc: t('ptoj.clarification_type_desc'),
 }, {
-  value: DiscussionType.ArchivedDiscussion,
+  value: DiscussionType.ARCHIVED_DISCUSSION,
   label: t('ptoj.archived'),
   desc: t('ptoj.archived_type_desc'),
 } ])
@@ -102,17 +102,17 @@ function onEditDiscussion () {
   editingForm.value = {
     title: discussion.value.title,
     type: discussion.value.type,
-    pinned: discussion.value.pinned,
-    author: discussion.value.author.uid,
-    problem: discussion.value.problem?.pid || null,
-    contest: discussion.value.contest?.contestId || null,
+    isPinned: discussion.value.isPinned,
+    authorId: discussion.value.author.id,
+    problemId: discussion.value.problem?.id || null,
+    contestId: discussion.value.contest?.id || null,
   }
   editDialog.value = true
 }
 
 function onFormAuthorBlur () {
-  if (!editingForm.value.author) {
-    editingForm.value.author = discussion.value!.author.uid
+  if (!editingForm.value.authorId) {
+    editingForm.value.authorId = discussion.value!.author.id
   }
 }
 
@@ -126,18 +126,18 @@ async function editDiscussion () {
   if (editingForm.value.type !== discussion.value.type) {
     payload.type = editingForm.value.type
   }
-  if (editingForm.value.author !== discussion.value.author.uid) {
-    payload.author = editingForm.value.author
+  if (editingForm.value.authorId !== discussion.value.author.id) {
+    payload.authorId = editingForm.value.authorId
   }
-  if ((editingForm.value.problem || null) !== (discussion.value.problem?.pid || null)) {
-    payload.problem = editingForm.value.problem || null
+  if ((editingForm.value.problemId || null) !== (discussion.value.problem?.id || null)) {
+    payload.problemId = editingForm.value.problemId || null
   }
-  if ((editingForm.value.contest || null) !== (discussion.value.contest?.contestId || null)) {
-    payload.contest = editingForm.value.contest || null
+  if ((editingForm.value.contestId || null) !== (discussion.value.contest?.id || null)) {
+    payload.contestId = editingForm.value.contestId || null
   }
 
   saving.value = true
-  const resp = await updateDiscussion(discussion.value.discussionId, payload)
+  const resp = await updateDiscussion(discussion.value.id, payload)
   saving.value = false
 
   if (!resp.success) {
@@ -154,8 +154,8 @@ async function togglePinDiscussion () {
   if (!discussion.value || !isAdmin.value) return
 
   saving.value = true
-  const resp = await updateDiscussion(discussion.value.discussionId, {
-    pinned: !discussion.value.pinned,
+  const resp = await updateDiscussion(discussion.value.id, {
+    isPinned: !discussion.value.isPinned,
   })
   saving.value = false
 
@@ -172,7 +172,7 @@ async function submitComment () {
   if (!discussion.value) return
 
   creatingComment.value = true
-  const resp = await createComment(discussion.value.discussionId, {
+  const resp = await createComment(discussion.value.id, {
     content: commentContent.value.trim(),
   })
   creatingComment.value = false
@@ -187,11 +187,11 @@ async function submitComment () {
   await fetchDiscussion()
 }
 
-function onViewAuthor (uid: string) {
-  router.push({ name: 'UserProfile', params: { uid } })
+function onViewAuthor (username: string) {
+  router.push({ name: 'UserProfile', params: { username } })
 }
-function onViewProblem (pid: number) {
-  router.push({ name: 'problemInfo', params: { pid } })
+function onViewProblem (problemId: number) {
+  router.push({ name: 'problemInfo', params: { problemId } })
 }
 function onViewContest (contestId: number) {
   router.push({ name: 'ContestOverview', params: { contestId } })
@@ -225,18 +225,18 @@ onMounted(fetchDiscussion)
       <div class="flex gap-2 items-start justify-between pt-6 px-6">
         <div class="flex flex-wrap gap-1 items-center">
           <span class="flex gap-1">
-            <Tag v-if="discussion.pinned" icon="pi pi-thumbtack" />
+            <Tag v-if="discussion.isPinned" icon="pi pi-thumbtack" />
             <DiscussionTypeTag :type="discussion.type" />
-            <Tag :value="discussion.discussionId" severity="secondary" icon="pi pi-hashtag" />
+            <Tag :value="discussion.id" severity="secondary" icon="pi pi-hashtag" />
           </span>
           <span class="flex gap-1">
             <Tag
-              v-if="discussion.contest" :value="discussion.contest.contestId" severity="secondary"
-              class="cursor-pointer" icon="pi pi-trophy" @click="onViewContest(discussion.contest.contestId)"
+              v-if="discussion.contest" :value="discussion.contest.id" severity="secondary"
+              class="cursor-pointer" icon="pi pi-trophy" @click="onViewContest(discussion.contest.id)"
             />
             <Tag
-              v-if="discussion.problem" :value="discussion.problem.pid" severity="secondary" class="cursor-pointer"
-              icon="pi pi-flag" @click="onViewProblem(discussion.problem.pid)"
+              v-if="discussion.problem" :value="discussion.problem.id" severity="secondary" class="cursor-pointer"
+              icon="pi pi-flag" @click="onViewProblem(discussion.problem.id)"
             />
           </span>
         </div>
@@ -245,7 +245,7 @@ onMounted(fetchDiscussion)
           <SplitButton
             v-if="isAdmin" icon="pi pi-pen-to-square" severity="secondary" outlined :disabled="loading"
             :model="[{
-              label: discussion.pinned ? t('ptoj.unpin') : t('ptoj.pin'),
+              label: discussion.isPinned ? t('ptoj.unpin') : t('ptoj.pin'),
               icon: 'pi pi-thumbtack',
               command: () => togglePinDiscussion(),
             }]" @click="onEditDiscussion"
@@ -271,16 +271,16 @@ onMounted(fetchDiscussion)
         >
           <div class="flex gap-4 items-start">
             <UserAvatar
-              :image="comment.author.avatar" class="cursor-pointer flex-none"
-              @click="onViewAuthor(comment.author.uid)"
+              :image="comment.author.avatarUrl" class="cursor-pointer flex-none"
+              @click="onViewAuthor(comment.author.username)"
             />
-            <div class="cursor-pointer flex font-medium items-center min-h-8" @click="onViewAuthor(comment.author.uid)">
+            <div class="cursor-pointer flex font-medium items-center min-h-8" @click="onViewAuthor(comment.author.username)">
               <span class="flex flex-wrap gap-2 items-center">
                 <a class="text-lg">
-                  {{ comment.author.uid }}
+                  {{ comment.author.username }}
                 </a>
-                <span v-if="comment.author.nick" class="text-muted-color">
-                  {{ comment.author.nick }}
+                <span v-if="comment.author.nickname" class="text-muted-color">
+                  {{ comment.author.nickname }}
                 </span>
               </span>
             </div>
@@ -343,17 +343,17 @@ onMounted(fetchDiscussion)
             </Select>
             <label for="type">{{ t('ptoj.type') }}</label>
           </IftaLabel>
-          <UserSelect v-model="editingForm.author" :label="t('ptoj.author')" required @blur="onFormAuthorBlur" />
+          <UserSelect v-model="editingForm.authorId" :label="t('ptoj.author')" required @blur="onFormAuthorBlur" />
           <IftaLabel>
             <InputNumber
-              id="problem" v-model="editingForm.problem" mode="decimal" :min="1" fluid :use-grouping="false"
+              id="problem" v-model="editingForm.problemId" mode="decimal" :min="1" fluid :use-grouping="false"
               :placeholder="t('ptoj.enter_problem_id')"
             />
             <label for="problem">{{ t('ptoj.problem') }}</label>
           </IftaLabel>
           <IftaLabel>
             <InputNumber
-              id="contest" v-model="editingForm.contest" mode="decimal" :min="1" fluid :use-grouping="false"
+              id="contest" v-model="editingForm.contestId" mode="decimal" :min="1" fluid :use-grouping="false"
               :placeholder="t('ptoj.enter_contest_id')"
             />
             <label for="contest">{{ t('ptoj.contest') }}</label>

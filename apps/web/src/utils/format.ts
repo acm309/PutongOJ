@@ -61,7 +61,7 @@ export function timeDiffPretty (ms: number) {
 
 export function contestLabeling (
   value: number,
-  style: LabelingStyle = LabelingStyle.Numeric,
+  style: LabelingStyle = LabelingStyle.NUMERIC,
 ): string {
   //
   function toAlphabetic (n: number): string {
@@ -78,10 +78,10 @@ export function contestLabeling (
   }
 
   switch (style) {
-    case LabelingStyle.Alphabetic:
+    case LabelingStyle.ALPHABETIC:
       return toAlphabetic(value)
 
-    case LabelingStyle.Numeric:
+    case LabelingStyle.NUMERIC:
     default:
       return String(value)
   }
@@ -89,13 +89,13 @@ export function contestLabeling (
 
 export function getPrivilegeLabel (privilege: any) {
   switch (privilege) {
-    case UserPrivilege.Root:
+    case UserPrivilege.ROOT:
       return 'Root'
-    case UserPrivilege.Admin:
+    case UserPrivilege.ADMIN:
       return 'Admin'
-    case UserPrivilege.User:
+    case UserPrivilege.USER:
       return 'User'
-    case UserPrivilege.Banned:
+    case UserPrivilege.BANNED:
       return 'Banned'
     default:
       return 'Unknown'
@@ -104,13 +104,13 @@ export function getPrivilegeLabel (privilege: any) {
 
 export function getPrivilegeSeverity (privilege: any) {
   switch (privilege) {
-    case UserPrivilege.Root:
+    case UserPrivilege.ROOT:
       return 'warn'
-    case UserPrivilege.Admin:
+    case UserPrivilege.ADMIN:
       return 'success'
-    case UserPrivilege.User:
+    case UserPrivilege.USER:
       return 'primary'
-    case UserPrivilege.Banned:
+    case UserPrivilege.BANNED:
       return 'danger'
     default:
       return 'contrast'
@@ -123,18 +123,18 @@ export function thousandSeparator (num: number | string): string {
 
 export function getJudgeStatusClassname (judgeStatus: JudgeStatus) {
   switch (judgeStatus) {
-    case JudgeStatus.Accepted:
+    case JudgeStatus.ACCEPTED:
       return 'text-red-500'
-    case JudgeStatus.WrongAnswer:
-    case JudgeStatus.RuntimeError:
-    case JudgeStatus.TimeLimitExceeded:
-    case JudgeStatus.MemoryLimitExceeded:
-    case JudgeStatus.OutputLimitExceeded:
-    case JudgeStatus.SystemError:
+    case JudgeStatus.WRONG_ANSWER:
+    case JudgeStatus.RUNTIME_ERROR:
+    case JudgeStatus.TIME_LIMIT_EXCEEDED:
+    case JudgeStatus.MEMORY_LIMIT_EXCEEDED:
+    case JudgeStatus.OUTPUT_LIMIT_EXCEEDED:
+    case JudgeStatus.SYSTEM_ERROR:
       return 'text-green-500'
-    case JudgeStatus.CompileError:
+    case JudgeStatus.COMPILE_ERROR:
       return 'text-violet-500'
-    case JudgeStatus.PresentationError:
+    case JudgeStatus.PRESENTATION_ERROR:
       return 'text-yellow-600'
     default:
       return ''

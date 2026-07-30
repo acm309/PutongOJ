@@ -11,10 +11,10 @@ const props = defineProps<{
     isTimeBased?: boolean
   }[]
   field?: string
-  order?: number
+  order?: 'asc' | 'desc'
 }>()
 const emit = defineEmits<{
-  (e: 'sort', event: { field?: string, order?: number }): void
+  (e: 'sort', event: { field?: string, order?: 'asc' | 'desc' }): void
 }>()
 
 const { t } = useI18n()
@@ -36,15 +36,15 @@ const sortingMenuItems = computed(() => [ {
       ? t('ptoj.newest')
       : t('ptoj.descending'),
     icon: 'pi pi-sort-amount-down',
-    checked: props.order === -1,
-    command: () => emit('sort', { order: -1 }),
+    checked: props.order === 'desc',
+    command: () => emit('sort', { order: 'desc' }),
   }, {
     label: props.options.find(o => o.value === props.field)?.isTimeBased
       ? t('ptoj.oldest')
       : t('ptoj.ascending'),
     icon: 'pi pi-sort-amount-up-alt',
-    checked: props.order === 1,
-    command: () => emit('sort', { order: 1 }),
+    checked: props.order === 'asc',
+    command: () => emit('sort', { order: 'asc' }),
   } ],
 } ])
 </script>
@@ -52,7 +52,7 @@ const sortingMenuItems = computed(() => [ {
 <template>
   <Button
     type="button" severity="secondary" outlined
-    :icon="props.order === 1 ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'" @click="sortingMenu?.toggle"
+    :icon="props.order === 'asc' ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'" @click="sortingMenu?.toggle"
   />
   <Menu ref="sortingMenu" :model="sortingMenuItems" :popup="true">
     <template #item="{ item, props: itemsProps }">

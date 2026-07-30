@@ -1,4 +1,8 @@
-import type { AvatarPresetsQueryResult, PublicConfigQueryResult } from '@putongoj/shared'
+import type {
+  AvatarPresetsQueryResult,
+  PublicConfigQueryResult,
+  WebSocketTokenQueryResult,
+} from '@putongoj/shared'
 import { instanceSafe as instance } from './instance'
 
 export async function getPublicConfig () {
@@ -6,7 +10,7 @@ export async function getPublicConfig () {
 }
 
 export async function getWebSocketToken () {
-  return instance.get<{ token: string }>('/websocket/token')
+  return instance.get<WebSocketTokenQueryResult>('/websocket/token')
 }
 
 export async function getAvatarPresets () {

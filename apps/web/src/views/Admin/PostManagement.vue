@@ -22,7 +22,7 @@ const router = useRouter()
 const message = useMessage()
 
 const query = ref({} as AdminPostListQuery)
-const docs = ref([] as AdminPostListQueryResult['docs'])
+const docs = ref([] as AdminPostListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 const createDialog = ref(false)
@@ -64,7 +64,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -90,7 +90,7 @@ function onReset () {
   })
 }
 
-function onSort (event: { field?: string, order?: number }) {
+function onSort (event: { field?: string, order?: 'asc' | 'desc' }) {
   router.replace({
     query: {
       ...route.query,
@@ -164,11 +164,11 @@ onRouteQueryUpdate(fetch)
             </span>
             <span v-if="doc.isPinned" class="flex gap-2 items-center text-primary">
               <span class="pi pi-thumbtack" />
-              <span>{{ t('ptoj.pinned') }}</span>
+              <span>{{ t('ptoj.isPinned') }}</span>
             </span>
             <span v-if="doc.isHidden" class="flex gap-2 items-center text-orange-400">
               <span class="pi pi-eye-slash" />
-              <span>{{ t('ptoj.hidden') }}</span>
+              <span>{{ t('ptoj.isHidden') }}</span>
             </span>
             <span v-if="!doc.isPublished" class="flex gap-2 items-center text-yellow-500">
               <span class="pi pi-minus-circle" />

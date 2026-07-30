@@ -18,7 +18,7 @@ import { timePretty } from '@/utils/format'
 import { useMessage } from '@/utils/message'
 
 const props = defineProps<{
-  value: ContestListQueryResult['docs']
+  value: ContestListQueryResult['items']
   sortField?: string
   sortOrder?: number
   loading?: boolean
@@ -64,13 +64,13 @@ const applyStatus = computed(() => {
     return ApplyStatus.CannotApply
   }
   if (
-    details.value.participation !== ParticipationStatus.NotApplied
+    details.value.participationStatus !== ParticipationStatus.NOT_APPLIED
     && !details.value.isJury
     && !details.value.hasStarted
   ) {
     return ApplyStatus.WaitingStart
   }
-  if (details.value.participation !== ParticipationStatus.NotApplied) {
+  if (details.value.participationStatus !== ParticipationStatus.NOT_APPLIED) {
     return ApplyStatus.CannotApply
   }
   if (details.value.isIpBlocked) {
@@ -114,8 +114,8 @@ async function onOpenContest (contestId: number) {
   password.value = ''
 
   if (
-    (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted)
-    || (details.value.participation === ParticipationStatus.EarlyExit && details.value.hasEnded)
+    (details.value.participationStatus === ParticipationStatus.APPROVED && details.value.hasStarted)
+    || (details.value.participationStatus === ParticipationStatus.EARLY_EXIT && details.value.hasEnded)
     || details.value.isJury
   ) {
     gotoContest(contestId)
@@ -142,10 +142,10 @@ async function onSubmit () {
   if (refreshed.success) {
     details.value = refreshed.data
   } else {
-    details.value.participation = ParticipationStatus.Approved
+    details.value.participationStatus = ParticipationStatus.APPROVED
   }
 
-  if (details.value.isJury || (details.value.participation === ParticipationStatus.Approved && details.value.hasStarted) || (details.value.participation === ParticipationStatus.EarlyExit && details.value.hasEnded)) {
+  if (details.value.isJury || (details.value.participationStatus === ParticipationStatus.APPROVED && details.value.hasStarted) || (details.value.participationStatus === ParticipationStatus.EARLY_EXIT && details.value.hasEnded)) {
     gotoContest(currentContestId.value!)
     return
   }
@@ -161,10 +161,10 @@ async function onSubmit () {
 <template>
   <DataTable
     class="-mb-px whitespace-nowrap" :value="props.value" sort-mode="single" :sort-field="props.sortField"
-    :sort-order="props.sortOrder" data-key="contestId" :lazy="true" :loading="props.loading" scrollable
+    :sort-order="props.sortOrder" data-key="id" :lazy="true" :loading="props.loading" scrollable
     @sort="handleSort"
   >
-    <Column class="pl-8 text-center w-18" field="contestId">
+    <Column class="pl-8 text-center w-18" field="id">
       <template #header>
         <span class="text-center w-full">
           <i class="pi pi-hashtag" />
@@ -175,7 +175,7 @@ async function onSubmit () {
     <Column :header="t('ptoj.contest')" class="min-w-96">
       <template #body="{ data }">
         <span class="-my-1 flex gap-4 items-center justify-between">
-          <Button :label="data.title" link fluid class="justify-start p-0" @click="onOpenContest(data.contestId)" />
+          <Button :label="data.title" link fluid class="justify-start p-0" @click="onOpenContest(data.id)" />
           <span v-if="data.isHidden" class="flex gap-1 justify-end">
             <Tag :value="t('ptoj.hidden')" severity="secondary" />
           </span>

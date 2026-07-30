@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TagListQueryResult } from '@putongoj/shared'
-import { tagColors } from '@putongoj/shared'
+import { TagColor } from '@putongoj/shared'
 import { computed, onMounted, ref, watch } from 'vue'
 import { findTags } from '@/api/tags'
 import ProblemTag from './ProblemTag.vue'
@@ -58,11 +58,11 @@ watch(selectedTags, (newVal) => {
 
 <template>
   <div class="flex flex-wrap gap-1 problem-tags-select">
-    <template v-for="color in tagColors" :key="color">
+    <template v-for="color in Object.values(TagColor)" :key="color">
       <ProblemTag
-        v-for="tag of (tagsGroupByColor[color] || [])" :key="tag.tagId" class="cursor-pointer problem-tag"
-        :filled="selectedTags.includes(tag.tagId)" :color="color" :name="tag.name"
-        @click="() => handleTagClick(tag.tagId)"
+        v-for="tag of (tagsGroupByColor[color] || [])" :key="tag.id" class="cursor-pointer problem-tag"
+        :filled="selectedTags.includes(tag.id)" :color="color" :name="tag.name"
+        @click="() => handleTagClick(tag.id)"
       />
     </template>
   </div>

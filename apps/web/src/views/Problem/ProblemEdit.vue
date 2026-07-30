@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemEntityForm } from '@putongoj/shared'
+import type { ProblemUpdatePayload } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
@@ -17,31 +17,32 @@ const problemStore = useProblemStore()
 
 const { problem } = storeToRefs(problemStore)
 const { findOne, update: updateProblem } = problemStore
-const paramPid = computed(() => Number.parseInt(route.params.pid as string))
+const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
 const loadingProblem = ref(false)
-const problemForm = ref({} as Partial<ProblemEntityForm>)
+const problemForm = ref<ProblemUpdatePayload>({})
 
 async function loadProblem () {
   loadingProblem.value = true
-  await findOne({ pid: paramPid.value })
+  await findOne(problemId.value)
   loadingProblem.value = false
 }
 
 async function submitForm () {
-  const data = await updateProblem(problemForm.value)
+  const response = await updateProblem(problemId.value, problemForm.value)
+  if (!response.success || !response.data.success || response.data.id === null) return
   message.success(t('oj.submit_success'))
   await loadProblem()
-  router.push({ name: 'problemInfo', params: { pid: data.pid } })
+  router.push({ name: 'problemInfo', params: { problemId: response.data.id } })
 }
 
 onMounted(async () => {
-  if (problem.value?.pid !== paramPid.value) {
+  if (problem.value?.id !== problemId.value) {
     await loadProblem()
   }
   problemForm.value = {
     ...problem.value,
-    tags: problem.value.tags?.map(tag => tag.tagId) || [],
+    tagIds: problem.value?.tags.map(tag => tag.id) ?? [],
   }
 })
 </script>

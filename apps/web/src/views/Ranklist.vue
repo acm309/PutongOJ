@@ -32,7 +32,7 @@ const message = useMessage()
 
 const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as UserRanklistQuery)
-const docs = ref([] as UserRanklistQueryResult['docs'])
+const docs = ref([] as UserRanklistQueryResult['items'])
 const groups = ref<GroupListQueryResult>([])
 const total = ref(0)
 const loading = ref(false)
@@ -40,7 +40,7 @@ const loadingGroups = ref(false)
 const exportDialog = ref(false)
 
 const hasFilter = computed(() => {
-  return Boolean(query.value.group)
+  return Boolean(query.value.groupId)
 })
 
 async function fetchGroups () {
@@ -52,7 +52,7 @@ async function fetchGroups () {
     return
   }
   groups.value = resp.data
-  if (query.value.group && !groups.value.some(g => g.gid === query.value.group)) {
+  if (query.value.groupId && !groups.value.some(g => g.id === query.value.groupId)) {
     onReset()
   }
 }
@@ -76,7 +76,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -93,7 +93,7 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      group: query.value.group,
+      groupId: query.value.groupId,
       page: undefined,
     },
   })
@@ -103,7 +103,7 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      group: undefined,
+      groupId: undefined,
       page: undefined,
     },
   })
@@ -111,7 +111,7 @@ function onReset () {
 
 async function onExport (format: ExportFormat) {
   message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
-  const resp = await exportRanklist({ group: query.value.group })
+  const resp = await exportRanklist({ groupId: query.value.groupId })
   if (!resp.success) {
     message.error(t('ptoj.failed_fetch_ranklist'), resp.message)
     exportDialog.value = false
@@ -144,7 +144,7 @@ onRouteQueryUpdate(fetch)
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
-          v-model="query.group" fluid :options="groups" option-label="title" option-value="gid" show-clear
+          v-model="query.groupId" fluid :options="groups" option-label="name" option-value="id" show-clear
           :placeholder="t('ptoj.filter_by_group')" :loading="loadingGroups" :disabled="loading" @change="onSearch"
         />
 
@@ -175,22 +175,22 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column field="uid" frozen>
+      <Column field="username" frozen>
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.user') }}</span>
         </template>
         <template #body="{ data }">
           <RouterLink
-            :to="{ name: 'UserProfile', params: { uid: data.uid } }"
+            :to="{ name: 'UserProfile', params: { username: data.username } }"
             class="cursor-pointer flex gap-2.5 group items-center min-h-[40px]"
           >
-            <UserAvatar :image="data.avatar" shape="circle" class="flex-none" />
-            <span class="font-medium group-hover:underline min-w-24 text-primary">{{ data.uid }}</span>
+            <UserAvatar :image="data.avatarUrl" shape="circle" class="flex-none" />
+            <span class="font-medium group-hover:underline min-w-24 text-primary">{{ data.username }}</span>
           </RouterLink>
         </template>
       </Column>
 
-      <Column :header="t('ptoj.nickname')" field="nick" class="max-w-48 truncate" />
+      <Column :header="t('ptoj.nickname')" field="nickname" class="max-w-48 truncate" />
 
       <Column :header="t('ptoj.motto')" field="motto" class="min-w-96">
         <template #body="{ data }">
@@ -200,13 +200,13 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column field="solve" class="text-center whitespace-nowrap">
+      <Column field="solvedProblemCount" class="text-center whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.solved') }}</span>
         </template>
       </Column>
 
-      <Column field="submit" class="text-center whitespace-nowrap">
+      <Column field="submittedProblemCount" class="text-center whitespace-nowrap">
         <template #header>
           <span class="font-semibold text-center w-full">{{ t('ptoj.submitted') }}</span>
         </template>
@@ -217,7 +217,7 @@ onRouteQueryUpdate(fetch)
           <span class="font-semibold text-center w-full">{{ t('ptoj.ratio') }}</span>
         </template>
         <template #body="{ data }">
-          {{ formatPercentage(data.solve, data.submit) }}
+          {{ formatPercentage(data.solvedProblemCount, data.submittedProblemCount) }}
         </template>
       </Column>
 

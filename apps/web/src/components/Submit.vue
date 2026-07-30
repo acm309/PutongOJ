@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SolutionSubmitPayload } from '@putongoj/shared'
 import type { PropType } from 'vue'
-import type { Solution } from '@/types'
 import { Language } from '@putongoj/shared'
 import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
@@ -33,7 +32,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  submitted: [payload: { sid: number, problem: number, contest?: number }]
+  submitted: [payload: { submissionId: number, problemId: number, contestId?: number }]
 }>()
 
 const { t } = useI18n()
@@ -42,9 +41,12 @@ const sessionStore = useSessionStore()
 const { isLogined } = storeToRefs(sessionStore)
 const solutionStorage = useSolutionStorage()
 const isSubmitting = ref(false)
-const solution = reactive<Solution>({
+const solution = reactive<{
+  language: Language | null
+  sourceCode: string
+}>({
   language: null,
-  code: '',
+  sourceCode: '',
 })
 
 const storageKey = computed(() => props.contest == null ? `problem:${props.problem}` : `contest:${props.contest}:problem:${props.problem}`)
@@ -60,15 +62,15 @@ const languages = computed(() =>
 
 const defaultLanguage = computed<Language | null>(() => languages.value[0]?.value ?? null)
 
-function isLanguageAllowed (language: Solution['language']) {
+function isLanguageAllowed (language: Language | null) {
   return language != null && (props.allowedLanguages == null || props.allowedLanguages.includes(language))
 }
 
-function resetSolution (nextSolution?: Partial<Solution>) {
+function resetSolution (nextSolution?: Partial<typeof solution>) {
   solution.language = isLanguageAllowed(nextSolution?.language ?? null)
     ? nextSolution!.language!
     : defaultLanguage.value
-  solution.code = nextSolution?.code ?? ''
+  solution.sourceCode = nextSolution?.sourceCode ?? ''
 }
 
 function init () {
@@ -81,7 +83,7 @@ function init () {
 }
 
 function reset () {
-  solution.code = ''
+  solution.sourceCode = ''
 }
 
 function validateBeforeSubmit () {
@@ -95,12 +97,12 @@ function validateBeforeSubmit () {
     return false
   }
 
-  if (!solution.code.trim()) {
+  if (!solution.sourceCode.trim()) {
     message.warn(t('ptoj.code_cannot_be_empty'))
     return false
   }
 
-  if (solution.language === Language.Java && !solution.code.includes('Main')) {
+  if (solution.language === Language.JAVA && !solution.sourceCode.includes('Main')) {
     message.warn(t('ptoj.java_main_class_required'))
     return false
   }
@@ -122,13 +124,13 @@ async function submit () {
 
   try {
     const payload: SolutionSubmitPayload = {
-      problem: props.problem,
+      problemId: props.problem,
       language,
-      code: solution.code,
+      sourceCode: solution.sourceCode,
     }
 
     if (props.contest != null) {
-      payload.contest = props.contest
+      payload.contestId = props.contest
     }
 
     const resp = await createSolution(payload)
@@ -139,23 +141,23 @@ async function submit () {
 
     message.success(t('oj.submit_success'))
     emit('submitted', {
-      sid: resp.data.solution,
-      problem: payload.problem,
-      contest: payload.contest,
+      submissionId: resp.data.submissionId,
+      problemId: payload.problemId,
+      contestId: payload.contestId,
     })
   } finally {
     isSubmitting.value = false
   }
 }
 
-const persistSolution = debounce((updatedSolution: Solution) => {
+const persistSolution = debounce((updatedSolution: typeof solution) => {
   if (!storageKey.value) {
     return
   }
 
   solutionStorage.value[storageKey.value] = {
     language: updatedSolution.language,
-    code: updatedSolution.code,
+    sourceCode: updatedSolution.sourceCode,
   }
 }, 500)
 
@@ -192,13 +194,13 @@ onBeforeUnmount(() => {
     </div>
     <div>
       <Message
-        v-if="solution.language === Language.Java" :severity="solution.code.includes('Main') ? 'info' : 'warn'"
+        v-if="solution.language === Language.JAVA" :severity="solution.sourceCode.includes('Main') ? 'info' : 'warn'"
         :closable="false" icon="pi pi-info-circle"
       >
         {{ t('ptoj.java_main_class_required') }}
       </Message>
       <Textarea
-        v-model="solution.code" class="font-mono" fluid auto-resize rows="15"
+        v-model="solution.sourceCode" class="font-mono" fluid auto-resize rows="15"
         :placeholder="t('oj.paste_your_code')"
       />
     </div>

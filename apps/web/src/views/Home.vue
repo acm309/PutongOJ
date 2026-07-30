@@ -23,7 +23,7 @@ const { isAdmin } = storeToRefs(sessionStore)
 const zhCN = computed(() => locale.value === 'zh-CN')
 const query = ref(PostListQuerySchema.parse({}))
 
-const docs = ref([] as PostListQueryResult['docs'])
+const docs = ref([] as PostListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 
@@ -46,7 +46,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -111,7 +111,7 @@ onRouteQueryUpdate(fetch)
               </span>
               <span v-if="doc.isPinned" class="flex gap-2 items-center text-primary">
                 <span class="pi pi-thumbtack" />
-                <span>{{ t('ptoj.pinned') }}</span>
+                <span>{{ t('ptoj.isPinned') }}</span>
               </span>
             </div>
             <p

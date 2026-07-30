@@ -11,13 +11,13 @@ export const useContestStore = defineStore('contest', {
     lastFetch: 0,
   }),
   getters: {
-    contestId: state => state.contest.contestId,
-    problems: state => state.contest.problems.sort((a, b) => a.index - b.index),
+    contestId: state => state.contest.id,
+    problems: state => state.contest.problems.toSorted((a, b) => a.position - b.position),
     problemLabels (state): Map<number, string> {
       const labelingStyle = state.contest.labelingStyle
       const labels = new Map<number, string>()
-      this.problems.forEach(({ problemId, index }) => {
-        labels.set(problemId, contestLabeling(index, labelingStyle))
+      this.problems.forEach(({ problemId, position }) => {
+        labels.set(problemId, contestLabeling(position, labelingStyle))
       })
       return labels
     },
@@ -50,7 +50,7 @@ export const useContestStore = defineStore('contest', {
       return resp
     },
     async reloadContest () {
-      return this.loadContest(this.contest.contestId)
+      return this.loadContest(this.contest.id)
     },
     async reloadContestIfNeeded () {
       if (Date.now() - this.lastFetch < CONTEST_CACHE_TIME) {

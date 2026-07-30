@@ -33,14 +33,14 @@ const {
 } = storeToRefs(useContestStore())
 
 const query = ref({} as AccountSubmissionListQuery)
-const docs = ref([] as AccountSubmissionListQueryResult['docs'])
+const docs = ref([] as AccountSubmissionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
 
 const hasFilter = computed(() => {
   return Boolean(
-    query.value.problem
-    || Number.isInteger(query.value.judge)
+    query.value.problemId
+    || query.value.status !== undefined
     || query.value.language,
   )
 })
@@ -49,7 +49,7 @@ async function fetch () {
   const parsed = AccountSubmissionListQuerySchema.safeParse(route.query)
   if (parsed.success) {
     query.value = parsed.data
-    query.value.contest = contestId.value
+    query.value.contestId = contestId.value
   } else {
     router.replace({ query: {} })
     return
@@ -65,7 +65,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -74,8 +74,8 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
-      contest: undefined,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
+      contestId: undefined,
     },
   })
 }
@@ -85,7 +85,7 @@ function onPage (event: any) {
     query: {
       ...route.query,
       page: (event.first / event.rows + 1),
-      contest: undefined,
+      contestId: undefined,
     },
   })
 }
@@ -94,10 +94,10 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      problem: query.value.problem || undefined,
-      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      problemId: query.value.problemId || undefined,
+      status: query.value.status ?? undefined,
       language: query.value.language || undefined,
-      contest: undefined,
+      contestId: undefined,
       page: undefined,
     },
   })
@@ -107,28 +107,28 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      user: undefined,
-      problem: undefined,
-      contest: undefined,
-      judge: undefined,
+      username: undefined,
+      problemId: undefined,
+      contestId: undefined,
+      status: undefined,
       language: undefined,
       page: undefined,
     },
   })
 }
 
-function handleViewProblem (data: any) {
+function handleViewProblem (problemId: number) {
   router.push({
     name: 'contestProblem',
     params: {
       contestId: contestId.value,
-      problemId: data.pid,
+      problemId,
     },
   })
 }
 
 emitter.on('submission-updated', (sid) => {
-  if (docs.value.some(item => item.sid === sid)) {
+  if (docs.value.some(item => item.id === sid)) {
     fetch()
   }
 })
@@ -142,7 +142,7 @@ onRouteQueryUpdate(fetch)
     <div class="border-b border-surface p-6">
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
-          v-model="query.problem" fluid :options="problemOptions" option-label="label" option-value="value"
+          v-model="query.problemId" fluid :options="problemOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @change="onSearch"
         >
           <template #dropdownicon>
@@ -151,7 +151,7 @@ onRouteQueryUpdate(fetch)
         </Select>
 
         <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          v-model="query.status" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
@@ -186,10 +186,13 @@ onRouteQueryUpdate(fetch)
 
     <SolutionDataTable
       class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"
-      :sort-order="query.sort" hide-user hide-contest @sort="onSort"
+      :sort-order="query.sort === 'asc' ? 1 : -1" hide-user hide-contest @sort="onSort"
     >
       <template #problem="{ data }">
-        <Button class="-my-px p-0" :label="problemLabels.get(data.pid) " link fluid @click="handleViewProblem(data)" />
+        <Button
+          class="-my-px p-0" :label="problemLabels.get(data.problemId)" link fluid
+          @click="handleViewProblem(data.problemId)"
+        />
       </template>
     </SolutionDataTable>
 

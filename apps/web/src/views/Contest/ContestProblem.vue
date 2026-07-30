@@ -21,7 +21,7 @@ const { contestId, problems, problemLabels } = storeToRefs(contestStore)
 const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
 async function fetch () {
-  await findOneProblem({ pid: problemId.value, cid: contestId.value })
+  await findOneProblem(problemId.value)
 }
 
 fetch()
@@ -43,7 +43,7 @@ onRouteParamUpdate(fetch)
         </Button>
       </RouterLink>
     </div>
-    <div>
+    <div v-if="problem">
       <Problem v-model="problem" class="p-4">
         <template #title>
           {{ problem.title }}

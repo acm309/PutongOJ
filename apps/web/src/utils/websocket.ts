@@ -70,15 +70,15 @@ class WebSocketService {
 
   private handleMessage (message: WebSocketMessage) {
     if (message.type === WebSocketMessageType.SubmissionResult) {
-      const { solutionId, judgeStatus } = message.data
+      const { submissionId, status } = message.data
       this.messageService.info(
         this.t('ptoj.submission_result'),
         this.t('ptoj.submission_result_detail', {
-          solutionId,
-          judgeStatus: judgeStatusLabels[judgeStatus],
+          solutionId: submissionId,
+          judgeStatus: judgeStatusLabels[status],
         }),
       )
-      emitter.emit('submission-updated', solutionId)
+      emitter.emit('submission-updated', submissionId)
     } else if (message.type === WebSocketMessageType.Notification) {
       const { title, content } = message.data
       this.messageService.info(title, content)

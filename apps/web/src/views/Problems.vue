@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { FindProblemsParams } from '@/types/api'
+import type { ProblemListQuery, ProblemUpdatePayload } from '@putongoj/shared'
+import { ProblemVisibility } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -7,75 +8,71 @@ import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Select from 'primevue/select'
-import { computed, onBeforeMount, reactive, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import ProblemTag from '@/components/ProblemTag.vue'
-import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import { statusLabels } from '@/utils/constant'
+import { problemVisibilityLabels } from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
 import { onProfileUpdate, onRouteQueryUpdate } from '@/utils/helper'
-
-const options = reactive([
-  { value: 'pid', label: 'Pid' },
-  { value: 'title', label: 'Title' },
-  { value: 'tag', label: 'Tag' },
-])
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-
-const DEFAULT_PAGE_SIZE = 30
-const MAX_PAGE_SIZE = 100
-
-const page = computed<number>(() =>
-  Math.max(Number.parseInt(route.query.page as string) || 1, 1))
-const pageSize = computed<number>(() =>
-  Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
-    || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
-
-const type = ref(route.query.type || 'pid')
-const content = ref(String(route.query.content || ''))
-const query = computed(() => ({
-  type: type.value,
-  content: content.value,
-  page: page.value,
-  pageSize: pageSize.value,
-}))
-
 const problemStore = useProblemStore()
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 
-const { problems, solved } = storeToRefs(problemStore)
-const { status } = storeToRefs(rootStore)
-const { isAdmin } = storeToRefs(sessionStore)
-const { findProblems, update } = problemStore
+const searchOptions = [
+  { value: 'id', label: 'ID' },
+  { value: 'title', label: 'Title' },
+  { value: 'tag', label: 'Tag' },
+]
 
+const page = computed(() => Math.max(Number(route.query.page) || 1, 1))
+const pageSize = computed(() => Math.max(Math.min(Number(route.query.pageSize) || 30, 100), 1))
+const searchField = ref<NonNullable<ProblemListQuery['searchField']>>(
+  (route.query.searchField as NonNullable<ProblemListQuery['searchField']>) || 'id',
+)
+const search = ref(String(route.query.search || ''))
 const loading = ref(false)
 
-function reload (payload = {}) {
-  router.push({ name: 'problems', query: Object.assign({}, query.value, payload) })
+const query = computed<ProblemListQuery>(() => ({
+  page: page.value,
+  pageSize: pageSize.value,
+  searchField: searchField.value,
+  search: search.value || undefined,
+}))
+
+const { problems, solvedProblemIds } = storeToRefs(problemStore)
+
+function reload (payload: Partial<ProblemListQuery> = {}) {
+  router.push({ name: 'problems', query: { ...query.value, ...payload } })
+}
+
+function resetFilters () {
+  reload({
+    page: 1,
+    searchField: undefined,
+    search: undefined,
+  })
 }
 
 async function fetch () {
   loading.value = true
-  type.value = route.query.type || 'pid'
-  content.value = String(route.query.content || '')
-  await findProblems(query.value as FindProblemsParams)
+  searchField.value = (route.query.searchField as NonNullable<ProblemListQuery['searchField']>) || 'id'
+  search.value = String(route.query.search || '')
+  await problemStore.findProblems(query.value)
   loading.value = false
 }
 
-const search = () => reload({ page: 1, type: type.value, content: content.value })
-const pageChange = (val: number) => reload({ page: val })
-
-function change (problem: { pid: number, status: number }) {
-  loading.value = true
-  problem.status = problem.status === status.value.Reserve ? status.value.Available : status.value.Reserve
-  update({ pid: problem.pid, status: problem.status }).then(fetch)
+async function toggleVisibility (problem: typeof problems.value.items[number]) {
+  const visibility: ProblemUpdatePayload['visibility'] = problem.visibility === ProblemVisibility.RESERVED
+    ? ProblemVisibility.AVAILABLE
+    : ProblemVisibility.RESERVED
+  await problemStore.update(problem.id, { visibility })
+  await fetch()
 }
 
 onBeforeMount(fetch)
@@ -96,30 +93,29 @@ onProfileUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <div class="flex gap-2">
           <Select
-            v-model="type" class="w-36" fluid :options="options" option-label="label" option-value="value"
+            v-model="searchField" class="w-36" fluid :options="searchOptions" option-label="label" option-value="value"
             :disabled="loading"
           />
           <InputText
-            v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
-            @keypress.enter="search"
+            v-model="search" fluid placeholder="Enter search content..." :disabled="loading"
+            @keypress.enter="reload({ page: 1, searchField, search })"
           />
         </div>
-
         <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
           <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="resetFilters" />
           <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
-            @click="() => reload({ page: 1, type: undefined, content: undefined })"
+            :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading"
+            @click="reload({ page: 1, searchField, search })"
           />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
         </div>
       </div>
     </div>
 
-    <DataTable class="-mb-px whitespace-nowrap" :value="problems.docs" :lazy="true" :loading="loading" scrollable>
+    <DataTable class="-mb-px whitespace-nowrap" :value="problems.items" :lazy="true" :loading="loading" scrollable>
       <Column class="pl-8 text-center w-18">
         <template #body="{ data }">
-          <span v-if="solved.includes(data.pid)" class="text-emerald-500">
+          <span v-if="solvedProblemIds.includes(data.id)" class="text-emerald-500">
             <i class="pi pi-check" />
           </span>
           <span v-else>
@@ -127,33 +123,28 @@ onProfileUpdate(fetch)
           </span>
         </template>
       </Column>
-
-      <Column class="px-2 text-center w-18" field="pid">
+      <Column class="px-2 text-center w-18" field="id">
         <template #header>
           <span class="text-center w-full">
             <i class="pi pi-hashtag" />
           </span>
         </template>
       </Column>
-
       <Column :header="t('ptoj.problem')">
         <template #body="{ data }">
           <span class="-my-1 flex gap-4 items-center justify-between">
-            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
+            <RouterLink :to="{ name: 'problemInfo', params: { problemId: data.id } }" class="grow">
               <Button class="justify-start p-0" :label="data.title" fluid link />
             </RouterLink>
             <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
-              <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
-                <ProblemTag
-                  class="cursor-pointer" :color="tag.color" :name="tag.name"
-                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
-                />
-              </template>
+              <ProblemTag
+                v-for="tag in data.tags" :key="tag.id" class="cursor-pointer" :name="tag.name" :color="tag.color"
+                @click="reload({ page: 1, searchField: 'tag', search: tag.name })"
+              />
             </span>
           </span>
         </template>
       </Column>
-
       <Column class="pr-6 w-42">
         <template #header>
           <span class="text-center w-full">
@@ -163,20 +154,20 @@ onProfileUpdate(fetch)
         <template #body="{ data }">
           <span class="flex gap-2 items-center">
             <span class="grow text-center text-muted-color text-sm">
-              {{ data.solve }} / {{ data.submit }}
+              {{ data.solverCount }} / {{ data.submitterCount }}
             </span>
             <span class="min-w-18 text-right">
-              {{ formatPercentage(data.solve, data.submit) }}
+              {{ formatPercentage(data.solverCount, data.submitterCount) }}
             </span>
           </span>
         </template>
       </Column>
-
-      <Column v-if="isAdmin || problems.docs.some(doc => doc.isOwner)" class="pr-6 text-center w-30">
+      <Column v-if="sessionStore.isAdmin || problems.items.some(item => item.isOwner)" class="pr-6 text-center w-30">
         <template #body="{ data }">
           <Button
-            v-if="isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" class="-my-1 p-0"
-            :label="statusLabels[(data.status as 0 | 2)]" link @click="change(data)"
+            v-if="sessionStore.isAdmin || data.isOwner" v-tooltip.left="'Click to change status'" class="-my-1 p-0" link
+            :label="problemVisibilityLabels[data.visibility as keyof typeof problemVisibilityLabels]"
+            @click="toggleVisibility(data)"
           />
         </template>
       </Column>
@@ -193,7 +184,7 @@ onProfileUpdate(fetch)
       :first="(page - 1) * pageSize" :rows="pageSize" :total-records="problems.total"
       template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       :current-page-report-template="t('ptoj.paginator_report')"
-      @page="(event: any) => pageChange(event.first / event.rows + 1)"
+      @page="event => reload({ page: event.first / event.rows + 1 })"
     />
   </div>
 </template>

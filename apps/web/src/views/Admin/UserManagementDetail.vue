@@ -5,7 +5,7 @@ import type {
   AdminUserOAuthQueryResult,
 } from '@putongoj/shared'
 import type { SessionInfo } from '@/types'
-import { OAuthProvider, passwordRegex } from '@putongoj/shared'
+import { OAuthProvider, passwordRegex, UserPrivilege } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -48,9 +48,9 @@ const confirm = useConfirm()
 const message = useMessage()
 const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
-const { profile, isRoot } = storeToRefs(sessionStore)
+const { profile, isAdmin, isRoot } = storeToRefs(sessionStore)
 
-const uid = computed(() => route.params.uid as string)
+const uid = computed(() => route.params.username as string)
 const user = ref<AdminUserDetailQueryResult | null>(null)
 const editingUser = ref<AdminUserEditPayload>({})
 const connections = ref<AdminUserOAuthQueryResult>({ cjlu: null, codeforces: null })
@@ -75,33 +75,36 @@ function megabyteToByte (megabyte?: number) {
 const hasChanges = computed(() => {
   if (!user.value) return false
   return editingUser.value.privilege !== user.value.privilege
-    || editingUser.value.nick !== user.value.nick
+    || editingUser.value.nickname !== user.value.nickname
     || editingUser.value.motto !== user.value.motto
-    || editingUser.value.mail !== user.value.mail
+    || editingUser.value.email !== user.value.email
     || editingUser.value.school !== user.value.school
-    || editingUser.value.avatar !== user.value.avatar
+    || editingUser.value.avatarUrl !== user.value.avatarUrl
 })
 const hasQuotaChanges = computed(() => {
   if (!user.value) return false
   return megabyteToByte(editingUser.value.storageQuota) !== user.value.storageQuota
 })
 
-const isSelf = computed(() => profile.value?.uid === user.value?.uid)
+const isSelf = computed(() => profile.value?.username === user.value?.username)
+const isTargetAdmin = computed(() => {
+  return user.value?.privilege === UserPrivilege.ADMIN || user.value?.privilege === UserPrivilege.ROOT
+})
 const canOperate = computed(() => {
   if (!profile.value || !user.value) return false
   if (isSelf.value || isRoot.value) return true
-  return profile.value.privilege > user.value.privilege
+  return isAdmin.value && !isTargetAdmin.value
 })
 
 function setEditingUser () {
   if (!user.value) return
   editingUser.value = {
     privilege: user.value.privilege,
-    nick: user.value.nick,
+    nickname: user.value.nickname,
     motto: user.value.motto,
-    mail: user.value.mail,
+    email: user.value.email,
     school: user.value.school,
-    avatar: user.value.avatar,
+    avatarUrl: user.value.avatarUrl,
     storageQuota: byteToMegabyte(user.value.storageQuota),
   }
 }
@@ -126,7 +129,7 @@ async function fetch () {
 
   user.value = userResp.data
   setEditingUser()
-  changeDomTitle({ title: `${user.value.uid} - User Management` })
+  changeDomTitle({ title: `${user.value.username} - User Management` })
 
   await fetchSessions()
 }
@@ -138,20 +141,20 @@ async function saveUser () {
   if (editingUser.value.privilege !== user.value.privilege) {
     payload.privilege = editingUser.value.privilege
   }
-  if (editingUser.value.nick !== user.value.nick) {
-    payload.nick = editingUser.value.nick
+  if (editingUser.value.nickname !== user.value.nickname) {
+    payload.nickname = editingUser.value.nickname
   }
   if (editingUser.value.motto !== user.value.motto) {
     payload.motto = editingUser.value.motto
   }
-  if (editingUser.value.mail !== user.value.mail) {
-    payload.mail = editingUser.value.mail
+  if (editingUser.value.email !== user.value.email) {
+    payload.email = editingUser.value.email
   }
   if (editingUser.value.school !== user.value.school) {
     payload.school = editingUser.value.school
   }
-  if (editingUser.value.avatar !== user.value.avatar) {
-    payload.avatar = editingUser.value.avatar
+  if (editingUser.value.avatarUrl !== user.value.avatarUrl) {
+    payload.avatarUrl = editingUser.value.avatarUrl
   }
 
   saving.value = true
@@ -328,15 +331,15 @@ onRouteParamUpdate(fetch)
         </Message>
 
         <IftaLabel>
-          <InputText id="username" :value="user.uid" fluid readonly />
+          <InputText id="username" :value="user.username" fluid readonly />
           <label for="username">{{ t('ptoj.username') }}</label>
         </IftaLabel>
 
         <IftaLabel>
           <Select
-            v-if="!isSelf && (user.privilege < profile!.privilege || isRoot)" id="privilege"
+            v-if="!isSelf && (isRoot || !isTargetAdmin)" id="privilege"
             v-model="editingUser.privilege" fluid :options="privilegeOptions" option-label="label" option-value="value"
-            :option-disabled="(option) => !isRoot && option.value >= profile!.privilege"
+            :option-disabled="(option) => !isRoot && (option.value === UserPrivilege.ADMIN || option.value === UserPrivilege.ROOT)"
           >
             <template #option="slotProps">
               <Tag
@@ -354,7 +357,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <InputText
-            id="nickname" v-model="editingUser.nick" fluid maxlength="30"
+            id="nickname" v-model="editingUser.nickname" fluid maxlength="30"
             :placeholder="t('ptoj.enter_nickname')" :readonly="!canOperate"
           />
           <label for="nickname">{{ t('ptoj.nickname') }}</label>
@@ -362,7 +365,7 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <InputText
-            id="email" v-model="editingUser.mail" fluid type="email" maxlength="254"
+            id="email" v-model="editingUser.email" fluid type="email" maxlength="254"
             :placeholder="t('ptoj.enter_email')" :readonly="!canOperate"
           />
           <label for="email">{{ t('ptoj.email') }}</label>
@@ -378,10 +381,10 @@ onRouteParamUpdate(fetch)
 
         <IftaLabel>
           <InputText
-            id="avatar" v-model="editingUser.avatar" fluid maxlength="300"
+            id="avatar" v-model="editingUser.avatarUrl" fluid maxlength="300"
             :placeholder="t('ptoj.enter_avatar_url')" :readonly="!canOperate || !isRoot"
           />
-          <label for="avatar">{{ t('ptoj.avatar') }}</label>
+          <label for="avatar">{{ t('ptoj.avatarUrl') }}</label>
         </IftaLabel>
 
         <IftaLabel class="-mb-1.5 md:col-span-2">

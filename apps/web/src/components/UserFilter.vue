@@ -33,7 +33,7 @@ watch(() => props.modelValue, (val) => {
 const value = computed({
   get: () => selected.value,
   set: (val: string | UserSuggestQueryResult[number] | null) => {
-    selected.value = typeof val === 'string' ? val : val?.uid || ''
+    selected.value = typeof val === 'string' ? val : val?.username || ''
     emit('update:modelValue', selected.value)
   },
 })
@@ -54,14 +54,14 @@ async function fetch (event: any) {
 <template>
   <IconField>
     <AutoComplete
-      v-model="value" :suggestions="users" option-label="uid" :disabled="props.disabled" :loading="loading"
+      v-model="value" :suggestions="users" option-label="username" :disabled="props.disabled" :loading="loading"
       :placeholder="props.placeholder || t('ptoj.filter_by_user')" fluid :force-selection="props.forceSelection"
       @complete="fetch" @keypress.enter="emit('select')" @option-select="emit('select')"
     >
       <template #option="{ option }">
-        {{ option.uid }}
-        <span v-if="option.nick" class="ml-2 text-muted-color">
-          ({{ option.nick }})
+        {{ option.username }}
+        <span v-if="option.nickname" class="ml-2 text-muted-color">
+          ({{ option.nickname }})
         </span>
       </template>
     </AutoComplete>

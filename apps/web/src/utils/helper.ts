@@ -6,8 +6,8 @@ import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useSessionStore } from '@/store/modules/session'
 
 // TODO: 后期这里应该会改 URL
-export function testcaseUrl (pid: number, uuid: string, type = 'in') {
-  return `/api/problem/${encodeURIComponent(pid)}/testcases/${encodeURIComponent(uuid)}.${type}`
+export function testcaseUrl (problemId: number, uuid: string, type = 'in') {
+  return `/api/problems/${encodeURIComponent(problemId)}/testcases/${encodeURIComponent(uuid)}.${type}`
 }
 
 export function onRouteQueryUpdate (callback: (...args: any[]) => void) {

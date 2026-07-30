@@ -17,16 +17,16 @@ const { findOne } = problemStore
 const { problem } = storeToRefs(problemStore)
 
 const title = ref('')
-const problemId = computed(() => Number(route.params.pid))
+const problemId = computed(() => Number(route.params.problemId))
 
 function handleSubmitted () {
-  router.push({ name: 'MySubmissions', query: { problem: problemId.value } })
+  router.push({ name: 'MySubmissions', query: { problemId: problemId.value } })
 }
 
 async function init () {
-  if (problem.value.title == null)
-    await findOne({ pid: problemId.value })
-  title.value = problem.value.title
+  if (problem.value?.id !== problemId.value)
+    await findOne(problemId.value)
+  title.value = problem.value?.title ?? ''
   changeDomTitle({ title: title.value })
 }
 

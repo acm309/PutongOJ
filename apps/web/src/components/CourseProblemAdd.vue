@@ -3,7 +3,7 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { addCourseProblems } from '@/api/course'
 import ProblemSelect from '@/components/ProblemSelect.vue'
 import { useMessage } from '@/utils/message'
 
@@ -27,7 +27,9 @@ function close (added: number = 0) {
 
 async function submit () {
   try {
-    const { data: { added } } = await api.course.addProblems(props.courseId, selected.value)
+    const response = await addCourseProblems(props.courseId, { problemIds: selected.value })
+    if (!response.success) return
+    const { added } = response.data
     if (added > 0) {
       message.success(t('oj.successfully_added_problems', { added }))
     } else {

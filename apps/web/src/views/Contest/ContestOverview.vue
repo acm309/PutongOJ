@@ -35,7 +35,7 @@ onMounted(contestStore.reloadContestIfNeeded)
         </span>
       </template>
       <template #body="{ data }">
-        {{ contestLabeling(data.index, contest.labelingStyle) }}
+        {{ contestLabeling(data.position, contest.labelingStyle) }}
       </template>
     </Column>
 

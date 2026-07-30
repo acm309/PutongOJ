@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ProblemEntityPreview } from '@putongoj/shared'
-import type { FindProblemsParams } from '@/types/api'
+import type { ProblemListQuery, ProblemListQueryResult, ProblemUpdatePayload } from '@putongoj/shared'
+import { ProblemVisibility } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -14,13 +14,12 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { moveCourseProblem, removeCourseProblem } from '@/api/course'
 import ProblemTag from '@/components/ProblemTag.vue'
-import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
-import { statusLabels } from '@/utils/constant'
+import { problemVisibilityLabels } from '@/utils/constant'
 import { formatPercentage } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -30,18 +29,16 @@ const router = useRouter()
 const { t } = useI18n()
 const confirm = useConfirm()
 const message = useMessage()
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
 const courseStore = useCourseStore()
-const { status } = storeToRefs(rootStore)
 const { isAdmin } = storeToRefs(sessionStore)
-const { problems, solved } = storeToRefs(problemStore)
+const { problems, solvedProblemIds } = storeToRefs(problemStore)
 const { course } = storeToRefs(courseStore)
 const { findProblems, update } = problemStore
 
 const searchOptions = [
-  { value: 'pid', label: 'Pid' },
+  { value: 'id', label: 'ID' },
   { value: 'title', label: 'Title' },
   { value: 'tag', label: 'Tag' },
 ]
@@ -56,21 +53,21 @@ const pageSize = computed<number>(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-const type = ref(String(route.query.type || 'pid'))
-const content = ref(String(route.query.content || ''))
+const searchField = ref(String(route.query.searchField || 'id'))
+const search = ref(String(route.query.search || ''))
 const loading = ref(false)
 
-const query = computed<FindProblemsParams>(() => {
+const query = computed<ProblemListQuery>(() => {
   return {
     page: page.value,
     pageSize: pageSize.value,
-    course: id,
-    type: String(route.query.type || type.value),
-    content: String(route.query.content || content.value),
+    courseId: id,
+    searchField: (route.query.searchField || searchField.value) as ProblemListQuery['searchField'],
+    search: String(route.query.search || search.value),
   }
 })
 
-function reload (payload: Partial<FindProblemsParams> = {}) {
+function reload (payload: Partial<ProblemListQuery> = {}) {
   const routeQuery = { ...query.value, ...payload }
   router.push({
     name: 'courseProblems',
@@ -85,21 +82,21 @@ async function fetch () {
   loading.value = false
 }
 
-const search = () => reload({ page: 1, type: type.value, content: content.value })
+const submitSearch = () => reload({ page: 1, searchField: searchField.value as ProblemListQuery['searchField'], search: search.value })
 const pageChange = (val: number) => reload({ page: val })
 
-async function switchStatus (problem: ProblemEntityPreview) {
+async function switchStatus (problem: ProblemListQueryResult['items'][number]) {
   loading.value = true
-  const newStatus = problem.status === status.value.Reserve
-    ? status.value.Available
-    : status.value.Reserve
-  await update({ pid: problem.pid, status: newStatus })
+  const visibility: ProblemUpdatePayload['visibility'] = problem.visibility === ProblemVisibility.RESERVED
+    ? ProblemVisibility.AVAILABLE
+    : ProblemVisibility.RESERVED
+  await update(problem.id, { visibility })
   loading.value = false
   await fetch()
 }
 
 const sortingModal = ref(false)
-const sorting = ref({} as ProblemEntityPreview)
+const sorting = ref<ProblemListQueryResult['items'][number] | null>(null)
 const newPosition = ref<number | null>(null)
 
 async function updateSorting () {
@@ -109,11 +106,10 @@ async function updateSorting () {
   }
   loading.value = true
   try {
-    await api.course.moveCourseProblem(
-      course.value.courseId,
-      sorting.value.pid,
-      newPosition.value,
-    )
+    if (!course.value || !sorting.value) return
+    await moveCourseProblem(course.value.id, sorting.value.id, {
+      beforePosition: newPosition.value,
+    })
     message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
@@ -124,9 +120,9 @@ async function updateSorting () {
   }
 }
 
-function removeProblem (event: any, pid: number) {
+function removeProblem (event: Event, problemId: number) {
   confirm.require({
-    target: event.currentTarget,
+    target: event.currentTarget as HTMLElement,
     message: '你确定要从该课程中移除该题目吗？',
     rejectProps: {
       label: '取消',
@@ -138,7 +134,8 @@ function removeProblem (event: any, pid: number) {
       severity: 'danger',
     },
     accept: async () => {
-      await api.course.removeCourseProblem(course.value.courseId, pid)
+      if (!course.value) return
+      await removeCourseProblem(course.value.id, problemId)
       message.success('题目已从课程中移除')
       fetch()
     },
@@ -155,12 +152,12 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <div class="flex gap-2">
           <Select
-            v-model="type" class="w-36" fluid :options="searchOptions" option-label="label" option-value="value"
+            v-model="searchField" class="w-36" fluid :options="searchOptions" option-label="label" option-value="value"
             :disabled="loading"
           />
           <InputText
-            v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
-            @keypress.enter="search"
+            v-model="search" fluid placeholder="Enter search content..." :disabled="loading"
+            @keypress.enter="submitSearch"
           />
         </div>
 
@@ -170,15 +167,15 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
             @click="() => reload({ page: 1, type: undefined, content: undefined })"
           /> -->
-          <Button :label="t('oj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
+          <Button :label="t('oj.search')" icon="pi pi-search" :disabled="loading" @click="submitSearch" />
         </div>
       </div>
     </div>
 
-    <DataTable class="-mb-px whitespace-nowrap" :value="problems.docs" :lazy="true" :loading="loading" scrollable>
+    <DataTable class="-mb-px whitespace-nowrap" :value="problems.items" :lazy="true" :loading="loading" scrollable>
       <Column class="pl-8 text-center w-18">
         <template #body="{ data }">
-          <span v-if="solved.includes(data.pid)" class="text-emerald-500">
+          <span v-if="solvedProblemIds.includes(data.id)" class="text-emerald-500">
             <i class="pi pi-check" />
           </span>
           <span v-else>
@@ -198,19 +195,19 @@ onRouteQueryUpdate(fetch)
         </template>
       </Column>
 
-      <Column class="px-2 text-center w-18" field="pid" />
+      <Column class="px-2 text-center w-18" field="id" />
 
       <Column :header="t('ptoj.problem')">
         <template #body="{ data }">
           <span class="-my-1 flex gap-4 items-center justify-between">
-            <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }" class="grow">
+            <RouterLink :to="{ name: 'problemInfo', params: { problemId: data.id } }" class="grow">
               <Button class="justify-start p-0" :label="data.title" fluid link />
             </RouterLink>
             <span v-if="data.tags.length > 0" class="flex gap-1 justify-end">
               <template v-for="(tag, tagIdx) in data.tags" :key="tagIdx">
                 <ProblemTag
                   class="cursor-pointer" :color="tag.color" :name="tag.name"
-                  @click="reload({ page: 1, type: 'tag', content: tag.name })"
+                  @click="reload({ page: 1, searchField: 'tag', search: tag.name })"
                 />
               </template>
             </span>
@@ -227,25 +224,25 @@ onRouteQueryUpdate(fetch)
         <template #body="{ data }">
           <span class="flex gap-2 items-center">
             <span class="grow text-center text-muted-color text-sm">
-              {{ data.solve }} / {{ data.submit }}
+              {{ data.solverCount }} / {{ data.submitterCount }}
             </span>
             <span class="min-w-18 text-right">
-              {{ formatPercentage(data.solve, data.submit) }}
+              {{ formatPercentage(data.solverCount, data.submitterCount) }}
             </span>
           </span>
         </template>
       </Column>
 
-      <Column v-if="course.role.manageProblem || isAdmin" class="pr-5 text-center w-24">
+      <Column v-if="course?.role.canManageProblems || isAdmin" class="pr-5 text-center w-24">
         <template #body="{ data }">
           <span class="-my-1 flex justify-end">
             <Button
               v-tooltip.left="(isAdmin || data.isOwner) ? t('oj.click_to_change_status') : null" link
-              class="grow mr-3 p-0" :disabled="!(isAdmin || data.isOwner)" :label="statusLabels[(data.status as 0 | 2)]"
+              class="grow mr-3 p-0" :disabled="!(isAdmin || data.isOwner)" :label="problemVisibilityLabels[data.visibility as keyof typeof problemVisibilityLabels]"
               @click="switchStatus(data)"
             />
             <Button icon="pi pi-sort" link class="p-0" @click="sortingModal = true; sorting = data" />
-            <Button icon="pi pi-trash" link class="p-0 text-red-400" @click="event => removeProblem(event, data.pid)" />
+            <Button icon="pi pi-trash" link class="p-0 text-red-400" @click="event => removeProblem(event, data.id)" />
           </span>
         </template>
       </Column>
@@ -269,7 +266,7 @@ onRouteQueryUpdate(fetch)
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
           <label class="font-semibold">{{ t('oj.move_problem') }}</label>
-          <InputText :model-value="sorting.title" disabled fluid />
+          <InputText :model-value="sorting?.title ?? ''" disabled fluid />
         </div>
         <div class="flex flex-col gap-2">
           <label class="font-semibold">{{ t('oj.before_position') }}</label>

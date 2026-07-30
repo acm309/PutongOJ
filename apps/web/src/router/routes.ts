@@ -45,13 +45,13 @@ const routes: Array<RouteRecordRaw> = [
     redirect: { name: 'Ranklist' },
   },
   {
-    path: '/users/:uid',
+    path: '/users/:username',
     name: 'UserProfile',
     component: UserProfile,
     meta: { title: 'User Profile' },
   },
   {
-    path: '/user/:uid',
+    path: '/user/:username',
     redirect: { name: 'UserProfile' },
   },
   {

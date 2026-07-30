@@ -35,7 +35,7 @@ const router = useRouter()
 const message = useMessage()
 const creating = ref(false)
 const createForm = ref({
-  type: DiscussionType.PrivateClarification,
+  type: DiscussionType.PRIVATE_CLARIFICATION,
   title: '',
   content: '',
 } as DiscussionCreatePayload)
@@ -46,17 +46,17 @@ const hasEntered = computed(() => {
 })
 
 const discussionTypeOptions = computed(() => [ {
-  value: DiscussionType.PrivateClarification,
+  value: DiscussionType.PRIVATE_CLARIFICATION,
   label: t('ptoj.clarification'),
   desc: t('ptoj.clarification_type_desc'),
   disabled: false,
 }, {
-  value: DiscussionType.PublicAnnouncement,
+  value: DiscussionType.PUBLIC_ANNOUNCEMENT,
   label: t('ptoj.announcement'),
   desc: t('ptoj.announcement_type_desc'),
   disabled: !props.isManaged,
 }, {
-  value: DiscussionType.OpenDiscussion,
+  value: DiscussionType.OPEN_DISCUSSION,
   label: t('ptoj.discussion'),
   desc: t('ptoj.discussion_type_desc'),
   disabled: !props.isManaged,
@@ -65,13 +65,13 @@ const discussionTypeOptions = computed(() => [ {
 async function submitDiscussion () {
   const payload = { ...createForm.value }
   if (typeof props.contest === 'number') {
-    payload.contest = props.contest
+    payload.contestId = props.contest
     if (typeof problem.value === 'number') {
-      payload.problem = problem.value
+      payload.problemId = problem.value
     }
   } else {
     if (typeof props.problem === 'number') {
-      payload.problem = props.problem
+      payload.problemId = props.problem
     }
   }
 
@@ -84,7 +84,7 @@ async function submitDiscussion () {
     return
   }
 
-  const { discussionId } = resp.data
+  const discussionId = resp.data.id
   message.success(
     t('ptoj.successful_create_discussion'),
     t('ptoj.successful_create_discussion_detail', { discussionId }),

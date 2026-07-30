@@ -8,12 +8,13 @@ import { suggestUsers } from '@/api/user'
 import { useMessage } from '@/utils/message'
 
 const props = defineProps<{
-  modelValue?: string
+  modelValue?: number | null
   label?: string
   placeholder?: string
+  disabled?: boolean
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
+  (e: 'update:modelValue', value: number | null): void
   (e: 'select'): void
   (e: 'blur'): void
 }>()
@@ -23,17 +24,17 @@ const message = useMessage()
 
 const loading = ref(false)
 const users = ref([] as UserSuggestQueryResult)
-const selected = ref(props.modelValue || '')
+const selected = ref<number | UserSuggestQueryResult[number] | null>(props.modelValue ?? null)
 
 watch(() => props.modelValue, (val) => {
-  if (val !== selected.value) selected.value = val || ''
+  if (val !== selected.value) selected.value = val ?? null
 })
 
 const value = computed({
   get: () => selected.value,
-  set: (val: string | UserSuggestQueryResult[number] | null) => {
-    selected.value = typeof val === 'string' ? val : val?.uid || ''
-    emit('update:modelValue', selected.value)
+  set: (val: number | UserSuggestQueryResult[number] | null) => {
+    selected.value = val
+    emit('update:modelValue', typeof val === 'number' ? val : val?.id ?? null)
   },
 })
 
@@ -53,14 +54,14 @@ async function fetch (event: any) {
 <template>
   <IftaLabel>
     <AutoComplete
-      id="user" v-model="value" :suggestions="users" option-label="uid" :loading="loading"
+      id="user" v-model="value" :suggestions="users" option-label="username" :loading="loading" :disabled="props.disabled"
       :placeholder="props.placeholder || t('ptoj.select_user')" fluid force-selection @complete="fetch"
       @keypress.enter="emit('select')" @option-select="emit('select')" @blur="emit('blur')"
     >
       <template #option="{ option }">
-        {{ option.uid }}
-        <span v-if="option.nick" class="ml-2 text-muted-color">
-          ({{ option.nick }})
+        {{ option.username }}
+        <span v-if="option.nickname" class="ml-2 text-muted-color">
+          ({{ option.nickname }})
         </span>
       </template>
     </AutoComplete>

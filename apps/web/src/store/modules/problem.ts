@@ -1,36 +1,43 @@
-import type { Paginated, ProblemEntityView } from '@putongoj/shared'
-import type { ProblemBrief } from '@/types'
-import type { FindProblemsParams } from '@/types/api'
+import type { ProblemDetailQueryResult, ProblemListQuery, ProblemListQueryResult, ProblemUpdatePayload } from '@putongoj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { createProblem, findProblems, getProblem, removeProblem, updateProblem } from '@/api/problem'
 
 export const useProblemStore = defineStore('problem', {
   state: () => ({
-    problem: {} as ProblemEntityView,
-    solved: [] as number[],
-    problems: { docs: [], limit: 0, page: 1, pages: 0, total: 0 } as Paginated<ProblemBrief>,
+    problem: null as ProblemDetailQueryResult | null,
+    solvedProblemIds: [] as number[],
+    problems: {
+      items: [],
+      page: 1,
+      pageSize: 30,
+      total: 0,
+      solvedProblemIds: [],
+    } as ProblemListQueryResult,
   }),
   actions: {
-    async findProblems (params: FindProblemsParams) {
-      const { data } = await api.problem.findProblems(params)
-      this.problems = data.list
-      this.solved = data.solved
+    async findProblems (params: ProblemListQuery) {
+      const response = await findProblems(params)
+      if (response.success) {
+        this.problems = response.data
+        this.solvedProblemIds = response.data.solvedProblemIds
+      }
+      return response
     },
-    async findOne (payload: { pid: number, [key: string]: any }) {
-      const { data } = await api.problem.findOne(payload)
-      this.problem = data
-      return { problem: data }
+    async findOne (problemId: number) {
+      const response = await getProblem(problemId)
+      if (response.success) {
+        this.problem = response.data
+      }
+      return response
     },
-    async update (payload: { [key: string]: any }) {
-      return api.problem.update(payload).then(({ data }) => {
-        return data
-      })
+    async update (problemId: number, payload: ProblemUpdatePayload) {
+      return updateProblem(problemId, payload)
     },
-    async create (payload: { [key: string]: any }) {
-      return api.problem.create(payload).then(({ data }) => data.pid)
+    async create (payload: Parameters<typeof createProblem>[0]) {
+      return createProblem(payload)
     },
-    async delete (payload: { [key: string]: any }) {
-      return api.problem.delete(payload)
+    async remove (problemId: number) {
+      return removeProblem(problemId)
     },
   },
 })

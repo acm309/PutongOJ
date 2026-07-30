@@ -32,19 +32,19 @@ const router = useRouter()
 const message = useMessage()
 
 const query = ref({} as AdminSolutionListQuery)
-const docs = ref([] as AdminSolutionListQueryResult['docs'])
+const docs = ref([] as AdminSolutionListQueryResult['items'])
 const total = ref(0)
 const loading = ref(false)
-const selectedDocs = ref([] as AdminSolutionListQueryResult['docs'])
+const selectedDocs = ref([] as AdminSolutionListQueryResult['items'])
 const exportDialog = ref(false)
 const autoRefresh = ref<number | null>(null)
 
 const hasFilter = computed(() => {
   return Boolean(
-    query.value.user
-    || query.value.problem
-    || query.value.contest
-    || Number.isInteger(query.value.judge)
+    query.value.username
+    || query.value.problemId
+    || query.value.contestId
+    || query.value.status !== undefined
     || query.value.language,
   )
 })
@@ -68,7 +68,7 @@ async function fetch () {
     return
   }
 
-  docs.value = resp.data.docs
+  docs.value = resp.data.items
   total.value = resp.data.total
 }
 
@@ -77,7 +77,7 @@ function onSort (event: any) {
     query: {
       ...route.query,
       sortBy: event.sortField,
-      sort: event.sortOrder,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc',
     },
   })
 }
@@ -95,10 +95,10 @@ function onSearch () {
   router.replace({
     query: {
       ...route.query,
-      user: query.value.user || undefined,
-      problem: query.value.problem || undefined,
-      contest: query.value.contest || undefined,
-      judge: Number.isInteger(query.value.judge) ? query.value.judge : undefined,
+      username: query.value.username || undefined,
+      problemId: query.value.problemId || undefined,
+      contestId: query.value.contestId || undefined,
+      status: query.value.status ?? undefined,
       language: query.value.language || undefined,
       page: undefined,
     },
@@ -109,10 +109,10 @@ function onReset () {
   router.replace({
     query: {
       ...route.query,
-      user: undefined,
-      problem: undefined,
-      contest: undefined,
-      judge: undefined,
+      username: undefined,
+      problemId: undefined,
+      contestId: undefined,
+      status: undefined,
       language: undefined,
       page: undefined,
     },
@@ -169,11 +169,11 @@ onBeforeUnmount(clearAutoRefresh)
         </h1>
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
-        <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
+        <UserFilter v-model="query.username" :disabled="loading" @select="onSearch" />
 
         <IconField>
           <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" fluid :use-grouping="false"
+            v-model="query.problemId" mode="decimal" :min="1" fluid :use-grouping="false"
             :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-flag" />
@@ -181,14 +181,14 @@ onBeforeUnmount(clearAutoRefresh)
 
         <IconField>
           <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" fluid :use-grouping="false"
+            v-model="query.contestId" mode="decimal" :min="1" fluid :use-grouping="false"
             :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
           />
           <InputIcon class="pi pi-trophy" />
         </IconField>
 
         <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+          v-model="query.status" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
           show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
         >
           <template #option="slotProps">
@@ -233,7 +233,7 @@ onBeforeUnmount(clearAutoRefresh)
 
     <SolutionDataTable
       v-model:selection="selectedDocs" class="-mb-px" :value="docs" :loading="loading"
-      :sort-field="query.sortBy" :sort-order="query.sort" selectable @sort="onSort"
+      :sort-field="query.sortBy" :sort-order="query.sort === 'asc' ? 1 : -1" selectable @sort="onSort"
     />
 
     <Paginator

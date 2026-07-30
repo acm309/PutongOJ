@@ -8,12 +8,14 @@ import type {
   AdminGroupCreatePayload,
   AdminGroupDetailQueryResult,
   AdminGroupMembersUpdatePayload,
+  AdminGroupMembersUpdateResult,
   AdminGroupUpdatePayload,
   AdminNotificationCreatePayload,
   AdminPostCreatePayload,
   AdminPostDetailQueryResult,
   AdminPostListQuery,
   AdminPostListQueryResult,
+  AdminPostMutationResult,
   AdminPostUpdatePayload,
   AdminSolutionListExportQuery,
   AdminSolutionListExportQueryResult,
@@ -64,13 +66,13 @@ export async function findPosts (params: AdminPostListQuery) {
   return instance.get<AdminPostListQueryResult>('/admin/posts', { params })
 }
 export async function createPost (payload: AdminPostCreatePayload) {
-  return instance.post<{ slug: string }>('/admin/posts', payload)
+  return instance.post<AdminPostMutationResult>('/admin/posts', payload)
 }
 export async function getPost (slug: string) {
   return instance.get<AdminPostDetailQueryResult>(`/admin/posts/${encodeURIComponent(slug)}`)
 }
 export async function updatePost (slug: string, payload: AdminPostUpdatePayload) {
-  return instance.put<{ slug: string }>(`/admin/posts/${encodeURIComponent(slug)}`, payload)
+  return instance.put<AdminPostMutationResult>(`/admin/posts/${encodeURIComponent(slug)}`, payload)
 }
 export async function deletePost (slug: string) {
   return instance.delete<null>(`/admin/posts/${encodeURIComponent(slug)}`)
@@ -93,7 +95,7 @@ export async function updateGroup (groupId: string, payload: AdminGroupUpdatePay
   return instance.put<null>(`/admin/groups/${encodeURIComponent(groupId)}`, payload)
 }
 export async function updateGroupMembers (groupId: string, payload: AdminGroupMembersUpdatePayload) {
-  return instance.put<{ modifiedCount: number }>(`/admin/groups/${encodeURIComponent(groupId)}/members`, payload)
+  return instance.put<AdminGroupMembersUpdateResult>(`/admin/groups/${encodeURIComponent(groupId)}/members`, payload)
 }
 export async function removeGroup (groupId: string) {
   return instance.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)

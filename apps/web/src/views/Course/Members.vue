@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseMemberView } from '@putongoj/shared'
+import type { CourseMemberQueryResult } from '@putongoj/shared'
 import { UserPrivilege } from '@putongoj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -12,7 +12,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { findCourseMembers, removeCourseMember } from '@/api/course'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
@@ -24,13 +24,12 @@ const router = useRouter()
 const { t } = useI18n()
 const confirm = useConfirm()
 const message = useMessage()
-const { course } = api
 const sessionStore = useSessionStore()
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
 const DEFAULT_PAGE_SIZE = 30
 const MAX_PAGE_SIZE = 100
-const ADMIN_PRIVILEGE = [ UserPrivilege.Admin, UserPrivilege.Root ]
+const ADMIN_PRIVILEGE = [ UserPrivilege.ADMIN, UserPrivilege.ROOT ]
 
 const page = computed<number>(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
@@ -39,17 +38,19 @@ const pageSize = computed<number>(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-const docs = ref<CourseMemberView[]>([])
+const items = ref<CourseMemberQueryResult[]>([])
 const total = ref<number>(0)
 const loading = ref<boolean>(false)
 const openEdit = ref<boolean>(false)
-const editUserId = ref<string>('')
+const editUserId = ref<number | null>(null)
 
 async function fetch () {
   loading.value = true
-  const { data } = await course.findMembers(id, { page: page.value, pageSize: pageSize.value })
-  docs.value = data.docs
-  total.value = data.total
+  const response = await findCourseMembers(id, { page: page.value, pageSize: pageSize.value })
+  if (response.success) {
+    items.value = response.data.items
+    total.value = response.data.total
+  }
   loading.value = false
 }
 
@@ -60,14 +61,14 @@ function pageChange (page: number) {
   })
 }
 
-function openEditDialog (userId: string) {
+function openEditDialog (userId: number) {
   editUserId.value = userId
   openEdit.value = true
 }
 
-function removeMember (event: any, userId: string) {
+function removeMember (event: Event, userId: number) {
   confirm.require({
-    target: event.currentTarget,
+    target: event.currentTarget as HTMLElement,
     message: t('oj.course_remove_member_confirm'),
     header: t('oj.delete'),
     rejectProps: {
@@ -80,7 +81,7 @@ function removeMember (event: any, userId: string) {
       severity: 'danger',
     },
     accept: async () => {
-      await course.removeMember(id, userId)
+      await removeCourseMember(id, userId)
       message.success(t('oj.course_member_remove_success'))
       fetch()
     },
@@ -89,7 +90,7 @@ function removeMember (event: any, userId: string) {
 
 watch(() => openEdit.value, (val: boolean) => {
   if (val) return
-  editUserId.value = ''
+  editUserId.value = null
   fetch()
 })
 
@@ -103,18 +104,18 @@ onRouteQueryUpdate(fetch)
       <Button :label="t('oj.add')" icon="pi pi-plus" @click="openEdit = true" />
     </div>
 
-    <DataTable class="-mb-px whitespace-nowrap" :value="docs" :lazy="true" :loading="loading" scrollable>
+    <DataTable class="-mb-px whitespace-nowrap" :value="items" :lazy="true" :loading="loading" scrollable>
       <Column class="pl-8 w-52" :header="t('oj.username')">
         <template #body="{ data }">
-          <RouterLink :to="{ name: 'UserProfile', params: { uid: data.user.uid } }">
-            {{ data.user.uid }}
+          <RouterLink :to="{ name: 'UserProfile', params: { username: data.user.username } }">
+            {{ data.user.username }}
           </RouterLink>
         </template>
       </Column>
 
-      <Column class="w-52" :header="t('oj.nick')">
+      <Column class="w-52" :header="t('oj.nickname')">
         <template #body="{ data }">
-          <span v-if="data.user.nick?.trim()">{{ data.user.nick }}</span>
+          <span v-if="data.user.nickname?.trim()">{{ data.user.nickname }}</span>
         </template>
       </Column>
 
@@ -126,7 +127,7 @@ onRouteQueryUpdate(fetch)
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
-          <Checkbox v-else v-model="data.role.basic" binary disabled />
+          <Checkbox v-else v-model="data.role.canAccess" binary disabled />
         </template>
       </Column>
 
@@ -138,7 +139,7 @@ onRouteQueryUpdate(fetch)
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
-          <Checkbox v-else v-model="data.role.viewTestcase" binary disabled />
+          <Checkbox v-else v-model="data.role.canViewTestcases" binary disabled />
         </template>
       </Column>
 
@@ -150,7 +151,7 @@ onRouteQueryUpdate(fetch)
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
-          <Checkbox v-else v-model="data.role.viewSolution" binary disabled />
+          <Checkbox v-else v-model="data.role.canViewSubmissions" binary disabled />
         </template>
       </Column>
 
@@ -162,7 +163,7 @@ onRouteQueryUpdate(fetch)
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
-          <Checkbox v-else v-model="data.role.manageProblem" binary disabled />
+          <Checkbox v-else v-model="data.role.canManageProblems" binary disabled />
         </template>
       </Column>
 
@@ -174,7 +175,7 @@ onRouteQueryUpdate(fetch)
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <span />
           </template>
-          <Checkbox v-else v-model="data.role.manageContest" binary disabled />
+          <Checkbox v-else v-model="data.role.canManageContests" binary disabled />
         </template>
       </Column>
 
@@ -185,21 +186,21 @@ onRouteQueryUpdate(fetch)
         <template #body="{ data }">
           <template v-if="ADMIN_PRIVILEGE.includes(data.user.privilege)">
             <PrimeTag
-              v-if="data.user.privilege === UserPrivilege.Admin"
+              v-if="data.user.privilege === UserPrivilege.ADMIN"
               v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
               severity="info"
             >
               Admin
             </PrimeTag>
             <PrimeTag
-              v-else-if="data.user.privilege === UserPrivilege.Root"
+              v-else-if="data.user.privilege === UserPrivilege.ROOT"
               v-tooltip.top="{ value: t('oj.course_admin_override'), pt: { text: 'max-w-64 whitespace-normal' } }"
               severity="warn"
             >
               Root
             </PrimeTag>
           </template>
-          <Checkbox v-else v-model="data.role.manageCourse" binary disabled />
+          <Checkbox v-else v-model="data.role.canManageCourse" binary disabled />
         </template>
       </Column>
 
@@ -211,11 +212,11 @@ onRouteQueryUpdate(fetch)
 
       <Column class="pr-6 w-32" :header="t('oj.action')">
         <template #body="{ data }">
-          <template v-if="isAdmin || data.user.uid !== profile?.uid">
-            <Button :label="t('oj.edit')" text size="small" @click="() => openEditDialog(data.user.uid)" />
+          <template v-if="isAdmin || data.user.username !== profile?.username">
+            <Button :label="t('oj.edit')" text size="small" @click="() => openEditDialog(data.user.id)" />
             <Button
               :label="t('oj.delete')" text severity="danger" size="small"
-              @click="event => removeMember(event, data.user.uid)"
+              @click="event => removeMember(event, data.user.id)"
             />
           </template>
         </template>
@@ -236,6 +237,6 @@ onRouteQueryUpdate(fetch)
       @page="(event: any) => pageChange(event.first / event.rows + 1)"
     />
 
-    <CourseRoleEdit v-model="openEdit" :course-id="id" :user-id="editUserId" />
+    <CourseRoleEdit v-model="openEdit" :course-id="id" :user-id="editUserId ?? undefined" />
   </div>
 </template>
