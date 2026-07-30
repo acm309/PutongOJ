@@ -8,6 +8,7 @@ import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
 import remove from 'lodash/remove'
+import { isAdmin } from '../auth/user'
 import { loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
 import { loadProblemOrThrow } from '../policies/problem'
@@ -18,7 +19,7 @@ import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants'
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
+  if (!(isAdmin(profile) || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -41,7 +42,7 @@ export async function exportTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(
-    profile.isAdmin
+    isAdmin(profile)
     || (problem.ownerId === profile.id)
     || await courseService.hasProblemRole(
       profile.id, problem.id, 'canViewTestcases',
@@ -106,7 +107,7 @@ export async function exportTestcases (ctx: Context) {
 export async function createTestcase (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
+  if (!(isAdmin(profile) || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -150,7 +151,7 @@ export async function createTestcase (ctx: Context) {
 export async function removeTestcase (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  if (!(profile.isAdmin || (problem.ownerId === profile.id))) {
+  if (!(isAdmin(profile) || (problem.ownerId === profile.id))) {
     ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -182,7 +183,7 @@ export async function getTestcase (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
   if (!(
-    profile.isAdmin
+    isAdmin(profile)
     || (problem.ownerId === profile.id)
     || await courseService.hasProblemRole(
       profile.id, problem.id, 'canViewTestcases',

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { FileModelSchema, UserModelSchema } from '../model/index.js'
+import { FileFieldsSchema, UserFieldsSchema } from '../fields/index.js'
 import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const FileListQuerySchema = z.object({
@@ -13,14 +13,14 @@ export type FileListQuery = z.infer<typeof FileListQuerySchema>
 
 export const FileListQueryResultSchema = z.object({
   files: PaginatedResultSchema(z.object({
-    storageKey: FileModelSchema.shape.storageKey,
-    originalName: FileModelSchema.shape.originalName,
-    sizeBytes: FileModelSchema.shape.sizeBytes,
-    createdAt: FileModelSchema.shape.createdAt,
+    storageKey: FileFieldsSchema.shape.storageKey,
+    originalName: FileFieldsSchema.shape.originalName,
+    sizeBytes: FileFieldsSchema.shape.sizeBytes,
+    createdAt: FileFieldsSchema.shape.createdAt,
   })),
   usage: z.object({
     usedBytes: z.int().nonnegative(),
-    storageQuota: UserModelSchema.shape.storageQuota,
+    storageQuota: UserFieldsSchema.shape.storageQuota,
   }),
 })
 
@@ -28,8 +28,8 @@ export type FileListQueryResult = z.input<typeof FileListQueryResultSchema>
 
 export const FileUploadResultSchema = z.object({
   url: z.string().startsWith('/uploads/'),
-  storageKey: FileModelSchema.shape.storageKey,
-  sizeBytes: FileModelSchema.shape.sizeBytes,
+  storageKey: FileFieldsSchema.shape.storageKey,
+  sizeBytes: FileFieldsSchema.shape.sizeBytes,
 })
 
 export type FileUploadResult = z.input<typeof FileUploadResultSchema>

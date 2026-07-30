@@ -3,7 +3,6 @@ import type { PaginateOption, SortOption } from '../types'
 import { DiscussionType as DiscussionTypeEnum } from '@putongoj/shared'
 import { getDatabase } from '../config/postgres'
 import { distributeWork } from '../jobs/helper'
-import { toCommentDto, toDiscussionDto } from '../persistence/mappers'
 import logger from '../utils/logger'
 
 export interface DiscussionQueryFilters {
@@ -85,7 +84,17 @@ export async function getDiscussion (discussionId: number) {
 
 function toDiscussionView (discussion: DiscussionWithRelations) {
   return {
-    ...toDiscussionDto(discussion, discussion.commentStats),
+    id: discussion.id,
+    authorId: discussion.authorId,
+    problemId: discussion.problemId,
+    contestId: discussion.contestId,
+    type: discussion.type,
+    isPinned: discussion.isPinned,
+    title: discussion.title,
+    comments: discussion.commentStats?.visibleCommentCount ?? 0,
+    lastCommentAt: discussion.commentStats?.lastVisibleCommentAt ?? discussion.createdAt,
+    createdAt: discussion.createdAt,
+    updatedAt: discussion.updatedAt,
     author: discussion.author,
     problem: discussion.problem,
     contest: discussion.contest,
@@ -112,14 +121,23 @@ export async function getComments (
     include: { author: { select: { id: true, username: true, nickname: true, avatarUrl: true } } },
     orderBy: { createdAt: 'asc' },
   })
-  return comments.map(comment => ({ ...toCommentDto(comment), author: comment.author }))
+  return comments.map(comment => ({
+    id: comment.id,
+    discussionId: comment.discussionId,
+    authorId: comment.authorId,
+    content: comment.content,
+    isHidden: comment.isHidden,
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    author: comment.author,
+  }))
 }
 
 export async function createComment (discussionId: number, authorId: number, content: string) {
   const database = await getDatabase()
   const comment = await database.comment.create({ data: { discussionId, authorId, content } })
   await distributeWork('updateStatistic', `discussion:${discussionId}`)
-  return toCommentDto(comment)
+  return comment
 }
 
 export async function updateComment (commentId: number, data: Partial<{ isHidden: boolean }>) {
@@ -127,7 +145,7 @@ export async function updateComment (commentId: number, data: Partial<{ isHidden
   try {
     const comment = await database.comment.update({ where: { id: commentId }, data })
     await distributeWork('updateStatistic', `discussion:${comment.discussionId}`)
-    return toCommentDto(comment)
+    return comment
   } catch (error) {
     logger.warn(`Failed to update comment <Comment:${commentId}>: ${String(error)}`)
     return null
@@ -148,16 +166,21 @@ export async function updateDiscussion (discussionId: number, update: Discussion
   try {
     const discussion = await database.discussion.update({
       where: { id: discussionId },
-      data: {
-        ...(update.authorId === undefined ? {} : { authorId: update.authorId }),
-        ...(update.problemId === undefined ? {} : { problemId: update.problemId }),
-        ...(update.contestId === undefined ? {} : { contestId: update.contestId }),
-        ...(update.isPinned === undefined ? {} : { isPinned: update.isPinned }),
-        ...(update.title === undefined ? {} : { title: update.title }),
-        ...(update.type === undefined ? {} : { type: update.type }),
-      } as any,
+      data: update,
     })
-    return toDiscussionDto(discussion)
+    return {
+      id: discussion.id,
+      authorId: discussion.authorId,
+      problemId: discussion.problemId,
+      contestId: discussion.contestId,
+      type: discussion.type,
+      isPinned: discussion.isPinned,
+      title: discussion.title,
+      comments: 0,
+      lastCommentAt: discussion.createdAt,
+      createdAt: discussion.createdAt,
+      updatedAt: discussion.updatedAt,
+    }
   } catch (error) {
     logger.warn(`Failed to update discussion <Discussion:${discussionId}>: ${String(error)}`)
     return null
@@ -187,7 +210,19 @@ export async function createDiscussion (data: {
     return created
   })
   await distributeWork('updateStatistic', `discussion:${discussion.id}`)
-  return toDiscussionDto(discussion)
+  return {
+    id: discussion.id,
+    authorId: discussion.authorId,
+    problemId: discussion.problemId,
+    contestId: discussion.contestId,
+    type: discussion.type,
+    isPinned: discussion.isPinned,
+    title: discussion.title,
+    comments: 0,
+    lastCommentAt: discussion.createdAt,
+    createdAt: discussion.createdAt,
+    updatedAt: discussion.updatedAt,
+  }
 }
 
 const discussionService = {

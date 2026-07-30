@@ -1,6 +1,7 @@
 import type { ParticipationStatus } from '@putongoj/db'
 import type { Context } from 'koa'
 import { ParticipationStatus as ParticipationStatusEnum } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import { loadProfile } from '../middlewares/authn'
 import { contestService } from '../services/contest'
 import { isIpInWhitelist } from '../utils'
@@ -25,7 +26,7 @@ export async function loadContestState (ctx: Context, inputId?: number | string)
   const profile = await loadProfile(ctx)
   const participation = await contestService.getParticipation(profile.id, contest.id)
   const courseRole = await loadCourseRoleById(ctx, contest.courseId)
-  const isJury = profile.isAdmin || courseRole?.canManageContests === true
+  const isJury = isAdmin(profile) || courseRole?.canManageContests === true
   const isIpBlocked = contest.ipWhitelistEnabled && !isJury
     ? !isIpInWhitelist(ctx.state.clientIp, contest.ipWhitelist)
     : false

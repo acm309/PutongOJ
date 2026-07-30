@@ -1,12 +1,12 @@
 import { z } from 'zod'
 import { DiscussionType } from '@/consts/index.js'
 import {
-  CommentModelSchema,
-  ContestModelSchema,
-  DiscussionModelSchema,
-  ProblemModelSchema,
-  UserModelSchema,
-} from '../model/index.js'
+  CommentFieldsSchema,
+  ContestFieldsSchema,
+  DiscussionFieldsSchema,
+  ProblemFieldsSchema,
+  UserFieldsSchema,
+} from '../fields/index.js'
 import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const DiscussionListQuerySchema = z.object({
@@ -15,80 +15,80 @@ export const DiscussionListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'lastCommentAt', 'comments']).default('lastCommentAt'),
   authorId: z.coerce.number().int().positive().optional(),
-  type: DiscussionModelSchema.shape.type.optional(),
+  type: DiscussionFieldsSchema.shape.type.optional(),
 })
 
 export type DiscussionListQuery = z.infer<typeof DiscussionListQuerySchema>
 
 export const DiscussionListQueryResultSchema = PaginatedResultSchema(z.object({
-  id: DiscussionModelSchema.shape.id,
+  id: DiscussionFieldsSchema.shape.id,
   author: z.object({
-    id: UserModelSchema.shape.id,
-    username: UserModelSchema.shape.username,
-    avatarUrl: UserModelSchema.shape.avatarUrl,
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
+    avatarUrl: UserFieldsSchema.shape.avatarUrl,
   }),
   problem: z.object({
-    id: ProblemModelSchema.shape.id,
+    id: ProblemFieldsSchema.shape.id,
   }).nullable(),
   contest: z.object({
-    id: ContestModelSchema.shape.id,
+    id: ContestFieldsSchema.shape.id,
   }).nullable(),
-  type: DiscussionModelSchema.shape.type,
-  isPinned: DiscussionModelSchema.shape.isPinned,
-  title: DiscussionModelSchema.shape.title,
-  comments: DiscussionModelSchema.shape.comments,
-  lastCommentAt: DiscussionModelSchema.shape.lastCommentAt,
-  createdAt: DiscussionModelSchema.shape.createdAt,
+  type: DiscussionFieldsSchema.shape.type,
+  isPinned: DiscussionFieldsSchema.shape.isPinned,
+  title: DiscussionFieldsSchema.shape.title,
+  comments: DiscussionFieldsSchema.shape.comments,
+  lastCommentAt: DiscussionFieldsSchema.shape.lastCommentAt,
+  createdAt: DiscussionFieldsSchema.shape.createdAt,
 }))
 
 export type DiscussionListQueryResult = z.input<typeof DiscussionListQueryResultSchema>
 
 export const DiscussionDetailQueryResultSchema = z.object({
-  id: DiscussionModelSchema.shape.id,
+  id: DiscussionFieldsSchema.shape.id,
   author: z.object({
-    id: UserModelSchema.shape.id,
-    username: UserModelSchema.shape.username,
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
   }),
   problem: z.object({
-    id: ProblemModelSchema.shape.id,
+    id: ProblemFieldsSchema.shape.id,
   }).nullable(),
   contest: z.object({
-    id: ContestModelSchema.shape.id,
+    id: ContestFieldsSchema.shape.id,
   }).nullable(),
-  type: DiscussionModelSchema.shape.type,
-  isPinned: DiscussionModelSchema.shape.isPinned,
-  title: DiscussionModelSchema.shape.title,
+  type: DiscussionFieldsSchema.shape.type,
+  isPinned: DiscussionFieldsSchema.shape.isPinned,
+  title: DiscussionFieldsSchema.shape.title,
   comments: z.array(z.object({
-    id: CommentModelSchema.shape.id,
+    id: CommentFieldsSchema.shape.id,
     author: z.object({
-      id: UserModelSchema.shape.id,
-      username: UserModelSchema.shape.username,
-      nickname: UserModelSchema.shape.nickname,
-      avatarUrl: UserModelSchema.shape.avatarUrl,
+      id: UserFieldsSchema.shape.id,
+      username: UserFieldsSchema.shape.username,
+      nickname: UserFieldsSchema.shape.nickname,
+      avatarUrl: UserFieldsSchema.shape.avatarUrl,
     }),
-    content: CommentModelSchema.shape.content,
-    createdAt: CommentModelSchema.shape.createdAt,
-    updatedAt: CommentModelSchema.shape.updatedAt,
+    content: CommentFieldsSchema.shape.content,
+    createdAt: CommentFieldsSchema.shape.createdAt,
+    updatedAt: CommentFieldsSchema.shape.updatedAt,
   })),
   isJury: z.boolean(),
-  createdAt: DiscussionModelSchema.shape.createdAt,
-  updatedAt: DiscussionModelSchema.shape.updatedAt,
+  createdAt: DiscussionFieldsSchema.shape.createdAt,
+  updatedAt: DiscussionFieldsSchema.shape.updatedAt,
 })
 
 export type DiscussionDetailQueryResult = z.input<typeof DiscussionDetailQueryResultSchema>
 
 export const DiscussionCreatePayloadSchema = z.object({
-  type: DiscussionModelSchema.shape.type.exclude([DiscussionType.ARCHIVED_DISCUSSION]),
-  title: DiscussionModelSchema.shape.title,
-  problemId: ProblemModelSchema.shape.id.optional(),
-  contestId: ContestModelSchema.shape.id.optional(),
-  content: CommentModelSchema.shape.content,
+  type: DiscussionFieldsSchema.shape.type.exclude([DiscussionType.ARCHIVED_DISCUSSION]),
+  title: DiscussionFieldsSchema.shape.title,
+  problemId: ProblemFieldsSchema.shape.id.optional(),
+  contestId: ContestFieldsSchema.shape.id.optional(),
+  content: CommentFieldsSchema.shape.content,
 })
 
 export type DiscussionCreatePayload = z.infer<typeof DiscussionCreatePayloadSchema>
 
 export const CommentCreatePayloadSchema = z.object({
-  content: CommentModelSchema.shape.content,
+  content: CommentFieldsSchema.shape.content,
 })
 
 export type CommentCreatePayload = z.infer<typeof CommentCreatePayloadSchema>

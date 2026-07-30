@@ -1,8 +1,8 @@
-import type { GroupModel } from '@putongoj/shared'
+import type { Group } from '@putongoj/db'
 import { getDatabase } from '../config/postgres'
 import logger from '../utils/logger'
 
-export async function findGroups (): Promise<GroupModel[]> {
+export async function findGroups (): Promise<Group[]> {
   const database = await getDatabase()
   const groups = await database.group.findMany({
     orderBy: { id: 'desc' },

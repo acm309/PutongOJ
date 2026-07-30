@@ -1,7 +1,7 @@
 import type { Context, Middleware } from 'koa'
-import type { AuthenticatedUser } from '../persistence/types'
+import type { AuthenticatedUser } from '../auth/user'
+import { authenticatedUserSelect, isAdmin, isBanned, isRoot } from '../auth/user'
 import { getDatabase } from '../config/postgres'
-import { toAuthenticatedUser } from '../persistence/mappers'
 import sessionService from '../services/session'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/constants'
 
@@ -24,15 +24,15 @@ export async function checkSession (ctx: Context): Promise<AuthenticatedUser | u
     return
   }
   const database = await getDatabase()
-  const record = await database.user.findUnique({ where: { id: parsedUserId } })
+  const record = await database.user.findUnique({ where: { id: parsedUserId }, select: authenticatedUserSelect })
   if (!record) {
     await sessionService.revokeSession(userId, sessionId)
     delete ctx.session.userId
     delete ctx.session.sessionId
     return
   }
-  const user = toAuthenticatedUser(record)
-  if (user.isBanned) {
+  const user = record
+  if (isBanned(user)) {
     await sessionService.revokeSession(userId, sessionId)
     delete ctx.session.userId
     delete ctx.session.sessionId
@@ -62,11 +62,11 @@ export const loginRequire: Middleware = async (ctx, next) => {
   await next()
 }
 export const adminRequire: Middleware = async (ctx, next) => {
-  if (!(await loadProfile(ctx)).isAdmin) { return ctx.throw(...ERR_PERM_DENIED) }
+  if (!isAdmin(await loadProfile(ctx))) { return ctx.throw(...ERR_PERM_DENIED) }
   await next()
 }
 export const rootRequire: Middleware = async (ctx, next) => {
-  if (!(await loadProfile(ctx)).isRoot) { return ctx.throw(...ERR_PERM_DENIED) }
+  if (!isRoot(await loadProfile(ctx))) { return ctx.throw(...ERR_PERM_DENIED) }
   await next()
 }
 

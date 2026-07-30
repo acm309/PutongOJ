@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { JUDGE_STATUS_TERMINAL } from '@/consts/index.js'
-import { ProblemModelSchema } from '../model/problem.js'
-import { SolutionModelSchema } from '../model/solution.js'
+import { ProblemFieldsSchema } from '../fields/problem.js'
+import { SubmissionFieldsSchema } from '../fields/submission.js'
 import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 const ProblemStatisticsBucketSchema = z.object({
@@ -22,36 +22,36 @@ export const ProblemStatisticsQueryResultSchema = z.object({
 export type ProblemStatisticsQueryResult = z.input<typeof ProblemStatisticsQueryResultSchema>
 
 const ProblemEditorFieldsSchema = z.object({
-  title: ProblemModelSchema.shape.title,
-  timeLimitMs: ProblemModelSchema.shape.timeLimitMs,
-  memoryLimitKb: ProblemModelSchema.shape.memoryLimitKb,
-  description: ProblemModelSchema.shape.description,
-  inputFormat: ProblemModelSchema.shape.inputFormat,
-  outputFormat: ProblemModelSchema.shape.outputFormat,
-  sampleInput: ProblemModelSchema.shape.sampleInput,
-  sampleOutput: ProblemModelSchema.shape.sampleOutput,
-  hint: ProblemModelSchema.shape.hint,
-  visibility: ProblemModelSchema.shape.visibility,
-  judgeType: ProblemModelSchema.shape.judgeType,
-  judgeCode: ProblemModelSchema.shape.judgeCode,
+  title: ProblemFieldsSchema.shape.title,
+  timeLimitMs: ProblemFieldsSchema.shape.timeLimitMs,
+  memoryLimitKb: ProblemFieldsSchema.shape.memoryLimitKb,
+  description: ProblemFieldsSchema.shape.description,
+  inputFormat: ProblemFieldsSchema.shape.inputFormat,
+  outputFormat: ProblemFieldsSchema.shape.outputFormat,
+  sampleInput: ProblemFieldsSchema.shape.sampleInput,
+  sampleOutput: ProblemFieldsSchema.shape.sampleOutput,
+  hint: ProblemFieldsSchema.shape.hint,
+  visibility: ProblemFieldsSchema.shape.visibility,
+  judgeType: ProblemFieldsSchema.shape.judgeType,
+  judgeCode: ProblemFieldsSchema.shape.judgeCode,
   tagIds: z.array(z.int().positive()),
 })
 
 export const ProblemCreatePayloadSchema = ProblemEditorFieldsSchema.extend({
   courseId: z.int().positive().optional(),
 }).partial().extend({
-  title: ProblemModelSchema.shape.title,
-  timeLimitMs: ProblemModelSchema.shape.timeLimitMs.default(1000),
-  memoryLimitKb: ProblemModelSchema.shape.memoryLimitKb.default(32768),
-  description: ProblemModelSchema.shape.description.default(''),
-  inputFormat: ProblemModelSchema.shape.inputFormat.default(''),
-  outputFormat: ProblemModelSchema.shape.outputFormat.default(''),
-  sampleInput: ProblemModelSchema.shape.sampleInput.default(''),
-  sampleOutput: ProblemModelSchema.shape.sampleOutput.default(''),
-  hint: ProblemModelSchema.shape.hint.default(''),
-  visibility: ProblemModelSchema.shape.visibility.default('RESERVED'),
-  judgeType: ProblemModelSchema.shape.judgeType.default('TRADITIONAL'),
-  judgeCode: ProblemModelSchema.shape.judgeCode.default(''),
+  title: ProblemFieldsSchema.shape.title,
+  timeLimitMs: ProblemFieldsSchema.shape.timeLimitMs.default(1000),
+  memoryLimitKb: ProblemFieldsSchema.shape.memoryLimitKb.default(32768),
+  description: ProblemFieldsSchema.shape.description.default(''),
+  inputFormat: ProblemFieldsSchema.shape.inputFormat.default(''),
+  outputFormat: ProblemFieldsSchema.shape.outputFormat.default(''),
+  sampleInput: ProblemFieldsSchema.shape.sampleInput.default(''),
+  sampleOutput: ProblemFieldsSchema.shape.sampleOutput.default(''),
+  hint: ProblemFieldsSchema.shape.hint.default(''),
+  visibility: ProblemFieldsSchema.shape.visibility.default('RESERVED'),
+  judgeType: ProblemFieldsSchema.shape.judgeType.default('TRADITIONAL'),
+  judgeCode: ProblemFieldsSchema.shape.judgeCode.default(''),
   tagIds: z.array(z.int().positive()).default([]),
 })
 
@@ -67,21 +67,21 @@ export const ProblemSolutionListQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
   sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
   user: z.string().max(30).optional(),
-  status: SolutionModelSchema.shape.status.optional(),
-  language: SolutionModelSchema.shape.language.optional(),
+  status: SubmissionFieldsSchema.shape.status.optional(),
+  language: SubmissionFieldsSchema.shape.language.optional(),
 })
 
 export type ProblemSolutionListQuery = z.infer<typeof ProblemSolutionListQuerySchema>
 
 export const ProblemSolutionListQueryResultSchema = PaginatedResultSchema(z.object({
-  id: SolutionModelSchema.shape.id,
-  userId: SolutionModelSchema.shape.userId,
-  language: SolutionModelSchema.shape.language,
-  status: SolutionModelSchema.shape.status,
-  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
-  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
-  similarity: SolutionModelSchema.shape.similarity,
-  createdAt: SolutionModelSchema.shape.createdAt,
+  id: SubmissionFieldsSchema.shape.id,
+  userId: SubmissionFieldsSchema.shape.userId,
+  language: SubmissionFieldsSchema.shape.language,
+  status: SubmissionFieldsSchema.shape.status,
+  timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,
+  memoryUsedKb: SubmissionFieldsSchema.shape.memoryUsedKb,
+  similarity: SubmissionFieldsSchema.shape.similarity,
+  createdAt: SubmissionFieldsSchema.shape.createdAt,
 }))
 
 export type ProblemSolutionListQueryResult = z.input<typeof ProblemSolutionListQueryResultSchema>

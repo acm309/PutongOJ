@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { GroupModelSchema } from '../model/group.js'
-import { UserModelSchema } from '../model/user.js'
+import { GroupFieldsSchema } from '../fields/group.js'
+import { UserFieldsSchema } from '../fields/user.js'
 import { PaginatedResultSchema, PaginationSchema } from './utils.js'
 
 export const UserSubmissionHeatmapSchema = z.object({
@@ -13,17 +13,17 @@ export const UserSubmissionHeatmapSchema = z.object({
 export type UserSubmissionHeatmap = z.infer<typeof UserSubmissionHeatmapSchema>
 
 export const UserProfileQueryResultSchema = z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  privilege: UserModelSchema.shape.privilege,
-  nickname: UserModelSchema.shape.nickname,
-  avatarUrl: UserModelSchema.shape.avatarUrl,
-  motto: UserModelSchema.shape.motto,
-  email: UserModelSchema.shape.email.optional(),
-  school: UserModelSchema.shape.school,
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  privilege: UserFieldsSchema.shape.privilege,
+  nickname: UserFieldsSchema.shape.nickname,
+  avatarUrl: UserFieldsSchema.shape.avatarUrl,
+  motto: UserFieldsSchema.shape.motto,
+  email: UserFieldsSchema.shape.email.optional(),
+  school: UserFieldsSchema.shape.school,
   groups: z.array(z.object({
-    id: GroupModelSchema.shape.id,
-    name: GroupModelSchema.shape.name,
+    id: GroupFieldsSchema.shape.id,
+    name: GroupFieldsSchema.shape.name,
   })),
   codeforces: z.object({
     handle: z.string(),
@@ -32,7 +32,7 @@ export const UserProfileQueryResultSchema = z.object({
   solved: z.array(z.number()),
   attempted: z.array(z.number()),
   submissionHeatmap: UserSubmissionHeatmapSchema,
-  createdAt: UserModelSchema.shape.createdAt,
+  createdAt: UserFieldsSchema.shape.createdAt,
 })
 
 export type UserProfileQueryResult = z.input<typeof UserProfileQueryResultSchema>
@@ -46,11 +46,11 @@ export const UserRanklistQuerySchema = z.object({
 export type UserRanklistQuery = z.infer<typeof UserRanklistQuerySchema>
 
 export const UserRanklistQueryResultSchema = PaginatedResultSchema(z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  nickname: UserModelSchema.shape.nickname,
-  avatarUrl: UserModelSchema.shape.avatarUrl,
-  motto: UserModelSchema.shape.motto,
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  nickname: UserFieldsSchema.shape.nickname,
+  avatarUrl: UserFieldsSchema.shape.avatarUrl,
+  motto: UserFieldsSchema.shape.motto,
   solvedProblemCount: z.int().nonnegative(),
   submittedProblemCount: z.int().nonnegative(),
 }))
@@ -64,9 +64,9 @@ export const UserRanklistExportQuerySchema = z.object({
 export type UserRanklistExportQuery = z.infer<typeof UserRanklistExportQuerySchema>
 
 export const UserRanklistExportQueryResultSchema = z.array(z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  nickname: UserModelSchema.shape.nickname,
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  nickname: UserFieldsSchema.shape.nickname,
   solvedProblemCount: z.int().nonnegative(),
   submittedProblemCount: z.int().nonnegative(),
 }))
@@ -80,17 +80,17 @@ export const UserSuggestQuerySchema = z.object({
 export type UserSuggestQuery = z.infer<typeof UserSuggestQuerySchema>
 
 export const UserSuggestQueryResultSchema = z.array(z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  nickname: UserModelSchema.shape.nickname.optional(),
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  nickname: UserFieldsSchema.shape.nickname.optional(),
 }))
 
 export type UserSuggestQueryResult = z.input<typeof UserSuggestQueryResultSchema>
 
 export const UserItemListQueryResultSchema = z.array(z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  nickname: UserModelSchema.shape.nickname.optional(),
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  nickname: UserFieldsSchema.shape.nickname.optional(),
 }))
 
 export type UserItemListQueryResult = z.input<typeof UserItemListQueryResultSchema>

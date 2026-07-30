@@ -3,6 +3,7 @@ import path from 'node:path'
 import Router from '@koa/router'
 import { ErrorCode, JudgeStatus, SolutionSubmitPayloadSchema, SolutionSubmitResultSchema } from '@putongoj/shared'
 import fse from 'fs-extra'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
@@ -47,7 +48,7 @@ export async function findOne (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   const role = await loadCourseRoleById(ctx, submission.courseId)
-  if (submission.userId !== profile.id && !profile.isAdmin && !role?.canViewSubmissions) {
+  if (submission.userId !== profile.id && !isAdmin(profile) && !role?.canViewSubmissions) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
   }
 
@@ -55,7 +56,7 @@ export async function findOne (ctx: Context) {
     submission: {
       ...submission,
       testcaseResults: await database.submissionTestcaseResult.findMany({ where: { submissionId: id } }),
-      similarSubmission: profile.isAdmin && submission.similarSubmission
+      similarSubmission: isAdmin(profile) && submission.similarSubmission
         ? {
             id: submission.similarSubmission.id,
             userId: submission.similarSubmission.userId,

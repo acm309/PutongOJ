@@ -1,5 +1,6 @@
 import type { Context } from 'koa'
 import { DiscussionType } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import discussionService from '../services/discussion'
 import { loadContest } from './contest'
 import { loadCourseRoleById } from './course'
@@ -25,7 +26,9 @@ export async function loadDiscussion (ctx: Context, inputId?: number | string) {
   const courseRole = await loadCourseRoleById(ctx, contest?.courseId ?? null)
   const isAuthor = profile !== undefined && profile.id === discussion.authorId
   const isProblemOwner = profile !== undefined && discussion.problem !== null && profile.id === discussion.problem.ownerId
-  const isJury = profile?.isAdmin === true || isProblemOwner || courseRole?.canManageContests === true
+  const isJury = (profile !== undefined && isAdmin(profile))
+    || isProblemOwner
+    || courseRole?.canManageContests === true
   const canRead = (
     discussion.type === DiscussionType.OPEN_DISCUSSION
     || discussion.type === DiscussionType.PUBLIC_ANNOUNCEMENT

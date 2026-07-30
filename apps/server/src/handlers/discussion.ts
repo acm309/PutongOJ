@@ -9,6 +9,7 @@ import {
   DiscussionType,
   ErrorCode,
 } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import { loadProfile, loginRequire } from '../middlewares/authn'
 import { commentCreateLimit, discussionCreateLimit } from '../middlewares/ratelimit'
 import { loadContestState } from '../policies/contest'
@@ -26,7 +27,7 @@ async function findDiscussions (ctx: Context) {
     {
       ...(query.data.type === undefined ? {} : { types: [ query.data.type ] }),
       ...(query.data.authorId === undefined ? {} : { authorId: query.data.authorId }),
-      ...(profile?.isAdmin ? {} : { visibleToUserId: profile?.id ?? null }),
+      ...(profile !== undefined && isAdmin(profile) ? {} : { visibleToUserId: profile?.id ?? null }),
     },
   )
   const result = DiscussionListQueryResultSchema.encode({
@@ -46,7 +47,7 @@ async function getDiscussion (ctx: Context) {
   if (!state) { return createErrorResponse(ctx, ErrorCode.NotFound, 'Discussion not found or access denied') }
   const profile = ctx.state.profile
   const comments = await discussionService.getComments(state.discussion.id, {
-    showHidden: profile?.isAdmin ?? false,
+    showHidden: profile !== undefined && isAdmin(profile),
     exceptUserIds: profile ? [ profile.id ] : [],
   })
   const result = DiscussionDetailQueryResultSchema.encode({
@@ -72,7 +73,7 @@ async function createDiscussion (ctx: Context) {
   const payload = DiscussionCreatePayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) { return createZodErrorResponse(ctx, payload.error) }
   const profile = await loadProfile(ctx)
-  let managed = profile.isAdmin
+  let managed = isAdmin(profile)
   let problemId: number | null = null
   if (payload.data.problemId) {
     const state = await loadProblemState(ctx, payload.data.problemId, payload.data.contestId)

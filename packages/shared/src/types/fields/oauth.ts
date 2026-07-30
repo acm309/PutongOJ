@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { OAuthProvider } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-export const OAuthModelSchema = z.object({
+export const OAuthFieldsSchema = z.object({
   userId: z.int().positive(),
   provider: z.enum(OAuthProvider),
   providerId: z.string(),
@@ -13,5 +13,3 @@ export const OAuthModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type OAuthModel = z.infer<typeof OAuthModelSchema>

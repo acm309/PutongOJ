@@ -1,6 +1,5 @@
 import type { AdminAccountBatchRegisterResult } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { DiscussionUpdateDto } from '../services/discussion'
 import Router from '@koa/router'
 import {
   AdminAccountBatchRegisterPayloadSchema,
@@ -37,6 +36,7 @@ import {
   SessionRevokeOthersResultSchema,
   UserPrivilege,
 } from '@putongoj/shared'
+import { isRoot } from '../auth/user'
 import { distributeWork } from '../jobs/helper'
 import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
@@ -68,15 +68,17 @@ import { loadUser } from './user'
 async function loadEditingUser (ctx: Context) {
   const user = await loadUser(ctx)
   const profile = await loadProfile(ctx)
-  const privilegeRank: Record<UserPrivilege, number> = {
-    [UserPrivilege.BANNED]: 0,
-    [UserPrivilege.USER]: 1,
-    [UserPrivilege.ADMIN]: 2,
-    [UserPrivilege.ROOT]: 3,
-  }
-  const profilePrivilege = profile.privilege as UserPrivilege
-  const userPrivilege = user.privilege as UserPrivilege
-  if (!profile.isRoot && privilegeRank[profilePrivilege] <= privilegeRank[userPrivilege] && profile.id !== user.id) {
+  const privilegeRank = new Map<UserPrivilege, number>([
+    [ UserPrivilege.BANNED, 0 ],
+    [ UserPrivilege.USER, 1 ],
+    [ UserPrivilege.ADMIN, 2 ],
+    [ UserPrivilege.ROOT, 3 ],
+  ])
+  if (
+    !isRoot(profile)
+    && privilegeRank.get(profile.privilege)! <= privilegeRank.get(user.privilege)!
+    && profile.id !== user.id
+  ) {
     createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to edit this user')
     return null
   }
@@ -116,14 +118,14 @@ export async function updateUser (ctx: Context) {
     if (profile.id === user.id) {
       return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot change your own privilege')
     }
-    if (!profile.isRoot && (
+    if (!isRoot(profile) && (
       payload.data.privilege === UserPrivilege.ADMIN
       || payload.data.privilege === UserPrivilege.ROOT
     )) {
       return createErrorResponse(ctx, ErrorCode.Forbidden, 'Cannot elevate user privilege to equal or higher than yourself')
     }
   }
-  if (payload.data.avatarUrl !== undefined && !profile.isRoot) {
+  if (payload.data.avatarUrl !== undefined && !isRoot(profile)) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Only root administrators can change user avatars')
   }
 
@@ -252,7 +254,7 @@ export async function removeUserOAuthConnection (ctx: Context) {
   if (typeof providerName !== 'string' || !(providerName in providerMap)) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'No such OAuth provider')
   }
-  const provider = providerMap[providerName as keyof typeof providerMap]
+  const provider = providerMap[providerName]
 
   const user = await loadEditingUser(ctx)
   if (!user) {
@@ -569,7 +571,7 @@ export async function updateDiscussion (ctx: Context) {
     return createZodErrorResponse(ctx, payload.error)
   }
 
-  const update = {} as DiscussionUpdateDto
+  const update: Parameters<typeof discussionService.updateDiscussion>[1] = {}
   if (payload.data.authorId !== undefined) {
     const author = await userService.getUserById(payload.data.authorId)
     if (!author) {

@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from '../persistence/types'
+import type { AuthenticatedUser } from '../auth/user'
 import type { ContestState } from '../policies/contest'
 import type { CourseState } from '../policies/course'
 import type { DiscussionState } from '../policies/discussion'

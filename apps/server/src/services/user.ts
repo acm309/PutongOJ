@@ -3,11 +3,11 @@ import type { UserPrivilege, UserSubmissionHeatmap } from '@putongoj/shared'
 import type { PaginateOption, SortOption } from '../types'
 import { EXPORT_SIZE_MAX, OAuthProvider, RESERVED_KEYWORDS, UserPrivilege as UserPrivilegeEnum } from '@putongoj/shared'
 import { DateTime } from 'luxon'
+import { authenticatedUserSelect } from '../auth/user'
 import config from '../config'
 import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
 import { distributeWork } from '../jobs/helper'
-import { toAuthenticatedUser } from '../persistence/mappers'
 import { CacheKey, cacheService } from './cache'
 import { getUserOAuthConnection } from './oauth'
 
@@ -151,14 +151,17 @@ export async function exportRanklist (opt: { groupId?: number }) {
 
 export async function getUser (username: string) {
   const database = await getDatabase()
-  const user = await database.user.findFirst({ where: { username: { equals: username, mode: 'insensitive' } } })
-  return user ? toAuthenticatedUser(user) : null
+  const user = await database.user.findFirst({
+    where: { username: { equals: username, mode: 'insensitive' } },
+    select: authenticatedUserSelect,
+  })
+  return user
 }
 
 export async function getUserById (userId: number) {
   const database = await getDatabase()
-  const user = await database.user.findUnique({ where: { id: userId } })
-  return user ? toAuthenticatedUser(user) : null
+  const user = await database.user.findUnique({ where: { id: userId }, select: authenticatedUserSelect })
+  return user
 }
 
 export async function updateUser (userId: number, data: Partial<{
@@ -172,8 +175,8 @@ export async function updateUser (userId: number, data: Partial<{
   storageQuota: number
 }>) {
   const database = await getDatabase()
-  const user = await database.user.update({ where: { id: userId }, data })
-  return toAuthenticatedUser(user)
+  const user = await database.user.update({ where: { id: userId }, data, select: authenticatedUserSelect })
+  return user
 }
 
 export async function checkUserAvailable (username: string) {
@@ -189,8 +192,9 @@ export async function createUser (data: { username: string, passwordHash: string
       passwordHash: data.passwordHash,
       nickname: data.nickname ?? '',
     },
+    select: authenticatedUserSelect,
   })
-  return toAuthenticatedUser(user)
+  return user
 }
 
 export async function getSubmissionHeatmap (userId: number): Promise<UserSubmissionHeatmap> {

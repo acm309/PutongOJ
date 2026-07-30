@@ -1,7 +1,8 @@
 import type { AdminFileListQuery, FileListQuery } from '@putongoj/shared'
-import type { AuthenticatedUser } from '../persistence/types'
+import type { AuthenticatedUser } from '../auth/user'
 import path from 'node:path'
 import fse from 'fs-extra'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 import logger from '../utils/logger'
 
@@ -101,7 +102,7 @@ export async function checkQuota (
   profile: AuthenticatedUser,
   incomingSizeBytes: number,
 ): Promise<{ allowed: boolean, usedBytes: number, storageQuota: number }> {
-  if (profile.isAdmin) {
+  if (isAdmin(profile)) {
     return {
       allowed: true,
       usedBytes: 0,
@@ -208,7 +209,7 @@ export async function removeFile (profile: AuthenticatedUser, storageKey: string
     return null
   }
   const profileId = profile.id
-  if (!profile.isAdmin && file.ownerId !== profileId) {
+  if (!isAdmin(profile) && file.ownerId !== profileId) {
     return false
   }
 

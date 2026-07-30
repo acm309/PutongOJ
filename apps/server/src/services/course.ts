@@ -3,7 +3,6 @@ import type { CourseEntity, CourseRole, PaginatedResult } from '@putongoj/shared
 import type { PaginateOption } from '../types'
 import { CourseVisibility as CourseVisibilityEnum, UserPrivilege } from '@putongoj/shared'
 import { getDatabase } from '../config/postgres'
-import { toCourseRole } from '../persistence/mappers'
 import logger from '../utils/logger'
 
 const courseRoleNoAccess: CourseRole = {
@@ -39,6 +38,24 @@ export interface CourseMemberView {
   }
   createdAt: Date
   updatedAt: Date
+}
+
+function getCourseRole ({
+  canAccess,
+  canViewTestcases,
+  canViewSubmissions,
+  canManageProblems,
+  canManageContests,
+  canManageCourse,
+}: CourseRole): CourseRole {
+  return {
+    canAccess,
+    canViewTestcases,
+    canViewSubmissions,
+    canManageProblems,
+    canManageContests,
+    canManageCourse,
+  }
 }
 
 function normalizeRole (role: Partial<CourseRole>): CourseRole {
@@ -149,7 +166,7 @@ export async function findCourseMembers (courseId: number, opt: PaginateOption):
   ])
   return {
     items: items.map(member => ({
-      role: toCourseRole(member),
+      role: getCourseRole(member),
       user: {
         id: member.user.id,
         username: member.user.username,
@@ -173,7 +190,7 @@ export async function getCourseMember (courseId: number, username: string): Prom
   })
   if (!member) { return null }
   return {
-    role: toCourseRole(member),
+    role: getCourseRole(member),
     user: {
       id: member.user.id,
       username: member.user.username,
@@ -218,7 +235,7 @@ export async function getUserRole (userId: number | null | undefined, course: Co
     return courseRoleFullAccess
   }
   const member = await database.courseMember.findUnique({ where: { courseId_userId: { courseId: course.id, userId } } })
-  if (member) { return toCourseRole(member) }
+  if (member) { return getCourseRole(member) }
   return course.visibility === CourseVisibilityEnum.PUBLIC
     ? courseRolePublicAccess
     : courseRoleNoAccess

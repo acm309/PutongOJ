@@ -3,10 +3,10 @@ import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 import { OAuthAction, OAuthProvider } from '@putongoj/shared'
 import superagent from 'superagent'
+import { authenticatedUserSelect } from '../auth/user'
 import { globalConfig } from '../config'
 import { getDatabase } from '../config/postgres'
 import redis from '../config/redis'
-import { toAuthenticatedUser } from '../persistence/mappers'
 import logger from '../utils/logger'
 
 const DEFAULT_TIMEOUT = 5000
@@ -313,9 +313,9 @@ export async function findUserByOAuthConnection (
   const database = await getDatabase()
   const record = await database.oAuthConnection.findUnique({
     where: { provider_providerId: { provider, providerId } },
-    include: { user: true },
+    select: { user: { select: authenticatedUserSelect } },
   })
-  return record ? toAuthenticatedUser(record.user) : null
+  return record?.user ?? null
 }
 
 export async function getUserOAuthConnection (userId: number, provider: OAuthProvider) {

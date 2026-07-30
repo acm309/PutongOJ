@@ -1,12 +1,13 @@
-import type { PostModel } from '@putongoj/shared'
+import type { Post } from '@putongoj/db'
 import type { Context } from 'koa'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 
 export interface PostState {
-  post: PostModel & { id: number }
+  post: Post
 }
 
-function buildPostState (ctx: Context, post: PostModel & { id: number }) {
+function buildPostState (ctx: Context, post: Post) {
   const state: PostState = { post }
   ctx.state.post = state
   return state
@@ -27,8 +28,8 @@ export async function loadPost (ctx: Context, inputSlug?: string) {
     return null
   }
 
-  const isAdmin = ctx.state.profile?.isAdmin ?? false
-  if (!post.isPublished && !isAdmin) {
+  const canManage = ctx.state.profile !== undefined && isAdmin(ctx.state.profile)
+  if (!post.isPublished && !canManage) {
     return null
   }
 

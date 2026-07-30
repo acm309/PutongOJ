@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { OAuthProvider } from '@/consts/index.js'
 import { PAGE_SIZE_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate, stringToInt } from '../codec.js'
-import { UserAvatarSchema } from '../model/user.js'
+import { UserAvatarSchema } from '../fields/user.js'
 
 export const SortOptionSchema = z.object({
   sort: z.enum(['asc', 'desc']).default('desc'),

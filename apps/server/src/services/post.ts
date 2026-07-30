@@ -1,12 +1,13 @@
-import type { PaginatedResult, PostModel } from '@putongoj/shared'
+import type { Post } from '@putongoj/db'
+import type { PaginatedResult } from '@putongoj/shared'
 import type { PaginateOption, SortOption } from '../types'
 import { randomUUID } from 'node:crypto'
 import { getDatabase } from '../config/postgres'
 import logger from '../utils/logger'
 
-type PostCreateDto = Pick<PostModel, 'title'>
+type PostCreateDto = Pick<Post, 'title'>
 
-type PostUpdateDto = Partial<Pick<PostModel, 'title' | 'content' | 'slug' | 'publishesAt' | 'isPublished' | 'isPinned' | 'isHidden'>>
+type PostUpdateDto = Partial<Pick<Post, 'title' | 'content' | 'slug' | 'publishesAt' | 'isPublished' | 'isPinned' | 'isHidden'>>
 
 export interface PostFilters {
   title?: string
@@ -18,7 +19,7 @@ export interface PostFilters {
 async function findPosts (
   options: PaginateOption & SortOption,
   filters: PostFilters = {},
-): Promise<PaginatedResult<Omit<PostModel, 'content'>>> {
+): Promise<PaginatedResult<Omit<Post, 'content'>>> {
   const database = await getDatabase()
   const { page, pageSize, sort, sortBy } = options
   const orderBy = [

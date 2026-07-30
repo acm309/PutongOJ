@@ -9,9 +9,9 @@ import {
   ProblemStatisticsQueryResultSchema,
   ProblemUpdatePayloadSchema,
 } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
-import { toProblemDto } from '../persistence/mappers'
 import { loadCourseStateOrThrow } from '../policies/course'
 import { loadProblemState } from '../policies/problem'
 import courseService from '../services/course'
@@ -43,7 +43,7 @@ async function findProblems (ctx: Context) {
       })()
     : await problemService.findProblems({
         ...filters,
-        showReserved: Boolean(profile?.isAdmin),
+        showReserved: Boolean(profile !== undefined && isAdmin(profile)),
         ownerId: profile?.id,
       })
 
@@ -88,7 +88,7 @@ async function findProblemItems (ctx: Context) {
     ctx.body = await problemService.findCourseProblemItems(course.course.id, keyword)
     return
   }
-  if (!profile.isAdmin) {
+  if (!isAdmin(profile)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
   ctx.body = await problemService.findProblemItems(keyword)
@@ -103,12 +103,30 @@ async function getProblem (ctx: Context) {
   const problem = state.problem
   const profile = ctx.state.profile
   const isOwner = problem.ownerId === profile?.id
-  const canManage = profile?.isAdmin || isOwner
+  const canManage = (profile !== undefined && isAdmin(profile)) || isOwner
   ctx.body = {
-    ...toProblemDto(problem, problem.submissionStats),
+    id: problem.id,
+    title: problem.title,
+    timeLimitMs: problem.timeLimitMs,
+    memoryLimitKb: problem.memoryLimitKb,
+    description: problem.description,
+    inputFormat: problem.inputFormat,
+    outputFormat: problem.outputFormat,
+    sampleInput: problem.sampleInput,
+    sampleOutput: problem.sampleOutput,
+    hint: problem.hint,
+    visibility: problem.visibility,
+    judgeType: problem.judgeType,
     judgeCode: canManage ? problem.judgeCode : undefined,
+    ownerId: problem.ownerId,
+    statistics: {
+      submitterCount: problem.submissionStats?.submitterCount ?? 0,
+      solverCount: problem.submissionStats?.solverCount ?? 0,
+    },
     tags: problem.tags.map(item => item.tag),
     isOwner,
+    createdAt: problem.createdAt,
+    updatedAt: problem.updatedAt,
   }
 }
 
@@ -123,10 +141,10 @@ async function createProblem (ctx: Context) {
 
   if (courseId !== undefined) {
     const course = await loadCourseStateOrThrow(ctx, courseId)
-    if (!profile.isAdmin && !course.role.canManageProblems) {
+    if (!isAdmin(profile) && !course.role.canManageProblems) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
-  } else if (!profile.isAdmin) {
+  } else if (!isAdmin(profile)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -144,7 +162,7 @@ async function createProblem (ctx: Context) {
 async function updateProblem (ctx: Context) {
   const state = await loadProblemState(ctx)
   const profile = await loadProfile(ctx)
-  if (!state || (!profile.isAdmin && state.problem.ownerId !== profile.id)) {
+  if (!state || (!isAdmin(profile) && state.problem.ownerId !== profile.id)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
@@ -201,13 +219,14 @@ async function findProblemDiscussions (ctx: Context) {
   if (!state) {
     return ctx.throw(404)
   }
+  const profile = ctx.state.profile
 
   const rows = await discussionService.findDiscussions(query.data, {
     problemId: state.problem.id,
     contestId: null,
     ...(query.data.authorId === undefined ? {} : { authorId: query.data.authorId }),
     ...(query.data.type === undefined ? {} : { types: [ query.data.type ] }),
-    ...(ctx.state.profile?.isAdmin ? {} : { visibleToUserId: ctx.state.profile?.id ?? null }),
+    ...(profile !== undefined && isAdmin(profile) ? {} : { visibleToUserId: profile?.id ?? null }),
   })
   return createEnvelopedResponse(ctx, DiscussionListQueryResultSchema.encode({
     ...rows,

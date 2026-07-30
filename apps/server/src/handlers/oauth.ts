@@ -1,6 +1,6 @@
 import type { OAuthConnection } from '@putongoj/shared'
 import type { Context } from 'koa'
-import type { AuthenticatedUser } from '../persistence/types'
+import type { AuthenticatedUser } from '../auth/user'
 import type { OAuthState } from '../services/oauth'
 import Router from '@koa/router'
 import {

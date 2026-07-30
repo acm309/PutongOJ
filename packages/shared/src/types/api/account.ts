@@ -1,41 +1,41 @@
 import { z } from 'zod'
-import { SolutionModelSchema } from '../model/solution.js'
-import { UserModelSchema } from '../model/user.js'
+import { SubmissionFieldsSchema } from '../fields/submission.js'
+import { UserFieldsSchema } from '../fields/user.js'
 import { PaginatedResultSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const AccountProfileQueryResultSchema = z.object({
-  id: UserModelSchema.shape.id,
-  username: UserModelSchema.shape.username,
-  privilege: UserModelSchema.shape.privilege,
-  nickname: UserModelSchema.shape.nickname,
-  avatarUrl: UserModelSchema.shape.avatarUrl,
-  motto: UserModelSchema.shape.motto,
-  email: UserModelSchema.shape.email,
-  school: UserModelSchema.shape.school,
+  id: UserFieldsSchema.shape.id,
+  username: UserFieldsSchema.shape.username,
+  privilege: UserFieldsSchema.shape.privilege,
+  nickname: UserFieldsSchema.shape.nickname,
+  avatarUrl: UserFieldsSchema.shape.avatarUrl,
+  motto: UserFieldsSchema.shape.motto,
+  email: UserFieldsSchema.shape.email,
+  school: UserFieldsSchema.shape.school,
 })
 
 export type AccountProfileQueryResult = z.input<typeof AccountProfileQueryResultSchema>
 
 export const AccountLoginPayloadSchema = z.object({
-  username: UserModelSchema.shape.username,
+  username: UserFieldsSchema.shape.username,
   password: z.base64(),
 })
 
 export type AccountLoginPayload = z.infer<typeof AccountLoginPayloadSchema>
 
 export const AccountRegisterPayloadSchema = z.object({
-  username: UserModelSchema.shape.username,
+  username: UserFieldsSchema.shape.username,
   password: z.base64(),
 })
 
 export type AccountRegisterPayload = z.infer<typeof AccountRegisterPayloadSchema>
 
 export const AccountEditPayloadSchema = z.object({
-  nickname: UserModelSchema.shape.nickname.optional(),
-  avatarUrl: UserModelSchema.shape.avatarUrl.optional(),
-  motto: UserModelSchema.shape.motto.optional(),
-  email: UserModelSchema.shape.email.optional(),
-  school: UserModelSchema.shape.school.optional(),
+  nickname: UserFieldsSchema.shape.nickname.optional(),
+  avatarUrl: UserFieldsSchema.shape.avatarUrl.optional(),
+  motto: UserFieldsSchema.shape.motto.optional(),
+  email: UserFieldsSchema.shape.email.optional(),
+  school: UserFieldsSchema.shape.school.optional(),
 })
 
 export type AccountEditPayload = z.infer<typeof AccountEditPayloadSchema>
@@ -54,22 +54,22 @@ export const AccountSubmissionListQuerySchema = z.object({
   sortBy: z.enum(['createdAt', 'timeUsedMs', 'memoryUsedKb']).default('createdAt'),
   problemId: z.coerce.number().int().positive().optional(),
   contestId: z.coerce.number().int().positive().optional(),
-  status: SolutionModelSchema.shape.status.optional(),
-  language: SolutionModelSchema.shape.language.optional(),
+  status: SubmissionFieldsSchema.shape.status.optional(),
+  language: SubmissionFieldsSchema.shape.language.optional(),
 })
 
 export type AccountSubmissionListQuery = z.infer<typeof AccountSubmissionListQuerySchema>
 
 export const AccountSubmissionListQueryResultSchema = PaginatedResultSchema(z.object({
-  id: SolutionModelSchema.shape.id,
-  problemId: SolutionModelSchema.shape.problemId,
-  contestId: SolutionModelSchema.shape.contestId,
-  language: SolutionModelSchema.shape.language,
-  status: SolutionModelSchema.shape.status,
-  timeUsedMs: SolutionModelSchema.shape.timeUsedMs,
-  memoryUsedKb: SolutionModelSchema.shape.memoryUsedKb,
-  similarity: SolutionModelSchema.shape.similarity,
-  createdAt: SolutionModelSchema.shape.createdAt,
+  id: SubmissionFieldsSchema.shape.id,
+  problemId: SubmissionFieldsSchema.shape.problemId,
+  contestId: SubmissionFieldsSchema.shape.contestId,
+  language: SubmissionFieldsSchema.shape.language,
+  status: SubmissionFieldsSchema.shape.status,
+  timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,
+  memoryUsedKb: SubmissionFieldsSchema.shape.memoryUsedKb,
+  similarity: SubmissionFieldsSchema.shape.similarity,
+  createdAt: SubmissionFieldsSchema.shape.createdAt,
 }))
 
 export type AccountSubmissionListQueryResult = z.input<typeof AccountSubmissionListQueryResultSchema>

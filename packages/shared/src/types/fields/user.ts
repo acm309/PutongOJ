@@ -9,7 +9,7 @@ export const UserAvatarSchema = z.union([
   z.literal(''),
 ])
 
-export const UserModelSchema = z.object({
+export const UserFieldsSchema = z.object({
   id: z.int().positive(),
   username: z.string().min(3).max(20).regex(/^[\w-]+$/),
   privilege: z.enum(UserPrivilege),
@@ -24,5 +24,3 @@ export const UserModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type UserModel = z.infer<typeof UserModelSchema>

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PostModelSchema } from '../model/index.js'
+import { PostFieldsSchema } from '../fields/index.js'
 import { PaginatedResultSchema, PaginationSchema } from './utils.js'
 
 export const PostListQuerySchema = z.object({
@@ -10,22 +10,22 @@ export const PostListQuerySchema = z.object({
 export type PostListQuery = z.infer<typeof PostListQuerySchema>
 
 export const PostListQueryResultSchema = PaginatedResultSchema(z.object({
-  id: PostModelSchema.shape.id,
-  slug: PostModelSchema.shape.slug,
-  title: PostModelSchema.shape.title,
-  publishesAt: PostModelSchema.shape.publishesAt,
-  isPinned: PostModelSchema.shape.isPinned,
+  id: PostFieldsSchema.shape.id,
+  slug: PostFieldsSchema.shape.slug,
+  title: PostFieldsSchema.shape.title,
+  publishesAt: PostFieldsSchema.shape.publishesAt,
+  isPinned: PostFieldsSchema.shape.isPinned,
 }))
 
 export type PostListQueryResult = z.input<typeof PostListQueryResultSchema>
 
 export const PostDetailQueryResultSchema = z.object({
-  slug: PostModelSchema.shape.slug,
-  title: PostModelSchema.shape.title,
-  content: PostModelSchema.shape.content,
-  publishesAt: PostModelSchema.shape.publishesAt,
-  isPinned: PostModelSchema.shape.isPinned,
-  isHidden: PostModelSchema.shape.isHidden,
+  slug: PostFieldsSchema.shape.slug,
+  title: PostFieldsSchema.shape.title,
+  content: PostFieldsSchema.shape.content,
+  publishesAt: PostFieldsSchema.shape.publishesAt,
+  isPinned: PostFieldsSchema.shape.isPinned,
+  isHidden: PostFieldsSchema.shape.isHidden,
 })
 
 export type PostDetailQueryResult = z.input<typeof PostDetailQueryResultSchema>

@@ -1,5 +1,6 @@
 import type { Context } from 'koa'
 import { ProblemVisibility } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import courseService from '../services/course'
 import problemService from '../services/problem'
 import { loadContestState } from './contest'
@@ -15,7 +16,11 @@ export async function loadProblemState (ctx: Context, inputId?: string | number,
   const problem = await problemService.getProblem(problemId)
   if (!problem) { return null }
   const profile = ctx.state.profile
-  if (problem.visibility === ProblemVisibility.AVAILABLE || profile?.isAdmin || problem.ownerId === profile?.id) {
+  if (
+    problem.visibility === ProblemVisibility.AVAILABLE
+    || (profile !== undefined && isAdmin(profile))
+    || problem.ownerId === profile?.id
+  ) {
     const state = { problem }
     ctx.state.problem = state
     return state

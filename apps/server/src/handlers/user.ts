@@ -12,6 +12,7 @@ import {
   UserSuggestQuerySchema,
 } from '@putongoj/shared'
 import difference from 'lodash/difference'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
@@ -42,7 +43,7 @@ export async function exportRanklist (ctx: Context) {
   if (!query.success) { return createZodErrorResponse(ctx, query.error) }
 
   const profile = await loadProfile(ctx)
-  if (!query.data.groupId && !profile.isAdmin) {
+  if (!query.data.groupId && !isAdmin(profile)) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to export full ranklist')
   }
   const result = await userService.exportRanklist(query.data)

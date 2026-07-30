@@ -14,6 +14,7 @@ import {
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
 } from '@putongoj/shared'
+import { isBanned } from '../auth/user'
 import { checkSession, loadProfile, loginRequire } from '../middlewares/authn'
 import { userLoginLimit, userRegisterLimit } from '../middlewares/ratelimit'
 import cryptoService from '../services/crypto'
@@ -60,7 +61,7 @@ export async function userLogin (ctx: Context) {
   if (timingSafeEqual(Buffer.from(user.passwordHash, 'hex'), pwdHash) === false) {
     return createErrorResponse(ctx, ErrorCode.Unauthorized, 'Username or password is incorrect')
   }
-  if (user.isBanned) {
+  if (isBanned(user)) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Account has been banned, please contact the administrator')
   }
 

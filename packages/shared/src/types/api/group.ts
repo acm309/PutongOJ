@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { GroupModelSchema } from '../model/group.js'
+import { GroupFieldsSchema } from '../fields/group.js'
 
 export const GroupListQueryResultSchema = z.array(z.object({
-  id: GroupModelSchema.shape.id,
-  name: GroupModelSchema.shape.name,
+  id: GroupFieldsSchema.shape.id,
+  name: GroupFieldsSchema.shape.name,
 }))
 
 export type GroupListQueryResult = z.input<typeof GroupListQueryResultSchema>

@@ -2,9 +2,9 @@ import { z } from 'zod'
 import { ProblemJudgeType, ProblemVisibility } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-export const ProblemModelSchema = z.object({
+export const ProblemFieldsSchema = z.object({
   id: z.int().positive(),
-  title: z.string(),
+  title: z.string().min(1).max(80),
   timeLimitMs: z.int().positive(),
   memoryLimitKb: z.int().positive(),
   description: z.string(),
@@ -20,5 +20,3 @@ export const ProblemModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type ProblemModel = z.infer<typeof ProblemModelSchema>

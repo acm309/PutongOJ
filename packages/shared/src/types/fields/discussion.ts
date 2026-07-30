@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { DiscussionType, TITLE_LENGTH_MAX } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-export const DiscussionModelSchema = z.object({
+export const DiscussionFieldsSchema = z.object({
   id: z.int().positive(),
   authorId: z.int().positive(),
   problemId: z.int().positive().nullable(),
@@ -15,5 +15,3 @@ export const DiscussionModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type DiscussionModel = z.infer<typeof DiscussionModelSchema>

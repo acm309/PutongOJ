@@ -3,7 +3,7 @@ import { LabelingStyle, Language, ParticipationStatus } from '@/consts/index.js'
 import { TITLE_LENGTH_MAX } from '@/consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-export const ContestModelSchema = z.object({
+export const ContestFieldsSchema = z.object({
   id: z.int().positive(),
   /** Contest title */
   title: z.string().min(1).max(TITLE_LENGTH_MAX),
@@ -34,14 +34,10 @@ export const ContestModelSchema = z.object({
   updatedAt: isoDatetimeToDate,
 })
 
-export type ContestModel = z.infer<typeof ContestModelSchema>
-
-export const ContestParticipationModelSchema = z.object({
+export const ContestParticipationFieldsSchema = z.object({
   contestId: z.int().positive(),
   userId: z.int().positive(),
   status: z.enum(ParticipationStatus),
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type ContestParticipationModel = z.infer<typeof ContestParticipationModelSchema>

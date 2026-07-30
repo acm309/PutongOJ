@@ -2,7 +2,6 @@ import type { Context } from 'koa'
 import Router from '@koa/router'
 import { CourseVisibility } from '@putongoj/shared'
 import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
-import { toCourseRole } from '../persistence/mappers'
 import { loadCourseStateOrThrow } from '../policies/course'
 import courseService from '../services/course'
 import problemService from '../services/problem'
@@ -37,7 +36,7 @@ const findCourseItems = async (ctx: Context) => {
 
 const getCourse = async (ctx: Context) => {
   const { course, role } = await loadCourseStateOrThrow(ctx)
-  ctx.body = { ...toCourseDto(course, role), role: toCourseRole(role) }
+  ctx.body = { ...toCourseDto(course, role), role }
 }
 
 const joinCourse = async (ctx: Context) => {

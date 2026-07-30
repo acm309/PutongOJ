@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { COMMENT_LENGTH_MAX } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
 
-export const CommentModelSchema = z.object({
+export const CommentFieldsSchema = z.object({
   id: z.int().positive(),
   discussionId: z.int().positive(),
   authorId: z.int().positive(),
@@ -11,5 +11,3 @@ export const CommentModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type CommentModel = z.infer<typeof CommentModelSchema>

@@ -9,7 +9,7 @@ const TestcaseResultSchema = z.object({
   memoryUsedKb: z.int().nonnegative(),
 })
 
-export const SolutionModelSchema = z.object({
+export const SubmissionFieldsSchema = z.object({
   id: z.int().positive(),
   problemId: z.int().positive(),
   userId: z.int().positive(),
@@ -27,5 +27,3 @@ export const SolutionModelSchema = z.object({
   createdAt: isoDatetimeToDate,
   updatedAt: isoDatetimeToDate,
 })
-
-export type SolutionModel = z.infer<typeof SolutionModelSchema>

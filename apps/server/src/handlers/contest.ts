@@ -22,6 +22,7 @@ import {
   ErrorCode,
   ParticipationStatus,
 } from '@putongoj/shared'
+import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
 import { loadProfile, loginRequire } from '../middlewares/authn'
 import { dataExportLimit } from '../middlewares/ratelimit'
@@ -40,7 +41,7 @@ async function findContests (ctx: Context) {
     return createZodErrorResponse(ctx, query.error)
   }
 
-  let includeHidden = Boolean(ctx.state.profile?.isAdmin)
+  let includeHidden = Boolean(ctx.state.profile !== undefined && isAdmin(ctx.state.profile))
   if (query.data.courseId) {
     const state = await loadCourseStateOrThrow(ctx, query.data.courseId)
     if (!state.role.canAccess) {
@@ -334,12 +335,12 @@ async function createContest (ctx: Context) {
   }
 
   const profile = await loadProfile(ctx)
-  if (!profile.isAdmin && payload.data.courseId) {
+  if (!isAdmin(profile) && payload.data.courseId) {
     const state = await loadCourseStateOrThrow(ctx, payload.data.courseId)
     if (!state.role.canManageContests) {
       return createErrorResponse(ctx, ErrorCode.Forbidden)
     }
-  } else if (!profile.isAdmin) {
+  } else if (!isAdmin(profile)) {
     return createErrorResponse(ctx, ErrorCode.Forbidden)
   }
 
