@@ -1,3 +1,4 @@
+import { Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -10,7 +11,7 @@ test('Can not create solution without login', async (t) => {
     .post('/api/submissions')
     .send({
       problemId: 1000,
-      language: 1,
+      language: Language.C,
       sourceCode: 'Anything you like',
     })
 

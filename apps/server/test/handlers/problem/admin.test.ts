@@ -34,7 +34,7 @@ test.serial('create a new problem', async (t) => {
 
   t.is(create.status, 200)
 
-  createPid = create.body.id
+  createPid = create.body.data.id
 })
 
 test.serial('Update a problem', async (t) => {
@@ -50,10 +50,10 @@ test.serial('Update a problem', async (t) => {
     .get(`/api/problems/${createPid}`)
 
   t.is(find.status, 200)
-  t.is(find.body.title, '更新新建题目')
-  t.is(find.body.description, '应该可以更新成功吧')
-  t.is(find.body.inputFormat, '输入在一行中给出3个整数，其间以空格分隔。')
-  t.is(find.body.sampleOutput, '2->4->8')
+  t.is(find.body.data.title, '更新新建题目')
+  t.is(find.body.data.description, '应该可以更新成功吧')
+  t.is(find.body.data.inputFormat, '输入在一行中给出3个整数，其间以空格分隔。')
+  t.is(find.body.data.sampleOutput, '2->4->8')
 })
 
 test.serial('Delete a Problem', async (t) => {

@@ -33,8 +33,8 @@ test.before('create test problem', async (t) => {
   })
 
   t.is(created.status, 200)
-  t.truthy(created.body.id)
-  testPid = created.body.id
+  t.truthy(created.body.data.id)
+  testPid = created.body.data.id
 })
 
 test.serial('List is empty initially', async (t) => {

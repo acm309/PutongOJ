@@ -87,6 +87,12 @@ export const DiscussionCreatePayloadSchema = z.object({
 
 export type DiscussionCreatePayload = z.infer<typeof DiscussionCreatePayloadSchema>
 
+export const DiscussionCreateResultSchema = z.object({
+  id: DiscussionFieldsSchema.shape.id,
+})
+
+export type DiscussionCreateResult = z.input<typeof DiscussionCreateResultSchema>
+
 export const CommentCreatePayloadSchema = z.object({
   content: CommentFieldsSchema.shape.content,
 })

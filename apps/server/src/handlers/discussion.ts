@@ -3,6 +3,7 @@ import Router from '@koa/router'
 import {
   CommentCreatePayloadSchema,
   DiscussionCreatePayloadSchema,
+  DiscussionCreateResultSchema,
   DiscussionDetailQueryResultSchema,
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
@@ -94,7 +95,7 @@ async function createDiscussion (ctx: Context) {
   ) && !managed) { return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privileges to create this type of discussion') }
   const discussion = await discussionService.createDiscussion({ authorId: profile.id, problemId, contestId, ...payload.data })
   ctx.auditLog.info(`<Discussion:${discussion.id}> created by <User:${profile.username}>`)
-  return createEnvelopedResponse(ctx, { id: discussion.id })
+  return createEnvelopedResponse(ctx, DiscussionCreateResultSchema.encode(discussion))
 }
 
 async function createComment (ctx: Context) {

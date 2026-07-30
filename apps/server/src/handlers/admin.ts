@@ -11,11 +11,13 @@ import {
   AdminGroupCreatePayloadSchema,
   AdminGroupDetailQueryResultSchema,
   AdminGroupMembersUpdatePayloadSchema,
+  AdminGroupMembersUpdateResultSchema,
   AdminNotificationCreatePayloadSchema,
   AdminPostCreatePayloadSchema,
   AdminPostDetailQueryResultSchema,
   AdminPostListQueryResultSchema,
   AdminPostListQuerySchema,
+  AdminPostMutationResultSchema,
   AdminPostUpdatePayloadSchema,
   AdminSolutionListExportQueryResultSchema,
   AdminSolutionListExportQuerySchema,
@@ -330,7 +332,7 @@ export async function createPost (ctx: Context) {
   try {
     const post = await postService.createPost({ title })
     ctx.auditLog.info(`<Post:${post.slug}> created by <User:${profile.username}>`)
-    return createEnvelopedResponse(ctx, { slug: post.slug })
+    return createEnvelopedResponse(ctx, AdminPostMutationResultSchema.encode({ slug: post.slug }))
   } catch (err: any) {
     ctx.auditLog.error('Failed to create post', err)
     if (err.code === 11000) {
@@ -368,7 +370,7 @@ export async function updatePost (ctx: Context) {
     }
 
     ctx.auditLog.info(`<Post:${updated.slug}> updated by <User:${profile.username}>`)
-    return createEnvelopedResponse(ctx, { slug: updated.slug })
+    return createEnvelopedResponse(ctx, AdminPostMutationResultSchema.encode({ slug: updated.slug }))
   } catch (err: any) {
     ctx.auditLog.error('Failed to update post', err)
     if (err.code === 11000) {
@@ -522,7 +524,7 @@ export async function updateGroupMembers (ctx: Context) {
     }
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`<Group:${groupId}> updated ${modifiedCount} members by <User:${profile.username}>`)
-    return createEnvelopedResponse(ctx, { modifiedCount })
+    return createEnvelopedResponse(ctx, AdminGroupMembersUpdateResultSchema.encode({ modifiedCount }))
   } catch (err) {
     ctx.auditLog.error('Failed to update group members', err)
     return createErrorResponse(ctx, ErrorCode.InternalServerError)

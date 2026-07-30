@@ -4,6 +4,7 @@ import {
   ContestConfigEditPayloadSchema,
   ContestConfigQueryResultSchema,
   ContestCreatePayloadSchema,
+  ContestCreateResultSchema,
   ContestDetailQueryResultSchema,
   ContestListQueryResultSchema,
   ContestListQuerySchema,
@@ -348,7 +349,7 @@ async function createContest (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Contest end time must be after start time')
   }
   const contest = await contestService.createContest(payload.data)
-  return createEnvelopedResponse(ctx, { id: contest.id })
+  return createEnvelopedResponse(ctx, ContestCreateResultSchema.encode(contest))
 }
 
 export default function registerContestHandlers (router: Router) {

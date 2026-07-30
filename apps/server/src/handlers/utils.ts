@@ -2,7 +2,11 @@ import type { Context } from 'koa'
 import { randomUUID } from 'node:crypto'
 import { env } from 'node:process'
 import Router from '@koa/router'
-import { AvatarPresetsQueryResultSchema, PublicConfigQueryResultSchema } from '@putongoj/shared'
+import {
+  AvatarPresetsQueryResultSchema,
+  PublicConfigQueryResultSchema,
+  WebSocketTokenQueryResultSchema,
+} from '@putongoj/shared'
 import { globalConfig } from '../config'
 import redis from '../config/redis'
 import { loadProfile, loginRequire } from '../middlewares/authn'
@@ -60,7 +64,7 @@ export async function getWebSocketToken (ctx: Context) {
   const profile = await loadProfile(ctx)
   const token = randomUUID()
   await redis.setex(`websocket:token:${token}`, 10, profile.username)
-  return createEnvelopedResponse(ctx, { token })
+  return createEnvelopedResponse(ctx, WebSocketTokenQueryResultSchema.encode({ token }))
 }
 
 export async function getAvatarPresets (ctx: Context) {

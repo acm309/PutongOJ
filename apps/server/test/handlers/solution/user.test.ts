@@ -1,3 +1,4 @@
+import { JudgeStatus, Language } from '@putongoj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app'
@@ -122,7 +123,7 @@ test.serial('Submit a solution', async (t) => {
     .send({
       problemId: 1000,
       sourceCode: code,
-      language: 'CPP_17',
+      language: Language.CPP_17,
     })
 
   t.is(res.status, 200)
@@ -132,7 +133,10 @@ test.serial('Submit a solution', async (t) => {
   res = await request.get(`/api/submissions/${sid}`)
 
   t.is(res.status, 200)
-  t.is(res.body.submission.sourceCode, code)
+  t.true(res.body.success)
+  t.is(res.body.data.sourceCode, code)
+  t.is(res.body.data.user.username, userSeeds.primaryuser.username)
+  t.is(res.body.data.status, JudgeStatus.PENDING)
 })
 
 test('Status fails to find one', async (t) => {
@@ -141,7 +145,7 @@ test('Status fails to find one', async (t) => {
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
-  t.is(res.body.code, 400)
+  t.is(res.body.code, 404)
 })
 
 test('Status fails to delete', async (t) => {
@@ -185,7 +189,7 @@ test('Code is too long', async (t) => {
     .send({
       problemId: 1000,
       sourceCode: code,
-      language: 'CPP_17',
+      language: Language.CPP_17,
     })
 
   t.is(res.status, 200)
@@ -200,7 +204,7 @@ test('Code is too short', async (t) => {
     .send({
       problemId: 1000,
       sourceCode: code,
-      language: 'CPP_17',
+      language: Language.CPP_17,
     })
 
   t.is(res.status, 200)

@@ -23,8 +23,12 @@ const ContestParticipationManageableStatusSchema = z.enum(ParticipationStatus)
 const SubmissionListItemSchema = z.object({
   id: SubmissionFieldsSchema.shape.id,
   problemId: SubmissionFieldsSchema.shape.problemId,
-  userId: SubmissionFieldsSchema.shape.userId,
   contestId: SubmissionFieldsSchema.shape.contestId,
+  user: z.object({
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
+    nickname: UserFieldsSchema.shape.nickname,
+  }),
   language: SubmissionFieldsSchema.shape.language,
   status: SubmissionFieldsSchema.shape.status,
   timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,
@@ -143,6 +147,12 @@ export const ContestCreatePayloadSchema = z.object({
 })
 
 export type ContestCreatePayload = z.infer<typeof ContestCreatePayloadSchema>
+
+export const ContestCreateResultSchema = z.object({
+  id: ContestFieldsSchema.shape.id,
+})
+
+export type ContestCreateResult = z.input<typeof ContestCreateResultSchema>
 
 export const ContestConfigQueryResultSchema = z.object({
   id: ContestFieldsSchema.shape.id,

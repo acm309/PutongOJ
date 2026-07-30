@@ -52,6 +52,12 @@ export const AvatarPresetsQueryResultSchema = z.array(UserAvatarSchema)
 
 export type AvatarPresetsQueryResult = z.input<typeof AvatarPresetsQueryResultSchema>
 
+export const WebSocketTokenQueryResultSchema = z.object({
+  token: z.string(),
+})
+
+export type WebSocketTokenQueryResult = z.input<typeof WebSocketTokenQueryResultSchema>
+
 export const PublicConfigQueryResultSchema = z.object({
   name: z.string(),
   backendVersion: z.object({

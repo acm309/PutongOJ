@@ -4,10 +4,17 @@ import {
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
   ProblemCreatePayloadSchema,
+  ProblemCreateResultSchema,
+  ProblemDetailQueryResultSchema,
+  ProblemItemListQueryResultSchema,
+  ProblemItemListQuerySchema,
+  ProblemListQueryResultSchema,
+  ProblemListQuerySchema,
   ProblemSolutionListQueryResultSchema,
   ProblemSolutionListQuerySchema,
   ProblemStatisticsQueryResultSchema,
   ProblemUpdatePayloadSchema,
+  ProblemUpdateResultSchema,
 } from '@putongoj/shared'
 import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
@@ -19,23 +26,25 @@ import discussionService from '../services/discussion'
 import problemService from '../services/problem'
 import solutionService from '../services/solution'
 import tagService from '../services/tag'
-import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption } from '../utils'
+import { createEnvelopedResponse, createZodErrorResponse } from '../utils'
 import { ERR_PERM_DENIED } from '../utils/constants'
 
 async function findProblems (ctx: Context) {
-  const option = ctx.request.query
+  const query = ProblemListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
   const profile = ctx.state.profile
-  const paginate = parsePaginateOption(option, 30, 100)
   const filters = {
-    ...paginate,
-    type: typeof option.type === 'string' ? option.type : undefined,
-    content: typeof option.content === 'string' ? option.content : undefined,
+    page: query.data.page,
+    pageSize: query.data.pageSize,
+    type: query.data.searchField,
+    content: query.data.search,
   }
 
-  const courseId = typeof option.courseId === 'string' ? Number(option.courseId) : undefined
-  const list = courseId
+  const result = query.data.courseId
     ? await (async () => {
-        const course = await loadCourseStateOrThrow(ctx, courseId)
+        const course = await loadCourseStateOrThrow(ctx, query.data.courseId)
         if (!course.role.canAccess) {
           return ctx.throw(...ERR_PERM_DENIED)
         }
@@ -53,7 +62,7 @@ async function findProblems (ctx: Context) {
     const statuses = await database.userProblemStatus.findMany({
       where: {
         userId: profile.id,
-        problemId: { in: list.items.map(problem => problem.id) },
+        problemId: { in: result.items.map(problem => problem.id) },
         hasAccepted: true,
       },
       select: { problemId: true },
@@ -61,37 +70,36 @@ async function findProblems (ctx: Context) {
     solved = statuses.map(status => status.problemId)
   }
 
-  ctx.body = {
-    list: {
-      ...list,
-      items: list.items.map(problem => ({
-        ...problem,
-        isOwner: problem.ownerId === profile?.id,
-      })),
-    },
+  return createEnvelopedResponse(ctx, ProblemListQueryResultSchema.encode({
+    ...result,
+    items: result.items.map(problem => ({
+      ...problem,
+      isOwner: problem.ownerId === profile?.id,
+    })),
     solvedProblemIds: solved,
-  }
+  }))
 }
 
 async function findProblemItems (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const courseId = typeof ctx.request.query.courseId === 'string'
-    ? Number(ctx.request.query.courseId)
-    : undefined
-  const keyword = String(ctx.request.query.keyword ?? '')
+  const query = ProblemItemListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
-  if (courseId) {
-    const course = await loadCourseStateOrThrow(ctx, courseId)
+  if (query.data.courseId) {
+    const course = await loadCourseStateOrThrow(ctx, query.data.courseId)
     if (!course.role.canManageContests) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
-    ctx.body = await problemService.findCourseProblemItems(course.course.id, keyword)
-    return
+    const result = await problemService.findCourseProblemItems(course.course.id, query.data.keyword)
+    return createEnvelopedResponse(ctx, ProblemItemListQueryResultSchema.encode(result))
   }
   if (!isAdmin(profile)) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
-  ctx.body = await problemService.findProblemItems(keyword)
+  const result = await problemService.findProblemItems(query.data.keyword)
+  return createEnvelopedResponse(ctx, ProblemItemListQueryResultSchema.encode(result))
 }
 
 async function getProblem (ctx: Context) {
@@ -104,7 +112,7 @@ async function getProblem (ctx: Context) {
   const profile = ctx.state.profile
   const isOwner = problem.ownerId === profile?.id
   const canManage = (profile !== undefined && isAdmin(profile)) || isOwner
-  ctx.body = {
+  return createEnvelopedResponse(ctx, ProblemDetailQueryResultSchema.encode({
     id: problem.id,
     title: problem.title,
     timeLimitMs: problem.timeLimitMs,
@@ -127,7 +135,7 @@ async function getProblem (ctx: Context) {
     isOwner,
     createdAt: problem.createdAt,
     updatedAt: problem.updatedAt,
-  }
+  }))
 }
 
 async function createProblem (ctx: Context) {
@@ -156,7 +164,7 @@ async function createProblem (ctx: Context) {
   if (courseId !== undefined) {
     await courseService.addCourseProblem(courseId, problem.id)
   }
-  ctx.body = { id: problem.id }
+  return createEnvelopedResponse(ctx, ProblemCreateResultSchema.encode({ id: problem.id }))
 }
 
 async function updateProblem (ctx: Context) {
@@ -176,7 +184,10 @@ async function updateProblem (ctx: Context) {
     ...problemData,
     ...(tagIds === undefined ? {} : { tagIds: await tagService.getTagIds(tagIds) }),
   })
-  ctx.body = { id: problem?.id ?? null, success: Boolean(problem) }
+  return createEnvelopedResponse(ctx, ProblemUpdateResultSchema.encode({
+    id: problem?.id ?? null,
+    success: Boolean(problem),
+  }))
 }
 
 async function removeProblem (ctx: Context) {

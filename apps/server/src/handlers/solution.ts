@@ -1,7 +1,14 @@
 import type { Context } from 'koa'
 import path from 'node:path'
 import Router from '@koa/router'
-import { ErrorCode, JudgeStatus, SolutionSubmitPayloadSchema, SolutionSubmitResultSchema } from '@putongoj/shared'
+import {
+  ErrorCode,
+  JudgeStatus,
+  SolutionSubmitPayloadSchema,
+  SolutionSubmitResultSchema,
+  SubmissionDetailQueryResultSchema,
+  SubmissionStatusUpdatePayloadSchema,
+} from '@putongoj/shared'
 import fse from 'fs-extra'
 import { isAdmin } from '../auth/user'
 import { getDatabase } from '../config/postgres'
@@ -11,7 +18,7 @@ import { solutionCreateLimit } from '../middlewares/ratelimit'
 import { loadContestState } from '../policies/contest'
 import { loadCourseRoleById } from '../policies/course'
 import { loadProblemState } from '../policies/problem'
-import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse, toObjectRecord } from '../utils'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
 
 async function buildJudgeTask (
   problem: { id: number, timeLimitMs: number, memoryLimitKb: number, judgeType: string, judgeCode: string },
@@ -37,14 +44,22 @@ async function buildJudgeTask (
 
 export async function findOne (ctx: Context) {
   const id = Number(ctx.params.submissionId)
-  if (!Number.isInteger(id) || id <= 0) { return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id') }
+  if (!Number.isInteger(id) || id <= 0) {
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id')
+  }
 
   const database = await getDatabase()
   const submission = await database.submission.findUnique({
     where: { id },
-    include: { user: true, problem: true, course: true, similarSubmission: { include: { user: true } } },
+    include: {
+      user: true,
+      similarSubmission: { include: { user: true } },
+      testcaseResults: true,
+    },
   })
-  if (!submission) { return createErrorResponse(ctx, ErrorCode.BadRequest, 'No such a submission') }
+  if (!submission) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Submission not found')
+  }
 
   const profile = await loadProfile(ctx)
   const role = await loadCourseRoleById(ctx, submission.courseId)
@@ -52,21 +67,48 @@ export async function findOne (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Permission denied')
   }
 
-  const response = {
-    submission: {
-      ...submission,
-      testcaseResults: await database.submissionTestcaseResult.findMany({ where: { submissionId: id } }),
-      similarSubmission: isAdmin(profile) && submission.similarSubmission
-        ? {
-            id: submission.similarSubmission.id,
-            userId: submission.similarSubmission.userId,
-            sourceCode: submission.similarSubmission.sourceCode,
-            createdAt: submission.similarSubmission.createdAt,
-          }
-        : undefined,
+  const similarSubmission = isAdmin(profile) && submission.similarSubmission
+    ? {
+        id: submission.similarSubmission.id,
+        userId: submission.similarSubmission.userId,
+        user: {
+          id: submission.similarSubmission.user.id,
+          username: submission.similarSubmission.user.username,
+          nickname: submission.similarSubmission.user.nickname,
+        },
+        sourceCode: submission.similarSubmission.sourceCode,
+        createdAt: submission.similarSubmission.createdAt,
+      }
+    : null
+
+  return createEnvelopedResponse(ctx, SubmissionDetailQueryResultSchema.encode({
+    id: submission.id,
+    problemId: submission.problemId,
+    contestId: submission.contestId,
+    userId: submission.userId,
+    user: {
+      id: submission.user.id,
+      username: submission.user.username,
+      nickname: submission.user.nickname,
     },
-  }
-  ctx.body = response
+    language: submission.language,
+    status: submission.status,
+    timeUsedMs: submission.timeUsedMs,
+    memoryUsedKb: submission.memoryUsedKb,
+    errorMessage: submission.errorMessage,
+    similarity: submission.similarity,
+    similarSubmissionId: submission.similarSubmissionId,
+    sourceCode: submission.sourceCode,
+    testcaseResults: submission.testcaseResults.map(result => ({
+      testcaseId: result.testcaseId,
+      status: result.status,
+      timeUsedMs: result.timeUsedMs,
+      memoryUsedKb: result.memoryUsedKb,
+    })),
+    createdAt: submission.createdAt,
+    updatedAt: submission.updatedAt,
+    similarSubmission,
+  }))
 }
 
 async function create (ctx: Context) {
@@ -117,8 +159,8 @@ async function create (ctx: Context) {
 
 async function updateSolution (ctx: Context) {
   const id = Number(ctx.params.submissionId)
-  const status = toObjectRecord(ctx.request.body).status
-  if (!Number.isInteger(id) || !(status === JudgeStatus.REJUDGE_PENDING || status === JudgeStatus.SKIPPED)) {
+  const payload = SubmissionStatusUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!Number.isInteger(id) || id <= 0 || !payload.success) {
     return createErrorResponse(ctx, ErrorCode.BadRequest)
   }
 
@@ -126,7 +168,7 @@ async function updateSolution (ctx: Context) {
   const submission = await database.submission.update({
     where: { id },
     data: {
-      status,
+      status: payload.data.status,
       timeUsedMs: 0,
       memoryUsedKb: 0,
       errorMessage: '',
@@ -136,10 +178,10 @@ async function updateSolution (ctx: Context) {
     },
     include: { problem: true, user: true },
   })
-  if (status === JudgeStatus.REJUDGE_PENDING) {
+  if (payload.data.status === JudgeStatus.REJUDGE_PENDING) {
     await redis.rpush('judger:task', JSON.stringify(await buildJudgeTask(submission.problem, submission)))
   }
-  return createEnvelopedResponse(ctx, submission)
+  return createEnvelopedResponse(ctx, null)
 }
 
 export default function registerSolutionHandlers (router: Router) {

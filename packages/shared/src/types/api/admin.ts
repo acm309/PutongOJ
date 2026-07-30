@@ -108,8 +108,12 @@ export type AdminSolutionListQuery = z.infer<typeof AdminSolutionListQuerySchema
 export const AdminSolutionListQueryResultSchema = PaginatedResultSchema(z.object({
   id: SubmissionFieldsSchema.shape.id,
   problemId: SubmissionFieldsSchema.shape.problemId,
-  userId: SubmissionFieldsSchema.shape.userId,
   contestId: SubmissionFieldsSchema.shape.contestId,
+  user: z.object({
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
+    nickname: UserFieldsSchema.shape.nickname,
+  }),
   language: SubmissionFieldsSchema.shape.language,
   status: SubmissionFieldsSchema.shape.status,
   timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,
@@ -136,8 +140,12 @@ export type AdminSolutionListExportQuery = z.infer<typeof AdminSolutionListExpor
 export const AdminSolutionListExportQueryResultSchema = z.array(z.object({
   id: SubmissionFieldsSchema.shape.id,
   problemId: SubmissionFieldsSchema.shape.problemId,
-  userId: SubmissionFieldsSchema.shape.userId,
   contestId: SubmissionFieldsSchema.shape.contestId,
+  user: z.object({
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
+    nickname: UserFieldsSchema.shape.nickname,
+  }),
   language: SubmissionFieldsSchema.shape.language,
   status: SubmissionFieldsSchema.shape.status,
   timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,
@@ -181,6 +189,12 @@ export const AdminGroupMembersUpdatePayloadSchema = z.object({
 })
 
 export type AdminGroupMembersUpdatePayload = z.infer<typeof AdminGroupMembersUpdatePayloadSchema>
+
+export const AdminGroupMembersUpdateResultSchema = z.object({
+  modifiedCount: z.int().nonnegative(),
+})
+
+export type AdminGroupMembersUpdateResult = z.input<typeof AdminGroupMembersUpdateResultSchema>
 
 export const AdminDiscussionUpdatePayloadSchema = z.object({
   authorId: UserFieldsSchema.shape.id.optional(),
@@ -302,6 +316,12 @@ export const AdminPostUpdatePayloadSchema = z.object({
 })
 
 export type AdminPostUpdatePayload = z.infer<typeof AdminPostUpdatePayloadSchema>
+
+export const AdminPostMutationResultSchema = z.object({
+  slug: PostFieldsSchema.shape.slug,
+})
+
+export type AdminPostMutationResult = z.input<typeof AdminPostMutationResultSchema>
 
 export const AdminAccountBatchRegisterPayloadSchema = z.array(z.object({
   username: UserFieldsSchema.shape.username,

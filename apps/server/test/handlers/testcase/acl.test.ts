@@ -39,8 +39,8 @@ test.before('create reserved and available problems', async (t) => {
   })
 
   t.is(reserved.status, 200)
-  t.truthy(reserved.body.id)
-  reservedPid = reserved.body.id
+  t.truthy(reserved.body.data.id)
+  reservedPid = reserved.body.data.id
 
   const available = await adminRequest.post('/api/problems').send({
     title: 'Testcase Authorization Available Problem',
@@ -53,8 +53,8 @@ test.before('create reserved and available problems', async (t) => {
   })
 
   t.is(available.status, 200)
-  t.truthy(available.body.id)
-  availablePid = available.body.id
+  t.truthy(available.body.data.id)
+  availablePid = available.body.data.id
 
   const created = await adminRequest
     .post(`/api/problems/${availablePid}/testcases`)
@@ -70,7 +70,8 @@ test('Regular user can view available problem metadata', async (t) => {
   const res = await userRequest.get(`/api/problems/${availablePid}`)
 
   t.is(res.status, 200)
-  t.truthy(res.body.id ?? res.body.title)
+  t.true(res.body.success)
+  t.truthy(res.body.data.id ?? res.body.data.title)
 })
 
 test('List testcases on reserved problem is denied with 404', async (t) => {

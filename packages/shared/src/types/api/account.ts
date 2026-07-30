@@ -64,6 +64,11 @@ export const AccountSubmissionListQueryResultSchema = PaginatedResultSchema(z.ob
   id: SubmissionFieldsSchema.shape.id,
   problemId: SubmissionFieldsSchema.shape.problemId,
   contestId: SubmissionFieldsSchema.shape.contestId,
+  user: z.object({
+    id: UserFieldsSchema.shape.id,
+    username: UserFieldsSchema.shape.username,
+    nickname: UserFieldsSchema.shape.nickname,
+  }),
   language: SubmissionFieldsSchema.shape.language,
   status: SubmissionFieldsSchema.shape.status,
   timeUsedMs: SubmissionFieldsSchema.shape.timeUsedMs,

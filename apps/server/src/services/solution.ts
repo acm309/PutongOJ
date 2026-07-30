@@ -1,4 +1,4 @@
-import type { Submission } from '@putongoj/db'
+import type { Prisma, Submission } from '@putongoj/db'
 import type { PaginatedResult } from '@putongoj/shared'
 import type { PaginateOption, SortOption } from '../types'
 import { EXPORT_SIZE_MAX } from '@putongoj/shared'
@@ -12,10 +12,21 @@ interface SubmissionFilterOption {
   language?: Submission['language']
 }
 
-type ExportedSubmission = Pick<Submission,
-  'id' | 'problemId' | 'userId' | 'contestId' | 'language' | 'status'
-  | 'timeUsedMs' | 'memoryUsedKb' | 'similarity' | 'similarSubmissionId' | 'createdAt'
->
+const submissionListInclude = {
+  user: {
+    select: {
+      id: true,
+      username: true,
+      nickname: true,
+    },
+  },
+} satisfies Prisma.SubmissionInclude
+
+export type SubmissionListItem = Prisma.SubmissionGetPayload<{
+  include: typeof submissionListInclude
+}>
+
+type ExportedSubmission = SubmissionListItem
 
 function buildWhere (opt: SubmissionFilterOption) {
   return {
@@ -45,7 +56,7 @@ function orderBy (sortBy: string, sort: 'asc' | 'desc') {
 
 export async function findSolutions (
   opt: PaginateOption & SortOption & SubmissionFilterOption,
-): Promise<PaginatedResult<Submission>> {
+): Promise<PaginatedResult<SubmissionListItem>> {
   const database = await getDatabase()
   const where = buildWhere(opt)
   const [ rows, total ] = await Promise.all([
@@ -54,6 +65,7 @@ export async function findSolutions (
       orderBy: orderBy(opt.sortBy, opt.sort),
       skip: (opt.page - 1) * opt.pageSize,
       take: opt.pageSize,
+      include: submissionListInclude,
     }),
     database.submission.count({ where }),
   ])
@@ -74,6 +86,7 @@ export async function exportSolutions (
     where: buildWhere(opt),
     orderBy: orderBy(opt.sortBy, opt.sort),
     take: EXPORT_SIZE_MAX,
+    include: submissionListInclude,
   })
   return rows
 }

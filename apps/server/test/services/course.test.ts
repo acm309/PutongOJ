@@ -34,7 +34,7 @@ test.serial('maintains explicit course memberships and decimal problem ordering'
   if (!user) { return t.fail('seed user not found') }
 
   t.true(await courseService.updateCourseMember(courseId, user.id, roleEntire))
-  const member = await courseService.getCourseMember(courseId, user.username)
+  const member = await courseService.getCourseMember(courseId, user.id)
   t.is(member?.user.id, user.id)
   t.deepEqual(member?.role, roleEntire)
 

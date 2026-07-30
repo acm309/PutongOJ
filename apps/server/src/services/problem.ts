@@ -1,4 +1,4 @@
-import type { Prisma, ProblemJudgeType, ProblemVisibility } from '@putongoj/db'
+import type { Prisma, ProblemJudgeType, ProblemVisibility, TagColor } from '@putongoj/db'
 import type { PaginatedResult, ProblemStatisticsQueryResult } from '@putongoj/shared'
 import type { PaginateOption } from '../types'
 import path from 'node:path'
@@ -14,16 +14,18 @@ export interface ProblemListItem {
   title: string
   timeLimitMs: number
   memoryLimitKb: number
-  visibility: string
-  judgeType: string
+  visibility: ProblemVisibility
+  judgeType: ProblemJudgeType
   ownerId: number | null
   submitterCount: number
   solverCount: number
-  tags: Array<{ id: number, name: string, color: string }>
+  tags: Array<{ id: number, name: string, color: TagColor }>
 }
 
+type ProblemSearchType = 'title' | 'tag' | 'id'
+
 function buildProblemSearchWhere (opt: {
-  type?: string
+  type?: ProblemSearchType
   content?: string
   showReserved?: boolean
   ownerId?: number | null
@@ -45,7 +47,7 @@ function buildProblemSearchWhere (opt: {
       case 'tag':
         clauses.push({ tags: { some: { tag: { name: { contains: opt.content, mode: 'insensitive' } } } } })
         break
-      case 'pid': {
+      case 'id': {
         const prefix = Number(opt.content)
         if (Number.isInteger(prefix)) {
           clauses.push({ id: { gte: prefix, lt: prefix + 1 } })
@@ -65,7 +67,7 @@ function toListItem (problem: {
   visibility: string
   judgeType: string
   ownerId: number | null
-  tags: Array<{ tag: { id: number, name: string, color: string } }>
+  tags: Array<{ tag: { id: number, name: string, color: TagColor } }>
   submissionStats: { submitterCount: number, solverCount: number } | null
 }): ProblemListItem {
   return {
@@ -73,8 +75,8 @@ function toListItem (problem: {
     title: problem.title,
     timeLimitMs: problem.timeLimitMs,
     memoryLimitKb: problem.memoryLimitKb,
-    visibility: problem.visibility,
-    judgeType: problem.judgeType,
+    visibility: problem.visibility as ProblemVisibility,
+    judgeType: problem.judgeType as ProblemJudgeType,
     ownerId: problem.ownerId,
     submitterCount: problem.submissionStats?.submitterCount ?? 0,
     solverCount: problem.submissionStats?.solverCount ?? 0,
@@ -84,7 +86,7 @@ function toListItem (problem: {
 
 export async function findProblems (
   opt: PaginateOption & {
-    type?: string
+    type?: ProblemSearchType
     content?: string
     showReserved?: boolean
     ownerId?: number | null
@@ -290,7 +292,7 @@ export async function getStatistics (problemId: number): Promise<ProblemStatisti
   }, { redisTtl: 30 })
 }
 
-export async function findCourseProblems (courseId: number, opt: PaginateOption & { type?: string, content?: string }) {
+export async function findCourseProblems (courseId: number, opt: PaginateOption & { type?: ProblemSearchType, content?: string }) {
   const database = await getDatabase()
   const problemWhere = buildProblemSearchWhere({ type: opt.type, content: opt.content, showReserved: true })
   const where = { courseId, problem: problemWhere }

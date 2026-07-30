@@ -1,4 +1,4 @@
-import type { CourseVisibility, Prisma } from '@putongoj/db'
+import type { CourseVisibility, UserPrivilege as DbUserPrivilege, Prisma } from '@putongoj/db'
 import type { CourseEntity, CourseRole, PaginatedResult } from '@putongoj/shared'
 import type { PaginateOption } from '../types'
 import { CourseVisibility as CourseVisibilityEnum, UserPrivilege } from '@putongoj/shared'
@@ -34,7 +34,7 @@ export interface CourseMemberView {
     id: number
     username: string
     nickname: string
-    privilege: string
+    privilege: DbUserPrivilege
   }
   createdAt: Date
   updatedAt: Date
@@ -182,10 +182,10 @@ export async function findCourseMembers (courseId: number, opt: PaginateOption):
   }
 }
 
-export async function getCourseMember (courseId: number, username: string): Promise<CourseMemberView | null> {
+export async function getCourseMember (courseId: number, userId: number): Promise<CourseMemberView | null> {
   const database = await getDatabase()
   const member = await database.courseMember.findFirst({
-    where: { courseId, user: { username: { equals: username, mode: 'insensitive' } } },
+    where: { courseId, userId },
     include: { user: true },
   })
   if (!member) { return null }
