@@ -10,6 +10,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "rootDir": "..",
     "paths": {
       "@/*": [
         "./src/*"
@@ -18,9 +20,7 @@
         "../server/src/*"
       ]
     },
-    "resolveJsonModule": true,
-    "outDir": "dist",
-    "sourceMap": true
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*.ts",
