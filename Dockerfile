@@ -14,65 +14,66 @@ WORKDIR /app
 RUN npm i -g pnpm@11.17.0
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY backend/package.json backend/
-COPY document/package.json document/
-COPY frontend/package.json frontend/
-COPY shared/package.json shared/
+COPY tsconfig.base.json ./
+COPY apps/server/package.json apps/server/
+COPY apps/docs/package.json apps/docs/
+COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 RUN pnpm install --frozen-lockfile
 
-COPY shared/ shared/
-RUN pnpm --filter @putongoj/shared build
+COPY packages/shared/ packages/shared/
+RUN pnpm --filter @putong-oj/shared build
 
-# Documentation builder
-FROM base_builder AS document_builder
+# Docs builder
+FROM base_builder AS docs_builder
 WORKDIR /app
 
-COPY document/ document/
-RUN pnpm --filter @putongoj/document build
+COPY apps/docs/ apps/docs/
+RUN pnpm --filter @putong-oj/docs build
 
-# Frontend builder
-FROM base_builder AS frontend_builder
+# Web builder
+FROM base_builder AS web_builder
 WORKDIR /app
 
-COPY frontend/ frontend/
-COPY backend/ backend/
+COPY apps/web/ apps/web/
+COPY apps/server/ apps/server/
 COPY --from=version_checker /app/version.txt .
 
 RUN env \
     VITE_BUILD_SHA=$(cat version.txt) \
     VITE_BUILD_TIME=$(date +%s%3N) \
-    pnpm --filter @putongoj/frontend build
+    pnpm --filter @putong-oj/web build
 
-# Backend deps
-FROM base_builder AS backend_deps
+# Server deps
+FROM base_builder AS server_deps
 WORKDIR /app
 
-RUN pnpm --filter @putongoj/backend deploy --legacy /app/backend_deploy
+RUN pnpm --filter @putong-oj/server deploy --legacy /app/server_deploy
 
-# Backend builder
-FROM base_builder AS backend_builder
+# Server builder
+FROM base_builder AS server_builder
 WORKDIR /app
 
-COPY backend/ backend/
+COPY apps/server/ apps/server/
 RUN date +%s%3N > build_time.txt
-RUN pnpm --filter @putongoj/backend build
+RUN pnpm --filter @putong-oj/server build
 
 # Runtime
 FROM node:24-alpine AS runtime
 WORKDIR /app
 
-COPY --from=backend_deps /app/backend_deploy/node_modules ./node_modules
-COPY --from=backend_deps /app/backend_deploy/package.json ./package.json
+COPY --from=server_deps /app/server_deploy/node_modules ./node_modules
+COPY --from=server_deps /app/server_deploy/package.json ./package.json
 
-COPY --from=backend_builder /app/backend/dist ./dist
-COPY --from=frontend_builder /app/frontend/dist ./public
-COPY --from=document_builder /app/document/.vitepress/dist ./public/docs
+COPY --from=server_builder /app/apps/server/dist ./dist
+COPY --from=web_builder /app/apps/web/dist ./public
+COPY --from=docs_builder /app/apps/docs/.vitepress/dist ./public/docs
 
 COPY --from=version_checker /app/version.txt .
-COPY --from=backend_builder /app/build_time.txt .
+COPY --from=server_builder /app/build_time.txt .
 
-COPY backend/setup.js .
-COPY backend/entrypoint.sh .
+COPY apps/server/setup.js .
+COPY apps/server/entrypoint.sh .
 RUN chmod +x entrypoint.sh
 RUN mkdir -p /app/data /app/logs /app/public/uploads
 

@@ -1,8 +1,6 @@
 packages:
-  - "frontend"
-  - "backend"
-  - "shared"
-  - "document"
+  - "apps/*"
+  - "packages/*"
 catalog:
   "@antfu/eslint-config": "^8.3.0"
   "@ava/typescript": "^6.0.0"

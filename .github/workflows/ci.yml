@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: apps/server
 
     steps:
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build shared
-        run: pnpm --filter shared build
+        run: pnpm --filter @putong-oj/shared build
 
       - name: Typecheck
         run: pnpm typecheck
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: apps/web
 
     steps:
       - name: Checkout repository
@@ -97,7 +97,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build shared
-        run: pnpm --filter shared build
+        run: pnpm --filter @putong-oj/shared build
 
       - name: Typecheck
         run: pnpm typecheck
