@@ -14,6 +14,7 @@ WORKDIR /app
 RUN npm i -g pnpm@11.17.0
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY .npmrc ./
 COPY tsconfig.base.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/docs/package.json apps/docs/

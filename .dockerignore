@@ -2,9 +2,10 @@
 .github/
 **/dist/
 **/node_modules/
-apps/server/.nyc_output/
+/.turbo/
 apps/server/.env*
 apps/server/coverage.lcov
+apps/server/coverage/
 apps/server/dist/
 apps/server/test/
 apps/docs/.vitepress/cache/
@@ -13,6 +14,7 @@ apps/web/dist/
 apps/web/public/static/
 
 # Data
+/.dev/
 apps/server/data/
 apps/server/logs/
 apps/server/public/uploads/
