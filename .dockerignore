@@ -1,5 +1,6 @@
 # Development
 .github/
+/NOTES.md
 **/dist/
 **/node_modules/
 /.turbo/
