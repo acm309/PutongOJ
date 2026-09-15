@@ -1,11 +1,11 @@
-import type { UserDocument } from '../../src/models/User'
+import type { UserDocument } from '../../src/models/User.ts'
 import test from 'ava'
-import authnMiddleware from '../../src/middlewares/authn'
-import User from '../../src/models/User'
-import sessionService from '../../src/services/session'
-import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/constants'
-import { userSeeds } from '../seeds/user'
-import '../../src/config/db'
+import authnMiddleware from '../../src/middlewares/authn.ts'
+import User from '../../src/models/User.ts'
+import sessionService from '../../src/services/session.ts'
+import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../../src/utils/constants.ts'
+import { userSeeds } from '../seeds/user.ts'
+import '../../src/config/db.ts'
 
 const noopLog = { info () {}, warn () {}, error () {} }
 const nonExistUserId = '000000000000000000000000'

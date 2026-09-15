@@ -5,19 +5,19 @@ import { koaBody } from 'koa-body'
 import koaLogger from 'koa-logger'
 import session from 'koa-session'
 import staticServe from 'koa-static'
-import config from './config'
-import redis from './config/redis'
-import { databaseSetup } from './config/setup'
+import config from './config/index.ts'
+import redis from './config/redis.ts'
+import { databaseSetup } from './config/setup.ts'
 import {
   errorHandler,
   parseClientIp,
   setupAuditLog,
   setupRequestContext,
   spaFallback,
-} from './middlewares'
-import router from './routes'
-import logger from './utils/logger'
-import './config/db'
+} from './middlewares/index.ts'
+import router from './routes.ts'
+import logger from './utils/logger.ts'
+import './config/db.ts'
 
 const app = new Koa()
 
@@ -49,7 +49,7 @@ app.use(koaBody({
   },
 }))
 
-app.use(staticServe(path.join(__dirname, '..', 'public'), {
+app.use(staticServe(path.join(import.meta.dirname, '..', 'public'), {
   gzip: true,
   maxage: 7 * 24 * 60 * 60, // 1 week
 }))

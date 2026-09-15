@@ -1,8 +1,8 @@
 import type { CommentModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { COMMENT_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import ID from './ID.ts'
 
 interface CommentDocument extends Document<Types.ObjectId>, CommentModel { }
 

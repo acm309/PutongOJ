@@ -1,6 +1,6 @@
 import superagent from 'superagent'
-import redis from '../../config/redis'
-import logger from '../../utils/logger'
+import redis from '../../config/redis.ts'
+import logger from '../../utils/logger.ts'
 
 interface CodeforcesUserInfo {
   handle: string

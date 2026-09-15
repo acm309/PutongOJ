@@ -1,8 +1,8 @@
 import { UserPrivilege } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import { encryptData } from '../../../src/services/crypto'
+import app from '../../../src/app.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)

@@ -1,25 +1,26 @@
 {
   "name": "@putong-oj/server",
+  "type": "module",
   "private": true,
   "main": "app.ts",
   "scripts": {
     "build": "tsc && cp -r src/scripts dist/scripts",
-    "coverage": "nyc report --reporter=text-lcov > coverage.lcov",
+    "coverage": "c8 report --reporter=text-lcov > coverage.lcov",
     "deploy:init": "cross-env NODE_ENV=production node setup.js",
     "deploy:start": "pnpm exec pm2 start pm2.config.json",
     "dev": "concurrently \"pnpm run dev:app\" \"pnpm run dev:ws\" \"pnpm run dev:updater\" \"pnpm run dev:worker\"",
-    "dev:app": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/app.ts",
-    "dev:updater": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/updater.ts",
-    "dev:worker": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/jobs/worker.ts",
-    "dev:ws": "cross-env NODE_ENV=development nodemon -e ts,js --exec ts-node src/ws.ts",
+    "dev:app": "cross-env NODE_ENV=development node --watch src/app.ts",
+    "dev:updater": "cross-env NODE_ENV=development node --watch src/jobs/updater.ts",
+    "dev:worker": "cross-env NODE_ENV=development node --watch src/jobs/worker.ts",
+    "dev:ws": "cross-env NODE_ENV=development node --watch src/ws.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "posttest": "cross-env NODE_ENV=test ts-node test/posttest.ts",
-    "pretest": "cross-env NODE_ENV=test ts-node test/pretest.ts",
-    "report": "nyc report --reporter=html",
+    "posttest": "cross-env NODE_ENV=test node test/posttest.ts",
+    "pretest": "cross-env NODE_ENV=test node test/pretest.ts",
+    "report": "c8 report --reporter=html",
     "start": "cross-env NODE_ENV=production node dist/app.js",
-    "test": "cross-env-shell NODE_ENV=test \"ts-node test/pretest.ts && nyc ava && ts-node test/posttest.ts\"",
-    "typecheck": "tsc --noEmit --skipLibCheck"
+    "test": "cross-env NODE_ENV=test c8 ava",
+    "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.test.json"
   },
   "dependencies": {
     "@koa/router": "catalog:",
@@ -53,7 +54,6 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
-    "@ava/typescript": "catalog:",
     "@types/fast-levenshtein": "catalog:",
     "@types/fs-extra": "catalog:",
     "@types/koa": "catalog:",
@@ -69,20 +69,11 @@
     "@types/supertest": "catalog:",
     "@types/ws": "catalog:",
     "ava": "catalog:",
+    "c8": "catalog:",
     "concurrently": "catalog:",
     "eslint": "catalog:",
-    "nodemon": "catalog:",
-    "nyc": "catalog:",
     "supertest": "catalog:",
-    "ts-node": "catalog:",
     "typescript": "catalog:"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "data/*",
-      "dist/*",
-      "test/*"
-    ]
   },
   "ava": {
     "concurrency": 1,
@@ -97,21 +88,17 @@
       "test/**/*.test.{js,ts}"
     ],
     "require": [
-      "ts-node/register",
       "./test/_force-exit.mjs"
     ],
     "serial": true,
     "timeout": "30s"
   },
-  "nyc": {
+  "c8": {
     "include": [
-      "src/**/*.{js,ts}"
+      "src/**/*.ts"
     ],
     "exclude": [
       "**/*.d.ts"
-    ],
-    "require": [
-      "ts-node/register"
     ]
   }
 }

@@ -1,7 +1,7 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course'
-import type { ProblemState } from '../policies/problem'
+import type { CourseDocument } from '../models/Course.ts'
+import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import Router from '@koa/router'
@@ -12,17 +12,17 @@ import {
   SolutionSubmitResultSchema,
 } from '@putong-oj/shared'
 import fse from 'fs-extra'
-import { pick } from 'lodash'
-import redis from '../config/redis'
-import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
-import { solutionCreateLimit } from '../middlewares/ratelimit'
-import Contest from '../models/Contest'
-import Problem from '../models/Problem'
-import Solution from '../models/Solution'
-import { loadContestState } from '../policies/contest'
-import { loadCourseStateOrThrow } from '../policies/course'
-import { loadProblemState } from '../policies/problem'
-import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse, toObjectRecord } from '../utils'
+import pick from 'lodash/pick.js'
+import redis from '../config/redis.ts'
+import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
+import { solutionCreateLimit } from '../middlewares/ratelimit.ts'
+import Contest from '../models/Contest.ts'
+import Problem from '../models/Problem.ts'
+import Solution from '../models/Solution.ts'
+import { loadContestState } from '../policies/contest.ts'
+import { loadCourseStateOrThrow } from '../policies/course.ts'
+import { loadProblemState } from '../policies/problem.ts'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse, toObjectRecord } from '../utils/index.ts'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -143,7 +143,7 @@ const create = async (ctx: Context) => {
     const additionCode = problem.code
 
     let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../../data/${pid}`)
+    const dir = path.resolve(import.meta.dirname, `../../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
     if (fse.existsSync(file)) {
       meta = await fse.readJson(file)
@@ -229,7 +229,7 @@ async function updateSolution (ctx: Context) {
     const additionCode = problem.code
 
     let meta = { testcases: [] }
-    const dir = path.resolve(__dirname, `../../data/${pid}`)
+    const dir = path.resolve(import.meta.dirname, `../../data/${pid}`)
     const file = path.resolve(dir, 'meta.json')
     if (fse.existsSync(file)) {
       meta = await fse.readJson(file)

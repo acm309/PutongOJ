@@ -1,5 +1,5 @@
-import Settings from '../models/Settings'
-import { CacheKey, cacheService } from './cache'
+import Settings from '../models/Settings.ts'
+import { CacheKey, cacheService } from './cache.ts'
 
 export class SettingsKey {
   static migrationsApplied = 'migrationsApplied'

@@ -1,14 +1,15 @@
-require('dotenv-flow').config()
+import { resolve } from 'node:path'
+import process from 'node:process'
+import dotenvFlow from 'dotenv-flow'
+import fse from 'fs-extra'
 
-const { resolve } = require('node:path')
-const { env } = require('node:process')
-const { outputJSON } = require('fs-extra')
+dotenvFlow.config()
 
-const baseDir = resolve(__dirname, 'dist')
-const logsDir = resolve(__dirname, 'logs')
+const baseDir = resolve(import.meta.dirname, 'dist')
+const logsDir = resolve(import.meta.dirname, 'logs')
 const jobsDir = resolve(baseDir, 'jobs')
 
-const WORKER_INSTANCES = Number.parseInt(env.PTOJ_WORKER_INSTANCES, 10) || 2
+const WORKER_INSTANCES = Number.parseInt(process.env.PTOJ_WORKER_INSTANCES, 10) || 2
 
 async function main () {
   const apps = []
@@ -52,8 +53,8 @@ async function main () {
     })
   }
 
-  outputJSON(
-    resolve(__dirname, 'pm2.config.json'),
+  fse.outputJSON(
+    resolve(import.meta.dirname, 'pm2.config.json'),
     { apps },
     { spaces: 2, EOL: '\n' },
   )

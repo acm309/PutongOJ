@@ -1,5 +1,5 @@
 import { ParticipationStatus } from '@putong-oj/shared'
-import mongoose from '../config/db'
+import mongoose from '../config/db.ts'
 
 const contestParticipationSchema = new mongoose.Schema({
   contest: {

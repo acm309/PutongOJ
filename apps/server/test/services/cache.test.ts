@@ -1,6 +1,6 @@
 import test from 'ava'
-import redis from '../../src/config/redis'
-import { CacheKey, cacheService } from '../../src/services/cache'
+import redis from '../../src/config/redis.ts'
+import { CacheKey, cacheService } from '../../src/services/cache.ts'
 
 const KEY_PREFIX = 'cache_test'
 

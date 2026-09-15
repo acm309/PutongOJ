@@ -1,12 +1,12 @@
 import path from 'node:path'
 import { UserPrivilege } from '@putong-oj/shared'
 import fse from 'fs-extra'
-import ID from '../models/ID'
-import Problem from '../models/Problem'
-import User from '../models/User'
-import { passwordHash } from '../utils'
-import { deploy } from '../utils/constants'
-import { runMigrations } from './migrations'
+import ID from '../models/ID.ts'
+import Problem from '../models/Problem.ts'
+import User from '../models/User.ts'
+import { deploy } from '../utils/constants.ts'
+import { passwordHash } from '../utils/index.ts'
+import { runMigrations } from './migrations.ts'
 
 export async function databaseSetup () {
   await runMigrations()
@@ -56,7 +56,7 @@ export async function databaseSetup () {
       }).save(),
     )
     tasks.push(
-      fse.outputJson(path.resolve(__dirname, '../../data/1000/', 'meta.json'), {
+      fse.outputJson(path.resolve(import.meta.dirname, '../../data/1000/', 'meta.json'), {
         testcases: [],
       }, { spaces: 2 }),
     )

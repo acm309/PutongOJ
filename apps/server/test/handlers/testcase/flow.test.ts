@@ -3,9 +3,9 @@ import path from 'node:path'
 import test from 'ava'
 import fse from 'fs-extra'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import { encryptData } from '../../../src/services/crypto'
-import { deploy } from '../../../src/utils/constants'
+import app from '../../../src/app.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
+import { deploy } from '../../../src/utils/constants.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)
@@ -59,7 +59,7 @@ test.serial('Create testcase succeeds with valid in/out', async (t) => {
 
   testcaseUuid = res.body.data[0].uuid
 
-  const testDir = path.resolve(__dirname, `../../../data/${testPid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../../data/${testPid}`)
   t.true(fse.existsSync(path.resolve(testDir, `${testcaseUuid}.in`)))
   t.true(fse.existsSync(path.resolve(testDir, `${testcaseUuid}.out`)))
 })
@@ -166,7 +166,7 @@ test.serial('Remove testcase succeeds with valid uuid', async (t) => {
   const uuids = res.body.data.map((tc: any) => tc.uuid)
   t.false(uuids.includes(testcaseUuid))
 
-  const testDir = path.resolve(__dirname, `../../../data/${testPid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../../data/${testPid}`)
   t.true(fse.existsSync(path.resolve(testDir, `${testcaseUuid}.in`)))
   t.true(fse.existsSync(path.resolve(testDir, `${testcaseUuid}.out`)))
 })
@@ -183,7 +183,7 @@ test.after.always('cleanup', async () => {
   if (testPid) {
     await request.delete(`/api/problem/${testPid}`)
 
-    const testDir = path.resolve(__dirname, `../../../data/${testPid}`)
+    const testDir = path.resolve(import.meta.dirname, `../../../data/${testPid}`)
     if (fse.existsSync(testDir)) {
       await fse.remove(testDir)
     }

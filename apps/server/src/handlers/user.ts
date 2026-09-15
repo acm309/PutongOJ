@@ -1,5 +1,5 @@
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User'
+import type { UserDocument } from '../models/User.ts'
 import Router from '@koa/router'
 import {
   ErrorCode,
@@ -13,18 +13,18 @@ import {
   UserSuggestQueryResultSchema,
   UserSuggestQuerySchema,
 } from '@putong-oj/shared'
-import difference from 'lodash/difference'
-import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn'
-import { dataExportLimit } from '../middlewares/ratelimit'
-import Group from '../models/Group'
-import Solution from '../models/Solution'
-import userService from '../services/user'
+import difference from 'lodash/difference.js'
+import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn.ts'
+import { dataExportLimit } from '../middlewares/ratelimit.ts'
+import Group from '../models/Group.ts'
+import Solution from '../models/Solution.ts'
+import userService from '../services/user.ts'
+import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
-} from '../utils'
-import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants'
+} from '../utils/index.ts'
 
 export async function loadUser (
   ctx: Context,

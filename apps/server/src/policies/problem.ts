@@ -1,10 +1,10 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { ProblemDocumentPopulated } from '../models/Problem'
-import { loadContestState } from '../policies/contest'
-import courseService from '../services/course'
-import problemService from '../services/problem'
-import constants, { ERR_NOT_FOUND } from '../utils/constants'
+import type { ProblemDocumentPopulated } from '../models/Problem.ts'
+import { loadContestState } from '../policies/contest.ts'
+import courseService from '../services/course.ts'
+import problemService from '../services/problem.ts'
+import constants, { ERR_NOT_FOUND } from '../utils/constants.ts'
 
 const { status } = constants
 

@@ -1,10 +1,10 @@
 import { JudgeStatus } from '@putong-oj/shared'
-import Comment from '../../models/Comment'
-import Discussion from '../../models/Discussion'
-import Problem from '../../models/Problem'
-import Solution from '../../models/Solution'
-import User from '../../models/User'
-import logger from '../../utils/logger'
+import Comment from '../../models/Comment.ts'
+import Discussion from '../../models/Discussion.ts'
+import Problem from '../../models/Problem.ts'
+import Solution from '../../models/Solution.ts'
+import User from '../../models/User.ts'
+import logger from '../../utils/logger.ts'
 
 /**
  * 更新用户的统计信息

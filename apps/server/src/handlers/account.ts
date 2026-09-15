@@ -15,13 +15,13 @@ import {
   SessionRevokeOthersResultSchema,
   UserPrivilege,
 } from '@putong-oj/shared'
-import { checkSession, loadProfile, loginRequire } from '../middlewares/authn'
-import { userLoginLimit, userRegisterLimit } from '../middlewares/ratelimit'
-import cryptoService from '../services/crypto'
-import sessionService from '../services/session'
-import { settingsService } from '../services/settings'
-import solutionService from '../services/solution'
-import userService from '../services/user'
+import { checkSession, loadProfile, loginRequire } from '../middlewares/authn.ts'
+import { userLoginLimit, userRegisterLimit } from '../middlewares/ratelimit.ts'
+import cryptoService from '../services/crypto.ts'
+import sessionService from '../services/session.ts'
+import { settingsService } from '../services/settings.ts'
+import solutionService from '../services/solution.ts'
+import userService from '../services/user.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -29,7 +29,7 @@ import {
   isComplexPwd,
   passwordHash,
   passwordHashBuffer,
-} from '../utils'
+} from '../utils/index.ts'
 
 export async function getProfile (ctx: Context) {
   const profile = await checkSession(ctx)

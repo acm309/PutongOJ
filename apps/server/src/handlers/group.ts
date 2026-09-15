@@ -1,8 +1,8 @@
 import type { Context } from 'koa'
 import Router from '@koa/router'
 import { GroupListQueryResultSchema } from '@putong-oj/shared'
-import groupService from '../services/group'
-import { createEnvelopedResponse } from '../utils'
+import groupService from '../services/group.ts'
+import { createEnvelopedResponse } from '../utils/index.ts'
 
 export async function findGroups (ctx: Context) {
   const groups = await groupService.findGroups()

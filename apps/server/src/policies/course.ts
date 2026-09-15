@@ -1,10 +1,10 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { CourseRole, WithId } from '../types'
-import type { CourseEntity } from '../types/entity'
-import Course from '../models/Course'
-import courseService from '../services/course'
-import { ERR_NOT_FOUND } from '../utils/constants'
+import type { CourseEntity } from '../types/entity.ts'
+import type { CourseRole, WithId } from '../types/index.ts'
+import Course from '../models/Course.ts'
+import courseService from '../services/course.ts'
+import { ERR_NOT_FOUND } from '../utils/constants.ts'
 
 export interface CourseState {
   course: WithId<CourseEntity>

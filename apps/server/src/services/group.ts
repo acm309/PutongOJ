@@ -1,7 +1,7 @@
 import type { GroupModel } from '@putong-oj/shared'
-import { difference } from 'lodash'
-import Group from '../models/Group'
-import User from '../models/User'
+import difference from 'lodash/difference.js'
+import Group from '../models/Group.ts'
+import User from '../models/User.ts'
 
 export async function findGroups (): Promise<GroupModel[]> {
   const groups = await Group

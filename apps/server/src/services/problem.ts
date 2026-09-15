@@ -1,19 +1,19 @@
 import type { Paginated, ProblemStatisticsQueryResult } from '@putong-oj/shared'
 import type { PipelineStage } from 'mongoose'
-import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem'
-import type { PaginateOption } from '../types'
-import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity'
+import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem.ts'
+import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity.ts'
+import type { PaginateOption } from '../types/index.ts'
 import path from 'node:path'
 import { JUDGE_STATUS_TERMINAL, JudgeStatus } from '@putong-oj/shared'
 import fse from 'fs-extra'
-import { escapeRegExp } from 'lodash'
+import escapeRegExp from 'lodash/escapeRegExp.js'
 import mongoose, { Types } from 'mongoose'
-import CourseProblem from '../models/CourseProblem'
-import Problem from '../models/Problem'
-import Solution from '../models/Solution'
-import { status } from '../utils/constants'
-import { CacheKey, cacheService } from './cache'
-import tagService from './tag'
+import CourseProblem from '../models/CourseProblem.ts'
+import Problem from '../models/Problem.ts'
+import Solution from '../models/Solution.ts'
+import { status } from '../utils/constants.ts'
+import { CacheKey, cacheService } from './cache.ts'
+import tagService from './tag.ts'
 
 export async function findProblems (
   opt: PaginateOption & {
@@ -129,7 +129,7 @@ export async function createProblem (
   const problem = new Problem(opt)
   await problem.save()
 
-  const dir = path.resolve(__dirname, '../../data', String(problem.pid))
+  const dir = path.resolve(import.meta.dirname, '../../data', String(problem.pid))
   await fse.ensureDir(dir)
   await fse.outputJson(
     path.resolve(dir, 'meta.json'),

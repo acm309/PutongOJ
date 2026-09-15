@@ -1,10 +1,10 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import { JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
-import redis from '../config/redis'
-import Solution from '../models/Solution'
-import logger from '../utils/logger'
-import { distributeWork } from './helper'
-import '../config/db'
+import redis from '../config/redis.ts'
+import Solution from '../models/Solution.ts'
+import logger from '../utils/logger.ts'
+import { distributeWork } from './helper.ts'
+import '../config/db.ts'
 
 /**
  * @NOTE

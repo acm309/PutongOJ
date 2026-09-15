@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { gcm } from '@noble/ciphers/aes.js'
 import { x25519 } from '@noble/curves/ed25519.js'
 import { sha256 } from '@noble/hashes/sha2.js'
-import redis from '../config/redis'
+import redis from '../config/redis.ts'
 
 export interface KeyPair {
   publicKey: Uint8Array

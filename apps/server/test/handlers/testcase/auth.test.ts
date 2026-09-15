@@ -1,6 +1,6 @@
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
+import app from '../../../src/app.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)

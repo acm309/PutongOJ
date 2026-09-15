@@ -1,6 +1,6 @@
 import { tagColors } from '@putong-oj/shared'
-import mongoose from '../config/db'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import ID from './ID.ts'
 
 const tagSchema = new mongoose.Schema({
   tagId: {

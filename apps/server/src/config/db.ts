@@ -1,8 +1,8 @@
 import process from 'node:process'
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import config from '.'
-import logger from '../utils/logger'
+import logger from '../utils/logger.ts'
+import config from './index.ts'
 
 mongoose.set('strictQuery', true)
 mongoose.set('debug', config.mongooseDebug)

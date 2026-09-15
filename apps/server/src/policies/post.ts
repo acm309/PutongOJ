@@ -1,7 +1,7 @@
 import type { PostModel } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { WithId } from '../types'
-import Post from '../models/Post'
+import type { WithId } from '../types/index.ts'
+import Post from '../models/Post.ts'
 
 export interface PostState {
   post: WithId<PostModel>

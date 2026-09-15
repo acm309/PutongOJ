@@ -3,12 +3,12 @@ import { randomUUID } from 'node:crypto'
 import { env } from 'node:process'
 import Router from '@koa/router'
 import { AvatarPresetsQueryResultSchema, PublicConfigQueryResultSchema } from '@putong-oj/shared'
-import { globalConfig } from '../config'
-import redis from '../config/redis'
-import { loadProfile, loginRequire } from '../middlewares/authn'
-import cryptoService from '../services/crypto'
-import { settingsService } from '../services/settings'
-import { createEnvelopedResponse } from '../utils'
+import { globalConfig } from '../config/index.ts'
+import redis from '../config/redis.ts'
+import { loadProfile, loginRequire } from '../middlewares/authn.ts'
+import cryptoService from '../services/crypto.ts'
+import { settingsService } from '../services/settings.ts'
+import { createEnvelopedResponse } from '../utils/index.ts'
 
 function parseBuildTime (): Date | null {
   const buildTimeStr = env.NODE_BUILD_TIME

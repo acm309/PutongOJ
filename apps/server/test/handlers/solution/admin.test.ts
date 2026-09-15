@@ -1,9 +1,9 @@
 import { JudgeStatus } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import { encryptData } from '../../../src/services/crypto'
-import { deploy } from '../../../src/utils/constants'
+import app from '../../../src/app.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
+import { deploy } from '../../../src/utils/constants.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)

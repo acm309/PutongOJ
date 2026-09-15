@@ -1,9 +1,9 @@
 import type { Context } from 'koa'
 import Router from '@koa/router'
 import { ErrorCode, FileListQueryResultSchema, FileListQuerySchema, FileUploadResultSchema } from '@putong-oj/shared'
-import { loadProfile, loginRequire } from '../middlewares/authn'
-import fileService from '../services/file'
-import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
+import { loadProfile, loginRequire } from '../middlewares/authn.ts'
+import fileService from '../services/file.ts'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export async function upload (ctx: Context) {
   const profile = await loadProfile(ctx)

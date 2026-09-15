@@ -1,10 +1,10 @@
 import type { Context, Next } from 'koa'
 import { ErrorCode, ErrorCodeValues } from '@putong-oj/shared'
 import send from 'koa-send'
-import config from '../config'
-import { createErrorResponse } from '../utils'
-import logger from '../utils/logger'
-import authnMiddleware from './authn'
+import config from '../config/index.ts'
+import { createErrorResponse } from '../utils/index.ts'
+import logger from '../utils/logger.ts'
+import authnMiddleware from './authn.ts'
 
 export async function parseClientIp (ctx: Context, next: () => Promise<any>) {
   const { reverseProxy } = config

@@ -2,9 +2,9 @@ import path from 'node:path'
 import test from 'ava'
 import fse from 'fs-extra'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import { encryptData } from '../../../src/services/crypto'
-import { deploy, status } from '../../../src/utils/constants'
+import app from '../../../src/app.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
+import { deploy, status } from '../../../src/utils/constants.ts'
 
 const server = app.listen()
 const adminRequest = supertest.agent(server)
@@ -202,7 +202,7 @@ test.after.always('cleanup', async () => {
   if (reservedPid) {
     await adminRequest.delete(`/api/problem/${reservedPid}`)
 
-    const reservedDir = path.resolve(__dirname, `../../../data/${reservedPid}`)
+    const reservedDir = path.resolve(import.meta.dirname, `../../../data/${reservedPid}`)
     if (fse.existsSync(reservedDir)) {
       await fse.remove(reservedDir)
     }
@@ -210,7 +210,7 @@ test.after.always('cleanup', async () => {
   if (availablePid) {
     await adminRequest.delete(`/api/problem/${availablePid}`)
 
-    const testDir = path.resolve(__dirname, `../../../data/${availablePid}`)
+    const testDir = path.resolve(import.meta.dirname, `../../../data/${availablePid}`)
     if (fse.existsSync(testDir)) {
       await fse.remove(testDir)
     }

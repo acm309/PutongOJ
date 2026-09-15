@@ -1,7 +1,7 @@
 import type { Context, Middleware } from 'koa'
 import ratelimit from 'koa-ratelimit'
-import config from '../config'
-import redis from '../config/redis'
+import config from '../config/index.ts'
+import redis from '../config/redis.ts'
 
 function createRatelimitMiddleware (
   duration: number,

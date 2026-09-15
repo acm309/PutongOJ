@@ -1,8 +1,8 @@
-import type Redis from 'ioredis'
+import type { Redis } from 'ioredis'
 import type { Types } from 'mongoose'
 import { randomUUID } from 'node:crypto'
 import NodeCache from 'node-cache'
-import redis from '../config/redis'
+import redis from '../config/redis.ts'
 
 const MEMORY_CACHE_TTL = 3
 const REDIS_CACHE_TTL = 5

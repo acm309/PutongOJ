@@ -1,10 +1,10 @@
-import type { CourseDocument } from '../../src/models/Course'
-import type { CourseEntityEditable } from '../../src/types/entity'
+import type { CourseDocument } from '../../src/models/Course.ts'
+import type { CourseEntityEditable } from '../../src/types/entity.ts'
 import test from 'ava'
-import User from '../../src/models/User'
-import courseService from '../../src/services/course'
-import { userSeeds } from '../seeds/user'
-import '../../src/config/db'
+import User from '../../src/models/User.ts'
+import courseService from '../../src/services/course.ts'
+import { userSeeds } from '../seeds/user.ts'
+import '../../src/config/db.ts'
 
 const testCourse: Pick<CourseEntityEditable, 'name' | 'description' | 'encrypt'> = {
   name: 'C Programming',

@@ -4,9 +4,9 @@ import type {
   Paginated,
   SolutionModel,
 } from '@putong-oj/shared'
-import type { PaginateOption, SortOption } from '../types'
+import type { PaginateOption, SortOption } from '../types/index.ts'
 import { EXPORT_SIZE_MAX } from '@putong-oj/shared'
-import Solution from '../models/Solution'
+import Solution from '../models/Solution.ts'
 
 interface SolutionFilterOption {
   user?: string

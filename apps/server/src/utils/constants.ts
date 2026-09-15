@@ -1,4 +1,4 @@
-import type { CourseRole } from '../types'
+import type { CourseRole } from '../types/index.ts'
 import { ErrorCode } from '@putong-oj/shared'
 
 export const limitation = Object.freeze({

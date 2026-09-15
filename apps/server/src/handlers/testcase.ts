@@ -7,13 +7,13 @@ import { ProblemTestcaseListQueryResultSchema, uuidRegex } from '@putong-oj/shar
 import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
-import remove from 'lodash/remove'
-import { loadProfile, loginRequire } from '../middlewares/authn'
-import { dataExportLimit } from '../middlewares/ratelimit'
-import { loadProblemOrThrow } from '../policies/problem'
-import courseService from '../services/course'
-import { createEnvelopedResponse, toObjectRecord } from '../utils'
-import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants'
+import remove from 'lodash/remove.js'
+import { loadProfile, loginRequire } from '../middlewares/authn.ts'
+import { dataExportLimit } from '../middlewares/ratelimit.ts'
+import { loadProblemOrThrow } from '../policies/problem.ts'
+import courseService from '../services/course.ts'
+import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants.ts'
+import { createEnvelopedResponse, toObjectRecord } from '../utils/index.ts'
 
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
@@ -24,7 +24,7 @@ export async function findTestcases (ctx: Context) {
 
   const { pid } = problem
   let meta = { testcases: [] }
-  const dir = path.resolve(__dirname, `../../data/${pid}`)
+  const dir = path.resolve(import.meta.dirname, `../../data/${pid}`)
   const file = path.resolve(dir, 'meta.json')
   if (!fse.existsSync(file)) {
     fse.ensureDirSync(dir)
@@ -51,7 +51,7 @@ export async function exportTestcases (ctx: Context) {
   }
 
   const { pid } = problem
-  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../data/${pid}`)
 
   if (!fse.existsSync(testDir)) {
     ctx.throw(404, 'No testcases found for this problem')
@@ -126,7 +126,7 @@ export async function createTestcase (ctx: Context) {
    * 记得中间要修改对应的 meta.json
    */
 
-  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../data/${pid}`)
   const id = randomUUID() // 快速生成RFC4122 UUID
 
   // 将文件读取到meta对象
@@ -167,7 +167,7 @@ export async function removeTestcase (ctx: Context) {
    * 一个提交的测试数据用的是 id 为 1 的测试数据，即时管理员不再用这个数据了，我们仍然能够看到当时这个提交用的测试数据
    */
 
-  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../data/${pid}`)
   const meta = await fse.readJson(path.resolve(testDir, 'meta.json'))
 
   remove(meta.testcases, item => item.uuid === uuid)
@@ -201,7 +201,7 @@ export async function getTestcase (ctx: Context) {
     ctx.throw(400, 'Invalid type')
   }
 
-  const testDir = path.resolve(__dirname, `../../data/${pid}`)
+  const testDir = path.resolve(import.meta.dirname, `../../data/${pid}`)
   if (!fse.existsSync(path.resolve(testDir, `${uuid}.${type}`))) {
     ctx.throw(400, 'No such a testcase')
   }

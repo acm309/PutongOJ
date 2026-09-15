@@ -1,10 +1,10 @@
 import { randomBytes } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import config from '../config'
-import redis from '../config/redis'
+import config from '../config/index.ts'
+import redis from '../config/redis.ts'
 
-const luaScript = readFileSync(path.join(__dirname, '..', 'scripts', 'session.lua'))
+const luaScript = readFileSync(path.join(import.meta.dirname, '..', 'scripts', 'session.lua'))
 
 interface SessionInfo {
   loginAt: string

@@ -1,5 +1,5 @@
-import type { CourseEntity } from '../../src/types/entity'
-import { encrypt } from '../../src/utils/constants'
+import type { CourseEntity } from '../../src/types/entity.ts'
+import { encrypt } from '../../src/utils/constants.ts'
 
 const courseSeeds: Partial<CourseEntity>[] = [
   {

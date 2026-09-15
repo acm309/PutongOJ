@@ -1,8 +1,8 @@
 import type { DiscussionModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { DiscussionType, TITLE_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import ID from './ID.ts'
 
 interface DiscussionDocument extends Document<Types.ObjectId>, DiscussionModel { }
 

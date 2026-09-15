@@ -1,4 +1,4 @@
-import mongoose from '../config/db'
+import mongoose from '../config/db.ts'
 
 const fileSchema = new mongoose.Schema({
   storageKey: {

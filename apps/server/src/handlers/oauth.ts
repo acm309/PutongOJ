@@ -1,7 +1,7 @@
 import type { OAuthConnection } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User'
-import type { OAuthState } from '../services/oauth'
+import type { UserDocument } from '../models/User.ts'
+import type { OAuthState } from '../services/oauth.ts'
 import Router from '@koa/router'
 import {
   ErrorCode,
@@ -14,10 +14,10 @@ import {
   OAuthProviderSchema,
   OAuthUserConnectionsQueryResultSchema,
 } from '@putong-oj/shared'
-import { loadProfile, loginRequire } from '../middlewares/authn'
-import oauthService from '../services/oauth'
-import sessionService from '../services/session'
-import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils'
+import { loadProfile, loginRequire } from '../middlewares/authn.ts'
+import oauthService from '../services/oauth.ts'
+import sessionService from '../services/session.ts'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export const providerMap: Record<string, OAuthProvider> = {
   cjlu: OAuthProvider.CJLU,

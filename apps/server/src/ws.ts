@@ -2,11 +2,11 @@ import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import process from 'node:process'
 import { uuidV4Regex, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
-import WebSocket from 'ws'
-import { globalConfig } from './config'
-import redis from './config/redis'
+import { WebSocket, WebSocketServer } from 'ws'
+import { globalConfig } from './config/index.ts'
+import redis from './config/redis.ts'
 
-const wss = new WebSocket.Server({ port: globalConfig.wsPort })
+const wss = new WebSocketServer({ port: globalConfig.wsPort })
 
 const userConnections = new Map<string, Set<WebSocket>>()
 

@@ -1,6 +1,6 @@
 import type { Document, Model, Types } from 'mongoose'
-import type { CourseProblemEntity } from '../types/entity'
-import mongoose from '../config/db'
+import type { CourseProblemEntity } from '../types/entity.ts'
+import mongoose from '../config/db.ts'
 
 export interface CourseProblemDocument extends Document<Types.ObjectId>, CourseProblemEntity { }
 

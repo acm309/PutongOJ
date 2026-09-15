@@ -1,10 +1,10 @@
 import { Language } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import { encryptData } from '../../../src/services/crypto'
-import { deploy } from '../../../src/utils/constants'
-import { userSeeds } from '../../seeds/user'
+import app from '../../../src/app.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
+import { deploy } from '../../../src/utils/constants.ts'
+import { userSeeds } from '../../seeds/user.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)

@@ -1,9 +1,9 @@
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { CourseMemberEntity, CourseMemberView } from '../types/entity'
-import type { UserEntity } from './User'
+import type { CourseMemberEntity, CourseMemberView } from '../types/entity.ts'
+import type { UserEntity } from './User.ts'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db'
-import { courseRoleNone } from '../utils/constants'
+import mongoose from '../config/db.ts'
+import { courseRoleNone } from '../utils/constants.ts'
 
 export interface CourseMemberDocument extends Document<Types.ObjectId>, CourseMemberEntity { }
 

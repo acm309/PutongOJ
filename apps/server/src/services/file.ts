@@ -1,14 +1,14 @@
 import type { AdminFileListQuery, FileListQuery, FileModel } from '@putong-oj/shared'
 import type { Types } from 'mongoose'
-import type { UserDocument } from '../models/User'
-import type { QueryFilter } from '../types/mongo'
+import type { UserDocument } from '../models/User.ts'
+import type { QueryFilter } from '../types/mongo.ts'
 import path from 'node:path'
 import fse from 'fs-extra'
-import Files from '../models/Files'
-import logger from '../utils/logger'
-import userService from './user'
+import Files from '../models/Files.ts'
+import logger from '../utils/logger.ts'
+import userService from './user.ts'
 
-const uploadDir = path.join(__dirname, '../../public/uploads')
+const uploadDir = path.join(import.meta.dirname, '../../public/uploads')
 
 async function queryFiles (
   filter: QueryFilter<FileModel>,

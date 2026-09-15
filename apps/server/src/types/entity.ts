@@ -1,9 +1,9 @@
 import type { TagModel } from '@putong-oj/shared'
 import type { Types } from 'mongoose'
-import type { CourseRole } from '.'
-import type { CourseDocument } from '../models/Course'
-import type { UserEntity } from '../models/User'
-import type { encrypt, problemType, status } from '../utils/constants'
+import type { CourseDocument } from '../models/Course.ts'
+import type { UserEntity } from '../models/User.ts'
+import type { encrypt, problemType, status } from '../utils/constants.ts'
+import type { CourseRole } from './index.ts'
 
 // Common
 

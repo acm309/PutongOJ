@@ -8,11 +8,11 @@ import type {
   UserModel,
 } from '@putong-oj/shared'
 import type { Types } from 'mongoose'
-import type { DocumentId, PaginateOption, SortOption } from '../types'
-import type { QueryFilter } from '../types/mongo'
-import { distributeWork } from '../jobs/helper'
-import Comment from '../models/Comment'
-import Discussion from '../models/Discussion'
+import type { DocumentId, PaginateOption, SortOption } from '../types/index.ts'
+import type { QueryFilter } from '../types/mongo.ts'
+import { distributeWork } from '../jobs/helper.ts'
+import Comment from '../models/Comment.ts'
+import Discussion from '../models/Discussion.ts'
 
 export type DiscussionQueryFilters = QueryFilter<{
   author: Types.ObjectId

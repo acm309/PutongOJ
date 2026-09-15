@@ -1,6 +1,6 @@
-import type { UserDocument } from '../../src/models/User'
+import type { UserDocument } from '../../src/models/User.ts'
 import { UserPrivilege } from '@putong-oj/shared'
-import { deploy } from '../../src/utils/constants'
+import { deploy } from '../../src/utils/constants.ts'
 
 type UserSeed = Partial<Omit<UserDocument, 'pwd'>> & { pwd?: string }
 

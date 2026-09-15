@@ -5,7 +5,11 @@
     "rootDir": "./src",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "outDir": "./dist"
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "outDir": "./dist",
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   },
   "include": [
     "src/**/*"

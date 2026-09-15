@@ -20,7 +20,7 @@
     },
     "test": {
       "dependsOn": [ "^build" ],
-      "outputs": [ ".nyc_output/**", "coverage.lcov" ]
+      "outputs": [ "coverage/**", "coverage.lcov" ]
     },
     "typecheck": {
       "dependsOn": [ "^build" ],

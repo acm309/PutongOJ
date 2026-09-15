@@ -1,6 +1,6 @@
-import Redis from 'ioredis'
-import config from '.'
-import logger from '../utils/logger'
+import { Redis } from 'ioredis'
+import logger from '../utils/logger.ts'
+import config from './index.ts'
 
 const redis = new Redis(config.redisURL)
 

@@ -1,12 +1,12 @@
 import { resolve } from 'node:path'
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
+import app from '../../../src/app.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)
 
-const filepath = resolve(__dirname, '../utils.test.ts')
+const filepath = resolve(import.meta.dirname, '../utils.test.ts')
 
 test('Visitor cannot upload a file', async (t) => {
   const res = await request

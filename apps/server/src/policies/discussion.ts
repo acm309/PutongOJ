@@ -1,9 +1,9 @@
 import type { Context } from 'koa'
-import type { DiscussionDocument } from '../services/discussion'
+import type { DiscussionDocument } from '../services/discussion.ts'
 import { DiscussionType } from '@putong-oj/shared'
-import discussionService from '../services/discussion'
-import { loadContest } from './contest'
-import { loadCourseRoleById } from './course'
+import discussionService from '../services/discussion.ts'
+import { loadContest } from './contest.ts'
+import { loadCourseRoleById } from './course.ts'
 
 export interface DiscussionState {
   discussion: DiscussionDocument

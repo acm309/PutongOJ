@@ -1,11 +1,11 @@
 import type { FileModel } from '@putong-oj/shared'
 import path from 'node:path'
 import fse from 'fs-extra'
-import Files from '../../models/Files'
-import User from '../../models/User'
-import logger from '../../utils/logger'
+import Files from '../../models/Files.ts'
+import User from '../../models/User.ts'
+import logger from '../../utils/logger.ts'
 
-const uploadDir = path.join(__dirname, '../../../public/uploads')
+const uploadDir = path.join(import.meta.dirname, '../../../public/uploads')
 
 async function scanUploadsFolder () {
   const stats = {

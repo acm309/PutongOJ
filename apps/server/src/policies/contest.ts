@@ -1,12 +1,12 @@
 import type { ContestModel } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { WithId } from '../types'
+import type { WithId } from '../types/index.ts'
 import { ParticipationStatus } from '@putong-oj/shared'
-import { loadProfile } from '../middlewares/authn'
-import Contest from '../models/Contest'
-import { loadCourseRoleById } from '../policies/course'
-import { contestService } from '../services/contest'
-import { isIpInWhitelist } from '../utils'
+import { loadProfile } from '../middlewares/authn.ts'
+import Contest from '../models/Contest.ts'
+import { loadCourseRoleById } from '../policies/course.ts'
+import { contestService } from '../services/contest.ts'
+import { isIpInWhitelist } from '../utils/index.ts'
 
 export interface ContestState {
   contest: WithId<ContestModel>

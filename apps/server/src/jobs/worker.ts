@@ -1,10 +1,10 @@
-import redis from '../config/redis'
-import logger from '../utils/logger'
-import checkSimilarity from './tasks/checkSimilarity'
-import fetchCodeforces from './tasks/fetchCodeforces'
-import scanUploadsFolder from './tasks/scanUploadsFolder'
-import updateStatistic from './tasks/updateStatistic'
-import '../config/db'
+import redis from '../config/redis.ts'
+import logger from '../utils/logger.ts'
+import checkSimilarity from './tasks/checkSimilarity.ts'
+import fetchCodeforces from './tasks/fetchCodeforces.ts'
+import scanUploadsFolder from './tasks/scanUploadsFolder.ts'
+import updateStatistic from './tasks/updateStatistic.ts'
+import '../config/db.ts'
 
 async function main () {
   logger.info('Worker is running...')

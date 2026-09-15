@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { TITLE_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db'
+import mongoose from '../config/db.ts'
 
 const postSchema = new mongoose.Schema({
   slug: {

@@ -1,6 +1,6 @@
 import type { Context } from 'koa'
 import type { Types } from 'mongoose'
-import type { DiscussionQueryFilters } from '../services/discussion'
+import type { DiscussionQueryFilters } from '../services/discussion.ts'
 import Router from '@koa/router'
 import {
   CommentCreatePayloadSchema,
@@ -11,19 +11,19 @@ import {
   DiscussionType,
   ErrorCode,
 } from '@putong-oj/shared'
-import { loadProfile, loginRequire } from '../middlewares/authn'
-import { commentCreateLimit, discussionCreateLimit } from '../middlewares/ratelimit'
-import { loadContestState } from '../policies/contest'
-import { loadCourseRoleById } from '../policies/course'
-import { loadDiscussion, publicDiscussionTypes } from '../policies/discussion'
-import { loadProblemOrThrow } from '../policies/problem'
-import discussionService from '../services/discussion'
-import { getUser } from '../services/user'
+import { loadProfile, loginRequire } from '../middlewares/authn.ts'
+import { commentCreateLimit, discussionCreateLimit } from '../middlewares/ratelimit.ts'
+import { loadContestState } from '../policies/contest.ts'
+import { loadCourseRoleById } from '../policies/course.ts'
+import { loadDiscussion, publicDiscussionTypes } from '../policies/discussion.ts'
+import { loadProblemOrThrow } from '../policies/problem.ts'
+import discussionService from '../services/discussion.ts'
+import { getUser } from '../services/user.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
-} from '../utils'
+} from '../utils/index.ts'
 
 async function findDiscussions (ctx: Context) {
   const query = DiscussionListQuerySchema.safeParse(ctx.request.query)

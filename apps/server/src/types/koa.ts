@@ -1,9 +1,9 @@
-import type { UserDocument } from '../models/User'
-import type { ContestState } from '../policies/contest'
-import type { CourseState } from '../policies/course'
-import type { DiscussionState } from '../policies/discussion'
-import type { PostState } from '../policies/post'
-import type { ProblemState } from '../policies/problem'
+import type { UserDocument } from '../models/User.ts'
+import type { ContestState } from '../policies/contest.ts'
+import type { CourseState } from '../policies/course.ts'
+import type { DiscussionState } from '../policies/discussion.ts'
+import type { PostState } from '../policies/post.ts'
+import type { ProblemState } from '../policies/problem.ts'
 import 'koa'
 
 declare module 'koa' {

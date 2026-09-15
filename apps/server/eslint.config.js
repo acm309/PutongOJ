@@ -1,9 +1,8 @@
-const antfu = require('@antfu/eslint-config').default
+import antfu from '@antfu/eslint-config'
 
-module.exports = antfu(
+export default antfu(
   {
     ignores: [
-      '.nyc_output',
       'coverage',
       'data',
       'dist',

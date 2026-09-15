@@ -1,28 +1,29 @@
 import type { Paginated } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { CourseRole } from '../types'
-import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity'
+import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity.ts'
+import type { CourseRole } from '../types/index.ts'
 import Router from '@koa/router'
 import {
   ContestListQueryResultSchema,
   CourseContestListQuerySchema,
   ErrorCode,
 } from '@putong-oj/shared'
-import { escapeRegExp, pick } from 'lodash'
-import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn'
-import User from '../models/User'
-import { loadCourseState, loadCourseStateOrThrow } from '../policies/course'
-import { contestService } from '../services/contest'
-import courseService from '../services/course'
-import problemService from '../services/problem'
+import escapeRegExp from 'lodash/escapeRegExp.js'
+import pick from 'lodash/pick.js'
+import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
+import User from '../models/User.ts'
+import { loadCourseState, loadCourseStateOrThrow } from '../policies/course.ts'
+import { contestService } from '../services/contest.ts'
+import courseService from '../services/course.ts'
+import problemService from '../services/problem.ts'
+import { encrypt, ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
   parsePaginateOption,
   toObjectRecord,
-} from '../utils'
-import { encrypt, ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants'
+} from '../utils/index.ts'
 
 const findCourses = async (ctx: Context) => {
   const opt = ctx.request.query

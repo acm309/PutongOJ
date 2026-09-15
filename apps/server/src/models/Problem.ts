@@ -1,10 +1,10 @@
 import type { TagModel } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { ProblemEntity } from '../types/entity'
+import type { ProblemEntity } from '../types/entity.ts'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db'
-import { limitation, problemType, status } from '../utils/constants'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import { limitation, problemType, status } from '../utils/constants.ts'
+import ID from './ID.ts'
 
 export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
 export type ProblemDocumentPopulated = Omit<ProblemDocument,

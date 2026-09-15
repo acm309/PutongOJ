@@ -1,4 +1,4 @@
-import type { OAuthClientConfig } from '../services/oauth'
+import type { OAuthClientConfig } from '../services/oauth.ts'
 import { randomBytes } from 'node:crypto'
 import { env } from 'node:process'
 import { OAuthProvider } from '@putong-oj/shared'

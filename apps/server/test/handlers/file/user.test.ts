@@ -3,18 +3,18 @@ import fs from 'node:fs'
 import { resolve } from 'node:path'
 import test from 'ava'
 import supertest from 'supertest'
-import app from '../../../src/app'
-import Files from '../../../src/models/Files'
-import User from '../../../src/models/User'
-import { encryptData } from '../../../src/services/crypto'
-import { deploy } from '../../../src/utils/constants'
-import { userSeeds } from '../../seeds/user'
+import app from '../../../src/app.ts'
+import Files from '../../../src/models/Files.ts'
+import User from '../../../src/models/User.ts'
+import { encryptData } from '../../../src/services/crypto.ts'
+import { deploy } from '../../../src/utils/constants.ts'
+import { userSeeds } from '../../seeds/user.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)
 const otherRequest = supertest.agent(server)
 
-const filepath = resolve(__dirname, '../utils.test.ts')
+const filepath = resolve(import.meta.dirname, '../utils.test.ts')
 const content = fs.readFileSync(filepath, 'utf8')
 
 let uploadedStorageKey: string | null = null

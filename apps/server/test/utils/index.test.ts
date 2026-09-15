@@ -1,5 +1,5 @@
 import test from 'ava'
-import helper, { isIpInWhitelist } from '../../src/utils'
+import helper, { isIpInWhitelist } from '../../src/utils/index.ts'
 
 test('Helper purify', (t) => {
   t.deepEqual(helper.purify({

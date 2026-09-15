@@ -1,6 +1,6 @@
 import test from 'ava'
-import redis from '../../src/config/redis'
-import cryptoService from '../../src/services/crypto'
+import redis from '../../src/config/redis.ts'
+import cryptoService from '../../src/services/crypto.ts'
 
 test.serial('encryptData (empty string)', async (t) => {
   await t.throwsAsync(cryptoService.encryptData(''), {

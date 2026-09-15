@@ -2,7 +2,7 @@ import type { UserModel } from '@putong-oj/shared'
 import type { Document, PaginateModel, Schema, Types } from 'mongoose'
 import { UserModelSchema, UserPrivilege, UserPrivilegeValues } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db'
+import mongoose from '../config/db.ts'
 
 export interface UserEntity extends UserModel { }
 

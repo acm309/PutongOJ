@@ -1,9 +1,9 @@
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { CourseEntity } from '../types/entity'
+import type { CourseEntity } from '../types/entity.ts'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db'
-import { encrypt } from '../utils/constants'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import { encrypt } from '../utils/constants.ts'
+import ID from './ID.ts'
 
 export interface CourseDocument extends Document<Types.ObjectId>, CourseEntity {
   isPublic: boolean

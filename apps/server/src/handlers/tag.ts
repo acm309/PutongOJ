@@ -1,8 +1,8 @@
 import type { Context } from 'koa'
 import Router from '@koa/router'
 import { TagListQueryResultSchema } from '@putong-oj/shared'
-import tagService from '../services/tag'
-import { createEnvelopedResponse } from '../utils'
+import tagService from '../services/tag.ts'
+import { createEnvelopedResponse } from '../utils/index.ts'
 
 export async function findTags (ctx: Context) {
   const tags = await tagService.getTags()

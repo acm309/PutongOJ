@@ -1,12 +1,13 @@
 import type { Enveloped } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { ZodError } from 'zod'
-import type { PaginateOption } from '../types'
+import type { PaginateOption } from '../types/index.ts'
 import { Buffer } from 'node:buffer'
 import { BlockList, isIPv6 } from 'node:net'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
 import { ErrorCode, passwordRegex } from '@putong-oj/shared'
-import { pick, pickBy } from 'lodash'
+import pick from 'lodash/pick.js'
+import pickBy from 'lodash/pickBy.js'
 
 export function parsePaginateOption (
   opt: Record<string, unknown>,
@@ -69,13 +70,13 @@ export function purify (obj: Record<string, any>) {
 
 export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
   const { requestId } = ctx.state
-  ctx.body = <Enveloped<T>>{
+  ctx.body = {
     success: true,
     code: 200,
     message: 'OK',
     data,
     requestId,
-  }
+  } as Enveloped<T>
 }
 
 function getFriendlyErrorMessage (code: ErrorCode): string {
@@ -105,13 +106,13 @@ export function createErrorResponse (
 ): void {
   const { requestId } = ctx.state
   const message = msg ?? getFriendlyErrorMessage(code)
-  ctx.body = <Enveloped<null>>{
+  ctx.body = {
     success: false,
     code,
     message,
     data: null,
     requestId,
-  }
+  } as Enveloped<null>
 }
 
 function getFriendlyZodErrorMessage (error: ZodError): string {

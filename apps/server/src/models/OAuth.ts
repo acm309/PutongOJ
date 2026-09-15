@@ -1,8 +1,8 @@
 import type { OAuthConnection } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
-import type { Entity } from '../types/entity'
-import type { UserDocument } from './User'
-import mongoose from '../config/db'
+import type { Entity } from '../types/entity.ts'
+import type { UserDocument } from './User.ts'
+import mongoose from '../config/db.ts'
 
 export interface OAuthEntity extends Entity, OAuthConnection {
   user: Types.ObjectId

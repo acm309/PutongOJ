@@ -1,10 +1,10 @@
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { SolutionEntity } from '../types/entity'
+import type { SolutionEntity } from '../types/entity.ts'
 import { JudgeStatus, JudgeStatusValues } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db'
-import { status } from '../utils/constants'
-import ID from './ID'
+import mongoose from '../config/db.ts'
+import { status } from '../utils/constants.ts'
+import ID from './ID.ts'
 
 export interface SolutionDocument extends Document<Types.ObjectId>, SolutionEntity {
   isAccepted: boolean

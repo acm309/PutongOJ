@@ -1,7 +1,7 @@
 import type { AdminAccountBatchRegisterResult, ContestModel, PostModel } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { DiscussionUpdateDto } from '../services/discussion'
-import type { QueryFilter } from '../types/mongo'
+import type { DiscussionUpdateDto } from '../services/discussion.ts'
+import type { QueryFilter } from '../types/mongo.ts'
 import Router from '@koa/router'
 import {
   AdminAccountBatchRegisterPayloadSchema,
@@ -39,35 +39,35 @@ import {
   SessionListQueryResultSchema,
   SessionRevokeOthersResultSchema,
 } from '@putong-oj/shared'
-import { escapeRegExp } from 'lodash'
-import { distributeWork } from '../jobs/helper'
-import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn'
-import { dataExportLimit } from '../middlewares/ratelimit'
-import { loadPost } from '../policies/post'
-import { contestService } from '../services/contest'
-import courseService from '../services/course'
-import cryptoService from '../services/crypto'
-import discussionService from '../services/discussion'
-import fileService from '../services/file'
-import groupService from '../services/group'
-import oauthService from '../services/oauth'
-import { postService } from '../services/post'
-import problemService from '../services/problem'
-import sessionService from '../services/session'
-import { settingsService } from '../services/settings'
-import solutionService from '../services/solution'
-import tagService from '../services/tag'
-import userService from '../services/user'
-import websocketService from '../services/websocket'
+import escapeRegExp from 'lodash/escapeRegExp.js'
+import { distributeWork } from '../jobs/helper.ts'
+import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn.ts'
+import { dataExportLimit } from '../middlewares/ratelimit.ts'
+import { loadPost } from '../policies/post.ts'
+import { contestService } from '../services/contest.ts'
+import courseService from '../services/course.ts'
+import cryptoService from '../services/crypto.ts'
+import discussionService from '../services/discussion.ts'
+import fileService from '../services/file.ts'
+import groupService from '../services/group.ts'
+import oauthService from '../services/oauth.ts'
+import { postService } from '../services/post.ts'
+import problemService from '../services/problem.ts'
+import sessionService from '../services/session.ts'
+import { settingsService } from '../services/settings.ts'
+import solutionService from '../services/solution.ts'
+import tagService from '../services/tag.ts'
+import userService from '../services/user.ts'
+import websocketService from '../services/websocket.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
   isComplexPwd,
   passwordHash,
-} from '../utils'
-import { providerMap } from './oauth'
-import { loadUser } from './user'
+} from '../utils/index.ts'
+import { providerMap } from './oauth.ts'
+import { loadUser } from './user.ts'
 
 async function loadEditingUser (ctx: Context) {
   const user = await loadUser(ctx)

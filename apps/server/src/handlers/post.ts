@@ -6,13 +6,13 @@ import {
   PostListQueryResultSchema,
   PostListQuerySchema,
 } from '@putong-oj/shared'
-import { loadPost } from '../policies/post'
-import { postService } from '../services/post'
+import { loadPost } from '../policies/post.ts'
+import { postService } from '../services/post.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
-} from '../utils'
+} from '../utils/index.ts'
 
 async function findPosts (ctx: Context) {
   const query = PostListQuerySchema.safeParse(ctx.request.query)

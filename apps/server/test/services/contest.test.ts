@@ -1,11 +1,11 @@
 import { ParticipationStatus } from '@putong-oj/shared'
 import test from 'ava'
-import Contest from '../../src/models/Contest'
-import User from '../../src/models/User'
-import { contestService } from '../../src/services/contest'
-import { userSeeds } from '../seeds/user'
-import '../../src/models/Course'
-import '../../src/config/db'
+import Contest from '../../src/models/Contest.ts'
+import User from '../../src/models/User.ts'
+import { contestService } from '../../src/services/contest.ts'
+import { userSeeds } from '../seeds/user.ts'
+import '../../src/models/Course.ts'
+import '../../src/config/db.ts'
 
 // ─── shared state ────────────────────────────────────────────────────────────
 

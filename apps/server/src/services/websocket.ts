@@ -1,6 +1,6 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import { WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
-import redis from '../config/redis'
+import redis from '../config/redis.ts'
 
 const CHANNEL = 'websocket:message'
 
