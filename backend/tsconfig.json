@@ -1,14 +1,11 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ES2023",
     "rootDir": "./src",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "strict": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "outDir": "./dist"
   },
   "include": [
     "src/**/*"

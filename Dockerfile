@@ -11,7 +11,7 @@ RUN echo $(git rev-parse --short HEAD) > version.txt
 FROM node:24-slim AS base_builder
 WORKDIR /app
 
-RUN npm i -g pnpm@latest-11
+RUN npm i -g pnpm@11.17.0
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY backend/package.json backend/
@@ -47,7 +47,7 @@ RUN env \
 FROM base_builder AS backend_deps
 WORKDIR /app
 
-RUN pnpm --filter @putongoj/backend deploy /app/backend_deploy
+RUN pnpm --filter @putongoj/backend deploy --legacy /app/backend_deploy
 
 # Backend builder
 FROM base_builder AS backend_builder

@@ -137,3 +137,9 @@ dist
 
 # Editor directories and files
 .vscode/
+
+# Local agent working notes (not part of the repository)
+MONOREPO-PLAN.md
+
+# Turborepo
+.turbo/

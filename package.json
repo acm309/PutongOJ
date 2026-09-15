@@ -1,0 +1,28 @@
+{
+  "name": "putong-oj",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24",
+      "onFail": "error"
+    }
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  }
+}

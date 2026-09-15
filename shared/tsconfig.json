@@ -1,19 +1,16 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "ES2023",
+    "lib": ["ES2023"],
     "rootDir": "./src",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "strict": true,
     "declaration": true,
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "outDir": "./dist"
   },
   "include": ["src/**/*", "eslint.config.js"],
   "exclude": ["node_modules", "dist"]
