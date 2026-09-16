@@ -1,90 +1,34 @@
 import type { Redis } from 'ioredis'
 import type { Types } from 'mongoose'
 import { randomUUID } from 'node:crypto'
-import NodeCache from 'node-cache'
 import redis from '../config/redis.ts'
 
-const MEMORY_CACHE_TTL = 3
 const REDIS_CACHE_TTL = 5
 
-const MEMORY_CHECK_PERIOD = 60
 const REDIS_LOCK_TTL = 10
 const REDIS_LOCK_RETRY_MS = 100
 const REDIS_LOCK_MAX_RETRIES = 100
 
 interface CacheOptions {
-  skipMemoryCache?: boolean
-}
-
-interface CacheCreationOptions extends CacheOptions {
   redisTtl?: number
 }
 
 class CacheService {
-  private memoryCache: NodeCache
   private redisClient: Redis
 
   constructor () {
-    this.memoryCache = new NodeCache({
-      stdTTL: MEMORY_CACHE_TTL,
-      checkperiod: MEMORY_CHECK_PERIOD,
-    })
     this.redisClient = redis
   }
 
-  public async get<T>(
-    key: string,
-    opt?: CacheOptions,
-  ): Promise<T | null> {
-    const skipMemoryCache = this.shouldSkipMemoryCache(opt)
-
-    if (!skipMemoryCache) {
-      const memoryValue = this.memoryCache.get<T>(key)
-      if (memoryValue !== undefined) {
-        return memoryValue
-      }
-    }
-
+  public async get<T>(key: string): Promise<T | null> {
     const redisValue = await this.redisClient.get(key)
-    const value = this.tryDecode<T>(redisValue)
-    if (value !== null && !skipMemoryCache) {
-      this.memoryCache.set(key, value)
-    }
-
-    return value
+    return this.tryDecode<T>(redisValue)
   }
 
   public async getOrCreate<T>(
     key: string,
     func: () => Promise<T>,
-    opt?: CacheCreationOptions,
-  ): Promise<T> {
-    const skipMemoryCache = this.shouldSkipMemoryCache(opt)
-
-    if (!skipMemoryCache) {
-      const memoryValue = this.memoryCache.get<T>(key)
-      if (memoryValue !== undefined) {
-        return memoryValue
-      }
-    }
-
-    const value = await this.getOrCreateFromRedisCache<T>(key, func, opt)
-    if (!skipMemoryCache) {
-      this.memoryCache.set(key, value)
-    }
-
-    return value
-  }
-
-  public async remove (key: string): Promise<void> {
-    await this.redisClient.del(key)
-    this.memoryCache.del(key)
-  }
-
-  private async getOrCreateFromRedisCache<T>(
-    key: string,
-    func: () => Promise<T>,
-    opt?: CacheCreationOptions,
+    opt?: CacheOptions,
   ): Promise<T> {
     let redisValue = await this.redisClient.get(key)
     let value = this.tryDecode<T>(redisValue)
@@ -111,6 +55,10 @@ class CacheService {
     }
 
     return value
+  }
+
+  public async remove (key: string): Promise<void> {
+    await this.redisClient.del(key)
   }
 
   private tryDecode<T>(value: string | null): T | null {
@@ -150,10 +98,6 @@ class CacheService {
         return 0
       end
     `, 1, lockKey, token)
-  }
-
-  private shouldSkipMemoryCache (opt?: CacheOptions): boolean {
-    return opt?.skipMemoryCache ?? false
   }
 }
 

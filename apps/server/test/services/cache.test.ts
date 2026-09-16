@@ -55,8 +55,6 @@ test.serial('remove', async (t) => {
   const redisVal = await redis.get(key)
   t.is(redisVal, null)
 
-  // Ensure old memory entry is gone: if remove() forgot memory eviction,
-  // this would return stale { x: 1 } instead of the new redis value.
   await redis.set(key, JSON.stringify({ x: 2 }), 'EX', 60)
   const afterGet = await cacheService.get<{ x: number }>(key)
   t.deepEqual(afterGet, { x: 2 })
@@ -77,7 +75,7 @@ test.serial('getOrCreate (factory called on miss)', async (t) => {
   t.deepEqual(result, { value: 'created' })
   t.is(callCount, 1)
 
-  // Second call – factory should NOT be invoked (memory cache hit)
+  // The second call should read the value back from Redis.
   const result2 = await cacheService.getOrCreate(key, factory)
   t.deepEqual(result2, { value: 'created' })
   t.is(callCount, 1) // still 1
@@ -113,36 +111,6 @@ test.serial('getOrCreate (custom redisTtl)', async (t) => {
   t.true(ttl > 0 && ttl <= customTtl)
 })
 
-test.serial('getOrCreate (skipMemoryCache)', async (t) => {
-  const key = `${KEY_PREFIX}:getorcreate:skip_memory`
-
-  let createCount = 0
-  const created = await cacheService.getOrCreate(
-    key,
-    async () => {
-      createCount++
-      return { from: 'factory' }
-    },
-    { skipMemoryCache: true },
-  )
-  t.deepEqual(created, { from: 'factory' })
-  t.is(createCount, 1)
-
-  await redis.set(key, JSON.stringify({ from: 'redis-updated' }), 'EX', 60)
-
-  const result = await cacheService.getOrCreate(
-    key,
-    async () => {
-      createCount++
-      return { from: 'should-not-run' }
-    },
-    { skipMemoryCache: true },
-  )
-
-  t.deepEqual(result, { from: 'redis-updated' })
-  t.is(createCount, 1)
-})
-
 test.serial('getOrCreate (concurrent calls should only run one factory)', async (t) => {
   const key = `${KEY_PREFIX}:getorcreate:concurrent`
 
@@ -154,9 +122,9 @@ test.serial('getOrCreate (concurrent calls should only run one factory)', async 
   }
 
   const [ result1, result2, result3 ] = await Promise.all([
-    cacheService.getOrCreate(key, factory, { skipMemoryCache: true }),
-    cacheService.getOrCreate(key, factory, { skipMemoryCache: true }),
-    cacheService.getOrCreate(key, factory, { skipMemoryCache: true }),
+    cacheService.getOrCreate(key, factory),
+    cacheService.getOrCreate(key, factory),
+    cacheService.getOrCreate(key, factory),
   ])
 
   t.deepEqual(result1, { from: 'factory-once' })

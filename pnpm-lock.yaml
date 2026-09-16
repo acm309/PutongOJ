@@ -370,9 +370,6 @@ catalogs:
     mongoose-paginate-v2:
       specifier: ^1.9.5
       version: 1.9.5
-    node-cache:
-      specifier: ^5.1.2
-      version: 5.1.2
     only:
       specifier: ^0.0.2
       version: 0.0.2
@@ -528,9 +525,6 @@ importers:
       mongoose-paginate-v2:
         specifier: 'catalog:'
         version: 1.9.5(mongoose@9.10.0(socks@2.8.9))
-      node-cache:
-        specifier: 'catalog:'
-        version: 5.1.2
       pm2:
         specifier: 'catalog:'
         version: 7.0.4(supports-color@8.1.1)
@@ -3037,10 +3031,6 @@ packages:
     resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
     engines: {node: '>=20'}
 
-  clone@2.1.2:
-    resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
-    engines: {node: '>=0.8'}
-
   cluster-key-slot@1.1.1:
     resolution: {integrity: sha512-rwHwUfXL40Chm1r08yrhU3qpUvdVlgkKNeyeGPOxnW8/SyVDvgRaed/Uz54AqWNaTCAThlj6QAs3TZcKI0xDEw==}
     engines: {node: '>=0.10.0'}
@@ -4825,10 +4815,6 @@ packages:
   netmask@2.1.1:
     resolution: {integrity: sha512-eonl3sLUha+S1GzTPxychyhnUzKyeQkZ7jLjKrBagJgPla13F+uQ71HgpFefyHgqrjEbCPkDArxYsjY8/+gLKA==}
     engines: {node: '>= 0.4.0'}
-
-  node-cache@5.1.2:
-    resolution: {integrity: sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==}
-    engines: {node: '>= 8.0.0'}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -8539,8 +8525,6 @@ snapshots:
       strip-ansi: 7.2.0
       wrap-ansi: 9.0.2
 
-  clone@2.1.2: {}
-
   cluster-key-slot@1.1.1: {}
 
   co-body@6.2.0:
@@ -10488,10 +10472,6 @@ snapshots:
   negotiator@0.6.3: {}
 
   netmask@2.1.1: {}
-
-  node-cache@5.1.2:
-    dependencies:
-      clone: 2.1.2
 
   node-fetch@2.7.0:
     dependencies:

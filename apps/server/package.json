@@ -45,7 +45,6 @@
     "luxon": "catalog:",
     "mongoose": "catalog:",
     "mongoose-paginate-v2": "catalog:",
-    "node-cache": "catalog:",
     "pm2": "catalog:",
     "superagent": "catalog:",
     "tracer": "catalog:",
