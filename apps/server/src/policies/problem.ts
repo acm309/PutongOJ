@@ -1,6 +1,5 @@
+import type { ProblemDocumentPopulated, Types } from '@putong-oj/db'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
-import type { ProblemDocumentPopulated } from '../models/Problem.ts'
 import { loadContestState } from '../policies/contest.ts'
 import courseService from '../services/course.ts'
 import problemService from '../services/problem.ts'

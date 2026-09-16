@@ -1,10 +1,10 @@
+import type { GroupEntity } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { GroupEntity } from '../types/entity.ts'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
-export interface GroupDocument extends Document<Types.ObjectId>, GroupEntity {}
+export type GroupDocument = {} & Document<Types.ObjectId> & GroupEntity
 
 type GroupModel = PaginateModel<GroupDocument>
 
@@ -47,7 +47,8 @@ groupSchema.pre('save', async function () {
 
 const Group
   = mongoose.model<GroupDocument, GroupModel>(
-    'Group', groupSchema,
+    'Group',
+    groupSchema,
   )
 
 export default Group

@@ -1,5 +1,5 @@
+import type { Types } from '@putong-oj/db'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
 import type { DiscussionQueryFilters } from '../services/discussion.ts'
 import Router from '@koa/router'
 import {

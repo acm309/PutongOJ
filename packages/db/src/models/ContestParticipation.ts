@@ -1,5 +1,5 @@
 import { ParticipationStatus } from '@putong-oj/shared'
-import mongoose from '../config/db.ts'
+import mongoose from '../client.js'
 
 const contestParticipationSchema = new mongoose.Schema({
   contest: {
@@ -37,6 +37,8 @@ contestParticipationSchema.index({
 })
 
 const ContestParticipation = mongoose.model(
-  'ContestParticipation', contestParticipationSchema)
+  'ContestParticipation',
+  contestParticipationSchema,
+)
 
 export default ContestParticipation

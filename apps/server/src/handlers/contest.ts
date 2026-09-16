@@ -1,8 +1,9 @@
+import type { Types } from '@putong-oj/db'
 import type { ContestModel } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
 import type { DiscussionQueryFilters } from '../services/discussion.ts'
 import Router from '@koa/router'
+import { Group, Problem, Solution, User } from '@putong-oj/db'
 import {
   ContestConfigEditPayloadSchema,
   ContestConfigQueryResultSchema,
@@ -29,10 +30,6 @@ import {
 import escapeRegExp from 'lodash/escapeRegExp.js'
 import { loadProfile, loginRequire } from '../middlewares/authn.ts'
 import { dataExportLimit } from '../middlewares/ratelimit.ts'
-import Group from '../models/Group.ts'
-import Problem from '../models/Problem.ts'
-import Solution from '../models/Solution.ts'
-import User from '../models/User.ts'
 import { loadContestState } from '../policies/contest.ts'
 import { loadCourseStateById, loadCourseStateOrThrow } from '../policies/course.ts'
 import { publicDiscussionTypes } from '../policies/discussion.ts'

@@ -1,15 +1,10 @@
+import type { CourseDocument, Types } from '@putong-oj/db'
 import type { ContestModel, ContestParticipationManageableStatus, ContestParticipationModel, ContestRanklist, ContestRanklistProblem, UserModel } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course.ts'
 import type { PaginateOption, SortOption } from '../types/index.ts'
 import type { QueryFilter } from '../types/mongo.ts'
+import { Contest, ContestParticipation, Problem, Solution, User } from '@putong-oj/db'
 import { JudgeStatus, ParticipationStatus } from '@putong-oj/shared'
 import escapeRegExp from 'lodash/escapeRegExp.js'
-import Contest from '../models/Contest.ts'
-import ContestParticipation from '../models/ContestParticipation.ts'
-import Problem from '../models/Problem.ts'
-import Solution from '../models/Solution.ts'
-import User from '../models/User.ts'
 import { CacheKey, cacheService } from './cache.ts'
 
 async function findContests (

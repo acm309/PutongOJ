@@ -1,15 +1,14 @@
+import type { SolutionEntity } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { SolutionEntity } from '../types/entity.ts'
-import { JudgeStatus, JudgeStatusValues } from '@putong-oj/shared'
+import { JudgeStatus, JudgeStatusValues, status } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-import { status } from '../utils/constants.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
-export interface SolutionDocument extends Document<Types.ObjectId>, SolutionEntity {
+export type SolutionDocument = {
   isAccepted: boolean
   isPending: boolean
-}
+} & Document<Types.ObjectId> & SolutionEntity
 
 type SolutionModel = PaginateModel<SolutionDocument>
 
@@ -164,7 +163,8 @@ solutionSchema.pre('save', async function () {
 
 const Solution
   = mongoose.model<SolutionDocument, SolutionModel>(
-    'Solution', solutionSchema,
+    'Solution',
+    solutionSchema,
   )
 
 export default Solution

@@ -1,6 +1,7 @@
+import type { UserDocument } from '@putong-oj/db'
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User.ts'
 import Router from '@koa/router'
+import { Group, Solution } from '@putong-oj/db'
 import {
   ErrorCode,
   JudgeStatus,
@@ -16,8 +17,6 @@ import {
 import difference from 'lodash/difference.js'
 import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn.ts'
 import { dataExportLimit } from '../middlewares/ratelimit.ts'
-import Group from '../models/Group.ts'
-import Solution from '../models/Solution.ts'
 import userService from '../services/user.ts'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants.ts'
 import {

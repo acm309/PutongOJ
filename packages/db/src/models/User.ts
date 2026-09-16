@@ -1,16 +1,8 @@
-import type { UserModel } from '@putong-oj/shared'
-import type { Document, PaginateModel, Schema, Types } from 'mongoose'
+import type { PaginateModel, Schema } from 'mongoose'
+import type { UserDocument } from '../types.js'
 import { UserModelSchema, UserPrivilege, UserPrivilegeValues } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-
-export interface UserEntity extends UserModel { }
-
-export interface UserDocument extends Document<Types.ObjectId>, UserEntity {
-  isBanned: boolean
-  isAdmin: boolean
-  isRoot: boolean
-}
+import mongoose from '../client.js'
 
 const userSchema: Schema = new mongoose.Schema({
   uid: {
@@ -133,7 +125,8 @@ userSchema.virtual('isRoot').get(function (this: UserDocument): boolean {
 })
 
 const User = mongoose.model<UserDocument, PaginateModel<UserDocument>>(
-  'User', userSchema,
+  'User',
+  userSchema,
 )
 
 export default User

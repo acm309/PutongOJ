@@ -1,10 +1,10 @@
+import type { CourseDocument, Types } from '@putong-oj/db'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course.ts'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
 import path from 'node:path'
 import Router from '@koa/router'
+import { Contest, Problem, Solution } from '@putong-oj/db'
 import {
   ErrorCode,
   JudgeStatus,
@@ -16,9 +16,6 @@ import pick from 'lodash/pick.js'
 import redis from '../config/redis.ts'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
 import { solutionCreateLimit } from '../middlewares/ratelimit.ts'
-import Contest from '../models/Contest.ts'
-import Problem from '../models/Problem.ts'
-import Solution from '../models/Solution.ts'
 import { loadContestState } from '../policies/contest.ts'
 import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { loadProblemState } from '../policies/problem.ts'

@@ -1,3 +1,4 @@
+export * from './domain.js'
 export * from './keywords.js'
 export * from './limit.js'
 export * from './regex.js'

@@ -1,5 +1,5 @@
+import type { Types } from '@putong-oj/db'
 import type { Redis } from 'ioredis'
-import type { Types } from 'mongoose'
 import { randomUUID } from 'node:crypto'
 import redis from '../config/redis.ts'
 

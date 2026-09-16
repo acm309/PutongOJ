@@ -1,6 +1,6 @@
+import { Solution } from '@putong-oj/db'
 import { JudgeStatus } from '@putong-oj/shared'
 import levenshtein from 'fast-levenshtein'
-import Solution from '../../models/Solution.ts'
 import logger from '../../utils/logger.ts'
 
 function codeNormalize (code: string): string {

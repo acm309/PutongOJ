@@ -1,10 +1,11 @@
+import type { Types } from '@putong-oj/db'
 import type { Paginated } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
 import type { DiscussionQueryFilters } from '../services/discussion.ts'
 import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView } from '../types/entity.ts'
 import type { WithId } from '../types/index.ts'
 import Router from '@koa/router'
+import { Solution, User } from '@putong-oj/db'
 import {
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
@@ -15,8 +16,6 @@ import {
 } from '@putong-oj/shared'
 import pick from 'lodash/pick.js'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
-import Solution from '../models/Solution.ts'
-import User from '../models/User.ts'
 import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { publicDiscussionTypes } from '../policies/discussion.ts'
 import { loadProblemOrThrow } from '../policies/problem.ts'

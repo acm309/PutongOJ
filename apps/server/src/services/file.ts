@@ -1,10 +1,9 @@
+import type { Types, UserDocument } from '@putong-oj/db'
 import type { AdminFileListQuery, FileListQuery, FileModel } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
-import type { UserDocument } from '../models/User.ts'
 import type { QueryFilter } from '../types/mongo.ts'
 import path from 'node:path'
+import { Files } from '@putong-oj/db'
 import fse from 'fs-extra'
-import Files from '../models/Files.ts'
 import logger from '../utils/logger.ts'
 import userService from './user.ts'
 

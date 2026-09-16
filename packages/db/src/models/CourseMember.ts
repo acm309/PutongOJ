@@ -1,18 +1,17 @@
+import type { CourseMemberEntity, CourseMemberView, UserEntity } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { CourseMemberEntity, CourseMemberView } from '../types/entity.ts'
-import type { UserEntity } from './User.ts'
+import { courseRoleNone } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-import { courseRoleNone } from '../utils/constants.ts'
+import mongoose from '../client.js'
 
-export interface CourseMemberDocument extends Document<Types.ObjectId>, CourseMemberEntity { }
+export type CourseMemberDocument = { } & Document<Types.ObjectId> & CourseMemberEntity
 
-interface CourseMemberModel extends PaginateModel<CourseMemberDocument> {
+type CourseMemberModel = {
   toView: (
     courseMember: Partial<CourseMemberEntity> | null,
     user: Partial<Pick<UserEntity, 'uid' | 'nick' | 'privilege'>> | null,
   ) => CourseMemberView
-}
+} & PaginateModel<CourseMemberDocument>
 
 const courseRoleSchema = new mongoose.Schema({
   basic: {
@@ -95,7 +94,8 @@ courseMemberSchema.statics.toView = function (
 
 const CourseMember
   = mongoose.model<CourseMemberDocument, CourseMemberModel>(
-    'CourseMember', courseMemberSchema,
+    'CourseMember',
+    courseMemberSchema,
   )
 
 export default CourseMember

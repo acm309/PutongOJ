@@ -1,6 +1,6 @@
+import type { UserDocument } from '@putong-oj/db'
 import type { OAuthConnection } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { UserDocument } from '../models/User.ts'
 import type { OAuthState } from '../services/oauth.ts'
 import Router from '@koa/router'
 import {

@@ -1,4 +1,4 @@
-import Settings from '../models/Settings.ts'
+import { Settings } from '@putong-oj/db'
 import { CacheKey, cacheService } from './cache.ts'
 
 export class SettingsKey {

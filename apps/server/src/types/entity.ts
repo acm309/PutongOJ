@@ -1,35 +1,22 @@
-import type { TagModel } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
-import type { CourseDocument } from '../models/Course.ts'
-import type { UserEntity } from '../models/User.ts'
-import type { encrypt, problemType, status } from '../utils/constants.ts'
-import type { CourseRole } from './index.ts'
+import type {
+  CourseEntity,
+  CourseRole,
+  ProblemEntity,
+  TagModel,
+} from '@putong-oj/shared'
 
-// Common
-
-interface EntityTimestamps {
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface Entity extends EntityTimestamps { }
-
-interface ViewTimestamps {
-  createdAt: number
-  updatedAt: number
-}
-
-export interface View extends ViewTimestamps { }
-
-// Course
-
-export interface CourseEntity extends Entity {
-  courseId: number
-  name: string
-  description: string
-  encrypt: typeof encrypt.Public | typeof encrypt.Private
-  joinCode: string
-}
+export type {
+  CourseEntity,
+  CourseMemberEntity,
+  CourseMemberView,
+  CourseProblemEntity,
+  Entity,
+  GroupEntity,
+  ProblemEntity,
+  SolutionEntity,
+  UserEntity,
+  View,
+} from '@putong-oj/shared'
 
 export type CourseEntityEditable = Pick<CourseEntity,
   'name' | 'description' | 'encrypt' | 'joinCode'
@@ -57,56 +44,6 @@ export interface CourseEntityPreviewWithRole extends CourseEntityPreview {
   role: CourseRole
 }
 
-// Course Member
-
-export interface CourseMemberEntity extends Entity {
-  user: Types.ObjectId
-  course: Types.ObjectId
-  role: CourseRole
-}
-
-export interface CourseMemberView extends Pick<CourseMemberEntity, 'role'>, View {
-  user: Pick<UserEntity, 'uid' | 'nick' | 'privilege'>
-}
-
-// Course Problem
-
-export interface CourseProblemEntity extends Entity {
-  course: Types.ObjectId
-  problem: Types.ObjectId
-  sort: number
-}
-
-// Problem
-
-export interface ProblemEntity extends Entity {
-  pid: number
-  title: string
-  /** Time limit in milliseconds */
-  time: number
-  /** Memory limit in kilobytes */
-  memory: number
-  description: string
-  /** Input format description */
-  input: string
-  /** Output format description */
-  output: string
-  /** Input example */
-  in: string
-  /** Output example */
-  out: string
-  hint: string
-  status: typeof status[keyof typeof status]
-  /** Judge type */
-  type: typeof problemType[keyof typeof problemType]
-  /** Judger code */
-  code: string
-  tags: Types.ObjectId[]
-  owner: Types.ObjectId | null
-  submit: number
-  solve: number
-}
-
 export type ProblemEntityForm = Pick<ProblemEntity,
   'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
   | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'
@@ -131,40 +68,4 @@ export type ProblemEntityView = Pick<ProblemEntity,
 > & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
   isOwner: boolean
   tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
-}
-
-// Solution
-
-export interface SolutionEntity extends Entity {
-  sid: number
-  pid: number
-  uid: string
-  mid: number
-  course: CourseDocument | null
-  code: string
-  length: number
-  language: number
-  create: number
-  status: number
-  judge: number
-  time: number
-  memory: number
-  error: string
-  sim: number
-  sim_s_id: number
-  testcases: {
-    uuid: string
-    judge: number
-    time: number
-    memory: number
-  }[]
-}
-
-// Group
-
-export interface GroupEntity extends Entity {
-  gid: number
-  title: string
-  list: string[]
-  create: number
 }

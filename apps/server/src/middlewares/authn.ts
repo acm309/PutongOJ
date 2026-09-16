@@ -1,6 +1,6 @@
+import type { UserDocument } from '@putong-oj/db'
 import type { Context, Middleware } from 'koa'
-import type { UserDocument } from '../models/User.ts'
-import User from '../models/User.ts'
+import { User } from '@putong-oj/db'
 import sessionService from '../services/session.ts'
 import { ERR_LOGIN_REQUIRE, ERR_PERM_DENIED } from '../utils/constants.ts'
 

@@ -1,16 +1,12 @@
+import type { PipelineStage, ProblemDocument, ProblemDocumentPopulated, Types } from '@putong-oj/db'
 import type { Paginated, ProblemStatisticsQueryResult } from '@putong-oj/shared'
-import type { PipelineStage } from 'mongoose'
-import type { ProblemDocument, ProblemDocumentPopulated } from '../models/Problem.ts'
 import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity.ts'
 import type { PaginateOption } from '../types/index.ts'
 import path from 'node:path'
+import { CourseProblem, mongoose, Problem, Solution } from '@putong-oj/db'
 import { JUDGE_STATUS_TERMINAL, JudgeStatus } from '@putong-oj/shared'
 import fse from 'fs-extra'
 import escapeRegExp from 'lodash/escapeRegExp.js'
-import mongoose, { Types } from 'mongoose'
-import CourseProblem from '../models/CourseProblem.ts'
-import Problem from '../models/Problem.ts'
-import Solution from '../models/Solution.ts'
 import { status } from '../utils/constants.ts'
 import { CacheKey, cacheService } from './cache.ts'
 import tagService from './tag.ts'
@@ -31,7 +27,7 @@ export async function findProblems (
       = [ { status: status.Available } ]
     if (includeOwner) {
       statusFilters.push({
-        owner: new Types.ObjectId(includeOwner.toString()),
+        owner: new mongoose.Types.ObjectId(includeOwner.toString()),
       })
     }
     filters.push({ $or: statusFilters })

@@ -3,6 +3,7 @@ import type { Context } from 'koa'
 import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity.ts'
 import type { CourseRole } from '../types/index.ts'
 import Router from '@koa/router'
+import { User } from '@putong-oj/db'
 import {
   ContestListQueryResultSchema,
   CourseContestListQuerySchema,
@@ -11,7 +12,6 @@ import {
 import escapeRegExp from 'lodash/escapeRegExp.js'
 import pick from 'lodash/pick.js'
 import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
-import User from '../models/User.ts'
 import { loadCourseState, loadCourseStateOrThrow } from '../policies/course.ts'
 import { contestService } from '../services/contest.ts'
 import courseService from '../services/course.ts'

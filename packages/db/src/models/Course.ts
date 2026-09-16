@@ -1,15 +1,15 @@
+import type { CourseEntity } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { CourseEntity } from '../types/entity.ts'
+import { encrypt } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-import { encrypt } from '../utils/constants.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
-export interface CourseDocument extends Document<Types.ObjectId>, CourseEntity {
+export type CourseDocument = {
   isPublic: boolean
   isPrivate: boolean
   canJoin: boolean
-}
+} & Document<Types.ObjectId> & CourseEntity
 
 type CourseModel = PaginateModel<CourseDocument>
 
@@ -84,7 +84,8 @@ courseSchema.pre('save', async function (this: CourseDocument) {
 
 const Course
   = mongoose.model<CourseDocument, CourseModel>(
-    'Course', courseSchema,
+    'Course',
+    courseSchema,
   )
 
 export default Course

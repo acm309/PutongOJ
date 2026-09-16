@@ -1,14 +1,12 @@
+import type { OAuthDocument, OAuthDocumentPopulated, Types, UserDocument } from '@putong-oj/db'
 import type { OAuthConnection, OAuthUserProfile } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
-import type { OAuthDocument, OAuthDocumentPopulated } from '../models/OAuth.ts'
-import type { UserDocument } from '../models/User.ts'
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
+import { OAuth } from '@putong-oj/db'
 import { OAuthAction, OAuthProvider } from '@putong-oj/shared'
 import superagent from 'superagent'
 import { globalConfig } from '../config/index.ts'
 import redis from '../config/redis.ts'
-import OAuth from '../models/OAuth.ts'
 
 const DEFAULT_TIMEOUT = 5000
 const DEFAULT_STATE_TTL = 600

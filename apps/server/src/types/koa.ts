@@ -1,4 +1,4 @@
-import type { UserDocument } from '../models/User.ts'
+import type { UserDocument } from '@putong-oj/db'
 import type { ContestState } from '../policies/contest.ts'
 import type { CourseState } from '../policies/course.ts'
 import type { DiscussionState } from '../policies/discussion.ts'

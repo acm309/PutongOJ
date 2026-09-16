@@ -1,8 +1,8 @@
+import type { Types } from '@putong-oj/db'
 import type { Paginated, PostModel } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
 import type { PaginateOption, SortOption } from '../types/index.ts'
 import type { QueryFilter } from '../types/mongo.ts'
-import Post from '../models/Post.ts'
+import { Post } from '@putong-oj/db'
 
 type PostCreateDto = Pick<PostModel, 'title'>
 

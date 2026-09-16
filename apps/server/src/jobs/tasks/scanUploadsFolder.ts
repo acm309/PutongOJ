@@ -1,8 +1,7 @@
 import type { FileModel } from '@putong-oj/shared'
 import path from 'node:path'
+import { Files, User } from '@putong-oj/db'
 import fse from 'fs-extra'
-import Files from '../../models/Files.ts'
-import User from '../../models/User.ts'
 import logger from '../../utils/logger.ts'
 
 const uploadDir = path.join(import.meta.dirname, '../../../public/uploads')

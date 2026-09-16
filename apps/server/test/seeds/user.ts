@@ -1,4 +1,4 @@
-import type { UserDocument } from '../../src/models/User.ts'
+import type { UserDocument } from '@putong-oj/db'
 import { UserPrivilege } from '@putong-oj/shared'
 import { deploy } from '../../src/utils/constants.ts'
 

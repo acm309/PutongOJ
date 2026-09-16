@@ -1,6 +1,6 @@
 import { LabelingStyle, LabelingStyleValues, LanguageValues, TITLE_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
 const contestSchema = new mongoose.Schema({
   contestId: {

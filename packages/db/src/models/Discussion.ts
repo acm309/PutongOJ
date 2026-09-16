@@ -1,10 +1,10 @@
 import type { DiscussionModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { DiscussionType, TITLE_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
-interface DiscussionDocument extends Document<Types.ObjectId>, DiscussionModel { }
+type DiscussionDocument = { } & Document<Types.ObjectId> & DiscussionModel
 
 const discussionSchema = new mongoose.Schema({
   discussionId: {
@@ -66,7 +66,8 @@ discussionSchema.pre('save', async function () {
 
 const Discussion
   = mongoose.model<DiscussionDocument, Model<DiscussionDocument>>(
-    'Discussion', discussionSchema,
+    'Discussion',
+    discussionSchema,
   )
 
 export default Discussion

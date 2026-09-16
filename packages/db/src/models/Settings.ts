@@ -1,4 +1,4 @@
-import mongoose from '../config/db.ts'
+import mongoose from '../client.js'
 
 const settingsSchema = new mongoose.Schema({
   key: {

@@ -1,18 +1,6 @@
-import type { OAuthConnection } from '@putong-oj/shared'
-import type { Document, Model, Types } from 'mongoose'
-import type { Entity } from '../types/entity.ts'
-import type { UserDocument } from './User.ts'
-import mongoose from '../config/db.ts'
-
-export interface OAuthEntity extends Entity, OAuthConnection {
-  user: Types.ObjectId
-}
-
-export type OAuthDocument = Document<Types.ObjectId> & OAuthEntity
-
-export type OAuthDocumentPopulated = OAuthDocument & {
-  user: UserDocument
-}
+import type { Model } from 'mongoose'
+import type { OAuthDocument } from '../types.js'
+import mongoose from '../client.js'
 
 type OAuthModel = Model<OAuthDocument>
 
@@ -61,7 +49,8 @@ oauthSchema.index({ provider: 1, providerId: 1 }, { unique: true })
 
 const OAuth
   = mongoose.model<OAuthDocument, OAuthModel>(
-    'OAuth', oauthSchema,
+    'OAuth',
+    oauthSchema,
   )
 
 export default OAuth

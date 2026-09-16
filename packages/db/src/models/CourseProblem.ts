@@ -1,10 +1,10 @@
+import type { CourseProblemEntity } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
-import type { CourseProblemEntity } from '../types/entity.ts'
-import mongoose from '../config/db.ts'
+import mongoose from '../client.js'
 
-export interface CourseProblemDocument extends Document<Types.ObjectId>, CourseProblemEntity { }
+export type CourseProblemDocument = { } & Document<Types.ObjectId> & CourseProblemEntity
 
-interface CourseProblemModel extends Model<CourseProblemDocument> {}
+type CourseProblemModel = {} & Model<CourseProblemDocument>
 
 const courseProblemSchema = new mongoose.Schema({
   course: {
@@ -38,7 +38,8 @@ courseProblemSchema.index({
 
 const CourseProblem
   = mongoose.model<CourseProblemDocument, CourseProblemModel>(
-    'CourseProblem', courseProblemSchema,
+    'CourseProblem',
+    courseProblemSchema,
   )
 
 export default CourseProblem

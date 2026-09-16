@@ -1,10 +1,10 @@
 import type { CommentModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { COMMENT_LENGTH_MAX } from '@putong-oj/shared'
-import mongoose from '../config/db.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
-interface CommentDocument extends Document<Types.ObjectId>, CommentModel { }
+type CommentDocument = { } & Document<Types.ObjectId> & CommentModel
 
 const commentSchema = new mongoose.Schema({
   commentId: {
@@ -49,7 +49,8 @@ commentSchema.pre('save', async function () {
 
 const Comment
   = mongoose.model<CommentDocument, Model<CommentDocument>>(
-    'Comment', commentSchema,
+    'Comment',
+    commentSchema,
   )
 
 export default Comment

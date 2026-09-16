@@ -1,9 +1,5 @@
+import { Comment, Discussion, Problem, Solution, User } from '@putong-oj/db'
 import { JudgeStatus } from '@putong-oj/shared'
-import Comment from '../../models/Comment.ts'
-import Discussion from '../../models/Discussion.ts'
-import Problem from '../../models/Problem.ts'
-import Solution from '../../models/Solution.ts'
-import User from '../../models/User.ts'
 import logger from '../../utils/logger.ts'
 
 /**

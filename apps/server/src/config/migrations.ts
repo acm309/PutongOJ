@@ -1,12 +1,8 @@
 import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
 import { md5 } from '@noble/hashes/legacy.js'
+import { Contest, mongoose, OAuth, Post, User } from '@putong-oj/db'
 import { OAuthProvider } from '@putong-oj/shared'
-import mongoose from '../config/db.ts'
-import Contest from '../models/Contest.ts'
-import OAuth from '../models/OAuth.ts'
-import Post from '../models/Post.ts'
-import User from '../models/User.ts'
 import { settingsService } from '../services/settings.ts'
 import logger from '../utils/logger.ts'
 

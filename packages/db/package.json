@@ -1,0 +1,24 @@
+{
+  "name": "@putong-oj/db",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run clean && tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@putong-oj/shared": "workspace:*",
+    "lodash": "catalog:",
+    "mongoose": "catalog:",
+    "mongoose-paginate-v2": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

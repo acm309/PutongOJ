@@ -17,7 +17,7 @@
       "outputs": [ "coverage/**", "coverage.lcov" ]
     },
     "typecheck": {
-      "dependsOn": [ "^build" ],
+      "dependsOn": [ "^build", "@putong-oj/db#build" ],
       "outputs": []
     }
   }

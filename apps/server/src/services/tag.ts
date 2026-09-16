@@ -1,7 +1,7 @@
+import type { Types } from '@putong-oj/db'
 import type { TagModel } from '@putong-oj/shared'
-import type { Types } from 'mongoose'
+import { Tag } from '@putong-oj/db'
 import escapeRegExp from 'lodash/escapeRegExp.js'
-import Tag from '../models/Tag.ts'
 
 export async function getTags () {
   const tags = await Tag

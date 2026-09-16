@@ -1,13 +1,6 @@
-import type { Types } from 'mongoose'
+import type { ObjectId } from '@putong-oj/db'
 
-export interface CourseRole {
-  basic: boolean
-  viewTestcase: boolean
-  viewSolution: boolean
-  manageProblem: boolean
-  manageContest: boolean
-  manageCourse: boolean
-}
+export type { CourseRole } from '@putong-oj/shared'
 
 export interface PaginateOption {
   page: number
@@ -20,7 +13,7 @@ export interface SortOption {
 }
 
 export interface DocumentId {
-  _id: Types.ObjectId
+  _id: ObjectId
 }
 
 export type WithId<T> = T & DocumentId

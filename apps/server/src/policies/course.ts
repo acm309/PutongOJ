@@ -1,8 +1,8 @@
+import type { Types } from '@putong-oj/db'
 import type { Context } from 'koa'
-import type { Types } from 'mongoose'
 import type { CourseEntity } from '../types/entity.ts'
 import type { CourseRole, WithId } from '../types/index.ts'
-import Course from '../models/Course.ts'
+import { Course } from '@putong-oj/db'
 import courseService from '../services/course.ts'
 import { ERR_NOT_FOUND } from '../utils/constants.ts'
 

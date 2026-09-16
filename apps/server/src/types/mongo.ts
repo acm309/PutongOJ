@@ -1,4 +1,4 @@
-import type { mongo } from 'mongoose'
+import type { mongo } from '@putong-oj/db'
 
 interface RootQuerySelector<T> {
   $and?: Array<QueryFilter<T>>

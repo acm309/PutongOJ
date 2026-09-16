@@ -1,15 +1,12 @@
-import type { TagModel } from '@putong-oj/shared'
+import type { ProblemEntity, TagModel } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
-import type { ProblemEntity } from '../types/entity.ts'
+import { limitation, problemType, status } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
-import mongoose from '../config/db.ts'
-import { limitation, problemType, status } from '../utils/constants.ts'
-import ID from './ID.ts'
+import mongoose from '../client.js'
+import ID from './ID.js'
 
 export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
-export type ProblemDocumentPopulated = Omit<ProblemDocument,
-  'tags'
-> & {
+export type ProblemDocumentPopulated = Omit<ProblemDocument, 'tags'> & {
   tags: TagModel[]
 }
 
@@ -132,7 +129,8 @@ problemSchema.pre('save', async function (this: ProblemDocument) {
 
 const Problem
   = mongoose.model<ProblemDocument, CourseModel>(
-    'Problem', problemSchema,
+    'Problem',
+    problemSchema,
   )
 
 export default Problem

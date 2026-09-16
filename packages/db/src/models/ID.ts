@@ -1,20 +1,26 @@
 import type { Document, Model, Schema } from 'mongoose'
 import capitalize from 'lodash/capitalize.js'
-import mongoose from '../config/db.ts'
+import mongoose from '../client.js'
 
 const idFields = [
-  'Comment', 'Contest', 'Course', 'Discussion', 'Group', 'Problem',
-  'Solution', 'Tag',
+  'Comment',
+  'Contest',
+  'Course',
+  'Discussion',
+  'Group',
+  'Problem',
+  'Solution',
+  'Tag',
 ]
 
-interface IdDocument extends Document {
+type IdDocument = {
   name: string
   id: number
-}
+} & Document
 
-interface IdModel extends Model<IdDocument> {
+type IdModel = {
   generateId: (field: string) => Promise<number>
-}
+} & Model<IdDocument>
 
 const idSchema: Schema = new mongoose.Schema({
   name: {
@@ -58,7 +64,8 @@ idSchema.statics.generateId = async function (field: string): Promise<number> {
 
 const ID
   = mongoose.model<IdDocument, IdModel>(
-    'ids', idSchema,
+    'ids',
+    idSchema,
   )
 
 export default ID

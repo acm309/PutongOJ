@@ -1,0 +1,6 @@
+export { connectMongoose, disconnectMongoose, mongoose } from './client.js'
+export type { ConnectMongooseOptions } from './client.js'
+export { default } from './client.js'
+export * from './models/index.js'
+export * from './types.js'
+export type { mongo, PipelineStage, Types } from 'mongoose'
