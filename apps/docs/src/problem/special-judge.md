@@ -19,14 +19,6 @@ Putong OJ 的 SPJ 评测流程由如下几个部分组成：
 - **选手输出**：程序运行后生成的结果文件（`outfile`）；
 - **SPJ 程序**：读取输入数据和选手输出进行验证的 Checker。
 
-```mermaid
-graph LR
-    A[测试点数据] -->|infile| C[SPJ 程序]
-    B[选手输出] -->|outfile| C
-    A -->|ansfile| C
-    C -->|返回值| D{评测结果}
-```
-
 SPJ 程序通过返回值确定评测结果：
 
 - Return 0：<span style="color: oklch(63.7% 0.237 25.331)">Accepted</span> 选手程序输出正确；

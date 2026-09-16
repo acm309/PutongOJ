@@ -12,18 +12,6 @@
    - 太小（猜测值 < 目标值）
    - 正确（猜测值 = 目标值）
 
-```mermaid
-sequenceDiagram
-    participant 选手程序
-    participant 评测系统
-    选手程序->>评测系统: 猜测 114
-    评测系统-->>选手程序: 太大
-    选手程序->>评测系统: 猜测 6
-    评测系统-->>选手程序: 太小
-    选手程序->>评测系统: 猜测 42
-    评测系统-->>选手程序: 正确
-```
-
 > [!TIP] 相关链接
 > - [OI Wiki - 交互题](https://oi-wiki.org/contest/interaction/)
 > - [洛谷帮助中心 - 交互题功能说明](https://help.luogu.com.cn/manual/luogu/problem/interactive-problems)
@@ -54,14 +42,6 @@ Putong OJ 在评测交互题时，会同时运行选手程序以及由出题人�
 
 - 选手程序的 STDOUT → 交互器的 STDIN
 - 交互器的 STDOUT → 选手程序的 STDIN
-
-```mermaid
-graph LR
-    A[选手程序] -->|STDOUT| B[交互器]
-    B -->|STDIN| A
-    C[测试数据] -->|文件读取| B
-    B -->|返回值| D{评测结果}
-```
 
 题目的时空限制以及测量仅限于选手程序，交互器运行所消耗的资源不会影响评测结果。最终答案正确与否将由交互器的返回值决定：
 

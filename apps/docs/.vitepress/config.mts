@@ -1,7 +1,5 @@
-import { withMermaid } from 'vitepress-plugin-mermaid'
-
 // https://vitepress.dev/reference/site-config
-export default withMermaid({
+export default {
   title: 'Putong OJ Docs',
   description: 'Putong OJ Documentation',
   srcDir: './src',
@@ -49,4 +47,4 @@ export default withMermaid({
       pattern: 'https://github.com/acm309/PutongOJ/tree/main/apps/docs/src/:path'
     },
   },
-})
+}

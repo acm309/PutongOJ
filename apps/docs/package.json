@@ -7,8 +7,6 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "mermaid": "catalog:",
-    "vitepress": "catalog:",
-    "vitepress-plugin-mermaid": "catalog:"
+    "vitepress": "catalog:"
   }
 }
