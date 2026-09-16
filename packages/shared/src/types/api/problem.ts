@@ -25,7 +25,7 @@ export const ProblemSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   user: z.string().max(30).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
   language: stringToInt.pipe(z.enum(Language)).optional(),

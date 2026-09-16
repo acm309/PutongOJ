@@ -32,7 +32,7 @@ export const AdminUserListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['uid', 'createdAt', 'lastVisitedAt']).default('lastVisitedAt'),
+  sortBy: z.enum([ 'uid', 'createdAt', 'lastVisitedAt' ]).default('lastVisitedAt'),
   keyword: z.string().max(30).optional(),
   privilege: stringToInt.pipe(z.enum(UserPrivilege)).optional(),
 })
@@ -98,10 +98,10 @@ export const AdminSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   user: z.string().max(30).optional(),
   problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
+  contest: stringToInt.pipe(z.union([ z.int().nonnegative(), z.literal(-1) ])).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
   language: stringToInt.pipe(z.enum(Language)).optional(),
 })
@@ -126,10 +126,10 @@ export type AdminSolutionListQueryResult = z.input<typeof AdminSolutionListQuery
 
 export const AdminSolutionListExportQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   user: z.string().max(30).optional(),
   problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
+  contest: stringToInt.pipe(z.union([ z.int().nonnegative(), z.literal(-1) ])).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
   language: stringToInt.pipe(z.enum(Language)).optional(),
 })
@@ -156,11 +156,11 @@ export const AdminContestListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['contestId', 'createdAt', 'updatedAt', 'startsAt', 'endsAt']).default('createdAt'),
+  sortBy: z.enum([ 'contestId', 'createdAt', 'updatedAt', 'startsAt', 'endsAt' ]).default('createdAt'),
   contestId: stringToInt.pipe(z.int().positive()).optional(),
   title: z.string().max(TITLE_LENGTH_MAX).optional(),
   // -1 represents contests that are not associated with a course.
-  course: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
+  course: stringToInt.pipe(z.union([ z.int().nonnegative(), z.literal(-1) ])).optional(),
   isHidden: z.stringbool().optional(),
   isPublic: z.stringbool().optional(),
   isLocked: z.stringbool().optional(),
@@ -264,7 +264,7 @@ export const AdminFileListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'sizeBytes']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'sizeBytes' ]).default('createdAt'),
   uploader: UserModelSchema.shape.uid.optional(),
 })
 
@@ -284,7 +284,7 @@ export const AdminPostListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['publishesAt', 'createdAt', 'updatedAt']).default('publishesAt'),
+  sortBy: z.enum([ 'publishesAt', 'createdAt', 'updatedAt' ]).default('publishesAt'),
   title: z.string().max(TITLE_LENGTH_MAX).optional(),
   isPublished: z.stringbool().optional(),
   isPinned: z.stringbool().optional(),

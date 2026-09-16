@@ -35,7 +35,7 @@ The compiler / runtime environment of the judge is as follows:
 
 Yes, you can determine whether your program is running on the judge in different ways. C and C++ use macro definitions, Java uses system properties, and Python uses environment variables to determine whether the program is running on the judge. Here are some examples:
 
-#### C / C++ {#detect-c-cpp}
+### C / C++ {#detect-c-cpp}
 ```c
 #include <stdio.h>
 
@@ -49,7 +49,7 @@ int main() {
 }
 ```
 
-#### Java {#detect-java}
+### Java {#detect-java}
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -62,7 +62,7 @@ public class Main {
 }
 ```
 
-#### Python 3 / PyPy 3 {#detect-python}
+### Python 3 / PyPy 3 {#detect-python}
 ```python
 import os
 

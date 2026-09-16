@@ -14,7 +14,7 @@ export const DiscussionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(10),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'lastCommentAt', 'comments']).default('lastCommentAt'),
+  sortBy: z.enum([ 'createdAt', 'lastCommentAt', 'comments' ]).default('lastCommentAt'),
   author: UserModelSchema.shape.uid.optional(),
   type: stringToInt.pipe(z.enum(DiscussionType)).optional(),
 })
@@ -76,7 +76,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
 export type DiscussionDetailQueryResult = z.input<typeof DiscussionDetailQueryResultSchema>
 
 export const DiscussionCreatePayloadSchema = z.object({
-  type: z.enum(DiscussionType).exclude(['ArchivedDiscussion']),
+  type: z.enum(DiscussionType).exclude([ 'ArchivedDiscussion' ]),
   title: DiscussionModelSchema.shape.title,
   problem: ProblemModelSchema.shape.pid.optional(),
   contest: ContestModelSchema.shape.contestId.optional(),

@@ -13,7 +13,7 @@ export const SolutionModelSchema = z.object({
   sid: z.int().nonnegative(),
   pid: z.int().nonnegative(),
   uid: z.string(),
-  mid: z.union([z.int().nonnegative(), z.literal(-1)]),
+  mid: z.union([ z.int().nonnegative(), z.literal(-1) ]),
   course: ObjectIdSchema.nullable().optional(),
   code: z.string(),
   length: z.int().nonnegative(),

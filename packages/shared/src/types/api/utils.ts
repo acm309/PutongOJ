@@ -14,7 +14,7 @@ export const PaginationSchema = z.object({
   pageSize: stringToInt.pipe(z.int().positive().max(PAGE_SIZE_MAX)).optional(),
 })
 
-export function PaginatedSchema<T extends z.ZodType>(schema: T) {
+export function PaginatedSchema<T extends z.ZodType> (schema: T) {
   return z.object({
     docs: z.array(schema),
     limit: z.number(),

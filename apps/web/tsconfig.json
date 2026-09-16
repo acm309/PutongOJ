@@ -7,11 +7,9 @@
       "dom"
     ],
     "useDefineForClassFields": true,
+    "rootDir": "..",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "rootDir": "..",
     "paths": {
       "@/*": [
         "./src/*"
@@ -20,7 +18,9 @@
         "../server/src/*"
       ]
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": [
     "src/**/*.ts",

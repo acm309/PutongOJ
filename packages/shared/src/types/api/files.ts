@@ -6,7 +6,7 @@ export const FileListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'sizeBytes']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'sizeBytes' ]).default('createdAt'),
 })
 
 export type FileListQuery = z.infer<typeof FileListQuerySchema>

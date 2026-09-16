@@ -35,7 +35,7 @@
 
 是的，你可以通过不同的方式来判断你的程序是否在评测机上运行。C 和 C++ 通过宏定义，Java 通过系统属性，Python 通过环境变量来得知程序是否在评测机上运行。下面给出了一些示例：
 
-#### C / C++ {#detect-c-cpp}
+### C / C++ {#detect-c-cpp}
 ```c
 #include <stdio.h>
 
@@ -49,7 +49,7 @@ int main() {
 }
 ```
 
-#### Java {#detect-java}
+### Java {#detect-java}
 ```java
 public class Main {
     public static void main(String[] args) {
@@ -62,7 +62,7 @@ public class Main {
 }
 ```
 
-#### Python 3 / PyPy 3 {#detect-python}
+### Python 3 / PyPy 3 {#detect-python}
 ```python
 import os
 

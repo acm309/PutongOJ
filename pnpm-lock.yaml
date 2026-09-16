@@ -409,6 +409,9 @@ catalogs:
     tsc-alias:
       specifier: ^1.9.5
       version: 1.9.5
+    turbo:
+      specifier: ^2
+      version: 2.10.12
     typescript:
       specifier: ^6.0.3
       version: 6.0.3
@@ -447,8 +450,14 @@ importers:
 
   .:
     devDependencies:
+      '@antfu/eslint-config':
+        specifier: 'catalog:'
+        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.63.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 10.10.0(jiti@2.7.0)(supports-color@8.1.1)
       turbo:
-        specifier: ^2
+        specifier: 'catalog:'
         version: 2.10.12
 
   apps/docs:
@@ -541,9 +550,6 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
-      '@antfu/eslint-config':
-        specifier: 'catalog:'
-        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.63.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@types/fast-levenshtein':
         specifier: 'catalog:'
         version: 0.0.4
@@ -595,9 +601,6 @@ importers:
       concurrently:
         specifier: 'catalog:'
         version: 9.2.4
-      eslint:
-        specifier: 'catalog:'
-        version: 10.10.0(jiti@2.7.0)(supports-color@8.1.1)
       supertest:
         specifier: 'catalog:'
         version: 7.2.2(supports-color@8.1.1)
@@ -704,15 +707,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
-      '@antfu/eslint-config':
-        specifier: 'catalog:'
-        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.63.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
       '@types/lodash.debounce':
         specifier: 'catalog:'
         version: 4.0.9
-      eslint:
-        specifier: 'catalog:'
-        version: 10.10.0(jiti@2.7.0)(supports-color@8.1.1)
       rollup-plugin-visualizer:
         specifier: 'catalog:'
         version: 7.1.1(rolldown@1.2.8)(rollup@4.62.2)
@@ -735,12 +732,6 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
-      '@antfu/eslint-config':
-        specifier: 'catalog:'
-        version: 8.3.0(@typescript-eslint/rule-tester@8.56.1(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.63.0(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/utils@8.63.0(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@vue/compiler-sfc@3.5.42)(eslint@10.10.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 10.10.0(jiti@2.7.0)(supports-color@8.1.1)
       tsc-alias:
         specifier: 'catalog:'
         version: 1.9.5

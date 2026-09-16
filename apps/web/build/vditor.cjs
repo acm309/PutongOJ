@@ -37,5 +37,4 @@ ignoreFiles.forEach((file) => {
   rmSync(resolve(targetPath, file), { recursive: true, force: true })
 })
 
-/* eslint-disable-next-line no-console */
 console.log(`Vditor ${version} has been successfully copied to public directory`)

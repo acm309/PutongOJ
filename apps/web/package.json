@@ -6,8 +6,6 @@
     "build": "pnpm run config && vite build",
     "config": "node build/vditor.cjs",
     "dev": "pnpm run config && vite",
-    "lint": "eslint ./src",
-    "lint:fix": "eslint ./src --fix",
     "preview": "vite preview",
     "start": "pnpm run dev",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
@@ -47,9 +45,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "catalog:",
     "@types/lodash.debounce": "catalog:",
-    "eslint": "catalog:",
     "rollup-plugin-visualizer": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

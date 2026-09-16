@@ -52,9 +52,9 @@ export const AccountSubmissionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   problem: stringToInt.pipe(z.int().nonnegative()).optional(),
-  contest: stringToInt.pipe(z.union([z.int().nonnegative(), z.literal(-1)])).optional(),
+  contest: stringToInt.pipe(z.union([ z.int().nonnegative(), z.literal(-1) ])).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
   language: stringToInt.pipe(z.enum(Language)).optional(),
 })

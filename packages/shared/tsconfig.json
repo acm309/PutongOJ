@@ -12,6 +12,6 @@
     "declaration": true,
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "eslint.config.js"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

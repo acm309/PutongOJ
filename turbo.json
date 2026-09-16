@@ -12,12 +12,6 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "outputs": []
-    },
-    "lint:fix": {
-      "cache": false
-    },
     "test": {
       "dependsOn": [ "^build" ],
       "outputs": [ "coverage/**", "coverage.lcov" ]

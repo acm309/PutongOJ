@@ -13,7 +13,7 @@ export const ContestListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'startsAt', 'endsAt']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'startsAt', 'endsAt' ]).default('createdAt'),
   title: z.string().max(30).optional(),
 })
 
@@ -64,7 +64,7 @@ export const ContestParticipantListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'updatedAt', 'status']).default('updatedAt'),
+  sortBy: z.enum([ 'createdAt', 'updatedAt', 'status' ]).default('updatedAt'),
   user: z.string().max(30).optional(),
   status: stringToInt.pipe(ContestParticipationManageableStatusSchema).optional(),
 })
@@ -189,7 +189,7 @@ export const ContestSolutionListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   user: z.string().max(30).optional(),
   problem: stringToInt.pipe(z.int().nonnegative()).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),
@@ -215,7 +215,7 @@ export type ContestSolutionListQueryResult = z.input<typeof ContestSolutionListQ
 
 export const ContestSolutionListExportQuerySchema = z.object({
   sort: SortOptionSchema.shape.sort,
-  sortBy: z.enum(['createdAt', 'time', 'memory']).default('createdAt'),
+  sortBy: z.enum([ 'createdAt', 'time', 'memory' ]).default('createdAt'),
   user: z.string().max(30).optional(),
   problem: stringToInt.pipe(z.int().nonnegative()).optional(),
   judge: stringToInt.pipe(z.enum(JudgeStatus)).optional(),

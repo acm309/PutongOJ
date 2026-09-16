@@ -17,7 +17,7 @@ export default {
         text: '基础', items: [
           { text: '常见问题', link: '/faq' },
           { text: 'Frequently Asked Questions', link: '/faq-en' },
-        ]
+        ],
       },
       {
         text: '平台',
@@ -44,7 +44,7 @@ export default {
       { icon: 'github', link: 'https://github.com/acm309/PutongOJ' },
     ],
     editLink: {
-      pattern: 'https://github.com/acm309/PutongOJ/tree/main/apps/docs/src/:path'
+      pattern: 'https://github.com/acm309/PutongOJ/tree/main/apps/docs/src/:path',
     },
   },
 }

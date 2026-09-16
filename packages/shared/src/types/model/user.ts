@@ -16,7 +16,7 @@ export const UserModelSchema = z.object({
   nick: z.string().max(30),
   avatar: UserAvatarSchema,
   motto: z.string().max(300),
-  mail: z.union([z.email(), z.literal('')]),
+  mail: z.union([ z.email(), z.literal('') ]),
   school: z.string().max(30),
   gid: z.array(z.int().nonnegative()),
   storageQuota: z.int().nonnegative(),

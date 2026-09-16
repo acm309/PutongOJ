@@ -13,8 +13,6 @@
     "dev:updater": "cross-env NODE_ENV=development node --watch src/jobs/updater.ts",
     "dev:worker": "cross-env NODE_ENV=development node --watch src/jobs/worker.ts",
     "dev:ws": "cross-env NODE_ENV=development node --watch src/ws.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "posttest": "cross-env NODE_ENV=test node test/posttest.ts",
     "pretest": "cross-env NODE_ENV=test node test/pretest.ts",
     "report": "c8 report --reporter=html",
@@ -52,7 +50,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "catalog:",
     "@types/fast-levenshtein": "catalog:",
     "@types/fs-extra": "catalog:",
     "@types/koa": "catalog:",
@@ -70,7 +67,6 @@
     "ava": "catalog:",
     "c8": "catalog:",
     "concurrently": "catalog:",
-    "eslint": "catalog:",
     "supertest": "catalog:",
     "typescript": "catalog:"
   },

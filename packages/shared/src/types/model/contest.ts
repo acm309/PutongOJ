@@ -34,7 +34,7 @@ export const ContestModelSchema = z.object({
   allowedGroups: z.array(ObjectIdSchema),
   /** IP whitelist for accessing the contest */
   ipWhitelist: z.array(z.object({
-    cidr: z.union([z.cidrv4(), z.cidrv6()]),
+    cidr: z.union([ z.cidrv4(), z.cidrv6() ]),
     comment: z.string().max(100).nullable(),
   })),
   /** Is IP whitelist enabled */

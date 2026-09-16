@@ -19,12 +19,14 @@
     "dev": "turbo run dev",
     "dev:db": "docker compose -f docker-compose.dev.yml up -d --wait",
     "dev:db:down": "docker compose -f docker-compose.dev.yml down",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
+    "lint": "eslint apps packages",
+    "lint:fix": "eslint apps packages --fix",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "turbo": "^2"
+    "@antfu/eslint-config": "catalog:",
+    "eslint": "catalog:",
+    "turbo": "catalog:"
   }
 }
