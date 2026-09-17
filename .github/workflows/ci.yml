@@ -13,37 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  checks:
-    name: Checks
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run lint
-        run: pnpm lint
-
-      - name: Run typecheck
-        run: pnpm typecheck
-
-      - name: Build application
-        run: pnpm build
-
-  server-test:
-    name: Server Tests
+  test:
+    name: Checks & Tests
     runs-on: ubuntu-latest
 
     services:
@@ -83,6 +54,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run typecheck
+        run: pnpm typecheck
+
+      - name: Build application
+        run: pnpm build
+
       - name: Run server tests
         run: pnpm test
 
@@ -101,7 +81,7 @@ jobs:
 
   publish:
     name: Publish Docker Image
-    needs: [checks, server-test]
+    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
