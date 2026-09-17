@@ -19,11 +19,15 @@ COPY tsconfig.base.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/docs/package.json apps/docs/
 COPY apps/web/package.json apps/web/
+COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
 RUN pnpm install --frozen-lockfile
 
 COPY packages/shared/ packages/shared/
 RUN pnpm --filter @putong-oj/shared build
+
+COPY packages/db/ packages/db/
+RUN pnpm --filter @putong-oj/db build
 
 # Docs builder
 FROM base_builder AS docs_builder
