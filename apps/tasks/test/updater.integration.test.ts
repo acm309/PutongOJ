@@ -1,14 +1,14 @@
 import { connectMongoose, disconnectMongoose, Solution } from '@putong-oj/db'
 import { JudgeStatus, Language, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
-import { loadConfig } from '../src/config.ts'
-import { RESULT_QUEUE_NAME } from '../src/constants.ts'
-import { Updater } from '../src/queue/updater.ts'
+import { loadJudgerConfig } from '../src/modules/judger/config.ts'
+import { RESULT_QUEUE_NAME } from '../src/modules/judger/constants.ts'
+import { Updater } from '../src/modules/judger/queue/updater.ts'
 import { integrationTest, mongodbURL } from './helpers.ts'
 
 integrationTest('publishes result notifications and queues follow-up jobs', async (t) => {
   const sid = Date.now()
-  const config = loadConfig({
+  const config = loadJudgerConfig({
     PTOJ_MONGODB_URL: mongodbURL,
     PTOJ_REDIS_URL: 'redis://127.0.0.1:6379/15',
     PTOJ_DEBUG: '0',

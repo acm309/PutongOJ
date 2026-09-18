@@ -11,7 +11,7 @@ import type {
 import type { DocumentId, PaginateOption, SortOption } from '../types/index.ts'
 import type { QueryFilter } from '../types/mongo.ts'
 import { Comment, Discussion } from '@putong-oj/db'
-import { distributeWork } from '../jobs/helper.ts'
+import { distributeWork } from './taskQueue.ts'
 
 export type DiscussionQueryFilters = QueryFilter<{
   author: Types.ObjectId

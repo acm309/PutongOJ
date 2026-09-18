@@ -6,11 +6,8 @@
   "scripts": {
     "build": "tsc && cp -r src/scripts dist/scripts",
     "coverage": "c8 report --reporter=text-lcov > coverage.lcov",
-    "deploy:init": "cross-env NODE_ENV=production node setup.js",
-    "deploy:start": "pnpm exec pm2 start pm2.config.json",
-    "dev": "concurrently \"pnpm run dev:app\" \"pnpm run dev:ws\" \"pnpm run dev:worker\"",
+    "dev": "concurrently \"pnpm run dev:app\" \"pnpm run dev:ws\"",
     "dev:app": "cross-env NODE_ENV=development node --watch src/app.ts",
-    "dev:worker": "cross-env NODE_ENV=development node --watch src/jobs/worker.ts",
     "dev:ws": "cross-env NODE_ENV=development node --watch src/ws.ts",
     "posttest": "cross-env NODE_ENV=test node test/posttest.ts",
     "pretest": "cross-env NODE_ENV=test node test/pretest.ts",
@@ -29,7 +26,6 @@
     "@zip.js/zip.js": "catalog:",
     "cross-env": "catalog:",
     "dotenv-flow": "catalog:",
-    "fast-levenshtein": "catalog:",
     "fs-extra": "catalog:",
     "ioredis": "catalog:",
     "koa": "catalog:",
@@ -48,7 +44,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/fast-levenshtein": "catalog:",
     "@types/fs-extra": "catalog:",
     "@types/koa": "catalog:",
     "@types/koa-logger": "catalog:",

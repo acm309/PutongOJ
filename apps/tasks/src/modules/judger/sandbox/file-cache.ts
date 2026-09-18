@@ -1,6 +1,6 @@
-import type { Logger } from '../logger.ts'
+import type { Logger } from '../../../logger.ts'
 import type { PreparedFile } from './types.ts'
-import { createLogger } from '../logger.ts'
+import { createLogger } from '../../../logger.ts'
 
 export interface FileCacheClient {
   deleteFile: (fileId: string) => Promise<boolean>
@@ -29,7 +29,7 @@ export class FileCache {
     this.client = client
     this.expire = options.expire ?? 60 * 60
     this.recycleGap = options.recycleGap ?? 60
-    this.logger = createLogger('tasks.file-cache')
+    this.logger = createLogger('judger.file-cache')
   }
 
   private now (): number {

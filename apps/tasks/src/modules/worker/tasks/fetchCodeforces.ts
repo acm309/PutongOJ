@@ -1,6 +1,8 @@
+import type { Redis } from 'ioredis'
 import superagent from 'superagent'
-import redis from '../../config/redis.ts'
-import logger from '../../utils/logger.ts'
+import { createLogger } from '../../../logger.ts'
+
+const logger = createLogger('worker.fetch-codeforces')
 
 interface CodeforcesUserInfo {
   handle: string
@@ -34,7 +36,7 @@ type CodeforcesUserInfoResponse = {
 
 const CODEFORCES_TIMEOUT = 15000
 
-async function fetchCodeforcesUserInfo (handles: string[]) {
+async function fetchCodeforcesUserInfo (redis: Redis, handles: string[]) {
   const url = new URL('https://codeforces.com/api/user.info')
 
   url.searchParams.set('handles', handles.join(';'))
@@ -59,13 +61,13 @@ async function fetchCodeforcesUserInfo (handles: string[]) {
   logger.info(`Fetched Codeforces info for handles: ${handles.join(', ')}`)
 }
 
-async function fetchCodeforces (item: string) {
+async function fetchCodeforces (redis: Redis, item: string) {
   const type = item.slice(0, item.indexOf(':'))
   const id = item.slice(item.indexOf(':') + 1)
 
   switch (type) {
     case 'userInfo':
-      await fetchCodeforcesUserInfo(id.split(','))
+      await fetchCodeforcesUserInfo(redis, id.split(','))
       break
     default:
       logger.warn(`Unknown Codeforces fetch type <${type}>`)

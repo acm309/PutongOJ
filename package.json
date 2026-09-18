@@ -19,8 +19,8 @@
     "dev": "turbo run dev",
     "dev:db": "docker compose -f docker-compose.dev.yml up -d --wait",
     "dev:db:down": "docker compose -f docker-compose.dev.yml down",
-    "lint": "eslint apps packages",
-    "lint:fix": "eslint apps packages --fix",
+    "lint": "eslint apps packages setup.js",
+    "lint:fix": "eslint apps packages setup.js --fix",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },

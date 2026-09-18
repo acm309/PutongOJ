@@ -1,6 +1,6 @@
 import { Language, problemType } from '@putong-oj/shared'
 import test from 'ava'
-import { buildJudgerTask } from '../src/services/submission.ts'
+import { buildJudgerTask } from '../src/modules/judger/services/submission.ts'
 
 test('builds a judger task from database records', (t) => {
   const submission = buildJudgerTask(

@@ -3,9 +3,9 @@ import { connectMongoose, disconnectMongoose, Problem, Solution } from '@putong-
 import { JudgeStatus, Language } from '@putong-oj/shared'
 import fse from 'fs-extra'
 import { Redis } from 'ioredis'
-import { loadConfig } from '../src/config.ts'
-import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../src/constants.ts'
-import { Processor } from '../src/queue/processor.ts'
+import { loadJudgerConfig } from '../src/modules/judger/config.ts'
+import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../src/modules/judger/constants.ts'
+import { Processor } from '../src/modules/judger/queue/processor.ts'
 import { integrationTest, mongodbURL, sandboxEndpoint } from './helpers.ts'
 
 integrationTest('processes a queued submission in order', async (t) => {
@@ -17,7 +17,7 @@ integrationTest('processes a queued submission in order', async (t) => {
   const testcaseUUID = `queue-testcase-${sid}`
   const testcaseDir = path.resolve(dataDir, String(pid))
   const config = {
-    ...loadConfig({
+    ...loadJudgerConfig({
       PTOJ_MONGODB_URL: mongodbURL,
       PTOJ_REDIS_URL: 'redis://127.0.0.1:6379/15',
       PTOJ_SANDBOX_ENDPOINT: sandboxEndpoint,

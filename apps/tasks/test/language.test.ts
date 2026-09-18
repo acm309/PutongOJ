@@ -1,6 +1,6 @@
 import { Language } from '@putong-oj/shared'
 import test from 'ava'
-import { LanguageRegistry } from '../src/languages/registry.ts'
+import { LanguageRegistry } from '../src/modules/judger/languages/registry.ts'
 
 test('rejects duplicate language registration', (t) => {
   t.throws(() => {

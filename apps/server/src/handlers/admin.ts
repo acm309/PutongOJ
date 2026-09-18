@@ -40,7 +40,6 @@ import {
   SessionRevokeOthersResultSchema,
 } from '@putong-oj/shared'
 import escapeRegExp from 'lodash/escapeRegExp.js'
-import { distributeWork } from '../jobs/helper.ts'
 import { adminRequire, loadProfile, rootRequire } from '../middlewares/authn.ts'
 import { dataExportLimit } from '../middlewares/ratelimit.ts'
 import { loadPost } from '../policies/post.ts'
@@ -57,6 +56,7 @@ import sessionService from '../services/session.ts'
 import { settingsService } from '../services/settings.ts'
 import solutionService from '../services/solution.ts'
 import tagService from '../services/tag.ts'
+import { distributeWork } from '../services/taskQueue.ts'
 import userService from '../services/user.ts'
 import websocketService from '../services/websocket.ts'
 import {

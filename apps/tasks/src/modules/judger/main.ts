@@ -1,18 +1,18 @@
 import process from 'node:process'
 import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
-import { loadConfig } from './config.ts'
-import { closeLogger, configureLogger, createLogger } from './logger.ts'
+import { closeLogger, configureLogger, createLogger } from '../../logger.ts'
+import { loadJudgerConfig } from './config.ts'
 import { Processor } from './queue/processor.ts'
 import { Updater } from './queue/updater.ts'
 
 async function main (): Promise<void> {
-  const config = loadConfig()
+  const config = loadJudgerConfig()
   configureLogger({
     debug: config.debug,
     logFile: config.logFile,
   })
 
-  const logger = createLogger('tasks.main')
+  const logger = createLogger('judger.main')
   logger.info(
     'Starting with '
     + `mongo_db='${new URL(config.mongodbURL).pathname}', `
@@ -60,7 +60,7 @@ async function main (): Promise<void> {
     processor.stop()
     updater.stop()
     await Promise.allSettled(running)
-    logger.info('Tasks stopped')
+    logger.info('Judger stopped')
     await disconnectMongoose()
     await closeLogger()
   }

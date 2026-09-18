@@ -6,10 +6,11 @@ import fse from 'fs-extra'
 dotenvFlow.config()
 
 const baseDir = resolve(import.meta.dirname, 'dist')
+const tasksModulesDir = resolve(import.meta.dirname, 'tasks/dist/modules')
 const logsDir = resolve(import.meta.dirname, 'logs')
-const jobsDir = resolve(baseDir, 'jobs')
 
 const WORKER_INSTANCES = Number.parseInt(process.env.PTOJ_WORKER_INSTANCES, 10) || 2
+const JUDGER_INSTANCES = Number.parseInt(process.env.PTOJ_JUDGER_INSTANCES, 10) || 1
 
 async function main () {
   const apps = []
@@ -36,13 +37,31 @@ async function main () {
     error_file: resolve(logsDir, 'ws.err.log'),
     ...commons,
   })
+  for (let i = 0; i < JUDGER_INSTANCES; i++) {
+    apps.push({
+      name: 'judger',
+      script: resolve(tasksModulesDir, 'judger/main.js'),
+      out_file: resolve(logsDir, `judger-${i}.out.log`),
+      error_file: resolve(logsDir, `judger-${i}.err.log`),
+      ...commons,
+      env: {
+        ...commons.env,
+        PTOJ_DATA_DIR: '/app/data',
+        PTOJ_SANDBOX_DATA_DIR: '/app/data',
+      },
+    })
+  }
   for (let i = 0; i < WORKER_INSTANCES; i++) {
     apps.push({
       name: 'worker',
-      script: resolve(jobsDir, 'worker.js'),
+      script: resolve(tasksModulesDir, 'worker/main.js'),
       out_file: resolve(logsDir, `worker-${i}.out.log`),
       error_file: resolve(logsDir, `worker-${i}.err.log`),
       ...commons,
+      env: {
+        ...commons.env,
+        PTOJ_UPLOAD_DIR: '/app/public/uploads',
+      },
     })
   }
 

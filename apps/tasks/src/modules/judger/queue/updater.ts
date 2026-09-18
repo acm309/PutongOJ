@@ -1,17 +1,17 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
-import type { WorkerConfig } from '../config.ts'
+import type { JudgerConfig } from '../config.ts'
 import { Solution } from '@putong-oj/db'
 import { JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
+import { createLogger } from '../../../logger.ts'
 import { RESULT_QUEUE_NAME } from '../constants.ts'
-import { createLogger } from '../logger.ts'
 
 export class Updater {
   private readonly redis: Redis
-  private readonly logger = createLogger('tasks.updater')
+  private readonly logger = createLogger('judger.updater')
   private running = true
 
-  constructor (config: WorkerConfig) {
+  constructor (config: JudgerConfig) {
     this.redis = new Redis(config.redisOptions)
   }
 

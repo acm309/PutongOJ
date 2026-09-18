@@ -1,6 +1,6 @@
 import { JudgeStatus, Language, problemType } from '@putong-oj/shared'
 import test from 'ava'
-import { Judger } from '../src/judge/judger.ts'
+import { Judger } from '../src/modules/judger/judge/judger.ts'
 import { createClient, integrationTest } from './helpers.ts'
 
 const testcases = [

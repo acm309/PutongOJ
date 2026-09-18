@@ -1,7 +1,9 @@
 import { Solution } from '@putong-oj/db'
 import { JudgeStatus } from '@putong-oj/shared'
 import levenshtein from 'fast-levenshtein'
-import logger from '../../utils/logger.ts'
+import { createLogger } from '../../../logger.ts'
+
+const logger = createLogger('worker.check-similarity')
 
 function codeNormalize (code: string): string {
   return code

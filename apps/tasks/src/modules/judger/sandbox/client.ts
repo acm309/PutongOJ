@@ -1,11 +1,11 @@
-import type { Logger } from '../logger.ts'
+import type { Logger } from '../../../logger.ts'
 import type {
   PipeMap,
   PreparedFile,
   SandboxCmd,
   SandboxResult,
 } from './types.ts'
-import { createLogger } from '../logger.ts'
+import { createLogger } from '../../../logger.ts'
 import { FileCache } from './file-cache.ts'
 import { SandboxResultSchema } from './types.ts'
 
@@ -21,7 +21,7 @@ export class SandboxClient {
 
   constructor (endpoint: string) {
     this.endpoint = endpoint.replace(/\/+$/, '')
-    this.logger = createLogger('tasks.sandbox-client')
+    this.logger = createLogger('judger.sandbox-client')
     this.cache = new FileCache(this)
   }
 

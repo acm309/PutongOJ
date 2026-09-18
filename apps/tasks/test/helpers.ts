@@ -1,6 +1,6 @@
 import process from 'node:process'
 import test from 'ava'
-import { SandboxClient } from '../src/sandbox/client.ts'
+import { SandboxClient } from '../src/modules/judger/sandbox/client.ts'
 
 export const integrationTest = process.env.PTOJ_RUN_INTEGRATION === '1'
   ? test

@@ -1,6 +1,8 @@
 import { Comment, Discussion, Problem, Solution, User } from '@putong-oj/db'
 import { JudgeStatus } from '@putong-oj/shared'
-import logger from '../../utils/logger.ts'
+import { createLogger } from '../../../logger.ts'
+
+const logger = createLogger('worker.update-statistic')
 
 /**
  * 更新用户的统计信息

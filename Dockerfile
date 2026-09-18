@@ -56,6 +56,14 @@ WORKDIR /app
 
 RUN pnpm --filter @putong-oj/server deploy --legacy /app/server_deploy
 
+# Tasks deps
+FROM base_builder AS tasks_deps
+WORKDIR /app
+
+COPY apps/tasks/ apps/tasks/
+RUN pnpm --filter @putong-oj/tasks build
+RUN pnpm --filter @putong-oj/tasks deploy --legacy --prod /app/tasks_deploy
+
 # Server builder
 FROM base_builder AS server_builder
 WORKDIR /app
@@ -70,6 +78,7 @@ WORKDIR /app
 
 COPY --from=server_deps /app/server_deploy/node_modules ./node_modules
 COPY --from=server_deps /app/server_deploy/package.json ./package.json
+COPY --from=tasks_deps /app/tasks_deploy ./tasks
 
 COPY --from=server_builder /app/apps/server/dist ./dist
 COPY --from=web_builder /app/apps/web/dist ./public
@@ -78,12 +87,12 @@ COPY --from=docs_builder /app/apps/docs/.vitepress/dist ./public/docs
 COPY --from=version_checker /app/version.txt .
 COPY --from=server_builder /app/build_time.txt .
 
-COPY apps/server/setup.js .
+COPY setup.js .
 COPY apps/server/entrypoint.sh .
 RUN chmod +x entrypoint.sh
 RUN mkdir -p /app/data /app/logs /app/public/uploads
 
-EXPOSE 3000/tcp
+EXPOSE 3000/tcp 3001/tcp
 VOLUME [ "/app/data", "/app/logs", "/app/public/uploads" ]
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

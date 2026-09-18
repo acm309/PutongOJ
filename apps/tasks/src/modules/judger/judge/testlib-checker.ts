@@ -3,8 +3,8 @@ import type { SandboxClient } from '../sandbox/client.ts'
 import type { PreparedFile } from '../sandbox/types.ts'
 import { createHash } from 'node:crypto'
 import { JudgeStatus } from '@putong-oj/shared'
+import { createLogger } from '../../../logger.ts'
 import { DEFAULT_CHECKER_CODE, TESTLIB_CODE } from '../assets.ts'
-import { createLogger } from '../logger.ts'
 import {
   collector,
   createSandboxCmd,
@@ -27,7 +27,7 @@ export class TestlibChecker {
 
   private readonly client: SandboxClient
   private readonly code: string
-  private readonly logger = createLogger('tasks.checker')
+  private readonly logger = createLogger('judger.checker')
   private compiledFile?: { fileId: string }
 
   constructor (

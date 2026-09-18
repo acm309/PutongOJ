@@ -1,4 +1,4 @@
-import { FileCache } from '../src/sandbox/file-cache.ts'
+import { FileCache } from '../src/modules/judger/sandbox/file-cache.ts'
 import { createClient, integrationTest } from './helpers.ts'
 
 const fileContent = [

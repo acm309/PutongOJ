@@ -1,10 +1,13 @@
 # Putong OJ Tasks
 
-TypeScript replacement for the original Python `ptoj-judger`. It keeps the
-original judging behavior while using the pinned `go-judge` sandbox for code
-execution. It also handles result notifications and queues follow-up jobs.
+TypeScript replacement for the original Python `ptoj-judger` and the background
+jobs that previously lived under `apps/server`.
 
-## Responsibilities
+## Modules
+
+### Judger
+
+Entrypoint: `src/modules/judger/main.ts`
 
 - Consume submission ObjectIds from `judger:task`.
 - Load submissions and problems from MongoDB by `_id`.
@@ -14,6 +17,15 @@ execution. It also handles result notifications and queues follow-up jobs.
 - Publish solution ObjectIds to `judger:result` after saving results.
 - Consume result notifications, push WebSocket updates, and trigger statistics
   and similarity jobs.
+
+### Worker
+
+Entrypoint: `src/modules/worker/main.ts`
+
+- Update user, problem, and discussion statistics.
+- Check accepted solutions for similarity.
+- Fetch Codeforces user information.
+- Scan the uploads directory and restore missing file records.
 
 The sandbox and Testlib checker remain C/C++ components. This service replaces
 the Python control plane, not the secure execution sandbox.
@@ -27,7 +39,8 @@ the Python control plane, not the secure execution sandbox.
 | `PTOJ_SANDBOX_ENDPOINT` | `http://localhost:5050` | go-judge endpoint |
 | `PTOJ_DATA_DIR` | `apps/server/data` | Directory containing testcase metadata and files |
 | `PTOJ_SANDBOX_DATA_DIR` | `/app/data` | Testcase directory as seen by the sandbox |
-| `PTOJ_LOG_FILE` | `tasks.log` | Log file path |
+| `PTOJ_UPLOAD_DIR` | `apps/server/public/uploads` | Uploads directory scanned by the worker |
+| `PTOJ_LOG_FILE` | `judger.log` / `worker.log` | Log file path |
 | `PTOJ_DEBUG` | `1` | Enable debug logging |
 
 ## Local Development
@@ -38,10 +51,17 @@ Start Redis, go-judge, and the worker:
 docker compose up --build
 ```
 
-Or run the worker directly against local services:
+Run both modules directly against local services:
 
 ```bash
 pnpm --filter @putong-oj/tasks dev
+```
+
+They can also be started independently:
+
+```bash
+pnpm --filter @putong-oj/tasks dev:judger
+pnpm --filter @putong-oj/tasks dev:worker
 ```
 
 ## Tests

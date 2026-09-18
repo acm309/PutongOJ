@@ -7,9 +7,9 @@ import escapeRegExp from 'lodash/escapeRegExp.js'
 import { DateTime } from 'luxon'
 import config from '../config/index.ts'
 import redis from '../config/redis.ts'
-import { distributeWork } from '../jobs/helper.ts'
 import { CacheKey, cacheService } from './cache.ts'
 import { getUserOAuthConnection } from './oauth.ts'
+import { distributeWork } from './taskQueue.ts'
 
 const reservedUsernames = new Set(
   RESERVED_KEYWORDS.flatMap(s => [ s.toLowerCase(), `${s.toLowerCase()}s` ]),

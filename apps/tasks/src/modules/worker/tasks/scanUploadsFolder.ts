@@ -2,11 +2,11 @@ import type { FileModel } from '@putong-oj/shared'
 import path from 'node:path'
 import { Files, User } from '@putong-oj/db'
 import fse from 'fs-extra'
-import logger from '../../utils/logger.ts'
+import { createLogger } from '../../../logger.ts'
 
-const uploadDir = path.join(import.meta.dirname, '../../../public/uploads')
+const logger = createLogger('worker.scan-uploads')
 
-async function scanUploadsFolder () {
+async function scanUploadsFolder (uploadDir: string) {
   const stats = {
     scanned: 0,
     added: 0,
