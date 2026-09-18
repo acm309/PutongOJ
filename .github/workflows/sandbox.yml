@@ -1,4 +1,4 @@
-name: Sandbox Image
+name: Code Sandbox
 
 permissions:
   contents: read

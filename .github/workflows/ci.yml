@@ -1,4 +1,4 @@
-name: CI
+name: Putong OJ
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ on:
 
 jobs:
   checks:
-    name: Checks
+    name: Code Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -184,7 +184,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   publish:
-    name: Publish Docker Image
+    name: Build and Publish
     needs:
       - checks
       - server-tests
