@@ -468,12 +468,18 @@ importers:
 
   apps/judger:
     dependencies:
+      '@putong-oj/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@putong-oj/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       cross-env:
         specifier: 'catalog:'
         version: 10.1.0
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.4.0
       ioredis:
         specifier: 'catalog:'
         version: 5.11.1(supports-color@8.1.1)
@@ -481,6 +487,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@types/fs-extra':
+        specifier: 'catalog:'
+        version: 11.0.4
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.4

@@ -1,6 +1,6 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import { Solution } from '@putong-oj/db'
-import { JudgerResultSchema, JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
+import { JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import redis from '../config/redis.ts'
 import logger from '../utils/logger.ts'
 import { distributeWork } from './helper.ts'
@@ -9,25 +9,19 @@ import '../config/db.ts'
 /**
  * @NOTE
  *
- * Updater 用于将 Judger 的结果更新到数据库
- * `judger:result` 的内容需要按序处理
- * 所以只能同时运行一个 Updater 实例
+ * Updater 只消费 Judger 的结果通知。
+ * 测评结果已经由 Judger 写入数据库，这里负责推送 WebSocket 和触发后续任务。
  */
 
-async function updateResult (result: any) {
-  const { sid } = result
-  const solution = await Solution.findOne({ sid }).exec()
+async function notifyResult (solutionId: string) {
+  const solution = await Solution.findOne({ _id: solutionId }).lean().exec()
   if (solution == null) {
-    logger.warn(`Solution <${sid}> not found`)
+    logger.warn(`Solution <${solutionId}> not found`)
     return
   }
-
-  const fields = [ 'time', 'memory', 'testcases', 'judge', 'error' ]
-  fields.forEach((field) => {
-    if (result[field] !== undefined) {
-      (solution as any)[field] = result[field]
-    }
-  })
+  if (solution.judge === JudgeStatus.RunningJudge) {
+    return
+  }
 
   const message: WebSocketMessage = {
     type: WebSocketMessageType.SubmissionResult,
@@ -42,19 +36,16 @@ async function updateResult (result: any) {
     message,
   }
 
-  await solution.save()
-  logger.info(`Solution <${sid}> update to status ${solution.judge}`)
-
-  const tasks = [] as Promise<any>[]
-  if (solution.judge !== JudgeStatus.RunningJudge) {
-    tasks.push(distributeWork('updateStatistic', `problem:${solution.pid}`))
-    tasks.push(distributeWork('updateStatistic', `user:${solution.uid}`))
-    tasks.push(redis.publish('websocket:message', JSON.stringify(dispatch)))
-  }
+  const tasks = [
+    distributeWork('updateStatistic', `problem:${solution.pid}`),
+    distributeWork('updateStatistic', `user:${solution.uid}`),
+    redis.publish('websocket:message', JSON.stringify(dispatch)),
+  ] as Promise<any>[]
   if (solution.judge === JudgeStatus.Accepted) {
     tasks.push(distributeWork('checkSimilarity', solution.sid))
   }
   await Promise.all(tasks)
+  logger.info(`Notified solution <${solution.sid}> result: ${solution.judge}`)
 }
 
 async function main () {
@@ -66,8 +57,7 @@ async function main () {
         continue
       }
       const [ , item ] = blpopResult
-      const result = JudgerResultSchema.parse(JSON.parse(item))
-      await updateResult(result)
+      await notifyResult(item)
     } catch (e) {
       logger.error(e)
     }

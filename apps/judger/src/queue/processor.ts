@@ -1,12 +1,13 @@
-import type { JudgerResult, JudgerTask } from '@putong-oj/shared'
+import type { JudgerResult } from '@putong-oj/shared'
 import type { JudgerConfig } from '../config.ts'
 import type { Scheduler } from './scheduler.ts'
-import { JudgerTaskSchema, JudgeStatus } from '@putong-oj/shared'
+import { JudgeStatus } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../constants.ts'
 import { Judger } from '../judge/judger.ts'
 import { createLogger } from '../logger.ts'
 import { SandboxClient } from '../sandbox/client.ts'
+import { loadJudgerTask, saveJudgerResult } from '../services/submission.ts'
 
 export class Processor {
   private readonly idx: number
@@ -45,7 +46,7 @@ export class Processor {
     this.logger.debug(`Processor ${this.idx} closed`)
   }
 
-  async getSubmission (): Promise<JudgerTask | undefined> {
+  async getSolutionId (): Promise<string | undefined> {
     while (this.scheduler.isRunning()) {
       const popValue = await this.redis.blpop(
         TASK_QUEUE_NAME,
@@ -57,42 +58,60 @@ export class Processor {
 
       const [ , value ] = popValue
       this.logger.debug(`Processor ${this.idx} popped ${value}`)
-      return JudgerTaskSchema.parse(JSON.parse(value))
+      return value.trim()
     }
     return undefined
   }
 
-  async putResult (result: JudgerResult): Promise<void> {
-    this.logger.debug(`Processor ${this.idx} putting result`, result)
-    await this.redis.rpush(
-      RESULT_QUEUE_NAME,
-      JSON.stringify(result),
-    )
+  async putResult (solutionId: string): Promise<void> {
+    try {
+      this.logger.debug(
+        `Processor ${this.idx} notifying solution ${solutionId}`,
+      )
+      await this.redis.rpush(
+        RESULT_QUEUE_NAME,
+        solutionId,
+      )
+    } catch (error) {
+      this.logger.error(
+        `Processor ${this.idx} failed to enqueue result for ${solutionId}:`,
+        error,
+      )
+    }
   }
 
   async process (): Promise<void> {
-    const submission = await this.getSubmission()
-    if (!submission) {
+    const solutionId = await this.getSolutionId()
+    if (solutionId === undefined) {
       return
     }
 
     this.logger.debug(
-      `Processor ${this.idx} processing submission ${submission.sid}`,
+      `Processor ${this.idx} processing solution ${solutionId}`,
     )
     const startTime = performance.now()
-    await this.putResult({
-      sid: submission.sid,
-      time: 0,
-      memory: 0,
-      testcases: [],
-      judge: JudgeStatus.RunningJudge,
-      error: '',
-    })
 
     try {
+      const submission = await loadJudgerTask(solutionId, this.config)
+      if (!submission) {
+        return
+      }
+
+      const runningResult: JudgerResult = {
+        sid: submission.sid,
+        time: 0,
+        memory: 0,
+        testcases: [],
+        judge: JudgeStatus.RunningJudge,
+        error: '',
+      }
+      await saveJudgerResult(solutionId, runningResult)
+      await this.putResult(solutionId)
+
       const judger = new Judger(this.client, submission)
       const result = await judger.getResult()
-      await this.putResult(result)
+      await saveJudgerResult(solutionId, result)
+      await this.putResult(solutionId)
 
       const elapsedSeconds = (performance.now() - startTime) / 1000
       this.logger.info(
@@ -101,17 +120,26 @@ export class Processor {
       )
     } catch (error) {
       this.logger.error(
-        `Processor ${this.idx} failed submission ${submission.sid}:`,
+        `Processor ${this.idx} failed solution ${solutionId}:`,
         error,
       )
-      await this.putResult({
-        sid: submission.sid,
+      const result: JudgerResult = {
+        sid: 0,
         time: 0,
         memory: 0,
         testcases: [],
         judge: JudgeStatus.SystemError,
         error: '',
-      })
+      }
+      try {
+        await saveJudgerResult(solutionId, result)
+      } catch (saveError) {
+        this.logger.error(
+          `Processor ${this.idx} failed to save system error for ${solutionId}:`,
+          saveError,
+        )
+      }
+      await this.putResult(solutionId)
     }
   }
 

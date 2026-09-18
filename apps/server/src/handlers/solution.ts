@@ -2,17 +2,14 @@ import type { CourseDocument, Types } from '@putong-oj/db'
 import type { Context } from 'koa'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
-import path from 'node:path'
 import Router from '@koa/router'
 import { Contest, Problem, Solution } from '@putong-oj/db'
 import {
   ErrorCode,
-  JudgerTaskSchema,
   JudgeStatus,
   SolutionSubmitPayloadSchema,
   SolutionSubmitResultSchema,
 } from '@putong-oj/shared'
-import fse from 'fs-extra'
 import pick from 'lodash/pick.js'
 import redis from '../config/redis.ts'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
@@ -132,28 +129,7 @@ const create = async (ctx: Context) => {
     }
   }
 
-  const { problem } = problemState
-
   try {
-    const timeLimit = problem.time
-    const memoryLimit = problem.memory
-    const type = problem.type
-    const additionCode = problem.code
-
-    let meta = { testcases: [] }
-    const dir = path.resolve(import.meta.dirname, `../../data/${pid}`)
-    const file = path.resolve(dir, 'meta.json')
-    if (fse.existsSync(file)) {
-      meta = await fse.readJson(file)
-    }
-    const testcases = meta.testcases.map((item: { uuid: string }) => {
-      return {
-        uuid: item.uuid,
-        input: { src: `/app/data/${pid}/${item.uuid}.in` },
-        output: { src: `/app/data/${pid}/${item.uuid}.out` },
-      }
-    })
-
     const solution = new Solution({
       pid, mid, uid, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
@@ -162,13 +138,7 @@ const create = async (ctx: Context) => {
     await solution.save()
 
     const sid = solution.sid
-    const submission = JudgerTaskSchema.parse({
-      sid, timeLimit, memoryLimit,
-      testcases, language, code,
-      type, additionCode,
-    })
-
-    await redis.rpush('judger:task', JSON.stringify(submission))
+    await redis.rpush('judger:task', solution._id.toString())
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
     const result = SolutionSubmitResultSchema.encode({ solution: sid })
@@ -196,8 +166,7 @@ async function updateSolution (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
   }
   const pid = solution.pid
-  const problem = await Problem.findOne({ pid })
-  if (!problem) {
+  if (!await Problem.exists({ pid })) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution not found')
   }
 
@@ -221,32 +190,7 @@ async function updateSolution (ctx: Context) {
   }
 
   try {
-    const timeLimit = problem.time
-    const memoryLimit = problem.memory
-    const type = problem.type
-    const additionCode = problem.code
-
-    let meta = { testcases: [] }
-    const dir = path.resolve(import.meta.dirname, `../../data/${pid}`)
-    const file = path.resolve(dir, 'meta.json')
-    if (fse.existsSync(file)) {
-      meta = await fse.readJson(file)
-    }
-    const testcases = meta.testcases.map((item: { uuid: string }) => {
-      return {
-        uuid: item.uuid,
-        input: { src: `/app/data/${pid}/${item.uuid}.in` },
-        output: { src: `/app/data/${pid}/${item.uuid}.out` },
-      }
-    })
-    const submission = JudgerTaskSchema.parse({
-      sid, timeLimit, memoryLimit, testcases,
-      language: solution.language,
-      code: solution.code,
-      type, additionCode,
-    })
-
-    await redis.rpush('judger:task', JSON.stringify(submission))
+    await redis.rpush('judger:task', solution._id.toString())
     ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)
   } catch (err) {
     ctx.auditLog.error('Failed to push solution to judger queue', err)

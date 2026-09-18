@@ -1,17 +1,27 @@
-import { JudgeStatus, Language, problemType } from '@putong-oj/shared'
+import path from 'node:path'
+import { connectMongoose, disconnectMongoose, Problem, Solution } from '@putong-oj/db'
+import { JudgeStatus, Language } from '@putong-oj/shared'
+import fse from 'fs-extra'
 import { Redis } from 'ioredis'
 import { loadConfig } from '../src/config.ts'
 import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../src/constants.ts'
 import { Scheduler } from '../src/queue/scheduler.ts'
-import { integrationTest, sandboxEndpoint } from './helpers.ts'
+import { integrationTest, mongodbURL, sandboxEndpoint } from './helpers.ts'
 
 integrationTest('processes a queued submission in order', async (t) => {
   const taskQueue = TASK_QUEUE_NAME
   const resultQueue = RESULT_QUEUE_NAME
+  const dataDir = path.resolve(import.meta.dirname, '../../server/data')
+  const pid = 999_999
+  const sid = Date.now()
+  const testcaseUUID = `queue-testcase-${sid}`
+  const testcaseDir = path.resolve(dataDir, String(pid))
   const config = {
     ...loadConfig({
+      PTOJ_MONGODB_URL: mongodbURL,
       PTOJ_REDIS_URL: 'redis://127.0.0.1:6379/15',
       PTOJ_SANDBOX_ENDPOINT: sandboxEndpoint,
+      PTOJ_DATA_DIR: dataDir,
       PTOJ_DEBUG: '0',
     }),
     initConcurrent: 1,
@@ -20,23 +30,37 @@ integrationTest('processes a queued submission in order', async (t) => {
   const scheduler = new Scheduler(config)
 
   try {
-    await redis.del(taskQueue, resultQueue)
-    await redis.rpush(taskQueue, JSON.stringify({
-      sid: 42,
-      timeLimit: 1000,
-      memoryLimit: 32768,
-      testcases: [
-        {
-          uuid: 'queue-testcase',
-          input: { content: '1 2\n' },
-          output: { content: '3\n' },
-        },
-      ],
-      language: Language.Python,
+    await connectMongoose({ uri: config.mongodbURL })
+    await Promise.all([
+      Problem.deleteMany({ pid }),
+      Solution.deleteMany({ sid }),
+      fse.remove(testcaseDir),
+    ])
+    await Promise.all([
+      fse.outputFile(path.join(testcaseDir, `${testcaseUUID}.in`), '1 2\n'),
+      fse.outputFile(path.join(testcaseDir, `${testcaseUUID}.out`), '3\n'),
+      fse.outputJson(path.join(testcaseDir, 'meta.json'), {
+        testcases: [ { uuid: testcaseUUID } ],
+      }),
+    ])
+    await Problem.create({
+      pid,
+      title: 'Judger queue integration',
+      time: 1000,
+      memory: 32768,
+    })
+    const queuedSolution = await Solution.create({
+      sid,
+      pid,
+      uid: 'judger-integration',
       code: 'a, b = map(int, input().split())\nprint(a + b)\n',
-      type: problemType.Traditional,
-      additionCode: '',
-    }))
+      length: 47,
+      language: Language.Python,
+    })
+    const solutionId = queuedSolution._id.toString()
+
+    await redis.del(taskQueue, resultQueue)
+    await redis.rpush(taskQueue, solutionId)
 
     scheduler.start()
     const running = await redis.blpop(resultQueue, 10)
@@ -44,14 +68,26 @@ integrationTest('processes a queued submission in order', async (t) => {
 
     t.truthy(running)
     t.truthy(final)
-    const runningResult = JSON.parse(running![1])
-    const finalResult = JSON.parse(final![1])
-    t.is(runningResult.judge, JudgeStatus.RunningJudge)
-    t.is(finalResult.judge, JudgeStatus.Accepted)
-    t.is(finalResult.sid, 42)
+    t.is(running![1], solutionId)
+    t.is(final![1], solutionId)
+
+    const solution = await Solution.findOne({ sid }).lean().exec()
+    t.is(solution?.judge, JudgeStatus.Accepted)
+    t.is(solution?.testcases.length, 1)
+    t.is(solution?.testcases[0]?.uuid, testcaseUUID)
+    t.is(solution?.testcases[0]?.judge, JudgeStatus.Accepted)
   } finally {
     await scheduler.stop()
-    await redis.del(taskQueue, resultQueue)
-    await redis.quit()
+    try {
+      await Promise.all([
+        redis.del(taskQueue, resultQueue),
+        Problem.deleteMany({ pid }),
+        Solution.deleteMany({ sid }),
+        fse.remove(testcaseDir),
+      ])
+      await redis.quit()
+    } finally {
+      await disconnectMongoose()
+    }
   }
 })

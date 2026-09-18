@@ -14,12 +14,15 @@
     "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@putong-oj/db": "workspace:*",
     "@putong-oj/shared": "workspace:*",
     "cross-env": "catalog:",
+    "fs-extra": "catalog:",
     "ioredis": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@types/fs-extra": "catalog:",
     "@types/node": "catalog:",
     "ava": "catalog:",
     "c8": "catalog:",

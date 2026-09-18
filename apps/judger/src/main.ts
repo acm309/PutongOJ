@@ -1,4 +1,5 @@
 import process from 'node:process'
+import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
 import { loadConfig } from './config.ts'
 import { closeLogger, configureLogger, createLogger } from './logger.ts'
 import { Scheduler } from './queue/scheduler.ts'
@@ -13,11 +14,26 @@ async function main (): Promise<void> {
   const logger = createLogger('judger.main')
   logger.info(
     'Starting with '
+    + `mongo_db='${new URL(config.mongodbURL).pathname}', `
     + `redis_url=${config.redisURL}, `
     + `sandbox_endpoint=${config.sandboxEndpoint}, `
+    + `data_dir='${config.dataDir}', `
     + `init_concurrent=${config.initConcurrent}, `
     + `log_file='${config.logFile}'`,
   )
+
+  await connectMongoose({
+    uri: config.mongodbURL,
+    onConnected: () => {
+      logger.info('MongoDB connected successfully')
+    },
+    onDisconnected: () => {
+      logger.warn('MongoDB disconnected')
+    },
+    onError: (error) => {
+      logger.error('MongoDB error:', error)
+    },
+  })
 
   const scheduler = new Scheduler(config)
   let stopping = false
@@ -42,6 +58,7 @@ async function main (): Promise<void> {
   } finally {
     await scheduler.stop()
     logger.info('Scheduler stopped')
+    await disconnectMongoose()
     await closeLogger()
   }
 }

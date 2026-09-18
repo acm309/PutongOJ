@@ -15,6 +15,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages/shared/ packages/shared/
 RUN pnpm --filter @putong-oj/shared build
 
+COPY packages/db/ packages/db/
+RUN pnpm --filter @putong-oj/db build
+
 COPY apps/judger/ apps/judger/
 RUN pnpm --filter @putong-oj/judger build
 RUN pnpm --filter @putong-oj/judger deploy --legacy --prod /app/judger_deploy
