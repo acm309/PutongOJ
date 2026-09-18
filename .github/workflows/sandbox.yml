@@ -2,6 +2,7 @@ name: Code Sandbox
 
 permissions:
   contents: read
+  packages: write
 
 on:
   push:
@@ -31,11 +32,21 @@ jobs:
           username: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
 
+      - name: Log in to GitHub Container Registry
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate Docker metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: registry.cn-hangzhou.aliyuncs.com/putong-oj/ptoj-sandbox
+          images: |
+            registry.cn-hangzhou.aliyuncs.com/putong-oj/ptoj-sandbox
+            ghcr.io/acm309/ptoj-sandbox
           tags: |
             type=raw,value=latest
             type=sha,format=long

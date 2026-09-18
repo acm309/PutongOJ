@@ -2,6 +2,7 @@ name: Putong OJ
 
 permissions:
   contents: read
+  packages: read
 
 env:
   CI: true
@@ -111,6 +112,10 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
 
+    env:
+      PTOJ_DATA_DIR: /tmp/putong-oj-tasks-data
+      PTOJ_SANDBOX_DATA_DIR: /app/data/putong-oj-tasks-data
+
     services:
       mongodb:
         image: mongo:8.0
@@ -133,14 +138,14 @@ jobs:
           --health-retries 10
 
       sandbox:
-        image: registry.cn-hangzhou.aliyuncs.com/putong-oj/ptoj-sandbox:latest
+        image: ghcr.io/acm309/ptoj-sandbox:latest
         credentials:
-          username: ${{ secrets.ALIYUN_USERNAME }}
-          password: ${{ secrets.ALIYUN_PASSWORD }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         ports:
           - 5050:5050
         volumes:
-          - ${{ github.workspace }}/apps/server/data:/app/data:ro
+          - /tmp:/app/data:ro
         options: >-
           --privileged
           --shm-size=256m

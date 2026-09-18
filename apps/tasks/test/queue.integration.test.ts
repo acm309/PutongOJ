@@ -11,7 +11,9 @@ import { integrationTest, mongodbURL, sandboxEndpoint } from './helpers.ts'
 integrationTest('processes a queued submission in order', async (t) => {
   const taskQueue = TASK_QUEUE_NAME
   const resultQueue = RESULT_QUEUE_NAME
-  const dataDir = path.resolve(import.meta.dirname, '../../server/data')
+  const dataDir = process.env.PTOJ_DATA_DIR?.trim()
+    || path.resolve(import.meta.dirname, '../../server/data')
+  const sandboxDataDir = process.env.PTOJ_SANDBOX_DATA_DIR?.trim() || '/app/data'
   const pid = 999_999
   const sid = Date.now()
   const testcaseUUID = `queue-testcase-${sid}`
@@ -22,6 +24,7 @@ integrationTest('processes a queued submission in order', async (t) => {
       PTOJ_REDIS_URL: 'redis://127.0.0.1:6379/15',
       PTOJ_SANDBOX_ENDPOINT: sandboxEndpoint,
       PTOJ_DATA_DIR: dataDir,
+      PTOJ_SANDBOX_DATA_DIR: sandboxDataDir,
       PTOJ_DEBUG: '0',
     }),
   }
