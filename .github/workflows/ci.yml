@@ -13,8 +13,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Checks & Tests
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run typecheck
+        run: pnpm typecheck
+
+      - name: Build application
+        run: pnpm build
+
+  server-tests:
+    name: Server Tests
+    needs: checks
     runs-on: ubuntu-latest
 
     services:
@@ -54,26 +84,66 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run lint
-        run: pnpm lint
-
-      - name: Run typecheck
-        run: pnpm typecheck
-
-      - name: Build application
-        run: pnpm build
+      - name: Build workspace dependencies
+        run: pnpm exec turbo run build --filter=@putong-oj/db
 
       - name: Run server tests
-        run: pnpm test
+        run: pnpm --filter @putong-oj/server test
 
       - name: Generate server coverage
         if: github.ref == 'refs/heads/main'
         run: pnpm --filter @putong-oj/server coverage
 
-      - name: Upload coverage to Codecov
+      - name: Upload server coverage to Codecov
         if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v7
         with:
+          files: apps/server/coverage.lcov
+          flags: server
+          name: server
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  tasks-tests:
+    name: Tasks Tests
+    needs: checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace dependencies
+        run: pnpm exec turbo run build --filter=@putong-oj/db
+
+      - name: Run tasks unit tests
+        run: pnpm --filter @putong-oj/tasks test:unit
+
+      - name: Generate tasks coverage
+        if: github.ref == 'refs/heads/main'
+        run: pnpm --filter @putong-oj/tasks coverage
+
+      - name: Upload tasks coverage to Codecov
+        if: github.ref == 'refs/heads/main'
+        uses: codecov/codecov-action@v7
+        with:
+          files: apps/tasks/coverage.lcov
+          flags: tasks
+          name: tasks
           fail_ci_if_error: true
           verbose: true
         env:
@@ -81,7 +151,10 @@ jobs:
 
   publish:
     name: Publish Docker Image
-    needs: test
+    needs:
+      - checks
+      - server-tests
+      - tasks-tests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 

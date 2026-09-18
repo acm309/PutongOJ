@@ -79,10 +79,10 @@ To retain data across container restarts, mount the following volumes:
 
 ### Setting Up the Judger
 
-The TypeScript judger lives in [`apps/judger`](apps/judger/README.md). It keeps
-the original Redis protocol and uses the go-judge sandbox for code execution.
-The root `docker-compose.yml` includes the application, Redis, MongoDB, sandbox,
-and judger services:
+The TypeScript task services live in [`apps/tasks`](apps/tasks/README.md). They
+keep the original Redis protocols and use the go-judge sandbox for code
+execution. The root `docker-compose.yml` includes the application, Redis,
+MongoDB, and sandbox services:
 
 ```bash
 docker compose up --build

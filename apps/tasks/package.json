@@ -6,6 +6,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc && mkdir -p dist/modules/judger && cp -R src/modules/judger/assets dist/modules/judger/assets",
     "clean": "rm -rf dist coverage",
+    "coverage": "c8 report --reporter=text-lcov > coverage.lcov",
     "dev": "concurrently --names judger,worker \"pnpm run dev:judger\" \"pnpm run dev:worker\"",
     "dev:judger": "cross-env NODE_ENV=development node --watch src/modules/judger/main.ts",
     "dev:worker": "cross-env NODE_ENV=development node --watch src/modules/worker/main.ts",
