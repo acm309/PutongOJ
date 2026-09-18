@@ -4,7 +4,7 @@ WORKDIR /app
 RUN npm i -g pnpm@11.17.0
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.base.json ./
-COPY apps/judger/package.json apps/judger/
+COPY apps/tasks/package.json apps/tasks/
 COPY apps/docs/package.json apps/docs/
 COPY apps/server/package.json apps/server/
 COPY apps/web/package.json apps/web/
@@ -18,18 +18,18 @@ RUN pnpm --filter @putong-oj/shared build
 COPY packages/db/ packages/db/
 RUN pnpm --filter @putong-oj/db build
 
-COPY apps/judger/ apps/judger/
-RUN pnpm --filter @putong-oj/judger build
-RUN pnpm --filter @putong-oj/judger deploy --legacy --prod /app/judger_deploy
+COPY apps/tasks/ apps/tasks/
+RUN pnpm --filter @putong-oj/tasks build
+RUN pnpm --filter @putong-oj/tasks deploy --legacy --prod /app/tasks_deploy
 
 FROM node:24-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/judger_deploy/package.json ./package.json
-COPY --from=builder /app/judger_deploy/node_modules ./node_modules
-COPY --from=builder /app/apps/judger/dist ./dist
+COPY --from=builder /app/tasks_deploy/package.json ./package.json
+COPY --from=builder /app/tasks_deploy/node_modules ./node_modules
+COPY --from=builder /app/apps/tasks/dist ./dist
 
 RUN mkdir -p /app/logs && chown -R node:node /app
 USER node

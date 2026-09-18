@@ -19,7 +19,7 @@ COPY tsconfig.base.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/docs/package.json apps/docs/
 COPY apps/web/package.json apps/web/
-COPY apps/judger/package.json apps/judger/
+COPY apps/tasks/package.json apps/tasks/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
 RUN pnpm install --frozen-lockfile

@@ -1,8 +1,8 @@
-# Putong OJ Judger
+# Putong OJ Tasks
 
 TypeScript replacement for the original Python `ptoj-judger`. It keeps the
 original judging behavior while using the pinned `go-judge` sandbox for code
-execution.
+execution. It also handles result notifications and queues follow-up jobs.
 
 ## Responsibilities
 
@@ -12,6 +12,8 @@ execution.
 - Judge traditional, Special Judge, and interactive problems.
 - Save running and final results to MongoDB.
 - Publish solution ObjectIds to `judger:result` after saving results.
+- Consume result notifications, push WebSocket updates, and trigger statistics
+  and similarity jobs.
 
 The sandbox and Testlib checker remain C/C++ components. This service replaces
 the Python control plane, not the secure execution sandbox.
@@ -25,7 +27,7 @@ the Python control plane, not the secure execution sandbox.
 | `PTOJ_SANDBOX_ENDPOINT` | `http://localhost:5050` | go-judge endpoint |
 | `PTOJ_DATA_DIR` | `apps/server/data` | Directory containing testcase metadata and files |
 | `PTOJ_SANDBOX_DATA_DIR` | `/app/data` | Testcase directory as seen by the sandbox |
-| `PTOJ_LOG_FILE` | `judger.log` | Log file path |
+| `PTOJ_LOG_FILE` | `tasks.log` | Log file path |
 | `PTOJ_DEBUG` | `1` | Enable debug logging |
 
 ## Local Development
@@ -39,7 +41,7 @@ docker compose up --build
 Or run the worker directly against local services:
 
 ```bash
-pnpm --filter @putong-oj/judger dev
+pnpm --filter @putong-oj/tasks dev
 ```
 
 ## Tests
@@ -47,7 +49,7 @@ pnpm --filter @putong-oj/judger dev
 Unit tests do not require external services:
 
 ```bash
-pnpm --filter @putong-oj/judger test:unit
+pnpm --filter @putong-oj/tasks test:unit
 ```
 
 Integration tests require MongoDB on port `27017`, Redis on port `6379`, and
@@ -55,5 +57,5 @@ the sandbox on port `5050`:
 
 ```bash
 docker compose up -d db redis sandbox
-pnpm --filter @putong-oj/judger test:integration
+pnpm --filter @putong-oj/tasks test:integration
 ```

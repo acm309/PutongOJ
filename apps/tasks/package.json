@@ -1,5 +1,5 @@
 {
-  "name": "@putong-oj/judger",
+  "name": "@putong-oj/tasks",
   "type": "module",
   "private": true,
   "main": "dist/main.js",

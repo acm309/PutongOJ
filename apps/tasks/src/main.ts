@@ -3,6 +3,7 @@ import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
 import { loadConfig } from './config.ts'
 import { closeLogger, configureLogger, createLogger } from './logger.ts'
 import { Processor } from './queue/processor.ts'
+import { Updater } from './queue/updater.ts'
 
 async function main (): Promise<void> {
   const config = loadConfig()
@@ -11,7 +12,7 @@ async function main (): Promise<void> {
     logFile: config.logFile,
   })
 
-  const logger = createLogger('judger.main')
+  const logger = createLogger('tasks.main')
   logger.info(
     'Starting with '
     + `mongo_db='${new URL(config.mongodbURL).pathname}', `
@@ -35,6 +36,7 @@ async function main (): Promise<void> {
   })
 
   const processor = new Processor(config)
+  const updater = new Updater(config)
   let stopping = false
   const stop = (): void => {
     if (stopping) {
@@ -42,16 +44,23 @@ async function main (): Promise<void> {
     }
     stopping = true
     processor.stop()
+    updater.stop()
   }
 
   process.once('SIGINT', stop)
   process.once('SIGTERM', stop)
 
+  const running = [
+    processor.run(),
+    updater.run(),
+  ]
   try {
-    await processor.run()
+    await Promise.all(running)
   } finally {
     processor.stop()
-    logger.info('Processor stopped')
+    updater.stop()
+    await Promise.allSettled(running)
+    logger.info('Tasks stopped')
     await disconnectMongoose()
     await closeLogger()
   }

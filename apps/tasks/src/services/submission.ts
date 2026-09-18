@@ -4,7 +4,7 @@ import type {
   ProblemEntity,
   SolutionEntity,
 } from '@putong-oj/shared'
-import type { JudgerConfig } from '../config.ts'
+import type { WorkerConfig } from '../config.ts'
 import path from 'node:path'
 import { Problem, Solution } from '@putong-oj/db'
 import { JudgerTaskSchema, ProblemTestcaseListQueryResultSchema } from '@putong-oj/shared'
@@ -14,7 +14,7 @@ import { createLogger } from '../logger.ts'
 type SolutionRecord = Pick<SolutionEntity, 'sid' | 'pid' | 'language' | 'code'>
 type ProblemRecord = Pick<ProblemEntity, 'pid' | 'time' | 'memory' | 'type' | 'code'>
 
-const logger = createLogger('judger.submission')
+const logger = createLogger('tasks.submission')
 
 export function buildJudgerTask (
   solution: SolutionRecord,
@@ -55,7 +55,7 @@ async function loadTestcases (
 
 export async function loadJudgerTask (
   id: string,
-  config: JudgerConfig,
+  config: WorkerConfig,
 ): Promise<JudgerTask | undefined> {
   const solution = await Solution
     .findOne({ _id: id })

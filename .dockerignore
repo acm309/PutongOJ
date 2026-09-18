@@ -9,9 +9,9 @@ apps/server/coverage.lcov
 apps/server/coverage/
 apps/server/dist/
 apps/server/test/
-apps/judger/coverage/
-apps/judger/dist/
-apps/judger/test/
+apps/tasks/coverage/
+apps/tasks/dist/
+apps/tasks/test/
 apps/docs/.vitepress/cache/
 apps/docs/.vitepress/dist/
 apps/web/dist/

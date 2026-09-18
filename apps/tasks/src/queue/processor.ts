@@ -1,5 +1,5 @@
 import type { JudgerResult } from '@putong-oj/shared'
-import type { JudgerConfig } from '../config.ts'
+import type { WorkerConfig } from '../config.ts'
 import { JudgeStatus } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../constants.ts'
@@ -9,13 +9,13 @@ import { SandboxClient } from '../sandbox/client.ts'
 import { loadJudgerTask, saveJudgerResult } from '../services/submission.ts'
 
 export class Processor {
-  private readonly config: JudgerConfig
-  private readonly logger = createLogger('judger.processor')
+  private readonly config: WorkerConfig
+  private readonly logger = createLogger('tasks.processor')
   private readonly redis: Redis
   private readonly client: SandboxClient
   private running = true
 
-  constructor (config: JudgerConfig) {
+  constructor (config: WorkerConfig) {
     this.config = config
     this.redis = new Redis(config.redisOptions)
     this.client = new SandboxClient(config.sandboxEndpoint)

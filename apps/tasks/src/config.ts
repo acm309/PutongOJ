@@ -3,7 +3,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { DEFAULT_REDIS_OPTIONS, parseRedisUrl } from './utils/redis.ts'
 
-export interface JudgerConfig {
+export interface WorkerConfig {
   mongodbURL: string
   redisOptions: RedisOptions
   redisURL: string
@@ -14,7 +14,7 @@ export interface JudgerConfig {
   debug: boolean
 }
 
-export function loadConfig (env: NodeJS.ProcessEnv = process.env): JudgerConfig {
+export function loadConfig (env: NodeJS.ProcessEnv = process.env): WorkerConfig {
   const mongodbURL = env.PTOJ_MONGODB_URL?.trim() || 'mongodb://localhost:27017/oj'
   const redisURL = env.PTOJ_REDIS_URL?.trim() || 'redis://localhost:6379'
   const redisOptions = parseRedisUrl(redisURL)
@@ -22,7 +22,7 @@ export function loadConfig (env: NodeJS.ProcessEnv = process.env): JudgerConfig 
   const dataDir = env.PTOJ_DATA_DIR?.trim()
     || path.resolve(import.meta.dirname, '../../server/data')
   const sandboxDataDir = env.PTOJ_SANDBOX_DATA_DIR?.trim() || '/app/data'
-  const logFile = env.PTOJ_LOG_FILE?.trim() || 'judger.log'
+  const logFile = env.PTOJ_LOG_FILE?.trim() || 'tasks.log'
   const debugValue = env.PTOJ_DEBUG?.trim() || '1'
 
   return {

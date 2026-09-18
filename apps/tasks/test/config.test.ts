@@ -20,11 +20,11 @@ test('supports Redis urls with database indexes', (t) => {
 
 test('loads database and testcase paths', (t) => {
   const config = loadConfig({
-    PTOJ_MONGODB_URL: 'mongodb://localhost:27018/putong-judger-test',
+    PTOJ_MONGODB_URL: 'mongodb://localhost:27018/putong-tasks-test',
     PTOJ_DATA_DIR: '/tmp/putong-data',
     PTOJ_SANDBOX_DATA_DIR: '/sandbox-data',
   })
-  t.is(config.mongodbURL, 'mongodb://localhost:27018/putong-judger-test')
+  t.is(config.mongodbURL, 'mongodb://localhost:27018/putong-tasks-test')
   t.is(config.dataDir, '/tmp/putong-data')
   t.is(config.sandboxDataDir, '/sandbox-data')
 })

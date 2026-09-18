@@ -21,7 +21,7 @@ export class SandboxClient {
 
   constructor (endpoint: string) {
     this.endpoint = endpoint.replace(/\/+$/, '')
-    this.logger = createLogger('judger.sandbox-client')
+    this.logger = createLogger('tasks.sandbox-client')
     this.cache = new FileCache(this)
   }
 

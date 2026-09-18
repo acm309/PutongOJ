@@ -30,7 +30,7 @@ export class Judger {
   private readonly submission: JudgerTask
   private readonly result: JudgerResult
   private readonly checker: TestlibChecker
-  private readonly logger = createLogger('judger.judger')
+  private readonly logger = createLogger('tasks.judger')
   private readonly cleanupTasks = new Set<Promise<unknown>>()
   private readonly languageConfig?: LanguageConfig
   private compiledFile?: PreparedFile

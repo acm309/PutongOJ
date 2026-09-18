@@ -36,13 +36,6 @@ async function main () {
     error_file: resolve(logsDir, 'ws.err.log'),
     ...commons,
   })
-  apps.push({
-    name: 'updater',
-    script: resolve(jobsDir, 'updater.js'),
-    out_file: resolve(logsDir, 'updater.out.log'),
-    error_file: resolve(logsDir, 'updater.err.log'),
-    ...commons,
-  })
   for (let i = 0; i < WORKER_INSTANCES; i++) {
     apps.push({
       name: 'worker',

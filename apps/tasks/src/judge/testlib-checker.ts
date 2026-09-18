@@ -27,7 +27,7 @@ export class TestlibChecker {
 
   private readonly client: SandboxClient
   private readonly code: string
-  private readonly logger = createLogger('judger.checker')
+  private readonly logger = createLogger('tasks.checker')
   private compiledFile?: { fileId: string }
 
   constructor (

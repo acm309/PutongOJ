@@ -45,14 +45,14 @@ integrationTest('processes a queued submission in order', async (t) => {
     ])
     await Problem.create({
       pid,
-      title: 'Judger queue integration',
+      title: 'Tasks queue integration',
       time: 1000,
       memory: 32768,
     })
     const queuedSolution = await Solution.create({
       sid,
       pid,
-      uid: 'judger-integration',
+      uid: 'tasks-integration',
       code: 'a, b = map(int, input().split())\nprint(a + b)\n',
       length: 47,
       language: Language.Python,

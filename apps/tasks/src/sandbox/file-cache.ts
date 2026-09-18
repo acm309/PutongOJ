@@ -29,7 +29,7 @@ export class FileCache {
     this.client = client
     this.expire = options.expire ?? 60 * 60
     this.recycleGap = options.recycleGap ?? 60
-    this.logger = createLogger('judger.file-cache')
+    this.logger = createLogger('tasks.file-cache')
   }
 
   private now (): number {
