@@ -79,7 +79,14 @@ To retain data across container restarts, mount the following volumes:
 
 ### Setting Up the Judger
 
-To configure the judging system, refer to [ptoj-judger](https://github.com/net-escape/ptoj-judger).
+The TypeScript judger lives in [`apps/judger`](apps/judger/README.md). It keeps
+the original Redis protocol and uses the go-judge sandbox for code execution.
+The root `docker-compose.yml` includes the application, Redis, MongoDB, sandbox,
+and judger services:
+
+```bash
+docker compose up --build
+```
 
 ## License 📜
 

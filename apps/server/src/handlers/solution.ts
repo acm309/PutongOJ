@@ -7,6 +7,7 @@ import Router from '@koa/router'
 import { Contest, Problem, Solution } from '@putong-oj/db'
 import {
   ErrorCode,
+  JudgerTaskSchema,
   JudgeStatus,
   SolutionSubmitPayloadSchema,
   SolutionSubmitResultSchema,
@@ -161,11 +162,11 @@ const create = async (ctx: Context) => {
     await solution.save()
 
     const sid = solution.sid
-    const submission = {
+    const submission = JudgerTaskSchema.parse({
       sid, timeLimit, memoryLimit,
       testcases, language, code,
       type, additionCode,
-    }
+    })
 
     await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
@@ -238,12 +239,12 @@ async function updateSolution (ctx: Context) {
         output: { src: `/app/data/${pid}/${item.uuid}.out` },
       }
     })
-    const submission = {
+    const submission = JudgerTaskSchema.parse({
       sid, timeLimit, memoryLimit, testcases,
       language: solution.language,
       code: solution.code,
       type, additionCode,
-    }
+    })
 
     await redis.rpush('judger:task', JSON.stringify(submission))
     ctx.auditLog.info(`<Submission:${sid}> rejudged by <User:${profile.uid}>`)

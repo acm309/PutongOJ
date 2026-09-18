@@ -466,6 +466,34 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0-alpha.17(@types/node@24.13.4)(axios@1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.28)(stylus@0.64.0(supports-color@8.1.1))(terser@5.44.0)(typescript@6.0.3)(yaml@2.9.0)
 
+  apps/judger:
+    dependencies:
+      '@putong-oj/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      cross-env:
+        specifier: 'catalog:'
+        version: 10.1.0
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1(supports-color@8.1.1)
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.5
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.4
+      ava:
+        specifier: 'catalog:'
+        version: 7.0.0(@ava/typescript@6.0.0)(rollup@4.62.2)(supports-color@8.1.1)
+      c8:
+        specifier: 'catalog:'
+        version: 12.0.0
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
   apps/server:
     dependencies:
       '@koa/router':

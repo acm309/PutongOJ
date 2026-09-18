@@ -1,6 +1,5 @@
-# Putong OJ Minimal Docker Compose Configuration
-# Sandbox and Judger services are not included here
-# And you should mount the data, logs and uploads directories to persist data
+# Putong OJ Docker Compose Configuration
+# You should mount the data, logs and uploads directories to persist data.
 
 services:
   putong-oj:
@@ -25,3 +24,18 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+
+  sandbox:
+    build:
+      context: .
+      dockerfile: apps/judger/Dockerfile.sandbox
+    privileged: true
+    shm_size: 256m
+
+  judger:
+    build:
+      context: .
+      dockerfile: apps/judger/Dockerfile.judger
+    environment:
+      PTOJ_REDIS_URL: redis://redis:6379
+      PTOJ_SANDBOX_ENDPOINT: http://sandbox:5050

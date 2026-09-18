@@ -1,0 +1,22 @@
+FROM criyle/go-judge:v1.11.3 AS go-judge
+
+FROM debian:12
+
+WORKDIR /opt
+
+RUN apt-get update && \
+    apt-get install -y curl gcc-12 g++-12 openjdk-17-jdk python3.11 pypy3 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=go-judge /opt/go-judge /opt/mount.yaml /opt/
+
+RUN sed -i 's/java 21/java 17/g' mount.yaml && \
+    sed -i 's/java-21-openjdk/java-17-openjdk/g' mount.yaml && \
+    sed -i 's/size=128m/size=256m/g' mount.yaml
+
+EXPOSE 5050/tcp 5052/tcp
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=20 \
+    CMD curl -fsS http://localhost:5050/version
+
+ENTRYPOINT [ "./go-judge" ]

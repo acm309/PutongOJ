@@ -1,6 +1,6 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import { Solution } from '@putong-oj/db'
-import { JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
+import { JudgerResultSchema, JudgeStatus, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import redis from '../config/redis.ts'
 import logger from '../utils/logger.ts'
 import { distributeWork } from './helper.ts'
@@ -66,7 +66,7 @@ async function main () {
         continue
       }
       const [ , item ] = blpopResult
-      const result = JSON.parse(item)
+      const result = JudgerResultSchema.parse(JSON.parse(item))
       await updateResult(result)
     } catch (e) {
       logger.error(e)
