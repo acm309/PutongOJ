@@ -10,8 +10,6 @@ export interface JudgerConfig {
   sandboxEndpoint: string
   dataDir: string
   sandboxDataDir: string
-  logFile?: string
-  debug: boolean
 }
 
 export function loadJudgerConfig (env: NodeJS.ProcessEnv = process.env): JudgerConfig {
@@ -22,8 +20,6 @@ export function loadJudgerConfig (env: NodeJS.ProcessEnv = process.env): JudgerC
   const dataDir = env.PTOJ_DATA_DIR?.trim()
     || path.resolve(import.meta.dirname, '../../../../server/data')
   const sandboxDataDir = env.PTOJ_SANDBOX_DATA_DIR?.trim() || '/app/data'
-  const logFile = env.PTOJ_LOG_FILE?.trim() || 'judger.log'
-  const debugValue = env.PTOJ_DEBUG?.trim() || '1'
 
   return {
     mongodbURL,
@@ -35,7 +31,5 @@ export function loadJudgerConfig (env: NodeJS.ProcessEnv = process.env): JudgerC
     sandboxEndpoint,
     dataDir,
     sandboxDataDir,
-    logFile,
-    debug: debugValue === '1',
   }
 }

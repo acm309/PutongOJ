@@ -128,8 +128,11 @@ export class TestlibChecker {
     const status = judgeStatusFromChecker(checkerResult)
     if (status === JudgeStatus.SystemError && checkerResult.status !== SandboxStatus.Accepted) {
       this.logger.error(
-        `Checker execution failed with status: ${checkerResult.status}, `
-        + `exit code: ${checkerResult.exitStatus}`,
+        {
+          exitStatus: checkerResult.exitStatus,
+          status: checkerResult.status,
+        },
+        'Checker execution failed',
       )
     }
     return status

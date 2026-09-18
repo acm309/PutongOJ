@@ -40,8 +40,7 @@ the Python control plane, not the secure execution sandbox.
 | `PTOJ_DATA_DIR` | `apps/server/data` | Directory containing testcase metadata and files |
 | `PTOJ_SANDBOX_DATA_DIR` | `/app/data` | Testcase directory as seen by the sandbox |
 | `PTOJ_UPLOAD_DIR` | `apps/server/public/uploads` | Uploads directory scanned by the worker |
-| `PTOJ_LOG_FILE` | `judger.log` / `worker.log` | Log file path |
-| `PTOJ_DEBUG` | `1` | Enable debug logging |
+| `PTOJ_LOG_LEVEL` | `info` | Pino log level |
 
 ## Local Development
 

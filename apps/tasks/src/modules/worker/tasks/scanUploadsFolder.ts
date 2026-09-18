@@ -65,7 +65,7 @@ async function scanUploadsFolder (uploadDir: string) {
       existingStorageKeys.add(name)
     } catch (err) {
       stats.failed++
-      logger.error(`Failed scanning upload ${name}`, err)
+      logger.error({ err, name }, 'Failed scanning upload')
     }
   }
 
@@ -91,11 +91,11 @@ async function scanUploadsFolder (uploadDir: string) {
         }
       }
 
-      logger.error('Scan uploads folder insertMany encountered partial failures', err)
+      logger.error({ err }, 'Scan uploads folder insertMany encountered partial failures')
     }
   }
 
-  logger.info(`Scan uploads folder finished: scanned=${stats.scanned}, added=${stats.added}, skipped=${stats.skipped}, failed=${stats.failed}`)
+  logger.info(stats, 'Scan uploads folder finished')
 }
 
 export default scanUploadsFolder

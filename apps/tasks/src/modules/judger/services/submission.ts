@@ -63,7 +63,7 @@ export async function loadJudgerTask (
     .lean()
     .exec() as unknown as SolutionRecord | null
   if (!solution) {
-    logger.warn(`Solution <${id}> not found`)
+    logger.warn({ solutionId: id }, 'Solution not found')
     return undefined
   }
 
@@ -104,6 +104,6 @@ export async function saveJudgerResult (
   ).exec()
 
   if (updated.matchedCount === 0) {
-    logger.warn(`Solution <${id}> not found while saving result`)
+    logger.warn({ solutionId: id }, 'Solution not found while saving result')
   }
 }

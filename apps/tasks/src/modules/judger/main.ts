@@ -1,25 +1,23 @@
 import process from 'node:process'
 import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
-import { closeLogger, configureLogger, createLogger } from '../../logger.ts'
+import { createLogger } from '../../logger.ts'
 import { loadJudgerConfig } from './config.ts'
 import { Processor } from './queue/processor.ts'
 import { Updater } from './queue/updater.ts'
 
+const logger = createLogger('judger.main')
+
 async function main (): Promise<void> {
   const config = loadJudgerConfig()
-  configureLogger({
-    debug: config.debug,
-    logFile: config.logFile,
-  })
 
-  const logger = createLogger('judger.main')
   logger.info(
-    'Starting with '
-    + `mongo_db='${new URL(config.mongodbURL).pathname}', `
-    + `redis_url=${config.redisURL}, `
-    + `sandbox_endpoint=${config.sandboxEndpoint}, `
-    + `data_dir='${config.dataDir}', `
-    + `log_file='${config.logFile}'`,
+    {
+      mongoDatabase: new URL(config.mongodbURL).pathname,
+      redisURL: config.redisURL,
+      sandboxEndpoint: config.sandboxEndpoint,
+      dataDir: config.dataDir,
+    },
+    'Judger starting',
   )
 
   await connectMongoose({
@@ -31,7 +29,7 @@ async function main (): Promise<void> {
       logger.warn('MongoDB disconnected')
     },
     onError: (error) => {
-      logger.error('MongoDB error:', error)
+      logger.error({ err: error }, 'MongoDB error')
     },
   })
 
@@ -62,12 +60,10 @@ async function main (): Promise<void> {
     await Promise.allSettled(running)
     logger.info('Judger stopped')
     await disconnectMongoose()
-    await closeLogger()
   }
 }
 
-main().catch(async (error: unknown) => {
-  console.error(error)
+main().catch((error: unknown) => {
+  logger.error({ err: error }, 'Judger failed')
   process.exitCode = 1
-  await closeLogger()
 })

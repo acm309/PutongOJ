@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
 import { Redis } from 'ioredis'
-import { closeLogger, configureLogger, createLogger } from '../../logger.ts'
+import { createLogger } from '../../logger.ts'
 import { loadWorkerConfig } from './config.ts'
 import checkSimilarity from './tasks/checkSimilarity.ts'
 import fetchCodeforces from './tasks/fetchCodeforces.ts'
@@ -15,20 +15,18 @@ const JOB_QUEUES = [
   'worker:scanUploadsFolder',
 ]
 
+const logger = createLogger('worker.main')
+
 async function main (): Promise<void> {
   const config = loadWorkerConfig()
-  configureLogger({
-    debug: config.debug,
-    logFile: config.logFile,
-  })
 
-  const logger = createLogger('worker.main')
   logger.info(
-    'Starting with '
-    + `mongo_db='${new URL(config.mongodbURL).pathname}', `
-    + `redis_url=${config.redisURL}, `
-    + `upload_dir='${config.uploadDir}', `
-    + `log_file='${config.logFile}'`,
+    {
+      mongoDatabase: new URL(config.mongodbURL).pathname,
+      redisURL: config.redisURL,
+      uploadDir: config.uploadDir,
+    },
+    'Worker starting',
   )
 
   await connectMongoose({
@@ -40,7 +38,7 @@ async function main (): Promise<void> {
       logger.warn('MongoDB disconnected')
     },
     onError: (error) => {
-      logger.error('MongoDB error:', error)
+      logger.error({ err: error }, 'MongoDB error')
     },
   })
 
@@ -84,13 +82,13 @@ async function main (): Promise<void> {
               await scanUploadsFolder(config.uploadDir)
               break
             default:
-              logger.warn(`Unknown job <${job}>`)
+              logger.warn({ job }, 'Unknown job')
           }
         } finally {
           await redis.srem(`worker:${job}:set`, item)
         }
       } catch (error) {
-        logger.error(error)
+        logger.error({ err: error }, 'Worker job failed')
       }
     }
   } finally {
@@ -101,12 +99,10 @@ async function main (): Promise<void> {
     }
     logger.info('Worker stopped')
     await disconnectMongoose()
-    await closeLogger()
   }
 }
 
-main().catch(async (error: unknown) => {
-  console.error(error)
+main().catch((error: unknown) => {
+  logger.error({ err: error }, 'Worker failed')
   process.exitCode = 1
-  await closeLogger()
 })

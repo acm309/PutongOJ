@@ -58,7 +58,7 @@ async function fetchCodeforcesUserInfo (redis: Redis, handles: string[]) {
     JSON.stringify({ ...user, fetchedAt: Date.now() }),
     'EX', 60 * 60 * 24 * 7, // 7 days
   )))
-  logger.info(`Fetched Codeforces info for handles: ${handles.join(', ')}`)
+  logger.info({ handles }, 'Fetched Codeforces info')
 }
 
 async function fetchCodeforces (redis: Redis, item: string) {
@@ -70,7 +70,7 @@ async function fetchCodeforces (redis: Redis, item: string) {
       await fetchCodeforcesUserInfo(redis, id.split(','))
       break
     default:
-      logger.warn(`Unknown Codeforces fetch type <${type}>`)
+      logger.warn({ type }, 'Unknown Codeforces fetch type')
   }
 }
 

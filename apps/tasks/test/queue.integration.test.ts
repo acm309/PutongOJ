@@ -25,7 +25,6 @@ integrationTest('processes a queued submission in order', async (t) => {
       PTOJ_SANDBOX_ENDPOINT: sandboxEndpoint,
       PTOJ_DATA_DIR: dataDir,
       PTOJ_SANDBOX_DATA_DIR: sandboxDataDir,
-      PTOJ_DEBUG: '0',
     }),
   }
   const redis = new Redis(config.redisOptions)

@@ -49,7 +49,7 @@ export class Processor {
       }
 
       const [ , value ] = popValue
-      this.logger.debug(`Processor popped ${value}`)
+      this.logger.debug({ value }, 'Processor popped task')
       return value.trim()
     }
     return undefined
@@ -57,17 +57,15 @@ export class Processor {
 
   async putResult (solutionId: string): Promise<void> {
     try {
-      this.logger.debug(
-        `Processor notifying solution ${solutionId}`,
-      )
+      this.logger.debug({ solutionId }, 'Processor notifying solution')
       await this.redis.rpush(
         RESULT_QUEUE_NAME,
         solutionId,
       )
     } catch (error) {
       this.logger.error(
-        `Processor failed to enqueue result for ${solutionId}:`,
-        error,
+        { err: error, solutionId },
+        'Processor failed to enqueue result',
       )
     }
   }
@@ -78,9 +76,7 @@ export class Processor {
       return
     }
 
-    this.logger.debug(
-      `Processor processing solution ${solutionId}`,
-    )
+    this.logger.debug({ solutionId }, 'Processor processing solution')
     const startTime = performance.now()
 
     try {
@@ -107,13 +103,17 @@ export class Processor {
 
       const elapsedSeconds = (performance.now() - startTime) / 1000
       this.logger.info(
-        `Processor finished submission ${submission.sid} `
-        + `with result ${JudgeStatus[result.judge]} in ${elapsedSeconds} seconds`,
+        {
+          elapsedSeconds,
+          judge: JudgeStatus[result.judge],
+          solutionId: submission.sid,
+        },
+        'Processor finished submission',
       )
     } catch (error) {
       this.logger.error(
-        `Processor failed solution ${solutionId}:`,
-        error,
+        { err: error, solutionId },
+        'Processor failed solution',
       )
       const result: JudgerResult = {
         sid: 0,
@@ -127,8 +127,8 @@ export class Processor {
         await saveJudgerResult(solutionId, result)
       } catch (saveError) {
         this.logger.error(
-          `Processor failed to save system error for ${solutionId}:`,
-          saveError,
+          { err: saveError, solutionId },
+          'Processor failed to save system error',
         )
       }
       await this.putResult(solutionId)

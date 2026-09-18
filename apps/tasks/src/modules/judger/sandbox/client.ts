@@ -1,4 +1,3 @@
-import type { Logger } from '../../../logger.ts'
 import type {
   PipeMap,
   PreparedFile,
@@ -17,11 +16,10 @@ interface RunRequest {
 export class SandboxClient {
   readonly endpoint: string
   readonly cache: FileCache
-  private readonly logger: Logger
+  private readonly logger = createLogger('judger.sandbox-client')
 
   constructor (endpoint: string) {
     this.endpoint = endpoint.replace(/\/+$/, '')
-    this.logger = createLogger('judger.sandbox-client')
     this.cache = new FileCache(this)
   }
 
@@ -95,7 +93,12 @@ export class SandboxClient {
     }
 
     this.logger.warn(
-      `Failed to download file '${fileId}': ${response.status} ${result}`,
+      {
+        body: result,
+        fileId,
+        status: response.status,
+      },
+      'Failed to download file',
     )
     return undefined
   }
@@ -110,7 +113,12 @@ export class SandboxClient {
 
     const body = await response.text()
     this.logger.warn(
-      `Failed to delete file '${fileId}': ${response.status} ${body}`,
+      {
+        body,
+        fileId,
+        status: response.status,
+      },
+      'Failed to delete file',
     )
     return false
   }

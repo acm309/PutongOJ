@@ -25,7 +25,7 @@ async function updateUserStatistic (uid: string) {
     },
   ).exec()
 
-  logger.info(`User <${uid}> statistic updated`)
+  logger.info({ uid }, 'User statistic updated')
 }
 
 /**
@@ -51,13 +51,13 @@ async function updateProblemStatistic (pid: number | string) {
     },
   ).exec()
 
-  logger.info(`Problem <${pid}> statistic updated`)
+  logger.info({ pid }, 'Problem statistic updated')
 }
 
 async function updateDiscussionStatistic (discussion: string) {
   const discussionDoc = await Discussion.findOne({ _id: discussion })
   if (!discussionDoc) {
-    logger.warn(`Discussion <${discussion}> not found while updating statistic`)
+    logger.warn({ discussion }, 'Discussion not found while updating statistic')
     return
   }
 
@@ -76,7 +76,7 @@ async function updateDiscussionStatistic (discussion: string) {
     },
   )
 
-  logger.info(`Discussion <${discussionId}> statistic updated`)
+  logger.info({ discussionId }, 'Discussion statistic updated')
 }
 
 /**
@@ -98,7 +98,7 @@ async function updateStatistic (item: string) {
       await updateDiscussionStatistic(id)
       break
     default:
-      logger.warn(`Unknown statistic type <${type}>`)
+      logger.warn({ type }, 'Unknown statistic type')
   }
 }
 

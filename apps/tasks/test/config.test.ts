@@ -8,8 +8,6 @@ test('loads judger defaults', (t) => {
   t.is(config.redisURL, 'redis://localhost:6379')
   t.is(config.sandboxEndpoint, 'http://localhost:5050')
   t.is(config.sandboxDataDir, '/app/data')
-  t.is(config.logFile, 'judger.log')
-  t.true(config.debug)
 })
 
 test('supports Redis urls with database indexes', (t) => {
@@ -36,8 +34,6 @@ test('loads worker defaults', (t) => {
   t.is(config.mongodbURL, 'mongodb://localhost:27017/oj')
   t.is(config.redisURL, 'redis://localhost:6379')
   t.true(config.uploadDir.endsWith('apps/server/public/uploads'))
-  t.is(config.logFile, 'worker.log')
-  t.true(config.debug)
 })
 
 test('loads worker upload directory', (t) => {

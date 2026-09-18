@@ -55,9 +55,12 @@ export class Judger {
     } catch (error) {
       this.result.judge = JudgeStatus.SystemError
       this.logger.error(
-        `Submission ${submission.sid} failed on initialization: `
-        + `unsupported language ${submission.language}`,
-        error,
+        {
+          err: error,
+          language: submission.language,
+          submissionId: submission.sid,
+        },
+        'Submission failed on initialization',
       )
     }
 
@@ -67,7 +70,7 @@ export class Judger {
         ? DEFAULT_CHECKER_CODE
         : submission.additionCode,
     )
-    this.logger.debug(`Submission ${submission.sid} initialized`)
+    this.logger.debug({ submissionId: submission.sid }, 'Submission initialized')
   }
 
   private trackCleanup (promise: Promise<unknown>): void {
@@ -75,8 +78,11 @@ export class Judger {
     void promise
       .catch((error) => {
         this.logger.warn(
-          `Submission ${this.submission.sid} cleanup task failed:`,
-          error,
+          {
+            err: error,
+            submissionId: this.submission.sid,
+          },
+          'Submission cleanup task failed',
         )
       })
       .finally(() => {
@@ -118,7 +124,7 @@ export class Judger {
 
   async compile (): Promise<void> {
     if (this.compiledFile) {
-      this.logger.warn(`Submission ${this.submission.sid} already compiled`)
+      this.logger.warn({ submissionId: this.submission.sid }, 'Submission already compiled')
       return
     }
     if (!this.languageConfig) {
@@ -126,7 +132,7 @@ export class Judger {
       return
     }
 
-    this.logger.debug(`Submission ${this.submission.sid} compiling`)
+    this.logger.debug({ submissionId: this.submission.sid }, 'Submission compiling')
     try {
       const command = createSandboxCmd({
         args: this.languageConfig.compileCmd,
@@ -144,8 +150,8 @@ export class Judger {
       if (!compiledResult) {
         this.result.judge = JudgeStatus.SystemError
         this.logger.error(
-          `Submission ${this.submission.sid} failed on compilation: `
-          + 'sandbox returned no result',
+          { submissionId: this.submission.sid },
+          'Submission failed on compilation: sandbox returned no result',
         )
         return
       }
@@ -154,8 +160,11 @@ export class Judger {
         this.result.judge = JudgeStatus.CompileError
         this.result.error = compiledResult.files?.stderr ?? ''
         this.logger.debug(
-          `Submission ${this.submission.sid} ended with compile error: ${
-            this.result.error}`,
+          {
+            error: this.result.error,
+            submissionId: this.submission.sid,
+          },
+          'Submission ended with compile error',
         )
         return
       }
@@ -164,19 +173,22 @@ export class Judger {
       if (!fileId) {
         this.result.judge = JudgeStatus.SystemError
         this.logger.error(
-          `Submission ${this.submission.sid} failed on compilation: `
-          + 'no compiled file',
+          { submissionId: this.submission.sid },
+          'Submission failed on compilation: no compiled file',
         )
         return
       }
 
       this.compiledFile = preparedFile(fileId)
-      this.logger.debug(`Submission ${this.submission.sid} compiled`)
+      this.logger.debug({ submissionId: this.submission.sid }, 'Submission compiled')
     } catch (error) {
       this.result.judge = JudgeStatus.SystemError
       this.logger.error(
-        `Submission ${this.submission.sid} failed on compilation:`,
-        error,
+        {
+          err: error,
+          submissionId: this.submission.sid,
+        },
+        'Submission failed on compilation',
       )
     }
   }
@@ -195,7 +207,7 @@ export class Judger {
   async runTestcaseTraditional (
     testcase: JudgerTestcase,
   ): Promise<JudgerTestcaseResult> {
-    this.logger.debug(`Running testcase: '${testcase.uuid}'`)
+    this.logger.debug({ testcaseId: testcase.uuid }, 'Running testcase')
     const { timeLimit, memoryLimit } = this.getLimits()
     const command = createSandboxCmd({
       args: this.languageConfig?.runCmd ?? [],
@@ -235,7 +247,11 @@ export class Judger {
 
     this.trackCleanup(this.client.deleteFile(outputFile.fileId))
     this.logger.debug(
-      `Testcase '${testcase.uuid}' finished with judge status: ${judge}`,
+      {
+        judge,
+        testcaseId: testcase.uuid,
+      },
+      'Testcase finished',
     )
     return {
       uuid: testcase.uuid,
@@ -247,7 +263,7 @@ export class Judger {
   async runTestcaseInteraction (
     testcase: JudgerTestcase,
   ): Promise<JudgerTestcaseResult> {
-    this.logger.debug(`Running testcase: '${testcase.uuid}'`)
+    this.logger.debug({ testcaseId: testcase.uuid }, 'Running testcase')
     const interactorFile = this.checker.getCompiledFile()
     if (!interactorFile) {
       throw new Error('Interactor is unavailable')
@@ -323,13 +339,20 @@ export class Judger {
 
     if (judge === JudgeStatus.SystemError) {
       this.logger.error(
-        `Interactor execution failed with status: ${interactorResult.status}, `
-        + `exit code: ${interactorResult.exitStatus}`,
+        {
+          exitStatus: interactorResult.exitStatus,
+          status: interactorResult.status,
+        },
+        'Interactor execution failed',
       )
     }
 
     this.logger.debug(
-      `Testcase '${testcase.uuid}' finished with judge status: ${judge}`,
+      {
+        judge,
+        testcaseId: testcase.uuid,
+      },
+      'Testcase finished',
     )
     return {
       uuid: testcase.uuid,
@@ -348,24 +371,28 @@ export class Judger {
   }
 
   async cleanup (): Promise<void> {
-    this.logger.debug(`Submission ${this.submission.sid} cleanup started`)
+    this.logger.debug({ submissionId: this.submission.sid }, 'Submission cleanup started')
     if (this.compiledFile) {
       this.trackCleanup(this.client.deleteFile(this.compiledFile.fileId))
     }
 
     await Promise.allSettled([ ...this.cleanupTasks ])
     this.cleanupTasks.clear()
-    this.logger.debug(`Submission ${this.submission.sid} cleanup completed`)
+    this.logger.debug({ submissionId: this.submission.sid }, 'Submission cleanup completed')
   }
 
   async run (): Promise<void> {
     if (this.result.judge !== JudgeStatus.Pending) {
       this.logger.warn(
-        `Submission ${this.submission.sid} result already set: ${this.result.judge}`,
+        {
+          judge: this.result.judge,
+          submissionId: this.submission.sid,
+        },
+        'Submission result already set',
       )
       return
     }
-    this.logger.debug(`Submission ${this.submission.sid} start judging`)
+    this.logger.debug({ submissionId: this.submission.sid }, 'Submission start judging')
 
     if (!this.languageConfig) {
       this.result.judge = JudgeStatus.SystemError
@@ -380,8 +407,8 @@ export class Judger {
       if (!this.compiledFile) {
         this.result.judge = JudgeStatus.SystemError
         this.logger.error(
-          `Submission ${this.submission.sid} failed on compilation: `
-          + 'no compiled file',
+          { submissionId: this.submission.sid },
+          'Submission failed on compilation: no compiled file',
         )
         return
       }
@@ -390,7 +417,8 @@ export class Judger {
     if (this.submission.testcases.length === 0) {
       this.result.judge = JudgeStatus.SystemError
       this.logger.error(
-        `Submission ${this.submission.sid} failed on judging: no testcases`,
+        { submissionId: this.submission.sid },
+        'Submission failed on judging: no testcases',
       )
       return
     }
@@ -400,8 +428,11 @@ export class Judger {
     } catch (error) {
       this.result.judge = JudgeStatus.SystemError
       this.logger.error(
-        `Submission ${this.submission.sid} failed on checker compilation:`,
-        error,
+        {
+          err: error,
+          submissionId: this.submission.sid,
+        },
+        'Submission failed on checker compilation',
       )
       return
     }
@@ -427,9 +458,12 @@ export class Judger {
             judge: JudgeStatus.SystemError,
           }
           this.logger.error(
-            `Submission ${this.submission.sid} failed on testing `
-            + `'${testcase.uuid}':`,
-            error,
+            {
+              err: error,
+              submissionId: this.submission.sid,
+              testcaseId: testcase.uuid,
+            },
+            'Submission failed on testing',
           )
         }
       }
@@ -443,7 +477,8 @@ export class Judger {
     if (this.result.testcases.length === 0) {
       this.result.judge = JudgeStatus.SystemError
       this.logger.error(
-        `Submission ${this.submission.sid} failed on judging: no testcase results`,
+        { submissionId: this.submission.sid },
+        'Submission failed on judging: no testcase results',
       )
       return
     }
@@ -471,7 +506,8 @@ export class Judger {
 
     this.result.judge = JudgeStatus.SystemError
     this.logger.error(
-      `Submission ${this.submission.sid} failed on final check: no status found`,
+      { submissionId: this.submission.sid },
+      'Submission failed on final check: no status found',
     )
   }
 
@@ -482,8 +518,11 @@ export class Judger {
       } catch (error) {
         this.result.judge = JudgeStatus.SystemError
         this.logger.error(
-          `Submission ${this.submission.sid} failed on judging:`,
-          error,
+          {
+            err: error,
+            submissionId: this.submission.sid,
+          },
+          'Submission failed on judging',
         )
       }
 
@@ -491,13 +530,22 @@ export class Judger {
         await this.cleanup()
       } catch (error) {
         this.logger.error(
-          `Submission ${this.submission.sid} failed on cleanup:`,
-          error,
+          {
+            err: error,
+            submissionId: this.submission.sid,
+          },
+          'Submission failed on cleanup',
         )
       }
     }
 
-    this.logger.debug(`Submission ${this.submission.sid} result:`, this.result)
+    this.logger.debug(
+      {
+        result: this.result,
+        submissionId: this.submission.sid,
+      },
+      'Submission result',
+    )
     return this.result
   }
 }

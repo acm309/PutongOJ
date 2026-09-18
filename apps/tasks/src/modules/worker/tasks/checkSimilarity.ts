@@ -21,7 +21,7 @@ async function checkSimilarity (item: string) {
   const sid = Number.parseInt(item, 10)
   const solution = await Solution.findOne({ sid }).exec()
   if (!solution) {
-    logger.error(`Solution <${sid}> not found`)
+    logger.error({ solutionId: sid }, 'Solution not found')
     return
   }
   const start_time = Date.now()
@@ -48,9 +48,15 @@ async function checkSimilarity (item: string) {
 
   const end_time = Date.now()
   logger.info(
-    `Solution <${sid}> has similarity with <${result.sim_s_id}>`
-    + ` (${result.sim}%) in ${end_time - start_time}ms`
-    + ` (${solutions.length} solutions checked)`)
+    {
+      checkedSolutions: solutions.length,
+      elapsedMs: end_time - start_time,
+      similarSolutionId: result.sim_s_id,
+      similarity: result.sim,
+      solutionId: sid,
+    },
+    'Solution similarity checked',
+  )
 
   if (result.sim < 70) { return }
 

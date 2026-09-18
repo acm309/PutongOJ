@@ -8,8 +8,6 @@ export interface WorkerConfig {
   redisOptions: RedisOptions
   redisURL: string
   uploadDir: string
-  logFile?: string
-  debug: boolean
 }
 
 export function loadWorkerConfig (env: NodeJS.ProcessEnv = process.env): WorkerConfig {
@@ -18,8 +16,6 @@ export function loadWorkerConfig (env: NodeJS.ProcessEnv = process.env): WorkerC
   const redisOptions = parseRedisUrl(redisURL)
   const uploadDir = env.PTOJ_UPLOAD_DIR?.trim()
     || path.resolve(import.meta.dirname, '../../../../server/public/uploads')
-  const logFile = env.PTOJ_LOG_FILE?.trim() || 'worker.log'
-  const debugValue = env.PTOJ_DEBUG?.trim() || '1'
 
   return {
     mongodbURL,
@@ -29,7 +25,5 @@ export function loadWorkerConfig (env: NodeJS.ProcessEnv = process.env): WorkerC
     },
     redisURL,
     uploadDir,
-    logFile,
-    debug: debugValue === '1',
   }
 }

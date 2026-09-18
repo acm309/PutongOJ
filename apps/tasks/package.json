@@ -25,6 +25,7 @@
     "fast-levenshtein": "catalog:",
     "fs-extra": "catalog:",
     "ioredis": "catalog:",
+    "pino": "catalog:",
     "superagent": "catalog:",
     "zod": "catalog:"
   },

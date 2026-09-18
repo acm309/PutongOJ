@@ -36,18 +36,18 @@ export class Updater {
 
     const exists = await this.redis.sismember(taskSet, item)
     if (exists) {
-      this.logger.debug(`Task <${task}> for <${item}> already exists`)
+      this.logger.debug({ item, task }, 'Worker task already exists')
       return
     }
 
     await this.redis.multi().sadd(taskSet, item).rpush(taskList, item).exec()
-    this.logger.debug(`Task <${task}> for <${item}> added`)
+    this.logger.debug({ item, task }, 'Worker task added')
   }
 
   async notifyResult (solutionId: string): Promise<void> {
     const solution = await Solution.findOne({ _id: solutionId }).lean().exec()
     if (solution == null) {
-      this.logger.warn(`Solution <${solutionId}> not found`)
+      this.logger.warn({ solutionId }, 'Solution not found')
       return
     }
     if (solution.judge === JudgeStatus.RunningJudge) {
@@ -76,7 +76,13 @@ export class Updater {
       tasks.push(this.distributeWork('checkSimilarity', solution.sid))
     }
     await Promise.all(tasks)
-    this.logger.info(`Notified solution <${solution.sid}> result: ${solution.judge}`)
+    this.logger.info(
+      {
+        judge: solution.judge,
+        solutionId: solution.sid,
+      },
+      'Notified solution result',
+    )
   }
 
   stop (): void {
@@ -96,7 +102,7 @@ export class Updater {
           const [ , item ] = blpopResult
           await this.notifyResult(item)
         } catch (error) {
-          this.logger.error(error)
+          this.logger.error({ err: error }, 'Updater failed')
         }
       }
     } finally {

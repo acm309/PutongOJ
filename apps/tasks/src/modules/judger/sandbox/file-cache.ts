@@ -1,4 +1,3 @@
-import type { Logger } from '../../../logger.ts'
 import type { PreparedFile } from './types.ts'
 import { createLogger } from '../../../logger.ts'
 
@@ -18,7 +17,7 @@ export class FileCache {
   private readonly files = new Map<string, PreparedFile>()
   private readonly lastAccess = new Map<string, number>()
   private readonly cleanupTasks = new Set<Promise<unknown>>()
-  private readonly logger: Logger
+  private readonly logger = createLogger('judger.file-cache')
   private recycleTimer?: NodeJS.Timeout
   private closed = false
 
@@ -29,7 +28,6 @@ export class FileCache {
     this.client = client
     this.expire = options.expire ?? 60 * 60
     this.recycleGap = options.recycleGap ?? 60
-    this.logger = createLogger('judger.file-cache')
   }
 
   private now (): number {
@@ -40,7 +38,7 @@ export class FileCache {
     this.cleanupTasks.add(promise)
     void promise
       .catch((error) => {
-        this.logger.warn('Failed to clean up sandbox file:', error)
+        this.logger.warn({ err: error }, 'Failed to clean up sandbox file')
       })
       .finally(() => {
         this.cleanupTasks.delete(promise)
@@ -63,9 +61,9 @@ export class FileCache {
     const file = this.files.get(identifier)
     if (file !== undefined) {
       this.lastAccess.set(identifier, this.now())
-      this.logger.debug(`Accessed file '${identifier}'`)
+      this.logger.debug({ identifier }, 'Accessed file')
     } else {
-      this.logger.debug(`File '${identifier}' not found in cache`)
+      this.logger.debug({ identifier }, 'File not found in cache')
     }
     return file
   }
@@ -73,10 +71,10 @@ export class FileCache {
   async set (identifier: string, file: PreparedFile): Promise<void> {
     const previous = this.files.get(identifier)
     if (previous !== undefined) {
-      this.logger.debug(`Updating existing file '${identifier}' in cache`)
+      this.logger.debug({ identifier }, 'Updating existing file in cache')
       this.trackCleanup(this.client.deleteFile(previous.fileId))
     } else {
-      this.logger.debug(`Adding new file '${identifier}' to cache`)
+      this.logger.debug({ identifier }, 'Adding new file to cache')
     }
 
     this.files.set(identifier, file)
@@ -97,7 +95,7 @@ export class FileCache {
 
       const file = this.files.get(identifier)
       if (file) {
-        this.logger.debug(`Recycling expired file '${identifier}'`)
+        this.logger.debug({ identifier }, 'Recycling expired file')
         this.trackCleanup(this.client.deleteFile(file.fileId))
       }
       this.files.delete(identifier)

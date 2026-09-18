@@ -11,7 +11,6 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
   const config = loadJudgerConfig({
     PTOJ_MONGODB_URL: mongodbURL,
     PTOJ_REDIS_URL: 'redis://127.0.0.1:6379/15',
-    PTOJ_DEBUG: '0',
   })
   const redis = new Redis(config.redisOptions)
   const subscriber = new Redis(config.redisOptions)
