@@ -111,6 +111,40 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      sandbox:
+        image: registry.cn-hangzhou.aliyuncs.com/putong-oj/ptoj-sandbox:latest
+        credentials:
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+        ports:
+          - 5050:5050
+        volumes:
+          - ${{ github.workspace }}/apps/server/data:/app/data:ro
+        options: >-
+          --privileged
+          --shm-size=256m
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -130,8 +164,8 @@ jobs:
       - name: Build workspace dependencies
         run: pnpm exec turbo run build --filter=@putong-oj/db
 
-      - name: Run tasks unit tests
-        run: pnpm --filter @putong-oj/tasks test:unit
+      - name: Run tasks integration tests
+        run: pnpm --filter @putong-oj/tasks test:integration
 
       - name: Generate tasks coverage
         if: github.ref == 'refs/heads/main'
@@ -176,7 +210,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ vars.ALIYUN_IMAGE }}
+          images: registry.cn-hangzhou.aliyuncs.com/putong-oj/putong-oj
           flavor: |
             latest=true
           tags: |
