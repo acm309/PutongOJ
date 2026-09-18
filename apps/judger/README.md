@@ -25,7 +25,6 @@ the Python control plane, not the secure execution sandbox.
 | `PTOJ_SANDBOX_ENDPOINT` | `http://localhost:5050` | go-judge endpoint |
 | `PTOJ_DATA_DIR` | `apps/server/data` | Directory containing testcase metadata and files |
 | `PTOJ_SANDBOX_DATA_DIR` | `/app/data` | Testcase directory as seen by the sandbox |
-| `PTOJ_INIT_CONCURRENT` | `1` | Number of processor tasks |
 | `PTOJ_LOG_FILE` | `judger.log` | Log file path |
 | `PTOJ_DEBUG` | `1` | Enable debug logging |
 

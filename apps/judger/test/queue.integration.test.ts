@@ -5,7 +5,7 @@ import fse from 'fs-extra'
 import { Redis } from 'ioredis'
 import { loadConfig } from '../src/config.ts'
 import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../src/constants.ts'
-import { Scheduler } from '../src/queue/scheduler.ts'
+import { Processor } from '../src/queue/processor.ts'
 import { integrationTest, mongodbURL, sandboxEndpoint } from './helpers.ts'
 
 integrationTest('processes a queued submission in order', async (t) => {
@@ -24,10 +24,10 @@ integrationTest('processes a queued submission in order', async (t) => {
       PTOJ_DATA_DIR: dataDir,
       PTOJ_DEBUG: '0',
     }),
-    initConcurrent: 1,
   }
   const redis = new Redis(config.redisOptions)
-  const scheduler = new Scheduler(config)
+  const processor = new Processor(config)
+  let processing: Promise<void> | undefined
 
   try {
     await connectMongoose({ uri: config.mongodbURL })
@@ -62,7 +62,7 @@ integrationTest('processes a queued submission in order', async (t) => {
     await redis.del(taskQueue, resultQueue)
     await redis.rpush(taskQueue, solutionId)
 
-    scheduler.start()
+    processing = processor.run()
     const running = await redis.blpop(resultQueue, 10)
     const final = await redis.blpop(resultQueue, 30)
 
@@ -77,7 +77,8 @@ integrationTest('processes a queued submission in order', async (t) => {
     t.is(solution?.testcases[0]?.uuid, testcaseUUID)
     t.is(solution?.testcases[0]?.judge, JudgeStatus.Accepted)
   } finally {
-    await scheduler.stop()
+    processor.stop()
+    await processing
     try {
       await Promise.all([
         redis.del(taskQueue, resultQueue),

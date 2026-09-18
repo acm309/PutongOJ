@@ -7,7 +7,6 @@ test('loads Python-compatible defaults', (t) => {
   t.is(config.redisURL, 'redis://localhost:6379')
   t.is(config.sandboxEndpoint, 'http://localhost:5050')
   t.is(config.sandboxDataDir, '/app/data')
-  t.is(config.initConcurrent, 1)
   t.true(config.debug)
 })
 
@@ -28,9 +27,4 @@ test('loads database and testcase paths', (t) => {
   t.is(config.mongodbURL, 'mongodb://localhost:27018/putong-judger-test')
   t.is(config.dataDir, '/tmp/putong-data')
   t.is(config.sandboxDataDir, '/sandbox-data')
-})
-
-test('rejects invalid concurrency', (t) => {
-  t.throws(() => loadConfig({ PTOJ_INIT_CONCURRENT: '0' }))
-  t.throws(() => loadConfig({ PTOJ_INIT_CONCURRENT: 'invalid' }))
 })

@@ -2,7 +2,7 @@ import process from 'node:process'
 import { connectMongoose, disconnectMongoose } from '@putong-oj/db'
 import { loadConfig } from './config.ts'
 import { closeLogger, configureLogger, createLogger } from './logger.ts'
-import { Scheduler } from './queue/scheduler.ts'
+import { Processor } from './queue/processor.ts'
 
 async function main (): Promise<void> {
   const config = loadConfig()
@@ -18,7 +18,6 @@ async function main (): Promise<void> {
     + `redis_url=${config.redisURL}, `
     + `sandbox_endpoint=${config.sandboxEndpoint}, `
     + `data_dir='${config.dataDir}', `
-    + `init_concurrent=${config.initConcurrent}, `
     + `log_file='${config.logFile}'`,
   )
 
@@ -35,29 +34,24 @@ async function main (): Promise<void> {
     },
   })
 
-  const scheduler = new Scheduler(config)
+  const processor = new Processor(config)
   let stopping = false
-  const stop = async (): Promise<void> => {
+  const stop = (): void => {
     if (stopping) {
       return
     }
     stopping = true
-    await scheduler.stop()
+    processor.stop()
   }
 
-  process.once('SIGINT', () => {
-    void stop()
-  })
-  process.once('SIGTERM', () => {
-    void stop()
-  })
+  process.once('SIGINT', stop)
+  process.once('SIGTERM', stop)
 
-  scheduler.start()
   try {
-    await scheduler.wait()
+    await processor.run()
   } finally {
-    await scheduler.stop()
-    logger.info('Scheduler stopped')
+    processor.stop()
+    logger.info('Processor stopped')
     await disconnectMongoose()
     await closeLogger()
   }

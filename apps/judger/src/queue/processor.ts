@@ -1,6 +1,5 @@
 import type { JudgerResult } from '@putong-oj/shared'
 import type { JudgerConfig } from '../config.ts'
-import type { Scheduler } from './scheduler.ts'
 import { JudgeStatus } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { RESULT_QUEUE_NAME, TASK_QUEUE_NAME } from '../constants.ts'
@@ -10,24 +9,17 @@ import { SandboxClient } from '../sandbox/client.ts'
 import { loadJudgerTask, saveJudgerResult } from '../services/submission.ts'
 
 export class Processor {
-  private readonly idx: number
-  private readonly scheduler: Scheduler
   private readonly config: JudgerConfig
   private readonly logger = createLogger('judger.processor')
   private readonly redis: Redis
   private readonly client: SandboxClient
+  private running = true
 
-  constructor (
-    scheduler: Scheduler,
-    idx: number,
-    config: JudgerConfig,
-  ) {
-    this.scheduler = scheduler
-    this.idx = idx
+  constructor (config: JudgerConfig) {
     this.config = config
     this.redis = new Redis(config.redisOptions)
     this.client = new SandboxClient(config.sandboxEndpoint)
-    this.logger.debug(`Processor ${this.idx} initialized`)
+    this.logger.debug('Processor initialized')
   }
 
   async connect (): Promise<void> {
@@ -43,11 +35,11 @@ export class Processor {
     } else {
       this.redis.disconnect()
     }
-    this.logger.debug(`Processor ${this.idx} closed`)
+    this.logger.debug('Processor closed')
   }
 
   async getSolutionId (): Promise<string | undefined> {
-    while (this.scheduler.isRunning()) {
+    while (this.running) {
       const popValue = await this.redis.blpop(
         TASK_QUEUE_NAME,
         5,
@@ -57,7 +49,7 @@ export class Processor {
       }
 
       const [ , value ] = popValue
-      this.logger.debug(`Processor ${this.idx} popped ${value}`)
+      this.logger.debug(`Processor popped ${value}`)
       return value.trim()
     }
     return undefined
@@ -66,7 +58,7 @@ export class Processor {
   async putResult (solutionId: string): Promise<void> {
     try {
       this.logger.debug(
-        `Processor ${this.idx} notifying solution ${solutionId}`,
+        `Processor notifying solution ${solutionId}`,
       )
       await this.redis.rpush(
         RESULT_QUEUE_NAME,
@@ -74,7 +66,7 @@ export class Processor {
       )
     } catch (error) {
       this.logger.error(
-        `Processor ${this.idx} failed to enqueue result for ${solutionId}:`,
+        `Processor failed to enqueue result for ${solutionId}:`,
         error,
       )
     }
@@ -87,7 +79,7 @@ export class Processor {
     }
 
     this.logger.debug(
-      `Processor ${this.idx} processing solution ${solutionId}`,
+      `Processor processing solution ${solutionId}`,
     )
     const startTime = performance.now()
 
@@ -115,12 +107,12 @@ export class Processor {
 
       const elapsedSeconds = (performance.now() - startTime) / 1000
       this.logger.info(
-        `Processor ${this.idx} finished submission ${submission.sid} `
+        `Processor finished submission ${submission.sid} `
         + `with result ${JudgeStatus[result.judge]} in ${elapsedSeconds} seconds`,
       )
     } catch (error) {
       this.logger.error(
-        `Processor ${this.idx} failed solution ${solutionId}:`,
+        `Processor failed solution ${solutionId}:`,
         error,
       )
       const result: JudgerResult = {
@@ -135,7 +127,7 @@ export class Processor {
         await saveJudgerResult(solutionId, result)
       } catch (saveError) {
         this.logger.error(
-          `Processor ${this.idx} failed to save system error for ${solutionId}:`,
+          `Processor failed to save system error for ${solutionId}:`,
           saveError,
         )
       }
@@ -143,16 +135,20 @@ export class Processor {
     }
   }
 
+  stop (): void {
+    this.running = false
+  }
+
   async run (): Promise<void> {
-    this.logger.debug(`Processor ${this.idx} started`)
+    this.logger.debug('Processor started')
     await this.connect()
     try {
-      while (this.scheduler.isRunning()) {
+      while (this.running) {
         await this.process()
       }
     } finally {
       await this.close()
     }
-    this.logger.debug(`Processor ${this.idx} stopped`)
+    this.logger.debug('Processor stopped')
   }
 }
