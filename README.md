@@ -67,6 +67,59 @@ docker run -d --name ptoj-app \
 
 This will start the application on port `3000`.
 
+#### Full-stack Compose Example
+
+The following Compose configuration can be used to run the application,
+MongoDB, Redis, and sandbox together:
+
+```yaml
+# Putong OJ Docker Compose Configuration
+# You should mount the data, logs and uploads directories to persist data.
+
+services:
+  putong-oj:
+    build:
+      context: .
+    environment:
+      - NODE_ENV=production
+      - PTOJ_MONGODB_URL=mongodb://db:27017/oj
+      - PTOJ_REDIS_URL=redis://redis:6379
+      - PTOJ_SANDBOX_ENDPOINT=http://sandbox:5050
+    ports:
+      - 3000:3000
+      - 3001:3001
+    volumes:
+      - putong-oj-data:/app/data
+      - putong-oj-uploads:/app/apps/server/public/uploads
+    depends_on:
+      - redis
+      - db
+      - sandbox
+
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  sandbox:
+    build:
+      context: .
+      dockerfile: apps/judger/Dockerfile.sandbox
+    privileged: true
+    shm_size: 256m
+    volumes:
+      - putong-oj-data:/app/data:ro
+
+volumes:
+  putong-oj-data:
+  putong-oj-uploads:
+```
+
 ### Persistent Data Storage
 
 To retain data across container restarts, mount the following volumes:
@@ -86,12 +139,12 @@ The backend is split into independently built applications:
 - [`apps/worker`](apps/worker/README.md) runs asynchronous maintenance jobs.
 - [`apps/judger`](apps/judger/README.md) judges submissions with the go-judge sandbox.
 
-The root image still launches all four processes with PM2. The root
-`docker-compose.yml` includes the application, Redis, MongoDB, and sandbox
-services:
+The root image launches all four processes with PM2. The root
+`docker-compose.yml` starts MongoDB, Redis, and sandbox for local development:
 
 ```bash
-docker compose up --build
+pnpm dev:db
+pnpm dev:db:down
 ```
 
 ## License 📜

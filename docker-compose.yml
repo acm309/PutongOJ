@@ -1,35 +1,32 @@
-# Putong OJ Docker Compose Configuration
-# You should mount the data, logs and uploads directories to persist data.
+# Local development dependencies.
+
+name: putong-oj-dev
 
 services:
-  putong-oj:
-    build:
-      context: .
-    environment:
-      - NODE_ENV=production
-      - PTOJ_MONGODB_URL=mongodb://db:27017/oj
-      - PTOJ_REDIS_URL=redis://redis:6379
-      - PTOJ_SANDBOX_ENDPOINT=http://sandbox:5050
+  mongo:
+    image: mongo:8.2
     ports:
-      - 3000:3000
-      - 3001:3001
+      - 127.0.0.1:27017:27017
     volumes:
-      - putong-oj-data:/app/data
-      - putong-oj-uploads:/app/apps/server/public/uploads
-    depends_on:
-      - redis
-      - db
-      - sandbox
-
-  db:
-    image: mongo:latest
-    ports:
-      - 27017:27017
+      - ./.dev/mongo:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   redis:
-    image: redis:latest
+    image: redis:7
+    command: redis-server --appendonly yes
     ports:
-      - 6379:6379
+      - 127.0.0.1:6379:6379
+    volumes:
+      - ./.dev/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   sandbox:
     build:
@@ -37,9 +34,7 @@ services:
       dockerfile: apps/judger/Dockerfile.sandbox
     privileged: true
     shm_size: 256m
+    ports:
+      - 127.0.0.1:5050:5050
     volumes:
-      - putong-oj-data:/app/data:ro
-
-volumes:
-  putong-oj-data:
-  putong-oj-uploads:
+      - ./apps/server/data:/app/data:ro
