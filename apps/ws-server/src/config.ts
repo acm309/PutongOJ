@@ -3,7 +3,7 @@ import process from 'node:process'
 import dotenvFlow from 'dotenv-flow'
 
 const workspaceRoot = resolve(import.meta.dirname, '../../..')
-dotenvFlow.config({ path: workspaceRoot })
+dotenvFlow.config({ path: workspaceRoot, silent: true })
 
 function numberEnv (name: string, defaultValue: number): number {
   const value = process.env[name]?.trim()

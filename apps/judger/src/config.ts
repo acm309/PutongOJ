@@ -5,7 +5,7 @@ import dotenvFlow from 'dotenv-flow'
 import { DEFAULT_REDIS_OPTIONS, parseRedisUrl } from './utils/redis.ts'
 
 const workspaceRoot = path.resolve(import.meta.dirname, '../../..')
-dotenvFlow.config({ path: workspaceRoot })
+dotenvFlow.config({ path: workspaceRoot, silent: true })
 
 export interface JudgerConfig {
   mongodbURL: string

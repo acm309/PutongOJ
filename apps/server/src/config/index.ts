@@ -6,7 +6,7 @@ import { OAuthProvider } from '@putong-oj/shared'
 import dotenvFlow from 'dotenv-flow'
 
 const workspaceRoot = resolve(import.meta.dirname, '../../../..')
-dotenvFlow.config({ path: workspaceRoot })
+dotenvFlow.config({ path: workspaceRoot, silent: true })
 
 function stringEnv (name: string): string | undefined
 function stringEnv (name: string, defaultValue: string | (() => string)): string

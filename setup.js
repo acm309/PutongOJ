@@ -3,7 +3,7 @@ import process from 'node:process'
 import dotenvFlow from 'dotenv-flow'
 import fse from 'fs-extra'
 
-dotenvFlow.config()
+dotenvFlow.config({ silent: true })
 
 const serverDistDir = resolve(import.meta.dirname, 'apps/server/dist')
 const wsServerDistDir = resolve(import.meta.dirname, 'apps/ws-server/dist')

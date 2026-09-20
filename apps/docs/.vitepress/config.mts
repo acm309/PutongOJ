@@ -5,6 +5,12 @@ export default {
   srcDir: './src',
   lang: 'zh-CN',
   base: '/docs/',
+  vite: {
+    server: {
+      port: 5174,
+      strictPort: true,
+    },
+  },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
