@@ -26,22 +26,17 @@ function close (added: number = 0) {
 }
 
 async function submit () {
-  try {
-    const response = await addCourseProblems(props.courseId, selected.value)
-    if (!response.success) {
-      throw new Error(response.message)
-    }
-    const { added } = response.data
-    if (added > 0) {
-      message.success(t('oj.successfully_added_problems', { added }))
-    } else {
-      message.warn(t('oj.no_new_problems_added'))
-    }
-    close(added)
-  } catch (error: any) {
-    console.error(`Failed to add problems: ${error.message}`)
-    close()
+  const response = await addCourseProblems(props.courseId, selected.value)
+  if (!response.success) {
+    return
   }
+  const { added } = response.data
+  if (added > 0) {
+    message.success(t('oj.successfully_added_problems', { added }))
+  } else {
+    message.warn(t('oj.no_new_problems_added'))
+  }
+  close(added)
 }
 
 watch(() => props.modelValue, (val) => {

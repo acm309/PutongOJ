@@ -3,12 +3,12 @@ import type {
   PostListQuery,
   PostListQueryResult,
 } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { apiClient } from './instance'
 
 export async function findPosts (params: PostListQuery) {
-  return instance.get<PostListQueryResult>('/posts', { params })
+  return apiClient.get<PostListQueryResult>('/posts', { params })
 }
 
 export async function getPost (slug: string) {
-  return instance.get<PostDetailQueryResult>(`/posts/${encodeURIComponent(slug)}`)
+  return apiClient.get<PostDetailQueryResult>(`/posts/${encodeURIComponent(slug)}`)
 }

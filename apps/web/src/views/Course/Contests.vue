@@ -13,12 +13,10 @@ import { findCourseContests } from '@/api/contest'
 import ContestDataTable from '@/components/ContestDataTable.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const query = ref({} as ContestListQuery)
 const docs = ref([] as ContestListQueryResult['docs'])
@@ -56,7 +54,6 @@ async function fetch () {
   const resp = await findCourseContests(route.params.id as string, query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_contests'), resp.message)
     docs.value = []
     total.value = 0
     return

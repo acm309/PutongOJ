@@ -14,12 +14,10 @@ import PostCreateDialog from '@/components/PostCreateDialog.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const query = ref({} as AdminPostListQuery)
 const docs = ref([] as AdminPostListQueryResult['docs'])
@@ -58,7 +56,6 @@ async function fetch () {
   loading.value = false
 
   if (!resp.success || !resp.data) {
-    message.error('Failed to load posts', resp.message)
     docs.value = []
     total.value = 0
     return

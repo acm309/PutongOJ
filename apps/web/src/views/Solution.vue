@@ -55,7 +55,10 @@ function prettyCode (code: string) {
 }
 
 async function fetch () {
-  await findOne(Number.parseInt(route.params.sid as string))
+  const loaded = await findOne(Number.parseInt(route.params.sid as string))
+  if (!loaded) {
+    return
+  }
   root.changeDomTitle({ title: `Solution ${solution.value.pid}` })
 }
 
@@ -81,8 +84,6 @@ async function rejudge () {
       const res = await updateSolution({ judge: 11 })
       if (res.success) {
         message.success('Rejudge request sent')
-      } else {
-        message.error(res.message || 'Failed to send rejudge request')
       }
       showRefresh.value = true
     },
@@ -109,8 +110,6 @@ async function markAsSkipped () {
       const res = await updateSolution({ judge: 12 })
       if (res.success) {
         message.success('Marked as Skipped')
-      } else {
-        message.error(res.message || 'Failed to mark as Skipped')
       }
     },
   })

@@ -46,14 +46,14 @@ export const useProblemStore = defineStore('problem', {
     async update (payload: ProblemUpdatePayload & { pid: number }) {
       const response = await updateProblem(payload)
       if (!response.success) {
-        throw new Error(response.message)
+        return null
       }
       return response.data
     },
     async create (payload: ProblemCreatePayload) {
       const response = await createProblem(payload)
       if (!response.success) {
-        throw new Error(response.message)
+        return null
       }
       return response.data.pid
     },

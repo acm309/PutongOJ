@@ -64,11 +64,9 @@ async function submitCourse () {
       joinCode: course.value.joinCode || '',
     })
     if (!response.success) {
-      throw new Error(response.message)
+      return
     }
     message.success(t('oj.course_updated_successfully'))
-  } catch (e: any) {
-    message.error(t('oj.failed_to_update_course', { error: e.message }))
   } finally {
     submitting.value = false
   }

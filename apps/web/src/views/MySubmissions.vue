@@ -20,12 +20,10 @@ import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import emitter from '@/utils/emitter'
 import { getJudgeStatusClassname } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const query = ref({} as AccountSubmissionListQuery)
 const docs = ref([] as AccountSubmissionListQueryResult['docs'])
@@ -54,7 +52,6 @@ async function fetch () {
   const resp = await findSubmissions(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
     docs.value = []
     total.value = 0
     return

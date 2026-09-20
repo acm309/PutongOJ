@@ -1,6 +1,6 @@
 import type { TagListQueryResult } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { apiClient } from './instance'
 
 export async function findTags () {
-  return instance.get<TagListQueryResult>('/tags')
+  return apiClient.get<TagListQueryResult>('/tags')
 }

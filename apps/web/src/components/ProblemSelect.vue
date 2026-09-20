@@ -4,7 +4,6 @@ import AutoComplete from 'primevue/autocomplete'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { findProblemItems } from '@/api/problem'
-import { useMessage } from '@/utils/message'
 
 interface ProblemOption { value: number, label: string }
 
@@ -22,7 +21,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const message = useMessage()
 
 const loading = ref(false)
 const suggestions = ref<ProblemOption[]>([])
@@ -40,15 +38,13 @@ async function fetch (event: { query: string }) {
       course: props.course,
     })
     if (!response.success) {
-      throw new Error(response.message)
+      suggestions.value = []
+      return
     }
     suggestions.value = response.data.map((item: ProblemEntityItem) => ({
       value: item.pid,
       label: item.title,
     }))
-  } catch (error: any) {
-    suggestions.value = []
-    message.error(error.message || t('oj.failed_to_fetch_problems'))
   } finally {
     loading.value = false
   }

@@ -62,7 +62,6 @@ async function fetch () {
   const resp = await findSolutions(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
     docs.value = []
     total.value = 0
     return
@@ -123,7 +122,6 @@ async function onExport (format: ExportFormat) {
   message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
   const resp = await exportSolutions(query.value)
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_solutions'), resp.message)
     exportDialog.value = false
     return
   }

@@ -34,110 +34,114 @@ import type {
   SessionListQueryResult,
   SessionRevokeOthersResult,
 } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { apiClient } from './instance'
 
 export async function findUsers (params: AdminUserListQuery) {
-  return instance.get<AdminUserListQueryResult>('/admin/users', { params })
+  return apiClient.get<AdminUserListQueryResult>('/admin/users', { params })
 }
 export async function getUser (uid: string) {
-  return instance.get<AdminUserDetailQueryResult>(`/admin/users/${encodeURIComponent(uid)}`)
+  return apiClient.get<AdminUserDetailQueryResult>(`/admin/users/${encodeURIComponent(uid)}`)
 }
 export async function updateUser (uid: string, payload: AdminUserEditPayload) {
-  return instance.put<AdminUserDetailQueryResult>(`/admin/users/${encodeURIComponent(uid)}`, payload)
+  return apiClient.put<AdminUserDetailQueryResult>(`/admin/users/${encodeURIComponent(uid)}`, payload)
 }
 export async function updateUserPassword (uid: string, payload: AdminUserChangePasswordPayload) {
-  return instance.put<null>(`/admin/users/${encodeURIComponent(uid)}/password`, payload)
+  return apiClient.put<null>(`/admin/users/${encodeURIComponent(uid)}/password`, payload)
 }
 export async function getUserOAuthConnections (uid: string) {
-  return instance.get<AdminUserOAuthQueryResult>(`/admin/users/${encodeURIComponent(uid)}/oauth`)
+  return apiClient.get<AdminUserOAuthQueryResult>(`/admin/users/${encodeURIComponent(uid)}/oauth`)
 }
 export async function removeUserOAuthConnection (uid: string, provider: OAuthProvider) {
-  return instance.delete<null>(`/admin/users/${encodeURIComponent(uid)}/oauth/${provider}`)
+  return apiClient.delete<null>(`/admin/users/${encodeURIComponent(uid)}/oauth/${provider}`)
 }
 
 export async function findSolutions (params: AdminSolutionListQuery) {
-  return instance.get<AdminSolutionListQueryResult>('/admin/solutions', { params })
+  return apiClient.get<AdminSolutionListQueryResult>('/admin/solutions', { params })
 }
 export async function exportSolutions (params: AdminSolutionListExportQuery) {
-  return instance.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
+  return apiClient.get<AdminSolutionListExportQueryResult>('/admin/solutions/export', { params })
 }
 
 export async function findContests (params: AdminContestListQuery) {
-  return instance.get<AdminContestListQueryResult>('/admin/contests', { params })
+  return apiClient.get<AdminContestListQueryResult>('/admin/contests', { params })
 }
 
 export async function findPosts (params: AdminPostListQuery) {
-  return instance.get<AdminPostListQueryResult>('/admin/posts', { params })
+  return apiClient.get<AdminPostListQueryResult>('/admin/posts', { params })
 }
 export async function createPost (payload: AdminPostCreatePayload) {
-  return instance.post<{ slug: string }>('/admin/posts', payload)
+  return apiClient.post<{ slug: string }>('/admin/posts', payload)
 }
 export async function getPost (slug: string) {
-  return instance.get<AdminPostDetailQueryResult>(`/admin/posts/${encodeURIComponent(slug)}`)
+  return apiClient.get<AdminPostDetailQueryResult>(`/admin/posts/${encodeURIComponent(slug)}`)
 }
 export async function updatePost (slug: string, payload: AdminPostUpdatePayload) {
-  return instance.put<{ slug: string }>(`/admin/posts/${encodeURIComponent(slug)}`, payload)
+  return apiClient.put<{ slug: string }>(`/admin/posts/${encodeURIComponent(slug)}`, payload)
 }
 export async function deletePost (slug: string) {
-  return instance.delete<null>(`/admin/posts/${encodeURIComponent(slug)}`)
+  return apiClient.delete<null>(`/admin/posts/${encodeURIComponent(slug)}`)
 }
 
 export async function sendNotificationBroadcast (payload: AdminNotificationCreatePayload) {
-  return instance.post<null>('/admin/notifications/broadcast', payload)
+  return apiClient.post<null>('/admin/notifications/broadcast', payload)
 }
 export async function sendNotificationUser (username: string, payload: AdminNotificationCreatePayload) {
-  return instance.post<null>(`/admin/notifications/users/${encodeURIComponent(username)}`, payload)
+  return apiClient.post<null>(`/admin/notifications/users/${encodeURIComponent(username)}`, payload)
 }
 
 export async function createGroup (payload: AdminGroupCreatePayload) {
-  return instance.post<AdminGroupDetailQueryResult>('/admin/groups', payload)
+  return apiClient.post<AdminGroupDetailQueryResult>('/admin/groups', payload)
 }
 export async function getGroup (groupId: string) {
-  return instance.get<AdminGroupDetailQueryResult>(`/admin/groups/${encodeURIComponent(groupId)}`)
+  return apiClient.get<AdminGroupDetailQueryResult>(`/admin/groups/${encodeURIComponent(groupId)}`)
 }
 export async function updateGroup (groupId: string, payload: AdminGroupUpdatePayload) {
-  return instance.put<null>(`/admin/groups/${encodeURIComponent(groupId)}`, payload)
+  return apiClient.put<null>(`/admin/groups/${encodeURIComponent(groupId)}`, payload)
 }
 export async function updateGroupMembers (groupId: string, payload: AdminGroupMembersUpdatePayload) {
-  return instance.put<{ modifiedCount: number }>(`/admin/groups/${encodeURIComponent(groupId)}/members`, payload)
+  return apiClient.put<{ modifiedCount: number }>(`/admin/groups/${encodeURIComponent(groupId)}/members`, payload)
 }
 export async function removeGroup (groupId: string) {
-  return instance.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)
+  return apiClient.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)
 }
 
 export async function updateDiscussion (discussionId: number, payload: AdminDiscussionUpdatePayload) {
-  return instance.put<null>(`/admin/discussions/${discussionId}`, payload)
+  return apiClient.put<null>(`/admin/discussions/${discussionId}`, payload)
 }
 export async function updateComment (commentId: number, payload: AdminCommentUpdatePayload) {
-  return instance.put<null>(`/admin/comments/${commentId}`, payload)
+  return apiClient.put<null>(`/admin/comments/${commentId}`, payload)
 }
 
 export async function listUserSessions (uid: string) {
-  return instance.get<SessionListQueryResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
+  return apiClient.get<SessionListQueryResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
 }
 export async function revokeUserSession (uid: string, sessionId: string) {
-  return instance.delete<null>(`/admin/users/${encodeURIComponent(uid)}/sessions/${encodeURIComponent(sessionId)}`)
+  return apiClient.delete<null>(`/admin/users/${encodeURIComponent(uid)}/sessions/${encodeURIComponent(sessionId)}`)
 }
 export async function revokeUserAllSessions (uid: string) {
-  return instance.delete<SessionRevokeOthersResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
+  return apiClient.delete<SessionRevokeOthersResult>(`/admin/users/${encodeURIComponent(uid)}/sessions`)
 }
 
 export async function findTags () {
-  return instance.get<AdminTagListQueryResult>('/admin/tags')
+  return apiClient.get<AdminTagListQueryResult>('/admin/tags')
 }
 export async function createTag (payload: AdminTagCreatePayload) {
-  return instance.post<null>('/admin/tags', payload)
+  return apiClient.post<null>('/admin/tags', payload)
 }
 export async function updateTag (tagId: string, payload: AdminTagUpdatePayload) {
-  return instance.put<null>(`/admin/tags/${encodeURIComponent(tagId)}`, payload)
+  return apiClient.put<null>(`/admin/tags/${encodeURIComponent(tagId)}`, payload)
 }
 
 export async function findFiles (params: AdminFileListQuery) {
-  return instance.get<AdminFileListQueryResult>('/admin/files', { params })
+  return apiClient.get<AdminFileListQueryResult>('/admin/files', { params })
 }
 export async function removeFile (storageKey: string) {
-  return instance.delete<null>(`/admin/files/${encodeURIComponent(storageKey)}`)
+  return apiClient.delete<null>(`/admin/files/${encodeURIComponent(storageKey)}`)
 }
 export async function batchRegisterUsers (payload: AdminUserBatchRegisterPayload) {
-  return instance.post<AdminUserBatchRegisterResult>('/admin/users/batch-register', payload)
+  return apiClient.post<AdminUserBatchRegisterResult>(
+    '/admin/users/batch-register',
+    payload,
+    { callerHandledCodes: 'all' },
+  )
 }

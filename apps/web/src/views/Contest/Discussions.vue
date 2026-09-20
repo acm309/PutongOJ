@@ -18,12 +18,10 @@ import UserFilter from '@/components/UserFilter.vue'
 import { useContestStore } from '@/store/modules/contest'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const {
   contest,
@@ -68,7 +66,6 @@ async function fetch () {
   const resp = await findContestDiscussions(contestId.value, query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_discussions'), resp.message)
     docs.value = []
     total.value = 0
     return

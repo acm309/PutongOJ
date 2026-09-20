@@ -6,7 +6,6 @@ import InputIcon from 'primevue/inputicon'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { suggestUsers } from '@/api/user'
-import { useMessage } from '@/utils/message'
 
 const props = defineProps<{
   modelValue?: string
@@ -20,7 +19,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const message = useMessage()
 
 const loading = ref(false)
 const users = ref([] as UserSuggestQueryResult)
@@ -43,7 +41,6 @@ async function fetch (event: any) {
   const resp = await suggestUsers({ keyword: event.query })
   if (!resp.success) {
     users.value = []
-    message.error(t('ptoj.failed_fetch_users'), resp.message)
   } else {
     users.value = resp.data
   }

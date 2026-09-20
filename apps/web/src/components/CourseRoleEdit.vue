@@ -89,7 +89,7 @@ async function submit () {
       { role: role.value },
     )
     if (!response.success) {
-      throw new Error(response.message)
+      return
     }
     message.success(t('oj.course_member_update_success'))
     close()
@@ -106,7 +106,7 @@ async function loadUser () {
   try {
     const response = await getCourseMember(courseId.value, selectedUserId.value)
     if (!response.success) {
-      throw new Error(response.message)
+      return
     }
     const member = response.data
     isAdmin.value = member.user.privilege >= UserPrivilege.Admin

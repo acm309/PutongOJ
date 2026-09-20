@@ -52,7 +52,6 @@ async function sendNotification () {
   }
   sending.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_send_notification'), resp.message)
     return
   }
 

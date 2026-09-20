@@ -80,7 +80,6 @@ async function saveAvatar () {
   savingAvatar.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -98,12 +97,10 @@ async function fetch () {
   ])
   loading.value = false
   if (!profileResp.success) {
-    message.error(t('ptoj.failed_load_profile'), profileResp.message)
     return
   }
 
   if (!oauthResp.success) {
-    message.error(t('ptoj.failed_load_connect_accounts'), oauthResp.message)
     return
   }
 
@@ -137,7 +134,6 @@ async function saveProfile () {
   saving.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -164,12 +160,9 @@ async function changePassword () {
   })
   saving.value = false
   if (!resp.success) {
-    message.error(
-      t('ptoj.failed_update_password'),
-      resp.code === ErrorCode.Unauthorized
-        ? t('ptoj.password_current_incorrect')
-        : resp.message,
-    )
+    if (resp.code === ErrorCode.Unauthorized) {
+      message.error(t('ptoj.failed_update_password'), t('ptoj.password_current_incorrect'))
+    }
     return
   }
 
@@ -203,7 +196,6 @@ async function fetchSessions () {
   const resp = await listSessions()
   sessionsLoading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_sessions'), resp.message)
     return
   }
   sessions.value = resp.data.map((session) => {
@@ -223,7 +215,6 @@ async function fetchSessions () {
 async function revokeSessionById (sessionId: string) {
   const resp = await revokeSession(sessionId)
   if (!resp.success) {
-    message.error(t('ptoj.failed_logout_session'), resp.message)
     return
   }
   message.success(t('ptoj.session_logged_out'), t('ptoj.session_logged_out_detail'))
@@ -246,7 +237,6 @@ function confirmRevokeOthers (event: Event) {
     accept: async () => {
       const resp = await revokeOtherSessions()
       if (!resp.success) {
-        message.error(t('ptoj.failed_logout_session'), resp.message)
         return
       }
       message.success(t('ptoj.session_logged_out'), t('ptoj.sessions_logged_out_detail', { count: resp.data.removed }))

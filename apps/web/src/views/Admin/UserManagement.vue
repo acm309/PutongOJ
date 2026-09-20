@@ -18,12 +18,10 @@ import UserBatchImportModal from '@/components/UserBatchImportModal.vue'
 import { privilegeOptions } from '@/utils/constant'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const query = ref({} as AdminUserListQuery)
 const docs = ref([] as AdminUserListQueryResult['docs'])
@@ -44,7 +42,6 @@ async function fetch () {
   const resp = await findUsers(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_users'), resp.message)
     docs.value = []
     total.value = 0
     return

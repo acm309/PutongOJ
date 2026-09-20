@@ -32,8 +32,7 @@ async function submit () {
   const resp = await createPost({ title })
   submitting.value = false
 
-  if (!resp.success || !resp.data) {
-    message.error(t('ptoj.failed_create_post'), resp.message)
+  if (!resp.success) {
     return
   }
 

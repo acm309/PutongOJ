@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router'
 import Layout from '@/components/Layout.vue'
 import LoadingBar from '@/components/LoadingBar.vue'
 import { useRootStore } from '@/store'
-import { setErrorHandler } from './api/instance'
+import { setApiErrorHandler } from './api/instance'
 import { useSessionStore } from './store/modules/session'
 import { useMessage } from './utils/message'
 import { useWebSocket } from './utils/websocket'
@@ -24,26 +24,26 @@ const route = useRoute()
 const message = useMessage()
 const { t } = useI18n()
 
-setErrorHandler((err) => {
-  let detail: string = err.message || t('ptoj.unknown_error_occurred')
-  if (err.response?.status) {
-    const status = err.response.status
-    if (status === 401) {
-      detail = t('ptoj.request_error_401')
-    } else if (status === 403) {
-      detail = t('ptoj.request_error_403')
-    } else if (status === 404) {
-      detail = t('ptoj.request_error_404')
-    } else if (status === 429) {
-      detail = t('ptoj.request_error_429')
-    } else if (status >= 500) {
-      detail = t('ptoj.request_error_500')
-    } else {
-      detail = `${status} ${err.response.statusText}`
+setApiErrorHandler((err) => {
+  let detail = err.message
+  if (!detail && err.source === 'transport') {
+    if (!err.fromEnvelope && err.status) {
+      if (err.status === 401) {
+        detail = t('ptoj.request_error_401')
+      } else if (err.status === 403) {
+        detail = t('ptoj.request_error_403')
+      } else if (err.status === 404) {
+        detail = t('ptoj.request_error_404')
+      } else if (err.status === 429) {
+        detail = t('ptoj.request_error_429')
+      } else if (err.status >= 500) {
+        detail = t('ptoj.request_error_500')
+      }
+    } else if (!err.status) {
+      detail = t('ptoj.request_connection_lost')
     }
-  } else if (!err.response) {
-    detail = t('ptoj.request_connection_lost')
   }
+  detail ||= t('ptoj.unknown_error_occurred')
   message.error(t('ptoj.request_error_occurred'), detail)
 })
 

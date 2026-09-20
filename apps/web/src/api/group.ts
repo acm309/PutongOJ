@@ -1,6 +1,6 @@
 import type { GroupListQueryResult } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { apiClient } from './instance'
 
 export async function findGroups () {
-  return instance.get<GroupListQueryResult>('/group')
+  return apiClient.get<GroupListQueryResult>('/group')
 }

@@ -44,7 +44,6 @@ async function fetchTestcases () {
   const resp = await findTestcases(problem.value.pid)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_testcases'), resp.message)
     return
   }
   docs.value = resp.data
@@ -68,7 +67,6 @@ function handleDeleteTestcase (item: ProblemTestcaseListQueryResult[number]) {
       loading.value = false
 
       if (!resp.success) {
-        message.error(t('ptoj.failed_delete_testcase'), resp.message)
         return
       }
 
@@ -113,7 +111,6 @@ async function createTestcaseRequest (testcase: ProblemTestcaseCreatePayload) {
   loading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_create_testcase'), resp.message)
     return
   }
 

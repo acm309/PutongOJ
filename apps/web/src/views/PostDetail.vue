@@ -9,12 +9,10 @@ import { getPost } from '@/api/post'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 const { isAdmin } = storeToRefs(useSessionStore())
 
 const post = ref<PostDetailQueryResult | null>(null)
@@ -26,7 +24,6 @@ async function fetchPost () {
   loading.value = false
 
   if (!resp.success || !resp.data) {
-    message.error(resp.message)
     router.replace({ name: 'home' })
     return
   }

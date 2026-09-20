@@ -5,11 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
-const message = useMessage()
 
 const rootStore = useRootStore()
 const contestStore = useContestStore()
@@ -21,7 +19,6 @@ const contestLoaded = computed(() => contest.value?.contestId === contestId.valu
 async function fetch () {
   const resp = await contestStore.loadContest(contestId.value)
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_contest'), resp.message)
     return
   }
   const title = `${resp.data.title} - Contest ${resp.data.contestId}`

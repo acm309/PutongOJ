@@ -33,6 +33,9 @@ async function submitForm () {
     pid: paramPid.value,
     ...problemForm.value,
   })
+  if (data === null) {
+    return
+  }
   message.success(t('oj.submit_success'))
   await loadProblem()
   router.push({ name: 'problemInfo', params: { pid: data.pid } })

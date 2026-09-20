@@ -13,15 +13,16 @@ export const useSolutionStore = defineStore('solution', {
     async findOne (solutionId: number) {
       const response = await findSolution(solutionId)
       if (!response.success) {
-        throw new Error(response.message)
+        return false
       }
       this.solution = response.data
+      return true
     },
     async updateSolution (payload: SolutionStatusUpdatePayload) {
       const solutionId = (this.solution as any).sid!
       const response = await updateSolution(solutionId, payload)
       if (!response.success) {
-        throw new Error(response.message)
+        return response
       }
       this.solution = response.data
       return response

@@ -90,7 +90,6 @@ async function fetchDiscussion () {
   const resp = await getDiscussion(discussionId)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_discussion'), resp.message)
     return
   }
 
@@ -141,7 +140,6 @@ async function editDiscussion () {
   saving.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -160,7 +158,6 @@ async function togglePinDiscussion () {
   saving.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -178,7 +175,6 @@ async function submitComment () {
   creatingComment.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_create_comment'), resp.message)
     return
   }
 

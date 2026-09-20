@@ -20,12 +20,10 @@ import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 const rootStore = useRootStore()
 const { currentTime } = storeToRefs(rootStore)
 
@@ -83,7 +81,6 @@ async function fetch () {
   const resp = await findContests(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_contests'), resp.message)
     docs.value = []
     total.value = 0
     return

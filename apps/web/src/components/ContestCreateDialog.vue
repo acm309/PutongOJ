@@ -9,7 +9,6 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { createContest } from '@/api/contest'
-import { useMessage } from '@/utils/message'
 import LabeledSwitch from './LabeledSwitch.vue'
 
 const props = defineProps<{
@@ -22,7 +21,6 @@ const currentTime = Math.floor(Date.now() / HOUR) * HOUR
 
 const { t } = useI18n()
 const router = useRouter()
-const message = useMessage()
 
 const submitting = ref(false)
 const form = ref<ContestCreatePayload>({
@@ -42,7 +40,6 @@ async function submit () {
   submitting.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_create_contest'), resp.message)
     return
   }
 

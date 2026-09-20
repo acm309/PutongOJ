@@ -14,12 +14,10 @@ import SortingMenu from '@/components/SortingMenu.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const { isLogined, isAdmin } = storeToRefs(useSessionStore())
 const query = ref({} as DiscussionListQuery)
@@ -58,7 +56,6 @@ async function fetch () {
   const resp = await findDiscussions(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_discussions'), resp.message)
     docs.value = []
     total.value = 0
     return

@@ -121,7 +121,6 @@ async function fetch () {
   const resp = await getConfig(contestId.value)
   loading.value = false
   if (!resp.success || !resp.data) {
-    message.error(t('ptoj.failed_fetch_data'), resp.message)
     return
   }
 
@@ -165,21 +164,15 @@ async function addProblem () {
     return
   }
 
-  try {
-    const result = await problemStore.findOne(problemToAdd.value)
-    if (!result) {
-      throw new Error('Problem not found')
-    }
+  const result = await problemStore.findOne(problemToAdd.value)
+  if (result) {
     const { problem } = result
     problems.value.push({
       problemId: (problem as any).problemId ?? problem.pid,
       title: problem.title,
     })
-  } catch (error: any) {
-    message.error(t('ptoj.failed_proceed'), error?.message)
-  } finally {
-    problemToAdd.value = null
   }
+  problemToAdd.value = null
 }
 
 async function saveChanges (payload: Partial<ContestConfigEditPayload>) {
@@ -189,7 +182,6 @@ async function saveChanges (payload: Partial<ContestConfigEditPayload>) {
 
   const resp = await updateConfig(contestId.value, payload)
   if (!resp.success) {
-    message.error(t('ptoj.failed_update_contest'), resp.message)
     return
   }
   message.success(

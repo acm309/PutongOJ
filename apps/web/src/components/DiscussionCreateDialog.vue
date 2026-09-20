@@ -80,7 +80,6 @@ async function submitDiscussion () {
   creating.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_create_discussion'), resp.message)
     return
   }
 

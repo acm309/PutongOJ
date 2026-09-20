@@ -11,12 +11,10 @@ import { findPosts } from '@/api/post'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 const sessionStore = useSessionStore()
 const { isAdmin } = storeToRefs(sessionStore)
 
@@ -40,7 +38,6 @@ async function fetch () {
   loading.value = false
 
   if (!resp.success || !resp.data) {
-    message.error(t('ptoj.empty_content_desc'), resp.message)
     docs.value = []
     total.value = 0
     return

@@ -6,16 +6,22 @@ import type {
   OAuthProvider,
   OAuthUserConnectionsQueryResult,
 } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { apiClient } from './instance'
 
 export async function generateOAuthUrl (provider: OAuthProvider, params: OAuthGenerateUrlQuery) {
-  return instance.get<OAuthGenerateUrlQueryResult>(`/oauth/${provider}/url`, { params })
+  return apiClient.get<OAuthGenerateUrlQueryResult>(
+    `/oauth/${provider}/url`,
+    { params, callerHandledCodes: 'all' },
+  )
 }
 
 export async function handleOAuthCallback (provider: OAuthProvider, params: OAuthCallbackQuery) {
-  return instance.get<OAuthCallbackQueryResult>(`/oauth/${provider}/callback`, { params })
+  return apiClient.get<OAuthCallbackQueryResult>(
+    `/oauth/${provider}/callback`,
+    { params, callerHandledCodes: 'all' },
+  )
 }
 
 export async function getUserOAuthConnections () {
-  return instance.get<OAuthUserConnectionsQueryResult>('/oauth')
+  return apiClient.get<OAuthUserConnectionsQueryResult>('/oauth')
 }

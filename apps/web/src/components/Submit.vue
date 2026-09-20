@@ -133,7 +133,6 @@ async function submit () {
 
     const resp = await createSolution(payload)
     if (!resp.success || !resp.data) {
-      message.error(t('ptoj.failed_proceed'), resp.message)
       return
     }
 

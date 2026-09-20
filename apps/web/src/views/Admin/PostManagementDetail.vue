@@ -69,7 +69,6 @@ async function fetchPost () {
   loading.value = false
 
   if (!resp.success || !resp.data) {
-    message.error(resp.message)
     router.replace({ name: 'PostManagement' })
     return
   }
@@ -119,7 +118,6 @@ async function submit () {
     saving.value = false
 
     if (!resp.success || !resp.data) {
-      message.error(resp.message)
       return
     }
 
@@ -156,7 +154,6 @@ function del (event: Event) {
       deleting.value = false
 
       if (!resp.success) {
-        message.error(resp.message)
         return
       }
       message.success(t('ptoj.successful_delete_post_detail', { slug }))

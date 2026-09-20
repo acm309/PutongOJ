@@ -92,7 +92,11 @@ async function switchStatus (problem: ProblemEntityPreview) {
   const newStatus = problem.status === status.Reserve
     ? status.Available
     : status.Reserve
-  await update({ pid: problem.pid, status: newStatus })
+  const updated = await update({ pid: problem.pid, status: newStatus })
+  if (!updated) {
+    loading.value = false
+    return
+  }
   loading.value = false
   await fetch()
 }
@@ -114,13 +118,11 @@ async function updateSorting () {
       { beforePos: newPosition.value },
     )
     if (!response.success) {
-      throw new Error(response.message)
+      return
     }
     message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
-  } catch (e: any) {
-    message.error(t('oj.failed_to_update_sorting', { error: e.message }))
   } finally {
     loading.value = false
   }
@@ -142,7 +144,6 @@ function removeProblem (event: any, pid: number) {
     accept: async () => {
       const response = await removeCourseProblem(course.value.courseId, pid)
       if (!response.success) {
-        message.error(response.message)
         return
       }
       message.success('题目已从课程中移除')

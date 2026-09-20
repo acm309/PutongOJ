@@ -47,7 +47,6 @@ function onEarlyExit () {
     accept: async () => {
       const resp = await earlyExit(contestId.value)
       if (!resp.success) {
-        message.error(t('ptoj.failed_proceed'), resp.message)
         return
       }
       message.success(t('ptoj.successful_proceed'))

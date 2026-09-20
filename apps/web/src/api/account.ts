@@ -9,38 +9,51 @@ import type {
   SessionListQueryResult,
   SessionRevokeOthersResult,
 } from '@putong-oj/shared'
-import { instanceSafe as instance } from './instance'
+import { ErrorCode } from '@putong-oj/shared'
+import { apiClient } from './instance'
 
 export async function userLogin (payload: AccountLoginPayload) {
-  return instance.post<AccountProfileQueryResult>('/account/login', payload)
+  return apiClient.post<AccountProfileQueryResult>(
+    '/account/login',
+    payload,
+    { callerHandledCodes: 'all' },
+  )
 }
 export async function userRegister (payload: AccountRegisterPayload) {
-  return instance.post<AccountProfileQueryResult>('/account/register', payload)
+  return apiClient.post<AccountProfileQueryResult>(
+    '/account/register',
+    payload,
+    { callerHandledCodes: 'all' },
+  )
 }
 export async function userLogout () {
-  return instance.post<null>('/account/logout')
+  return apiClient.post<null>('/account/logout')
 }
 
 export async function getProfile () {
-  return instance.get<AccountProfileQueryResult>('/account/profile')
+  return apiClient.get<AccountProfileQueryResult>('/account/profile')
 }
 export async function updateProfile (payload: AccountEditPayload) {
-  return instance.put<AccountProfileQueryResult>('/account/profile', payload)
+  return apiClient.put<AccountProfileQueryResult>('/account/profile', payload)
 }
 export async function updatePassword (payload: AccountChangePasswordPayload) {
-  return instance.put<null>('/account/password', payload)
+  return apiClient.put<null>(
+    '/account/password',
+    payload,
+    { callerHandledCodes: [ ErrorCode.Unauthorized ] },
+  )
 }
 
 export async function findSubmissions (params: AccountSubmissionListQuery) {
-  return instance.get<AccountSubmissionListQueryResult>('/account/submissions', { params })
+  return apiClient.get<AccountSubmissionListQueryResult>('/account/submissions', { params })
 }
 
 export async function listSessions () {
-  return instance.get<SessionListQueryResult>('/account/sessions')
+  return apiClient.get<SessionListQueryResult>('/account/sessions')
 }
 export async function revokeSession (sessionId: string) {
-  return instance.delete<null>(`/account/sessions/${encodeURIComponent(sessionId)}`)
+  return apiClient.delete<null>(`/account/sessions/${encodeURIComponent(sessionId)}`)
 }
 export async function revokeOtherSessions () {
-  return instance.delete<SessionRevokeOthersResult>('/account/sessions')
+  return apiClient.delete<SessionRevokeOthersResult>('/account/sessions')
 }

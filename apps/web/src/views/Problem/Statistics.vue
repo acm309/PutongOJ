@@ -7,11 +7,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { getProblemStatistics } from '@/api/problem'
 import { thousandSeparator } from '@/utils/format'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
-const message = useMessage()
 
 const problemId = computed(() => Number.parseInt(route.params.pid as string))
 
@@ -120,8 +118,6 @@ async function getStatistics () {
     judgeCounts.value = resp.data.judgeCounts
     timeDistribution.value = resp.data.timeDistribution
     memoryDistribution.value = resp.data.memoryDistribution
-  } else {
-    message.error(t('ptoj.failed_fetch_data'), resp.message)
   }
 
   loading.value = false

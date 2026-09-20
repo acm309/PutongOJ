@@ -62,15 +62,16 @@ async function submitJoin () {
   joining.value = true
   try {
     const response = await joinCourse(courseId.value, joinForm.joinCode)
-    if (response.success && response.data.success) {
+    if (!response.success) {
+      return
+    }
+    if (response.data.success) {
       message.success(t('oj.course_join_success'))
       await findCourse(courseId.value)
     } else {
-      message.error(t('join_failed', { error: response.message || t('oj.unknown_error') }))
+      message.error(t('join_failed', { error: t('oj.unknown_error') }))
     }
     joinModal.value = false
-  } catch (e: any) {
-    message.error(t('join_failed', { error: e?.message || t('oj.unknown_error') }))
   } finally {
     joining.value = false
   }

@@ -44,7 +44,6 @@ async function fetch () {
   const resp = await findTags()
   loadingTags.value = false
   if (!resp.success) {
-    message.error(`Failed to load tags: ${resp.message}`)
     return
   }
   tags.value = resp.data
@@ -71,7 +70,6 @@ async function doCreate () {
   const resp = await createTag({ ...createForm.value, name: createForm.value.name.trim() })
   creating.value = false
   if (!resp.success) {
-    message.error(`Failed to create tag: ${resp.message}`)
     return
   }
   message.success('Tag created!')
@@ -141,7 +139,6 @@ async function submitUpdate () {
   )
   updating.value = false
   if (!resp.success) {
-    message.error(`Failed to update tag: ${resp.message}`)
     return
   }
   message.success('Tag updated!')

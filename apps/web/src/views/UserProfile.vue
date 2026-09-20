@@ -15,12 +15,10 @@ import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteParamUpdate } from '@/utils/helper'
-import { useMessage } from '@/utils/message'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 const sessionStore = useSessionStore()
 const { changeDomTitle } = useRootStore()
 const { isAdmin, profile } = storeToRefs(sessionStore)
@@ -47,7 +45,6 @@ async function fetch () {
   const resp = await getUser(uid.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_load_user'), resp.message)
     return
   }
 

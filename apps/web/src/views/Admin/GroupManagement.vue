@@ -163,7 +163,6 @@ async function fetchUsers () {
   if (resp.success) {
     allUsers.value = resp.data
   } else {
-    message.error(t('ptoj.failed_fetch_users'), resp.message)
     allUsers.value = []
   }
 }
@@ -173,7 +172,6 @@ async function fetchGroups () {
   const resp = await findGroups()
   loadingGroups.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_groups'), resp.message)
     return
   }
   groups.value = resp.data
@@ -189,7 +187,6 @@ async function fetchGroupDetail () {
   const resp = await getGroup(groupId.value.toString())
   loadingGroupDetail.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_load_group'), resp.message)
     currentGroup.value = null
     return
   }
@@ -242,7 +239,6 @@ async function handleCreateGroup () {
   loading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_create_group'), resp.message)
     return
   }
 
@@ -276,7 +272,6 @@ async function handleUpdateGroupName () {
   loading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -300,7 +295,6 @@ async function handleSaveMembers () {
   loading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -333,7 +327,6 @@ async function handleDeleteGroup (event: Event) {
       loading.value = false
 
       if (!resp.success) {
-        message.error(t('ptoj.failed_delete_group'), resp.message)
         return
       }
 

@@ -114,13 +114,10 @@ async function fetch () {
   ])
   loading.value = false
   if (!userResp.success) {
-    message.error(t('ptoj.failed_load_user'), userResp.message)
     router.back()
     return
   }
-  if (!oauthResp.success) {
-    message.error(t('ptoj.failed_load_connect_accounts'), oauthResp.message)
-  } else {
+  if (oauthResp.success) {
     connections.value = oauthResp.data
   }
 
@@ -159,7 +156,6 @@ async function saveUser () {
   saving.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -179,7 +175,6 @@ async function saveQuota () {
   savingQuota.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_save_changes'), resp.message)
     return
   }
 
@@ -204,7 +199,6 @@ async function changePassword () {
   })
   saving.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_update_password'), resp.message)
     return
   }
 
@@ -228,7 +222,6 @@ function disconnectOAuth (event: Event, provider: OAuthProvider) {
     accept: async () => {
       const result = await removeUserOAuthConnection(uid.value, provider)
       if (!result.success) {
-        message.error(t('ptoj.failed_proceed'), result.message)
         return
       }
       connections.value[provider] = null
@@ -249,7 +242,6 @@ async function fetchSessions () {
   sessionsLoading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_sessions'), resp.message)
     return
   }
   sessions.value = resp.data.map((session) => {
@@ -269,7 +261,6 @@ async function fetchSessions () {
 async function revokeUserSessionById (sessionId: string) {
   const resp = await revokeUserSession(uid.value, sessionId)
   if (!resp.success) {
-    message.error(t('ptoj.failed_logout_session'), resp.message)
     return
   }
   message.success(t('ptoj.session_logged_out'), t('ptoj.session_logged_out_detail'))
@@ -292,7 +283,6 @@ function confirmRevokeAllUserSessions (event: Event) {
     accept: async () => {
       const resp = await revokeUserAllSessions(uid.value)
       if (!resp.success) {
-        message.error(t('ptoj.failed_logout_session'), resp.message)
         return
       }
       message.success(t('ptoj.session_logged_out'), t('ptoj.sessions_logged_out_detail', { count: resp.data.removed }))

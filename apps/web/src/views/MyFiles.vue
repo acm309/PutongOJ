@@ -47,7 +47,6 @@ async function fetch () {
   const resp = await findFiles(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_files'), resp.message)
     docs.value = []
     total.value = 0
     return
@@ -82,7 +81,6 @@ async function onDelete (storageKey: string) {
   const resp = await removeFile(storageKey)
   deletingId.value = ''
   if (!resp.success) {
-    message.error(t('ptoj.failed_delete_file'), resp.message)
     return
   }
 

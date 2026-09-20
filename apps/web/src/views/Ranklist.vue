@@ -48,7 +48,6 @@ async function fetchGroups () {
   const resp = await findGroups()
   loadingGroups.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_groups'), resp.message)
     return
   }
   groups.value = resp.data
@@ -70,7 +69,6 @@ async function fetch () {
   const resp = await findRanklist(query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_ranklist'), resp.message)
     docs.value = []
     total.value = 0
     return
@@ -113,7 +111,6 @@ async function onExport (format: ExportFormat) {
   message.info(t('ptoj.exporting_data'), t('ptoj.exporting_data_detail'))
   const resp = await exportRanklist({ group: query.value.group })
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_ranklist'), resp.message)
     exportDialog.value = false
     return
   }

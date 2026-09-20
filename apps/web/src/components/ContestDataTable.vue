@@ -107,7 +107,6 @@ async function onOpenContest (contestId: number) {
   const resp = await getParticipation(contestId)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_data'), resp.message)
     return closeDialog()
   }
   details.value = resp.data
@@ -134,7 +133,6 @@ async function onSubmit () {
   loading.value = false
 
   if (!resp.success) {
-    message.error(t('ptoj.failed_join_contest'), t('ptoj.failed_join_contest_detail'))
     return
   }
 

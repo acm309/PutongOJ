@@ -5,7 +5,6 @@ import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { findCourseItems } from '@/api/course'
-import { useMessage } from '@/utils/message'
 
 const props = defineProps({
   modelValue: {
@@ -18,7 +17,6 @@ const props = defineProps({
 })
 const emit = defineEmits([ 'update:modelValue' ])
 const { t } = useI18n()
-const message = useMessage()
 
 const loading = ref(false)
 const courseOptions = ref<{ value: number, label: string, disabled?: boolean }[]>([])
@@ -32,7 +30,7 @@ const findCourseOptions = debounce(async (query: string) => {
   try {
     const response = await findCourseItems(query)
     if (!response.success) {
-      throw new Error(response.message)
+      return
     }
     courseOptions.value.length = 0
     response.data.forEach((item: CourseEntityItem) => {
@@ -47,8 +45,6 @@ const findCourseOptions = debounce(async (query: string) => {
       label: t('oj.unrelated_to_any_course'),
       disabled: false,
     })
-  } catch (error: any) {
-    message.error(error.message || t('oj.failed_to_fetch_courses'))
   } finally {
     loading.value = false
   }

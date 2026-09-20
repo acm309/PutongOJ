@@ -83,7 +83,6 @@ function removeMember (event: any, userId: string) {
     accept: async () => {
       const response = await removeCourseMember(id, userId)
       if (!response.success) {
-        message.error(response.message)
         return
       }
       message.success(t('oj.course_member_remove_success'))

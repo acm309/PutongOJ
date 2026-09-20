@@ -42,11 +42,12 @@ async function submit () {
       description: form.value.description,
       encrypt: form.value.isPublic ? 1 : 2,
     } as any)
+    if (id === null) {
+      return
+    }
     message.success(t('oj.course_create_success'))
     router.push({ name: 'courseProblems', params: { id } })
     visible.value = false
-  } catch (e: any) {
-    message.error(t('oj.course_create_failed', { error: e.message }))
   } finally {
     submitting.value = false
   }

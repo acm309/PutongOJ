@@ -80,7 +80,6 @@ async function fetch () {
   const resp = await findParticipants(contestId.value, query.value)
   loading.value = false
   if (!resp.success) {
-    message.error(t('ptoj.failed_fetch_participants'), resp.message)
     docs.value = []
     total.value = 0
     return
@@ -136,7 +135,6 @@ async function onUpdateStatus (username: string, status: ContestParticipationMan
   const resp = await updateParticipantStatus(contestId.value, username, { status })
   updatingUsername.value = ''
   if (!resp.success) {
-    message.error(t('ptoj.failed_update_participation_status'), resp.message)
     return
   }
 
