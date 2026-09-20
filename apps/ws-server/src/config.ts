@@ -1,7 +1,9 @@
+import { resolve } from 'node:path'
 import process from 'node:process'
 import dotenvFlow from 'dotenv-flow'
 
-dotenvFlow.config()
+const workspaceRoot = resolve(import.meta.dirname, '../../..')
+dotenvFlow.config({ path: workspaceRoot })
 
 function numberEnv (name: string, defaultValue: number): number {
   const value = process.env[name]?.trim()

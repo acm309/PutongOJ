@@ -42,6 +42,12 @@ Before proceeding, ensure that you have the following installed:
 - [MongoDB](https://www.mongodb.com/)
 - [Redis](https://redis.io/)
 
+For local development, create the environment file at the repository root:
+
+```bash
+cp .env.example .env
+```
+
 ### Build and Run
 
 #### Build Docker Image

@@ -18,6 +18,7 @@
     "@putong-oj/db": "workspace:*",
     "@putong-oj/shared": "workspace:*",
     "cross-env": "catalog:",
+    "dotenv-flow": "catalog:",
     "fs-extra": "catalog:",
     "ioredis": "catalog:",
     "pino": "catalog:",

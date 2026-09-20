@@ -14,6 +14,7 @@
     "@putong-oj/db": "workspace:*",
     "@putong-oj/shared": "workspace:*",
     "cross-env": "catalog:",
+    "dotenv-flow": "catalog:",
     "fast-levenshtein": "catalog:",
     "fs-extra": "catalog:",
     "ioredis": "catalog:",

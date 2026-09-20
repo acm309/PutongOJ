@@ -1,10 +1,10 @@
 # Development
 .github/
 /NOTES.md
+**/.env*
 **/dist/
 **/node_modules/
 /.turbo/
-apps/server/.env*
 apps/server/coverage.lcov
 apps/server/coverage/
 apps/server/dist/

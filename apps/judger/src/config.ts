@@ -1,7 +1,11 @@
 import type { RedisOptions } from 'ioredis'
 import path from 'node:path'
 import process from 'node:process'
+import dotenvFlow from 'dotenv-flow'
 import { DEFAULT_REDIS_OPTIONS, parseRedisUrl } from './utils/redis.ts'
+
+const workspaceRoot = path.resolve(import.meta.dirname, '../../..')
+dotenvFlow.config({ path: workspaceRoot })
 
 export interface JudgerConfig {
   mongodbURL: string
@@ -17,8 +21,7 @@ export function loadJudgerConfig (env: NodeJS.ProcessEnv = process.env): JudgerC
   const redisURL = env.PTOJ_REDIS_URL?.trim() || 'redis://localhost:6379'
   const redisOptions = parseRedisUrl(redisURL)
   const sandboxEndpoint = env.PTOJ_SANDBOX_ENDPOINT?.trim() || 'http://localhost:5050'
-  const dataDir = env.PTOJ_DATA_DIR?.trim()
-    || path.resolve(import.meta.dirname, '../../server/data')
+  const dataDir = path.resolve(workspaceRoot, env.PTOJ_DATA_DIR?.trim() || 'apps/server/data')
   const sandboxDataDir = env.PTOJ_SANDBOX_DATA_DIR?.trim() || '/app/data'
 
   return {

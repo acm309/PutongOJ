@@ -1,10 +1,12 @@
 import type { OAuthClientConfig } from '../services/oauth.ts'
 import { randomBytes } from 'node:crypto'
+import { resolve } from 'node:path'
 import { env } from 'node:process'
 import { OAuthProvider } from '@putong-oj/shared'
 import dotenvFlow from 'dotenv-flow'
 
-dotenvFlow.config()
+const workspaceRoot = resolve(import.meta.dirname, '../../../..')
+dotenvFlow.config({ path: workspaceRoot })
 
 function stringEnv (name: string): string | undefined
 function stringEnv (name: string, defaultValue: string | (() => string)): string
