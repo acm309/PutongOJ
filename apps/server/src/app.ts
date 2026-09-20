@@ -16,9 +16,10 @@ import {
   spaFallback,
 } from './middlewares/index.ts'
 import router from './routes.ts'
-import logger from './utils/logger.ts'
+import { createLogger } from './utils/logger.ts'
 import './config/db.ts'
 
+const logger = createLogger('server')
 const app = new Koa()
 
 // Logger for development, will show the method and route in the console

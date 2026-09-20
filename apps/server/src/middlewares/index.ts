@@ -4,8 +4,10 @@ import { ErrorCode, ErrorCodeValues } from '@putong-oj/shared'
 import send from 'koa-send'
 import config from '../config/index.ts'
 import { createErrorResponse } from '../utils/index.ts'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
 import authnMiddleware from './authn.ts'
+
+const logger = createLogger('server.audit')
 
 export async function parseClientIp (ctx: Context, next: () => Promise<any>) {
   const { reverseProxy } = config
@@ -67,9 +69,9 @@ export async function setupAuditLog (ctx: Context, next: Next) {
     error (message: string, error?: any) {
       const trace = buildTraceInfo()
       if (error) {
-        logger.error(`${message} ${trace}`, error)
+        logger.error({ err: error, trace }, message)
       } else {
-        logger.error(`${message} ${trace}`)
+        logger.error({ trace }, message)
       }
     },
     warn (message: string) {

@@ -1,7 +1,9 @@
 import process from 'node:process'
 import { connectMongoose } from '@putong-oj/db'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
 import config from './index.ts'
+
+const logger = createLogger('server.db')
 
 void connectMongoose({
   uri: config.mongodbURL,
@@ -10,15 +12,13 @@ void connectMongoose({
     logger.info('MongoDB connected successfully')
   },
   onError: (err) => {
-    logger.error('MongoDB connected failed')
-    logger.error(err)
+    logger.error({ err }, 'MongoDB connection failed')
     process.exit(-1)
   },
   onDisconnected: () => {
     logger.error('MongoDB disconnected')
   },
 }).catch((err) => {
-  logger.error('MongoDB connected failed')
-  logger.error(err)
+  logger.error({ err }, 'MongoDB connection failed')
   process.exit(-1)
 })

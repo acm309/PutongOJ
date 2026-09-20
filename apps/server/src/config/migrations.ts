@@ -4,7 +4,9 @@ import { md5 } from '@noble/hashes/legacy.js'
 import { Contest, mongoose, OAuth, Post, User } from '@putong-oj/db'
 import { OAuthProvider } from '@putong-oj/shared'
 import { settingsService } from '../services/settings.ts'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
+
+const logger = createLogger('server.migrations')
 
 interface MigrationTask {
   key: string

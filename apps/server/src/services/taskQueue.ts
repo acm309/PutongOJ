@@ -1,6 +1,8 @@
 import redis from '../config/redis.ts'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
 import '../config/db.ts'
+
+const logger = createLogger('server.task-queue')
 
 export async function distributeWork (task: string, id: string | number) {
   const taskList = `worker:${task}`
@@ -10,10 +12,10 @@ export async function distributeWork (task: string, id: string | number) {
 
   const exists = await redis.sismember(taskSet, id)
   if (exists) {
-    logger.debug(`Task <${task}> for <${id}> already exists`)
+    logger.debug({ id, task }, 'Task already exists')
     return
   }
 
   await redis.multi().sadd(taskSet, id).rpush(taskList, id).exec()
-  logger.debug(`Task <${task}> for <${id}> added`)
+  logger.debug({ id, task }, 'Task added')
 }

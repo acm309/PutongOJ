@@ -1,7 +1,8 @@
 import { Redis } from 'ioredis'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
 import config from './index.ts'
 
+const logger = createLogger('server.redis')
 const redis = new Redis(config.redisURL)
 
 redis.on('connect', () => {
@@ -13,7 +14,7 @@ redis.on('reconnecting', () => {
 })
 
 redis.on('error', (err) => {
-  logger.error('Redis error:', err)
+  logger.error({ err }, 'Redis error')
 })
 
 export default redis

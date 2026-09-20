@@ -4,9 +4,10 @@ import type { QueryFilter } from '../types/mongo.ts'
 import path from 'node:path'
 import { Files } from '@putong-oj/db'
 import fse from 'fs-extra'
-import logger from '../utils/logger.ts'
+import { createLogger } from '../utils/logger.ts'
 import userService from './user.ts'
 
+const logger = createLogger('server.file')
 const uploadDir = path.join(import.meta.dirname, '../../public/uploads')
 
 async function queryFiles (
@@ -199,7 +200,7 @@ export async function removeFile (profile: UserDocument, storageKey: string) {
   try {
     await fse.remove(absolutePath)
   } catch (err: any) {
-    logger.warn(`Failed to remove file on disk for <File:${saved.storageKey}>: ${err.message}`)
+    logger.warn({ err, storageKey: saved.storageKey }, 'Failed to remove file on disk')
   }
 
   return saved

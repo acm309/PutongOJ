@@ -35,8 +35,8 @@
     "koa-static": "catalog:",
     "lodash": "catalog:",
     "luxon": "catalog:",
+    "pino": "catalog:",
     "superagent": "catalog:",
-    "tracer": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

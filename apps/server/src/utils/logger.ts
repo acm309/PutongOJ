@@ -1,9 +1,13 @@
-import { env } from 'node:process'
-import tracer from 'tracer'
+import type { Logger as PinoLogger } from 'pino'
+import process from 'node:process'
+import pino from 'pino'
 
-// 故意略去时间: production 模式时会用另外的 package 将 log 输入文件，此时会附上时间戳
-const format = env.NODE_ENV === 'test'
-  ? ''
-  : '<{{title}}> {{message}} (in {{file}}:{{line}})'
+export type Logger = PinoLogger
 
-export default tracer.colorConsole({ format })
+const rootLogger = pino({
+  level: process.env.PTOJ_LOG_LEVEL?.trim() || 'info',
+})
+
+export function createLogger (name: string): Logger {
+  return rootLogger.child({ name })
+}
