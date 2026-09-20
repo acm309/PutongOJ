@@ -141,6 +141,7 @@ dist
 
 # Local working notes (not part of the repository)
 /NOTES.md
+/pm2.config.json
 
 # Turborepo
 .turbo/

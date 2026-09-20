@@ -107,14 +107,14 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  tasks-tests:
-    name: Tasks Tests
+  judger-tests:
+    name: Judger Tests
     needs: checks
     runs-on: ubuntu-latest
 
     env:
-      PTOJ_DATA_DIR: /tmp/putong-oj-tasks-data
-      PTOJ_SANDBOX_DATA_DIR: /app/data/putong-oj-tasks-data
+      PTOJ_DATA_DIR: /tmp/putong-oj-judger-data
+      PTOJ_SANDBOX_DATA_DIR: /app/data/putong-oj-judger-data
 
     services:
       mongodb:
@@ -169,20 +169,20 @@ jobs:
       - name: Build workspace dependencies
         run: pnpm exec turbo run build --filter=@putong-oj/db
 
-      - name: Run tasks integration tests
-        run: pnpm --filter @putong-oj/tasks test:integration
+      - name: Run judger integration tests
+        run: pnpm --filter @putong-oj/judger test:integration
 
-      - name: Generate tasks coverage
+      - name: Generate judger coverage
         if: github.ref == 'refs/heads/main'
-        run: pnpm --filter @putong-oj/tasks coverage
+        run: pnpm --filter @putong-oj/judger coverage
 
-      - name: Upload tasks coverage to Codecov
+      - name: Upload judger coverage to Codecov
         if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v7
         with:
-          files: apps/tasks/coverage.lcov
-          flags: tasks
-          name: tasks
+          files: apps/judger/coverage.lcov
+          flags: judger
+          name: judger
           fail_ci_if_error: true
           verbose: true
         env:
@@ -193,7 +193,7 @@ jobs:
     needs:
       - checks
       - server-tests
-      - tasks-tests
+      - judger-tests
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 

@@ -1,4 +1,5 @@
 import type { Context, Next } from 'koa'
+import path from 'node:path'
 import { ErrorCode, ErrorCodeValues } from '@putong-oj/shared'
 import send from 'koa-send'
 import config from '../config/index.ts'
@@ -106,6 +107,8 @@ export async function errorHandler (ctx: Context, next: Next) {
 export async function spaFallback (ctx: Context, next: Next) {
   await next()
   if (ctx.status === 404) {
-    return send(ctx, 'public/index.html')
+    return send(ctx, 'index.html', {
+      root: path.join(import.meta.dirname, '../../public'),
+    })
   }
 }

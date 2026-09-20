@@ -137,3 +137,5 @@ export const tagColors = [
 ] as const
 
 export type TagColor = typeof tagColors[number]
+
+export const WEBSOCKET_CHANNEL = 'websocket:message'

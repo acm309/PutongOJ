@@ -298,9 +298,6 @@ catalogs:
     chart.js:
       specifier: ^4.5.1
       version: 4.5.1
-    concurrently:
-      specifier: ^9.2.4
-      version: 9.2.4
     cross-env:
       specifier: ^10.1.0
       version: 10.1.0
@@ -452,6 +449,16 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      dotenv-flow:
+        specifier: 'catalog:'
+        version: 4.1.0
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.4.0
+      pm2:
+        specifier: 'catalog:'
+        version: 7.0.4(supports-color@8.1.1)
     devDependencies:
       '@antfu/eslint-config':
         specifier: 'catalog:'
@@ -468,6 +475,46 @@ importers:
       vitepress:
         specifier: 'catalog:'
         version: 2.0.0-alpha.17(@types/node@24.13.4)(axios@1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(jiti@2.7.0)(lightningcss@1.33.0)(postcss@8.5.28)(stylus@0.64.0(supports-color@8.1.1))(terser@5.44.0)(typescript@6.0.3)(yaml@2.9.0)
+
+  apps/judger:
+    dependencies:
+      '@putong-oj/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@putong-oj/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      cross-env:
+        specifier: 'catalog:'
+        version: 10.1.0
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.4.0
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1(supports-color@8.1.1)
+      pino:
+        specifier: 'catalog:'
+        version: 10.3.1
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.5
+    devDependencies:
+      '@types/fs-extra':
+        specifier: 'catalog:'
+        version: 11.0.4
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.4
+      ava:
+        specifier: 'catalog:'
+        version: 7.0.0(@ava/typescript@6.0.0)(rollup@4.62.2)(supports-color@8.1.1)
+      c8:
+        specifier: 'catalog:'
+        version: 12.0.0
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   apps/server:
     dependencies:
@@ -531,18 +578,12 @@ importers:
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
-      pm2:
-        specifier: 'catalog:'
-        version: 7.0.4(supports-color@8.1.1)
       superagent:
         specifier: 'catalog:'
         version: 10.3.0(supports-color@8.1.1)
       tracer:
         specifier: 'catalog:'
         version: 1.3.0
-      ws:
-        specifier: 'catalog:'
-        version: 8.21.3
       zod:
         specifier: 'catalog:'
         version: 4.6.5
@@ -583,76 +624,15 @@ importers:
       '@types/supertest':
         specifier: 'catalog:'
         version: 7.2.1
-      '@types/ws':
-        specifier: 'catalog:'
-        version: 8.18.1
       ava:
         specifier: 'catalog:'
         version: 7.0.0(@ava/typescript@6.0.0)(rollup@4.62.2)(supports-color@8.1.1)
       c8:
         specifier: 'catalog:'
         version: 12.0.0
-      concurrently:
-        specifier: 'catalog:'
-        version: 9.2.4
       supertest:
         specifier: 'catalog:'
         version: 7.2.2(supports-color@8.1.1)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-
-  apps/tasks:
-    dependencies:
-      '@putong-oj/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@putong-oj/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
-      cross-env:
-        specifier: 'catalog:'
-        version: 10.1.0
-      fast-levenshtein:
-        specifier: 'catalog:'
-        version: 3.0.0
-      fs-extra:
-        specifier: 'catalog:'
-        version: 11.4.0
-      ioredis:
-        specifier: 'catalog:'
-        version: 5.11.1(supports-color@8.1.1)
-      pino:
-        specifier: 'catalog:'
-        version: 10.3.1
-      superagent:
-        specifier: 'catalog:'
-        version: 10.3.0(supports-color@8.1.1)
-      zod:
-        specifier: 'catalog:'
-        version: 4.6.5
-    devDependencies:
-      '@types/fast-levenshtein':
-        specifier: 'catalog:'
-        version: 0.0.4
-      '@types/fs-extra':
-        specifier: 'catalog:'
-        version: 11.0.4
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.13.4
-      '@types/superagent':
-        specifier: 'catalog:'
-        version: 8.1.11
-      ava:
-        specifier: 'catalog:'
-        version: 7.0.0(@ava/typescript@6.0.0)(rollup@4.62.2)(supports-color@8.1.1)
-      c8:
-        specifier: 'catalog:'
-        version: 12.0.0
-      concurrently:
-        specifier: 'catalog:'
-        version: 9.2.4
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -771,6 +751,77 @@ importers:
       vue-tsc:
         specifier: 'catalog:'
         version: 3.3.11(typescript@6.0.3)
+
+  apps/worker:
+    dependencies:
+      '@putong-oj/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@putong-oj/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      cross-env:
+        specifier: 'catalog:'
+        version: 10.1.0
+      fast-levenshtein:
+        specifier: 'catalog:'
+        version: 3.0.0
+      fs-extra:
+        specifier: 'catalog:'
+        version: 11.4.0
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1(supports-color@8.1.1)
+      pino:
+        specifier: 'catalog:'
+        version: 10.3.1
+      superagent:
+        specifier: 'catalog:'
+        version: 10.3.0(supports-color@8.1.1)
+    devDependencies:
+      '@types/fast-levenshtein':
+        specifier: 'catalog:'
+        version: 0.0.4
+      '@types/fs-extra':
+        specifier: 'catalog:'
+        version: 11.0.4
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.4
+      '@types/superagent':
+        specifier: 'catalog:'
+        version: 8.1.11
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
+  apps/ws-server:
+    dependencies:
+      '@putong-oj/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      cross-env:
+        specifier: 'catalog:'
+        version: 10.1.0
+      dotenv-flow:
+        specifier: 'catalog:'
+        version: 4.1.0
+      ioredis:
+        specifier: 'catalog:'
+        version: 5.11.1(supports-color@8.1.1)
+      ws:
+        specifier: 'catalog:'
+        version: 8.21.3
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.4
+      '@types/ws':
+        specifier: 'catalog:'
+        version: 8.18.1
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   packages/db:
     dependencies:
@@ -3095,10 +3146,6 @@ packages:
     resolution: {integrity: sha512-xRwvIOMGrfOAnM1JYtqQImuaNtDEv9v6oIYAs4LIHwTiKee8uwvIi363igssOC0O5U04i4AlENs79LQLu9tEMw==}
     engines: {node: '>=20'}
 
-  cliui@8.0.1:
-    resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
-    engines: {node: '>=12'}
-
   cliui@9.0.1:
     resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
     engines: {node: '>=20'}
@@ -3175,11 +3222,6 @@ packages:
   concordance@5.0.4:
     resolution: {integrity: sha512-OAcsnTEYu1ARJqWVGwf4zh4JDfHZEaSNlNccFmt8YjB2l/n19/PF2viLINHc57vO4FKIAFl2FWASIGZZWZ2Kxw==}
     engines: {node: '>=10.18.0 <11 || >=12.14.0 <13 || >=14'}
-
-  concurrently@9.2.4:
-    resolution: {integrity: sha512-TZ0CEhyzvFjgtAvHTusDMgj7wNdihCh7LLLrzdUOXIhdlnL2JBBGA9eJxR24rtqgmdjh3OA3hrN1rCHj6HM8qA==}
-    engines: {node: '>=18'}
-    hasBin: true
 
   confbox@0.1.8:
     resolution: {integrity: sha512-RMtmw0iFkeR4YV+fUOSucriAQNb9g8zFR52MWCtl+cCZOFRNL6zeB395vPzFhEjjn4fMxXudmELnl/KF/WrK6w==}
@@ -5278,10 +5320,6 @@ packages:
     resolution: {integrity: sha512-NgRBy2Nx/bE+9F27nVHnqcN5HjyLmecqsqx2PJHu3/IEtADD4WuxuXIVExD5PoSDFVrl78dOonfcOe5O+5nbzQ==}
     hasBin: true
 
-  require-directory@2.1.1:
-    resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
-    engines: {node: '>=0.10.0'}
-
   reserved-identifiers@1.2.0:
     resolution: {integrity: sha512-yE7KUfFvaBFzGPs5H3Ops1RevfUEsDc5Iz65rOwWg4lE8HJSYtle77uul3+573457oHvBKuHYDl/xqUkKpEEdw==}
     engines: {node: '>=18'}
@@ -5351,9 +5389,6 @@ packages:
   run-series@1.1.9:
     resolution: {integrity: sha512-Arc4hUN896vjkqCYrUXquBFtRZdv1PfLbTYP71efP6butxyQ0kWpiNJyAgsxscmQg1cqvHY32/UCBzXedTpU2g==}
 
-  rxjs@7.8.2:
-    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
-
   safe-buffer@5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
 
@@ -5416,10 +5451,6 @@ packages:
   shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
-
-  shell-quote@1.9.0:
-    resolution: {integrity: sha512-Iov+JwFv/2HcTpcwNMKd8+IWNb8tboQJNQTkAY/LLVK7gGH9jy+LGkVqPxfekHl+yMmiqXszdGWXgkfml7hjqA==}
-    engines: {node: '>= 0.4'}
 
   shiki@3.23.0:
     resolution: {integrity: sha512-55Dj73uq9ZXL5zyeRPzHQsK7Nbyt6Y10k5s7OjuFZGMhpp4r/rsLBH0o/0fstIzX1Lep9VxefWljK/SKCzygIA==}
@@ -5711,10 +5742,6 @@ packages:
 
   traverse@0.3.9:
     resolution: {integrity: sha512-iawgk0hLP3SxGKDfnDJf8wTz4p2qImnyihM5Hh/sGvQ3K37dPi/w8sRhdNIxYA1TwFwc5mDhIJq+O0RsvXBKdQ==}
-
-  tree-kill@1.2.2:
-    resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
-    hasBin: true
 
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
@@ -6166,10 +6193,6 @@ packages:
   yargs-parser@22.0.0:
     resolution: {integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=23}
-
-  yargs@17.7.2:
-    resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
-    engines: {node: '>=12'}
 
   yargs@18.1.0:
     resolution: {integrity: sha512-2rAgRKu54VsHkqI0/tYkmluGXHD4KW7yZoycuqDQ15QOTnc2VVfy0nN/1eMhnQLO00A+dwtK20xuCnc1YGeUyg==}
@@ -8631,12 +8654,6 @@ snapshots:
       slice-ansi: 8.0.0
       string-width: 8.2.2
 
-  cliui@8.0.1:
-    dependencies:
-      string-width: 4.2.3
-      strip-ansi: 6.0.1
-      wrap-ansi: 7.0.0
-
   cliui@9.0.1:
     dependencies:
       string-width: 7.2.0
@@ -8708,15 +8725,6 @@ snapshots:
       md5-hex: 3.0.1
       semver: 7.8.5
       well-known-symbols: 2.0.0
-
-  concurrently@9.2.4:
-    dependencies:
-      chalk: 4.1.2
-      rxjs: 7.8.2
-      shell-quote: 1.9.0
-      supports-color: 8.1.1
-      tree-kill: 1.2.2
-      yargs: 17.7.2
 
   confbox@0.1.8: {}
 
@@ -11004,8 +11012,6 @@ snapshots:
     dependencies:
       jsesc: 3.1.0
 
-  require-directory@2.1.1: {}
-
   reserved-identifiers@1.2.0: {}
 
   resolve-cwd@3.0.0:
@@ -11106,10 +11112,6 @@ snapshots:
 
   run-series@1.1.9: {}
 
-  rxjs@7.8.2:
-    dependencies:
-      tslib: 2.8.1
-
   safe-buffer@5.1.2: {}
 
   safe-buffer@5.2.1: {}
@@ -11153,8 +11155,6 @@ snapshots:
       shebang-regex: 3.0.0
 
   shebang-regex@3.0.0: {}
-
-  shell-quote@1.9.0: {}
 
   shiki@3.23.0:
     dependencies:
@@ -11372,6 +11372,7 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+    optional: true
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
@@ -11470,8 +11471,6 @@ snapshots:
       tinytim: 0.1.1
 
   traverse@0.3.9: {}
-
-  tree-kill@1.2.2: {}
 
   trim-lines@3.0.1: {}
 
@@ -11885,16 +11884,6 @@ snapshots:
   yargs-parser@21.1.1: {}
 
   yargs-parser@22.0.0: {}
-
-  yargs@17.7.2:
-    dependencies:
-      cliui: 8.0.1
-      escalade: 3.2.0
-      get-caller-file: 2.0.5
-      require-directory: 2.1.1
-      string-width: 4.2.3
-      y18n: 5.0.8
-      yargs-parser: 21.1.1
 
   yargs@18.1.0:
     dependencies:

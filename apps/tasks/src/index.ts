@@ -1,7 +1,0 @@
-export * from './modules/judger/config.ts'
-export * from './modules/judger/constants.ts'
-export * from './modules/judger/judge/judger.ts'
-export * from './modules/judger/judge/testlib-checker.ts'
-export * from './modules/judger/languages/registry.ts'
-export * from './modules/judger/sandbox/client.ts'
-export * from './modules/judger/sandbox/types.ts'

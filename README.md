@@ -74,15 +74,21 @@ To retain data across container restarts, mount the following volumes:
 ```plaintext
 /app/data
 /app/logs
-/app/public/uploads
+/app/apps/server/public/uploads
 ```
 
-### Setting Up the Judger
+### Services
 
-The TypeScript task services live in [`apps/tasks`](apps/tasks/README.md). They
-keep the original Redis protocols and use the go-judge sandbox for code
-execution. The root `docker-compose.yml` includes the application, Redis,
-MongoDB, and sandbox services:
+The backend is split into independently built applications:
+
+- [`apps/server`](apps/server) provides the Koa HTTP API.
+- [`apps/ws-server`](apps/ws-server/README.md) serves WebSocket connections and Redis dispatches.
+- [`apps/worker`](apps/worker/README.md) runs asynchronous maintenance jobs.
+- [`apps/judger`](apps/judger/README.md) judges submissions with the go-judge sandbox.
+
+The root image still launches all four processes with PM2. The root
+`docker-compose.yml` includes the application, Redis, MongoDB, and sandbox
+services:
 
 ```bash
 docker compose up --build

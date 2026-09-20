@@ -1,8 +1,6 @@
 import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
-import { WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
+import { WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import redis from '../config/redis.ts'
-
-const CHANNEL = 'websocket:message'
 
 export async function sendBroadcastNotification (title: string, content: string) {
   const message: WebSocketMessage = {
@@ -13,7 +11,7 @@ export async function sendBroadcastNotification (title: string, content: string)
     type: WebSocketDispatchType.Broadcast,
     message,
   }
-  await redis.publish(CHANNEL, JSON.stringify(dispatch))
+  await redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch))
 }
 
 export async function sendUserNotification (username: string, title: string, content: string) {
@@ -26,7 +24,7 @@ export async function sendUserNotification (username: string, title: string, con
     username,
     message,
   }
-  await redis.publish(CHANNEL, JSON.stringify(dispatch))
+  await redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch))
 }
 
 const websocketService = {

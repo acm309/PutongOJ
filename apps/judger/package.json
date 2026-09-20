@@ -1,0 +1,56 @@
+{
+  "name": "@putong-oj/judger",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc && mkdir -p dist/assets && cp -R src/assets/. dist/assets/",
+    "clean": "rm -rf dist coverage",
+    "coverage": "c8 report --reporter=text-lcov > coverage.lcov",
+    "dev": "cross-env NODE_ENV=development node --watch src/main.ts",
+    "start": "cross-env NODE_ENV=production node dist/main.js",
+    "test": "cross-env NODE_ENV=test c8 ava",
+    "test:integration": "cross-env NODE_ENV=test PTOJ_RUN_INTEGRATION=1 c8 ava",
+    "test:unit": "cross-env NODE_ENV=test c8 ava --match='!*integration*'",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@putong-oj/db": "workspace:*",
+    "@putong-oj/shared": "workspace:*",
+    "cross-env": "catalog:",
+    "fs-extra": "catalog:",
+    "ioredis": "catalog:",
+    "pino": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "catalog:",
+    "@types/node": "catalog:",
+    "ava": "catalog:",
+    "c8": "catalog:",
+    "typescript": "catalog:"
+  },
+  "ava": {
+    "concurrency": 1,
+    "environmentVariables": {
+      "NODE_ENV": "test"
+    },
+    "extensions": [
+      "ts",
+      "js"
+    ],
+    "files": [
+      "test/**/*.test.{js,ts}"
+    ],
+    "serial": true,
+    "timeout": "2m"
+  },
+  "c8": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ]
+  }
+}

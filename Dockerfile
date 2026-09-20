@@ -13,13 +13,16 @@ WORKDIR /app
 
 RUN npm i -g pnpm@11.17.0
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY .npmrc ./
 COPY tsconfig.base.json ./
+COPY turbo.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/docs/package.json apps/docs/
 COPY apps/web/package.json apps/web/
-COPY apps/tasks/package.json apps/tasks/
+COPY apps/ws-server/package.json apps/ws-server/
+COPY apps/worker/package.json apps/worker/
+COPY apps/judger/package.json apps/judger/
 COPY packages/db/package.json packages/db/
 COPY packages/shared/package.json packages/shared/
 RUN pnpm install --frozen-lockfile
@@ -30,69 +33,49 @@ RUN pnpm --filter @putong-oj/shared build
 COPY packages/db/ packages/db/
 RUN pnpm --filter @putong-oj/db build
 
-# Docs builder
-FROM base_builder AS docs_builder
+# Application builder
+FROM base_builder AS app_builder
 WORKDIR /app
 
-COPY apps/docs/ apps/docs/
-RUN pnpm --filter @putong-oj/docs build
-
-# Web builder
-FROM base_builder AS web_builder
-WORKDIR /app
-
-COPY apps/web/ apps/web/
-COPY apps/server/ apps/server/
+COPY apps/ apps/
 COPY --from=version_checker /app/version.txt .
-
-RUN env \
-    VITE_BUILD_SHA=$(cat version.txt) \
-    VITE_BUILD_TIME=$(date +%s%3N) \
-    pnpm --filter @putong-oj/web build
-
-# Server deps
-FROM base_builder AS server_deps
-WORKDIR /app
-
-RUN pnpm --filter @putong-oj/server deploy --legacy /app/server_deploy
-
-# Tasks deps
-FROM base_builder AS tasks_deps
-WORKDIR /app
-
-COPY apps/tasks/ apps/tasks/
-RUN pnpm --filter @putong-oj/tasks build
-RUN pnpm --filter @putong-oj/tasks deploy --legacy --prod /app/tasks_deploy
-
-# Server builder
-FROM base_builder AS server_builder
-WORKDIR /app
-
-COPY apps/server/ apps/server/
-RUN date +%s%3N > build_time.txt
-RUN pnpm --filter @putong-oj/server build
+RUN date +%s%3N > build_time.txt && \
+    env \
+      VITE_BUILD_SHA=$(cat version.txt) \
+      VITE_BUILD_TIME=$(cat build_time.txt) \
+      pnpm build
 
 # Runtime
 FROM node:24-alpine AS runtime
 WORKDIR /app
 
-COPY --from=server_deps /app/server_deploy/node_modules ./node_modules
-COPY --from=server_deps /app/server_deploy/package.json ./package.json
-COPY --from=tasks_deps /app/tasks_deploy ./tasks
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY apps/server/package.json apps/server/
+COPY apps/ws-server/package.json apps/ws-server/
+COPY apps/worker/package.json apps/worker/
+COPY apps/judger/package.json apps/judger/
+COPY packages/db/package.json packages/db/
+COPY packages/shared/package.json packages/shared/
+RUN npm i -g pnpm@11.17.0 && pnpm install --prod --frozen-lockfile
 
-COPY --from=server_builder /app/apps/server/dist ./dist
-COPY --from=web_builder /app/apps/web/dist ./public
-COPY --from=docs_builder /app/apps/docs/.vitepress/dist ./public/docs
+COPY --from=app_builder /app/apps/server/dist ./apps/server/dist
+COPY --from=app_builder /app/apps/ws-server/dist ./apps/ws-server/dist
+COPY --from=app_builder /app/apps/worker/dist ./apps/worker/dist
+COPY --from=app_builder /app/apps/judger/dist ./apps/judger/dist
+COPY --from=app_builder /app/apps/web/dist ./apps/server/public
+COPY --from=app_builder /app/apps/docs/.vitepress/dist ./apps/server/public/docs
+COPY --from=app_builder /app/packages/db/dist ./packages/db/dist
+COPY --from=app_builder /app/packages/shared/dist ./packages/shared/dist
 
 COPY --from=version_checker /app/version.txt .
-COPY --from=server_builder /app/build_time.txt .
+COPY --from=app_builder /app/build_time.txt .
 
 COPY setup.js .
 COPY apps/server/entrypoint.sh .
 RUN chmod +x entrypoint.sh
-RUN mkdir -p /app/data /app/logs /app/public/uploads
+RUN mkdir -p /app/data /app/logs /app/apps/server/public/uploads
 
 EXPOSE 3000/tcp 3001/tcp
-VOLUME [ "/app/data", "/app/logs", "/app/public/uploads" ]
+VOLUME [ "/app/data", "/app/logs", "/app/apps/server/public/uploads" ]
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

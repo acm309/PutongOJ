@@ -1,5 +1,6 @@
 {
   "name": "putong-oj",
+  "type": "module",
   "private": true,
   "packageManager": "pnpm@11.17.0",
   "engines": {
@@ -23,6 +24,11 @@
     "lint:fix": "eslint apps packages setup.js --fix",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
+  },
+  "dependencies": {
+    "dotenv-flow": "catalog:",
+    "fs-extra": "catalog:",
+    "pm2": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",

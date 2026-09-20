@@ -6,9 +6,7 @@
   "scripts": {
     "build": "tsc && cp -r src/scripts dist/scripts",
     "coverage": "c8 report --reporter=text-lcov > coverage.lcov",
-    "dev": "concurrently \"pnpm run dev:app\" \"pnpm run dev:ws\"",
-    "dev:app": "cross-env NODE_ENV=development node --watch src/app.ts",
-    "dev:ws": "cross-env NODE_ENV=development node --watch src/ws.ts",
+    "dev": "cross-env NODE_ENV=development node --watch src/app.ts",
     "posttest": "cross-env NODE_ENV=test node test/posttest.ts",
     "pretest": "cross-env NODE_ENV=test node test/pretest.ts",
     "report": "c8 report --reporter=html",
@@ -37,10 +35,8 @@
     "koa-static": "catalog:",
     "lodash": "catalog:",
     "luxon": "catalog:",
-    "pm2": "catalog:",
     "superagent": "catalog:",
     "tracer": "catalog:",
-    "ws": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -56,10 +52,8 @@
     "@types/node": "catalog:",
     "@types/superagent": "catalog:",
     "@types/supertest": "catalog:",
-    "@types/ws": "catalog:",
     "ava": "catalog:",
     "c8": "catalog:",
-    "concurrently": "catalog:",
     "supertest": "catalog:",
     "typescript": "catalog:"
   },

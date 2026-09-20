@@ -1,0 +1,25 @@
+{
+  "name": "@putong-oj/ws-server",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "pnpm run clean && tsc",
+    "clean": "rm -rf dist",
+    "dev": "cross-env NODE_ENV=development node --watch src/index.ts",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@putong-oj/shared": "workspace:*",
+    "cross-env": "catalog:",
+    "dotenv-flow": "catalog:",
+    "ioredis": "catalog:",
+    "ws": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/ws": "catalog:",
+    "typescript": "catalog:"
+  }
+}

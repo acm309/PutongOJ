@@ -15,7 +15,7 @@ services:
       - 3001:3001
     volumes:
       - putong-oj-data:/app/data
-      - putong-oj-uploads:/app/public/uploads
+      - putong-oj-uploads:/app/apps/server/public/uploads
     depends_on:
       - redis
       - db
@@ -34,7 +34,7 @@ services:
   sandbox:
     build:
       context: .
-      dockerfile: apps/tasks/Dockerfile.sandbox
+      dockerfile: apps/judger/Dockerfile.sandbox
     privileged: true
     shm_size: 256m
     volumes:

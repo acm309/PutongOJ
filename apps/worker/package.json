@@ -1,0 +1,30 @@
+{
+  "name": "@putong-oj/worker",
+  "type": "module",
+  "private": true,
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "pnpm run clean && tsc",
+    "clean": "rm -rf dist",
+    "dev": "cross-env NODE_ENV=development node --watch src/main.ts",
+    "start": "cross-env NODE_ENV=production node dist/main.js",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@putong-oj/db": "workspace:*",
+    "@putong-oj/shared": "workspace:*",
+    "cross-env": "catalog:",
+    "fast-levenshtein": "catalog:",
+    "fs-extra": "catalog:",
+    "ioredis": "catalog:",
+    "pino": "catalog:",
+    "superagent": "catalog:"
+  },
+  "devDependencies": {
+    "@types/fast-levenshtein": "catalog:",
+    "@types/fs-extra": "catalog:",
+    "@types/node": "catalog:",
+    "@types/superagent": "catalog:",
+    "typescript": "catalog:"
+  }
+}

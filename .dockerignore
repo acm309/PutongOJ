@@ -9,13 +9,17 @@ apps/server/coverage.lcov
 apps/server/coverage/
 apps/server/dist/
 apps/server/test/
-apps/tasks/coverage/
-apps/tasks/dist/
-apps/tasks/test/
+apps/tasks/
+apps/ws-server/dist/
+apps/worker/dist/
+apps/judger/coverage/
+apps/judger/dist/
+apps/judger/test/
 apps/docs/.vitepress/cache/
 apps/docs/.vitepress/dist/
 apps/web/dist/
 apps/web/public/static/
+/pm2.config.json
 
 # Data
 /.dev/
