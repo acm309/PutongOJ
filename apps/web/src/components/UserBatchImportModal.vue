@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AdminAccountBatchRegisterPayload } from '@putong-oj/shared'
+import type { AdminUserBatchRegisterPayload } from '@putong-oj/shared'
 import { passwordRegex, UserModelSchema } from '@putong-oj/shared'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -284,8 +284,8 @@ async function onFileChange (event: Event) {
   await parseExcelFile(file)
 }
 
-function toPayloadItem (row: ImportRow): AdminAccountBatchRegisterPayload[number] {
-  const item: AdminAccountBatchRegisterPayload[number] = {
+function toPayloadItem (row: ImportRow): AdminUserBatchRegisterPayload[number] {
+  const item: AdminUserBatchRegisterPayload[number] = {
     username: row.username,
     password: row.password,
   }

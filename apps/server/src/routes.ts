@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 
 import registerAccountHandlers from './handlers/account.ts'
-import registerAdminHandlers from './handlers/admin.ts'
+import registerAdminHandlers from './handlers/admin/index.ts'
 import registerContestHandlers from './handlers/contest.ts'
 import registerCourseHandlers from './handlers/course.ts'
 import registerDiscussionHandlers from './handlers/discussion.ts'
