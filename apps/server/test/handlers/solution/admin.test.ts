@@ -24,9 +24,9 @@ test('Can see solution and sim of other users', async (t) => {
     .get('/api/status/4')
 
   t.is(res.status, 200)
-  t.truthy(res.body.solution.sim)
-  t.truthy(res.body.solution.sim_s_id)
-  t.truthy(res.body.solution.code)
+  t.truthy(res.body.data.sim)
+  t.truthy(res.body.data.sim_s_id)
+  t.truthy(res.body.data.code)
 })
 
 test('Push solution to rejudge', async (t) => {

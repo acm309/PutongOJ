@@ -1,5 +1,5 @@
 import type { CourseDocument } from '@putong-oj/db'
-import type { CourseEntityEditable } from '../../src/types/entity.ts'
+import type { CourseEntityEditable } from '@putong-oj/shared'
 import { User } from '@putong-oj/db'
 import test from 'ava'
 import courseService from '../../src/services/course.ts'

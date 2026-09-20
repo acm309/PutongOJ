@@ -1,4 +1,4 @@
-import type { CourseRole } from '@server/types'
+import type { CourseRole } from '@putong-oj/shared'
 import { JudgeStatus, Language, UserPrivilege } from '@putong-oj/shared'
 
 export const languageHighlight: Record<Language, string> = {

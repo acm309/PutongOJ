@@ -24,7 +24,7 @@ export const SolutionModelSchema = z.object({
   error: z.string(),
   sim: z.number(),
   sim_s_id: z.number(),
-  testcase: z.array(TestcaseResultSchema),
+  testcases: z.array(TestcaseResultSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
 })

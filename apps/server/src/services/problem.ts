@@ -1,6 +1,12 @@
 import type { PipelineStage, ProblemDocument, ProblemDocumentPopulated, Types } from '@putong-oj/db'
-import type { Paginated, ProblemStatisticsQueryResult } from '@putong-oj/shared'
-import type { ProblemEntity, ProblemEntityForm, ProblemEntityItem, ProblemEntityPreview } from '../types/entity.ts'
+import type {
+  Paginated,
+  ProblemEntity,
+  ProblemEntityForm,
+  ProblemEntityItem,
+  ProblemEntityPreview,
+  ProblemStatisticsQueryResult,
+} from '@putong-oj/shared'
 import type { PaginateOption } from '../types/index.ts'
 import path from 'node:path'
 import { CourseProblem, mongoose, Problem, Solution } from '@putong-oj/db'

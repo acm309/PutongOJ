@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { FindProblemsParams } from '@/types/api'
+import type { ProblemListQuery } from '@putong-oj/shared'
+import { status } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -11,7 +12,6 @@ import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import ProblemTag from '@/components/ProblemTag.vue'
-import { useRootStore } from '@/store'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import { statusLabels } from '@/utils/constant'
@@ -47,11 +47,9 @@ const query = computed(() => ({
 }))
 
 const problemStore = useProblemStore()
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 
 const { problems, solved } = storeToRefs(problemStore)
-const { status } = storeToRefs(rootStore)
 const { isAdmin } = storeToRefs(sessionStore)
 const { findProblems, update } = problemStore
 
@@ -65,16 +63,16 @@ async function fetch () {
   loading.value = true
   type.value = route.query.type || 'pid'
   content.value = String(route.query.content || '')
-  await findProblems(query.value as FindProblemsParams)
+  await findProblems(query.value as ProblemListQuery)
   loading.value = false
 }
 
 const search = () => reload({ page: 1, type: type.value, content: content.value })
 const pageChange = (val: number) => reload({ page: val })
 
-function change (problem: { pid: number, status: number }) {
+function change (problem: { pid: number, status: 0 | 2 }) {
   loading.value = true
-  problem.status = problem.status === status.value.Reserve ? status.value.Available : status.value.Reserve
+  problem.status = problem.status === status.Reserve ? status.Available : status.Reserve
   update({ pid: problem.pid, status: problem.status }).then(fetch)
 }
 

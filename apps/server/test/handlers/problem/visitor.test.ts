@@ -11,12 +11,13 @@ test('Problem list', async (t) => {
     .get('/api/problem')
 
   t.is(res.status, 200)
-  t.truthy(Array.isArray(res.body.list.docs))
-  t.truthy(Array.isArray(res.body.solved))
+  t.true(res.body.success)
+  t.truthy(Array.isArray(res.body.data.list.docs))
+  t.truthy(Array.isArray(res.body.data.solved))
 
-  if (res.body.list.docs.length > 0) {
-    t.truthy(res.body.list.docs[0].title)
-    t.truthy(res.body.list.docs[0].pid)
+  if (res.body.data.list.docs.length > 0) {
+    t.truthy(res.body.data.list.docs[0].title)
+    t.truthy(res.body.data.list.docs[0].pid)
   }
 })
 
@@ -26,10 +27,10 @@ test('Problem find one', async (t) => {
 
   t.is(res.status, 200)
 
-  const n = problemSeeds.find(item => item.title === res.body.title)!
+  const n = problemSeeds.find(item => item.title === res.body.data.title)!
 
   for (const [ key, value ] of Object.entries(n)) {
-    t.deepEqual(res.body[key], value)
+    t.deepEqual(res.body.data[key], value)
   }
 })
 

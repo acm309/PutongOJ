@@ -34,7 +34,7 @@ test.serial('create a new problem', async (t) => {
 
   t.is(create.status, 200)
 
-  createPid = create.body.pid
+  createPid = create.body.data.pid
 })
 
 test.serial('Update a problem', async (t) => {
@@ -50,8 +50,8 @@ test.serial('Update a problem', async (t) => {
     .get(`/api/problem/${createPid}`)
 
   t.is(find.status, 200)
-  t.is(find.body.title, '更新新建题目')
-  t.is(find.body.description, '应该可以更新成功吧')
+  t.is(find.body.data.title, '更新新建题目')
+  t.is(find.body.data.description, '应该可以更新成功吧')
 })
 
 test.serial('Delete a Problem', async (t) => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProblemEntityForm } from '@server/types/entity'
+import type { ProblemUpdatePayload } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
@@ -20,16 +20,19 @@ const { findOne, update: updateProblem } = problemStore
 const paramPid = computed(() => Number.parseInt(route.params.pid as string))
 
 const loadingProblem = ref(false)
-const problemForm = ref({} as Partial<ProblemEntityForm>)
+const problemForm = ref({} as ProblemUpdatePayload)
 
 async function loadProblem () {
   loadingProblem.value = true
-  await findOne({ pid: paramPid.value })
+  await findOne(paramPid.value)
   loadingProblem.value = false
 }
 
 async function submitForm () {
-  const data = await updateProblem(problemForm.value)
+  const data = await updateProblem({
+    pid: paramPid.value,
+    ...problemForm.value,
+  })
   message.success(t('oj.submit_success'))
   await loadProblem()
   router.push({ name: 'problemInfo', params: { pid: data.pid } })

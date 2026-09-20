@@ -1,5 +1,6 @@
+import type { SolutionStatusUpdatePayload } from '@putong-oj/shared'
 import { defineStore } from 'pinia'
-import api from '@/api'
+import { findSolution, updateSolution } from '@/api/solution'
 
 export const useSolutionStore = defineStore('solution', {
   state: () => ({
@@ -9,17 +10,21 @@ export const useSolutionStore = defineStore('solution', {
     } as any,
   }),
   actions: {
-    async findOne (payload: { [key: string]: any }) {
-      const { data } = await api.solution.findOne(payload)
-      this.solution = data.solution
-    },
-    async updateSolution (payload: { judge: number }) {
-      const solutionId = (this.solution as any).sid!
-      const { data } = await api.solution.updateSolution(solutionId, payload)
-      if (data.success && data.data) {
-        this.solution = data.data
+    async findOne (solutionId: number) {
+      const response = await findSolution(solutionId)
+      if (!response.success) {
+        throw new Error(response.message)
       }
-      return data
+      this.solution = response.data
+    },
+    async updateSolution (payload: SolutionStatusUpdatePayload) {
+      const solutionId = (this.solution as any).sid!
+      const response = await updateSolution(solutionId, payload)
+      if (!response.success) {
+        throw new Error(response.message)
+      }
+      this.solution = response.data
+      return response
     },
   },
 })

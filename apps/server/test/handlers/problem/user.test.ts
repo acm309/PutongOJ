@@ -35,9 +35,10 @@ test('Query problem list', async (t) => {
     .get('/api/problem')
 
   t.is(res.status, 200)
-  t.true(Array.isArray(res.body.list.docs))
-  t.is(res.body.list.docs.length, res.body.list.total)
-  t.truthy(Array.isArray(res.body.solved))
+  t.true(res.body.success)
+  t.true(Array.isArray(res.body.data.list.docs))
+  t.is(res.body.data.list.docs.length, res.body.data.list.total)
+  t.truthy(Array.isArray(res.body.data.solved))
 })
 
 test('Statistics for pid 1001', async (t) => {

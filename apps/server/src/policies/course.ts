@@ -1,6 +1,6 @@
 import type { Types } from '@putong-oj/db'
+import type { CourseEntity } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { CourseEntity } from '../types/entity.ts'
 import type { CourseRole, WithId } from '../types/index.ts'
 import { Course } from '@putong-oj/db'
 import courseService from '../services/course.ts'

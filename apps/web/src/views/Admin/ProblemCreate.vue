@@ -32,7 +32,11 @@ const problem = reactive({
 })
 
 async function submit () {
-  const pid = await problemStore.create(problem)
+  const pid = await problemStore.create({
+    ...problem,
+    course: problem.course ?? undefined,
+    type: problem.type as 1 | 2 | 3,
+  })
   message.success(t('oj.create_problem_success', { pid }))
   if (!problem.in && !problem.out) {
     message.info(t('oj.sample_input_output_empty'))

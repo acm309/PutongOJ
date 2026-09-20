@@ -1,6 +1,13 @@
 import type { CourseDocument, PipelineStage, Types, UserDocument } from '@putong-oj/db'
-import type { Paginated, UserEntity } from '@putong-oj/shared'
-import type { CourseEntityEditable, CourseEntityItem, CourseEntityPreview, CourseMemberEntity, CourseMemberView } from '../types/entity.ts'
+import type {
+  CourseEntityEditable,
+  CourseEntityItem,
+  CourseEntityPreview,
+  CourseMemberEntity,
+  CourseMemberView,
+  Paginated,
+  UserEntity,
+} from '@putong-oj/shared'
 import type { CourseRole, PaginateOption } from '../types/index.ts'
 import { Course, CourseMember, CourseProblem, mongoose, User } from '@putong-oj/db'
 import escapeRegExp from 'lodash/escapeRegExp.js'

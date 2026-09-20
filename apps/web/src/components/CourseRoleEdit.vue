@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseRole } from '@server/types'
+import type { CourseRole } from '@putong-oj/shared'
 import { UserPrivilege } from '@putong-oj/shared'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -7,7 +7,7 @@ import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { getCourseMember, updateCourseMember } from '@/api/course'
 import UserSelect from '@/components/UserSelect.vue'
 import { courseRoleFields } from '@/utils/constant'
 import { useMessage } from '@/utils/message'
@@ -83,7 +83,14 @@ async function submit () {
   if (!selectedUserId.value) return
   loading.value = true
   try {
-    await api.course.updateMember(courseId.value, selectedUserId.value, role.value)
+    const response = await updateCourseMember(
+      courseId.value,
+      selectedUserId.value,
+      { role: role.value },
+    )
+    if (!response.success) {
+      throw new Error(response.message)
+    }
     message.success(t('oj.course_member_update_success'))
     close()
   } finally {
@@ -97,7 +104,11 @@ async function loadUser () {
   }
   loading.value = true
   try {
-    const { data: member } = await api.course.getMember(courseId.value, selectedUserId.value)
+    const response = await getCourseMember(courseId.value, selectedUserId.value)
+    if (!response.success) {
+      throw new Error(response.message)
+    }
+    const member = response.data
     isAdmin.value = member.user.privilege >= UserPrivilege.Admin
     loaded.value = true
     Object.assign(role.value, member.role)

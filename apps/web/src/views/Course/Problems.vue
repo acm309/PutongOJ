@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ProblemEntityPreview } from '@server/types/entity'
-import type { FindProblemsParams } from '@/types/api'
+import type { ProblemEntityPreview, ProblemListQuery } from '@putong-oj/shared'
+import { status } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
@@ -14,9 +14,8 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { moveCourseProblem, removeCourseProblem } from '@/api/course'
 import ProblemTag from '@/components/ProblemTag.vue'
-import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -30,11 +29,9 @@ const router = useRouter()
 const { t } = useI18n()
 const confirm = useConfirm()
 const message = useMessage()
-const rootStore = useRootStore()
 const sessionStore = useSessionStore()
 const problemStore = useProblemStore()
 const courseStore = useCourseStore()
-const { status } = storeToRefs(rootStore)
 const { isAdmin } = storeToRefs(sessionStore)
 const { problems, solved } = storeToRefs(problemStore)
 const { course } = storeToRefs(courseStore)
@@ -56,21 +53,23 @@ const pageSize = computed<number>(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 const id = Number.parseInt(route.params.id as string)
 
-const type = ref(String(route.query.type || 'pid'))
+type SearchField = 'title' | 'tag' | 'pid'
+
+const type = ref<SearchField>((route.query.type as SearchField) || 'pid')
 const content = ref(String(route.query.content || ''))
 const loading = ref(false)
 
-const query = computed<FindProblemsParams>(() => {
+const query = computed<ProblemListQuery>(() => {
   return {
     page: page.value,
     pageSize: pageSize.value,
     course: id,
-    type: String(route.query.type || type.value),
+    type: (route.query.type as SearchField) || type.value,
     content: String(route.query.content || content.value),
   }
 })
 
-function reload (payload: Partial<FindProblemsParams> = {}) {
+function reload (payload: Partial<ProblemListQuery> = {}) {
   const routeQuery = { ...query.value, ...payload }
   router.push({
     name: 'courseProblems',
@@ -90,9 +89,9 @@ const pageChange = (val: number) => reload({ page: val })
 
 async function switchStatus (problem: ProblemEntityPreview) {
   loading.value = true
-  const newStatus = problem.status === status.value.Reserve
-    ? status.value.Available
-    : status.value.Reserve
+  const newStatus = problem.status === status.Reserve
+    ? status.Available
+    : status.Reserve
   await update({ pid: problem.pid, status: newStatus })
   loading.value = false
   await fetch()
@@ -109,11 +108,14 @@ async function updateSorting () {
   }
   loading.value = true
   try {
-    await api.course.moveCourseProblem(
+    const response = await moveCourseProblem(
       course.value.courseId,
       sorting.value.pid,
-      newPosition.value,
+      { beforePos: newPosition.value },
     )
+    if (!response.success) {
+      throw new Error(response.message)
+    }
     message.success(t('oj.problem_sorting_updated'))
     sortingModal.value = false
     await fetch()
@@ -138,7 +140,11 @@ function removeProblem (event: any, pid: number) {
       severity: 'danger',
     },
     accept: async () => {
-      await api.course.removeCourseProblem(course.value.courseId, pid)
+      const response = await removeCourseProblem(course.value.courseId, pid)
+      if (!response.success) {
+        message.error(response.message)
+        return
+      }
       message.success('题目已从课程中移除')
       fetch()
     },

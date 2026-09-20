@@ -1,20 +1,28 @@
 import type { Types } from '@putong-oj/db'
-import type { Paginated } from '@putong-oj/shared'
+import type { CourseEntity } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { DiscussionQueryFilters } from '../services/discussion.ts'
-import type { CourseEntity, ProblemEntity, ProblemEntityItem, ProblemEntityPreview, ProblemEntityView } from '../types/entity.ts'
 import type { WithId } from '../types/index.ts'
 import Router from '@koa/router'
-import { Solution, User } from '@putong-oj/db'
+import { Problem, Solution, User } from '@putong-oj/db'
 import {
   DiscussionListQueryResultSchema,
   DiscussionListQuerySchema,
+  ErrorCode,
   JudgeStatus,
+  ProblemCreatePayloadSchema,
+  ProblemCreateResultSchema,
+  ProblemDetailQueryResultSchema,
+  ProblemItemListQueryResultSchema,
+  ProblemItemListQuerySchema,
+  ProblemListQueryResultSchema,
+  ProblemListQuerySchema,
   ProblemSolutionListQueryResultSchema,
   ProblemSolutionListQuerySchema,
   ProblemStatisticsQueryResultSchema,
+  ProblemUpdatePayloadSchema,
+  ProblemUpdateResultSchema,
 } from '@putong-oj/shared'
-import pick from 'lodash/pick.js'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
 import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { publicDiscussionTypes } from '../policies/discussion.ts'
@@ -25,148 +33,114 @@ import problemService from '../services/problem.ts'
 import solutionService from '../services/solution.ts'
 import tagService from '../services/tag.ts'
 import { getUser } from '../services/user.ts'
-import { ERR_PERM_DENIED, problemType, status } from '../utils/constants.ts'
-import { createEnvelopedResponse, createZodErrorResponse, parsePaginateOption, toObjectRecord } from '../utils/index.ts'
+import { ERR_PERM_DENIED } from '../utils/constants.ts'
+import { createEnvelopedResponse, createZodErrorResponse } from '../utils/index.ts'
 
-/*
- * Some temporary helper functions, to be removed after use zod schema for request body validation.
- */
-
-function toNumberOrDefault (value: unknown, fallback: number): number {
-  const n = Number(value)
-  return Number.isFinite(n) ? n : fallback
+function buildProblemList (
+  list: Awaited<ReturnType<typeof problemService.findProblems>>,
+  profileId?: Types.ObjectId,
+) {
+  return {
+    ...list,
+    docs: list.docs.map((problem) => {
+      const { owner, ...item } = problem
+      return {
+        ...item,
+        isOwner: profileId && owner ? owner.equals(profileId) : false,
+      }
+    }),
+  }
 }
 
-function toStringOrDefault (value: unknown, fallback = ''): string {
-  return typeof value === 'string' ? value : fallback
-}
+async function findProblems (ctx: Context) {
+  const query = ProblemListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
-function toProblemStatus (
-  value: unknown,
-  fallback: typeof status[keyof typeof status],
-): typeof status[keyof typeof status] {
-  const parsed = Number(value)
-  return (parsed === status.Reserve || parsed === status.Available)
-    ? parsed
-    : fallback
-}
-
-function toProblemType (
-  value: unknown,
-  fallback: typeof problemType[keyof typeof problemType],
-): typeof problemType[keyof typeof problemType] {
-  const parsed = Number(value)
-  return (parsed === problemType.Traditional
-    || parsed === problemType.Interaction
-    || parsed === problemType.SpecialJudge)
-    ? parsed
-    : fallback
-}
-
-const findProblems = async (ctx: Context) => {
-  const opt = ctx.request.query
   const profile = ctx.state.profile
-  const showReserved: boolean = !!profile?.isAdmin
+  const { page, pageSize, course: courseId, type, content } = query.data
 
-  /** @todo [ TO BE DEPRECATED ] 要有专门的 Endpoint 来获取所有题目 */
-  if (Number(opt.page) === -1 && profile?.isAdmin) {
-    const docs = await problemService.getProblemItems()
-    ctx.body = { list: { docs, total: docs.length }, solved: [] }
-    return
+  if (page === -1 && profile?.isAdmin) {
+    const total = await Problem.countDocuments()
+    const result = total === 0
+      ? { docs: [], limit: 0, page: 1, pages: 0, total: 0 }
+      : await problemService.findProblems({
+          page: 1,
+          pageSize: total,
+          showReserved: true,
+          includeOwner: profile._id,
+        })
+    const list = buildProblemList(result as Awaited<ReturnType<typeof problemService.findProblems>>, profile._id)
+    return createEnvelopedResponse(ctx, ProblemListQueryResultSchema.encode({ list, solved: [] }))
   }
 
   let courseDocId: Types.ObjectId | undefined
-  if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourseStateOrThrow(ctx, opt.course)
+  if (courseId) {
+    const { course, role } = await loadCourseStateOrThrow(ctx, courseId)
     if (!role.basic) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
     courseDocId = course._id
   }
 
-  const paginateOption = parsePaginateOption(opt, 30, 100)
-  const filterOption = {
-    type: typeof opt.type === 'string' ? opt.type : undefined,
-    content: typeof opt.content === 'string' ? opt.content : undefined,
-  }
-
-  let list: Paginated<ProblemEntityPreview & { owner?: Types.ObjectId | null }>
-  if (courseDocId) {
-    list = await problemService.findCourseProblems(
-      courseDocId,
-      {
-        ...paginateOption,
-        ...filterOption,
-      },
-    )
-  } else {
-    list = await problemService.findProblems(
-      {
-        ...paginateOption,
-        ...filterOption,
-        showReserved,
+  const list = courseDocId
+    ? await problemService.findCourseProblems(courseDocId, { page, pageSize, type, content })
+    : await problemService.findProblems({
+        page,
+        pageSize,
+        type,
+        content,
+        showReserved: !!profile?.isAdmin,
         includeOwner: profile?._id ?? null,
-      },
-    )
-  }
-  list.docs = list.docs.map(doc => ({
-    ...doc,
-    isOwner: profile?._id && doc.owner
-      ? doc.owner.equals(profile._id)
-      : false,
-    owner: undefined,
-  }))
+      })
+  const result = buildProblemList(list, profile?._id)
 
   let solved: number[] = []
-  if (profile && list.total > 0) {
+  if (profile && result.total > 0) {
     solved = await Solution
       .find({
         uid: profile.uid,
-        pid: { $in: list.docs.map(p => p.pid) },
+        pid: { $in: result.docs.map(problem => problem.pid) },
         judge: JudgeStatus.Accepted,
       })
       .distinct('pid')
       .lean()
   }
 
-  ctx.body = { list, solved } as {
-    list: Paginated<ProblemEntityPreview>
-    solved: number[]
-  }
+  return createEnvelopedResponse(ctx, ProblemListQueryResultSchema.encode({
+    list: result,
+    solved,
+  }))
 }
 
-const findProblemItems = async (ctx: Context) => {
-  const opt = ctx.request.query
-  const profile = await loadProfile(ctx)
+async function findProblemItems (ctx: Context) {
+  const query = ProblemItemListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
-  let courseDocId: Types.ObjectId | undefined
-  if (typeof opt.course === 'string') {
-    const { course, role } = await loadCourseStateOrThrow(ctx, opt.course)
+  const profile = await loadProfile(ctx)
+  const { keyword, course: courseId } = query.data
+
+  if (courseId) {
+    const { course, role } = await loadCourseStateOrThrow(ctx, courseId)
     if (!role.manageContest) {
       return ctx.throw(...ERR_PERM_DENIED)
     }
-    courseDocId = course._id
+    const result = await problemService.findCourseProblemItems(course._id, keyword)
+    return createEnvelopedResponse(ctx, ProblemItemListQueryResultSchema.encode(result))
   }
 
-  if (!courseDocId && !profile.isAdmin) {
+  if (!profile.isAdmin) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const keyword = String(opt.keyword).trim()
-  let response: ProblemEntityItem[] | undefined
-
-  if (courseDocId) {
-    response = await problemService.findCourseProblemItems(
-      courseDocId, keyword,
-    )
-  } else {
-    response = await problemService.findProblemItems(keyword)
-  }
-
-  ctx.body = response
+  const result = await problemService.findProblemItems(keyword)
+  return createEnvelopedResponse(ctx, ProblemItemListQueryResultSchema.encode(result))
 }
 
-const getProblem = async (ctx: Context) => {
+async function getProblem (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const profile = ctx.state.profile
 
@@ -175,9 +149,18 @@ const getProblem = async (ctx: Context) => {
     : false
   const canManage = profile?.isAdmin ?? isOwner
 
-  const response: ProblemEntityView = {
-    ...pick(problem, [ 'pid', 'title', 'time', 'memory', 'status',
-      'description', 'input', 'output', 'in', 'out', 'hint' ]),
+  const result = ProblemDetailQueryResultSchema.encode({
+    pid: problem.pid,
+    title: problem.title,
+    time: problem.time,
+    memory: problem.memory,
+    status: problem.status,
+    description: problem.description,
+    input: problem.input,
+    output: problem.output,
+    in: problem.in,
+    out: problem.out,
+    hint: problem.hint,
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
     tags: problem.tags.map(tag => ({
@@ -186,22 +169,24 @@ const getProblem = async (ctx: Context) => {
       color: tag.color,
     })),
     isOwner,
-  }
-  ctx.body = response
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
-const createProblem = async (ctx: Context) => {
-  const opt = toObjectRecord(ctx.request.body)
+async function createProblem (ctx: Context) {
+  const payload = ProblemCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const profile = await loadProfile(ctx)
-  const courseInput = (typeof opt.course === 'string' || typeof opt.course === 'number')
-    ? opt.course
-    : undefined
+  const { course: courseId, ...problemData } = payload.data
   const hasPermission = async (): Promise<boolean> => {
     if (profile.isAdmin) {
       return true
     }
-    if (courseInput != null) {
-      const { role } = await loadCourseStateOrThrow(ctx, courseInput)
+    if (courseId !== undefined) {
+      const { role } = await loadCourseStateOrThrow(ctx, courseId)
       return role.manageProblem
     }
     return false
@@ -210,50 +195,40 @@ const createProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const owner = profile._id
   let course: WithId<CourseEntity> | undefined
-  if (courseInput != null) {
-    course = (await loadCourseStateOrThrow(ctx, courseInput)).course
+  if (courseId !== undefined) {
+    course = (await loadCourseStateOrThrow(ctx, courseId)).course
   }
 
   try {
     const problem = await problemService.createProblem({
-      title: toStringOrDefault(opt.title),
-      time: toNumberOrDefault(opt.time, 1000),
-      memory: toNumberOrDefault(opt.memory, 32768),
-      status: toProblemStatus(opt.status, status.Reserve),
-      description: toStringOrDefault(opt.description),
-      input: toStringOrDefault(opt.input),
-      output: toStringOrDefault(opt.output),
-      in: toStringOrDefault(opt.in),
-      out: toStringOrDefault(opt.out),
-      hint: toStringOrDefault(opt.hint),
-      type: toProblemType(opt.type, problemType.Traditional),
-      code: toStringOrDefault(opt.code),
-      owner,
+      ...problemData,
+      owner: profile._id,
     })
     if (course) {
       await courseService.addCourseProblem(course._id, problem._id)
     }
     ctx.auditLog.info(`<Problem:${problem.pid}> created by <User:${profile.uid}>`)
-    const response: Pick<ProblemEntity, 'pid'>
-      = pick(problem, [ 'pid' ])
-    ctx.body = response
-  } catch (err: any) {
-    if (err.name === 'ValidationError') {
-      return ctx.throw(400, err.message)
-    } else {
-      throw err
+    const result = ProblemCreateResultSchema.encode({ pid: problem.pid })
+    return createEnvelopedResponse(ctx, result)
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      return ctx.throw(ErrorCode.BadRequest, error.message)
     }
+    throw error
   }
 }
 
-const updateProblem = async (ctx: Context) => {
-  const opt = toObjectRecord(ctx.request.body)
+async function updateProblem (ctx: Context) {
+  const payload = ProblemUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const problem = await loadProblemOrThrow(ctx)
   const profile = await loadProfile(ctx)
-  let canManage = profile?.isAdmin ?? false
-  if (profile && !canManage && problem.owner) {
+  let canManage = profile.isAdmin
+  if (!canManage && problem.owner) {
     const owner = await User.findById(problem.owner).lean()
     if (owner && owner.uid === profile.uid) {
       canManage = true
@@ -263,55 +238,45 @@ const updateProblem = async (ctx: Context) => {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const pid = problem.pid
-  const uid = profile.uid
+  const { tags, ...problemData } = payload.data
   try {
-    const problem = await problemService.updateProblem(pid, {
-      title: typeof opt.title === 'string' ? opt.title : undefined,
-      time: Number.isFinite(Number(opt.time)) ? Number(opt.time) : undefined,
-      memory: Number.isFinite(Number(opt.memory)) ? Number(opt.memory) : undefined,
-      status: opt.status == null ? undefined : toProblemStatus(opt.status, status.Reserve),
-      description: typeof opt.description === 'string' ? opt.description : undefined,
-      input: typeof opt.input === 'string' ? opt.input : undefined,
-      output: typeof opt.output === 'string' ? opt.output : undefined,
-      in: typeof opt.in === 'string' ? opt.in : undefined,
-      out: typeof opt.out === 'string' ? opt.out : undefined,
-      hint: typeof opt.hint === 'string' ? opt.hint : undefined,
-      type: opt.type == null ? undefined : toProblemType(opt.type, problemType.Traditional),
-      code: typeof opt.code === 'string' ? opt.code : undefined,
-      tags: Array.isArray(opt.tags)
-        ? await tagService.getTagObjectIds(
-            opt.tags.map((id: any) => Number(id)).filter((id: number) => Number.isInteger(id) && id > 0),
-          )
-        : undefined,
+    const updated = await problemService.updateProblem(problem.pid, {
+      ...problemData,
+      tags: tags === undefined
+        ? undefined
+        : await tagService.getTagObjectIds(tags),
     })
-    ctx.auditLog.info(`<Problem:${pid}> updated by <User:${uid}>`)
-    const response: Pick<ProblemEntity, 'pid'> & { success: boolean }
-      = { pid: problem?.pid ?? -1, success: !!problem }
-    ctx.body = response
-  } catch (err: any) {
-    if (err.name === 'ValidationError') {
-      return ctx.throw(400, err.message)
-    } else {
-      throw err
+    ctx.auditLog.info(`<Problem:${problem.pid}> updated by <User:${profile.uid}>`)
+    const result = ProblemUpdateResultSchema.encode({
+      pid: updated?.pid ?? -1,
+      success: !!updated,
+    })
+    return createEnvelopedResponse(ctx, result)
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      return ctx.throw(ErrorCode.BadRequest, error.message)
     }
+    throw error
   }
 }
 
-const removeProblem = async (ctx: Context) => {
-  const pid = ctx.params.pid
+async function removeProblem (ctx: Context) {
+  const pid = Number(ctx.params.pid)
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return ctx.throw(ErrorCode.BadRequest, 'Invalid problem ID')
+  }
+
   const profile = await loadProfile(ctx)
-
   try {
-    await problemService.removeProblem(Number(pid))
+    await problemService.removeProblem(pid)
     ctx.auditLog.info(`<Problem:${pid}> removed by <User:${profile.uid}>`)
-  } catch (e: any) {
-    ctx.throw(400, e.message)
+  } catch (error: any) {
+    return ctx.throw(ErrorCode.BadRequest, error.message)
   }
-  ctx.body = {}
+  return createEnvelopedResponse(ctx, null)
 }
 
-const getStatistics = async (ctx: Context) => {
+async function getStatistics (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const statistics = await problemService.getStatistics(problem._id)
   const result = ProblemStatisticsQueryResultSchema.encode(statistics)
@@ -388,14 +353,11 @@ function registerProblemHandlers (router: Router) {
   problemRouter.get('/', findProblems)
   problemRouter.get('/items', loginRequire, findProblemItems)
   problemRouter.post('/', loginRequire, createProblem)
-
   problemRouter.get('/:pid', getProblem)
   problemRouter.put('/:pid', loginRequire, updateProblem)
   problemRouter.del('/:pid', rootRequire, removeProblem)
-
   problemRouter.get('/:pid/statistics', loginRequire, getStatistics)
   problemRouter.get('/:pid/solutions', loginRequire, findSolutions)
-
   problemRouter.get('/:pid/discussions', findProblemDiscussions)
 
   router.use(problemRouter.routes(), problemRouter.allowedMethods())

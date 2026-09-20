@@ -1,34 +1,10 @@
 import type { Enveloped } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { ZodError } from 'zod'
-import type { PaginateOption } from '../types/index.ts'
 import { Buffer } from 'node:buffer'
 import { BlockList, isIPv6 } from 'node:net'
 import { md5, sha1 } from '@noble/hashes/legacy.js'
 import { ErrorCode, passwordRegex } from '@putong-oj/shared'
-import pick from 'lodash/pick.js'
-import pickBy from 'lodash/pickBy.js'
-
-export function parsePaginateOption (
-  opt: Record<string, unknown>,
-  defaultPageSize = 10,
-  maxPageSize = 100,
-): PaginateOption {
-  let page = Number(opt.page)
-  let pageSize = Number(opt.pageSize)
-
-  if (!Number.isInteger(page) || page <= 0) {
-    page = 1
-  }
-
-  if (!Number.isInteger(pageSize) || pageSize <= 0) {
-    pageSize = defaultPageSize
-  } else if (pageSize > maxPageSize) {
-    pageSize = maxPageSize
-  }
-
-  return { page, pageSize }
-}
 
 export function passwordHashBuffer (password: string): Buffer {
   const passwordArr = Uint8Array.from(Buffer.from(password))
@@ -52,20 +28,6 @@ export function isComplexPwd (pwd: string): boolean {
     return false
   }
   return passwordRegex.test(pwd)
-}
-
-export function only<T extends object> (
-  obj: T,
-  keys: string | string[],
-): Partial<T> {
-  if (typeof keys === 'string') {
-    keys = keys.split(' ')
-  }
-  return pick(obj, keys)
-}
-
-export function purify (obj: Record<string, any>) {
-  return pickBy(obj, x => x != null && x !== '')
 }
 
 export function createEnvelopedResponse<T> (ctx: Context, data: T): void {
@@ -160,24 +122,10 @@ export function isIpInWhitelist (ip: string, whitelist: { cidr: string }[]): boo
   return blockList.check(ip, type)
 }
 
-/**
- * A temporary helper function to convert an unknown value to a record,
- * returning an empty object if the value is not a plain object.
- */
-export function toObjectRecord (value: unknown): Record<string, unknown> {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return value as Record<string, unknown>
-  }
-  return {}
-}
-
 export default {
-  parsePaginateOption,
   passwordHashBuffer,
   passwordHash,
   isComplexPwd,
-  only,
-  purify,
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,

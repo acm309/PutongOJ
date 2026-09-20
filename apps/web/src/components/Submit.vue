@@ -139,7 +139,7 @@ async function submit () {
 
     message.success(t('oj.submit_success'))
     emit('submitted', {
-      sid: resp.data.solution,
+      sid: resp.data.sid,
       problem: payload.problem,
       contest: payload.contest,
     })

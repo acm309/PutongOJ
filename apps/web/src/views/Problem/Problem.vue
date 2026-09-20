@@ -59,7 +59,7 @@ const tabItems = computed(() => {
 
 async function init () {
   const pid = Number.parseInt(route.params.pid as string)
-  await findOne({ pid })
+  await findOne(pid)
   if (problem.value?.title) {
     changeDomTitle({ title: problem.value.title })
   }

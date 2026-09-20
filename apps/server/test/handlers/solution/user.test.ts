@@ -128,12 +128,12 @@ test.serial('Submit a solution', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  sid = res.body.data.solution
+  sid = res.body.data.sid
 
   res = await request.get(`/api/status/${sid}`)
 
   t.is(res.status, 200)
-  t.is(res.body.solution.code, code)
+  t.is(res.body.data.code, code)
 })
 
 test('Status fails to find one', async (t) => {

@@ -1,22 +1,4 @@
 import type { SolutionModel } from '@putong-oj/shared'
-import type { ProblemEntityPreview } from '@server/types/entity'
-
-export interface TimeResp {
-  serverTime: number
-}
-
-export interface Problem {
-  pid: number
-  title: string
-}
-
-export type ProblemBrief = ProblemEntityPreview
-
-export interface ProblemDetail extends Problem {
-  description: string
-  input: string
-  output: string
-}
 
 export interface Solution {
   language: number | null

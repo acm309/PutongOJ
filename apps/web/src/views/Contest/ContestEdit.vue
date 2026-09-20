@@ -166,7 +166,11 @@ async function addProblem () {
   }
 
   try {
-    const { problem } = await problemStore.findOne({ pid: problemToAdd.value })
+    const result = await problemStore.findOne(problemToAdd.value)
+    if (!result) {
+      throw new Error('Problem not found')
+    }
+    const { problem } = result
     problems.value.push({
       problemId: (problem as any).problemId ?? problem.pid,
       title: problem.title,

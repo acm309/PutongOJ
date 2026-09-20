@@ -7,17 +7,19 @@ import { Contest, Problem, Solution } from '@putong-oj/db'
 import {
   ErrorCode,
   JudgeStatus,
+  SolutionDetailQueryResultSchema,
+  SolutionStatusUpdatePayloadSchema,
   SolutionSubmitPayloadSchema,
   SolutionSubmitResultSchema,
+  SolutionUpdateQueryResultSchema,
 } from '@putong-oj/shared'
-import pick from 'lodash/pick.js'
 import redis from '../config/redis.ts'
 import { loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
 import { solutionCreateLimit } from '../middlewares/ratelimit.ts'
 import { loadContestState } from '../policies/contest.ts'
 import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { loadProblemState } from '../policies/problem.ts'
-import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse, toObjectRecord } from '../utils/index.ts'
+import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
@@ -61,21 +63,19 @@ export async function findOne (ctx: Context) {
     simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
   }
 
-  ctx.body = {
-    solution: {
-      ...pick(solution, [ 'sid', 'pid', 'uid', 'mid', 'course', 'code', 'language',
-        'create', 'status', 'judge', 'time', 'memory', 'error', 'sim', 'sim_s_id', 'testcases' ]),
-      simSolution: simSolution
-        ? pick(simSolution, [ 'sid', 'uid', 'code', 'create' ])
-        : undefined,
-    },
-  }
+  const result = SolutionDetailQueryResultSchema.encode({
+    ...solution,
+    status: solution.status as 0 | 2,
+    course: solution.course ? solution.course.toString() : null,
+    simSolution: simSolution || undefined,
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
 /**
  * 创建一个提交
  */
-const create = async (ctx: Context) => {
+async function create (ctx: Context) {
   const profile = await loadProfile(ctx)
   const payload = SolutionSubmitPayloadSchema.safeParse(ctx.request.body)
   if (!payload.success) {
@@ -141,7 +141,7 @@ const create = async (ctx: Context) => {
     await redis.rpush('judger:task', solution._id.toString())
     ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
 
-    const result = SolutionSubmitResultSchema.encode({ solution: sid })
+    const result = SolutionSubmitResultSchema.encode({ sid })
     return createEnvelopedResponse(ctx, result)
   } catch (e: any) {
     ctx.throw(400, e.message)
@@ -150,16 +150,16 @@ const create = async (ctx: Context) => {
 
 async function updateSolution (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const opt = toObjectRecord(ctx.request.body)
+  const payload = SolutionStatusUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
 
   const sid = Number(ctx.params.sid)
   if (!Number.isInteger(sid) || sid <= 0) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid submission id')
   }
-  const updatedJudge = Number(opt.judge)
-  if (updatedJudge !== JudgeStatus.RejudgePending && updatedJudge !== JudgeStatus.Skipped) {
-    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid judge status, only support RejudgePending and Skipped')
-  }
+  const updatedJudge = payload.data.judge
 
   const solution = await Solution.findOne({ sid })
   if (!solution) {
@@ -186,7 +186,13 @@ async function updateSolution (ctx: Context) {
   }
 
   if (updatedJudge !== JudgeStatus.RejudgePending) {
-    return createEnvelopedResponse(ctx, solution)
+    const result = SolutionUpdateQueryResultSchema.encode({
+      ...solution.toObject(),
+      course: solution.course ? solution.course.toString() : null,
+      status: solution.status as 0 | 2,
+      testcases: solution.testcases,
+    })
+    return createEnvelopedResponse(ctx, result)
   }
 
   try {
@@ -197,7 +203,13 @@ async function updateSolution (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 
-  return createEnvelopedResponse(ctx, solution)
+  const result = SolutionUpdateQueryResultSchema.encode({
+    ...solution.toObject(),
+    course: solution.course ? solution.course.toString() : null,
+    status: solution.status as 0 | 2,
+    testcases: solution.testcases,
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
 function registerSolutionHandlers (router: Router) {

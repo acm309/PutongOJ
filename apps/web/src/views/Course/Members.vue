@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CourseMemberView } from '@server/types/entity'
+import type { CourseMemberView } from '@putong-oj/shared'
 import { UserPrivilege } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
@@ -12,7 +12,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { findCourseMembers, removeCourseMember } from '@/api/course'
 import CourseRoleEdit from '@/components/CourseRoleEdit.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
@@ -24,7 +24,6 @@ const router = useRouter()
 const { t } = useI18n()
 const confirm = useConfirm()
 const message = useMessage()
-const { course } = api
 const sessionStore = useSessionStore()
 const { isAdmin, profile } = storeToRefs(sessionStore)
 
@@ -47,9 +46,11 @@ const editUserId = ref<string>('')
 
 async function fetch () {
   loading.value = true
-  const { data } = await course.findMembers(id, { page: page.value, pageSize: pageSize.value })
-  docs.value = data.docs
-  total.value = data.total
+  const response = await findCourseMembers(id, { page: page.value, pageSize: pageSize.value })
+  if (response.success) {
+    docs.value = response.data.docs
+    total.value = response.data.total
+  }
   loading.value = false
 }
 
@@ -80,7 +81,11 @@ function removeMember (event: any, userId: string) {
       severity: 'danger',
     },
     accept: async () => {
-      await course.removeMember(id, userId)
+      const response = await removeCourseMember(id, userId)
+      if (!response.success) {
+        message.error(response.message)
+        return
+      }
       message.success(t('oj.course_member_remove_success'))
       fetch()
     },

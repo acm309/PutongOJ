@@ -21,7 +21,7 @@ const { contestId, problems, problemLabels } = storeToRefs(contestStore)
 const problemId = computed(() => Number.parseInt(route.params.problemId as string))
 
 async function fetch () {
-  await findOneProblem({ pid: problemId.value, cid: contestId.value })
+  await findOneProblem(problemId.value, contestId.value)
 }
 
 fetch()

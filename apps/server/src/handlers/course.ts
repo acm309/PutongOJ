@@ -1,47 +1,62 @@
-import type { Paginated } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { CourseEntity, CourseEntityItem, CourseEntityPreview, CourseEntityViewWithRole, CourseMemberView } from '../types/entity.ts'
-import type { CourseRole } from '../types/index.ts'
 import Router from '@koa/router'
 import { User } from '@putong-oj/db'
 import {
   ContestListQueryResultSchema,
   CourseContestListQuerySchema,
+  CourseCreatePayloadSchema,
+  CourseCreateResultSchema,
+  CourseDetailQueryResultSchema,
+  CourseItemListQueryResultSchema,
+  CourseItemListQuerySchema,
+  CourseJoinPayloadSchema,
+  CourseListQueryResultSchema,
+  CourseListQuerySchema,
+  CourseMemberListQueryResultSchema,
+  CourseMemberListQuerySchema,
+  CourseMemberQueryResultSchema,
+  CourseMemberUpdatePayloadSchema,
+  CourseMutationResultSchema,
+  CourseProblemAddPayloadSchema,
+  CourseProblemAddResultSchema,
+  CourseProblemMovePayloadSchema,
+  CourseUpdatePayloadSchema,
   ErrorCode,
 } from '@putong-oj/shared'
 import escapeRegExp from 'lodash/escapeRegExp.js'
-import pick from 'lodash/pick.js'
 import { adminRequire, loadProfile, loginRequire, rootRequire } from '../middlewares/authn.ts'
 import { loadCourseState, loadCourseStateOrThrow } from '../policies/course.ts'
 import { contestService } from '../services/contest.ts'
 import courseService from '../services/course.ts'
 import problemService from '../services/problem.ts'
-import { encrypt, ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants.ts'
+import { ERR_INVALID_ID, ERR_NOT_FOUND, ERR_PERM_DENIED } from '../utils/constants.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
   createZodErrorResponse,
-  parsePaginateOption,
-  toObjectRecord,
 } from '../utils/index.ts'
 
-const findCourses = async (ctx: Context) => {
-  const opt = ctx.request.query
-  const { page, pageSize } = parsePaginateOption(opt, 5, 100)
+async function findCourses (ctx: Context) {
+  const query = CourseListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
-  const response: Paginated<CourseEntityPreview>
-    = await courseService.findCourses({ page, pageSize })
-  ctx.body = response
+  const result = await courseService.findCourses(query.data)
+  return createEnvelopedResponse(ctx, CourseListQueryResultSchema.encode(result))
 }
 
-const findCourseItems = async (ctx: Context) => {
-  const keyword = String(ctx.request.query.keyword ?? '').trim()
-  const response: CourseEntityItem[]
-    = await courseService.findCourseItems(keyword)
-  ctx.body = response
+async function findCourseItems (ctx: Context) {
+  const query = CourseItemListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
+
+  const result = await courseService.findCourseItems(query.data.keyword.trim())
+  return createEnvelopedResponse(ctx, CourseItemListQueryResultSchema.encode(result))
 }
 
-const findCourseContests = async (ctx: Context) => {
+async function findCourseContests (ctx: Context) {
   const query = CourseContestListQuerySchema.safeParse(ctx.request.query)
   if (!query.success) {
     return createZodErrorResponse(ctx, query.error)
@@ -73,107 +88,105 @@ const findCourseContests = async (ctx: Context) => {
   return createEnvelopedResponse(ctx, result)
 }
 
-const getCourse = async (ctx: Context) => {
+async function getCourse (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
-  const response: CourseEntityViewWithRole = {
-    ...pick(course, [ 'courseId', 'name', 'description', 'encrypt' ]),
+  const result = CourseDetailQueryResultSchema.encode({
+    courseId: course.courseId,
+    name: course.name,
+    description: course.description,
+    encrypt: course.encrypt,
     joinCode: role.manageCourse ? course.joinCode : undefined,
     canJoin: (course.joinCode?.length ?? 0) > 0,
     role,
-  }
-
-  ctx.body = response
+  })
+  return createEnvelopedResponse(ctx, result)
 }
 
-const joinCourse = async (ctx: Context) => {
-  const opt = toObjectRecord(ctx.request.body)
+async function joinCourse (ctx: Context) {
+  const payload = CourseJoinPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const { course, role } = await loadCourseStateOrThrow(ctx)
-  const joinCode = String(opt.joinCode ?? '').trim()
+  const { joinCode } = payload.data
   if (!joinCode) {
-    return ctx.throw(400, 'Missing join code')
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Missing join code')
   }
   if (course.joinCode.trim() !== joinCode) {
-    return ctx.throw(403, 'Invalid join code')
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Invalid join code')
   }
 
   const profile = await loadProfile(ctx)
   const result = await courseService.updateCourseMember(
-    course._id, profile._id,
+    course._id,
+    profile._id,
     { ...role, basic: true },
   )
-
-  const response: { success: boolean } = { success: result }
-  ctx.body = response
+  return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
-const createCourse = async (ctx: Context) => {
-  const opt = toObjectRecord(ctx.request.body)
+async function createCourse (ctx: Context) {
+  const payload = CourseCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const profile = await loadProfile(ctx)
   try {
-    const course = await courseService.createCourse({
-      name: String(opt.name ?? '').trim(),
-      description: String(opt.description ?? '').trim(),
-      encrypt: Number(opt.encrypt) === encrypt.Public ? encrypt.Public : encrypt.Private,
-    })
-    const response: Pick<CourseEntity, 'courseId'>
-      = { courseId: course.courseId }
+    const course = await courseService.createCourse(payload.data)
     ctx.auditLog.info(`<Course:${course.courseId}> created by <User:${profile.uid}>`)
-    ctx.body = response
+    const result = CourseCreateResultSchema.encode({ courseId: course.courseId })
+    return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     if (err.name === 'ValidationError') {
-      return ctx.throw(400, err.message)
-    } else {
-      throw err
+      return createErrorResponse(ctx, ErrorCode.BadRequest, err.message)
     }
+    throw err
   }
 }
 
-const updateCourse = async (ctx: Context) => {
+async function updateCourse (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const opt = toObjectRecord(ctx.request.body)
-  const { courseId } = course
+  const payload = CourseUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const profile = await loadProfile(ctx)
   try {
-    const course = await courseService.updateCourse(
-      courseId,
-      {
-        name: String(opt.name ?? '').trim(),
-        description: String(opt.description ?? '').trim(),
-        encrypt: Number(opt.encrypt) === encrypt.Public ? encrypt.Public : encrypt.Private,
-        joinCode: String(opt.joinCode ?? '').trim(),
-      },
-    )
-    const response: { success: boolean } = { success: !!course }
-    ctx.auditLog.info(`<Course:${courseId}> updated by <User:${profile.uid}>`)
-    ctx.body = response
+    const updated = await courseService.updateCourse(course.courseId, payload.data)
+    ctx.auditLog.info(`<Course:${course.courseId}> updated by <User:${profile.uid}>`)
+    const result = CourseMutationResultSchema.encode({ success: !!updated })
+    return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     if (err.name === 'ValidationError') {
-      return ctx.throw(400, err.message)
-    } else {
-      throw err
+      return createErrorResponse(ctx, ErrorCode.BadRequest, err.message)
     }
+    throw err
   }
 }
 
-const findCourseMembers = async (ctx: Context) => {
+async function findCourseMembers (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
-  const opt = ctx.request.query
-  const { page, pageSize } = parsePaginateOption(opt, 30, 200)
+  const query = CourseMemberListQuerySchema.safeParse(ctx.request.query)
+  if (!query.success) {
+    return createZodErrorResponse(ctx, query.error)
+  }
 
-  const response: Paginated<CourseMemberView>
-    = await courseService.findCourseMembers(course._id, { page, pageSize })
-  ctx.body = response
+  const result = await courseService.findCourseMembers(course._id, query.data)
+  return createEnvelopedResponse(ctx, CourseMemberListQueryResultSchema.encode(result))
 }
 
-const getCourseMember = async (ctx: Context) => {
+async function getCourseMember (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
@@ -181,7 +194,7 @@ const getCourseMember = async (ctx: Context) => {
 
   const { userId } = ctx.params
   if (!userId) {
-    return ctx.throw(400, 'Missing uid')
+    return ctx.throw(...ERR_INVALID_ID)
   }
 
   const member = await courseService.getCourseMember(course._id, userId)
@@ -189,66 +202,46 @@ const getCourseMember = async (ctx: Context) => {
     return ctx.throw(...ERR_NOT_FOUND)
   }
 
-  const response: CourseMemberView = member
-  ctx.body = response
+  return createEnvelopedResponse(ctx, CourseMemberQueryResultSchema.encode(member))
 }
 
-const updateCourseMember = async (ctx: Context) => {
+async function updateCourseMember (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
   }
 
+  const payload = CourseMemberUpdatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
   const { userId } = ctx.params
-  const body = toObjectRecord(ctx.request.body)
-  const hasRole = body.role != null
-  const newRole = toObjectRecord(body.role) as Record<string, boolean>
-  if (!userId || !hasRole) {
-    return ctx.throw(400, 'Missing uid or role')
+  if (!userId) {
+    return ctx.throw(...ERR_INVALID_ID)
   }
   const user = await User.findOne({ uid: userId })
   if (!user) {
-    return ctx.throw(404, 'User not found')
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'User not found')
   }
   const profile = await loadProfile(ctx)
   if (profile.uid === userId) {
-    return ctx.throw(400, 'Cannot change your own role')
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot change your own role')
   }
-
-  const roleFields: Array<keyof CourseRole> = [
-    'basic',
-    'viewTestcase',
-    'viewSolution',
-    'manageProblem',
-    'manageContest',
-    'manageCourse',
-  ]
-  const invalidField = roleFields.find(field => typeof newRole[field] !== 'boolean')
-  if (invalidField) {
-    return ctx.throw(400, `Invalid role field: ${invalidField}`)
-  }
-  if (!newRole.basic) {
-    return ctx.throw(400, 'Basic permission is required, remove member if not needed')
+  if (!payload.data.role.basic) {
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Basic permission is required, remove member if not needed')
   }
 
   const result = await courseService.updateCourseMember(
     course._id,
     user._id,
-    {
-      basic: newRole.basic,
-      viewTestcase: newRole.viewTestcase,
-      viewSolution: newRole.viewSolution,
-      manageProblem: newRole.manageProblem,
-      manageContest: newRole.manageContest,
-      manageCourse: newRole.manageCourse,
-    },
+    payload.data.role,
   )
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> updated by <User:${profile.uid}>`)
-  const response: { success: boolean } = { success: result }
-  ctx.body = response
+  return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
-const removeCourseMember = async (ctx: Context) => {
+async function removeCourseMember (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   if (!role.manageCourse) {
     return ctx.throw(...ERR_PERM_DENIED)
@@ -256,28 +249,26 @@ const removeCourseMember = async (ctx: Context) => {
 
   const { userId } = ctx.params
   if (!userId) {
-    return ctx.throw(400, 'Missing uid')
+    return ctx.throw(...ERR_INVALID_ID)
   }
   const profile = await loadProfile(ctx)
   if (profile.uid === userId) {
-    return ctx.throw(400, 'Cannot remove yourself from the course')
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Cannot remove yourself from the course')
   }
 
   const result = await courseService.removeCourseMember(course._id, userId)
-  const response: { success: boolean } = { success: result }
   ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> removed by <User:${profile.uid}>`)
-  ctx.body = response
+  return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
-const addCourseProblems = async (ctx: Context) => {
+async function addCourseProblems (ctx: Context) {
   const { course } = await loadCourseStateOrThrow(ctx)
-  const body = toObjectRecord(ctx.request.body)
-  const problemIds = body.problemIds
-  if (!Array.isArray(problemIds) || problemIds.length === 0) {
-    return ctx.throw(400, 'problemIds must be a non-empty array')
+  const payload = CourseProblemAddPayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
   }
 
-  const result = await Promise.all(problemIds.map(async (pid: any) => {
+  const result = await Promise.all(payload.data.problemIds.map(async (pid) => {
     const problem = await problemService.getProblem(pid)
     if (!problem) {
       return false
@@ -285,52 +276,58 @@ const addCourseProblems = async (ctx: Context) => {
     return await courseService.addCourseProblem(course._id, problem._id)
   }))
 
-  const successCount = result.filter(v => v).length
-  const response: { success: boolean, added: number } = {
-    success: successCount === problemIds.length,
-    added: successCount,
-  }
+  const successCount = result.filter(Boolean).length
   const profile = await loadProfile(ctx)
   ctx.auditLog.info(`<Course:${course.courseId}> added ${successCount} problems by <User:${profile.uid}>`)
-  ctx.body = response
+  return createEnvelopedResponse(ctx, CourseProblemAddResultSchema.encode({
+    success: successCount === payload.data.problemIds.length,
+    added: successCount,
+  }))
 }
 
-const moveCourseProblem = async (ctx: Context) => {
+async function moveCourseProblem (ctx: Context) {
   const { course } = await loadCourseStateOrThrow(ctx)
-  const body = toObjectRecord(ctx.request.body)
-  const beforePos = Number(body.beforePos ?? 1)
-  const problemId = ctx.params.problemId
-  const problem = await problemService.getProblem(problemId)
+  const payload = CourseProblemMovePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+
+  const problem = await problemService.getProblem(ctx.params.problemId)
   if (!problem) {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.moveCourseProblem(
-    course._id, problem._id, beforePos,
+    course._id,
+    problem._id,
+    payload.data.beforePos,
   )
-  ctx.body = { success: result }
+  return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
-const rearrangeCourseProblem = async (ctx: Context) => {
+async function rearrangeCourseProblem (ctx: Context) {
   const { course } = await loadCourseStateOrThrow(ctx)
   try {
     await courseService.rearrangeCourseProblem(course._id)
-    ctx.body = { success: true }
-  } catch (e: any) {
-    ctx.throw(500, `Failed to rearrange course problems: ${e.message}`)
+    return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: true }))
+  } catch (error: any) {
+    return createErrorResponse(
+      ctx,
+      ErrorCode.InternalServerError,
+      `Failed to rearrange course problems: ${error.message}`,
+    )
   }
 }
 
-const removeCourseProblem = async (ctx: Context) => {
+async function removeCourseProblem (ctx: Context) {
   const { course } = await loadCourseStateOrThrow(ctx)
-  const problemId = ctx.params.problemId
-  const problem = await problemService.getProblem(problemId)
+  const problem = await problemService.getProblem(ctx.params.problemId)
   if (!problem) {
     return ctx.throw(...ERR_INVALID_ID)
   }
   const result = await courseService.removeCourseProblem(course._id, problem._id)
   const profile = await loadProfile(ctx)
-  ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${problemId}> by <User:${profile.uid}>`)
-  ctx.body = { success: result }
+  ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${ctx.params.problemId}> by <User:${profile.uid}>`)
+  return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
 function registerCourseHandlers (router: Router) {

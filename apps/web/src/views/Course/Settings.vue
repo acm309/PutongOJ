@@ -7,7 +7,7 @@ import Textarea from 'primevue/textarea'
 import { useConfirm } from 'primevue/useconfirm'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { rearrangeCourseProblems, updateCourse } from '@/api/course'
 import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
@@ -50,19 +50,22 @@ function validate () {
   return true
 }
 
-async function updateCourse () {
+async function submitCourse () {
   if (!validate()) {
     return
   }
 
   submitting.value = true
   try {
-    await api.course.updateCourse(course.value.courseId, {
+    const response = await updateCourse(course.value.courseId, {
       name: course.value.name,
       description: course.value.description,
       encrypt: course.value.encrypt,
       joinCode: course.value.joinCode || '',
     })
+    if (!response.success) {
+      throw new Error(response.message)
+    }
     message.success(t('oj.course_updated_successfully'))
   } catch (e: any) {
     message.error(t('oj.failed_to_update_course', { error: e.message }))
@@ -85,7 +88,7 @@ function rearrangeProblems (event: any) {
       label: t('oj.ok'),
     },
     accept: () => {
-      api.course.rearrangeProblems(course.value.courseId)
+      rearrangeCourseProblems(course.value.courseId)
       message.info(t('oj.rearrange_task_dispatched'))
     },
   })
@@ -110,7 +113,7 @@ function rearrangeProblems (event: any) {
       </IftaLabel>
 
       <div class="flex gap-3 justify-end md:col-span-2">
-        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="updateCourse" />
+        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="submitCourse" />
       </div>
     </div>
 
@@ -127,7 +130,7 @@ function rearrangeProblems (event: any) {
       </IftaLabel>
 
       <div class="flex gap-3 justify-end md:col-span-2">
-        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="updateCourse" />
+        <Button :label="t('ptoj.save_changes')" :loading="submitting" icon="pi pi-save" @click="submitCourse" />
       </div>
     </div>
 

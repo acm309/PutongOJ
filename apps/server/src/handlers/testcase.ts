@@ -3,7 +3,11 @@ import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import Router from '@koa/router'
-import { ProblemTestcaseListQueryResultSchema, uuidRegex } from '@putong-oj/shared'
+import {
+  ProblemTestcaseCreatePayloadSchema,
+  ProblemTestcaseListQueryResultSchema,
+  uuidRegex,
+} from '@putong-oj/shared'
 import { BlobWriter, TextReader, ZipWriter } from '@zip.js/zip.js'
 import fse from 'fs-extra'
 import send from 'koa-send'
@@ -13,7 +17,7 @@ import { dataExportLimit } from '../middlewares/ratelimit.ts'
 import { loadProblemOrThrow } from '../policies/problem.ts'
 import courseService from '../services/course.ts'
 import { ERR_INVALID_ID, ERR_PERM_DENIED } from '../utils/constants.ts'
-import { createEnvelopedResponse, toObjectRecord } from '../utils/index.ts'
+import { createEnvelopedResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export async function findTestcases (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
@@ -113,9 +117,12 @@ export async function createTestcase (ctx: Context) {
   const { pid } = problem
   const { uid } = profile
 
-  const body = toObjectRecord(ctx.request.body)
-  const testin = String(body.in || '')
-  const testout = String(body.out || '')
+  const payload = ProblemTestcaseCreatePayloadSchema.safeParse(ctx.request.body)
+  if (!payload.success) {
+    return createZodErrorResponse(ctx, payload.error)
+  }
+  const testin = payload.data.in
+  const testout = payload.data.out
 
   if (!testin && !testout) {
     ctx.throw(400, 'Cannot create testcase without both input and output')

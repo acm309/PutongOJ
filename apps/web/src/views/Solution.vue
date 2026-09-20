@@ -55,7 +55,7 @@ function prettyCode (code: string) {
 }
 
 async function fetch () {
-  await findOne(route.params)
+  await findOne(Number.parseInt(route.params.sid as string))
   root.changeDomTitle({ title: `Solution ${solution.value.pid}` })
 }
 

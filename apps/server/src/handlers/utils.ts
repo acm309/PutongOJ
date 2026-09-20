@@ -2,7 +2,12 @@ import type { Context } from 'koa'
 import { randomUUID } from 'node:crypto'
 import { env } from 'node:process'
 import Router from '@koa/router'
-import { AvatarPresetsQueryResultSchema, PublicConfigQueryResultSchema } from '@putong-oj/shared'
+import {
+  AvatarPresetsQueryResultSchema,
+  PublicConfigQueryResultSchema,
+  ServerTimeQueryResultSchema,
+  WebSocketTokenQueryResultSchema,
+} from '@putong-oj/shared'
 import { globalConfig } from '../config/index.ts'
 import redis from '../config/redis.ts'
 import { loadProfile, loginRequire } from '../middlewares/authn.ts'
@@ -25,10 +30,9 @@ function parseBuildTime (): Date | null {
 const commitHash = env.NODE_BUILD_SHA || 'unknown'
 const buildAt = parseBuildTime()
 
-const serverTime = (ctx: Context) => {
-  ctx.body = {
-    serverTime: Date.now(),
-  }
+function serverTime (ctx: Context) {
+  const result = ServerTimeQueryResultSchema.encode({ serverTime: Date.now() })
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function getPublicConfig (ctx: Context) {
@@ -60,7 +64,8 @@ export async function getWebSocketToken (ctx: Context) {
   const profile = await loadProfile(ctx)
   const token = randomUUID()
   await redis.setex(`websocket:token:${token}`, 10, profile.uid)
-  return createEnvelopedResponse(ctx, { token })
+  const result = WebSocketTokenQueryResultSchema.encode({ token })
+  return createEnvelopedResponse(ctx, result)
 }
 
 export async function getAvatarPresets (ctx: Context) {

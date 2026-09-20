@@ -10,8 +10,9 @@ test('Server time', async (t) => {
     .get('/api/servertime')
 
   t.is(res.status, 200)
-  t.truthy(res.body.serverTime)
-  t.truthy(Number.isInteger(res.body.serverTime))
+  t.true(res.body.success)
+  t.truthy(res.body.data.serverTime)
+  t.truthy(Number.isInteger(res.body.data.serverTime))
 })
 
 test.skip('Website information', async (t) => {

@@ -54,6 +54,18 @@ export const AvatarPresetsQueryResultSchema = z.array(UserAvatarSchema)
 
 export type AvatarPresetsQueryResult = z.input<typeof AvatarPresetsQueryResultSchema>
 
+export const ServerTimeQueryResultSchema = z.object({
+  serverTime: z.int().nonnegative(),
+})
+
+export type ServerTimeQueryResult = z.input<typeof ServerTimeQueryResultSchema>
+
+export const WebSocketTokenQueryResultSchema = z.object({
+  token: z.string(),
+})
+
+export type WebSocketTokenQueryResult = z.input<typeof WebSocketTokenQueryResultSchema>
+
 export const PublicConfigQueryResultSchema = z.object({
   name: z.string(),
   backendVersion: z.object({

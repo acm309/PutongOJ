@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { ProblemEntityItem } from '@server/types/entity'
+import type { ProblemEntityItem } from '@putong-oj/shared'
 import AutoComplete from 'primevue/autocomplete'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '@/api'
+import { findProblemItems } from '@/api/problem'
 import { useMessage } from '@/utils/message'
 
 interface ProblemOption { value: number, label: string }
@@ -35,11 +35,14 @@ watch(() => selected.value, (items) => {
 async function fetch (event: { query: string }) {
   loading.value = true
   try {
-    const { data } = await api.problem.findProblemItems({
+    const response = await findProblemItems({
       keyword: event.query,
       course: props.course,
     })
-    suggestions.value = data.map((item: ProblemEntityItem) => ({
+    if (!response.success) {
+      throw new Error(response.message)
+    }
+    suggestions.value = response.data.map((item: ProblemEntityItem) => ({
       value: item.pid,
       label: item.title,
     }))

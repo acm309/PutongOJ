@@ -25,7 +25,7 @@ function handleSubmitted () {
 
 async function init () {
   if (problem.value.title == null)
-    await findOne({ pid: problemId.value })
+    await findOne(problemId.value)
   title.value = problem.value.title
   changeDomTitle({ title: title.value })
 }

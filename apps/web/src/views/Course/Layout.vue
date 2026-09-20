@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { courseRoleNone } from '@server/utils/constants'
-import { AxiosError } from 'axios'
+import { courseRoleNone } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -9,7 +8,7 @@ import InputText from 'primevue/inputtext'
 import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api'
+import { joinCourse } from '@/api/course'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { onProfileUpdate } from '@/utils/helper'
@@ -54,7 +53,7 @@ async function fetch () {
   }
 }
 
-async function joinCourse () {
+async function submitJoin () {
   if (!joinForm.joinCode) {
     message.warn(t('oj.form_invalid'))
     return
@@ -62,14 +61,12 @@ async function joinCourse () {
 
   joining.value = true
   try {
-    const result = await api.course.joinCourse(courseId.value, joinForm.joinCode)
-    if (result.data?.success === true) {
+    const response = await joinCourse(courseId.value, joinForm.joinCode)
+    if (response.success && response.data.success) {
       message.success(t('oj.course_join_success'))
       await findCourse(courseId.value)
-    } else if (result instanceof AxiosError) {
-      message.error(t('join_failed', { error: `Failed to join course: ${result.response?.data?.error || result.message}` }))
     } else {
-      message.error(t('join_failed', { error: t('oj.unknown_error') }))
+      message.error(t('join_failed', { error: response.message || t('oj.unknown_error') }))
     }
     joinModal.value = false
   } catch (e: any) {
@@ -130,7 +127,7 @@ onProfileUpdate(fetch)
 
       <template #footer>
         <Button :label="t('oj.cancel')" severity="secondary" outlined :disabled="joining" @click="joinModal = false" />
-        <Button :label="t('oj.confirm')" :loading="joining" @click="joinCourse" />
+        <Button :label="t('oj.confirm')" :loading="joining" @click="submitJoin" />
       </template>
     </Dialog>
   </div>
