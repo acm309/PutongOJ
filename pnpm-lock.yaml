@@ -812,6 +812,9 @@ importers:
       ioredis:
         specifier: 'catalog:'
         version: 5.11.1(supports-color@8.1.1)
+      pino:
+        specifier: 'catalog:'
+        version: 10.3.1
       ws:
         specifier: 'catalog:'
         version: 8.21.3

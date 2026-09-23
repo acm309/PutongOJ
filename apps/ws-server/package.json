@@ -15,6 +15,7 @@
     "cross-env": "catalog:",
     "dotenv-flow": "catalog:",
     "ioredis": "catalog:",
+    "pino": "catalog:",
     "ws": "catalog:"
   },
   "devDependencies": {

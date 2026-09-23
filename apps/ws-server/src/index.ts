@@ -4,8 +4,10 @@ import { uuidV4Regex, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessage
 import { Redis } from 'ioredis'
 import { WebSocket, WebSocketServer } from 'ws'
 import config from './config.ts'
+import { createLogger } from './logger.ts'
 import redis from './redis.ts'
 
+const logger = createLogger('ws-server')
 const wss = new WebSocketServer({ port: config.port })
 
 const userConnections = new Map<string, Set<WebSocket>>()
@@ -22,7 +24,7 @@ function addConnection (username: string, ws: WebSocket): void {
     removeConnection(username, ws)
   })
   ws.on('error', (error) => {
-    console.error('WebSocket error:', error)
+    logger.error({ err: error, username }, 'WebSocket error')
   })
 
   const helloMessage: WebSocketMessage = {
@@ -31,7 +33,7 @@ function addConnection (username: string, ws: WebSocket): void {
   }
   ws.send(JSON.stringify(helloMessage))
 
-  console.log(`User '${username}' connected, total sockets: ${userConnection.size}`)
+  logger.info({ username, totalSockets: userConnection.size }, 'User connected')
 }
 
 function removeConnection (username: string, ws: WebSocket): void {
@@ -53,7 +55,7 @@ function sendToUser (username: string, message: any): void {
         ws.send(messageStr)
       }
     })
-    console.log(`Sent message to user '${username}': ${JSON.stringify(message)}`)
+    logger.info({ username, message }, 'Sent message to user')
   }
 }
 
@@ -64,7 +66,7 @@ function sendBroadcast (message: any): void {
       ws.send(messageStr)
     }
   })
-  console.log(`Broadcast message: ${JSON.stringify(message)}`)
+  logger.info({ message }, 'Broadcast message')
 }
 
 wss.on('connection', async (ws, request) => {
@@ -96,20 +98,20 @@ setInterval(() => {
 
 setInterval(() => {
   const connectedUsers = userConnections.size
-  console.log(`Connected users: ${connectedUsers}`)
+  logger.info({ connectedUsers }, 'Connected users')
 }, 300000)
 
 const subscriber = new Redis(config.redisURL)
 
 subscriber.on('error', (err) => {
-  console.error('Redis subscriber error:', err)
+  logger.error({ err }, 'Redis subscriber error')
 })
 
 subscriber.subscribe(WEBSOCKET_CHANNEL, (err) => {
   if (err) {
-    console.error('Failed to subscribe: ', err)
+    logger.error({ err }, 'Failed to subscribe')
   } else {
-    console.log(`Subscribed to ${WEBSOCKET_CHANNEL} channel`)
+    logger.info({ channel: WEBSOCKET_CHANNEL }, 'Subscribed to channel')
   }
 })
 
@@ -132,12 +134,12 @@ function handleMessage (json: string): void {
       }
     }
   } catch (error) {
-    console.error('Error handling message:', error)
+    logger.error({ err: error, json }, 'Error handling message')
   }
 }
 
 async function shutdown (signal: string) {
-  console.log(`Received ${signal}, shutting down WebSocket server...`)
+  logger.info({ signal }, 'Shutting down WebSocket server')
   wss.close()
   await subscriber.quit()
   await redis.quit()
