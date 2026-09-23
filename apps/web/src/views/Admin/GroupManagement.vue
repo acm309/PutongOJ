@@ -5,6 +5,7 @@ import type {
   GroupListQueryResult,
   UserItemListQueryResult,
 } from '@putong-oj/shared'
+import { ObjectIdStringSchema } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -38,7 +39,7 @@ const confirm = useConfirm()
 
 const { isRoot } = storeToRefs(useSessionStore())
 
-const groupId = ref<number | null>(null)
+const groupId = ref<string | null>(null)
 const groups = ref<GroupListQueryResult>([])
 const currentGroup = ref<AdminGroupDetailQueryResult | null>(null)
 const allUsers = ref<UserItemListQueryResult>([])
@@ -197,12 +198,12 @@ async function fetchGroupDetail () {
 
 async function fetch () {
   if (route.query.group) {
-    const id = Number(route.query.group)
-    if (Number.isNaN(id) || !Number.isInteger(id) || id < 0) {
+    const parsedGroupId = ObjectIdStringSchema.safeParse(route.query.group)
+    if (!parsedGroupId.success) {
       return onReset()
     }
-    groupId.value = id
-    if (!groups.value.some(g => g.gid === groupId.value)) {
+    groupId.value = parsedGroupId.data
+    if (!groups.value.some(group => group.id === groupId.value)) {
       return onReset()
     }
     await fetchGroupDetail()
@@ -250,7 +251,7 @@ async function handleCreateGroup () {
   newGroupName.value = ''
   await fetchGroups()
 
-  groupId.value = resp.data.groupId
+  groupId.value = resp.data.id
   onSelect()
 }
 
@@ -268,7 +269,7 @@ async function handleUpdateGroupName () {
   }
 
   loading.value = true
-  const resp = await updateGroup(currentGroup.value.groupId.toString(), { name })
+  const resp = await updateGroup(currentGroup.value.id, { name })
   loading.value = false
 
   if (!resp.success) {
@@ -291,7 +292,7 @@ async function handleSaveMembers () {
     members: currentGroup.value.members,
   }
 
-  const resp = await updateGroupMembers(currentGroup.value.groupId.toString(), payload)
+  const resp = await updateGroupMembers(currentGroup.value.id, payload)
   loading.value = false
 
   if (!resp.success) {
@@ -323,7 +324,7 @@ async function handleDeleteGroup (event: Event) {
     },
     accept: async () => {
       loading.value = true
-      const resp = await removeGroup(currentGroup.value!.groupId.toString())
+      const resp = await removeGroup(currentGroup.value!.id)
       loading.value = false
 
       if (!resp.success) {
@@ -364,7 +365,7 @@ watch([ sourceSearch, targetSearch ], resetSelections)
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
-          v-model="groupId" fluid :options="groups" option-label="title" option-value="gid" show-clear
+          v-model="groupId" fluid :options="groups" option-label="title" option-value="id" show-clear
           :placeholder="t('ptoj.select_group')" :loading="loadingGroups" :disabled="loading" @change="onSelect"
         />
 

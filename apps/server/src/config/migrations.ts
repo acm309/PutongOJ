@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
 import { md5 } from '@noble/hashes/legacy.js'
-import { Contest, mongoose, OAuth, Post, User } from '@putong-oj/db'
+import { Contest, ID, mongoose, OAuth, Post, User } from '@putong-oj/db'
 import { OAuthProvider } from '@putong-oj/shared'
 import { settingsService } from '../services/settings.ts'
 import { createLogger } from '../utils/logger.ts'
@@ -124,6 +124,94 @@ async function migrateContestAllowEarlyExit () {
   logger.info(`Migration Contest.allowEarlyExit completed, modified=${result.modifiedCount}`)
 }
 
+async function migrateGroupIdToObjectId () {
+  interface LegacyGroup {
+    _id: mongoose.Types.ObjectId
+    gid?: number
+  }
+
+  interface LegacyUser {
+    _id: mongoose.Types.ObjectId
+    gid?: unknown
+  }
+
+  const groupCollection = mongoose.connection.collection('Group')
+  const userCollection = mongoose.connection.collection('User')
+
+  const legacyGroups = await groupCollection
+    .find({ gid: { $exists: true } })
+    .toArray() as unknown as LegacyGroup[]
+  const groupIdByGid = new Map<number, mongoose.Types.ObjectId>()
+  for (const group of legacyGroups) {
+    if (typeof group.gid === 'number' && group._id instanceof mongoose.Types.ObjectId) {
+      groupIdByGid.set(group.gid, group._id)
+    }
+  }
+
+  const legacyUsers = await userCollection
+    .find({ gid: { $exists: true } })
+    .toArray() as unknown as LegacyUser[]
+  let skippedCount = 0
+  const operations = legacyUsers.map((user) => {
+    const legacyGroupIds = Array.isArray(user.gid) ? user.gid : [ user.gid ]
+    const groups: mongoose.Types.ObjectId[] = []
+    const seen = new Set<string>()
+
+    for (const gid of legacyGroupIds) {
+      if (typeof gid !== 'number') {
+        skippedCount += 1
+        continue
+      }
+
+      const groupId = groupIdByGid.get(gid)
+      if (!groupId) {
+        skippedCount += 1
+        continue
+      }
+
+      const groupIdHex = groupId.toHexString()
+      if (!seen.has(groupIdHex)) {
+        seen.add(groupIdHex)
+        groups.push(groupId)
+      }
+    }
+
+    return {
+      updateOne: {
+        filter: { _id: user._id },
+        update: {
+          $set: { groups },
+          $unset: { gid: '' },
+        },
+      },
+    }
+  })
+
+  if (operations.length > 0) {
+    await userCollection.bulkWrite(operations, { ordered: false })
+  }
+
+  const groupIndexes = await groupCollection.indexes()
+  if (groupIndexes.some(index => index.name === 'gid_1')) {
+    await groupCollection.dropIndex('gid_1')
+  }
+
+  const groupUpdate = await groupCollection.updateMany({}, { $unset: { gid: '' } })
+
+  const userIndexes = await userCollection.indexes()
+  if (userIndexes.some(index => index.name === 'gid_1')) {
+    await userCollection.dropIndex('gid_1')
+  }
+
+  await ID.deleteOne({ name: 'Group' })
+
+  logger.info(
+    'Migration Group.gid -> _id completed, '
+    + `groups=${groupIdByGid.size}, users=${operations.length}, `
+    + `clearedGroups=${groupUpdate.modifiedCount}, skipped=${skippedCount}`,
+  )
+}
+
 const migrationTasks: MigrationTask[] = [
   {
     key: '20260320-user-storage-quota-default',
@@ -149,6 +237,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260612-contest-allow-early-exit',
     description: 'Backfill missing Contest.allowEarlyExit with false',
     run: migrateContestAllowEarlyExit,
+  },
+  {
+    key: '20260922-group-object-id',
+    description: 'Replace Group.gid and User.gid[] with ObjectId-based group references',
+    run: migrateGroupIdToObjectId,
   },
 ]
 

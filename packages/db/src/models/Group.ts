@@ -2,20 +2,12 @@ import type { GroupEntity } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../client.js'
-import ID from './ID.js'
 
 export type GroupDocument = {} & Document<Types.ObjectId> & GroupEntity
 
 type GroupModel = PaginateModel<GroupDocument>
 
 const groupSchema = new mongoose.Schema({
-  gid: {
-    type: Number,
-    index: {
-      unique: true,
-    },
-    default: -1,
-  },
   title: {
     type: String,
     required: true,
@@ -38,12 +30,6 @@ const groupSchema = new mongoose.Schema({
 })
 
 groupSchema.plugin(mongoosePaginate)
-
-groupSchema.pre('save', async function () {
-  if (this.gid === -1) {
-    this.gid = await ID.generateId('Group')
-  }
-})
 
 const Group
   = mongoose.model<GroupDocument, GroupModel>(

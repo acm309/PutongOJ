@@ -84,16 +84,20 @@ export async function getUser (ctx: Context) {
       .distinct('pid')
       .lean(),
     Group
-      .find({ gid: { $in: user.gid } })
-      .select('-_id gid title')
+      .find({ _id: { $in: user.groups } })
+      .select('title')
       .lean(),
     userService.getSubmissionHeatmap(user._id),
   ])
 
   const codeforces = await userService.getCodeforcesProfile(user._id)
   const attempted = difference(failed, solved)
+  const groupItems = groups.map(group => ({
+    id: group._id.toString(),
+    title: group.title,
+  }))
   const result = UserProfileQueryResultSchema.encode({
-    ...user.toObject(), groups, solved, attempted, codeforces, submissionHeatmap,
+    ...user.toObject(), groups: groupItems, solved, attempted, codeforces, submissionHeatmap,
   })
   return createEnvelopedResponse(ctx, result)
 }

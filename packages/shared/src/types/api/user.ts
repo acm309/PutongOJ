@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { stringToInt } from '../codec.js'
 import { GroupModelSchema } from '../model/group.js'
 import { UserModelSchema } from '../model/user.js'
+import { ObjectIdStringSchema } from '../utils.js'
 import { PaginatedSchema, PaginationSchema } from './utils.js'
 
 export const UserSubmissionHeatmapSchema = z.object({
@@ -22,7 +22,7 @@ export const UserProfileQueryResultSchema = z.object({
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school,
   groups: z.array(z.object({
-    gid: GroupModelSchema.shape.gid,
+    id: GroupModelSchema.shape.id,
     title: GroupModelSchema.shape.title,
   })),
   codeforces: z.object({
@@ -40,7 +40,7 @@ export type UserProfileQueryResult = z.input<typeof UserProfileQueryResultSchema
 export const UserRanklistQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(30),
-  group: stringToInt.pipe(GroupModelSchema.shape.gid).optional(),
+  group: ObjectIdStringSchema.optional(),
 })
 
 export type UserRanklistQuery = z.infer<typeof UserRanklistQuerySchema>
@@ -57,7 +57,7 @@ export const UserRanklistQueryResultSchema = PaginatedSchema(z.object({
 export type UserRanklistQueryResult = z.input<typeof UserRanklistQueryResultSchema>
 
 export const UserRanklistExportQuerySchema = z.object({
-  group: stringToInt.pipe(GroupModelSchema.shape.gid).optional(),
+  group: ObjectIdStringSchema.optional(),
 })
 
 export type UserRanklistExportQuery = z.infer<typeof UserRanklistExportQuerySchema>

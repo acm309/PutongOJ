@@ -65,10 +65,16 @@ app.use(router.routes()).use(router.allowedMethods())
 // In test environment, we will export the app without starting the server,
 // and let the test framework handle it
 if (env.NODE_ENV !== 'test') {
-  app.listen(config.port, async () => {
-    await databaseSetup()
-    logger.info(`The server is running at http://localhost:${config.port}`)
-  })
+  databaseSetup()
+    .then(() => {
+      app.listen(config.port, () => {
+        logger.info(`The server is running at http://localhost:${config.port}`)
+      })
+    })
+    .catch((err) => {
+      logger.error({ err }, 'Database setup failed')
+      process.exit(-1)
+    })
 
   async function shutdown (signal: string) {
     logger.info(`Received ${signal}, shutting down...`)

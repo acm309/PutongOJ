@@ -3,7 +3,6 @@ import { Course, Group, ID, Problem, Solution, User } from '@putong-oj/db'
 import discussionService from '../src/services/discussion.ts'
 import { passwordHash } from '../src/utils/index.ts'
 import { removeall } from './helper.ts'
-// import { contestSeeds } from './seeds/contest.ts'
 import { courseSeeds } from './seeds/course.ts'
 import { discussionSeeds } from './seeds/discussion.ts'
 import { groupSeeds } from './seeds/group.ts'
@@ -14,11 +13,14 @@ import { userSeeds } from './seeds/user.ts'
 async function main () {
   await removeall()
   await Promise.all([
+    Group.syncIndexes(),
+    User.syncIndexes(),
+  ])
+  await Promise.all([
     new ID({ name: 'Comment', id: 0 }).save(),
     new ID({ name: 'Contest', id: 0 }).save(),
     new ID({ name: 'Course', id: 2 }).save(),
     new ID({ name: 'Discussion', id: 0 }).save(),
-    new ID({ name: 'Group', id: 0 }).save(),
     new ID({ name: 'Problem', id: 999 }).save(),
     new ID({ name: 'Solution', id: 0 }).save(),
     new ID({ name: 'Tag', id: 0 }).save(),

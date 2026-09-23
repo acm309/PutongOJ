@@ -14,7 +14,8 @@ test('Group list', async (t) => {
   t.truthy(Array.isArray(res.body.data))
 
   const item = res.body.data[0]
-  t.is(typeof item.gid, 'number')
+  t.is(typeof item.id, 'string')
+  t.regex(item.id, /^[0-9a-f]{24}$/i)
   t.is(typeof item.title, 'string')
 })
 

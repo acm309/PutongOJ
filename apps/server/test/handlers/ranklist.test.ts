@@ -28,8 +28,16 @@ test('Fetch ranklist', async (t) => {
 })
 
 test('Fetch ranklist filtered by group', async (t) => {
+  const groups = await request.get('/api/group')
+  const groupId = groups.body.data[0]?.id
+  t.is(typeof groupId, 'string')
+  if (typeof groupId !== 'string') {
+    return
+  }
+
   const res = await request
-    .get('/api/users/ranklist?group=1')
+    .get('/api/users/ranklist')
+    .query({ group: groupId })
 
   t.is(res.status, 200)
   t.true(res.body.success)

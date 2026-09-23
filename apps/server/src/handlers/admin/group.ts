@@ -5,6 +5,7 @@ import {
   AdminGroupDetailQueryResultSchema,
   AdminGroupMembersUpdatePayloadSchema,
   ErrorCode,
+  ObjectIdStringSchema,
 } from '@putong-oj/shared'
 import { loadProfile, rootRequire } from '../../middlewares/authn.ts'
 import groupService from '../../services/group.ts'
@@ -14,15 +15,13 @@ import {
   createZodErrorResponse,
 } from '../../utils/index.ts'
 
-function parseGroupId (ctx: Context): number | null {
-  const groupIdStr = ctx.params.groupId
-  const groupId = Number(groupIdStr)
-
-  if (Number.isNaN(groupId) || !Number.isInteger(groupId) || groupId < 0) {
+function parseGroupId (ctx: Context): string | null {
+  const groupId = ObjectIdStringSchema.safeParse(ctx.params.groupId)
+  if (!groupId.success) {
     createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid group ID')
     return null
   }
-  return groupId
+  return groupId.data
 }
 
 export async function getGroup (ctx: Context) {
@@ -50,7 +49,7 @@ export async function createGroup (ctx: Context) {
     const group = await groupService.createGroup(payload.data.name)
     const result = AdminGroupDetailQueryResultSchema.encode(group)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Group:${group.groupId}> created by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Group:${group.id}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to create group', err)

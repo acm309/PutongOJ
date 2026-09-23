@@ -4,21 +4,26 @@ import difference from 'lodash/difference.js'
 
 export async function findGroups (): Promise<GroupModel[]> {
   const groups = await Group
-    .find({}, '-_id gid title createdAt updatedAt')
-    .sort({ gid: -1 })
+    .find({}, 'title createdAt updatedAt')
+    .sort({ createdAt: -1, _id: -1 })
     .lean()
-  return groups
+  return groups.map(group => ({
+    id: group._id.toString(),
+    title: group.title,
+    createdAt: group.createdAt,
+    updatedAt: group.updatedAt,
+  }))
 }
 
-export async function getGroup (groupId: number) {
-  const group = await Group.findOne({ gid: groupId }).lean()
+export async function getGroup (groupId: string) {
+  const group = await Group.findById(groupId).lean()
   if (!group) {
     return null
   }
 
-  const users = await User.find({ gid: groupId }, { _id: 0, uid: 1 }).lean()
+  const users = await User.find({ groups: groupId }, { _id: 0, uid: 1 }).lean()
   return {
-    groupId: group.gid,
+    id: group._id.toString(),
     name: group.title,
     members: users.map(u => u.uid),
   }
@@ -28,18 +33,18 @@ export async function createGroup (name: string) {
   const group = new Group({ title: name })
   await group.save()
   return {
-    groupId: group.gid,
+    id: group._id.toString(),
     name: group.title,
     members: [] as string[],
   }
 }
 
-export async function updateGroup (groupId: number, name: string) {
-  const result = await Group.updateOne({ gid: groupId }, { title: name })
+export async function updateGroup (groupId: string, name: string) {
+  const result = await Group.updateOne({ _id: groupId }, { title: name })
   return result.modifiedCount > 0
 }
 
-export async function updateGroupMembers (groupId: number, members: string[]) {
+export async function updateGroupMembers (groupId: string, members: string[]) {
   const group = await getGroup(groupId)
   if (!group) {
     return null
@@ -52,13 +57,13 @@ export async function updateGroupMembers (groupId: number, members: string[]) {
   if (toAdd.length > 0) {
     tasks.push(User.updateMany(
       { uid: { $in: toAdd } },
-      { $addToSet: { gid: groupId } },
+      { $addToSet: { groups: groupId } },
     ))
   }
   if (toRemove.length > 0) {
     tasks.push(User.updateMany(
       { uid: { $in: toRemove } },
-      { $pull: { gid: groupId } },
+      { $pull: { groups: groupId } },
     ))
   }
 
@@ -66,13 +71,13 @@ export async function updateGroupMembers (groupId: number, members: string[]) {
   return result.reduce((sum, res) => sum + res.modifiedCount, 0)
 }
 
-export async function removeGroup (groupId: number) {
-  const result = await Group.deleteOne({ gid: groupId })
+export async function removeGroup (groupId: string) {
+  const result = await Group.deleteOne({ _id: groupId })
   if (result.deletedCount === 0) {
     return null
   }
 
-  await User.updateMany({ gid: groupId }, { $pull: { gid: groupId } })
+  await User.updateMany({ groups: groupId }, { $pull: { groups: groupId } })
   return true
 }
 

@@ -8,6 +8,8 @@ import { userSeeds } from '../../seeds/user.ts'
 const server = app.listen()
 const request = supertest.agent(server)
 
+let createdGroupId = ''
+
 test.before('Login', async (t) => {
   const login = await request
     .post('/api/account/login')
@@ -27,25 +29,28 @@ test.serial('create new group', async (t) => {
     })
 
   t.is(create.status, 200)
+  t.true(create.body.success)
+  t.is(typeof create.body.data.id, 'string')
+  createdGroupId = create.body.data.id
 })
 
 test.serial('Update Group 2', async (t) => {
   const update = await request
-    .put('/api/admin/groups/2')
+    .put(`/api/admin/groups/${createdGroupId}`)
     .send({
       name: '测试组更新2',
     })
   t.is(update.status, 200)
 
   const updateMembers = await request
-    .put('/api/admin/groups/2/members')
+    .put(`/api/admin/groups/${createdGroupId}/members`)
     .send({
       members: [ 'admin' ],
     })
   t.is(updateMembers.status, 200)
 
   const find = await request
-    .get('/api/admin/groups/2')
+    .get(`/api/admin/groups/${createdGroupId}`)
 
   t.is(find.status, 200)
   t.is(find.body.data.name, '测试组更新2')
@@ -54,20 +59,20 @@ test.serial('Update Group 2', async (t) => {
   const user = await request
     .get('/api/users/admin')
 
-  t.true(user.body.data.groups.some((group: any) => group.gid === 2))
+  t.true(user.body.data.groups.some((group: any) => group.id === createdGroupId))
 })
 
 test.serial('Update Group 2 -- update members', async (t) => {
   const user = userSeeds.primaryuser
   const update = await request
-    .put('/api/admin/groups/2/members')
+    .put(`/api/admin/groups/${createdGroupId}/members`)
     .send({
       members: [ user.uid ],
     })
   t.is(update.status, 200)
 
   const find = await request
-    .get('/api/admin/groups/2')
+    .get(`/api/admin/groups/${createdGroupId}`)
 
   t.is(find.status, 200)
   t.is(find.body.data.name, '测试组更新2')
@@ -76,28 +81,28 @@ test.serial('Update Group 2 -- update members', async (t) => {
   let r = await request
     .get('/api/users/admin')
 
-  t.false(r.body.data.groups.some((group: any) => group.gid === 2))
+  t.false(r.body.data.groups.some((group: any) => group.id === createdGroupId))
 
   r = await request
     .get(`/api/users/${user.uid}`)
 
-  t.true(r.body.data.groups.some((group: any) => group.gid === 2))
+  t.true(r.body.data.groups.some((group: any) => group.id === createdGroupId))
 })
 
 test.serial.skip('Delete Group 2', async (t) => {
   const del = await request
-    .delete('/api/group/2')
+    .delete(`/api/admin/groups/${createdGroupId}`)
   t.is(del.status, 200)
 
   const find = await request
-    .get('/api/group/2')
+    .get(`/api/admin/groups/${createdGroupId}`)
 
   t.is(find.status, 400)
 
   const user = await request
     .get('/api/users/admin')
 
-  t.false(user.body.data.groups.some((group: any) => group.gid === 2))
+  t.false(user.body.data.groups.some((group: any) => group.id === createdGroupId))
 })
 
 test('The length of group title should be greater than 3', async (t) => {

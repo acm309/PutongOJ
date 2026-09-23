@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { UserPrivilege } from '../../consts/index.js'
 import { AVATAR_URL_LENGTH_MAX } from '../../consts/limit.js'
 import { isoDatetimeToDate } from '../codec.js'
+import { ObjectIdSchema } from '../utils.js'
 
 export const UserAvatarSchema = z.union([
   z.url({ protocol: /^https$/, normalize: true }).max(AVATAR_URL_LENGTH_MAX),
@@ -18,7 +19,7 @@ export const UserModelSchema = z.object({
   motto: z.string().max(300),
   mail: z.union([ z.email(), z.literal('') ]),
   school: z.string().max(30),
-  gid: z.array(z.int().nonnegative()),
+  groups: z.array(ObjectIdSchema),
   storageQuota: z.int().nonnegative(),
   submit: z.int().nonnegative(),
   solve: z.int().nonnegative(),

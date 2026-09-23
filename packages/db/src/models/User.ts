@@ -88,8 +88,11 @@ const userSchema: Schema = new mongoose.Schema({
         'School name is too long. It should be less than 30 characters long',
     },
   },
-  gid: {
-    type: [ Number ],
+  groups: {
+    type: [ {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Group',
+    } ],
     default: [],
     index: true,
   },

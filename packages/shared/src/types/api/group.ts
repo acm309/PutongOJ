@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { GroupModelSchema } from '../model/group.js'
 
 export const GroupListQueryResultSchema = z.array(z.object({
-  gid: GroupModelSchema.shape.gid,
+  id: GroupModelSchema.shape.id,
   title: GroupModelSchema.shape.title,
 }))
 

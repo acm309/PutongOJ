@@ -7,7 +7,6 @@ const idFields = [
   'Contest',
   'Course',
   'Discussion',
-  'Group',
   'Problem',
   'Solution',
   'Tag',

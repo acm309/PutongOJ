@@ -257,9 +257,9 @@ async function getConfig (ctx: Context) {
     (async () => {
       const groups = await Group
         .find({ _id: { $in: contest.allowedGroups } })
-        .select({ _id: 0, gid: 1, title: 1 })
+        .select({ title: 1 })
         .lean()
-      return groups.map(({ gid, title }) => ({ groupId: gid, name: title }))
+      return groups.map(({ _id, title }) => ({ id: _id.toString(), name: title }))
     })(),
     (async () => {
       const problems = await Problem
@@ -321,7 +321,7 @@ async function updateConfig (ctx: Context) {
   }
   let allowedGroups: Types.ObjectId[] | undefined
   if (payload.data.allowedGroups !== undefined) {
-    const groups = await Group.find({ gid: { $in: payload.data.allowedGroups } }).select([ '_id' ]).lean()
+    const groups = await Group.find({ _id: { $in: payload.data.allowedGroups } }).select([ '_id' ]).lean()
     allowedGroups = groups.map(g => g._id)
   }
   let ipWhitelist: { cidr: string, comment: string | null }[] | undefined

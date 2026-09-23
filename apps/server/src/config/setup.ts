@@ -16,7 +16,6 @@ export async function databaseSetup () {
     Contest: 0,
     Course: 0,
     Discussion: 0,
-    Group: 0,
     Problem: 999,
     Solution: 0,
     Tag: 0,

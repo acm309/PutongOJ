@@ -138,7 +138,6 @@ export type SolutionEntity = {
 } & Entity
 
 export type GroupEntity = {
-  gid: number
   title: string
   list: string[]
   create: number

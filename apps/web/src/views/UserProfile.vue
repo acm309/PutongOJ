@@ -161,8 +161,8 @@ onRouteParamUpdate(fetch)
                 :severity="getPrivilegeSeverity(user.privilege)"
               />
               <RouterLink
-                v-for="group in user.groups" :key="group.gid"
-                :to="{ name: 'Ranklist', query: { group: group.gid } }"
+                v-for="group in user.groups" :key="group.id"
+                :to="{ name: 'Ranklist', query: { group: group.id } }"
               >
                 <Tag :value="group.title" severity="secondary" />
               </RouterLink>

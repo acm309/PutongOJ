@@ -10,3 +10,5 @@ export const ObjectIdSchema = z.custom<Types.ObjectId>((val: any) => {
   }
   return /^[0-9a-f]{24}$/i.test(strval)
 })
+
+export const ObjectIdStringSchema = z.string().regex(/^[0-9a-f]{24}$/i)

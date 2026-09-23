@@ -51,7 +51,7 @@ async function fetchGroups () {
     return
   }
   groups.value = resp.data
-  if (query.value.group && !groups.value.some(g => g.gid === query.value.group)) {
+  if (query.value.group && !groups.value.some(group => group.id === query.value.group)) {
     onReset()
   }
 }
@@ -141,7 +141,7 @@ onRouteQueryUpdate(fetch)
       </div>
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <Select
-          v-model="query.group" fluid :options="groups" option-label="title" option-value="gid" show-clear
+          v-model="query.group" fluid :options="groups" option-label="title" option-value="id" show-clear
           :placeholder="t('ptoj.filter_by_group')" :loading="loadingGroups" :disabled="loading" @change="onSearch"
         />
 

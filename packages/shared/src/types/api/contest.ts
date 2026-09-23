@@ -7,6 +7,7 @@ import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
 import { ContestRanklistSchema } from '../service/contest.js'
+import { ObjectIdStringSchema } from '../utils.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 export const ContestListQuerySchema = z.object({
@@ -143,7 +144,7 @@ export const ContestConfigQueryResultSchema = z.object({
     nickname: UserModelSchema.shape.nick,
   })),
   allowedGroups: z.array(z.object({
-    groupId: GroupModelSchema.shape.gid,
+    id: GroupModelSchema.shape.id,
     name: GroupModelSchema.shape.title,
   })),
   ipWhitelist: ContestModelSchema.shape.ipWhitelist,
@@ -174,7 +175,7 @@ export const ContestConfigEditPayloadSchema = z.object({
   allowEarlyExit: ContestModelSchema.shape.allowEarlyExit,
   password: ContestModelSchema.shape.password,
   allowedUsers: z.array(UserModelSchema.shape.uid),
-  allowedGroups: z.array(GroupModelSchema.shape.gid),
+  allowedGroups: z.array(ObjectIdStringSchema),
   ipWhitelist: ContestModelSchema.shape.ipWhitelist,
   ipWhitelistEnabled: ContestModelSchema.shape.ipWhitelistEnabled,
   problems: z.array(ProblemModelSchema.shape.pid),

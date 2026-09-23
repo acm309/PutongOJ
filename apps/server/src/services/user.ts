@@ -71,7 +71,7 @@ export async function getAllUserItems (): Promise<Pick<UserModel, 'uid' | 'nick'
 }
 
 export async function findRanklist (
-  opt: PaginateOption & { group?: number },
+  opt: PaginateOption & { group?: string },
 ): Promise<Paginated<UserModel>> {
   const { page, pageSize, group } = opt
 
@@ -79,8 +79,8 @@ export async function findRanklist (
     solve: { $gt: 0 },
     privilege: { $ne: UserPrivilege.Banned },
   }
-  if (typeof group === 'number') {
-    filter.gid = group
+  if (typeof group === 'string') {
+    filter.groups = group
   }
 
   const query = {
@@ -95,7 +95,7 @@ export async function findRanklist (
 }
 
 export async function exportRanklist (
-  opt: { group?: number },
+  opt: { group?: string },
 ): Promise<Pick<UserModel, 'uid' | 'nick' | 'solve' | 'submit'>[]> {
   const { group } = opt
 
@@ -103,8 +103,8 @@ export async function exportRanklist (
     solve: { $gt: 0 },
     privilege: { $ne: UserPrivilege.Banned },
   }
-  if (typeof group === 'number') {
-    filter.gid = group
+  if (typeof group === 'string') {
+    filter.groups = group
   }
 
   return await User.find(filter)
