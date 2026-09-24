@@ -64,7 +64,6 @@ interface GlobalConfig {
   disableRateLimit: boolean
   mongooseDebug: boolean
   oauthConfigs: Record<OAuthProvider, { enabled: boolean } & OAuthClientConfig>
-  helpDocURL?: string
   submissionHeatmapTimezone: string
   umamiAnalytics: {
     websiteId?: string
@@ -150,7 +149,6 @@ export const globalConfig: GlobalConfig = {
     false,
   ),
   oauthConfigs,
-  helpDocURL: stringEnv('PTOJ_HELP_DOC_URL'),
   submissionHeatmapTimezone: stringEnv('PTOJ_SUBMISSION_HEATMAP_TIMEZONE', 'Asia/Shanghai'),
   umamiAnalytics: {
     websiteId: stringEnv('PTOJ_UMAMI_WEBSITE_ID'),

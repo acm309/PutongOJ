@@ -7,7 +7,6 @@ import Menubar from 'primevue/menubar'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { useThemeStore } from '@/store/theme'
 import { useMessage } from '@/utils/message'
@@ -17,7 +16,6 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
-const rootStore = useRootStore()
 const themeStore = useThemeStore()
 const sessionStore = useSessionStore()
 
@@ -27,7 +25,6 @@ const hasExtraHeader = computed(() => {
   )
 })
 
-const { config } = storeToRefs(rootStore)
 const { profile, isAdmin, isLogined } = storeToRefs(sessionStore)
 const currentRoute = computed(() => route.name)
 const profileMenu = ref()
@@ -65,14 +62,12 @@ const menuItems = computed(() => {
     route: 'Discussions',
   })
 
-  if (config.value.helpDocURL) {
-    items.push({
-      label: t('ptoj.help'),
-      icon: 'pi pi-question-circle',
-      url: config.value.helpDocURL,
-      target: '_blank',
-    })
-  }
+  items.push({
+    label: t('ptoj.help'),
+    icon: 'pi pi-question-circle',
+    url: '/docs/',
+    target: '_blank',
+  })
 
   if (isAdmin.value) {
     items.push({

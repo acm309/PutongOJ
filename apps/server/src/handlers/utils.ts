@@ -36,7 +36,7 @@ function serverTime (ctx: Context) {
 }
 
 export async function getPublicConfig (ctx: Context) {
-  const { helpDocURL, oauthConfigs, umamiAnalytics } = globalConfig
+  const { oauthConfigs, umamiAnalytics } = globalConfig
   const apiPublicKey = await cryptoService.getServerPublicKey()
   const result = PublicConfigQueryResultSchema.encode({
     name: 'Putong OJ',
@@ -49,7 +49,6 @@ export async function getPublicConfig (ctx: Context) {
       cjlu: oauthConfigs.cjlu.enabled,
       codeforces: oauthConfigs.codeforces.enabled,
     },
-    helpDocURL,
     umamiAnalytics: umamiAnalytics.websiteId
       ? {
           websiteId: umamiAnalytics.websiteId,
