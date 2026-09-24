@@ -27,29 +27,25 @@ export async function parseClientIp (ctx: Context, next: () => Promise<any>) {
 }
 
 export async function setupAuditLog (ctx: Context, next: Next) {
-  const buildTraceInfo = () => {
+  const getTraceInfo = () => {
     const { requestId, clientIp, sessionId } = ctx.state
-    const trace = [ `Req ${requestId}`, `IP ${clientIp}` ]
-    if (sessionId) {
-      trace.push(`Sess ${sessionId}`)
-    }
-    return `[${trace.join(', ')}]`
+    return { requestId, clientIp, sessionId }
   }
 
   ctx.auditLog = {
     info (message: string) {
-      logger.info(`${message} ${buildTraceInfo()}`)
-    },
-    error (message: string, error?: any) {
-      const trace = buildTraceInfo()
-      if (error) {
-        logger.error({ err: error, trace }, message)
-      } else {
-        logger.error({ trace }, message)
-      }
+      logger.info(getTraceInfo(), message)
     },
     warn (message: string) {
-      logger.warn(`${message} ${buildTraceInfo()}`)
+      logger.warn(getTraceInfo(), message)
+    },
+    error (message: string, error?: any) {
+      const trace = getTraceInfo()
+      if (error) {
+        logger.error({ ...trace, err: error }, message)
+      } else {
+        logger.error(trace, message)
+      }
     },
   }
   await next()
