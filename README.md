@@ -95,7 +95,7 @@ services:
       - 3000:3000
       - 3001:3001
     volumes:
-      - putong-oj-data:/app/data
+      - putong-oj-data:/app/apps/server/data
       - putong-oj-uploads:/app/apps/server/public/uploads
     depends_on:
       - redis
@@ -131,7 +131,7 @@ volumes:
 To retain data across container restarts, mount the following volumes:
 
 ```plaintext
-/app/data
+/app/apps/server/data
 /app/logs
 /app/apps/server/public/uploads
 ```

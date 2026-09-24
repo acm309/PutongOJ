@@ -73,9 +73,9 @@ COPY --from=app_builder /app/build_time.txt .
 COPY setup.js .
 COPY apps/server/entrypoint.sh .
 RUN chmod +x entrypoint.sh
-RUN mkdir -p /app/data /app/logs /app/apps/server/public/uploads
+RUN mkdir -p /app/apps/server/data /app/logs /app/apps/server/public/uploads
 
 EXPOSE 3000/tcp 3001/tcp
-VOLUME [ "/app/data", "/app/logs", "/app/apps/server/public/uploads" ]
+VOLUME [ "/app/apps/server/data", "/app/logs", "/app/apps/server/public/uploads" ]
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

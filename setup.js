@@ -49,7 +49,7 @@ async function main () {
     ...commons,
     env: {
       ...commons.env,
-      PTOJ_DATA_DIR: '/app/data',
+      PTOJ_DATA_DIR: '/app/apps/server/data',
       PTOJ_SANDBOX_DATA_DIR: '/app/data',
     },
   })
