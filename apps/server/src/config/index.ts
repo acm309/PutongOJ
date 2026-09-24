@@ -56,10 +56,8 @@ interface GlobalConfig {
   sessionMaxAge: number
   sessionMaxCount: number
   reverseProxy: {
-    enabled: boolean
-    forwardLimit: number
-    forwardedForHeader: string
-    trustedProxies: string[]
+    trust: boolean
+    ipHeader: string
   }
   disableRateLimit: boolean
   mongooseDebug: boolean
@@ -123,22 +121,14 @@ export const globalConfig: GlobalConfig = {
     10,
   ),
   reverseProxy: {
-    enabled: booleanEnv(
-      'PTOJ_REVERSE_PROXY_ENABLED',
+    trust: booleanEnv(
+      'PTOJ_TRUST_PROXY',
       false,
     ),
-    forwardLimit: numberEnv(
-      'PTOJ_REVERSE_PROXY_FORWARD_LIMIT',
-      1,
-    ),
-    forwardedForHeader: stringEnv(
-      'PTOJ_REVERSE_PROXY_FORWARDED_FOR_HEADER',
+    ipHeader: stringEnv(
+      'PTOJ_PROXY_IP_HEADER',
       'X-Forwarded-For',
     ),
-    trustedProxies: stringEnv(
-      'PTOJ_REVERSE_PROXY_TRUSTED_PROXIES',
-      '',
-    ).split(',').map(s => s.trim()).filter(s => s.length > 0),
   },
   disableRateLimit: booleanEnv(
     'PTOJ_DISABLE_RATE_LIMIT',
