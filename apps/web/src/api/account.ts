@@ -31,7 +31,10 @@ export async function userLogout () {
 }
 
 export async function getProfile () {
-  return apiClient.get<AccountProfileQueryResult>('/account/profile')
+  return apiClient.get<AccountProfileQueryResult>(
+    '/account/profile',
+    { callerHandledCodes: [ ErrorCode.Unauthorized ] },
+  )
 }
 export async function updateProfile (payload: AccountEditPayload) {
   return apiClient.put<AccountProfileQueryResult>('/account/profile', payload)
