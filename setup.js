@@ -20,7 +20,6 @@ async function main () {
     env: {
       NODE_ENV: 'production',
     },
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     restart_delay: 1000,
     merge_logs: true,
   }
