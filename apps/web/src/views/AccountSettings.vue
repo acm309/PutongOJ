@@ -14,7 +14,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { getProfile, listSessions, revokeOtherSessions, revokeSession, updatePassword, updateProfile, verifyAccount } from '@/api/account'
-import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
+import { generateOAuthUrl, getUserOAuthConnections, removeOAuthConnection } from '@/api/oauth'
 import { getAvatarPresets } from '@/api/utils'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
@@ -197,6 +197,30 @@ async function connectOAuth (provider: OAuthProvider) {
     return
   }
   window.open(resp.data.url, '_self', 'noopener,noreferrer')
+}
+
+function disconnectOAuth (event: Event, provider: OAuthProvider) {
+  confirm.require({
+    target: event.currentTarget as HTMLElement,
+    message: t('ptoj.proceed_confirm_message'),
+    rejectProps: {
+      label: t('ptoj.cancel'),
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: t('ptoj.disconnect'),
+      severity: 'danger',
+    },
+    accept: async () => {
+      const resp = await removeOAuthConnection(provider)
+      if (!resp.success) {
+        return
+      }
+      connections.value[provider] = null
+      message.success(t('ptoj.successful_proceed'), t('ptoj.account_disconnected_detail'))
+    },
+  })
 }
 
 async function verify () {
@@ -383,9 +407,10 @@ onMounted(() => {
               </div>
             </div>
             <Button
-              :label="connections.cjlu ? t('ptoj.connected') : t('ptoj.connect')" :disabled="!!connections.cjlu"
-              @click="connectOAuth(OAuthProvider.CJLU)"
+              v-if="connections.cjlu" :label="t('ptoj.disconnect')" severity="danger" outlined
+              @click="event => disconnectOAuth(event, OAuthProvider.CJLU)"
             />
+            <Button v-else :label="t('ptoj.connect')" @click="connectOAuth(OAuthProvider.CJLU)" />
           </div>
           <div class="flex gap-4 items-center justify-between p-4">
             <div>
@@ -400,9 +425,10 @@ onMounted(() => {
               </div>
             </div>
             <Button
-              :label="connections.codeforces ? t('ptoj.connected') : t('ptoj.connect')" :disabled="!!connections.codeforces"
-              @click="connectOAuth(OAuthProvider.Codeforces)"
+              v-if="connections.codeforces" :label="t('ptoj.disconnect')" severity="danger" outlined
+              @click="event => disconnectOAuth(event, OAuthProvider.Codeforces)"
             />
+            <Button v-else :label="t('ptoj.connect')" @click="connectOAuth(OAuthProvider.Codeforces)" />
           </div>
         </div>
       </div>

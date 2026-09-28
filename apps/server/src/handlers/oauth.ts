@@ -127,10 +127,27 @@ export async function getUserOAuthConnections (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
+export async function removeOAuthConnection (ctx: Context) {
+  const provider = OAuthProviderSchema.safeParse(ctx.params.provider)
+  if (!provider.success) {
+    return createZodErrorResponse(ctx, provider.error)
+  }
+
+  const profile = await loadProfile(ctx)
+  const result = await oauthService.removeOAuthConnection(profile._id, provider.data)
+  if (!result) {
+    return createErrorResponse(ctx, ErrorCode.NotFound)
+  }
+
+  ctx.auditLog.info(`<User:${profile.uid}> removed ${provider.data} OAuth connection`)
+  return createEnvelopedResponse(ctx, null)
+}
+
 function registerOAuthHandlers (router: Router) {
   const oauthRouter = new Router({ prefix: '/oauth' })
 
   oauthRouter.get('/', loginRequire, getUserOAuthConnections)
+  oauthRouter.delete('/:provider', loginRequire, removeOAuthConnection)
   oauthRouter.get('/:provider/url', generateOAuthUrl)
   oauthRouter.get('/:provider/callback', handleOAuthCallback)
 

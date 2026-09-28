@@ -202,6 +202,57 @@ test('Verify account via CJLU SSO unlocks gated fields', async (t) => {
   t.is(r.body.data.motto, 'verified motto')
 })
 
+test('User can unbind only their own OAuth connection', async (t) => {
+  const userUid = 'testunbind'
+  const otherUid = 'testunbindother'
+  const requestUser = supertest.agent(server)
+
+  let r = await requestUser
+    .post('/api/account/register')
+    .send({ username: userUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  r = await requestUser
+    .post('/api/account/login')
+    .send({ username: userUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  r = await supertest(server)
+    .post('/api/account/register')
+    .send({ username: otherUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  const user = await User.findOne({ uid: userUid })
+  const otherUser = await User.findOne({ uid: otherUid })
+  t.truthy(user)
+  t.truthy(otherUser)
+
+  await new OAuth({
+    user: user!._id,
+    provider: OAuthProvider.CJLU,
+    providerId: userUid,
+    displayName: 'tester',
+    accessToken: 'test-token',
+  }).save()
+  await new OAuth({
+    user: otherUser!._id,
+    provider: OAuthProvider.CJLU,
+    providerId: otherUid,
+    displayName: 'other tester',
+    accessToken: 'test-token',
+  }).save()
+
+  r = await requestUser.delete(`/api/oauth/${OAuthProvider.CJLU}`)
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  t.is(await OAuth.countDocuments({ user: user!._id, provider: OAuthProvider.CJLU }), 0)
+  t.is(await OAuth.countDocuments({ user: otherUser!._id, provider: OAuthProvider.CJLU }), 1)
+})
+
 test('Update user with school not valid (too long)', async (t) => {
   const r = await request
     .put('/api/account/profile')
