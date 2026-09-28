@@ -2,7 +2,7 @@ import type { Types, UserDocument } from '@putong-oj/db'
 import type { Paginated, UserModel, UserSubmissionHeatmap } from '@putong-oj/shared'
 import type { PaginateOption, SortOption } from '../types/index.ts'
 import { Solution, User } from '@putong-oj/db'
-import { EXPORT_SIZE_MAX, OAuthProvider, RESERVED_KEYWORDS, UserPrivilege } from '@putong-oj/shared'
+import { OAuthProvider, RESERVED_KEYWORDS, UserPrivilege } from '@putong-oj/shared'
 import escapeRegExp from 'lodash/escapeRegExp.js'
 import { DateTime } from 'luxon'
 import config from '../config/index.ts'
@@ -92,26 +92,6 @@ export async function findRanklist (
   }
 
   return await User.paginate(filter, query) as any
-}
-
-export async function exportRanklist (
-  opt: { group?: string },
-): Promise<Pick<UserModel, 'uid' | 'nick' | 'solve' | 'submit'>[]> {
-  const { group } = opt
-
-  const filter: Record<string, any> = {
-    solve: { $gt: 0 },
-    privilege: { $ne: UserPrivilege.Banned },
-  }
-  if (typeof group === 'string') {
-    filter.groups = group
-  }
-
-  return await User.find(filter)
-    .select({ _id: 0, uid: 1, nick: 1, solve: 1, submit: 1 })
-    .sort({ solve: -1, submit: 1, createdAt: 1 })
-    .limit(EXPORT_SIZE_MAX)
-    .lean()
 }
 
 export async function getUser (uid: string): Promise<UserDocument | null> {
@@ -279,7 +259,6 @@ const userService = {
   suggestUsers,
   getAllUserItems,
   findRanklist,
-  exportRanklist,
   getUser,
   updateUser,
   checkUserAvailable,

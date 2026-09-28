@@ -1,8 +1,6 @@
 import type {
   UserItemListQueryResult,
   UserProfileQueryResult,
-  UserRanklistExportQuery,
-  UserRanklistExportQueryResult,
   UserRanklistQuery,
   UserRanklistQueryResult,
   UserSuggestQuery,
@@ -22,7 +20,4 @@ export async function getAllUserItems () {
 
 export async function findRanklist (params: UserRanklistQuery) {
   return apiClient.get<UserRanklistQueryResult>('/users/ranklist', { params })
-}
-export async function exportRanklist (params: UserRanklistExportQuery) {
-  return apiClient.get<UserRanklistExportQueryResult>('/users/ranklist/export', { params })
 }

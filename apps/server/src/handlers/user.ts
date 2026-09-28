@@ -3,25 +3,20 @@ import type { Context } from 'koa'
 import Router from '@koa/router'
 import { Group, Solution } from '@putong-oj/db'
 import {
-  ErrorCode,
   JudgeStatus,
   UserItemListQueryResultSchema,
   UserProfileQueryResultSchema,
-  UserRanklistExportQueryResultSchema,
-  UserRanklistExportQuerySchema,
   UserRanklistQueryResultSchema,
   UserRanklistQuerySchema,
   UserSuggestQueryResultSchema,
   UserSuggestQuerySchema,
 } from '@putong-oj/shared'
 import difference from 'lodash/difference.js'
-import { adminRequire, loadProfile, loginRequire } from '../middlewares/authn.ts'
-import { dataExportLimit } from '../middlewares/ratelimit.ts'
+import { adminRequire, loginRequire } from '../middlewares/authn.ts'
 import userService from '../services/user.ts'
 import { ERR_INVALID_ID, ERR_NOT_FOUND } from '../utils/constants.ts'
 import {
   createEnvelopedResponse,
-  createErrorResponse,
   createZodErrorResponse,
 } from '../utils/index.ts'
 
@@ -54,21 +49,6 @@ export async function findRanklist (ctx: Context) {
 
   const users = await userService.findRanklist(query.data)
   const result = UserRanklistQueryResultSchema.encode(users)
-  return createEnvelopedResponse(ctx, result)
-}
-
-export async function exportRanklist (ctx: Context) {
-  const query = UserRanklistExportQuerySchema.safeParse(ctx.request.query)
-  if (!query.success) {
-    return createZodErrorResponse(ctx, query.error)
-  }
-  const profile = await loadProfile (ctx)
-  if (!query.data.group && !profile.isAdmin) {
-    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to export full ranklist')
-  }
-
-  const users = await userService.exportRanklist(query.data)
-  const result = UserRanklistExportQueryResultSchema.encode(users)
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -125,7 +105,6 @@ function registerUserHandlers (router: Router) {
   userRouter.get('/items', adminRequire, getAllUserItems)
   userRouter.get('/suggest', loginRequire, suggestUsers)
   userRouter.get('/ranklist', findRanklist)
-  userRouter.get('/ranklist/export', loginRequire, dataExportLimit, exportRanklist)
   userRouter.get('/:uid', getUser)
 
   router.use(userRouter.routes(), userRouter.allowedMethods())
