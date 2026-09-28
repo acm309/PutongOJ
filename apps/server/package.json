@@ -46,7 +46,6 @@
     "@types/koa-ratelimit": "catalog:",
     "@types/koa-send": "catalog:",
     "@types/koa-static": "catalog:",
-    "@types/koa__router": "catalog:",
     "@types/lodash": "catalog:",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",

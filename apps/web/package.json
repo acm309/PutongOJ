@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-legacy": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
+    "@vue/devtools-api": "catalog:",
     "@vueuse/core": "catalog:",
     "@zip.js/zip.js": "catalog:",
     "axios": "catalog:",
