@@ -1,4 +1,5 @@
-import { UserPrivilege } from '@putong-oj/shared'
+import { OAuth, User } from '@putong-oj/db'
+import { ErrorCode, OAuthProvider, UserPrivilege } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -29,6 +30,11 @@ test.before('Create user and login', async (t) => {
   t.true(r.body.success)
   t.is(r.body.data.uid, uid)
   t.is(r.body.data.privilege, UserPrivilege.User)
+  t.false(r.body.data.verified)
+
+  // Newly registered users are unverified; mark this one as verified so that
+  // the profile-update tests below can exercise fields gated by verification.
+  await User.updateOne({ uid }, { $set: { verified: true } })
 })
 
 test('Update user with nick not valid (too long)', async (t) => {
@@ -93,6 +99,107 @@ test('Update user\'s motto then clear', async (t) => {
     .get(`/api/users/${uid}`)
   t.is(r.status, 200)
   t.is(r.body.data.motto, '')
+})
+
+test('Unverified user cannot update gated profile fields', async (t) => {
+  const unverifiedUid = 'testunverified'
+  const requestUnverified = supertest.agent(server)
+
+  let r = await requestUnverified
+    .post('/api/account/register')
+    .send({ username: unverifiedUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+  t.false(r.body.data.verified)
+
+  r = await requestUnverified
+    .put('/api/account/profile')
+    .send({ motto: 'test19025' })
+  t.is(r.status, 200)
+  t.false(r.body.success)
+  t.is(r.body.code, ErrorCode.Forbidden)
+})
+
+test('Verify account requires a CJLU SSO connection', async (t) => {
+  const unverifiedUid = 'testverifyreq'
+  const requestUnverified = supertest.agent(server)
+
+  let r = await requestUnverified
+    .post('/api/account/register')
+    .send({ username: unverifiedUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  r = await requestUnverified
+    .post('/api/account/verify')
+  t.is(r.status, 200)
+  t.false(r.body.success)
+  t.is(r.body.code, ErrorCode.Forbidden)
+})
+
+test('Verify account rejects a mismatched CJLU SSO provider id', async (t) => {
+  const unverifiedUid = 'testverifymismatch'
+  const requestUnverified = supertest.agent(server)
+
+  let r = await requestUnverified
+    .post('/api/account/register')
+    .send({ username: unverifiedUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  const user = await User.findOne({ uid: unverifiedUid })
+  t.truthy(user)
+  await new OAuth({
+    user: user!._id,
+    provider: OAuthProvider.CJLU,
+    providerId: 'test-cjlu-mismatch',
+    displayName: 'tester',
+    accessToken: 'test-token',
+  }).save()
+
+  r = await requestUnverified
+    .post('/api/account/verify')
+  t.is(r.status, 200)
+  t.false(r.body.success)
+  t.is(r.body.code, ErrorCode.Forbidden)
+})
+
+test('Verify account via CJLU SSO unlocks gated fields', async (t) => {
+  const unverifiedUid = 'testverified'
+  const requestUnverified = supertest.agent(server)
+
+  let r = await requestUnverified
+    .post('/api/account/register')
+    .send({ username: unverifiedUid, password: await encryptData(pwd) })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  const user = await User.findOne({ uid: unverifiedUid })
+  t.truthy(user)
+  await new OAuth({
+    user: user!._id,
+    provider: OAuthProvider.CJLU,
+    providerId: unverifiedUid,
+    displayName: 'tester',
+    accessToken: 'test-token',
+  }).save()
+
+  r = await requestUnverified
+    .post('/api/account/verify')
+  t.is(r.status, 200)
+  t.true(r.body.success)
+
+  r = await requestUnverified
+    .get('/api/account/profile')
+  t.is(r.status, 200)
+  t.true(r.body.data.verified)
+
+  r = await requestUnverified
+    .put('/api/account/profile')
+    .send({ motto: 'verified motto' })
+  t.is(r.status, 200)
+  t.true(r.body.success)
+  t.is(r.body.data.motto, 'verified motto')
 })
 
 test('Update user with school not valid (too long)', async (t) => {

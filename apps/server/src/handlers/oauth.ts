@@ -17,6 +17,7 @@ import {
 import { loadProfile, loginRequire } from '../middlewares/authn.ts'
 import oauthService from '../services/oauth.ts'
 import sessionService from '../services/session.ts'
+import userService from '../services/user.ts'
 import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export const providerMap: Record<string, OAuthProvider> = {
@@ -102,6 +103,16 @@ export async function handleOAuthCallback (ctx: Context) {
   }
   const updatedConnection = await oauthService
     .upsertOAuthConnection(user._id, connection)
+
+  if (!user.verified && oauthService.isVerifiableOAuthConnection(user, connection)) {
+    try {
+      await userService.updateUser(user, { verified: true })
+      ctx.auditLog.info(`<User:${user.uid}> verified account via ${connection.provider} OAuth`)
+    } catch (err) {
+      ctx.auditLog.error('Failed to auto-verify account after OAuth connection', err)
+    }
+  }
+
   const response = OAuthCallbackQueryResultSchema.encode({
     action: stateData.action,
     connection: updatedConnection,

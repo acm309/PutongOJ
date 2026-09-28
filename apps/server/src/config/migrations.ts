@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { md5 } from '@noble/hashes/legacy.js'
 import { Contest, ID, mongoose, OAuth, Post, User } from '@putong-oj/db'
 import { OAuthProvider } from '@putong-oj/shared'
+import { isVerifiableOAuthConnection } from '../services/oauth.ts'
 import { settingsService } from '../services/settings.ts'
 import { createLogger } from '../utils/logger.ts'
 
@@ -212,6 +213,40 @@ async function migrateGroupIdToObjectId () {
   )
 }
 
+async function migrateUserVerifiedBackfill () {
+  const users = await User.find({ verified: { $exists: false } })
+    .select({ _id: 1, uid: 1 })
+    .lean()
+
+  if (users.length === 0) {
+    logger.info('Migration user.verified backfill skipped, no users to migrate')
+    return
+  }
+
+  const connections = await OAuth.find({
+    provider: OAuthProvider.CJLU,
+    user: { $in: users.map(user => user._id) },
+  }).lean()
+  const connectionByUserId = new Map(
+    connections.map(connection => [ connection.user.toString(), connection ]),
+  )
+  const operations = users.map((user) => {
+    const connection = connectionByUserId.get(user._id.toString())
+    const verified = connection !== undefined
+      && isVerifiableOAuthConnection(user, connection)
+
+    return {
+      updateOne: {
+        filter: { _id: user._id, verified: { $exists: false } },
+        update: { $set: { verified } },
+      },
+    }
+  })
+  const result = await User.bulkWrite(operations, { ordered: false })
+
+  logger.info(`Migration user.verified backfill completed, modified=${result.modifiedCount}`)
+}
+
 const migrationTasks: MigrationTask[] = [
   {
     key: '20260320-user-storage-quota-default',
@@ -242,6 +277,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260922-group-object-id',
     description: 'Replace Group.gid and User.gid[] with ObjectId-based group references',
     run: migrateGroupIdToObjectId,
+  },
+  {
+    key: '20260927-user-verified-backfill',
+    description: 'Backfill pre-existing users as verified only when their CJLU SSO providerId matches their uid',
+    run: migrateUserVerifiedBackfill,
   },
 ]
 

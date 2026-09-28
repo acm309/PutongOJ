@@ -113,6 +113,18 @@ onRouteParamUpdate(fetch)
         <div class="lg:col-span-2 space-y-2">
           <Fieldset :legend="t('ptoj.basic_information')">
             <div class="space-y-4">
+              <div v-if="user.verified" class="flex gap-3 items-center">
+                <i class="m-2 pi pi-verified text-lg text-primary" />
+                <div>
+                  <div class="text-muted-color text-sm">
+                    {{ t('ptoj.account_verification') }}
+                  </div>
+                  <div class="font-medium">
+                    {{ t('ptoj.verified') }}
+                  </div>
+                </div>
+              </div>
+
               <div v-if="user.mail" class="flex gap-3 items-center">
                 <i class="m-2 pi pi-envelope text-lg text-muted-color" />
                 <div>

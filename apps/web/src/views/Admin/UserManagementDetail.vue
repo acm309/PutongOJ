@@ -33,6 +33,7 @@ import {
   updateUser,
   updateUserPassword,
 } from '@/api/admin'
+import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { privilegeOptions } from '@/utils/constant'
@@ -80,6 +81,7 @@ const hasChanges = computed(() => {
     || editingUser.value.mail !== user.value.mail
     || editingUser.value.school !== user.value.school
     || editingUser.value.avatar !== user.value.avatar
+    || editingUser.value.verified !== user.value.verified
 })
 const hasQuotaChanges = computed(() => {
   if (!user.value) return false
@@ -103,6 +105,7 @@ function setEditingUser () {
     school: user.value.school,
     avatar: user.value.avatar,
     storageQuota: byteToMegabyte(user.value.storageQuota),
+    verified: user.value.verified,
   }
 }
 
@@ -149,6 +152,9 @@ async function saveUser () {
   }
   if (editingUser.value.avatar !== user.value.avatar) {
     payload.avatar = editingUser.value.avatar
+  }
+  if (editingUser.value.verified !== user.value.verified) {
+    payload.verified = editingUser.value.verified
   }
 
   saving.value = true
@@ -350,6 +356,11 @@ onRouteParamUpdate(fetch)
           <label for="nickname">{{ t('ptoj.nickname') }}</label>
         </IftaLabel>
 
+        <LabeledSwitch
+          v-model="editingUser.verified" variant="value" :label="t('ptoj.account_verification')"
+          :description="editingUser.verified ? t('ptoj.verified') : t('ptoj.not_verified')" :disabled="!canOperate"
+        />
+
         <IftaLabel>
           <InputText
             id="email" v-model="editingUser.mail" fluid type="email" maxlength="254"
@@ -366,7 +377,7 @@ onRouteParamUpdate(fetch)
           <label for="school">{{ t('ptoj.school') }}</label>
         </IftaLabel>
 
-        <IftaLabel>
+        <IftaLabel class="md:col-span-2">
           <InputText
             id="avatar" v-model="editingUser.avatar" fluid maxlength="300"
             :placeholder="t('ptoj.enter_avatar_url')" :readonly="!canOperate || !isRoot"
