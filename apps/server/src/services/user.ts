@@ -139,6 +139,9 @@ export async function updateUser (user: UserDocument, data: Partial<UserModel>):
   if (data.school !== undefined) {
     user.school = data.school
   }
+  if (data.verified !== undefined) {
+    user.verified = data.verified
+  }
   if (data.pwd !== undefined) {
     user.pwd = data.pwd
   }

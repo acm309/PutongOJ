@@ -37,6 +37,7 @@ export const AdminUserDetailQueryResultSchema = z.object({
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,
+  verified: UserModelSchema.shape.verified,
   storageQuota: UserModelSchema.shape.storageQuota,
   lastRequestId: UserModelSchema.shape.lastRequestId,
   lastVisitedAt: UserModelSchema.shape.lastVisitedAt,
@@ -52,6 +53,7 @@ export const AdminUserEditPayloadSchema = z.object({
   motto: UserModelSchema.shape.motto.optional(),
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school.optional(),
+  verified: UserModelSchema.shape.verified.optional(),
   storageQuota: UserModelSchema.shape.storageQuota.optional(),
 })
 
