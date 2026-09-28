@@ -2,9 +2,6 @@
 import type { AdminFileListQuery, AdminFileListQueryResult } from '@putong-oj/shared'
 import { AdminFileListQuerySchema } from '@putong-oj/shared'
 import Button from 'primevue/button'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
-import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -12,6 +9,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { findFiles, removeFile } from '@/api/admin'
 import FileDataTable from '@/components/FileDataTable.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import UserFilter from '@/components/UserFilter.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -67,7 +66,7 @@ function onPage (event: any) {
   })
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -76,6 +75,10 @@ function onSearch () {
     },
   })
 }
+
+const {
+  searchNow: onSearch,
+} = useDebouncedSearch(applySearch)
 
 async function onDelete (storageKey: string) {
   deletingId.value = storageKey
@@ -98,17 +101,13 @@ onRouteQueryUpdate(fetch)
     <PageHeader bottom-border icon="pi pi-folder-open" :title="t('ptoj.file_management')">
       <template #toolbar>
         <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-          <IconField>
-            <InputIcon class="pi pi-user text-(--p-text-secondary-color)" />
-            <InputText
-              v-model="query.uploader" fluid :placeholder="t('ptoj.filter_by_user')" maxlength="30"
-              :disabled="loading" @keypress.enter="onSearch"
-            />
-          </IconField>
+          <UserFilter
+            v-model="query.uploader" :disabled="loading" :placeholder="t('ptoj.filter_by_user')"
+            force-selection @select="onSearch"
+          />
 
           <div class="flex gap-2 items-center justify-end lg:col-span-2">
             <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
           </div>
         </div>
       </template>

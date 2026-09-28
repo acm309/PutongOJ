@@ -1,6 +1,8 @@
 import type { CourseRole } from '@putong-oj/shared'
 import { JudgeStatus, Language, UserPrivilege } from '@putong-oj/shared'
 
+export const SEARCH_DEBOUNCE_MS = 500
+
 export const languageHighlight: Record<Language, string> = {
   [Language.C]: 'c',
   [Language.Cpp11]: 'cpp',

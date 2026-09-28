@@ -21,9 +21,10 @@ import ExportDialog from '@/components/ExportDialog.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import UserFilter from '@/components/UserFilter.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import { exportDataToFile } from '@/utils/export'
-import { getJudgeStatusClassname } from '@/utils/format'
+import { getJudgeStatusClassname, toOptionalNumber } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -91,7 +92,7 @@ function onPage (event: any) {
   })
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -105,7 +106,24 @@ function onSearch () {
   })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
+function onProblemInput (event: { value?: string | number }) {
+  query.value.problem = toOptionalNumber(event.value)
+  onSearchInput()
+}
+
+function onContestInput (event: { value?: string | number }) {
+  query.value.contest = toOptionalNumber(event.value)
+  onSearchInput()
+}
+
 function onReset () {
+  cancelSearch()
   router.replace({
     query: {
       ...route.query,
@@ -168,7 +186,7 @@ onBeforeUnmount(clearAutoRefresh)
           <IconField>
             <InputNumber
               v-model="query.problem" mode="decimal" :min="1" fluid :use-grouping="false"
-              :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
+              :placeholder="t('ptoj.filter_by_problem')" @input="onProblemInput" @keypress.enter="onSearch"
             />
             <InputIcon class="pi pi-flag" />
           </IconField>
@@ -176,7 +194,7 @@ onBeforeUnmount(clearAutoRefresh)
           <IconField>
             <InputNumber
               v-model="query.contest" mode="decimal" :min="-1" fluid :use-grouping="false"
-              :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
+              :placeholder="t('ptoj.filter_by_contest')" @input="onContestInput" @keypress.enter="onSearch"
             />
             <InputIcon class="pi pi-trophy" />
           </IconField>
@@ -221,7 +239,6 @@ onBeforeUnmount(clearAutoRefresh)
               icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
               @click="onReset"
             />
-            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
           </div>
         </div>
       </template>

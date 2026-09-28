@@ -5,6 +5,7 @@ import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { findCourseItems } from '@/api/course'
+import { SEARCH_DEBOUNCE_MS } from '@/utils/constant'
 
 const props = defineProps({
   modelValue: {
@@ -48,7 +49,7 @@ const findCourseOptions = debounce(async (query: string) => {
   } finally {
     loading.value = false
   }
-}, 500)
+}, SEARCH_DEBOUNCE_MS)
 
 const value = computed({
   get: () => props.modelValue,

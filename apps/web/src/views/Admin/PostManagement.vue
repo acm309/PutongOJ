@@ -13,6 +13,7 @@ import { findPosts } from '@/api/admin'
 import PageHeader from '@/components/PageHeader.vue'
 import PostCreateDialog from '@/components/PostCreateDialog.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
@@ -66,7 +67,7 @@ async function fetch () {
   total.value = resp.data.total
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -76,7 +77,14 @@ function onSearch () {
   })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
 function onReset () {
+  cancelSearch()
   router.replace({
     query: {
       ...route.query,
@@ -124,7 +132,7 @@ onRouteQueryUpdate(fetch)
           <IconField>
             <InputText
               v-model="query.title" fluid :placeholder="t('ptoj.title')"
-              :disabled="loading" @keypress.enter="onSearch"
+              @input="onSearchInput" @keypress.enter="onSearch"
             />
             <InputIcon class="pi pi-search" />
           </IconField>
@@ -136,7 +144,6 @@ onRouteQueryUpdate(fetch)
               icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
               @click="onReset"
             />
-            <Button icon="pi pi-search" :label="t('ptoj.search')" :disabled="loading" outlined @click="onSearch" />
           </div>
         </div>
       </template>

@@ -121,6 +121,14 @@ export function thousandSeparator (num: number | string): string {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+export function toOptionalNumber (value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === '') {
+    return undefined
+  }
+  const number = Number(value)
+  return Number.isFinite(number) ? number : undefined
+}
+
 export function getJudgeStatusClassname (judgeStatus: JudgeStatus) {
   switch (judgeStatus) {
     case JudgeStatus.Accepted:

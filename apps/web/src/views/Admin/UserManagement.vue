@@ -16,6 +16,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { findUsers } from '@/api/admin'
 import PageHeader from '@/components/PageHeader.vue'
 import UserBatchImportModal from '@/components/UserBatchImportModal.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { privilegeOptions } from '@/utils/constant'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -67,7 +68,7 @@ function onPage (event: any) {
   } })
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({ query: {
     ...route.query,
     keyword: query.value.keyword || undefined,
@@ -76,7 +77,14 @@ function onSearch () {
   } })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
 function onReset () {
+  cancelSearch()
   router.replace({ query: {
     ...route.query,
     keyword: undefined,
@@ -110,7 +118,7 @@ onRouteQueryUpdate(fetch)
             <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
             <InputText
               v-model="query.keyword" fluid :placeholder="t('ptoj.search_by_username_or_nickname')"
-              maxlength="30" :disabled="loading" @keypress.enter="onSearch"
+              maxlength="30" @input="onSearchInput" @keypress.enter="onSearch"
             />
           </IconField>
 
@@ -129,7 +137,6 @@ onRouteQueryUpdate(fetch)
           <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
             <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
             <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
-            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
           </div>
         </div>
       </template>

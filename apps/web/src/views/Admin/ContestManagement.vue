@@ -18,8 +18,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { findContests } from '@/api/admin'
 import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useRootStore } from '@/store'
-import { timePretty } from '@/utils/format'
+import { timePretty, toOptionalNumber } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
@@ -91,7 +92,7 @@ async function fetch () {
   total.value = resp.data.total
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -106,7 +107,24 @@ function onSearch () {
   })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
+function onContestIdInput (event: { value?: string | number }) {
+  query.value.contestId = toOptionalNumber(event.value)
+  onSearchInput()
+}
+
+function onCourseInput (event: { value?: string | number }) {
+  query.value.course = toOptionalNumber(event.value)
+  onSearchInput()
+}
+
 function onReset () {
+  cancelSearch()
   router.replace({
     query: {
       ...route.query,
@@ -169,14 +187,14 @@ onRouteQueryUpdate(fetch)
             <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
             <InputText
               v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="200"
-              :disabled="loading" @keypress.enter="onSearch"
+              @input="onSearchInput" @keypress.enter="onSearch"
             />
           </IconField>
 
           <IconField>
             <InputNumber
               v-model="query.contestId" mode="decimal" fluid :placeholder="t('ptoj.filter_by_contest_id')"
-              :min="1" :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
+              :min="1" :use-grouping="false" @input="onContestIdInput" @keypress.enter="onSearch"
             />
             <InputIcon class="pi pi-hashtag" />
           </IconField>
@@ -184,7 +202,7 @@ onRouteQueryUpdate(fetch)
           <IconField>
             <InputNumber
               v-model="query.course" mode="decimal" fluid :placeholder="t('ptoj.filter_by_course')" :min="-1"
-              :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
+              :use-grouping="false" @input="onCourseInput" @keypress.enter="onSearch"
             />
             <InputIcon class="pi pi-book" />
           </IconField>
@@ -210,7 +228,6 @@ onRouteQueryUpdate(fetch)
               icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
               @click="onReset"
             />
-            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
           </div>
         </div>
       </template>

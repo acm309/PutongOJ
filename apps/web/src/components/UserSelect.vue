@@ -5,6 +5,7 @@ import IftaLabel from 'primevue/iftalabel'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { suggestUsers } from '@/api/user'
+import { SEARCH_DEBOUNCE_MS } from '@/utils/constant'
 
 const props = defineProps<{
   modelValue?: string
@@ -51,8 +52,8 @@ async function fetch (event: any) {
   <IftaLabel>
     <AutoComplete
       id="user" v-model="value" :suggestions="users" option-label="uid" :loading="loading"
-      :placeholder="props.placeholder || t('ptoj.select_user')" fluid force-selection @complete="fetch"
-      @keypress.enter="emit('select')" @option-select="emit('select')" @blur="emit('blur')"
+      :placeholder="props.placeholder || t('ptoj.select_user')" fluid force-selection :delay="SEARCH_DEBOUNCE_MS"
+      @complete="fetch" @keypress.enter="emit('select')" @option-select="emit('select')" @blur="emit('blur')"
     >
       <template #option="{ option }">
         {{ option.uid }}

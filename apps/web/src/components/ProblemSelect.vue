@@ -4,6 +4,7 @@ import AutoComplete from 'primevue/autocomplete'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { findProblemItems } from '@/api/problem'
+import { SEARCH_DEBOUNCE_MS } from '@/utils/constant'
 
 interface ProblemOption { value: number, label: string }
 
@@ -54,7 +55,7 @@ async function fetch (event: { query: string }) {
 <template>
   <AutoComplete
     v-model="selected" :suggestions="suggestions" option-label="label" :loading="loading"
-    :placeholder="t('oj.search_problems_placeholder')" fluid multiple @complete="fetch"
+    :placeholder="t('oj.search_problems_placeholder')" fluid multiple :delay="SEARCH_DEBOUNCE_MS" @complete="fetch"
   >
     <template #option="{ option }">
       <span class="mr-2 text-muted-color">[{{ option.value }}]</span>

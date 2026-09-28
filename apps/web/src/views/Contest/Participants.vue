@@ -13,6 +13,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findParticipants, updateParticipantStatus } from '@/api/contest'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useContestStore } from '@/store/modules/contest'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -108,7 +109,7 @@ function onSort (event: any) {
   })
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -119,7 +120,14 @@ function onSearch () {
   })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
 function onReset () {
+  cancelSearch()
   router.replace({
     query: {
       ...route.query,
@@ -152,7 +160,7 @@ onRouteQueryUpdate(fetch)
       <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
         <InputText
           v-model="query.user" fluid :placeholder="t('ptoj.filter_by_username_or_nickname')" maxlength="30"
-          :disabled="loading" @keypress.enter="onSearch"
+          @input="onSearchInput" @keypress.enter="onSearch"
         />
 
         <Select
@@ -170,7 +178,6 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
           />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
     </div>

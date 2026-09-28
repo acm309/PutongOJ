@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
@@ -7,11 +6,12 @@ import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Tag from 'primevue/tag'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCreate from '@/components/CourseCreate.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
@@ -31,7 +31,6 @@ const { isRoot } = storeToRefs(sessionStore)
 
 const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
-const SEARCH_DEBOUNCE_MS = 300
 
 const page = computed(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
@@ -65,19 +64,14 @@ function applySearch () {
   })
 }
 
-const debouncedSearch = debounce(applySearch, SEARCH_DEBOUNCE_MS)
-
-function onKeywordInput () {
-  debouncedSearch()
-}
-
-function onSearch () {
-  debouncedSearch.cancel()
-  applySearch()
-}
+const {
+  searchNow: onSearch,
+  searchLater: onKeywordInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
 
 function onReset () {
-  debouncedSearch.cancel()
+  cancelSearch()
   router.push({
     name: 'courses',
     query: {
@@ -100,7 +94,6 @@ function onPage (event: any) {
 
 onMounted(fetch)
 onRouteQueryUpdate(fetch)
-onBeforeUnmount(() => debouncedSearch.cancel())
 </script>
 
 <template>

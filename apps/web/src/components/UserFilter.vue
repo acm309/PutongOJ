@@ -6,6 +6,7 @@ import InputIcon from 'primevue/inputicon'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { suggestUsers } from '@/api/user'
+import { SEARCH_DEBOUNCE_MS } from '@/utils/constant'
 
 const props = defineProps<{
   modelValue?: string
@@ -53,7 +54,7 @@ async function fetch (event: any) {
     <AutoComplete
       v-model="value" :suggestions="users" option-label="uid" :disabled="props.disabled" :loading="loading"
       :placeholder="props.placeholder || t('ptoj.filter_by_user')" fluid :force-selection="props.forceSelection"
-      @complete="fetch" @keypress.enter="emit('select')" @option-select="emit('select')"
+      :delay="SEARCH_DEBOUNCE_MS" @complete="fetch" @keypress.enter="emit('select')" @option-select="emit('select')"
     >
       <template #option="{ option }">
         {{ option.uid }}

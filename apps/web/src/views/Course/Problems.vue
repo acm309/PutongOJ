@@ -16,6 +16,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { moveCourseProblem, removeCourseProblem } from '@/api/course'
 import ProblemTag from '@/components/ProblemTag.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useCourseStore } from '@/store/modules/course'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -84,7 +85,12 @@ async function fetch () {
   loading.value = false
 }
 
-const search = () => reload({ page: 1, type: type.value, content: content.value })
+const applySearch = () => reload({ page: 1, type: type.value, content: content.value })
+const {
+  searchNow: search,
+  searchLater,
+} = useDebouncedSearch(applySearch)
+
 const pageChange = (val: number) => reload({ page: val })
 
 async function switchStatus (problem: ProblemEntityPreview) {
@@ -163,11 +169,11 @@ onRouteQueryUpdate(fetch)
         <div class="flex gap-2">
           <Select
             v-model="type" class="w-36" fluid :options="searchOptions" option-label="label" option-value="value"
-            :disabled="loading"
+            :disabled="loading" @change="search"
           />
           <InputText
-            v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
-            @keypress.enter="search"
+            v-model="content" fluid placeholder="Enter search content..."
+            @input="searchLater" @keypress.enter="search"
           />
         </div>
 
@@ -177,7 +183,6 @@ onRouteQueryUpdate(fetch)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
             @click="() => reload({ page: 1, type: undefined, content: undefined })"
           /> -->
-          <Button :label="t('oj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
         </div>
       </div>
     </div>

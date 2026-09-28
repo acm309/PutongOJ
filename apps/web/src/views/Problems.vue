@@ -13,6 +13,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import ProblemTag from '@/components/ProblemTag.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
 import { statusLabels } from '@/utils/constant'
@@ -68,7 +69,18 @@ async function fetch () {
   loading.value = false
 }
 
-const search = () => reload({ page: 1, type: type.value, content: content.value })
+const applySearch = () => reload({ page: 1, type: type.value, content: content.value })
+const {
+  searchNow: search,
+  searchLater,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
+function onReset () {
+  cancelSearch()
+  reload({ page: 1, type: undefined, content: undefined })
+}
+
 const pageChange = (val: number) => reload({ page: val })
 
 function change (problem: { pid: number, status: 0 | 2 }) {
@@ -90,11 +102,11 @@ onProfileUpdate(fetch)
           <div class="flex gap-2">
             <Select
               v-model="type" class="w-36" fluid :options="options" option-label="label" option-value="value"
-              :disabled="loading"
+              :disabled="loading" @change="search"
             />
             <InputText
-              v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
-              @keypress.enter="search"
+              v-model="content" fluid placeholder="Enter search content..."
+              @input="searchLater" @keypress.enter="search"
             />
           </div>
 
@@ -102,9 +114,8 @@ onProfileUpdate(fetch)
             <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
             <Button
               icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
-              @click="() => reload({ page: 1, type: undefined, content: undefined })"
+              @click="onReset"
             />
-            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
           </div>
         </div>
       </template>

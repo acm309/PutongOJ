@@ -13,6 +13,7 @@ import { findContests } from '@/api/contest'
 import ContestDataTable from '@/components/ContestDataTable.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
+import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
 const { t } = useI18n()
@@ -82,7 +83,7 @@ function onPage (event: any) {
   })
 }
 
-function onSearch () {
+function applySearch () {
   router.replace({
     query: {
       ...route.query,
@@ -92,7 +93,14 @@ function onSearch () {
   })
 }
 
+const {
+  searchNow: onSearch,
+  searchLater: onSearchInput,
+  cancelSearch,
+} = useDebouncedSearch(applySearch)
+
 function onReset () {
+  cancelSearch()
   router.replace({
     query: {
       ...route.query,
@@ -115,7 +123,7 @@ onRouteQueryUpdate(fetch)
             <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
             <InputText
               v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="30"
-              :disabled="loading" @keypress.enter="onSearch"
+              @input="onSearchInput" @keypress.enter="onSearch"
             />
           </IconField>
 

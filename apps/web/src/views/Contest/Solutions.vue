@@ -223,7 +223,6 @@ onBeforeUnmount(clearAutoRefresh)
             icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
             @click="onReset"
           />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
         </div>
       </div>
     </div>
