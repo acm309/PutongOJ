@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import debounce from 'lodash.debounce'
 import { storeToRefs } from 'pinia'
 import Button from 'primevue/button'
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
+import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Tag from 'primevue/tag'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCreate from '@/components/CourseCreate.vue'
@@ -27,6 +31,7 @@ const { isRoot } = storeToRefs(sessionStore)
 
 const DEFAULT_PAGE_SIZE = 10
 const MAX_PAGE_SIZE = 100
+const SEARCH_DEBOUNCE_MS = 300
 
 const page = computed(() =>
   Math.max(Number.parseInt(route.query.page as string) || 1, 1))
@@ -35,12 +40,52 @@ const pageSize = computed(() =>
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
 
 const loading = ref(false)
+const keyword = ref(String(route.query.keyword || ''))
 const createDialogVisible = ref(false)
 
 async function fetch () {
+  keyword.value = String(route.query.keyword || '')
   loading.value = true
-  await findCourses({ page: page.value, pageSize: pageSize.value })
+  await findCourses({
+    page: page.value,
+    pageSize: pageSize.value,
+    keyword: keyword.value.trim() || undefined,
+  })
   loading.value = false
+}
+
+function applySearch () {
+  router.push({
+    name: 'courses',
+    query: {
+      ...route.query,
+      keyword: keyword.value.trim() || undefined,
+      page: undefined,
+    },
+  })
+}
+
+const debouncedSearch = debounce(applySearch, SEARCH_DEBOUNCE_MS)
+
+function onKeywordInput () {
+  debouncedSearch()
+}
+
+function onSearch () {
+  debouncedSearch.cancel()
+  applySearch()
+}
+
+function onReset () {
+  debouncedSearch.cancel()
+  router.push({
+    name: 'courses',
+    query: {
+      ...route.query,
+      keyword: undefined,
+      page: undefined,
+    },
+  })
 }
 
 function onPage (event: any) {
@@ -55,6 +100,7 @@ function onPage (event: any) {
 
 onMounted(fetch)
 onRouteQueryUpdate(fetch)
+onBeforeUnmount(() => debouncedSearch.cancel())
 </script>
 
 <template>
@@ -65,6 +111,26 @@ onRouteQueryUpdate(fetch)
           v-if="isRoot" icon="pi pi-plus" :label="t('oj.course_create')" :disabled="loading"
           @click="createDialogVisible = true"
         />
+      </template>
+
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
+          <IconField>
+            <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
+            <InputText
+              v-model="keyword" fluid :placeholder="t('ptoj.search_by_title')" maxlength="80"
+              @input="onKeywordInput" @keypress.enter="onSearch"
+            />
+          </IconField>
+
+          <div class="flex gap-2 items-center justify-end">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !keyword.trim()"
+              @click="onReset"
+            />
+          </div>
+        </div>
       </template>
     </PageHeader>
 

@@ -31,6 +31,7 @@ const CourseFieldsSchema = z.object({
 export const CourseListQuerySchema = z.object({
   page: PaginationSchema.shape.page,
   pageSize: PaginationSchema.shape.pageSize.default(5),
+  keyword: z.string().trim().max(80).optional(),
 })
 
 export type CourseListQuery = z.infer<typeof CourseListQuerySchema>

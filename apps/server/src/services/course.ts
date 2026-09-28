@@ -15,12 +15,15 @@ import omit from 'lodash/omit.js'
 import { courseRoleEntire, courseRoleNone, encrypt } from '../utils/constants.ts'
 
 export async function findCourses (
-  opt: PaginateOption & {},
+  opt: PaginateOption & { keyword?: string },
 ): Promise<Paginated<CourseEntityPreview>> {
-  const { page, pageSize } = opt
+  const { page, pageSize, keyword } = opt
   const query: Record<string, unknown> = {}
+  if (keyword) {
+    query.name = { $regex: new RegExp(escapeRegExp(keyword), 'i') }
+  }
   const result = await Course.paginate(query, {
-    sort: { courseId: -1 },
+    sort: { updatedAt: -1, courseId: -1 },
     page,
     limit: pageSize,
     lean: true,

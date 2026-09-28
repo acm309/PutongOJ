@@ -41,6 +41,18 @@ test('findCourses', async (t) => {
   t.is(typeof result.docs[0].encrypt, 'number')
 })
 
+test('findCourses (keyword)', async (t) => {
+  const result = await courseService.findCourses({
+    page: 1,
+    pageSize: 10,
+    keyword: 'java',
+  })
+
+  t.truthy(result)
+  t.true(result.docs.length > 0)
+  t.true(result.docs.every(course => course.name.toLowerCase().includes('java')))
+})
+
 test('createCourse (name too short)', async (t) => {
   const course = { ...testCourse, name: 'CP' }
   await t.throwsAsync(courseService.createCourse(course))
@@ -110,6 +122,21 @@ test.serial('updateCourse (serial)', async (t) => {
   t.is(updatedCourse?.courseId, courseId)
   t.is(updatedCourse?.name, 'Advanced C Programming')
   t.is(updatedCourse?.description, 'An advanced course about C programming')
+})
+
+test.serial('findCourses (sort by updatedAt desc)', async (t) => {
+  const courseId = testContext.course?.courseId
+  if (!courseId) {
+    return t.fail('Previous test did not create a course successfully')
+  }
+
+  const result = await courseService.findCourses({
+    page: 1,
+    pageSize: 10,
+  })
+
+  t.truthy(result)
+  t.is(result.docs[0]?.courseId, courseId)
 })
 
 test.serial('updateCourseMember (serial)', async (t) => {
