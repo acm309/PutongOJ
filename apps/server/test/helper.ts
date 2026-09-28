@@ -1,4 +1,4 @@
-import { Comment, Contest, Course, CourseMember, Discussion, Files, Group, ID, Post, Problem, Settings, Solution, Tag, User } from '@putong-oj/db'
+import { Comment, Contest, Course, CourseMember, Discussion, Files, Group, ID, OAuth, Post, Problem, Settings, Solution, Tag, User } from '@putong-oj/db'
 import redis from '../src/config/redis.ts'
 import '../src/config/db.ts'
 
@@ -12,6 +12,7 @@ export async function removeall () {
     Files.deleteMany({}),
     Group.deleteMany({}),
     ID.deleteMany({}),
+    OAuth.deleteMany({}),
     Post.deleteMany({}),
     Problem.deleteMany({}),
     Settings.deleteMany({}),

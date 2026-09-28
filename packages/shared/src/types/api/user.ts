@@ -21,6 +21,7 @@ export const UserProfileQueryResultSchema = z.object({
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail.optional(),
   school: UserModelSchema.shape.school,
+  verified: UserModelSchema.shape.verified,
   groups: z.array(z.object({
     id: GroupModelSchema.shape.id,
     title: GroupModelSchema.shape.title,

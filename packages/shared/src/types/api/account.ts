@@ -13,6 +13,7 @@ export const AccountProfileQueryResultSchema = z.object({
   motto: UserModelSchema.shape.motto,
   mail: UserModelSchema.shape.mail,
   school: UserModelSchema.shape.school,
+  verified: UserModelSchema.shape.verified,
 })
 
 export type AccountProfileQueryResult = z.input<typeof AccountProfileQueryResultSchema>

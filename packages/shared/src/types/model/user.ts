@@ -19,6 +19,7 @@ export const UserModelSchema = z.object({
   motto: z.string().max(300),
   mail: z.union([ z.email(), z.literal('') ]),
   school: z.string().max(30),
+  verified: z.boolean(),
   groups: z.array(ObjectIdSchema),
   storageQuota: z.int().nonnegative(),
   submit: z.int().nonnegative(),

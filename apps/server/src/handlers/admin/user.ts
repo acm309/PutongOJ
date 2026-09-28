@@ -81,9 +81,9 @@ export async function updateUser (ctx: Context) {
   }
 
   try {
-    const { privilege, nick, avatar, motto, school, mail, storageQuota } = payload.data
+    const { privilege, nick, avatar, motto, school, mail, verified, storageQuota } = payload.data
     const updatedUser = await userService.updateUser(user, {
-      privilege, nick, avatar, motto, school, mail, storageQuota,
+      privilege, nick, avatar, motto, school, mail, verified, storageQuota,
     })
     const result = AdminUserDetailQueryResultSchema.encode(updatedUser)
     ctx.auditLog.info(`<User:${user.uid}> updated by <User:${profile.uid}>`)

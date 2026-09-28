@@ -37,6 +37,7 @@ export async function databaseSetup () {
         uid: 'admin',
         pwd: passwordHash(deploy.adminInitPwd),
         privilege: UserPrivilege.Root,
+        verified: true,
       }).save(),
     )
   }
