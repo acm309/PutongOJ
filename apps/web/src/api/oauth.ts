@@ -25,3 +25,7 @@ export async function handleOAuthCallback (provider: OAuthProvider, params: OAut
 export async function getUserOAuthConnections () {
   return apiClient.get<OAuthUserConnectionsQueryResult>('/oauth')
 }
+
+export async function removeOAuthConnection (provider: OAuthProvider) {
+  return apiClient.delete<null>(`/oauth/${provider}`)
+}
