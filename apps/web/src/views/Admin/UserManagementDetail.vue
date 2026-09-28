@@ -34,6 +34,7 @@ import {
   updateUserPassword,
 } from '@/api/admin'
 import LabeledSwitch from '@/components/LabeledSwitch.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
 import { privilegeOptions } from '@/utils/constant'
@@ -303,12 +304,7 @@ onRouteParamUpdate(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
-    <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-      <i class="p-[4.5px] pi pi-user-edit text-2xl" />
-      <h1 class="text-xl">
-        {{ t('ptoj.user_management') }}
-      </h1>
-    </div>
+    <PageHeader icon="pi pi-user-edit" :title="t('ptoj.user_management')" />
 
     <template v-if="loading || !user">
       <div class="flex gap-4 items-center justify-center px-6 py-24">

@@ -11,6 +11,7 @@ import Select from 'primevue/select'
 import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import PageHeader from '@/components/PageHeader.vue'
 import ProblemTag from '@/components/ProblemTag.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { useSessionStore } from '@/store/modules/session'
@@ -83,36 +84,31 @@ onProfileUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-th-large text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.problem') }}
-        </h1>
-      </div>
+    <PageHeader bottom-border icon="pi pi-th-large" :title="t('ptoj.problem')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <div class="flex gap-2">
+            <Select
+              v-model="type" class="w-36" fluid :options="options" option-label="label" option-value="value"
+              :disabled="loading"
+            />
+            <InputText
+              v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
+              @keypress.enter="search"
+            />
+          </div>
 
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <div class="flex gap-2">
-          <Select
-            v-model="type" class="w-36" fluid :options="options" option-label="label" option-value="value"
-            :disabled="loading"
-          />
-          <InputText
-            v-model="content" fluid placeholder="Enter search content..." :disabled="loading"
-            @keypress.enter="search"
-          />
+          <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
+              @click="() => reload({ page: 1, type: undefined, content: undefined })"
+            />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
+          </div>
         </div>
-
-        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading"
-            @click="() => reload({ page: 1, type: undefined, content: undefined })"
-          />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="search" />
-        </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <DataTable class="-mb-px whitespace-nowrap" :value="problems.docs" :lazy="true" :loading="loading" scrollable>
       <Column class="pl-8 text-center w-18">

@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import PageHeader from '@/components/PageHeader.vue'
 import { useRootStore } from '@/store'
 import { useContestStore } from '@/store/modules/contest'
 
@@ -30,12 +31,8 @@ onMounted(fetch)
 
 <template>
   <div v-if="!contestLoaded" class="max-w-6xl p-0">
-    <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-      <i class="p-[4.5px] pi pi-trophy text-2xl" />
-      <h1 class="text-xl">
-        {{ t('ptoj.contest') }}
-      </h1>
-    </div>
+    <PageHeader icon="pi pi-trophy" :title="t('ptoj.contest')" />
+
     <div class="flex gap-4 items-center justify-center px-6 py-24">
       <i class="pi pi-spin pi-spinner text-2xl" />
       <span>{{ t('ptoj.loading') }}</span>

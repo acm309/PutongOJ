@@ -15,6 +15,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findSubmissions } from '@/api/account'
+import PageHeader from '@/components/PageHeader.vue'
 import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
 import emitter from '@/utils/emitter'
@@ -119,63 +120,59 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-6xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-copy text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.my_submissions') }}
-        </h1>
-      </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <IconField>
-          <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" :use-grouping="false" fluid
-            :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-flag" />
-        </IconField>
+    <PageHeader bottom-border icon="pi pi-copy" :title="t('ptoj.my_submissions')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <IconField>
+            <InputNumber
+              v-model="query.problem" mode="decimal" :min="1" :use-grouping="false" fluid
+              :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-flag" />
+          </IconField>
 
-        <IconField>
-          <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" :use-grouping="false" fluid
-            :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-trophy" />
-        </IconField>
+          <IconField>
+            <InputNumber
+              v-model="query.contest" mode="decimal" :min="-1" :use-grouping="false" fluid
+              :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-trophy" />
+          </IconField>
 
-        <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
-        >
-          <template #option="slotProps">
-            <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
-              {{ slotProps.option.label }}
-            </div>
-          </template>
-          <template #dropdownicon>
-            <i class="pi pi-check-square" />
-          </template>
-        </Select>
+          <Select
+            v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
+          >
+            <template #option="slotProps">
+              <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
+                {{ slotProps.option.label }}
+              </div>
+            </template>
+            <template #dropdownicon>
+              <i class="pi pi-check-square" />
+            </template>
+          </Select>
 
-        <Select
-          v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
-        >
-          <template #dropdownicon>
-            <i class="pi pi-code" />
-          </template>
-        </Select>
+          <Select
+            v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
+          >
+            <template #dropdownicon>
+              <i class="pi pi-code" />
+            </template>
+          </Select>
 
-        <div class="flex gap-2 items-center justify-end md:col-span-2 xl:col-span-2">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
-          />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          <div class="flex gap-2 items-center justify-end md:col-span-2 xl:col-span-2">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <SolutionDataTable
       class="-mb-px" :value="docs" :loading="loading" :sort-field="query.sortBy"

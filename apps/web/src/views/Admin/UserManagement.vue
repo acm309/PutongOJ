@@ -14,6 +14,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findUsers } from '@/api/admin'
+import PageHeader from '@/components/PageHeader.vue'
 import UserBatchImportModal from '@/components/UserBatchImportModal.vue'
 import { privilegeOptions } from '@/utils/constant'
 import { getPrivilegeLabel, getPrivilegeSeverity, timePretty } from '@/utils/format'
@@ -98,42 +99,41 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-users text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.user_management') }}
-        </h1>
-      </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <IconField>
-          <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
-          <InputText
-            v-model="query.keyword" fluid :placeholder="t('ptoj.search_by_username_or_nickname')"
-            maxlength="30" :disabled="loading" @keypress.enter="onSearch"
-          />
-        </IconField>
+    <PageHeader bottom-border icon="pi pi-users" :title="t('ptoj.user_management')">
+      <template #action>
+        <Button icon="pi pi-user-plus" severity="secondary" outlined :disabled="loading" @click="batchImportVisible = true" />
+      </template>
 
-        <Select
-          v-model="query.privilege" fluid :options="privilegeOptions" option-label="label"
-          option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')" :disabled="loading" @change="onSearch"
-        >
-          <template #option="slotProps">
-            <Tag
-              :value="getPrivilegeLabel(slotProps.option.value)"
-              :severity="getPrivilegeSeverity(slotProps.option.value)"
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <IconField>
+            <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
+            <InputText
+              v-model="query.keyword" fluid :placeholder="t('ptoj.search_by_username_or_nickname')"
+              maxlength="30" :disabled="loading" @keypress.enter="onSearch"
             />
-          </template>
-        </Select>
+          </IconField>
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
-          <Button icon="pi pi-user-plus" severity="secondary" outlined :disabled="loading" @click="batchImportVisible = true" />
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          <Select
+            v-model="query.privilege" fluid :options="privilegeOptions" option-label="label"
+            option-value="value" show-clear :placeholder="t('ptoj.filter_by_privilege')" :disabled="loading" @change="onSearch"
+          >
+            <template #option="slotProps">
+              <Tag
+                :value="getPrivilegeLabel(slotProps.option.value)"
+                :severity="getPrivilegeSeverity(slotProps.option.value)"
+              />
+            </template>
+          </Select>
+
+          <div class="flex gap-2 items-center justify-end lg:col-span-1 md:col-span-2">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading" @click="onReset" />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <DataTable
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"

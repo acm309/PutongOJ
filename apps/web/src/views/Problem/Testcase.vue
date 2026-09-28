@@ -15,6 +15,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createTestcase, findTestcases, removeTestcase } from '@/api/problem'
+import PageHeader from '@/components/PageHeader.vue'
 import TestcaseInput from '@/components/TestcaseInput.vue'
 import { useProblemStore } from '@/store/modules/problem'
 import { testcaseUrl } from '@/utils/helper'
@@ -216,22 +217,16 @@ fetchTestcases()
 
 <template>
   <div class="p-0">
-    <div class="border-b border-surface flex flex-wrap gap-4 items-center justify-between p-6">
-      <div class="flex font-semibold gap-4 items-center">
-        <i class="p-[4.5px] pi pi-database text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.testcases') }}
-        </h1>
-      </div>
-      <div class="flex gap-2">
+    <PageHeader bottom-border icon="pi pi-database" :title="t('ptoj.testcases')">
+      <template #action>
         <Button
           icon="pi pi-download" :label="t('ptoj.export')" outlined severity="secondary"
           :disabled="docs.length === 0" @click="handleExportZip"
         />
         <Button icon="pi pi-upload" :label="t('ptoj.import')" outlined severity="secondary" @click="handleImportZip" />
         <input ref="fileInputRef" type="file" accept=".zip" class="hidden" @change="onFileSelected">
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <DataTable :value="docs" :loading="loading">
       <Column field="uuid" class="pl-6">

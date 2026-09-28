@@ -9,6 +9,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { sendNotificationBroadcast, sendNotificationUser } from '@/api/admin'
+import PageHeader from '@/components/PageHeader.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useMessage } from '@/utils/message'
 
@@ -84,14 +85,10 @@ function onSendNotification (event: Event) {
 </script>
 
 <template>
-  <div class="max-w-4xl p-6">
-    <div class="flex font-semibold gap-4 items-center mb-4">
-      <i class="p-[4.5px] pi pi-send text-2xl" />
-      <h1 class="text-xl">
-        {{ t('ptoj.create_notification') }}
-      </h1>
-    </div>
-    <div class="gap-4 grid grid-cols-1 md:grid-cols-2">
+  <div class="max-w-4xl">
+    <PageHeader icon="pi pi-send" :title="t('ptoj.create_notification')" />
+
+    <div class="gap-4 grid grid-cols-1 md:grid-cols-2 p-6 pt-0">
       <IftaLabel :class="{ 'md:col-span-2': selectedDispatchMethod === 'broadcast' }">
         <Select
           id="method" v-model="selectedDispatchMethod" option-label="label" option-value="value"

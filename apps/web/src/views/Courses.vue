@@ -7,6 +7,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import CourseCreate from '@/components/CourseCreate.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { useSessionStore } from '@/store/modules/session'
@@ -58,21 +59,14 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
-    <div class="p-6">
-      <div class="flex gap-4 items-center justify-between">
-        <div class="flex font-semibold gap-4 items-center">
-          <i class="p-[4.5px] pi pi-book text-2xl" />
-          <h1 class="text-xl">
-            {{ t('oj.course') }}
-          </h1>
-        </div>
-
+    <PageHeader icon="pi pi-book" :title="t('oj.course')">
+      <template #action>
         <Button
           v-if="isRoot" icon="pi pi-plus" :label="t('oj.course_create')" :disabled="loading"
           @click="createDialogVisible = true"
         />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <template v-if="loading || courses.total === 0">
       <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">

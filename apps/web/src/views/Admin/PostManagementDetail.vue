@@ -12,6 +12,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { deletePost, getPost, updatePost } from '@/api/admin'
 import LabeledSwitch from '@/components/LabeledSwitch.vue'
 import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { useMessage } from '@/utils/message'
 
@@ -165,18 +166,13 @@ function del (event: Event) {
 
 <template>
   <div class="max-w-6xl p-0">
-    <div class="flex items-center justify-between pt-6 px-6">
-      <div class="flex font-semibold gap-4 items-center">
-        <i class="p-[4.5px] pi pi-file-edit text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.edit_post') }}
-        </h1>
-      </div>
-
-      <RouterLink v-if="post" :to="{ name: 'PostDetail', params: { slug: post.slug } }">
-        <Button outlined :label="t('ptoj.view_post')" icon="pi pi-eye" />
-      </RouterLink>
-    </div>
+    <PageHeader icon="pi pi-file-edit" :title="t('ptoj.edit_post')">
+      <template #action>
+        <RouterLink v-if="post" :to="{ name: 'PostDetail', params: { slug: post.slug } }">
+          <Button outlined :label="t('ptoj.view_post')" icon="pi pi-eye" />
+        </RouterLink>
+      </template>
+    </PageHeader>
 
     <template v-if="loading || !post">
       <div class="flex gap-4 items-center justify-center px-6 py-24">

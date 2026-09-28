@@ -18,6 +18,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { findGroups } from '@/api/group'
 import { exportRanklist, findRanklist } from '@/api/user'
 import ExportDialog from '@/components/ExportDialog.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { exportDataToFile } from '@/utils/export'
@@ -132,33 +133,30 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-chart-line text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.ranklist') }}
-        </h1>
-      </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <Select
-          v-model="query.group" fluid :options="groups" option-label="title" option-value="id" show-clear
-          :placeholder="t('ptoj.filter_by_group')" :loading="loadingGroups" :disabled="loading" @change="onSearch"
-        />
+    <PageHeader bottom-border icon="pi pi-chart-line" :title="t('ptoj.ranklist')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <Select
+            v-model="query.group" fluid :options="groups" option-label="title" option-value="id" show-clear
+            :placeholder="t('ptoj.filter_by_group')" :loading="loadingGroups" :disabled="loading" @change="onSearch"
+          />
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
-          <Button
-            v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : (!isAdmin && !hasFilter) ? t('ptoj.please_apply_filter_first') : undefined"
-            icon="pi pi-file-export" severity="secondary" outlined
-            :disabled="loading || !isLogined || (!isAdmin && !hasFilter)" @click="exportDialog = true"
-          />
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
-          />
+          <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+            <Button
+              v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : (!isAdmin && !hasFilter) ? t('ptoj.please_apply_filter_first') : undefined"
+              icon="pi pi-file-export" severity="secondary" outlined
+              :disabled="loading || !isLogined || (!isAdmin && !hasFilter)" @click="exportDialog = true"
+            />
+
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <DataTable class="-mb-px" :value="docs" :lazy="true" :loading="loading" scrollable>
       <Column class="max-w-18 pl-8 text-center">

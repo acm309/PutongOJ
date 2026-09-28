@@ -18,6 +18,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { exportSolutions, findSolutions } from '@/api/admin'
 import ExportDialog from '@/components/ExportDialog.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import SolutionDataTable from '@/components/SolutionDataTable.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { judgeStatusOptions, languageOptions } from '@/utils/constant'
@@ -159,75 +160,72 @@ onBeforeUnmount(clearAutoRefresh)
 
 <template>
   <div class="max-w-[1440px] p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-copy text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.solution_management') }}
-        </h1>
-      </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
-        <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
+    <PageHeader bottom-border icon="pi pi-copy" :title="t('ptoj.solution_management')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
+          <UserFilter v-model="query.user" :disabled="loading" @select="onSearch" />
 
-        <IconField>
-          <InputNumber
-            v-model="query.problem" mode="decimal" :min="1" fluid :use-grouping="false"
-            :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-flag" />
-        </IconField>
-
-        <IconField>
-          <InputNumber
-            v-model="query.contest" mode="decimal" :min="-1" fluid :use-grouping="false"
-            :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-trophy" />
-        </IconField>
-
-        <Select
-          v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
-        >
-          <template #option="slotProps">
-            <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
-              {{ slotProps.option.label }}
-            </div>
-          </template>
-          <template #dropdownicon>
-            <i class="pi pi-check-square" />
-          </template>
-        </Select>
-
-        <Select
-          v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
-        >
-          <template #dropdownicon>
-            <i class="pi pi-code" />
-          </template>
-        </Select>
-
-        <div class="flex gap-2 items-center justify-end xl:col-span-3">
-          <Button
-            icon="pi pi-file-export" severity="secondary" outlined :disabled="loading"
-            @click="exportDialog = true"
-          />
-          <ButtonGroup>
-            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-            <Button
-              v-tooltip.bottom="t('ptoj.auto_refresh')" :icon="autoRefresh ? 'pi pi-stop' : 'pi pi-play'"
-              :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading" @click="toggleAutoRefresh"
+          <IconField>
+            <InputNumber
+              v-model="query.problem" mode="decimal" :min="1" fluid :use-grouping="false"
+              :placeholder="t('ptoj.filter_by_problem')" :disabled="loading" @keypress.enter="onSearch"
             />
-          </ButtonGroup>
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
-          />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+            <InputIcon class="pi pi-flag" />
+          </IconField>
+
+          <IconField>
+            <InputNumber
+              v-model="query.contest" mode="decimal" :min="-1" fluid :use-grouping="false"
+              :placeholder="t('ptoj.filter_by_contest')" :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-trophy" />
+          </IconField>
+
+          <Select
+            v-model="query.judge" fluid :options="judgeStatusOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_judge_status')" :disabled="loading" @change="onSearch"
+          >
+            <template #option="slotProps">
+              <div :class="getJudgeStatusClassname(slotProps.option.value as JudgeStatus)">
+                {{ slotProps.option.label }}
+              </div>
+            </template>
+            <template #dropdownicon>
+              <i class="pi pi-check-square" />
+            </template>
+          </Select>
+
+          <Select
+            v-model="query.language" fluid :options="languageOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_language')" :disabled="loading" @change="onSearch"
+          >
+            <template #dropdownicon>
+              <i class="pi pi-code" />
+            </template>
+          </Select>
+
+          <div class="flex gap-2 items-center justify-end xl:col-span-3">
+            <Button
+              icon="pi pi-file-export" severity="secondary" outlined :disabled="loading"
+              @click="exportDialog = true"
+            />
+
+            <ButtonGroup>
+              <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+              <Button
+                v-tooltip.bottom="t('ptoj.auto_refresh')" :icon="autoRefresh ? 'pi pi-stop' : 'pi pi-play'"
+                :severity="autoRefresh ? 'primary' : 'secondary'" outlined :disabled="loading" @click="toggleAutoRefresh"
+              />
+            </ButtonGroup>
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <SolutionDataTable
       v-model:selection="selectedDocs" class="-mb-px" :value="docs" :loading="loading"

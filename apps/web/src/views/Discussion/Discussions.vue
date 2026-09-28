@@ -10,6 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { findDiscussions } from '@/api/discussion'
 import DiscussionCreateDialog from '@/components/DiscussionCreateDialog.vue'
 import DiscussionDataView from '@/components/DiscussionDataView.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import UserFilter from '@/components/UserFilter.vue'
 import { useSessionStore } from '@/store/modules/session'
@@ -115,35 +116,33 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
-    <div class="p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-comments text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.discussions') }}
-        </h1>
-      </div>
-
-      <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
-        <UserFilter
-          v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')" force-selection
-          @select="onSearch"
+    <PageHeader icon="pi pi-comments" :title="t('ptoj.discussions')">
+      <template #action>
+        <Button
+          v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : undefined" icon="pi pi-plus"
+          severity="primary" :label="t('ptoj.create_discussion')" :disabled="loading || !isLogined"
+          @click="onCreateDiscussion"
         />
+      </template>
 
-        <div class="flex gap-2 items-center justify-end">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2">
+          <UserFilter
+            v-model="query.author" :disabled="loading" :placeholder="t('ptoj.filter_by_author')" force-selection
+            @select="onSearch"
           />
-          <Button
-            v-tooltip.top="!isLogined ? t('ptoj.please_login_first') : undefined" icon="pi pi-plus"
-            severity="primary" :label="t('ptoj.create_discussion')" :disabled="loading || !isLogined"
-            @click="onCreateDiscussion"
-          />
+
+          <div class="flex gap-2 items-center justify-end">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <template v-if="loading || docs.length === 0">
       <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">

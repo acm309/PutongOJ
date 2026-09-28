@@ -10,6 +10,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { findPosts } from '@/api/admin'
+import PageHeader from '@/components/PageHeader.vue'
 import PostCreateDialog from '@/components/PostCreateDialog.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import { timePretty } from '@/utils/format'
@@ -113,38 +114,33 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-6xl p-0">
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex font-semibold gap-4 items-center">
-          <i class="p-[4.5px] pi pi-megaphone text-2xl" />
-          <h1 class="text-xl">
-            {{ t('ptoj.post_management') }}
-          </h1>
-        </div>
-
+    <PageHeader icon="pi pi-megaphone" :title="t('ptoj.post_management')">
+      <template #action>
         <Button icon="pi pi-plus" :label="t('ptoj.create_post')" :disabled="loading" @click="createDialog = true" />
-      </div>
+      </template>
 
-      <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2 xl:grid-cols-3">
-        <IconField>
-          <InputText
-            v-model="query.title" fluid :placeholder="t('ptoj.title')"
-            :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-search" />
-        </IconField>
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end md:grid-cols-2 xl:grid-cols-3">
+          <IconField>
+            <InputText
+              v-model="query.title" fluid :placeholder="t('ptoj.title')"
+              :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-search" />
+          </IconField>
 
-        <div class="flex gap-2 items-center justify-end xl:col-span-2">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
-          />
-          <Button icon="pi pi-search" :label="t('ptoj.search')" :disabled="loading" outlined @click="onSearch" />
+          <div class="flex gap-2 items-center justify-end xl:col-span-2">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+            <Button icon="pi pi-search" :label="t('ptoj.search')" :disabled="loading" outlined @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div v-if="loading" class="border-surface border-t flex gap-3 items-center justify-center p-8 text-muted-color">
       <i class="pi pi-spin pi-spinner" />

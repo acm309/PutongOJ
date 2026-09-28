@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findFiles, removeFile } from '@/api/admin'
 import FileDataTable from '@/components/FileDataTable.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
 
@@ -94,29 +95,24 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-folder-open text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.file_management') }}
-        </h1>
-      </div>
+    <PageHeader bottom-border icon="pi pi-folder-open" :title="t('ptoj.file_management')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <IconField>
+            <InputIcon class="pi pi-user text-(--p-text-secondary-color)" />
+            <InputText
+              v-model="query.uploader" fluid :placeholder="t('ptoj.filter_by_user')" maxlength="30"
+              :disabled="loading" @keypress.enter="onSearch"
+            />
+          </IconField>
 
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <IconField>
-          <InputIcon class="pi pi-user text-(--p-text-secondary-color)" />
-          <InputText
-            v-model="query.uploader" fluid :placeholder="t('ptoj.filter_by_user')" maxlength="30"
-            :disabled="loading" @keypress.enter="onSearch"
-          />
-        </IconField>
-
-        <div class="flex gap-2 items-center justify-end lg:col-span-2">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          <div class="flex gap-2 items-center justify-end lg:col-span-2">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <FileDataTable
       :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort"

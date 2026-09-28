@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getUser } from '@/api/user'
 import CodeforcesProfile from '@/components/CodeforcesProfile.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import SubmissionHeatmap from '@/components/SubmissionHeatmap.vue'
 import { useRootStore } from '@/store'
 import { useSessionStore } from '@/store/modules/session'
@@ -70,12 +71,8 @@ onRouteParamUpdate(fetch)
 <template>
   <div class="max-w-7xl p-0">
     <template v-if="loading || !user">
-      <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-        <i class="p-[4.5px] pi pi-user text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.user_profile') }}
-        </h1>
-      </div>
+      <PageHeader icon="pi pi-user" :title="t('ptoj.user_profile')" />
+
       <div class="flex gap-4 items-center justify-center px-6 py-24">
         <i class="pi pi-spin pi-spinner text-2xl" />
         <span>{{ loading ? t('ptoj.loading') : t('ptoj.failed_load_profile') }}</span>

@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findContests } from '@/api/contest'
 import ContestDataTable from '@/components/ContestDataTable.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import SortingMenu from '@/components/SortingMenu.vue'
 import { onRouteQueryUpdate } from '@/utils/helper'
 
@@ -107,33 +108,28 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-trophy text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.contests') }}
-        </h1>
-      </div>
+    <PageHeader bottom-border icon="pi pi-trophy" :title="t('ptoj.contests')">
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <IconField>
+            <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
+            <InputText
+              v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="30"
+              :disabled="loading" @keypress.enter="onSearch"
+            />
+          </IconField>
 
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <IconField>
-          <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
-          <InputText
-            v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="30"
-            :disabled="loading" @keypress.enter="onSearch"
-          />
-        </IconField>
-
-        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
-          />
+          <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <SortingMenu :options="sortingOptions" :field="query.sortBy" :order="query.sort" @sort="onSort" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <template v-if="loading || docs.length === 0">
       <div class="flex gap-4 items-center justify-center px-6 py-24">

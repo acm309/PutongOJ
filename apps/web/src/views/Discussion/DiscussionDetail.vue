@@ -18,6 +18,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { updateDiscussion } from '@/api/admin'
 import { createComment, getDiscussion } from '@/api/discussion'
 import DiscussionTypeTag from '@/components/DiscussionTypeTag.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import UserSelect from '@/components/UserSelect.vue'
 import { useSessionStore } from '@/store/modules/session'
@@ -199,12 +200,7 @@ onMounted(fetchDiscussion)
 <template>
   <div class="max-w-4xl p-0">
     <template v-if="loading || !discussion">
-      <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-        <i class="p-[4.5px] pi pi-comments text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.discussion') }}
-        </h1>
-      </div>
+      <PageHeader icon="pi pi-comments" :title="t('ptoj.discussion')" />
 
       <div class="flex gap-4 items-center justify-center p-24">
         <template v-if="loading">

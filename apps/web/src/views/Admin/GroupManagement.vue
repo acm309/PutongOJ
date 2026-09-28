@@ -27,6 +27,7 @@ import {
 } from '@/api/admin'
 import { findGroups } from '@/api/group'
 import { getAllUserItems } from '@/api/user'
+import PageHeader from '@/components/PageHeader.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -356,31 +357,30 @@ watch([ sourceSearch, targetSearch ], resetSelections)
 
 <template>
   <div class="max-w-7xl p-0">
-    <div class="pt-6 px-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-paperclip text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.group_management') }}
-        </h1>
-      </div>
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
-        <Select
-          v-model="groupId" fluid :options="groups" option-label="title" option-value="id" show-clear
-          :placeholder="t('ptoj.select_group')" :loading="loadingGroups" :disabled="loading" @change="onSelect"
+    <PageHeader icon="pi pi-paperclip" :title="t('ptoj.group_management')">
+      <template #action>
+        <Button
+          icon="pi pi-plus" :label="t('ptoj.create_group')" severity="primary" outlined :disabled="loading"
+          @click="createDialog = true"
         />
+      </template>
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="init" />
-          <Button
-            icon="pi pi-plus" :label="t('ptoj.create_group')" severity="primary" outlined :disabled="loading"
-            @click="createDialog = true"
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2">
+          <Select
+            v-model="groupId" fluid :options="groups" option-label="title" option-value="id" show-clear
+            :placeholder="t('ptoj.select_group')" :loading="loadingGroups" :disabled="loading" @change="onSelect"
           />
+
+          <div class="flex gap-2 items-center justify-end lg:col-span-2 md:col-span-1">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="init" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <template v-if="!groupId">
-      <div class="border-surface border-t flex flex-col gap-4 items-center justify-center mt-6 px-6 py-24 text-center">
+      <div class="border-surface border-t flex flex-col gap-4 items-center justify-center px-6 py-24 text-center">
         <i class="pi pi-info-circle text-4xl text-muted-color" />
         <div>
           <h3 class="font-semibold mb-2 text-lg">
@@ -394,14 +394,14 @@ watch([ sourceSearch, targetSearch ], resetSelections)
     </template>
 
     <template v-else-if="loadingGroupDetail || !currentGroup">
-      <div class="border-surface border-t flex gap-4 items-center justify-center mt-6 px-6 py-24">
+      <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">
         <i class="pi pi-spin pi-spinner text-2xl" />
         <span>{{ loadingGroupDetail ? t('ptoj.loading') : t('ptoj.failed_load_group') }}</span>
       </div>
     </template>
 
     <template v-else>
-      <div class="mt-4 pb-6 px-6">
+      <div class="-mt-2 pb-6 px-6">
         <div class="flex gap-2 justify-end mb-4">
           <Button
             icon="pi pi-pencil" :label="t('ptoj.rename')" severity="secondary" outlined :disabled="loading"

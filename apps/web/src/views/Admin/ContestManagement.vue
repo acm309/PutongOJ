@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findContests } from '@/api/admin'
 import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useRootStore } from '@/store'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -154,68 +155,66 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-384 p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-trophy text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.contest_management') }}
-        </h1>
-      </div>
-
-      <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
-        <IconField>
-          <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
-          <InputText
-            v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="200"
-            :disabled="loading" @keypress.enter="onSearch"
-          />
-        </IconField>
-
-        <IconField>
-          <InputNumber
-            v-model="query.contestId" mode="decimal" fluid :placeholder="t('ptoj.filter_by_contest_id')"
-            :min="1" :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-hashtag" />
-        </IconField>
-
-        <IconField>
-          <InputNumber
-            v-model="query.course" mode="decimal" fluid :placeholder="t('ptoj.filter_by_course')" :min="-1"
-            :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
-          />
-          <InputIcon class="pi pi-book" />
-        </IconField>
-
-        <Select
-          v-model="query.isPublic" fluid :options="publicOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_public')" :disabled="loading" @change="onSearch"
+    <PageHeader bottom-border icon="pi pi-trophy" :title="t('ptoj.contest_management')">
+      <template #action>
+        <Button
+          icon="pi pi-plus" :label="t('ptoj.create_contest')" :disabled="loading"
+          @click="createDialog = true"
         />
+      </template>
 
-        <Select
-          v-model="query.isHidden" fluid :options="hiddenOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_hidden')" :disabled="loading" @change="onSearch"
-        />
+      <template #toolbar>
+        <div class="gap-4 grid grid-cols-1 items-end lg:grid-cols-3 md:grid-cols-2 xl:grid-cols-4">
+          <IconField>
+            <InputIcon class="pi pi-search text-(--p-text-secondary-color)" />
+            <InputText
+              v-model="query.title" fluid :placeholder="t('ptoj.search_by_title')" maxlength="200"
+              :disabled="loading" @keypress.enter="onSearch"
+            />
+          </IconField>
 
-        <Select
-          v-model="query.isLocked" fluid :options="lockedOptions" option-label="label" option-value="value"
-          show-clear :placeholder="t('ptoj.filter_by_locked')" :disabled="loading" @change="onSearch"
-        />
+          <IconField>
+            <InputNumber
+              v-model="query.contestId" mode="decimal" fluid :placeholder="t('ptoj.filter_by_contest_id')"
+              :min="1" :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-hashtag" />
+          </IconField>
 
-        <div class="flex gap-2 items-center justify-end lg:col-span-3 md:col-span-2 xl:col-span-2">
-          <Button
-            icon="pi pi-plus" :label="t('ptoj.create_contest')" :disabled="loading"
-            @click="createDialog = true"
+          <IconField>
+            <InputNumber
+              v-model="query.course" mode="decimal" fluid :placeholder="t('ptoj.filter_by_course')" :min="-1"
+              :use-grouping="false" :disabled="loading" @keypress.enter="onSearch"
+            />
+            <InputIcon class="pi pi-book" />
+          </IconField>
+
+          <Select
+            v-model="query.isPublic" fluid :options="publicOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_public')" :disabled="loading" @change="onSearch"
           />
-          <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
-          <Button
-            icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
-            @click="onReset"
+
+          <Select
+            v-model="query.isHidden" fluid :options="hiddenOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_hidden')" :disabled="loading" @change="onSearch"
           />
-          <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+
+          <Select
+            v-model="query.isLocked" fluid :options="lockedOptions" option-label="label" option-value="value"
+            show-clear :placeholder="t('ptoj.filter_by_locked')" :disabled="loading" @change="onSearch"
+          />
+
+          <div class="flex gap-2 items-center justify-end lg:col-span-3 md:col-span-2 xl:col-span-2">
+            <Button icon="pi pi-refresh" severity="secondary" outlined :disabled="loading" @click="fetch" />
+            <Button
+              icon="pi pi-filter-slash" severity="secondary" outlined :disabled="loading || !hasFilter"
+              @click="onReset"
+            />
+            <Button :label="t('ptoj.search')" icon="pi pi-search" :disabled="loading" @click="onSearch" />
+          </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <DataTable
       class="-mb-px whitespace-nowrap" :value="docs" sort-mode="single" :sort-field="query.sortBy"

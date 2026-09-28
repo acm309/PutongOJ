@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findFiles, removeFile } from '@/api/file'
 import FileDataTable from '@/components/FileDataTable.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { onRouteQueryUpdate } from '@/utils/helper'
 import { useMessage } from '@/utils/message'
@@ -94,23 +95,18 @@ onRouteQueryUpdate(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
-    <div class="border-b border-surface p-6">
-      <div class="flex font-semibold gap-4 items-center mb-4">
-        <i class="p-[4.5px] pi pi-folder-open text-2xl" />
-        <h1 class="text-xl">
-          {{ t('ptoj.my_files') }}
-        </h1>
-      </div>
+    <PageHeader bottom-border icon="pi pi-folder-open" :title="t('ptoj.my_files')">
+      <template #toolbar>
+        <Message v-if="isAdmin" severity="secondary">
+          {{ t('ptoj.admin_quota_bypass') }}
+        </Message>
 
-      <Message v-if="isAdmin" severity="secondary">
-        {{ t('ptoj.admin_quota_bypass') }}
-      </Message>
-
-      <MeterGroup
-        v-else :value="usageMeterValues" :min="0" :max="Math.max(usage.storageQuota, 1)"
-        label-position="start"
-      />
-    </div>
+        <MeterGroup
+          v-else :value="usageMeterValues" :min="0" :max="Math.max(usage.storageQuota, 1)"
+          label-position="start"
+        />
+      </template>
+    </PageHeader>
 
     <FileDataTable
       :value="docs" :loading="loading" :sort-field="query.sortBy" :sort-order="query.sort"

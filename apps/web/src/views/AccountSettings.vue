@@ -16,6 +16,7 @@ import { useRouter } from 'vue-router'
 import { getProfile, listSessions, revokeOtherSessions, revokeSession, updatePassword, updateProfile, verifyAccount } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections, removeOAuthConnection } from '@/api/oauth'
 import { getAvatarPresets } from '@/api/utils'
+import PageHeader from '@/components/PageHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { encryptData } from '@/utils/crypto'
@@ -311,12 +312,7 @@ onMounted(() => {
 
 <template>
   <div class="max-w-4xl p-0">
-    <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-      <i class="p-[4.5px] pi pi-cog text-2xl" />
-      <h1 class="text-xl">
-        {{ t('ptoj.account_settings') }}
-      </h1>
-    </div>
+    <PageHeader icon="pi pi-cog" :title="t('ptoj.account_settings')" />
 
     <template v-if="loading || !profile">
       <div class="flex gap-4 items-center justify-center px-6 py-24">
@@ -326,7 +322,7 @@ onMounted(() => {
     </template>
 
     <template v-else>
-      <div class="border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 p-6 pt-5">
+      <div class="-mt-2 border-b border-surface gap-x-4 gap-y-6 grid grid-cols-1 md:grid-cols-2 pb-6 px-6">
         <div class="flex gap-4 items-center md:col-span-2">
           <div class="cursor-pointer flex group relative" @click="openAvatarDialog">
             <UserAvatar :image="profile.avatar" class="h-20 shadow-xs w-20" />

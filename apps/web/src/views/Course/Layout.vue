@@ -9,6 +9,7 @@ import { computed, onBeforeMount, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { joinCourse } from '@/api/course'
+import PageHeader from '@/components/PageHeader.vue'
 import { useRootStore } from '@/store'
 import { useCourseStore } from '@/store/modules/course'
 import { onProfileUpdate } from '@/utils/helper'
@@ -83,12 +84,8 @@ onProfileUpdate(fetch)
 
 <template>
   <div v-if="!courseLoaded" class="max-w-6xl p-0">
-    <div class="flex font-semibold gap-4 items-center pt-6 px-6">
-      <i class="p-[4.5px] pi pi-book text-2xl" />
-      <h1 class="text-xl">
-        {{ t('oj.course') }}
-      </h1>
-    </div>
+    <PageHeader icon="pi pi-book" :title="t('oj.course')" />
+
     <div class="flex gap-4 items-center justify-center px-6 py-24">
       <i class="pi pi-spin pi-spinner text-2xl" />
       <span>{{ t('ptoj.loading') }}</span>

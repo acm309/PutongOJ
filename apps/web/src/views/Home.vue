@@ -8,6 +8,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findPosts } from '@/api/post'
+import PageHeader from '@/components/PageHeader.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
 import { onRouteQueryUpdate } from '@/utils/helper'
@@ -78,18 +79,13 @@ onRouteQueryUpdate(fetch)
     </div>
 
     <div class="bg-(--p-content-background) border border-surface md:rounded-xl shadow-lg">
-      <div class="flex items-center justify-between p-6">
-        <div class="flex font-semibold gap-4 items-center">
-          <i class="p-[4.5px] pi pi-megaphone text-2xl" />
-          <h1 class="text-xl">
-            {{ t('ptoj.announcements') }}
-          </h1>
-        </div>
-
-        <RouterLink v-if="isAdmin" :to="{ name: 'PostManagement' }">
-          <Button icon="pi pi-cog" severity="secondary" variant="outlined" :label="t('ptoj.post_management')" />
-        </RouterLink>
-      </div>
+      <PageHeader icon="pi pi-megaphone" :title="t('ptoj.announcements')">
+        <template #action>
+          <RouterLink v-if="isAdmin" :to="{ name: 'PostManagement' }">
+            <Button icon="pi pi-cog" severity="secondary" variant="outlined" :label="t('ptoj.post_management')" />
+          </RouterLink>
+        </template>
+      </PageHeader>
 
       <template v-if="loading || docs.length === 0">
         <div class="border-surface border-t flex gap-4 items-center justify-center px-6 py-24">

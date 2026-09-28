@@ -10,6 +10,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { capitalize, computed, onBeforeMount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { createTag, findTags, updateTag } from '@/api/admin'
+import PageHeader from '@/components/PageHeader.vue'
 import ProblemTag from '@/components/ProblemTag.vue'
 import { timePretty } from '@/utils/format'
 import { useMessage } from '@/utils/message'
@@ -151,16 +152,11 @@ onBeforeMount(fetch)
 
 <template>
   <div class="max-w-4xl p-0">
-    <!-- Header -->
-    <div class="border-b border-surface flex gap-4 items-center justify-between p-6">
-      <div class="flex font-semibold gap-4 items-center">
-        <i class="p-[4.5px] pi pi-tags text-2xl" />
-        <h1 class="text-xl">
-          Tag Management
-        </h1>
-      </div>
-      <Button icon="pi pi-plus" label="Create Tag" @click="openCreateModal" />
-    </div>
+    <PageHeader bottom-border icon="pi pi-tags" title="Tag Management">
+      <template #action>
+        <Button icon="pi pi-plus" label="Create Tag" @click="openCreateModal" />
+      </template>
+    </PageHeader>
 
     <!-- Empty state -->
     <template v-if="tags.length === 0">

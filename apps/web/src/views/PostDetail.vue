@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getPost } from '@/api/post'
 import MarkdownPreview from '@/components/MarkdownPreview.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useSessionStore } from '@/store/modules/session'
 import { timePretty } from '@/utils/format'
 
@@ -37,18 +38,16 @@ watch(() => route.params.slug, fetchPost)
 
 <template>
   <div class="max-w-6xl p-0">
-    <div class="flex items-center justify-between pt-6 px-6">
-      <div class="flex font-semibold gap-4 items-center">
-        <i class="p-[4.5px] pi pi-megaphone text-2xl" />
-        <h1 class="text-xl">
-          {{ (!post || post.isHidden) ? t('ptoj.post') : t('ptoj.announcement') }}
-        </h1>
-      </div>
-
-      <RouterLink v-if="isAdmin && post" :to="{ name: 'PostManagementDetail', params: { slug: post.slug } }">
-        <Button :label="t('ptoj.edit_post')" icon="pi pi-pencil" />
-      </RouterLink>
-    </div>
+    <PageHeader
+      icon="pi pi-megaphone"
+      :title="(!post || post.isHidden) ? t('ptoj.post') : t('ptoj.announcement')"
+    >
+      <template #action>
+        <RouterLink v-if="isAdmin && post" :to="{ name: 'PostManagementDetail', params: { slug: post.slug } }">
+          <Button :label="t('ptoj.edit_post')" icon="pi pi-pencil" />
+        </RouterLink>
+      </template>
+    </PageHeader>
 
     <template v-if="loading || !post">
       <div class="flex gap-4 items-center justify-center px-6 py-24">
