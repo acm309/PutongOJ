@@ -77,7 +77,7 @@ LanguageRegistry.register(Language.Java, {
   needCompile: true,
   compileCmd: [
     '/usr/bin/bash', '-c',
-    '/usr/bin/javac Main.java -encoding UTF-8 && /usr/bin/jar cvf Main.jar *.class',
+    '/usr/bin/javac Main.java -encoding UTF-8 && /usr/bin/jar -J-Djava.io.tmpdir=. cvf Main.jar *.class',
   ],
   runCmd: [
     '/usr/bin/java', '-DONLINE_JUDGE', '-cp', 'Main.jar', 'Main',

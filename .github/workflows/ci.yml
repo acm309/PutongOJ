@@ -149,6 +149,7 @@ jobs:
         options: >-
           --privileged
           --shm-size=256m
+          --cgroupns=host
 
     steps:
       - name: Check out repository

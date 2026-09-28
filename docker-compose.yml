@@ -33,6 +33,7 @@ services:
       context: .
       dockerfile: apps/judger/Dockerfile.sandbox
     privileged: true
+    cgroup: host
     shm_size: 256m
     ports:
       - 127.0.0.1:5050:5050

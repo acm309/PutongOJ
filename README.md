@@ -117,6 +117,7 @@ services:
       context: .
       dockerfile: apps/judger/Dockerfile.sandbox
     privileged: true
+    cgroup: host
     shm_size: 256m
     volumes:
       - putong-oj-data:/app/data:ro
