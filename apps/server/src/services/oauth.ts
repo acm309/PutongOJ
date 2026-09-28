@@ -339,6 +339,18 @@ export async function getUserOAuthConnections (
   return connections
 }
 
+export function isVerifiableOAuthConnection (
+  user: Pick<UserDocument, 'uid'>,
+  connection: OAuthConnection,
+): boolean {
+  return connection.provider === OAuthProvider.CJLU && connection.providerId === user.uid
+}
+
+export async function canVerifyUser (user: UserDocument): Promise<boolean> {
+  const connection = await getUserOAuthConnection(user._id, OAuthProvider.CJLU)
+  return connection !== null && isVerifiableOAuthConnection(user, connection)
+}
+
 export async function isOAuthConnectedToAnotherUser (
   userId: Types.ObjectId,
   connectionData: OAuthConnection,
@@ -393,6 +405,8 @@ const oauthService = {
   findUserByOAuthConnection,
   getUserOAuthConnection,
   getUserOAuthConnections,
+  canVerifyUser,
+  isVerifiableOAuthConnection,
   isOAuthConnectedToAnotherUser,
   upsertOAuthConnection,
   removeOAuthConnection,

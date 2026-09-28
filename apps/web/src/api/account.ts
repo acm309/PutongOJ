@@ -37,7 +37,18 @@ export async function getProfile () {
   )
 }
 export async function updateProfile (payload: AccountEditPayload) {
-  return apiClient.put<AccountProfileQueryResult>('/account/profile', payload)
+  return apiClient.put<AccountProfileQueryResult>(
+    '/account/profile',
+    payload,
+    { callerHandledCodes: [ ErrorCode.Forbidden ] },
+  )
+}
+export async function verifyAccount () {
+  return apiClient.post<null>(
+    '/account/verify',
+    undefined,
+    { callerHandledCodes: [ ErrorCode.Forbidden ] },
+  )
 }
 export async function updatePassword (payload: AccountChangePasswordPayload) {
   return apiClient.put<null>(

@@ -18,6 +18,7 @@ import {
 import { checkSession, loadProfile, loginRequire } from '../middlewares/authn.ts'
 import { userLoginLimit, userRegisterLimit } from '../middlewares/ratelimit.ts'
 import cryptoService from '../services/crypto.ts'
+import oauthService from '../services/oauth.ts'
 import sessionService from '../services/session.ts'
 import { settingsService } from '../services/settings.ts'
 import solutionService from '../services/solution.ts'
@@ -30,6 +31,8 @@ import {
   passwordHash,
   passwordHashBuffer,
 } from '../utils/index.ts'
+
+const profileFieldsRequiringVerification = [ 'motto' ] as const
 
 export async function getProfile (ctx: Context) {
   const profile = await checkSession(ctx)
@@ -153,9 +156,16 @@ export async function updateProfile (ctx: Context) {
       if (avatar !== profile.avatar) {
         const presets = await settingsService.getAvatarPresets()
         if (!presets.includes(avatar)) {
-          return createErrorResponse(ctx, ErrorCode.Forbidden, 'Avatar is not in the allowed presets')
+          return createErrorResponse(ctx, ErrorCode.BadRequest, 'Avatar is not in the allowed presets')
         }
       }
+    }
+
+    const fieldRequiringVerification = profileFieldsRequiringVerification.find(
+      field => payload.data[field] !== undefined && payload.data[field] !== profile[field],
+    )
+    if (fieldRequiringVerification !== undefined && !profile.verified) {
+      return createErrorResponse(ctx, ErrorCode.Forbidden)
     }
 
     const updatedUser = await userService.updateUser(profile, {
@@ -166,6 +176,27 @@ export async function updateProfile (ctx: Context) {
     return createEnvelopedResponse(ctx, result)
   } catch (err) {
     ctx.auditLog.error('Failed to update profile', err)
+    return createErrorResponse(ctx, ErrorCode.InternalServerError)
+  }
+}
+
+export async function verifyAccount (ctx: Context) {
+  const profile = await loadProfile(ctx)
+  if (profile.verified) {
+    return createEnvelopedResponse(ctx, null)
+  }
+
+  const canSelfVerify = await oauthService.canVerifyUser(profile)
+  if (!canSelfVerify) {
+    return createErrorResponse(ctx, ErrorCode.Forbidden, 'Account does not meet verification requirements')
+  }
+
+  try {
+    await userService.updateUser(profile, { verified: true })
+    ctx.auditLog.info(`<User:${profile.uid}> verified account via CJLU SSO`)
+    return createEnvelopedResponse(ctx, null)
+  } catch (err) {
+    ctx.auditLog.error('Failed to verify account', err)
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
   }
 }
@@ -275,6 +306,7 @@ function registerAccountHandlers (router: Router) {
   accountRouter.post('/logout', loginRequire, userLogout)
   accountRouter.put('/profile', loginRequire, updateProfile)
   accountRouter.put('/password', loginRequire, updatePassword)
+  accountRouter.post('/verify', loginRequire, verifyAccount)
   accountRouter.get('/submissions', loginRequire, findSubmissions)
 
   accountRouter.get('/sessions', loginRequire, listSessions)

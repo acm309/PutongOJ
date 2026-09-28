@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AccountEditPayload, AccountProfileQueryResult, OAuthConnectionUserView } from '@putong-oj/shared'
+import type { AccountEditPayload, AccountProfileQueryResult, ErrorEnveloped, OAuthConnectionUserView } from '@putong-oj/shared'
 import type { SessionInfo } from '@/types'
 import { ErrorCode, OAuthAction, OAuthProvider, passwordRegex } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
@@ -13,7 +13,7 @@ import { UAParser } from 'ua-parser-js'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { getProfile, listSessions, revokeOtherSessions, revokeSession, updatePassword, updateProfile } from '@/api/account'
+import { getProfile, listSessions, revokeOtherSessions, revokeSession, updatePassword, updateProfile, verifyAccount } from '@/api/account'
 import { generateOAuthUrl, getUserOAuthConnections } from '@/api/oauth'
 import { getAvatarPresets } from '@/api/utils'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -44,6 +44,7 @@ const avatarPresets = ref<string[]>([])
 const avatarDialog = ref(false)
 const selectedAvatar = ref('')
 const savingAvatar = ref(false)
+const verifying = ref(false)
 
 const hasChanges = computed(() => {
   if (!profile.value) return false
@@ -69,6 +70,12 @@ function openAvatarDialog () {
   avatarDialog.value = true
 }
 
+function handleVerifyAccountError (result: ErrorEnveloped) {
+  if (result.code === ErrorCode.Forbidden) {
+    message.error(t('ptoj.failed_proceed'), t('ptoj.verify_account_ineligible_detail'))
+  }
+}
+
 async function saveAvatar () {
   if (!profile.value || selectedAvatar.value === profile.value.avatar) {
     avatarDialog.value = false
@@ -80,6 +87,9 @@ async function saveAvatar () {
   savingAvatar.value = false
 
   if (!resp.success) {
+    if (resp.code === ErrorCode.Forbidden) {
+      message.error(t('ptoj.failed_proceed'), t('ptoj.account_verification_required'))
+    }
     return
   }
 
@@ -134,6 +144,9 @@ async function saveProfile () {
   saving.value = false
 
   if (!resp.success) {
+    if (resp.code === ErrorCode.Forbidden) {
+      message.error(t('ptoj.failed_proceed'), t('ptoj.account_verification_required'))
+    }
     return
   }
 
@@ -184,6 +197,27 @@ async function connectOAuth (provider: OAuthProvider) {
     return
   }
   window.open(resp.data.url, '_self', 'noopener,noreferrer')
+}
+
+async function verify () {
+  verifying.value = true
+  const resp = await verifyAccount()
+  if (!resp.success) {
+    handleVerifyAccountError(resp)
+    verifying.value = false
+    return
+  }
+
+  const profileResp = await getProfile()
+  verifying.value = false
+  if (!profileResp.success) {
+    return
+  }
+
+  profile.value = profileResp.data
+  setEditingProfile()
+  sessionStore.setProfile(profileResp.data)
+  message.success(t('ptoj.successful_proceed'), t('ptoj.account_verified_detail'))
 }
 
 function gotoUserManagement () {
@@ -370,6 +404,35 @@ onMounted(() => {
               @click="connectOAuth(OAuthProvider.Codeforces)"
             />
           </div>
+        </div>
+      </div>
+
+      <div class="border-b border-surface p-6">
+        <h2 class="font-semibold mb-3 text-lg">
+          {{ t('ptoj.account_verification') }}
+        </h2>
+        <p class="mb-5 text-muted-color text-sm">
+          {{ t('ptoj.account_verification_desc') }}
+        </p>
+        <div class="border border-surface flex gap-4 items-center justify-between p-4 rounded-lg">
+          <div class="flex gap-3 items-center">
+            <i
+              class="pi px-1 text-2xl"
+              :class="profile.verified ? 'pi-verified text-primary' : 'pi-shield text-muted-color'"
+            />
+            <div>
+              <div class="font-medium">
+                {{ profile.verified ? t('ptoj.verified') : t('ptoj.not_verified') }}
+              </div>
+            </div>
+          </div>
+          <Button
+            v-if="!profile.verified"
+            class="shrink-0"
+            :label="connections.cjlu ? t('ptoj.verify_account') : t('ptoj.connect')"
+            :loading="verifying"
+            @click="connections.cjlu ? verify() : connectOAuth(OAuthProvider.CJLU)"
+          />
         </div>
       </div>
 
