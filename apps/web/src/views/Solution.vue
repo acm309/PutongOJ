@@ -142,8 +142,8 @@ onRouteQueryUpdate(fetch)
             </span>
             <span>
               {{ t('oj.author_label') }}
-              <RouterLink v-if="solution.uid" :to="{ name: 'UserProfile', params: { uid: solution.uid } }">
-                {{ solution.uid }}
+              <RouterLink v-if="solution.user.uid" :to="{ name: 'UserProfile', params: { uid: solution.user.uid } }">
+                {{ solution.user.uid }}
               </RouterLink>
             </span>
             <span v-if="solution.contest">
@@ -268,8 +268,8 @@ onRouteQueryUpdate(fetch)
           </span>
           <span>
             Author:
-            <RouterLink :to="{ name: 'UserProfile', params: { uid: solution.simSolution.uid } }">
-              {{ solution.simSolution.uid }}
+            <RouterLink :to="{ name: 'UserProfile', params: { uid: solution.simSolution.user.uid } }">
+              {{ solution.simSolution.user.uid }}
             </RouterLink>
           </span>
           <span>{{ timePretty(solution.simSolution.create) }}</span>

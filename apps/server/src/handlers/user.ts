@@ -56,11 +56,11 @@ export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
   const [ solved, failed, groups, submissionHeatmap ] = await Promise.all([
     Solution
-      .find({ uid: user.uid, judge: JudgeStatus.Accepted })
+      .find({ user: user._id, judge: JudgeStatus.Accepted })
       .distinct('pid')
       .lean(),
     Solution
-      .find({ uid: user.uid, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
+      .find({ user: user._id, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
       .distinct('pid')
       .lean(),
     Group

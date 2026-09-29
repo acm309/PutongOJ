@@ -99,7 +99,7 @@ async function findProblems (ctx: Context) {
   if (profile && result.total > 0) {
     solved = await Solution
       .find({
-        uid: profile.uid,
+        user: profile._id,
         pid: { $in: result.docs.map(problem => problem.pid) },
         judge: JudgeStatus.Accepted,
       })

@@ -1,4 +1,4 @@
-import { connectMongoose, disconnectMongoose, Solution } from '@putong-oj/db'
+import { connectMongoose, disconnectMongoose, Solution, User } from '@putong-oj/db'
 import { JudgeStatus, Language, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { loadJudgerConfig } from '../src/config.ts'
@@ -17,11 +17,15 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
   const updater = new Updater(config)
   const statisticQueue = 'worker:updateStatistic'
   const similarityQueue = 'worker:checkSimilarity'
+  const uid = `updater-${sid}`
   let processing: Promise<void> | undefined
 
   try {
     await connectMongoose({ uri: config.mongodbURL })
-    await Solution.deleteMany({ sid })
+    await Promise.all([
+      Solution.deleteMany({ sid }),
+      User.deleteMany({ uid }),
+    ])
     await redis.del(
       RESULT_QUEUE_NAME,
       statisticQueue,
@@ -30,10 +34,14 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
       `${similarityQueue}:set`,
     )
 
+    const user = await User.create({
+      uid,
+      pwd: '0'.repeat(72),
+    })
     const solution = await Solution.create({
       sid,
       pid: 999_999,
-      uid: 'updater-integration',
+      user: user._id,
       code: 'print("hello")\n',
       length: 15,
       language: Language.Python,
@@ -61,7 +69,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
 
     t.deepEqual(dispatch, {
       type: WebSocketDispatchType.User,
-      username: 'updater-integration',
+      username: uid,
       message: {
         type: WebSocketMessageType.SubmissionResult,
         data: {
@@ -71,7 +79,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
       },
     })
     t.true([ problemTask, userTask ].some(task => task?.[1] === 'problem:999999'))
-    t.true([ problemTask, userTask ].some(task => task?.[1] === 'user:updater-integration'))
+    t.true([ problemTask, userTask ].some(task => task?.[1] === `user:${user._id}`))
     t.deepEqual(similarityTask, [ similarityQueue, String(sid) ])
   } finally {
     updater.stop()
@@ -87,6 +95,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
         ),
         subscriber.unsubscribe(WEBSOCKET_CHANNEL),
         Solution.deleteMany({ sid }),
+        User.deleteMany({ uid }),
       ])
       await Promise.all([
         redis.quit(),

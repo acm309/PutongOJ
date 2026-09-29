@@ -202,7 +202,9 @@ export type ContestSolutionListQuery = z.infer<typeof ContestSolutionListQuerySc
 export const ContestSolutionListQueryResultSchema = PaginatedSchema(z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
+  user: z.object({
+    uid: UserModelSchema.shape.uid,
+  }),
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
@@ -227,7 +229,7 @@ export type ContestSolutionListExportQuery = z.infer<typeof ContestSolutionListE
 export const ContestSolutionListExportQueryResultSchema = z.array(z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
+  uid: UserModelSchema.shape.uid,
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,

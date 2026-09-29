@@ -29,7 +29,7 @@ async function checkSimilarity (item: string) {
 
   const solutions = await Solution.find({
     pid: solution.pid,
-    uid: { $ne: solution.uid },
+    user: { $ne: solution.user },
     create: { $lt: solution.create },
     judge: JudgeStatus.Accepted,
   }, {

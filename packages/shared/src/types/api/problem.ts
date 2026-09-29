@@ -11,6 +11,7 @@ import { stringToInt } from '../codec.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { TagModelSchema } from '../model/tag.js'
+import { UserModelSchema } from '../model/user.js'
 import { ObjectIdStringSchema } from '../utils.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
@@ -163,7 +164,9 @@ export type ProblemSolutionListQuery = z.infer<typeof ProblemSolutionListQuerySc
 
 export const ProblemSolutionListQueryResultSchema = PaginatedSchema(z.object({
   sid: SolutionModelSchema.shape.sid,
-  uid: SolutionModelSchema.shape.uid,
+  user: z.object({
+    uid: UserModelSchema.shape.uid,
+  }),
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,

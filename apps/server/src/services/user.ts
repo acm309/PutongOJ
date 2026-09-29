@@ -161,15 +161,6 @@ export async function getSubmissionHeatmap (user: Types.ObjectId) {
     async () => {
       const timezone = config.submissionHeatmapTimezone
 
-      const userDoc = await User
-        .findById(user)
-        .select({ _id: 0, uid: 1 })
-        .lean()
-      if (!userDoc) {
-        return { data: {}, startDate: '', endDate: '', timezone }
-      }
-      const { uid } = userDoc
-
       const nowInTz = DateTime.now().setZone(timezone)
       const weekday = nowInTz.weekday
 
@@ -186,7 +177,7 @@ export async function getSubmissionHeatmap (user: Types.ObjectId) {
       const queryEnd = nowInTz.endOf('day').toUTC().toJSDate()
 
       const results = await Solution.aggregate<{ _id: string, count: number }>([
-        { $match: { uid, createdAt: { $gte: queryStart, $lte: queryEnd } } },
+        { $match: { user, createdAt: { $gte: queryStart, $lte: queryEnd } } },
         {
           $group: {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone } },

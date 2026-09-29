@@ -1,5 +1,5 @@
-import type { CourseDocument, SolutionDocument, Types } from '@putong-oj/db'
-import type { ContestModel, WithId } from '@putong-oj/shared'
+import type { CourseDocument, Types } from '@putong-oj/db'
+import type { ContestModel, SolutionEntity, UserModel, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
@@ -32,10 +32,19 @@ export async function findOne (ctx: Context) {
     .findOne({ sid: opt })
     .populate<{
     contest: WithId<Pick<ContestModel, 'contestId'>> | null
-    similarSolution: Pick<SolutionDocument, 'sid' | 'uid' | 'code' | 'create'> | null
+    user: WithId<Pick<UserModel, 'uid'>>
+    similarSolution: (
+        WithId<Pick<SolutionEntity, 'sid' | 'code' | 'create'>>
+        & { user: WithId<Pick<UserModel, 'uid'>> }
+      ) | null
   }>([
       { path: 'contest', select: 'contestId' },
-      { path: 'similarSolution', select: 'sid uid code create' },
+      { path: 'user', select: 'uid' },
+      {
+        path: 'similarSolution',
+        select: 'sid user code create',
+        populate: { path: 'user', select: 'uid' },
+      },
     ])
     .lean()
   if (!solution) {
@@ -44,7 +53,7 @@ export async function findOne (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   const hasPermission = await (async () => {
-    if (solution.uid === profile.uid) {
+    if (solution.user._id.equals(profile._id)) {
       return true
     }
     if (profile.isAdmin) {
@@ -140,7 +149,7 @@ async function create (ctx: Context) {
 
   try {
     const solution = new Solution({
-      pid, contest, uid, code, language,
+      pid, contest, user: profile._id, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 
@@ -180,6 +189,7 @@ async function updateSolution (ctx: Context) {
   }
 
   let contest: Pick<ContestModel, 'contestId'> | null = null
+  let solutionUser: WithId<Pick<UserModel, 'uid'>>
   try {
     solution.judge = updatedJudge
     solution.time = 0
@@ -190,6 +200,8 @@ async function updateSolution (ctx: Context) {
     solution.testcases = []
 
     await solution.save()
+    await solution.populate<{ user: WithId<Pick<UserModel, 'uid'>> }>('user', 'uid')
+    solutionUser = solution.user as unknown as WithId<Pick<UserModel, 'uid'>>
     contest = solution.contest
       ? await Contest.findById(solution.contest, 'contestId').lean()
       : null
@@ -201,6 +213,7 @@ async function updateSolution (ctx: Context) {
   if (updatedJudge !== JudgeStatus.RejudgePending) {
     const result = SolutionUpdateQueryResultSchema.encode({
       ...solution.toObject(),
+      user: solutionUser,
       course: solution.course ? solution.course.toString() : null,
       contest,
       status: solution.status as 0 | 2,
@@ -219,6 +232,7 @@ async function updateSolution (ctx: Context) {
 
   const result = SolutionUpdateQueryResultSchema.encode({
     ...solution.toObject(),
+    user: solutionUser,
     course: solution.course ? solution.course.toString() : null,
     contest,
     status: solution.status as 0 | 2,

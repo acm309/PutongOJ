@@ -5,6 +5,7 @@ import { Contest, ID, mongoose, OAuth, Post, User } from '@putong-oj/db'
 import { OAuthProvider } from '@putong-oj/shared'
 import { isVerifiableOAuthConnection } from '../services/oauth.ts'
 import { settingsService } from '../services/settings.ts'
+import { passwordHash } from '../utils/index.ts'
 import { createLogger } from '../utils/logger.ts'
 
 const logger = createLogger('server.migrations')
@@ -405,6 +406,101 @@ async function migrateSolutionContestRef () {
   await solutionCollection.createIndex({ contest: 1, createdAt: -1 }, { name: 'contest_1_createdAt_-1' })
 }
 
+async function migrateSolutionUserRef () {
+  interface LegacySolution {
+    _id: mongoose.Types.ObjectId
+    uid?: unknown
+    user?: unknown
+  }
+
+  interface LegacyUser {
+    _id: mongoose.Types.ObjectId
+    uid?: unknown
+  }
+
+  const solutionCollection = mongoose.connection.collection('Solution')
+  const solutions = await solutionCollection
+    .find({
+      $or: [
+        { uid: { $exists: true } },
+        { user: { $exists: false } },
+      ],
+    })
+    .toArray() as unknown as LegacySolution[]
+  const users = await User
+    .find({}, { _id: 1, uid: 1 })
+    .lean() as unknown as LegacyUser[]
+  const userIdByUid = new Map<string, mongoose.Types.ObjectId>()
+
+  for (const user of users) {
+    if (typeof user.uid === 'string' && user._id instanceof mongoose.Types.ObjectId) {
+      userIdByUid.set(user.uid, user._id)
+    }
+  }
+
+  let missingUidCount = 0
+  let missingUserCount = 0
+  const rows = solutions.map((solution) => {
+    const uid = typeof solution.uid === 'string' ? solution.uid : ''
+    if (!uid) {
+      missingUidCount += 1
+      return { _id: solution._id, user: null }
+    }
+
+    const user = userIdByUid.get(uid)
+    if (!user) {
+      missingUserCount += 1
+      return { _id: solution._id, user: null }
+    }
+    return { _id: solution._id, user }
+  })
+
+  let ghostUserId: mongoose.Types.ObjectId | null = null
+  if (rows.some(row => row.user === null)) {
+    const ghost = await User.findOne({ uid: 'ghost' }).select('_id').lean()
+    if (ghost?._id instanceof mongoose.Types.ObjectId) {
+      ghostUserId = ghost._id
+    } else {
+      const createdGhost = new User({
+        uid: 'ghost',
+        nick: 'ghost',
+        pwd: passwordHash(randomUUID()),
+      })
+      await createdGhost.save()
+      ghostUserId = createdGhost._id
+    }
+  }
+
+  if (rows.length > 0) {
+    const operations = rows.map(row => ({
+      updateOne: {
+        filter: { _id: row._id },
+        update: {
+          $set: { user: row.user ?? ghostUserId },
+          $unset: { uid: '' },
+        },
+      },
+    }))
+
+    const result = await solutionCollection.bulkWrite(operations, { ordered: false })
+    logger.info(
+      'Migration Solution.uid -> user completed, '
+      + `modified=${result.modifiedCount}, missingUid=${missingUidCount}, missingUser=${missingUserCount}`,
+    )
+  } else {
+    logger.info('Migration Solution.uid -> user skipped, no solutions to migrate')
+  }
+
+  const indexNames = new Set((await solutionCollection.indexes()).map(index => index.name))
+  for (const indexName of [ 'uid_1', 'uid_1_createdAt_-1' ]) {
+    if (indexNames.has(indexName)) {
+      await solutionCollection.dropIndex(indexName)
+    }
+  }
+  await solutionCollection.createIndex({ user: 1 }, { name: 'user_1' })
+  await solutionCollection.createIndex({ user: 1, createdAt: -1 }, { name: 'user_1_createdAt_-1' })
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -504,6 +600,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-solution-contest-ref',
     description: 'Replace Solution.mid with ObjectId contest reference',
     run: migrateSolutionContestRef,
+  },
+  {
+    key: '20260929-solution-user-ref',
+    description: 'Replace Solution.uid with ObjectId user reference',
+    run: migrateSolutionUserRef,
   },
 ]
 

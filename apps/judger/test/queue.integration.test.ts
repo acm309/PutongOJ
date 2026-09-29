@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { connectMongoose, disconnectMongoose, Problem, Solution } from '@putong-oj/db'
+import { connectMongoose, disconnectMongoose, Problem, Solution, User } from '@putong-oj/db'
 import { JudgeStatus, Language } from '@putong-oj/shared'
 import fse from 'fs-extra'
 import { Redis } from 'ioredis'
@@ -18,6 +18,7 @@ integrationTest('processes a queued submission in order', async (t) => {
   const sid = Date.now()
   const testcaseUUID = `queue-testcase-${sid}`
   const testcaseDir = path.resolve(dataDir, String(pid))
+  const uid = `tasks-${sid}`
   const config = {
     ...loadJudgerConfig({
       PTOJ_MONGODB_URL: mongodbURL,
@@ -36,6 +37,7 @@ integrationTest('processes a queued submission in order', async (t) => {
     await Promise.all([
       Problem.deleteMany({ pid }),
       Solution.deleteMany({ sid }),
+      User.deleteMany({ uid }),
       fse.remove(testcaseDir),
     ])
     await Promise.all([
@@ -51,10 +53,14 @@ integrationTest('processes a queued submission in order', async (t) => {
       time: 1000,
       memory: 32768,
     })
+    const user = await User.create({
+      uid,
+      pwd: '0'.repeat(72),
+    })
     const queuedSolution = await Solution.create({
       sid,
       pid,
-      uid: 'tasks-integration',
+      user: user._id,
       code: 'a, b = map(int, input().split())\nprint(a + b)\n',
       length: 47,
       language: Language.Python,
@@ -86,6 +92,7 @@ integrationTest('processes a queued submission in order', async (t) => {
         redis.del(taskQueue, resultQueue),
         Problem.deleteMany({ pid }),
         Solution.deleteMany({ sid }),
+        User.deleteMany({ uid }),
         fse.remove(testcaseDir),
       ])
       await redis.quit()

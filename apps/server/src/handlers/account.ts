@@ -245,7 +245,7 @@ export async function findSubmissions (ctx: Context) {
   }
 
   const solutions = await solutionService
-    .findSolutions({ ...query.data, user: profile.uid })
+    .findSolutions({ ...query.data, user: profile._id })
   const result = AccountSubmissionListQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
 }

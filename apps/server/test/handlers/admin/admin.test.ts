@@ -163,7 +163,7 @@ test('Find solutions (filter by user)', async (t) => {
   t.true(Array.isArray(res.body.data.docs))
   // Every returned solution should belong to primaryUser
   for (const doc of res.body.data.docs) {
-    t.is(doc.uid, primaryUser.uid)
+    t.is(doc.user.uid, primaryUser.uid)
   }
 })
 

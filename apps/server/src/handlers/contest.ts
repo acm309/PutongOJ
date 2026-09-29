@@ -212,10 +212,10 @@ async function getContest (ctx: Context) {
   const [ problemsBasic, attempted, solved ] = await Promise.all([
     contestService.getProblemsWithStats(contest._id, isJury),
     Solution.distinct('pid', {
-      contest: contest._id, uid: profile.uid,
+      contest: contest._id, user: profile._id,
     }).lean(),
     Solution.distinct('pid', {
-      contest: contest._id, uid: profile.uid, judge: JudgeStatus.Accepted,
+      contest: contest._id, user: profile._id, judge: JudgeStatus.Accepted,
     }).lean(),
   ])
 

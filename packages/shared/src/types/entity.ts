@@ -116,7 +116,7 @@ export type ProblemEntityView = Pick<ProblemEntity, 'pid' | 'title' | 'time' | '
 export type SolutionEntity = {
   sid: number
   pid: number
-  uid: string
+  user: Types.ObjectId
   contest: Types.ObjectId | null
   course: Types.ObjectId | WithId<CourseEntity> | null
   code: string

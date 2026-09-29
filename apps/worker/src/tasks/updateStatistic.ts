@@ -6,17 +6,21 @@ const logger = createLogger('worker.update-statistic')
 
 /**
  * 更新用户的统计信息
- * @param uid 用户 ID
+ * @param userId 用户 ObjectId
  */
-async function updateUserStatistic (uid: string) {
-  uid = uid.trim()
+async function updateUserStatistic (userId: string) {
+  const user = await User.findById(userId.trim()).select('uid').exec()
+  if (!user) {
+    logger.warn({ userId }, 'User not found while updating statistic')
+    return
+  }
 
   const [ submitProblems, solveProblems ] = await Promise.all([
-    Solution.distinct('pid', { uid, judge: { $ne: JudgeStatus.Skipped } }),
-    Solution.distinct('pid', { uid, judge: JudgeStatus.Accepted }),
+    Solution.distinct('pid', { user: user._id, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('pid', { user: user._id, judge: JudgeStatus.Accepted }),
   ])
-  await User.findOneAndUpdate(
-    { uid },
+  await User.updateOne(
+    { _id: user._id },
     {
       $set: {
         submit: submitProblems.length,
@@ -25,7 +29,7 @@ async function updateUserStatistic (uid: string) {
     },
   ).exec()
 
-  logger.info({ uid }, 'User statistic updated')
+  logger.info({ uid: user.uid, userId: user._id.toString() }, 'User statistic updated')
 }
 
 /**
@@ -38,8 +42,8 @@ async function updateProblemStatistic (pid: number | string) {
   }
 
   const [ submitUsers, acceptedUsers ] = await Promise.all([
-    Solution.distinct('uid', { pid, judge: { $ne: JudgeStatus.Skipped } }),
-    Solution.distinct('uid', { pid, judge: JudgeStatus.Accepted }),
+    Solution.distinct('user', { pid, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('user', { pid, judge: JudgeStatus.Accepted }),
   ])
   await Problem.findOneAndUpdate(
     { pid },

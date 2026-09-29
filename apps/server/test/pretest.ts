@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import process from 'node:process'
 import { Comment, Course, Discussion, Group, ID, Problem, Solution, User } from '@putong-oj/db'
 import discussionService from '../src/services/discussion.ts'
@@ -37,10 +38,38 @@ async function main () {
       await new Problem(problem).save()
     }
   })()
+  const userInsert = (async () => {
+    await Promise.all(
+      Object.values(userSeeds).map((user) => {
+        return new User(Object.assign({}, user, {
+          pwd: passwordHash(user.pwd as string),
+        })).save()
+      }),
+    )
+    await new User({
+      uid: 'ghost',
+      nick: 'ghost',
+      pwd: passwordHash(randomUUID()),
+    }).save()
+  })()
+
+  await Promise.all([
+    courseInsert,
+    groupInsert,
+    problemInsert,
+    userInsert,
+  ])
+
   const solutionInsert = (async () => {
+    const users = await User.find({})
+    const userByUid = new Map(users.map(user => [ user.uid, user ]))
+    const ghost = userByUid.get('ghost')!
     const solutions = []
-    for (const solution of solutionSeeds) {
-      solutions.push(await new Solution(solution).save())
+
+    for (const solutionSeed of solutionSeeds) {
+      const { uid, ...solution } = solutionSeed
+      const user = userByUid.get(uid) ?? ghost
+      solutions.push(await new Solution({ ...solution, user: user._id }).save())
     }
 
     const similarSolution = solutions.find(solution => solution.similarity > 0)
@@ -50,21 +79,7 @@ async function main () {
       await similarSolution.save()
     }
   })()
-  const userInsert = Promise.all(
-    Object.values(userSeeds).map((user) => {
-      return new User(Object.assign({}, user, {
-        pwd: passwordHash(user.pwd as string),
-      })).save()
-    }),
-  )
-
-  await Promise.all([
-    courseInsert,
-    groupInsert,
-    problemInsert,
-    solutionInsert,
-    userInsert,
-  ])
+  await solutionInsert
 
   // Seed discussions - must be done after users and problems
   const discussionInsert = (async () => {

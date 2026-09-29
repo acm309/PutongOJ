@@ -4,6 +4,7 @@ import { isoDatetimeToDate } from '../codec.js'
 import { ContestModelSchema } from '../model/contest.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
+import { UserModelSchema } from '../model/user.js'
 
 export const SolutionSubmitPayloadSchema = z.object({
   problem: ProblemModelSchema.shape.pid.int().positive(),
@@ -30,7 +31,9 @@ const SolutionTestcaseResultSchema = z.object({
 const SolutionFieldsSchema = z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
-  uid: SolutionModelSchema.shape.uid,
+  user: z.object({
+    uid: UserModelSchema.shape.uid,
+  }),
   contest: z.object({
     contestId: ContestModelSchema.shape.contestId,
   }).nullable(),
@@ -59,7 +62,9 @@ export const SolutionDetailQueryResultSchema = SolutionFieldsSchema.omit({
   status: z.enum(status).optional(),
   simSolution: z.object({
     sid: SolutionModelSchema.shape.sid,
-    uid: SolutionModelSchema.shape.uid,
+    user: z.object({
+      uid: UserModelSchema.shape.uid,
+    }),
     code: SolutionModelSchema.shape.code,
     create: z.int().nonnegative(),
   }).optional(),

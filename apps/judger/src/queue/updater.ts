@@ -1,4 +1,4 @@
-import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
+import type { UserModel, WebSocketDispatch, WebSocketMessage, WithId } from '@putong-oj/shared'
 import type { JudgerConfig } from '../config.ts'
 import { Solution } from '@putong-oj/db'
 import { JudgeStatus, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
@@ -45,7 +45,11 @@ export class Updater {
   }
 
   async notifyResult (solutionId: string): Promise<void> {
-    const solution = await Solution.findOne({ _id: solutionId }).lean().exec()
+    const solution = await Solution
+      .findOne({ _id: solutionId })
+      .populate<{ user: WithId<Pick<UserModel, 'uid'>> }>('user', 'uid')
+      .lean()
+      .exec()
     if (solution == null) {
       this.logger.warn({ solutionId }, 'Solution not found')
       return
@@ -63,13 +67,13 @@ export class Updater {
     }
     const dispatch: WebSocketDispatch = {
       type: WebSocketDispatchType.User,
-      username: solution.uid,
+      username: solution.user.uid,
       message,
     }
 
     const tasks: Promise<unknown>[] = [
       this.distributeWork('updateStatistic', `problem:${solution.pid}`),
-      this.distributeWork('updateStatistic', `user:${solution.uid}`),
+      this.distributeWork('updateStatistic', `user:${solution.user._id}`),
       this.redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch)),
     ]
     if (solution.judge === JudgeStatus.Accepted) {

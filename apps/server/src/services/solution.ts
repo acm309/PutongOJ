@@ -6,27 +6,34 @@ import type {
   SolutionModel,
 } from '@putong-oj/shared'
 import type { PaginateOption, SortOption } from '../types/index.ts'
-import { Contest, Solution } from '@putong-oj/db'
+import { Contest, Solution, User } from '@putong-oj/db'
 import { EXPORT_SIZE_MAX } from '@putong-oj/shared'
+import escapeRegExp from 'lodash/escapeRegExp.js'
 
 interface SolutionFilterOption {
-  user?: string
+  user?: string | Types.ObjectId
   problem?: number
   contest?: number | Types.ObjectId | null
   judge?: JudgeStatus
   language?: Language
 }
 
-type SolutionWithContest = Omit<SolutionModel, 'contest'> & {
+type SolutionWithRelations = Omit<SolutionModel, 'contest' | 'user'> & {
   contest: { contestId: number } | null
+  user: { uid: string }
 }
 
 async function constructSolutionFilter (opt: SolutionFilterOption) {
   const { user, problem, contest, judge, language } = opt
   const filter: Record<string, any> = {}
 
-  if (typeof user === 'string') {
-    filter.uid = user
+  if (user !== undefined && typeof user !== 'string') {
+    filter.user = user
+  } else if (typeof user === 'string') {
+    const userDoc = await User
+      .findOne({ uid: { $regex: new RegExp(`^${escapeRegExp(user)}$`, 'i') } }, '_id')
+      .lean()
+    filter.user = userDoc?._id ?? { $in: [] }
   }
   if (typeof problem === 'number') {
     filter.pid = problem
@@ -52,7 +59,7 @@ async function constructSolutionFilter (opt: SolutionFilterOption) {
 
 export async function findSolutions (
   opt: PaginateOption & SortOption & SolutionFilterOption,
-): Promise<Paginated<SolutionWithContest>> {
+): Promise<Paginated<SolutionWithRelations>> {
   const { page, pageSize, sort, sortBy } = opt
   const filter = await constructSolutionFilter(opt)
 
@@ -65,10 +72,16 @@ export async function findSolutions (
     limit: pageSize,
     lean: true,
     leanWithId: false,
-    populate: {
-      path: 'contest',
-      select: 'contestId',
-    },
+    populate: [
+      {
+        path: 'contest',
+        select: 'contestId',
+      },
+      {
+        path: 'user',
+        select: 'uid',
+      },
+    ],
   }
   return await Solution.paginate(filter, query) as any
 }
@@ -76,18 +89,24 @@ export async function findSolutions (
 export async function exportSolutions (
   opt: SortOption & SolutionFilterOption,
 ): Promise<(Pick<SolutionModel,
-'sid' | 'pid' | 'uid' | 'language' | 'judge'
+'sid' | 'pid' | 'language' | 'judge'
 | 'time' | 'memory' | 'similarity' | 'createdAt'>
-& { contestId: number | null })[]> {
+& { uid: string, contestId: number | null })[]> {
   const { sort, sortBy } = opt
   const filter = await constructSolutionFilter(opt)
 
   const solutions = await Solution.find(filter)
     .select({
-      _id: 0, sid: 1, pid: 1, uid: 1, contest: 1, language: 1, judge: 1,
+      _id: 0, sid: 1, pid: 1, user: 1, contest: 1, language: 1, judge: 1,
       time: 1, memory: 1, similarity: 1, createdAt: 1,
     })
-    .populate<{ contest: { contestId: number } | null }>('contest', 'contestId')
+    .populate<{
+    contest: { contestId: number } | null
+    user: { uid: string } | null
+  }>([
+      { path: 'contest', select: 'contestId' },
+      { path: 'user', select: 'uid' },
+    ])
     .sort({
       [sortBy]: sort,
       ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
@@ -95,8 +114,9 @@ export async function exportSolutions (
     .limit(EXPORT_SIZE_MAX)
     .lean()
 
-  return solutions.map(({ contest, ...solution }) => ({
+  return solutions.map(({ contest, user, ...solution }) => ({
     ...solution,
+    uid: user?.uid ?? 'ghost',
     contestId: contest?.contestId ?? null,
   }))
 }

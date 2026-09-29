@@ -12,7 +12,7 @@ const TestcaseResultSchema = z.object({
 export const SolutionModelSchema = z.object({
   sid: z.int().nonnegative(),
   pid: z.int().nonnegative(),
-  uid: z.string(),
+  user: ObjectIdSchema,
   contest: ObjectIdSchema.nullable(),
   course: ObjectIdSchema.nullable().optional(),
   code: z.string(),

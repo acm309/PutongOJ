@@ -217,13 +217,13 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
 
       return await Promise.all(problems.map(async ({ _id, pid, title }) => {
         const [ { length: submit }, { length: solve } ] = await Promise.all([
-          Solution.distinct('uid', {
+          Solution.distinct('user', {
             contest: _id,
             pid,
             judge: { $nin: ignoredJudges },
             createdAt: { $lt: before },
           }).lean(),
-          Solution.distinct('uid', {
+          Solution.distinct('user', {
             contest: _id,
             pid,
             judge: JudgeStatus.Accepted,
@@ -264,7 +264,7 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
           judge: { $nin: ignoredJudges },
           createdAt: { $lt: endsAt },
         })
-        .select({ _id: 0, pid: 1, uid: 1, judge: 1, createdAt: 1 })
+        .select({ _id: 0, pid: 1, user: 1, judge: 1, createdAt: 1 })
         .sort({ createdAt: 1 })
         .lean()
 
@@ -272,12 +272,13 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
         && (!scoreboardUnfrozenAt || scoreboardUnfrozenAt > new Date())
 
       solutions.forEach((solution) => {
-        const { pid: problemId, uid: username, judge: judgement, createdAt } = solution
+        const { pid: problemId, judge: judgement, createdAt } = solution
+        const userId = solution.user.toString()
 
-        if (!ranklistRecord[username]) {
-          ranklistRecord[username] = {}
+        if (!ranklistRecord[userId]) {
+          ranklistRecord[userId] = {}
         }
-        const userRecord = ranklistRecord[username]
+        const userRecord = ranklistRecord[userId]
 
         if (!userRecord[problemId]) {
           userRecord[problemId] = { problemId, failedCount: 0, pendingCount: 0 }
@@ -309,16 +310,21 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
       })
 
       const users = await User
-        .find({ uid: { $in: Object.keys(ranklistRecord) } })
-        .select({ _id: 0, uid: 1, nick: 1 })
+        .find({ _id: { $in: Object.keys(ranklistRecord) } })
+        .select({ _id: 1, uid: 1, nick: 1 })
         .lean()
-      const nicknameMap = Object.fromEntries(users.map(user => [ user.uid, user.nick ]))
+      const userMap = new Map(users.map(user => [ user._id.toString(), user ]))
 
-      return Object.entries(ranklistRecord).map(([ username, problems ]) => ({
-        username,
-        nickname: nicknameMap[username] || username,
-        problems: Object.values(problems),
-      }))
+      return Object.entries(ranklistRecord).map(([ userId, problems ]) => {
+        const user = userMap.get(userId)
+        const username = user?.uid ?? 'ghost'
+
+        return {
+          username,
+          nickname: user?.nick || username,
+          problems: Object.values(problems),
+        }
+      })
     },
 
     // Frontend's auto-refresh interval is 10s,

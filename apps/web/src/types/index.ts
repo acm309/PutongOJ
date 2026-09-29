@@ -7,7 +7,7 @@ export interface Solution {
 
 export interface SolutionModelDataTable {
   sid: SolutionModel['sid']
-  uid?: SolutionModel['uid']
+  user?: { uid: string }
   pid?: SolutionModel['pid']
   contest?: { contestId: number } | null
   judge: SolutionModel['judge']

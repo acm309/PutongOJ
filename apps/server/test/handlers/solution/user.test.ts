@@ -1,4 +1,4 @@
-import { Contest, Solution } from '@putong-oj/db'
+import { Contest, Solution, User } from '@putong-oj/db'
 import { Language } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
@@ -135,6 +135,11 @@ test.serial('Submit a solution', async (t) => {
 
   t.is(res.status, 200)
   t.is(res.body.data.code, code)
+
+  const solution = await Solution.findOne({ sid }).lean()
+  const user = await User.findOne({ uid: userSeeds.primaryuser.uid }).select('_id').lean()
+  t.true(solution?.user.equals(user?._id))
+  t.false(Object.hasOwn(solution ?? {}, 'uid'))
 })
 
 test('Status fails to find one', async (t) => {

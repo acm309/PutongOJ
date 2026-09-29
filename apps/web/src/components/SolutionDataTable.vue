@@ -68,12 +68,12 @@ function handleSort (event: any) {
     </Column>
 
     <Column
-      v-if="!props.hideUser" :header="t('ptoj.user')" field="uid"
+      v-if="!props.hideUser" :header="t('ptoj.user')" field="user.uid"
       class="font-medium max-w-36 md:max-w-48 min-w-36 truncate"
     >
       <template #body="{ data }">
-        <RouterLink :to="{ name: 'UserProfile', params: { uid: data.uid } }">
-          <Button class="-my-px justify-start p-0" link fluid :label="String(data.uid ?? '')" />
+        <RouterLink :to="{ name: 'UserProfile', params: { uid: data.user?.uid } }">
+          <Button class="-my-px justify-start p-0" link fluid :label="String(data.user?.uid ?? '')" />
         </RouterLink>
       </template>
     </Column>
