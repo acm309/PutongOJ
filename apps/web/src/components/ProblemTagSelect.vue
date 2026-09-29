@@ -6,15 +6,15 @@ import { findTags } from '@/api/tags'
 import ProblemTag from './ProblemTag.vue'
 
 const props = defineProps<{
-  modelValue: number[]
+  modelValue: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: number[]): void
+  (e: 'update:modelValue', value: string[]): void
 }>()
 
 const tags = ref<TagListQueryResult>([])
-const selectedTags = ref<number[]>(props.modelValue)
+const selectedTags = ref<string[]>(props.modelValue)
 
 function groupByColor<T extends { color: string }> (
   items: T[],
@@ -31,7 +31,7 @@ function groupByColor<T extends { color: string }> (
 
 const tagsGroupByColor = computed(() => groupByColor(tags.value))
 
-function handleTagClick (tagId: number) {
+function handleTagClick (tagId: string) {
   const index = selectedTags.value.indexOf(tagId)
   if (index === -1) {
     selectedTags.value.push(tagId)
@@ -60,9 +60,9 @@ watch(selectedTags, (newVal) => {
   <div class="flex flex-wrap gap-1 problem-tags-select">
     <template v-for="color in tagColors" :key="color">
       <ProblemTag
-        v-for="tag of (tagsGroupByColor[color] || [])" :key="tag.tagId" class="cursor-pointer problem-tag"
-        :filled="selectedTags.includes(tag.tagId)" :color="color" :name="tag.name"
-        @click="() => handleTagClick(tag.tagId)"
+        v-for="tag of (tagsGroupByColor[color] || [])" :key="tag.id" class="cursor-pointer problem-tag"
+        :filled="selectedTags.includes(tag.id)" :color="color" :name="tag.name"
+        @click="() => handleTagClick(tag.id)"
       />
     </template>
   </div>

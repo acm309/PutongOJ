@@ -1,6 +1,5 @@
-import type { ContestModel } from '@putong-oj/shared'
+import type { ContestModel, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { WithId } from '../types/index.ts'
 import { Contest } from '@putong-oj/db'
 import { ParticipationStatus } from '@putong-oj/shared'
 import { loadProfile } from '../middlewares/authn.ts'

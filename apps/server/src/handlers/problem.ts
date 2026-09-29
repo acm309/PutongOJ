@@ -1,8 +1,7 @@
 import type { Types } from '@putong-oj/db'
-import type { CourseEntity } from '@putong-oj/shared'
+import type { CourseEntity, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { DiscussionQueryFilters } from '../services/discussion.ts'
-import type { WithId } from '../types/index.ts'
 import Router from '@koa/router'
 import { Problem, Solution, User } from '@putong-oj/db'
 import {
@@ -163,11 +162,7 @@ async function getProblem (ctx: Context) {
     hint: problem.hint,
     type: canManage ? problem.type : undefined,
     code: canManage ? problem.code : undefined,
-    tags: problem.tags.map(tag => ({
-      tagId: tag.tagId,
-      name: tag.name,
-      color: tag.color,
-    })),
+    tags: problem.tags,
     isOwner,
   })
   return createEnvelopedResponse(ctx, result)

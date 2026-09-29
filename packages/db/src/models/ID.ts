@@ -9,7 +9,6 @@ const idFields = [
   'Discussion',
   'Problem',
   'Solution',
-  'Tag',
 ]
 
 type IdDocument = {

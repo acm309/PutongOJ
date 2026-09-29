@@ -4,11 +4,12 @@ import type {
   ContestModel,
   DiscussionModel,
   DiscussionType,
+  DocumentId,
   Paginated,
   ProblemModel,
   UserModel,
 } from '@putong-oj/shared'
-import type { DocumentId, PaginateOption, SortOption } from '../types/index.ts'
+import type { PaginateOption, SortOption } from '../types/index.ts'
 import type { QueryFilter } from '../types/mongo.ts'
 import { Comment, Discussion } from '@putong-oj/db'
 import { distributeWork } from './taskQueue.ts'

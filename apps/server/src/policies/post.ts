@@ -1,6 +1,5 @@
-import type { PostModel } from '@putong-oj/shared'
+import type { PostModel, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
-import type { WithId } from '../types/index.ts'
 import { Post } from '@putong-oj/db'
 
 export interface PostState {

@@ -14,7 +14,7 @@ const requestAnon = supertest.agent(server)
 const adminUser = userSeeds.admin
 
 // Shared state across serial tests
-let createdTagId: number
+let createdTagId: string
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ test('Unauthenticated user cannot POST /api/admin/tags', async (t) => {
 
 test('Unauthenticated user cannot PUT /api/admin/tags/:tagId', async (t) => {
   const res = await requestAnon
-    .put('/api/admin/tags/1')
+    .put('/api/admin/tags/000000000000000000000000')
     .send({ name: 'unauthorized' })
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -72,7 +72,8 @@ test('GET /api/admin/tags items include admin fields', async (t) => {
   t.true(res.body.success)
   // If any tags exist, verify shape; otherwise just confirm the response
   for (const tag of res.body.data as any[]) {
-    t.is(typeof tag.tagId, 'number')
+    t.is(typeof tag.id, 'string')
+    t.regex(tag.id, /^[0-9a-f]{24}$/i)
     t.is(typeof tag.name, 'string')
     t.is(typeof tag.color, 'string')
   }
@@ -130,14 +131,14 @@ test.serial('POST /api/admin/tags creates a tag successfully', async (t) => {
   const created = (list.body.data as any[]).find((tag: any) => tag.name === 'ava-test-tag')
   t.truthy(created)
   t.is(created.color, 'blue')
-  createdTagId = created.tagId
+  createdTagId = created.id
 })
 
 // ─── updateTag ──────────────────────────────────────────────────────────────
 
-test('PUT /api/admin/tags/:tagId fails with non-numeric tagId', async (t) => {
+test('PUT /api/admin/tags/:tagId fails with non-ObjectId tagId', async (t) => {
   const res = await requestAdmin
-    .put('/api/admin/tags/not-a-number')
+    .put('/api/admin/tags/not-an-object-id')
     .send({ name: 'updated' })
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -155,7 +156,7 @@ test('PUT /api/admin/tags/:tagId fails with negative tagId', async (t) => {
 
 test('PUT /api/admin/tags/:tagId fails with invalid color', async (t) => {
   const res = await requestAdmin
-    .put('/api/admin/tags/1')
+    .put('/api/admin/tags/000000000000000000000001')
     .send({ color: 'notacolor' })
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -164,7 +165,7 @@ test('PUT /api/admin/tags/:tagId fails with invalid color', async (t) => {
 
 test('PUT /api/admin/tags/:tagId returns 404 for non-existent tag', async (t) => {
   const res = await requestAdmin
-    .put('/api/admin/tags/99999')
+    .put('/api/admin/tags/000000000000000000000000')
     .send({ name: 'ghost' })
   t.is(res.status, 200)
   t.false(res.body.success)
@@ -183,7 +184,7 @@ test.serial('PUT /api/admin/tags/:tagId updates name and color', async (t) => {
 
   // Confirm mutation in list
   const list = await requestAdmin.get('/api/admin/tags')
-  const updated = (list.body.data as any[]).find((tag: any) => tag.tagId === createdTagId)
+  const updated = (list.body.data as any[]).find((tag: any) => tag.id === createdTagId)
   t.truthy(updated)
   t.is(updated.name, 'ava-test-tag-updated')
   t.is(updated.color, 'red')

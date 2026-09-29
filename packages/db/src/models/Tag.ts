@@ -1,15 +1,7 @@
 import { tagColors } from '@putong-oj/shared'
 import mongoose from '../client.js'
-import ID from './ID.js'
 
 const tagSchema = new mongoose.Schema({
-  tagId: {
-    type: Number,
-    index: {
-      unique: true,
-    },
-    default: -1,
-  },
   name: {
     type: String,
     required: true,
@@ -29,12 +21,6 @@ const tagSchema = new mongoose.Schema({
 }, {
   collection: 'Tag',
   timestamps: true,
-})
-
-tagSchema.pre('save', async function (this) {
-  if (this.tagId === -1) {
-    this.tagId = await ID.generateId('Tag')
-  }
 })
 
 const Tag = mongoose.model('Tag', tagSchema)

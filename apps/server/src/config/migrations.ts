@@ -213,6 +213,20 @@ async function migrateGroupIdToObjectId () {
   )
 }
 
+async function migrateTagIdToObjectId () {
+  const tagCollection = mongoose.connection.collection('Tag')
+
+  const tagIndexes = await tagCollection.indexes()
+  if (tagIndexes.some(index => index.name === 'tagId_1')) {
+    await tagCollection.dropIndex('tagId_1')
+  }
+
+  const result = await tagCollection.updateMany({}, { $unset: { tagId: '' } })
+  await ID.deleteOne({ name: 'Tag' })
+
+  logger.info(`Migration Tag.tagId -> _id completed, cleared=${result.modifiedCount}`)
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -282,6 +296,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260927-user-verified-backfill',
     description: 'Backfill pre-existing users as verified only when their CJLU SSO providerId matches their uid',
     run: migrateUserVerifiedBackfill,
+  },
+  {
+    key: '20260929-tag-object-id',
+    description: 'Remove legacy Tag.tagId counter and use _id as the tag identifier',
+    run: migrateTagIdToObjectId,
   },
 ]
 

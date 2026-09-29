@@ -6,23 +6,28 @@ import escapeRegExp from 'lodash/escapeRegExp.js'
 export async function getTags () {
   const tags = await Tag
     .find({})
-    .select({ _id: 0, tagId: 1, name: 1, color: 1, createdAt: 1, updatedAt: 1 })
-    .sort({ tagId: 1 })
+    .sort({ _id: 1 })
     .lean()
-  return tags
+  return tags.map(tag => ({
+    id: tag._id.toString(),
+    name: tag.name,
+    color: tag.color,
+    createdAt: tag.createdAt,
+    updatedAt: tag.updatedAt,
+  }))
 }
 
 export async function getTagObjectIds (
-  tagIds: number[],
+  tagIds: string[],
 ): Promise<Types.ObjectId[]> {
   const tags = await Tag
-    .find({ tagId: { $in: tagIds } }, '_id')
-  return tags.map(t => t._id) as Types.ObjectId[]
+    .find({ _id: { $in: tagIds } }, '_id')
+  return tags.map(t => t._id)
 }
 
-export async function getTag (tagId: number) {
+export async function getTag (id: string) {
   const tag = await Tag
-    .findOne({ tagId })
+    .findById(id)
     .lean()
   return tag
 }
@@ -41,14 +46,14 @@ export async function createTag (opt: Partial<TagModel>) {
   return tag
 }
 
-export async function updateTag (tagId: number, opt: Partial<TagModel>) {
+export async function updateTag (id: string, opt: Partial<TagModel>) {
   const tag = await Tag
-    .findOneAndUpdate({ tagId }, { $set: opt }, { returnDocument: 'after' })
-  return tag
+    .findByIdAndUpdate(id, { $set: opt }, { returnDocument: 'after' })
+  return tag !== null
 }
 
-export async function removeTag (tagId: number): Promise<boolean> {
-  const res = await Tag.deleteOne({ tagId })
+export async function removeTag (id: string): Promise<boolean> {
+  const res = await Tag.deleteOne({ _id: id })
   return res.deletedCount === 1
 }
 

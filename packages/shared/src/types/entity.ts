@@ -96,20 +96,20 @@ export type ProblemEntity = {
 
 export type ProblemEntityForm = Pick<ProblemEntity, 'title' | 'time' | 'memory' | 'description' | 'input' | 'output' | 'in'
   | 'out' | 'hint' | 'status' | 'type' | 'code' | 'owner'> & {
-    tags?: number[]
+    tags?: Types.ObjectId[]
   }
 
 export type ProblemEntityItem = Pick<ProblemEntity, 'pid' | 'title'>
 
 export type ProblemEntityPreview = Pick<ProblemEntity, 'pid' | 'title' | 'status' | 'type' | 'submit' | 'solve'> & {
   isOwner?: boolean
-  tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
+  tags: Pick<TagModel, 'id' | 'name' | 'color'>[]
 }
 
 export type ProblemEntityView = Pick<ProblemEntity, 'pid' | 'title' | 'time' | 'memory' | 'status' | 'description'
   | 'input' | 'output' | 'in' | 'out' | 'hint'> & Partial<Pick<ProblemEntity, 'type' | 'code'>> & {
     isOwner: boolean
-    tags: Pick<TagModel, 'tagId' | 'name' | 'color'>[]
+    tags: Pick<TagModel, 'id' | 'name' | 'color'>[]
   }
 
 export type SolutionEntity = {

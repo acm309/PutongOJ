@@ -6,6 +6,8 @@ import type {
   ProblemEntityItem,
   ProblemEntityPreview,
   ProblemStatisticsQueryResult,
+  TagModel,
+  WithId,
 } from '@putong-oj/shared'
 import type { PaginateOption } from '../types/index.ts'
 import path from 'node:path'
@@ -66,13 +68,26 @@ export async function findProblems (
   const result = await Problem.paginate({ $and: filters }, {
     sort: { pid: 1 },
     page,
-    populate: { path: 'tags', select: '-_id tagId name color' },
+    populate: { path: 'tags', select: 'name color' },
     limit: pageSize,
     lean: true,
     leanWithId: false,
     select: '-_id pid title status type tags submit solve owner',
-  }) as unknown as Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>
-  return result
+  }) as unknown as Paginated<Omit<ProblemEntityPreview, 'tags'> & {
+    owner: Types.ObjectId | null
+    tags: WithId<Omit<TagModel, 'id'>>[]
+  }>
+  return {
+    ...result,
+    docs: result.docs.map(problem => ({
+      ...problem,
+      tags: problem.tags.map(tag => ({
+        id: tag._id.toString(),
+        name: tag.name,
+        color: tag.color,
+      })),
+    })),
+  }
 }
 
 export async function findProblemItems (
@@ -315,7 +330,7 @@ export async function findCourseProblems (
                     input: '$problem.tagsInfo',
                     as: 'tag',
                     in: {
-                      tagId: '$$tag.tagId',
+                      id: { $toString: '$$tag._id' },
                       name: '$$tag.name',
                       color: '$$tag.color',
                     },

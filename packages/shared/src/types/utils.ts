@@ -1,6 +1,12 @@
 import type { Types } from 'mongoose'
 import { z } from 'zod'
 
+export interface DocumentId {
+  _id: Types.ObjectId
+}
+
+export type WithId<T> = T & DocumentId
+
 export const ObjectIdSchema = z.custom<Types.ObjectId>((val: any) => {
   let strval: string = ''
   if (typeof val === 'string') {

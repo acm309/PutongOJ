@@ -115,8 +115,8 @@ const tagUpdatedAt = computed(() => {
   return timePretty(selectedTag.value.updatedAt)
 })
 
-function openUpdateModal (tagId: number) {
-  const found = tags.value.find(item => item.tagId === tagId)
+function openUpdateModal (tagId: string) {
+  const found = tags.value.find(item => item.id === tagId)
   if (!found) return
   selectedTag.value = found
   updateForm.value = { name: found.name, color: found.color }
@@ -135,7 +135,7 @@ async function submitUpdate () {
   }
   updating.value = true
   const resp = await updateTag(
-    String(selectedTag.value.tagId),
+    selectedTag.value.id,
     { ...updateForm.value, name: updateForm.value.name.trim() },
   )
   updating.value = false
@@ -182,8 +182,8 @@ onBeforeMount(fetch)
           </h3>
           <div class="flex flex-wrap gap-2">
             <ProblemTag
-              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.tagId" class="cursor-pointer"
-              size="large" :name="tagItem.name" :color="color" @click="openUpdateModal(tagItem.tagId)"
+              v-for="tagItem in tagsGroupByColor[color]" :key="tagItem.id" class="cursor-pointer"
+              size="large" :name="tagItem.name" :color="color" @click="openUpdateModal(tagItem.id)"
             />
           </div>
         </div>

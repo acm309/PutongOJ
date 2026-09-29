@@ -14,7 +14,7 @@ import { TagModelSchema } from '../model/tag.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 const ProblemTagSchema = z.object({
-  tagId: TagModelSchema.shape.tagId,
+  id: TagModelSchema.shape.id,
   name: TagModelSchema.shape.name,
   color: TagModelSchema.shape.color,
 })
@@ -113,7 +113,7 @@ export const ProblemCreatePayloadSchema = ProblemEditableFieldsSchema.partial().
 export type ProblemCreatePayload = z.input<typeof ProblemCreatePayloadSchema>
 
 export const ProblemUpdatePayloadSchema = ProblemEditableFieldsSchema.partial().extend({
-  tags: z.array(ProblemTagSchema.shape.tagId).optional(),
+  tags: z.array(ProblemTagSchema.shape.id).optional(),
 })
 
 export type ProblemUpdatePayload = z.infer<typeof ProblemUpdatePayloadSchema>

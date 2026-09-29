@@ -1,4 +1,4 @@
-import type { ProblemEntity, TagModel } from '@putong-oj/shared'
+import type { ProblemEntity, TagModel, WithId } from '@putong-oj/shared'
 import type { Document, PaginateModel, Types } from 'mongoose'
 import { limitation, problemType, status } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
@@ -7,7 +7,7 @@ import ID from './ID.js'
 
 export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
 export type ProblemDocumentPopulated = Omit<ProblemDocument, 'tags'> & {
-  tags: TagModel[]
+  tags: WithId<TagModel>[]
 }
 
 type CourseModel = PaginateModel<ProblemDocument>

@@ -23,7 +23,6 @@ async function main () {
     new ID({ name: 'Discussion', id: 0 }).save(),
     new ID({ name: 'Problem', id: 999 }).save(),
     new ID({ name: 'Solution', id: 0 }).save(),
-    new ID({ name: 'Tag', id: 0 }).save(),
   ])
 
   const courseInsert = Promise.all(

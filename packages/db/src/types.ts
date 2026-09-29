@@ -11,6 +11,7 @@ import type {
   SolutionEntity,
   TagModel,
   UserEntity,
+  WithId,
 } from '@putong-oj/shared'
 import type { Document, Types } from 'mongoose'
 import 'mongoose-paginate-v2'
@@ -36,7 +37,7 @@ export type UserDocument = {
 export type ProblemDocument = Document<Types.ObjectId> & ProblemEntity
 
 export type ProblemDocumentPopulated = Omit<ProblemDocument, 'tags'> & {
-  tags: TagModel[]
+  tags: WithId<TagModel>[]
 }
 
 export type SolutionDocument = {

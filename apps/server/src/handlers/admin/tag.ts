@@ -5,6 +5,7 @@ import {
   AdminTagListQueryResultSchema,
   AdminTagUpdatePayloadSchema,
   ErrorCode,
+  ObjectIdStringSchema,
 } from '@putong-oj/shared'
 import { loadProfile } from '../../middlewares/authn.ts'
 import tagService from '../../services/tag.ts'
@@ -29,7 +30,7 @@ export async function createTag (ctx: Context) {
   try {
     const tag = await tagService.createTag(payload.data)
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Tag:${tag.tagId}> created by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tag.id}> created by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to create tag', err)
@@ -38,9 +39,8 @@ export async function createTag (ctx: Context) {
 }
 
 export async function updateTag (ctx: Context) {
-  const tagIdStr = ctx.params.tagId
-  const tagId = Number(tagIdStr)
-  if (Number.isNaN(tagId) || !Number.isInteger(tagId) || tagId <= 0) {
+  const tagId = ObjectIdStringSchema.safeParse(ctx.params.tagId)
+  if (!tagId.success) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid tag ID')
   }
 
@@ -50,12 +50,12 @@ export async function updateTag (ctx: Context) {
   }
 
   try {
-    const success = await tagService.updateTag(tagId, payload.data)
+    const success = await tagService.updateTag(tagId.data, payload.data)
     if (!success) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Tag:${tagId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Tag:${tagId.data}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update tag', err)

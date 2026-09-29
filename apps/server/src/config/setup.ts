@@ -18,7 +18,6 @@ export async function databaseSetup () {
     Discussion: 0,
     Problem: 999,
     Solution: 0,
-    Tag: 0,
   }
   Object.entries(models).map(async ([ name, id ]) => {
     const item = await ID.findOne({ name })

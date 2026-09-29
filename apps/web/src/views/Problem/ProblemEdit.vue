@@ -47,7 +47,7 @@ onMounted(async () => {
   }
   problemForm.value = {
     ...problem.value,
-    tags: problem.value.tags?.map(tag => tag.tagId) || [],
+    tags: problem.value.tags?.map(tag => tag.id) || [],
   }
 })
 </script>
