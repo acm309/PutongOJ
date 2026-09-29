@@ -241,6 +241,20 @@ async function migrateCommentIdToObjectId () {
   logger.info(`Migration Comment.commentId -> _id completed, cleared=${result.modifiedCount}`)
 }
 
+async function migrateDiscussionIdToObjectId () {
+  const discussionCollection = mongoose.connection.collection('Discussion')
+
+  const discussionIndexes = await discussionCollection.indexes()
+  if (discussionIndexes.some(index => index.name === 'discussionId_1')) {
+    await discussionCollection.dropIndex('discussionId_1')
+  }
+
+  const result = await discussionCollection.updateMany({}, { $unset: { discussionId: '' } })
+  await ID.deleteOne({ name: 'Discussion' })
+
+  logger.info(`Migration Discussion.discussionId -> _id completed, cleared=${result.modifiedCount}`)
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -320,6 +334,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-comment-object-id',
     description: 'Remove legacy Comment.commentId counter and use _id as the comment identifier',
     run: migrateCommentIdToObjectId,
+  },
+  {
+    key: '20260929-discussion-object-id',
+    description: 'Remove legacy Discussion.discussionId counter and use _id as the discussion identifier',
+    run: migrateDiscussionIdToObjectId,
   },
 ]
 

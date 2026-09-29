@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { DiscussionType, TITLE_LENGTH_MAX } from '@/consts/index.js'
 import { isoDatetimeToDate } from '../codec.js'
-import { ObjectIdSchema } from '../utils.js'
+import { ObjectIdSchema, ObjectIdStringSchema } from '../utils.js'
 
 export const DiscussionModelSchema = z.object({
-  discussionId: z.int().nonnegative(),
+  id: ObjectIdStringSchema,
   author: ObjectIdSchema,
   problem: ObjectIdSchema.nullable(),
   contest: ObjectIdSchema.nullable(),

@@ -330,7 +330,7 @@ export async function findProblemDiscussions (ctx: Context) {
   const discussions = await discussionService.findDiscussions(
     { page, pageSize, sort, sortBy },
     { $and: filters },
-    [ 'discussionId', 'author', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
+    [ 'id', 'author', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
     { author: [ 'uid', 'avatar' ] },
   )
   const result = DiscussionListQueryResultSchema.encode({

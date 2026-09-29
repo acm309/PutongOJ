@@ -19,7 +19,7 @@ const primaryUser = userSeeds.primaryuser
 const pwdTestUser = userSeeds.kevin63
 
 // Shared state updated by serial tests
-let createdDiscussionId: number
+let createdDiscussionId: string
 let createdCommentId: string
 
 // ─── Setup ─────────────────────────────────────────────────────────────────
@@ -255,7 +255,7 @@ test.serial('Setup: create discussion for admin update tests', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
-  createdDiscussionId = res.body.data.discussionId
+  createdDiscussionId = res.body.data.id
   t.truthy(createdDiscussionId)
 })
 
@@ -294,7 +294,7 @@ test('Update discussion - fails for invalid id', async (t) => {
 
 test('Update discussion - fails for non-existent id', async (t) => {
   const res = await requestAdmin
-    .put('/api/admin/discussions/999999')
+    .put('/api/admin/discussions/000000000000000000000000')
     .send({ title: 'Ghost' })
 
   t.is(res.status, 200)

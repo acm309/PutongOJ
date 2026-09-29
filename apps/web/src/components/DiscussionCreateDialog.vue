@@ -83,7 +83,7 @@ async function submitDiscussion () {
     return
   }
 
-  const { discussionId } = resp.data
+  const { id: discussionId } = resp.data
   message.success(
     t('ptoj.successful_create_discussion'),
     t('ptoj.successful_create_discussion_detail', { discussionId }),

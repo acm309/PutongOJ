@@ -2,18 +2,10 @@ import type { DiscussionModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { DiscussionType, TITLE_LENGTH_MAX } from '@putong-oj/shared'
 import mongoose from '../client.js'
-import ID from './ID.js'
 
 type DiscussionDocument = { } & Document<Types.ObjectId> & DiscussionModel
 
 const discussionSchema = new mongoose.Schema({
-  discussionId: {
-    type: Number,
-    index: {
-      unique: true,
-    },
-    default: -1,
-  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -56,12 +48,6 @@ const discussionSchema = new mongoose.Schema({
 }, {
   collection: 'Discussion',
   timestamps: true,
-})
-
-discussionSchema.pre('save', async function () {
-  if (this.discussionId === -1) {
-    this.discussionId = await ID.generateId('Discussion')
-  }
 })
 
 const Discussion

@@ -18,15 +18,13 @@ import {
   createZodErrorResponse,
 } from '../../utils/index.ts'
 
-function parseDiscussionId (ctx: Context): number | null {
-  const discussionIdStr = ctx.params.discussionId
-  const discussionId = Number(discussionIdStr)
-
-  if (Number.isNaN(discussionId) || !Number.isInteger(discussionId) || discussionId <= 0) {
+function parseDiscussionId (ctx: Context): string | null {
+  const discussionId = ObjectIdStringSchema.safeParse(ctx.params.discussionId)
+  if (!discussionId.success) {
     createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid discussion ID')
     return null
   }
-  return discussionId
+  return discussionId.data
 }
 
 export async function updateDiscussion (ctx: Context) {

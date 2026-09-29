@@ -19,11 +19,11 @@ const { locale } = useI18n()
 </script>
 
 <template>
-  <div v-for="doc in props.value" :key="doc.discussionId" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
+  <div v-for="doc in props.value" :key="doc.id" class="border-surface border-t flex flex-col gap-2 px-6 py-5">
     <div class="flex flex-nowrap gap-x-4 gap-y-1 justify-between">
       <RouterLink
         class="font-medium grow hover:text-primary overflow-hidden text-color text-ellipsis text-lg text-pretty transition-colors"
-        :to="{ name: 'DiscussionDetail', params: { discussionId: doc.discussionId } }"
+        :to="{ name: 'DiscussionDetail', params: { discussionId: doc.id } }"
       >
         {{ doc.title }}
       </RouterLink>

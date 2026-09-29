@@ -1,9 +1,18 @@
+import { Discussion } from '@putong-oj/db'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
 
 const server = app.listen()
 const request = supertest.agent(server)
+
+async function getDiscussionIdByTitle (title: string) {
+  const discussion = await Discussion.findOne({ title }).select({ _id: 1 }).lean()
+  if (!discussion) {
+    throw new Error(`Discussion not found: ${title}`)
+  }
+  return discussion._id.toString()
+}
 
 test('List discussions - should show public discussions only', async (t) => {
   const res = await request
@@ -18,7 +27,7 @@ test('List discussions - should show public discussions only', async (t) => {
   const visibleTypes = [ 1, 2 ] // OpenDiscussion, PublicAnnouncement
   for (const doc of res.body.data.docs) {
     t.true(visibleTypes.includes(doc.type))
-    t.truthy(doc.discussionId)
+    t.truthy(doc.id)
     t.truthy(doc.title)
     t.truthy(doc.author)
     t.truthy(doc.author.uid)
@@ -47,12 +56,12 @@ test('List discussions with sorting', async (t) => {
 })
 
 test('Get specific public discussion', async (t) => {
-  // Discussion #1 should be OpenDiscussion (public)
+  const discussionId = await getDiscussionIdByTitle('Welcome to the OJ Discussion Board')
   const res = await request
-    .get('/api/discussions/1')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 1)
+  t.is(res.body.data.id, discussionId)
   t.truthy(res.body.data.title)
   t.truthy(res.body.data.author)
   t.truthy(Array.isArray(res.body.data.comments))
@@ -65,19 +74,19 @@ test('Get specific public discussion', async (t) => {
 })
 
 test('Get public announcement discussion', async (t) => {
-  // Discussion #2 should be PublicAnnouncement
+  const discussionId = await getDiscussionIdByTitle('Important System Update')
   const res = await request
-    .get('/api/discussions/2')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 2)
+  t.is(res.body.data.id, discussionId)
   t.truthy(res.body.data.title)
 })
 
 test('Cannot access private discussion as visitor', async (t) => {
-  // Discussion #3 should be PrivateClarification
+  const discussionId = await getDiscussionIdByTitle('Private Question')
   const res = await request
-    .get('/api/discussions/3')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -87,7 +96,7 @@ test('Cannot access private discussion as visitor', async (t) => {
 
 test('Get non-existent discussion', async (t) => {
   const res = await request
-    .get('/api/discussions/99999')
+    .get('/api/discussions/000000000000000000000000')
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
@@ -120,8 +129,9 @@ test('Cannot create discussion without login', async (t) => {
 })
 
 test('Cannot add comment without login', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Welcome to the OJ Discussion Board')
   const res = await request
-    .post('/api/discussions/1/comments')
+    .post(`/api/discussions/${discussionId}/comments`)
     .send({
       content: 'Test comment',
     })

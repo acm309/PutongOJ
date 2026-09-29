@@ -60,7 +60,7 @@ async function findDiscussions (ctx: Context) {
   const discussions = await discussionService.findDiscussions(
     { page, pageSize, sort, sortBy },
     { $and: filters },
-    [ 'discussionId', 'author', 'problem', 'contest', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
+    [ 'id', 'author', 'problem', 'contest', 'type', 'pinned', 'title', 'createdAt', 'lastCommentAt', 'comments' ],
     { author: [ 'uid', 'avatar' ], problem: [ 'pid' ], contest: [ 'contestId' ] },
   )
   const result = DiscussionListQueryResultSchema.encode(discussions)
@@ -131,8 +131,8 @@ async function createDiscussion (ctx: Context) {
     const discussion = await discussionService.createDiscussion({
       author, problem, contest, type, title, content,
     })
-    ctx.auditLog.info(`<Discussion:${discussion.discussionId}> created by <User:${profile.uid}>`)
-    return createEnvelopedResponse(ctx, { discussionId: discussion.discussionId })
+    ctx.auditLog.info(`<Discussion:${discussion.id}> created by <User:${profile.uid}>`)
+    return createEnvelopedResponse(ctx, { id: discussion.id })
   } catch (err) {
     ctx.auditLog.error('Failed to create discussion', err)
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
@@ -162,7 +162,7 @@ async function createComment (ctx: Context) {
     const comment = await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },
     )
-    ctx.auditLog.info(`<Comment:${comment.id}> created in <Discussion:${discussion.discussionId}> by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Comment:${comment.id}> created in <Discussion:${discussion.id}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to create comment', err)

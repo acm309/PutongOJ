@@ -12,12 +12,12 @@ export async function findDiscussions (params: DiscussionListQuery) {
 }
 
 export async function createDiscussion (payload: DiscussionCreatePayload) {
-  return apiClient.post<{ discussionId: number }>('/discussions', payload)
+  return apiClient.post<{ id: string }>('/discussions', payload)
 }
-export async function getDiscussion (discussionId: number | string) {
+export async function getDiscussion (discussionId: string) {
   return apiClient.get<DiscussionDetailQueryResult>(`/discussions/${encodeURIComponent(discussionId)}`)
 }
 
-export async function createComment (discussionId: number, payload: CommentCreatePayload) {
+export async function createComment (discussionId: string, payload: CommentCreatePayload) {
   return apiClient.post<null>(`/discussions/${encodeURIComponent(discussionId)}/comments`, payload)
 }

@@ -137,7 +137,7 @@ async function editDiscussion () {
   }
 
   saving.value = true
-  const resp = await updateDiscussion(discussion.value.discussionId, payload)
+  const resp = await updateDiscussion(discussion.value.id, payload)
   saving.value = false
 
   if (!resp.success) {
@@ -153,7 +153,7 @@ async function togglePinDiscussion () {
   if (!discussion.value || !isAdmin.value) return
 
   saving.value = true
-  const resp = await updateDiscussion(discussion.value.discussionId, {
+  const resp = await updateDiscussion(discussion.value.id, {
     pinned: !discussion.value.pinned,
   })
   saving.value = false
@@ -170,7 +170,7 @@ async function submitComment () {
   if (!discussion.value) return
 
   creatingComment.value = true
-  const resp = await createComment(discussion.value.discussionId, {
+  const resp = await createComment(discussion.value.id, {
     content: commentContent.value.trim(),
   })
   creatingComment.value = false
@@ -219,7 +219,6 @@ onMounted(fetchDiscussion)
           <span class="flex gap-1">
             <Tag v-if="discussion.pinned" icon="pi pi-thumbtack" />
             <DiscussionTypeTag :type="discussion.type" />
-            <Tag :value="discussion.discussionId" severity="secondary" icon="pi pi-hashtag" />
           </span>
           <span class="flex gap-1">
             <Tag

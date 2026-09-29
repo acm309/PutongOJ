@@ -61,13 +61,12 @@ async function updateDiscussionStatistic (discussion: string) {
     return
   }
 
-  const { discussionId } = discussionDoc
   const [ commentsCount, lastComment ] = await Promise.all([
     Comment.countDocuments({ discussion: discussionDoc._id }),
     Comment.findOne({ discussion: discussionDoc._id }).sort({ createdAt: -1 }),
   ])
-  await Discussion.findOneAndUpdate(
-    { discussionId },
+  await Discussion.findByIdAndUpdate(
+    discussionDoc._id,
     {
       $set: {
         comments: commentsCount,
@@ -76,7 +75,7 @@ async function updateDiscussionStatistic (discussion: string) {
     },
   )
 
-  logger.info({ discussionId }, 'Discussion statistic updated')
+  logger.info({ discussionId: discussionDoc._id }, 'Discussion statistic updated')
 }
 
 /**

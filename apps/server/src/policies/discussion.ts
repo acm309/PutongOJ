@@ -1,6 +1,6 @@
 import type { Context } from 'koa'
 import type { DiscussionDocument } from '../services/discussion.ts'
-import { DiscussionType } from '@putong-oj/shared'
+import { DiscussionType, ObjectIdStringSchema } from '@putong-oj/shared'
 import discussionService from '../services/discussion.ts'
 import { loadContest } from './contest.ts'
 import { loadCourseRoleById } from './course.ts'
@@ -15,16 +15,16 @@ export const publicDiscussionTypes = [
   DiscussionType.PublicAnnouncement,
 ] as DiscussionType[]
 
-export async function loadDiscussion (ctx: Context, inputId?: number | string) {
-  const discussionId = Number(inputId ?? ctx.params.discussionId)
-  if (!Number.isInteger(discussionId) || discussionId <= 0) {
+export async function loadDiscussion (ctx: Context, inputId?: string) {
+  const discussionId = ObjectIdStringSchema.safeParse(inputId ?? ctx.params.discussionId)
+  if (!discussionId.success) {
     return null
   }
-  if (ctx.state.discussion?.discussion.discussionId === discussionId) {
+  if (ctx.state.discussion?.discussion.id === discussionId.data) {
     return ctx.state.discussion
   }
 
-  const discussion = await discussionService.getDiscussion(discussionId)
+  const discussion = await discussionService.getDiscussion(discussionId.data)
   if (!discussion) {
     return null
   }

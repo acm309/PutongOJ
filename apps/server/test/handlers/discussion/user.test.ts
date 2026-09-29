@@ -1,3 +1,4 @@
+import { Discussion } from '@putong-oj/db'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -8,6 +9,14 @@ const server = app.listen()
 const request = supertest.agent(server)
 
 const user = userSeeds.primaryuser
+
+async function getDiscussionIdByTitle (title: string) {
+  const discussion = await Discussion.findOne({ title }).select({ _id: 1 }).lean()
+  if (!discussion) {
+    throw new Error(`Discussion not found: ${title}`)
+  }
+  return discussion._id.toString()
+}
 
 test.before('Login', async (t) => {
   const login = await request
@@ -30,18 +39,18 @@ test('List discussions - logged in user sees more', async (t) => {
 
   // User should see public discussions and their own private ones
   for (const doc of res.body.data.docs) {
-    t.truthy(doc.discussionId)
+    t.truthy(doc.id)
     t.truthy(doc.title)
   }
 })
 
 test('Can access own private discussion', async (t) => {
-  // Discussion #3 is a private discussion created by primaryuser
+  const discussionId = await getDiscussionIdByTitle('Private Question')
   const res = await request
-    .get('/api/discussions/3')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 3)
+  t.is(res.body.data.id, discussionId)
   t.truthy(res.body.data.title)
 })
 
@@ -70,7 +79,7 @@ test('Create private clarification', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Cannot create discussion with problem reference as normal user', async (t) => {
@@ -130,8 +139,9 @@ test('Create discussion with missing content', async (t) => {
 })
 
 test('Add comment to open discussion', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Welcome to the OJ Discussion Board')
   const res = await request
-    .post('/api/discussions/1/comments')
+    .post(`/api/discussions/${discussionId}/comments`)
     .send({
       content: 'This is a test comment',
     })
@@ -140,7 +150,7 @@ test('Add comment to open discussion', async (t) => {
 
   // Verify comment was added
   const getRes = await request
-    .get('/api/discussions/1')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(getRes.status, 200)
   const comments = getRes.body.data.comments
@@ -150,8 +160,9 @@ test('Add comment to open discussion', async (t) => {
 })
 
 test('Cannot add comment to announcement as normal user', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Important System Update')
   const res = await request
-    .post('/api/discussions/2/comments')
+    .post(`/api/discussions/${discussionId}/comments`)
     .send({
       content: 'Trying to comment on announcement',
     })
@@ -162,8 +173,9 @@ test('Cannot add comment to announcement as normal user', async (t) => {
 })
 
 test('Add comment with missing content', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Welcome to the OJ Discussion Board')
   const res = await request
-    .post('/api/discussions/1/comments')
+    .post(`/api/discussions/${discussionId}/comments`)
     .send({})
 
   t.is(res.status, 200)
@@ -173,7 +185,7 @@ test('Add comment with missing content', async (t) => {
 
 test('Add comment to non-existent discussion', async (t) => {
   const res = await request
-    .post('/api/discussions/99999/comments')
+    .post('/api/discussions/000000000000000000000000/comments')
     .send({
       content: 'Comment on non-existent discussion',
     })

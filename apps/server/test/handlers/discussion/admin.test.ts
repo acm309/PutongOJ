@@ -1,3 +1,4 @@
+import { Discussion } from '@putong-oj/db'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -8,6 +9,14 @@ const server = app.listen()
 const request = supertest.agent(server)
 
 const admin = userSeeds.admin
+
+async function getDiscussionIdByTitle (title: string) {
+  const discussion = await Discussion.findOne({ title }).select({ _id: 1 }).lean()
+  if (!discussion) {
+    throw new Error(`Discussion not found: ${title}`)
+  }
+  return discussion._id.toString()
+}
 
 test.before('Login as admin', async (t) => {
   const login = await request
@@ -37,12 +46,12 @@ test('Admin can see all discussions including private ones', async (t) => {
 })
 
 test('Admin can access any private discussion', async (t) => {
-  // Discussion #3 is a private discussion created by another user
+  const discussionId = await getDiscussionIdByTitle('Private Question')
   const res = await request
-    .get('/api/discussions/3')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
-  t.is(res.body.data.discussionId, 3)
+  t.is(res.body.data.id, discussionId)
   t.truthy(res.body.data.title)
   t.is(res.body.data.isJury, true) // Admin should be marked as jury
 })
@@ -57,11 +66,11 @@ test('Admin can create public announcement', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 
   // Verify the created announcement
   const getRes = await request
-    .get(`/api/discussions/${res.body.data.discussionId}`)
+    .get(`/api/discussions/${res.body.data.id}`)
 
   t.is(getRes.status, 200)
   t.is(getRes.body.data.type, 2)
@@ -69,8 +78,9 @@ test('Admin can create public announcement', async (t) => {
 })
 
 test('Admin can add comment to announcement', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Important System Update')
   const res = await request
-    .post('/api/discussions/2/comments')
+    .post(`/api/discussions/${discussionId}/comments`)
     .send({
       content: 'Admin comment on announcement',
     })
@@ -79,7 +89,7 @@ test('Admin can add comment to announcement', async (t) => {
 
   // Verify comment was added
   const getRes = await request
-    .get('/api/discussions/2')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(getRes.status, 200)
   const comments = getRes.body.data.comments
@@ -97,7 +107,7 @@ test('Admin can create open discussion', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Admin can create private clarification', async (t) => {
@@ -110,7 +120,7 @@ test('Admin can create private clarification', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 })
 
 test('Admin can create discussion with problem reference', async (t) => {
@@ -124,10 +134,10 @@ test('Admin can create discussion with problem reference', async (t) => {
     })
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.discussionId)
+  t.truthy(res.body.data.id)
 
   const getRes = await request
-    .get(`/api/discussions/${res.body.data.discussionId}`)
+    .get(`/api/discussions/${res.body.data.id}`)
 
   t.is(getRes.status, 200)
   t.truthy(getRes.body.data.problem)
@@ -135,8 +145,9 @@ test('Admin can create discussion with problem reference', async (t) => {
 })
 
 test('Admin sees isJury=true for discussions', async (t) => {
+  const discussionId = await getDiscussionIdByTitle('Welcome to the OJ Discussion Board')
   const res = await request
-    .get('/api/discussions/1')
+    .get(`/api/discussions/${discussionId}`)
 
   t.is(res.status, 200)
   t.is(res.body.data.isJury, true)

@@ -105,8 +105,8 @@ export async function removeGroup (groupId: string) {
   return apiClient.delete<null>(`/admin/groups/${encodeURIComponent(groupId)}`)
 }
 
-export async function updateDiscussion (discussionId: number, payload: AdminDiscussionUpdatePayload) {
-  return apiClient.put<null>(`/admin/discussions/${discussionId}`, payload)
+export async function updateDiscussion (discussionId: string, payload: AdminDiscussionUpdatePayload) {
+  return apiClient.put<null>(`/admin/discussions/${encodeURIComponent(discussionId)}`, payload)
 }
 export async function updateComment (commentId: string, payload: AdminCommentUpdatePayload) {
   return apiClient.put<null>(`/admin/comments/${encodeURIComponent(commentId)}`, payload)

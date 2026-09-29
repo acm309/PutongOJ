@@ -40,6 +40,9 @@ type DiscussionPopulated<T extends DiscussionPopulateConfig>
       : Types.ObjectId | null
   }
 
+type DiscussionPopulatedDocument<T extends DiscussionPopulateConfig>
+  = WithId<DiscussionPopulated<T>>
+
 export async function findDiscussions<
   TFields extends (keyof DiscussionModel)[],
   TPopulate extends DiscussionPopulateConfig,
@@ -50,6 +53,7 @@ export async function findDiscussions<
   populate: TPopulate = {} as TPopulate,
 ) {
   const { page, pageSize, sort, sortBy } = options
+  const selectFields = fields.filter(field => field !== 'id')
   let query = Discussion
     .find(filters)
     .sort({
@@ -57,7 +61,7 @@ export async function findDiscussions<
       [sortBy]: sort,
       ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
     })
-    .select([ '_id', ...fields ])
+    .select([ '_id', ...selectFields ])
     .skip((page - 1) * pageSize)
     .limit(pageSize)
   if (populate.author) {
@@ -70,12 +74,14 @@ export async function findDiscussions<
     query = query.populate({ path: 'contest', select: populate.contest })
   }
 
-  const docsPromise = query.lean()
+  const docsPromise = query
   const countPromise = Discussion.countDocuments(filters)
 
   const [ docs, total ] = await Promise.all([ docsPromise, countPromise ])
-  const result: Paginated<WithId<Pick<DiscussionPopulated<TPopulate>, TFields[number]>>> = {
-    docs: docs as any,
+  const result: Paginated<Pick<DiscussionPopulated<TPopulate>, TFields[number]>> = {
+    docs: docs.map(doc => doc.toObject<Pick<DiscussionPopulated<TPopulate>, TFields[number]>>({
+      virtuals: true,
+    })),
     limit: pageSize,
     page,
     pages: Math.ceil(total / pageSize),
@@ -85,9 +91,9 @@ export async function findDiscussions<
 }
 
 async function getDiscussionPopulated<TPopulate extends DiscussionPopulateConfig> (
-  discussionId: number, populate: TPopulate,
+  discussionId: string, populate: TPopulate,
 ) {
-  let query = Discussion.findOne({ discussionId })
+  let query = Discussion.findById(discussionId)
   if (populate.author) {
     query = query.populate({ path: 'author', select: populate.author })
   }
@@ -97,11 +103,11 @@ async function getDiscussionPopulated<TPopulate extends DiscussionPopulateConfig
   if (populate.contest) {
     query = query.populate({ path: 'contest', select: populate.contest })
   }
-  const doc = await query.lean()
-  return doc as WithId<DiscussionPopulated<TPopulate>> | null
+  const doc = await query
+  return doc?.toObject<DiscussionPopulatedDocument<TPopulate>>({ virtuals: true }) ?? null
 }
 
-export async function getDiscussion (discussionId: number) {
+export async function getDiscussion (discussionId: string) {
   return getDiscussionPopulated(discussionId, {
     author: [ 'uid' ],
     problem: [ 'pid', 'owner' ],
@@ -179,13 +185,13 @@ export type DiscussionUpdateDto = Partial<Pick<DiscussionModel,
 >>
 
 export async function updateDiscussion (
-  discussionId: number,
+  discussionId: string,
   update: DiscussionUpdateDto,
 ): Promise<DiscussionModel | null> {
-  const discussion = await Discussion.findOneAndUpdate(
-    { discussionId }, update, { returnDocument: 'after' },
-  ).lean()
-  return discussion
+  const discussion = await Discussion.findByIdAndUpdate(
+    discussionId, { $set: update }, { returnDocument: 'after' },
+  )
+  return discussion?.toObject({ virtuals: true }) ?? null
 }
 
 type DiscussionCreateDto = Pick<DiscussionModel,
@@ -201,7 +207,7 @@ export async function createDiscussion (
   })
   await newDiscussion.save()
   await createComment(newDiscussion._id, { author, content })
-  return newDiscussion.toObject()
+  return newDiscussion.toObject({ virtuals: true })
 }
 
 const discussionService = {

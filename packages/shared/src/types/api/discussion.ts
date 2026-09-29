@@ -22,7 +22,7 @@ export const DiscussionListQuerySchema = z.object({
 export type DiscussionListQuery = z.infer<typeof DiscussionListQuerySchema>
 
 export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
-  discussionId: DiscussionModelSchema.shape.discussionId,
+  id: DiscussionModelSchema.shape.id,
   author: z.object({
     uid: UserModelSchema.shape.uid,
     avatar: UserModelSchema.shape.avatar,
@@ -44,7 +44,7 @@ export const DiscussionListQueryResultSchema = PaginatedSchema(z.object({
 export type DiscussionListQueryResult = z.input<typeof DiscussionListQueryResultSchema>
 
 export const DiscussionDetailQueryResultSchema = z.object({
-  discussionId: DiscussionModelSchema.shape.discussionId,
+  id: DiscussionModelSchema.shape.id,
   author: z.object({
     uid: UserModelSchema.shape.uid,
   }),
