@@ -45,7 +45,7 @@ export async function findOne (ctx: Context) {
         .findOne({ contestId: solution.mid }, 'course')
         .populate<{ course: CourseDocument }>('course')
       if (contest && contest.course) {
-        const { role } = await loadCourseStateOrThrow(ctx, contest.course.courseId)
+        const { role } = await loadCourseStateOrThrow(ctx, contest.course.id)
         if (role.viewSolution) {
           return true
         }

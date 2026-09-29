@@ -14,12 +14,12 @@ export const useCourseStore = defineStore('course', {
     courses: { docs: [], limit: 0, page: 1, pages: 0, total: 0 } as Paginated<CourseEntityPreview>,
   }),
   actions: {
-    async createCourse (course: CourseCreatePayload): Promise<number | null> {
+    async createCourse (course: CourseCreatePayload): Promise<string | null> {
       const response = await createCourse(course)
       if (!response.success) {
         return null
       }
-      return response.data.courseId
+      return response.data.id
     },
     async findCourses (params: CourseListQuery) {
       const response = await findCourses(params)
@@ -27,7 +27,7 @@ export const useCourseStore = defineStore('course', {
         this.courses = response.data
       }
     },
-    async findCourse (courseId: number) {
+    async findCourse (courseId: string) {
       const response = await getCourse(courseId)
       if (response.success) {
         this.course = response.data

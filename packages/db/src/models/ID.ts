@@ -4,7 +4,6 @@ import mongoose from '../client.js'
 
 const idFields = [
   'Contest',
-  'Course',
   'Problem',
   'Solution',
 ]

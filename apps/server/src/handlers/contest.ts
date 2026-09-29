@@ -225,12 +225,12 @@ async function getContest (ctx: Context) {
     isSolved: solved.includes(problem.problemId),
   }))
 
-  let course: { courseId: number, name: string } | null = null
+  let course: { id: string, name: string } | null = null
   if (contest.course) {
     const courseState = await loadCourseStateById(ctx, contest.course)
     if (courseState) {
-      const { courseId, name } = courseState.course
-      course = { courseId, name }
+      const { id, name } = courseState.course
+      course = { id, name }
     }
   }
   const result = ContestDetailQueryResultSchema.encode({
@@ -280,12 +280,12 @@ async function getConfig (ctx: Context) {
     comment: entry.comment === undefined ? null : entry.comment,
   }))
 
-  let course: { courseId: number, name: string } | null = null
+  let course: { id: string, name: string } | null = null
   if (contest.course) {
     const courseState = await loadCourseStateById(ctx, contest.course)
     if (courseState) {
-      const { courseId, name } = courseState.course
-      course = { courseId, name }
+      const { id, name } = courseState.course
+      course = { id, name }
     }
   }
 

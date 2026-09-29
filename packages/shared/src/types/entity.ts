@@ -1,6 +1,7 @@
 import type { Types } from 'mongoose'
 import type { TagModel } from './model/tag.js'
 import type { UserModel } from './model/user.js'
+import type { WithId } from './utils.js'
 
 export type Entity = {
   createdAt: Date
@@ -22,7 +23,7 @@ export type CourseRole = {
 }
 
 export type CourseEntity = {
-  courseId: number
+  id: string
   name: string
   description: string
   encrypt: 1 | 2
@@ -31,18 +32,18 @@ export type CourseEntity = {
 
 export type CourseEntityEditable = Pick<CourseEntity, 'name' | 'description' | 'encrypt' | 'joinCode'>
 
-export type CourseEntityItem = Pick<CourseEntity, 'courseId' | 'name'>
+export type CourseEntityItem = Pick<CourseEntity, 'id' | 'name'>
 
 export type CourseEntityView = {
   canJoin: boolean
-} & Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>
+} & Pick<CourseEntity, 'id' | 'name' | 'description' | 'encrypt'>
 & Partial<Pick<CourseEntity, 'joinCode'>>
 
 export type CourseEntityViewWithRole = CourseEntityView & {
   role: CourseRole
 }
 
-export type CourseEntityPreview = Pick<CourseEntity, 'courseId' | 'name' | 'description' | 'encrypt'>
+export type CourseEntityPreview = Pick<CourseEntity, 'id' | 'name' | 'description' | 'encrypt'>
 
 export type CourseEntityPreviewWithRole = CourseEntityPreview & {
   role: CourseRole
@@ -117,7 +118,7 @@ export type SolutionEntity = {
   pid: number
   uid: string
   mid: number
-  course: Types.ObjectId | CourseEntity | null
+  course: Types.ObjectId | WithId<CourseEntity> | null
   code: string
   length: number
   language: number

@@ -10,7 +10,7 @@ interface ProblemOption { value: number, label: string }
 
 interface Props {
   modelValue: number[] | null
-  course?: number
+  course?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {

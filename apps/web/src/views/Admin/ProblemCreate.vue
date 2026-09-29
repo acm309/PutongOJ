@@ -28,7 +28,7 @@ const problem = reactive({
   type: 1,
   code: '',
   tags: [],
-  course: null as number | null,
+  course: null as string | null,
 })
 
 async function submit () {
@@ -83,7 +83,7 @@ async function submitCheck () {
 
 onMounted(() => {
   if (route.query.course) {
-    problem.course = Number.parseInt(route.query.course as string)
+    problem.course = route.query.course as string
   }
 })
 </script>

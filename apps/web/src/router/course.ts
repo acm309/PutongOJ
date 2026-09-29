@@ -16,7 +16,7 @@ const courseRoutes: Array<RouteRecordRaw> = [
     meta: { title: 'Courses' },
   },
   {
-    path: '/course/:id(\\d+)',
+    path: '/course/:id',
     name: 'course',
     components: {
       default: Layout,

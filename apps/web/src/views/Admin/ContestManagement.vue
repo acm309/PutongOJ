@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { findContests } from '@/api/admin'
 import ContestCreateDialog from '@/components/ContestCreateDialog.vue'
+import CourseFilter from '@/components/CourseFilter.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useDebouncedSearch } from '@/composables/useDebouncedSearch'
 import { useRootStore } from '@/store'
@@ -98,7 +99,7 @@ function applySearch () {
       ...route.query,
       contestId: query.value.contestId ?? undefined,
       title: query.value.title || undefined,
-      course: query.value.course ?? undefined,
+      course: query.value.course || undefined,
       isHidden: query.value.isHidden === undefined ? undefined : String(query.value.isHidden),
       isPublic: query.value.isPublic === undefined ? undefined : String(query.value.isPublic),
       isLocked: query.value.isLocked === undefined ? undefined : String(query.value.isLocked),
@@ -115,11 +116,6 @@ const {
 
 function onContestIdInput (event: { value?: string | number }) {
   query.value.contestId = toOptionalNumber(event.value)
-  onSearchInput()
-}
-
-function onCourseInput (event: { value?: string | number }) {
-  query.value.course = toOptionalNumber(event.value)
   onSearchInput()
 }
 
@@ -199,13 +195,10 @@ onRouteQueryUpdate(fetch)
             <InputIcon class="pi pi-hashtag" />
           </IconField>
 
-          <IconField>
-            <InputNumber
-              v-model="query.course" mode="decimal" fluid :placeholder="t('ptoj.filter_by_course')" :min="-1"
-              :use-grouping="false" @input="onCourseInput" @keypress.enter="onSearch"
-            />
-            <InputIcon class="pi pi-book" />
-          </IconField>
+          <CourseFilter
+            v-model="query.course" :disabled="loading" :placeholder="t('ptoj.filter_by_course')"
+            force-selection @select="onSearch"
+          />
 
           <Select
             v-model="query.isPublic" fluid :options="publicOptions" option-label="label" option-value="value"

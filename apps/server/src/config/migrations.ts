@@ -255,6 +255,20 @@ async function migrateDiscussionIdToObjectId () {
   logger.info(`Migration Discussion.discussionId -> _id completed, cleared=${result.modifiedCount}`)
 }
 
+async function migrateCourseIdToObjectId () {
+  const courseCollection = mongoose.connection.collection('Course')
+
+  const courseIndexes = await courseCollection.indexes()
+  if (courseIndexes.some(index => index.name === 'courseId_1')) {
+    await courseCollection.dropIndex('courseId_1')
+  }
+
+  const result = await courseCollection.updateMany({}, { $unset: { courseId: '' } })
+  await ID.deleteOne({ name: 'Course' })
+
+  logger.info(`Migration Course.courseId -> _id completed, cleared=${result.modifiedCount}`)
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -339,6 +353,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-discussion-object-id',
     description: 'Remove legacy Discussion.discussionId counter and use _id as the discussion identifier',
     run: migrateDiscussionIdToObjectId,
+  },
+  {
+    key: '20260929-course-object-id',
+    description: 'Remove legacy Course.courseId counter and use _id as the course identifier',
+    run: migrateCourseIdToObjectId,
   },
 ]
 

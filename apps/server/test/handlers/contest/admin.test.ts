@@ -15,6 +15,7 @@ const userAgent = supertest.agent(server)
 
 let contestId: number | null = null
 let courseContestId: number | null = null
+let courseId: string | null = null
 
 const now = Date.now()
 const baseContest = {
@@ -62,14 +63,15 @@ test.serial('Create a contest', async (t) => {
 })
 
 test.serial('Create a course contest', async (t) => {
-  const course = await Course.findOne({ courseId: 1 }).lean()
+  const course = await Course.findOne({ name: 'Java Basics' })
   if (!course) {
     return t.fail('Missing seeded course')
   }
+  courseId = course.id
 
   const res = await request
     .post('/api/contests')
-    .send({ ...baseContest, title: 'Admin Course Test Contest', course: 1 })
+    .send({ ...baseContest, title: 'Admin Course Test Contest', course: course.id })
 
   t.is(res.status, 200)
   t.true(res.body.success)
@@ -127,9 +129,10 @@ test.serial('Public list contains public contests but excludes course contests f
 
 test.serial('Course list returns course contests through the course endpoint', async (t) => {
   if (!courseContestId) { return t.fail('No courseContestId from prior test') }
+  if (!courseId) { return t.fail('No courseId from prior test') }
 
   const res = await request
-    .get('/api/course/1/contests')
+    .get(`/api/course/${courseId}/contests`)
     .query({ title: 'Admin Course Test' })
 
   t.is(res.status, 200)

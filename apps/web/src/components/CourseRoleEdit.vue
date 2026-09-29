@@ -18,7 +18,7 @@ const props = defineProps({
     default: false,
   },
   courseId: {
-    type: Number,
+    type: String,
     required: true,
   },
   userId: {

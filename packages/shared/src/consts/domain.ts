@@ -16,6 +16,8 @@ export const encrypt = Object.freeze({
   Password: 3,
 })
 
+export const filterUnassigned = 'none' as const
+
 export const problemType = Object.freeze({
   Traditional: 1,
   Interaction: 2,

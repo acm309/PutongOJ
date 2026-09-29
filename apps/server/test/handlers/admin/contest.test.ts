@@ -1,3 +1,5 @@
+import { Course } from '@putong-oj/db'
+import { filterUnassigned } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -21,6 +23,7 @@ const state = {
   publicContestId: 0,
   hiddenContestId: 0,
   courseContestId: 0,
+  courseId: '',
 }
 
 test.before('Log in and create contests for administration', async (t) => {
@@ -36,10 +39,15 @@ test.before('Log in and create contests for administration', async (t) => {
   })
   t.true(userLogin.body.success)
 
+  const course = await Course.findOne({ name: 'Java Basics' })
+  if (!course) {
+    return t.fail('Missing seeded course')
+  }
+
   const [ publicContest, hiddenContest, courseContest ] = await Promise.all([
     adminAgent.post('/api/contests').send({ ...baseContest, title: 'Admin List Public Contest' }),
     adminAgent.post('/api/contests').send({ ...baseContest, title: 'Admin List Hidden Contest', isHidden: true }),
-    adminAgent.post('/api/contests').send({ ...baseContest, title: 'Admin List Course Contest', course: 1 }),
+    adminAgent.post('/api/contests').send({ ...baseContest, title: 'Admin List Course Contest', course: course.id }),
   ])
   t.true(publicContest.body.success)
   t.true(hiddenContest.body.success)
@@ -48,6 +56,7 @@ test.before('Log in and create contests for administration', async (t) => {
   state.publicContestId = publicContest.body.data.contestId
   state.hiddenContestId = hiddenContest.body.data.contestId
   state.courseContestId = courseContest.body.data.contestId
+  state.courseId = course.id
 })
 
 test.serial('Admin list includes hidden and course contests', async (t) => {
@@ -59,7 +68,7 @@ test.serial('Admin list includes hidden and course contests', async (t) => {
   t.true(res.body.data.docs.some((contest: any) => contest.contestId === state.hiddenContestId))
   const courseContest = res.body.data.docs.find((contest: any) => contest.contestId === state.courseContestId)
   t.truthy(courseContest)
-  t.is(courseContest.course.courseId, 1)
+  t.is(courseContest.course.id, state.courseId)
   t.is(courseContest.course.name, 'Java Basics')
 })
 
@@ -69,15 +78,17 @@ test.serial('Admin list filters by visibility and course association', async (t)
   t.is(hidden.body.data.total, 1)
   t.true(hidden.body.data.docs[0].isHidden)
 
-  const noCourse = await adminAgent.get('/api/admin/contests').query({ contestId: state.publicContestId, course: -1 })
+  const noCourse = await adminAgent
+    .get('/api/admin/contests')
+    .query({ contestId: state.publicContestId, course: filterUnassigned })
   t.true(noCourse.body.success)
   t.is(noCourse.body.data.total, 1)
   t.is(noCourse.body.data.docs[0].course, null)
 
-  const course = await adminAgent.get('/api/admin/contests').query({ contestId: state.courseContestId, course: 1 })
+  const course = await adminAgent.get('/api/admin/contests').query({ contestId: state.courseContestId, course: state.courseId })
   t.true(course.body.success)
   t.is(course.body.data.total, 1)
-  t.is(course.body.data.docs[0].course.courseId, 1)
+  t.is(course.body.data.docs[0].course.id, state.courseId)
 })
 
 test.serial('Non-admin cannot access the admin contest list', async (t) => {

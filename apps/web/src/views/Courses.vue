@@ -135,9 +135,9 @@ onRouteQueryUpdate(fetch)
     </template>
 
     <template v-else>
-      <div v-for="item in courses.docs" :key="item.courseId" class="border-surface border-t p-2">
+      <div v-for="item in courses.docs" :key="item.id" class="border-surface border-t p-2">
         <RouterLink
-          :to="{ name: 'courseProblems', params: { id: item.courseId } }"
+          :to="{ name: 'courseProblems', params: { id: item.id } }"
           class="block group px-4 py-3 space-y-2"
         >
           <div class="flex flex-row gap-2 justify-between">

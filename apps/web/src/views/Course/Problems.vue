@@ -52,7 +52,7 @@ const page = computed<number>(() =>
 const pageSize = computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
-const id = Number.parseInt(route.params.id as string)
+const id = route.params.id as string
 
 type SearchField = 'title' | 'tag' | 'pid'
 
@@ -119,7 +119,7 @@ async function updateSorting () {
   loading.value = true
   try {
     const response = await moveCourseProblem(
-      course.value.courseId,
+      course.value.id,
       sorting.value.pid,
       { beforePos: newPosition.value },
     )
@@ -148,7 +148,7 @@ function removeProblem (event: any, pid: number) {
       severity: 'danger',
     },
     accept: async () => {
-      const response = await removeCourseProblem(course.value.courseId, pid)
+      const response = await removeCourseProblem(course.value.id, pid)
       if (!response.success) {
         return
       }

@@ -25,11 +25,17 @@ async function findContests (
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .select(fields)
-    .populate<{ course: Pick<CourseDocument, 'courseId' | 'name'> | null }>('course', { _id: 0, courseId: 1, name: 1 })
+    .populate<{ course: Pick<CourseDocument, '_id' | 'name'> | null }>('course', { name: 1 })
     .lean()
   const countPromise = Contest.countDocuments(filters)
 
-  const [ docs, count ] = await Promise.all([ docsPromise, countPromise ])
+  const [ rawDocs, count ] = await Promise.all([ docsPromise, countPromise ])
+  const docs = rawDocs.map(doc => ({
+    ...doc,
+    course: doc.course
+      ? { id: doc.course._id.toString(), name: doc.course.name }
+      : null,
+  }))
   const result = {
     docs,
     limit: pageSize,

@@ -9,7 +9,7 @@ import { useMessage } from '@/utils/message'
 
 const props = defineProps<{
   modelValue: boolean
-  courseId: number
+  courseId: string
 }>()
 const emit = defineEmits([ 'update:modelValue', 'close' ])
 const { t } = useI18n()

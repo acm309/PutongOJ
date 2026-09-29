@@ -3,7 +3,6 @@ import type { Document, PaginateModel, Types } from 'mongoose'
 import { encrypt } from '@putong-oj/shared'
 import mongoosePaginate from 'mongoose-paginate-v2'
 import mongoose from '../client.js'
-import ID from './ID.js'
 
 export type CourseDocument = {
   isPublic: boolean
@@ -14,13 +13,6 @@ export type CourseDocument = {
 type CourseModel = PaginateModel<CourseDocument>
 
 const courseSchema = new mongoose.Schema({
-  courseId: {
-    type: Number,
-    index: {
-      unique: true,
-    },
-    default: -1,
-  },
   name: {
     type: String,
     required: true,
@@ -74,12 +66,6 @@ courseSchema.virtual('isPrivate').get(function (this: CourseDocument): boolean {
 })
 courseSchema.virtual('canJoin').get(function (this: CourseDocument): boolean {
   return (this.joinCode?.length ?? 0) > 0
-})
-
-courseSchema.pre('save', async function (this: CourseDocument) {
-  if (this.courseId === -1) {
-    this.courseId = await ID.generateId('Course')
-  }
 })
 
 const Course

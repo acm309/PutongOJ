@@ -26,7 +26,7 @@ export async function findContests (params: ContestListQuery) {
   return apiClient.get<ContestListQueryResult>('/contests', { params })
 }
 
-export async function findCourseContests (courseId: number | string, params: CourseContestListQuery) {
+export async function findCourseContests (courseId: string, params: CourseContestListQuery) {
   return apiClient.get<ContestListQueryResult>(`/course/${encodeURIComponent(courseId)}/contests`, { params })
 }
 

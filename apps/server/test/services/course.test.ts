@@ -34,8 +34,8 @@ test('findCourses', async (t) => {
   t.true(result.pages > 1)
   t.deepEqual(
     Object.keys(result.docs[0]).sort(),
-    [ 'courseId', 'name', 'description', 'encrypt' ].sort())
-  t.is(typeof result.docs[0].courseId, 'number')
+    [ 'id', 'name', 'description', 'encrypt' ].sort())
+  t.is(typeof result.docs[0].id, 'string')
   t.is(typeof result.docs[0].name, 'string')
   t.is(typeof result.docs[0].description, 'string')
   t.is(typeof result.docs[0].encrypt, 'number')
@@ -72,7 +72,7 @@ test.serial('createCourse (serial)', async (t) => {
   const course = await courseService.createCourse(testCourse)
 
   t.truthy(course)
-  t.is(typeof course.courseId, 'number')
+  t.is(typeof course.id, 'string')
   t.is(course.name, testCourse.name)
   t.is(course.description, testCourse.description)
   t.is(course.encrypt, testCourse.encrypt)
@@ -81,19 +81,19 @@ test.serial('createCourse (serial)', async (t) => {
 })
 
 test('getCourse (non-existent course)', async (t) => {
-  const course = await courseService.getCourse(0)
+  const course = await courseService.getCourse('000000000000000000000000')
   t.is(course, null)
 })
 
 test.serial('getCourse (serial)', async (t) => {
-  const courseId = testContext.course?.courseId
+  const courseId = testContext.course?.id
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
   const course = await courseService.getCourse(courseId)
 
   t.truthy(course)
-  t.is(course?.courseId, courseId)
+  t.is(course?.id, courseId)
   t.is(course?.name, testCourse.name)
   t.is(course?.description, testCourse.description)
   t.is(course?.encrypt, testCourse.encrypt)
@@ -102,12 +102,12 @@ test.serial('getCourse (serial)', async (t) => {
 })
 
 test('updateCourse (non-existent course)', async (t) => {
-  const result = await courseService.updateCourse(0, {})
+  const result = await courseService.updateCourse('000000000000000000000000', {})
   t.is(result, null)
 })
 
 test.serial('updateCourse (serial)', async (t) => {
-  const courseId = testContext.course?.courseId
+  const courseId = testContext.course?.id
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -119,13 +119,13 @@ test.serial('updateCourse (serial)', async (t) => {
     })
 
   t.truthy(updatedCourse)
-  t.is(updatedCourse?.courseId, courseId)
+  t.is(updatedCourse?.id, courseId)
   t.is(updatedCourse?.name, 'Advanced C Programming')
   t.is(updatedCourse?.description, 'An advanced course about C programming')
 })
 
 test.serial('findCourses (sort by updatedAt desc)', async (t) => {
-  const courseId = testContext.course?.courseId
+  const courseId = testContext.course?.id
   if (!courseId) {
     return t.fail('Previous test did not create a course successfully')
   }
@@ -136,7 +136,7 @@ test.serial('findCourses (sort by updatedAt desc)', async (t) => {
   })
 
   t.truthy(result)
-  t.is(result.docs[0]?.courseId, courseId)
+  t.is(result.docs[0]?.id, courseId)
 })
 
 test.serial('updateCourseMember (serial)', async (t) => {

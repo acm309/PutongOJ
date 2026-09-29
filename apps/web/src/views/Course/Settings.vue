@@ -57,7 +57,7 @@ async function submitCourse () {
 
   submitting.value = true
   try {
-    const response = await updateCourse(course.value.courseId, {
+    const response = await updateCourse(course.value.id, {
       name: course.value.name,
       description: course.value.description,
       encrypt: course.value.encrypt,
@@ -86,7 +86,7 @@ function rearrangeProblems (event: any) {
       label: t('oj.ok'),
     },
     accept: () => {
-      rearrangeCourseProblems(course.value.courseId)
+      rearrangeCourseProblems(course.value.id)
       message.info(t('oj.rearrange_task_dispatched'))
     },
   })

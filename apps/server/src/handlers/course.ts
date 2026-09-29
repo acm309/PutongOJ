@@ -91,7 +91,7 @@ async function findCourseContests (ctx: Context) {
 async function getCourse (ctx: Context) {
   const { course, role } = await loadCourseStateOrThrow(ctx)
   const result = CourseDetailQueryResultSchema.encode({
-    courseId: course.courseId,
+    id: course.id,
     name: course.name,
     description: course.description,
     encrypt: course.encrypt,
@@ -135,8 +135,8 @@ async function createCourse (ctx: Context) {
   const profile = await loadProfile(ctx)
   try {
     const course = await courseService.createCourse(payload.data)
-    ctx.auditLog.info(`<Course:${course.courseId}> created by <User:${profile.uid}>`)
-    const result = CourseCreateResultSchema.encode({ courseId: course.courseId })
+    ctx.auditLog.info(`<Course:${course.id}> created by <User:${profile.uid}>`)
+    const result = CourseCreateResultSchema.encode({ id: course.id })
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
     if (err.name === 'ValidationError') {
@@ -159,8 +159,8 @@ async function updateCourse (ctx: Context) {
 
   const profile = await loadProfile(ctx)
   try {
-    const updated = await courseService.updateCourse(course.courseId, payload.data)
-    ctx.auditLog.info(`<Course:${course.courseId}> updated by <User:${profile.uid}>`)
+    const updated = await courseService.updateCourse(course.id, payload.data)
+    ctx.auditLog.info(`<Course:${course.id}> updated by <User:${profile.uid}>`)
     const result = CourseMutationResultSchema.encode({ success: !!updated })
     return createEnvelopedResponse(ctx, result)
   } catch (err: any) {
@@ -237,7 +237,7 @@ async function updateCourseMember (ctx: Context) {
     user._id,
     payload.data.role,
   )
-  ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> updated by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<Course:${course.id}> member <User:${userId}> updated by <User:${profile.uid}>`)
   return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
@@ -257,7 +257,7 @@ async function removeCourseMember (ctx: Context) {
   }
 
   const result = await courseService.removeCourseMember(course._id, userId)
-  ctx.auditLog.info(`<Course:${course.courseId}> member <User:${userId}> removed by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<Course:${course.id}> member <User:${userId}> removed by <User:${profile.uid}>`)
   return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 
@@ -278,7 +278,7 @@ async function addCourseProblems (ctx: Context) {
 
   const successCount = result.filter(Boolean).length
   const profile = await loadProfile(ctx)
-  ctx.auditLog.info(`<Course:${course.courseId}> added ${successCount} problems by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<Course:${course.id}> added ${successCount} problems by <User:${profile.uid}>`)
   return createEnvelopedResponse(ctx, CourseProblemAddResultSchema.encode({
     success: successCount === payload.data.problemIds.length,
     added: successCount,
@@ -326,7 +326,7 @@ async function removeCourseProblem (ctx: Context) {
   }
   const result = await courseService.removeCourseProblem(course._id, problem._id)
   const profile = await loadProfile(ctx)
-  ctx.auditLog.info(`<Course:${course.courseId}> removed <Problem:${ctx.params.problemId}> by <User:${profile.uid}>`)
+  ctx.auditLog.info(`<Course:${course.id}> removed <Problem:${ctx.params.problemId}> by <User:${profile.uid}>`)
   return createEnvelopedResponse(ctx, CourseMutationResultSchema.encode({ success: result }))
 }
 

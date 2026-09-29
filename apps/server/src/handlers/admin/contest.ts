@@ -5,6 +5,7 @@ import type { QueryFilter } from '../../types/mongo.ts'
 import {
   AdminContestListQueryResultSchema,
   AdminContestListQuerySchema,
+  filterUnassigned,
 } from '@putong-oj/shared'
 import escapeRegExp from 'lodash/escapeRegExp.js'
 import { contestService } from '../../services/contest.ts'
@@ -28,7 +29,7 @@ export async function findContests (ctx: Context) {
   if (title) {
     filters.title = { $regex: new RegExp(escapeRegExp(title), 'i') }
   }
-  if (course === -1) {
+  if (course === filterUnassigned) {
     filters.$or = [ { course: { $exists: false } }, { course: null } ]
   } else if (course !== undefined) {
     const courseDoc = await courseService.getCourse(course)

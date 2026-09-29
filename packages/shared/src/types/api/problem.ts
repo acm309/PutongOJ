@@ -11,6 +11,7 @@ import { stringToInt } from '../codec.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { TagModelSchema } from '../model/tag.js'
+import { ObjectIdStringSchema } from '../utils.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
 
 const ProblemTagSchema = z.object({
@@ -22,7 +23,7 @@ const ProblemTagSchema = z.object({
 export const ProblemListQuerySchema = z.object({
   page: stringToInt.pipe(z.union([ z.literal(-1), z.int().positive() ])).default(1),
   pageSize: stringToInt.pipe(z.int().positive()).default(30),
-  course: stringToInt.pipe(z.int().positive()).optional(),
+  course: ObjectIdStringSchema.optional(),
   type: z.enum([ 'title', 'tag', 'pid' ]).optional(),
   content: z.string().max(80).optional(),
 })
@@ -47,7 +48,7 @@ export type ProblemListQueryResult = z.input<typeof ProblemListQueryResultSchema
 
 export const ProblemItemListQuerySchema = z.object({
   keyword: z.string().max(80).default(''),
-  course: stringToInt.pipe(z.int().positive()).optional(),
+  course: ObjectIdStringSchema.optional(),
 })
 
 export type ProblemItemListQuery = z.infer<typeof ProblemItemListQuerySchema>
@@ -107,7 +108,7 @@ export const ProblemCreatePayloadSchema = ProblemEditableFieldsSchema.partial().
   hint: z.string().default(''),
   type: z.enum(problemType).default(problemType.Traditional),
   code: z.string().default(''),
-  course: z.int().positive().optional(),
+  course: ObjectIdStringSchema.optional(),
 })
 
 export type ProblemCreatePayload = z.input<typeof ProblemCreatePayloadSchema>

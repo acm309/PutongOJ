@@ -113,7 +113,7 @@ const tabItems = computed(() => {
 
 function jumpToCourse () {
   if (!contest.value.course) return
-  router.push({ name: 'courseContests', params: { id: contest.value.course.courseId } })
+  router.push({ name: 'courseContests', params: { id: contest.value.course.id } })
 }
 </script>
 

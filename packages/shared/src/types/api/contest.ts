@@ -109,7 +109,7 @@ export const ContestDetailQueryResultSchema = z.object({
   })),
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.object({
-    courseId: z.number(),
+    id: ObjectIdStringSchema,
     name: z.string(),
   }).nullable(),
 })
@@ -122,7 +122,7 @@ export const ContestCreatePayloadSchema = z.object({
   endsAt: ContestModelSchema.shape.endsAt,
   isHidden: ContestModelSchema.shape.isHidden,
   isPublic: ContestModelSchema.shape.isPublic,
-  course: z.number().nonnegative().nullable().optional(),
+  course: ObjectIdStringSchema.nullable().optional(),
 })
 
 export type ContestCreatePayload = z.infer<typeof ContestCreatePayloadSchema>
@@ -156,7 +156,7 @@ export const ContestConfigQueryResultSchema = z.object({
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
   course: z.object({
-    courseId: z.number(),
+    id: ObjectIdStringSchema,
     name: z.string(),
   }).nullable(),
 })
@@ -181,7 +181,7 @@ export const ContestConfigEditPayloadSchema = z.object({
   problems: z.array(ProblemModelSchema.shape.pid),
   allowedLanguages: ContestModelSchema.shape.allowedLanguages,
   labelingStyle: ContestModelSchema.shape.labelingStyle,
-  course: z.number().nonnegative().nullable(),
+  course: ObjectIdStringSchema.nullable(),
 }).partial()
 
 export type ContestConfigEditPayload = z.infer<typeof ContestConfigEditPayloadSchema>

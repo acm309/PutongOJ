@@ -4,6 +4,7 @@ import { encrypt } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
 import { ProblemModelSchema } from '../model/problem.js'
 import { UserModelSchema } from '../model/user.js'
+import { ObjectIdStringSchema } from '../utils.js'
 import { PaginatedSchema, PaginationSchema } from './utils.js'
 
 export const CourseRoleSchema = z.object({
@@ -21,7 +22,6 @@ const CourseEncryptSchema = z.union([
 ])
 
 const CourseFieldsSchema = z.object({
-  courseId: z.int().positive(),
   name: z.string().min(3).max(30),
   description: z.string().max(100),
   encrypt: CourseEncryptSchema,
@@ -37,7 +37,7 @@ export const CourseListQuerySchema = z.object({
 export type CourseListQuery = z.infer<typeof CourseListQuerySchema>
 
 export const CourseListQueryResultSchema = PaginatedSchema(z.object({
-  courseId: CourseFieldsSchema.shape.courseId,
+  id: ObjectIdStringSchema,
   name: CourseFieldsSchema.shape.name,
   description: CourseFieldsSchema.shape.description,
   encrypt: CourseFieldsSchema.shape.encrypt,
@@ -52,14 +52,14 @@ export const CourseItemListQuerySchema = z.object({
 export type CourseItemListQuery = z.infer<typeof CourseItemListQuerySchema>
 
 export const CourseItemListQueryResultSchema = z.array(z.object({
-  courseId: CourseFieldsSchema.shape.courseId,
+  id: ObjectIdStringSchema,
   name: CourseFieldsSchema.shape.name,
 }))
 
 export type CourseItemListQueryResult = z.input<typeof CourseItemListQueryResultSchema>
 
 export const CourseDetailQueryResultSchema = z.object({
-  courseId: CourseFieldsSchema.shape.courseId,
+  id: ObjectIdStringSchema,
   name: CourseFieldsSchema.shape.name,
   description: CourseFieldsSchema.shape.description,
   encrypt: CourseFieldsSchema.shape.encrypt,
@@ -94,7 +94,7 @@ export const CourseJoinPayloadSchema = z.object({
 export type CourseJoinPayload = z.infer<typeof CourseJoinPayloadSchema>
 
 export const CourseCreateResultSchema = z.object({
-  courseId: CourseFieldsSchema.shape.courseId,
+  id: ObjectIdStringSchema,
 })
 
 export type CourseCreateResult = z.input<typeof CourseCreateResultSchema>

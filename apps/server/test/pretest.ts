@@ -14,13 +14,13 @@ async function main () {
   await removeall()
   await Promise.all([
     Comment.syncIndexes(),
+    Course.syncIndexes(),
     Discussion.syncIndexes(),
     Group.syncIndexes(),
     User.syncIndexes(),
   ])
   await Promise.all([
     new ID({ name: 'Contest', id: 0 }).save(),
-    new ID({ name: 'Course', id: 2 }).save(),
     new ID({ name: 'Problem', id: 999 }).save(),
     new ID({ name: 'Solution', id: 0 }).save(),
   ])

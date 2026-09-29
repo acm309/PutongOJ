@@ -23,14 +23,20 @@ export async function findCourses (
     query.name = { $regex: new RegExp(escapeRegExp(keyword), 'i') }
   }
   const result = await Course.paginate(query, {
-    sort: { updatedAt: -1, courseId: -1 },
+    sort: { updatedAt: -1, _id: -1 },
     page,
     limit: pageSize,
-    lean: true,
-    leanWithId: false,
-    select: '-_id courseId name description encrypt',
-  }) as any
-  return result
+    select: 'name description encrypt',
+  }) as unknown as Paginated<CourseDocument>
+  return {
+    ...result,
+    docs: result.docs.map(course => ({
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      encrypt: course.encrypt,
+    } satisfies CourseEntityPreview)),
+  }
 }
 
 export async function findCourseItems (
@@ -43,7 +49,7 @@ export async function findCourseItems (
     query.push({
       $expr: {
         $regexMatch: {
-          input: { $toString: '$courseId' },
+          input: { $toString: '$_id' },
           regex: new RegExp(`^${escapeRegExp(keyword)}`, 'i'),
         },
       },
@@ -51,16 +57,19 @@ export async function findCourseItems (
   }
   const result = await Course.find(
     { $or: query },
-    '-_id courseId name',
-    { sort: { courseId: -1 }, limit: 10 },
-  ).lean()
-  return result
+    'name',
+    { sort: { _id: -1 }, limit: 10 },
+  )
+  return result.map(course => ({
+    id: course.id,
+    name: course.name,
+  } satisfies CourseEntityItem))
 }
 
 export async function getCourse (
-  courseId: number,
+  courseId: string,
 ): Promise<CourseDocument | null> {
-  const course = await Course.findOne({ courseId })
+  const course = await Course.findById(courseId)
   return course ?? null
 }
 
@@ -73,11 +82,11 @@ export async function createCourse (
 }
 
 export async function updateCourse (
-  courseId: number,
+  courseId: string,
   opt: Partial<CourseEntityEditable>,
 ): Promise<CourseDocument | null> {
   const course = await Course
-    .findOneAndUpdate({ courseId }, opt, { returnDocument: 'after' })
+    .findByIdAndUpdate(courseId, opt, { returnDocument: 'after' })
   return course ?? null
 }
 

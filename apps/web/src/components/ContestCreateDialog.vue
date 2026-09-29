@@ -12,7 +12,7 @@ import { createContest } from '@/api/contest'
 import LabeledSwitch from './LabeledSwitch.vue'
 
 const props = defineProps<{
-  course?: number
+  course?: string
 }>()
 const visible = defineModel<boolean>('visible')
 

@@ -36,7 +36,7 @@ const page = computed<number>(() =>
 const pageSize = computed<number>(() =>
   Math.max(Math.min(Number.parseInt(route.query.pageSize as string)
     || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), 1))
-const id = Number.parseInt(route.params.id as string)
+const id = route.params.id as string
 
 const docs = ref<CourseMemberView[]>([])
 const total = ref<number>(0)

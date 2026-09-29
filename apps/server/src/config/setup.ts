@@ -13,7 +13,6 @@ export async function databaseSetup () {
 
   const models = {
     Contest: 0,
-    Course: 0,
     Problem: 999,
     Solution: 0,
   }

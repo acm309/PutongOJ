@@ -25,10 +25,10 @@ const { findCourse } = courseStore
 const { course } = storeToRefs(courseStore)
 
 const displayTab = computed(() => route.name as string || 'courseProblems')
-const courseId = computed(() => Number.parseInt(route.params.id as string))
-const courseLoaded = computed(() => course.value?.courseId === courseId.value)
+const courseId = computed(() => route.params.id as string)
+const courseLoaded = computed(() => course.value?.id === courseId.value)
 const role = computed(() => {
-  if (course.value?.courseId !== courseId.value) {
+  if (course.value?.id !== courseId.value) {
     return courseRoleNone
   }
   return course.value?.role ?? courseRoleNone

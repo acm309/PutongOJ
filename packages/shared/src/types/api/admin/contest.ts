@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { TITLE_LENGTH_MAX } from '@/consts/index.js'
+import { filterUnassigned, TITLE_LENGTH_MAX } from '@/consts/index.js'
 import { stringToInt } from '../../codec.js'
 import { ContestModelSchema } from '../../model/index.js'
+import { ObjectIdStringSchema } from '../../utils.js'
 import {
   PaginatedSchema,
   PaginationSchema,
@@ -15,8 +16,7 @@ export const AdminContestListQuerySchema = z.object({
   sortBy: z.enum([ 'contestId', 'createdAt', 'updatedAt', 'startsAt', 'endsAt' ]).default('createdAt'),
   contestId: stringToInt.pipe(z.int().positive()).optional(),
   title: z.string().max(TITLE_LENGTH_MAX).optional(),
-  // -1 represents contests that are not associated with a course.
-  course: stringToInt.pipe(z.union([ z.int().nonnegative(), z.literal(-1) ])).optional(),
+  course: z.union([ ObjectIdStringSchema, z.literal(filterUnassigned) ]).optional(),
   isHidden: z.stringbool().optional(),
   isPublic: z.stringbool().optional(),
   isLocked: z.stringbool().optional(),
@@ -33,7 +33,7 @@ export const AdminContestListQueryResultSchema = PaginatedSchema(z.object({
   isLocked: ContestModelSchema.shape.isLocked,
   isPublic: ContestModelSchema.shape.isPublic,
   course: z.object({
-    courseId: z.int().positive(),
+    id: ObjectIdStringSchema,
     name: z.string(),
   }).nullable(),
   createdAt: ContestModelSchema.shape.createdAt,
