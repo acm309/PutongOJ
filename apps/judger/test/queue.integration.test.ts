@@ -16,9 +16,10 @@ integrationTest('processes a queued submission in order', async (t) => {
   const sandboxDataDir = process.env.PTOJ_SANDBOX_DATA_DIR?.trim() || '/app/data'
   const pid = 999_999
   const sid = Date.now()
+  const userSuffix = String(sid).slice(-8)
   const testcaseUUID = `queue-testcase-${sid}`
   const testcaseDir = path.resolve(dataDir, String(pid))
-  const uid = `tasks-${sid}`
+  const uid = `tasks-${userSuffix}`
   const config = {
     ...loadJudgerConfig({
       PTOJ_MONGODB_URL: mongodbURL,

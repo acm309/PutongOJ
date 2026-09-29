@@ -17,7 +17,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
   const updater = new Updater(config)
   const statisticQueue = 'worker:updateStatistic'
   const similarityQueue = 'worker:checkSimilarity'
-  const uid = `updater-${sid}`
+  const uid = `updater-${String(sid).slice(-8)}`
   let processing: Promise<void> | undefined
 
   try {
