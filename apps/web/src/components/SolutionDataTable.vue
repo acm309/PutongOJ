@@ -116,10 +116,10 @@ function handleSort (event: any) {
             {{ judgeStatusLabels[data.judge as JudgeStatus] }}
           </span>
           <Tag
-            v-if="data.sim" v-tooltip.top="t('ptoj.similarity_detected')" :class="getSimilarityClassname(data.sim)"
+            v-if="data.similarity" v-tooltip.top="t('ptoj.similarity_detected')" :class="getSimilarityClassname(data.similarity)"
             severity="secondary" class="ml-2 text-xs"
           >
-            {{ data.sim }}%
+            {{ data.similarity }}%
           </Tag>
         </div>
       </template>

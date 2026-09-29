@@ -269,6 +269,70 @@ async function migrateCourseIdToObjectId () {
   logger.info(`Migration Course.courseId -> _id completed, cleared=${result.modifiedCount}`)
 }
 
+async function migrateSolutionSimilarSolutionRef () {
+  interface LegacySolution {
+    _id: mongoose.Types.ObjectId
+    sid?: number
+    sim?: unknown
+    sim_s_id?: unknown
+  }
+
+  const solutionCollection = mongoose.connection.collection('Solution')
+  const solutions = await solutionCollection
+    .find({
+      $or: [
+        { sim: { $exists: true } },
+        { sim_s_id: { $exists: true } },
+      ],
+    })
+    .toArray() as unknown as LegacySolution[]
+
+  if (solutions.length === 0) {
+    logger.info('Migration Solution.sim_s_id/sim skipped, no solutions to migrate')
+    return
+  }
+
+  const allSolutions = await solutionCollection
+    .find({}, { projection: { _id: 1, sid: 1 } })
+    .toArray() as unknown as LegacySolution[]
+  const solutionIdBySid = new Map<number, mongoose.Types.ObjectId>()
+  for (const solution of allSolutions) {
+    if (typeof solution.sid === 'number' && solution._id instanceof mongoose.Types.ObjectId) {
+      solutionIdBySid.set(solution.sid, solution._id)
+    }
+  }
+
+  let missingCount = 0
+  const operations = solutions.map((solution) => {
+    const similarSid = typeof solution.sim_s_id === 'number' ? solution.sim_s_id : 0
+    let similarSolution: mongoose.Types.ObjectId | null = null
+
+    if (similarSid > 0) {
+      similarSolution = solutionIdBySid.get(similarSid) ?? null
+      if (!similarSolution) {
+        missingCount += 1
+      }
+    }
+
+    return {
+      updateOne: {
+        filter: { _id: solution._id },
+        update: {
+          $set: { similarSolution },
+          $rename: { sim: 'similarity' },
+          $unset: { sim_s_id: '' },
+        },
+      },
+    }
+  })
+
+  const result = await solutionCollection.bulkWrite(operations, { ordered: false })
+  logger.info(
+    'Migration Solution.sim_s_id/sim completed, '
+    + `modified=${result.modifiedCount}, missing=${missingCount}, renamedSimilarity=${solutions.length}`,
+  )
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -358,6 +422,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-course-object-id',
     description: 'Remove legacy Course.courseId counter and use _id as the course identifier',
     run: migrateCourseIdToObjectId,
+  },
+  {
+    key: '20260929-solution-similar-solution-ref',
+    description: 'Replace Solution.sim_s_id with ObjectId similarSolution reference and rename Solution.sim to similarity',
+    run: migrateSolutionSimilarSolutionRef,
   },
 ]
 

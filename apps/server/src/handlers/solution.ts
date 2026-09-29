@@ -1,4 +1,4 @@
-import type { CourseDocument, Types } from '@putong-oj/db'
+import type { CourseDocument, SolutionDocument, Types } from '@putong-oj/db'
 import type { Context } from 'koa'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
@@ -21,13 +21,21 @@ import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { loadProblemState } from '../policies/problem.ts'
 import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
+type SimilarSolutionPreview = Pick<SolutionDocument, 'sid' | 'uid' | 'code' | 'create'>
+
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
   if (!Number.isInteger(opt) || opt <= 0) {
     ctx.throw(400, 'Invalid submission id')
   }
 
-  const solution = await Solution.findOne({ sid: opt }).lean()
+  const solution = await Solution
+    .findOne({ sid: opt })
+    .populate<{ similarSolution: SimilarSolutionPreview | null }>(
+      'similarSolution',
+      'sid uid code create',
+    )
+    .lean()
   if (!solution) {
     ctx.throw(400, 'No such a solution')
   }
@@ -57,17 +65,13 @@ export async function findOne (ctx: Context) {
     ctx.throw(403, 'Permission denied')
   }
 
-  // 如果是 admin 请求，并且有 sim 值(有抄袭嫌隙)，那么也样将可能被抄袭的提交也返回
-  let simSolution
-  if (profile.isAdmin && solution.sim) {
-    simSolution = await Solution.findOne({ sid: solution.sim_s_id }).lean().exec()
-  }
-
   const result = SolutionDetailQueryResultSchema.encode({
     ...solution,
     status: solution.status as 0 | 2,
     course: solution.course ? solution.course.toString() : null,
-    simSolution: simSolution || undefined,
+    simSolution: profile.isAdmin && solution.similarity
+      ? solution.similarSolution ?? undefined
+      : undefined,
   })
   return createEnvelopedResponse(ctx, result)
 }
@@ -175,8 +179,8 @@ async function updateSolution (ctx: Context) {
     solution.time = 0
     solution.memory = 0
     solution.error = ''
-    solution.sim = 0
-    solution.sim_s_id = 0
+    solution.similarity = 0
+    solution.similarSolution = null
     solution.testcases = []
 
     await solution.save()

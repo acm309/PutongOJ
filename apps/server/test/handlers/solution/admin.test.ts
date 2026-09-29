@@ -19,13 +19,13 @@ test.before('Login', async (t) => {
   t.is(login.status, 200)
 })
 
-test('Can see solution and sim of other users', async (t) => {
+test('Can see solution and similarity of other users', async (t) => {
   const res = await request
     .get('/api/status/4')
 
   t.is(res.status, 200)
-  t.truthy(res.body.data.sim)
-  t.truthy(res.body.data.sim_s_id)
+  t.truthy(res.body.data.similarity)
+  t.truthy(res.body.data.simSolution?.sid)
   t.truthy(res.body.data.code)
 })
 

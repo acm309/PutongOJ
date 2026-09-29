@@ -61,7 +61,7 @@ export async function exportSolutions (
   opt: SortOption & SolutionFilterOption,
 ): Promise<Pick<SolutionModel,
 'sid' | 'pid' | 'uid' | 'mid' | 'language' | 'judge'
-| 'time' | 'memory' | 'sim' | 'sim_s_id' | 'createdAt'>[]
+| 'time' | 'memory' | 'similarity' | 'createdAt'>[]
 > {
   const { sort, sortBy } = opt
   const filter = constructSolutionFilter(opt)
@@ -69,7 +69,7 @@ export async function exportSolutions (
   return await Solution.find(filter)
     .select({
       _id: 0, sid: 1, pid: 1, uid: 1, mid: 1, language: 1, judge: 1,
-      time: 1, memory: 1, sim: 1, sim_s_id: 1, createdAt: 1,
+      time: 1, memory: 1, similarity: 1, createdAt: 1,
     })
     .sort({
       [sortBy]: sort,

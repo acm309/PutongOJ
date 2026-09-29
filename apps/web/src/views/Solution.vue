@@ -255,7 +255,7 @@ onRouteQueryUpdate(fetch)
         @click="onCopy(solution.code)"
       />
       <pre><code v-html="prettyCode(solution.code)" /></pre>
-      <div v-if="isAdmin && solution.sim && solution.simSolution">
+      <div v-if="isAdmin && solution.similarity && solution.simSolution">
         <div class="flex flex-wrap gap-4">
           <span>
             {{ t('oj.similar_to') }}
@@ -264,7 +264,7 @@ onRouteQueryUpdate(fetch)
             </RouterLink>
           </span>
           <span>
-            {{ t('oj.similarity') }}: {{ solution.sim }}{{ "%" }} <br>
+            {{ t('oj.similarity') }}: {{ solution.similarity }}{{ "%" }} <br>
           </span>
           <span>
             Author:

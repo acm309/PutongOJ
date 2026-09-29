@@ -122,13 +122,20 @@ const solutionSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
-  sim: {
+  similarity: {
     type: Number,
     default: 0,
   },
-  sim_s_id: {
-    type: Number,
-    default: 0,
+  similarSolution: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Solution',
+    default: null,
+    validate: {
+      validator (v: any) {
+        return v === null || mongoose.Types.ObjectId.isValid(v)
+      },
+      message: 'Invalid similar solution ID',
+    },
   },
   testcases: {
     type: [ testcaseResultSchema ],

@@ -11,7 +11,7 @@ export interface SolutionModelDataTable {
   pid?: SolutionModel['pid']
   mid?: SolutionModel['mid']
   judge: SolutionModel['judge']
-  sim: SolutionModel['sim']
+  similarity: SolutionModel['similarity']
   time: SolutionModel['time']
   memory: SolutionModel['memory']
   language: SolutionModel['language']

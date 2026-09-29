@@ -128,8 +128,8 @@ export type SolutionEntity = {
   time: number
   memory: number
   error: string
-  sim: number
-  sim_s_id: number
+  similarity: number
+  similarSolution: Types.ObjectId | null
   testcases: {
     uuid: string
     judge: number

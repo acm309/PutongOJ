@@ -207,8 +207,7 @@ export const ContestSolutionListQueryResultSchema = PaginatedSchema(z.object({
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
   memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
+  similarity: SolutionModelSchema.shape.similarity,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 
@@ -233,8 +232,7 @@ export const ContestSolutionListExportQueryResultSchema = z.array(z.object({
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
   memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
-  sim_s_id: SolutionModelSchema.shape.sim_s_id,
+  similarity: SolutionModelSchema.shape.similarity,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 

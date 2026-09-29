@@ -37,8 +37,16 @@ async function main () {
     }
   })()
   const solutionInsert = (async () => {
+    const solutions = []
     for (const solution of solutionSeeds) {
-      await new Solution(solution).save()
+      solutions.push(await new Solution(solution).save())
+    }
+
+    const similarSolution = solutions.find(solution => solution.similarity > 0)
+    const targetSolution = solutions.find(solution => solution.sid === 2)
+    if (similarSolution && targetSolution) {
+      similarSolution.similarSolution = targetSolution._id
+      await similarSolution.save()
     }
   })()
   const userInsert = Promise.all(

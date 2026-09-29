@@ -1,3 +1,4 @@
+import type { Types } from '@putong-oj/db'
 import { Solution } from '@putong-oj/db'
 import { JudgeStatus } from '@putong-oj/shared'
 import levenshtein from 'fast-levenshtein'
@@ -36,32 +37,35 @@ async function checkSimilarity (item: string) {
   }).lean().exec()
 
   const code = codeNormalize(solution.code)
-  const result = { sim: 0, sim_s_id: 0 }
+  const result = {
+    similarity: 0,
+    similarSolution: null as Types.ObjectId | null,
+  }
   for (const s of solutions) {
-    const sim = similarity(code, codeNormalize(s.code))
-    if (sim > result.sim) {
-      result.sim = sim
-      result.sim_s_id = s.sid
+    const similarityScore = similarity(code, codeNormalize(s.code))
+    if (similarityScore > result.similarity) {
+      result.similarity = similarityScore
+      result.similarSolution = s._id
     }
   }
-  result.sim = Math.round(result.sim * 100)
+  result.similarity = Math.round(result.similarity * 100)
 
   const end_time = Date.now()
   logger.info(
     {
       checkedSolutions: solutions.length,
       elapsedMs: end_time - start_time,
-      similarSolutionId: result.sim_s_id,
-      similarity: result.sim,
+      similarSolutionId: result.similarSolution?.toString(),
+      similarity: result.similarity,
       solutionId: sid,
     },
     'Solution similarity checked',
   )
 
-  if (result.sim < 70) { return }
+  if (result.similarity < 70) { return }
 
-  solution.sim = result.sim
-  solution.sim_s_id = result.sim_s_id
+  solution.similarity = result.similarity
+  solution.similarSolution = result.similarSolution
   await solution.save()
 }
 

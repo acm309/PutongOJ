@@ -168,7 +168,7 @@ export const ProblemSolutionListQueryResultSchema = PaginatedSchema(z.object({
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
   memory: SolutionModelSchema.shape.memory,
-  sim: SolutionModelSchema.shape.sim,
+  similarity: SolutionModelSchema.shape.similarity,
   createdAt: SolutionModelSchema.shape.createdAt,
 }))
 
