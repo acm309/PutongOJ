@@ -227,6 +227,20 @@ async function migrateTagIdToObjectId () {
   logger.info(`Migration Tag.tagId -> _id completed, cleared=${result.modifiedCount}`)
 }
 
+async function migrateCommentIdToObjectId () {
+  const commentCollection = mongoose.connection.collection('Comment')
+
+  const commentIndexes = await commentCollection.indexes()
+  if (commentIndexes.some(index => index.name === 'commentId_1')) {
+    await commentCollection.dropIndex('commentId_1')
+  }
+
+  const result = await commentCollection.updateMany({}, { $unset: { commentId: '' } })
+  await ID.deleteOne({ name: 'Comment' })
+
+  logger.info(`Migration Comment.commentId -> _id completed, cleared=${result.modifiedCount}`)
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -301,6 +315,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-tag-object-id',
     description: 'Remove legacy Tag.tagId counter and use _id as the tag identifier',
     run: migrateTagIdToObjectId,
+  },
+  {
+    key: '20260929-comment-object-id',
+    description: 'Remove legacy Comment.commentId counter and use _id as the comment identifier',
+    run: migrateCommentIdToObjectId,
   },
 ]
 

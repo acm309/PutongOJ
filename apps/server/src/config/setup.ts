@@ -12,7 +12,6 @@ export async function databaseSetup () {
   const tasks: Promise<any>[] = []
 
   const models = {
-    Comment: 0,
     Contest: 0,
     Course: 0,
     Discussion: 0,

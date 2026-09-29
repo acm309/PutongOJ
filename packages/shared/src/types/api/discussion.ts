@@ -58,7 +58,7 @@ export const DiscussionDetailQueryResultSchema = z.object({
   pinned: DiscussionModelSchema.shape.pinned,
   title: DiscussionModelSchema.shape.title,
   comments: z.array(z.object({
-    commentId: CommentModelSchema.shape.commentId,
+    id: CommentModelSchema.shape.id,
     author: z.object({
       uid: UserModelSchema.shape.uid,
       nick: UserModelSchema.shape.nick,

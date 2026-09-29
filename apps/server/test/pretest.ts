@@ -1,5 +1,5 @@
 import process from 'node:process'
-import { Course, Group, ID, Problem, Solution, User } from '@putong-oj/db'
+import { Comment, Course, Group, ID, Problem, Solution, User } from '@putong-oj/db'
 import discussionService from '../src/services/discussion.ts'
 import { passwordHash } from '../src/utils/index.ts'
 import { removeall } from './helper.ts'
@@ -13,11 +13,11 @@ import { userSeeds } from './seeds/user.ts'
 async function main () {
   await removeall()
   await Promise.all([
+    Comment.syncIndexes(),
     Group.syncIndexes(),
     User.syncIndexes(),
   ])
   await Promise.all([
-    new ID({ name: 'Comment', id: 0 }).save(),
     new ID({ name: 'Contest', id: 0 }).save(),
     new ID({ name: 'Course', id: 2 }).save(),
     new ID({ name: 'Discussion', id: 0 }).save(),

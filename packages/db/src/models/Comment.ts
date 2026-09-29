@@ -2,18 +2,10 @@ import type { CommentModel } from '@putong-oj/shared'
 import type { Document, Model, Types } from 'mongoose'
 import { COMMENT_LENGTH_MAX } from '@putong-oj/shared'
 import mongoose from '../client.js'
-import ID from './ID.js'
 
 type CommentDocument = { } & Document<Types.ObjectId> & CommentModel
 
 const commentSchema = new mongoose.Schema({
-  commentId: {
-    type: Number,
-    index: {
-      unique: true,
-    },
-    default: -1,
-  },
   discussion: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Discussion',
@@ -39,12 +31,6 @@ const commentSchema = new mongoose.Schema({
 }, {
   collection: 'Comment',
   timestamps: true,
-})
-
-commentSchema.pre('save', async function () {
-  if (this.commentId === -1) {
-    this.commentId = await ID.generateId('Comment')
-  }
 })
 
 const Comment

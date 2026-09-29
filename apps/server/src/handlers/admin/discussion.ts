@@ -5,6 +5,7 @@ import {
   AdminCommentUpdatePayloadSchema,
   AdminDiscussionUpdatePayloadSchema,
   ErrorCode,
+  ObjectIdStringSchema,
 } from '@putong-oj/shared'
 import { loadProfile } from '../../middlewares/authn.ts'
 import { contestService } from '../../services/contest.ts'
@@ -93,21 +94,10 @@ export async function updateDiscussion (ctx: Context) {
   }
 }
 
-function parseCommentId (ctx: Context): number | null {
-  const commentIdStr = ctx.params.commentId
-  const commentId = Number(commentIdStr)
-
-  if (Number.isNaN(commentId) || !Number.isInteger(commentId) || commentId <= 0) {
-    createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid comment ID')
-    return null
-  }
-  return commentId
-}
-
 export async function updateComment (ctx: Context) {
-  const commentId = parseCommentId(ctx)
-  if (commentId === null) {
-    return
+  const commentId = ObjectIdStringSchema.safeParse(ctx.params.commentId)
+  if (!commentId.success) {
+    return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid comment ID')
   }
 
   const payload = AdminCommentUpdatePayloadSchema.safeParse(ctx.request.body)
@@ -116,14 +106,14 @@ export async function updateComment (ctx: Context) {
   }
 
   try {
-    const result = await discussionService.updateComment(commentId, {
+    const result = await discussionService.updateComment(commentId.data, {
       hidden: payload.data.hidden,
     })
     if (!result) {
       return createErrorResponse(ctx, ErrorCode.NotFound)
     }
     const profile = await loadProfile(ctx)
-    ctx.auditLog.info(`<Comment:${commentId}> updated by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Comment:${commentId.data}> updated by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to update comment', err)

@@ -4,10 +4,10 @@ import type {
   ContestModel,
   DiscussionModel,
   DiscussionType,
-  DocumentId,
   Paginated,
   ProblemModel,
   UserModel,
+  WithId,
 } from '@putong-oj/shared'
 import type { PaginateOption, SortOption } from '../types/index.ts'
 import type { QueryFilter } from '../types/mongo.ts'
@@ -30,13 +30,13 @@ interface DiscussionPopulateConfig {
 type DiscussionPopulated<T extends DiscussionPopulateConfig>
   = Omit<DiscussionModel, 'author' | 'problem' | 'contest'> & {
     author: T['author'] extends (keyof UserModel)[]
-      ? Pick<UserModel, T['author'][number]> & DocumentId
+      ? WithId<Pick<UserModel, T['author'][number]>>
       : Types.ObjectId
     problem: T['problem'] extends (keyof ProblemModel)[]
-      ? Pick<ProblemModel, T['problem'][number]> & DocumentId | null
+      ? WithId<Pick<ProblemModel, T['problem'][number]>> | null
       : Types.ObjectId | null
     contest: T['contest'] extends (keyof ContestModel)[]
-      ? Pick<ContestModel, T['contest'][number]> & DocumentId | null
+      ? WithId<Pick<ContestModel, T['contest'][number]>> | null
       : Types.ObjectId | null
   }
 
@@ -74,7 +74,7 @@ export async function findDiscussions<
   const countPromise = Discussion.countDocuments(filters)
 
   const [ docs, total ] = await Promise.all([ docsPromise, countPromise ])
-  const result: Paginated<Pick<DiscussionPopulated<TPopulate>, TFields[number]> & DocumentId> = {
+  const result: Paginated<WithId<Pick<DiscussionPopulated<TPopulate>, TFields[number]>>> = {
     docs: docs as any,
     limit: pageSize,
     page,
@@ -98,7 +98,7 @@ async function getDiscussionPopulated<TPopulate extends DiscussionPopulateConfig
     query = query.populate({ path: 'contest', select: populate.contest })
   }
   const doc = await query.lean()
-  return doc as (DiscussionPopulated<TPopulate> & DocumentId) | null
+  return doc as WithId<DiscussionPopulated<TPopulate>> | null
 }
 
 export async function getDiscussion (discussionId: number) {
@@ -116,9 +116,11 @@ type CommentPopulateConfig = Pick<DiscussionPopulateConfig, 'author'>
 type CommentPopulated<T extends CommentPopulateConfig>
   = Omit<CommentModel, 'author'> & {
     author: T['author'] extends (keyof UserModel)[]
-      ? Pick<UserModel, T['author'][number]> & DocumentId
+      ? WithId<Pick<UserModel, T['author'][number]>>
       : Types.ObjectId
   }
+
+type CommentPopulatedDocument<T extends CommentPopulateConfig> = WithId<CommentPopulated<T>>
 
 async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   discussion: Types.ObjectId, populate: TPopulate,
@@ -139,8 +141,8 @@ async function getCommentsPopulated<TPopulate extends CommentPopulateConfig> (
   if (populate.author) {
     query = query.populate({ path: 'author', select: populate.author })
   }
-  const docs = await query.lean() as unknown[]
-  return docs as (CommentPopulated<TPopulate> & DocumentId)[]
+  const docs = await query
+  return docs.map(comment => comment.toObject<CommentPopulatedDocument<TPopulate>>({ virtuals: true }))
 }
 
 export async function getComments (
@@ -159,16 +161,16 @@ export async function createComment (
   const newComment = new Comment({ discussion, author, content })
   await newComment.save()
   await distributeWork('updateStatistic', `discussion:${discussion.toString()}`)
-  return newComment.toObject()
+  return newComment.toObject({ virtuals: true })
 }
 
 export async function updateComment (
-  commentId: number,
+  commentId: string,
   update: Partial<Pick<CommentModel, 'hidden'>>,
 ): Promise<CommentModel | null> {
-  const comment = await Comment.findOneAndUpdate(
-    { commentId }, update, { returnDocument: 'after' },
-  ).lean()
+  const comment = await Comment.findByIdAndUpdate(
+    commentId, { $set: update }, { returnDocument: 'after' },
+  )
   return comment
 }
 

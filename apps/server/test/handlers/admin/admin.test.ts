@@ -20,7 +20,7 @@ const pwdTestUser = userSeeds.kevin63
 
 // Shared state updated by serial tests
 let createdDiscussionId: number
-let createdCommentId: number
+let createdCommentId: string
 
 // ─── Setup ─────────────────────────────────────────────────────────────────
 
@@ -343,8 +343,9 @@ test.serial('Setup: add a comment to use in admin comment tests', async (t) => {
   t.is(disc.status, 200)
   const comments = disc.body.data.comments
   t.true(comments.length > 0)
-  createdCommentId = comments.at(-1).commentId
+  createdCommentId = comments.at(-1).id
   t.truthy(createdCommentId)
+  t.regex(createdCommentId, /^[0-9a-f]{24}$/i)
 })
 
 test.serial('Update comment - hide', async (t) => {
@@ -376,7 +377,7 @@ test('Update comment - fails for invalid id', async (t) => {
 
 test('Update comment - fails for non-existent id', async (t) => {
   const res = await requestAdmin
-    .put('/api/admin/comments/999999')
+    .put('/api/admin/comments/507f1f77bcf86cd799439011')
     .send({ hidden: true })
 
   t.is(res.status, 200)

@@ -162,7 +162,7 @@ async function createComment (ctx: Context) {
     const comment = await discussionService.createComment(
       discussion._id, { author: profile._id, content: payload.data.content },
     )
-    ctx.auditLog.info(`<Comment:${comment.commentId}> created in <Discussion:${discussion.discussionId}> by <User:${profile.uid}>`)
+    ctx.auditLog.info(`<Comment:${comment.id}> created in <Discussion:${discussion.discussionId}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
   } catch (err) {
     ctx.auditLog.error('Failed to create comment', err)
