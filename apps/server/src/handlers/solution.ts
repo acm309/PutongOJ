@@ -1,4 +1,5 @@
 import type { CourseDocument, SolutionDocument, Types } from '@putong-oj/db'
+import type { ContestModel, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
@@ -21,8 +22,6 @@ import { loadCourseStateOrThrow } from '../policies/course.ts'
 import { loadProblemState } from '../policies/problem.ts'
 import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
-type SimilarSolutionPreview = Pick<SolutionDocument, 'sid' | 'uid' | 'code' | 'create'>
-
 export async function findOne (ctx: Context) {
   const opt = Number.parseInt(ctx.params.sid, 10)
   if (!Number.isInteger(opt) || opt <= 0) {
@@ -31,10 +30,13 @@ export async function findOne (ctx: Context) {
 
   const solution = await Solution
     .findOne({ sid: opt })
-    .populate<{ similarSolution: SimilarSolutionPreview | null }>(
-      'similarSolution',
-      'sid uid code create',
-    )
+    .populate<{
+    contest: WithId<Pick<ContestModel, 'contestId'>> | null
+    similarSolution: Pick<SolutionDocument, 'sid' | 'uid' | 'code' | 'create'> | null
+  }>([
+      { path: 'contest', select: 'contestId' },
+      { path: 'similarSolution', select: 'sid uid code create' },
+    ])
     .lean()
   if (!solution) {
     ctx.throw(400, 'No such a solution')
@@ -48,9 +50,9 @@ export async function findOne (ctx: Context) {
     if (profile.isAdmin) {
       return true
     }
-    if (solution.mid > 0) {
+    if (solution.contest) {
       const contest = await Contest
-        .findOne({ contestId: solution.mid }, 'course')
+        .findById(solution.contest._id, 'course')
         .populate<{ course: CourseDocument }>('course')
       if (contest && contest.course) {
         const { role } = await loadCourseStateOrThrow(ctx, contest.course.id)
@@ -69,6 +71,7 @@ export async function findOne (ctx: Context) {
     ...solution,
     status: solution.status as 0 | 2,
     course: solution.course ? solution.course.toString() : null,
+    contest: solution.contest,
     simSolution: profile.isAdmin && solution.similarity
       ? solution.similarSolution ?? undefined
       : undefined,
@@ -90,15 +93,16 @@ async function create (ctx: Context) {
   const pid = payload.data.problem
   const code = payload.data.code
   const language = payload.data.language
-  const mid = payload.data.contest ?? -1
+  const contestId = payload.data.contest
+  let contest: Types.ObjectId | null = null
 
   let problemState: ProblemState | null = null
-  if (mid > 0) {
-    const contestState = await loadContestState(ctx, mid)
+  if (contestId !== undefined) {
+    const contestState = await loadContestState(ctx, contestId)
     if (!contestState) {
       ctx.throw(400, 'No such a contest')
     }
-    const { contest, accessible, isIpBlocked, isJury } = contestState
+    const { contest: contestDoc, accessible, isIpBlocked, isJury } = contestState
 
     if (isIpBlocked) {
       ctx.throw(403, 'Your IP address is not in the whitelist for this contest')
@@ -108,24 +112,25 @@ async function create (ctx: Context) {
     }
 
     const now = new Date()
-    if (!isJury && contest.startsAt > now) {
+    if (!isJury && contestDoc.startsAt > now) {
       ctx.throw(400, 'Contest is not started yet!')
     }
-    if (!isJury && contest.endsAt < now) {
+    if (!isJury && contestDoc.endsAt < now) {
       ctx.throw(400, 'Contest is ended!')
     }
 
-    problemState = await loadProblemState(ctx, pid, contest.contestId)
+    problemState = await loadProblemState(ctx, pid, contestDoc.contestId)
     if (!problemState) {
       ctx.throw(404, 'Problem not found or access denied')
     }
     const contestProblem = problemState.problem
-    if (!contest.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
+    if (!contestDoc.problems.some((problemId: Types.ObjectId) => problemId.equals(contestProblem._id))) {
       ctx.throw(400, 'No such a problem in the contest')
     }
-    if (contest.allowedLanguages && !contest.allowedLanguages.includes(language)) {
+    if (contestDoc.allowedLanguages && !contestDoc.allowedLanguages.includes(language)) {
       ctx.throw(400, 'This language is not allowed in the contest')
     }
+    contest = contestDoc._id
   } else {
     problemState = await loadProblemState(ctx, pid)
     if (!problemState) {
@@ -135,7 +140,7 @@ async function create (ctx: Context) {
 
   try {
     const solution = new Solution({
-      pid, mid, uid, code, language,
+      pid, contest, uid, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 
@@ -143,7 +148,7 @@ async function create (ctx: Context) {
 
     const sid = solution.sid
     await redis.rpush('judger:task', solution._id.toString())
-    ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${mid > 0 ? ` in <Contest:${mid}>` : ''} created by <User:${uid}>`)
+    ctx.auditLog.info(`<Submission:${sid}> of <Problem:${pid}>${contestId ? ` in <Contest:${contestId}>` : ''} created by <User:${uid}>`)
 
     const result = SolutionSubmitResultSchema.encode({ sid })
     return createEnvelopedResponse(ctx, result)
@@ -174,6 +179,7 @@ async function updateSolution (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution not found')
   }
 
+  let contest: Pick<ContestModel, 'contestId'> | null = null
   try {
     solution.judge = updatedJudge
     solution.time = 0
@@ -184,6 +190,9 @@ async function updateSolution (ctx: Context) {
     solution.testcases = []
 
     await solution.save()
+    contest = solution.contest
+      ? await Contest.findById(solution.contest, 'contestId').lean()
+      : null
   } catch (err) {
     ctx.auditLog.error('Failed to update solution', err)
     return createErrorResponse(ctx, ErrorCode.InternalServerError)
@@ -193,6 +202,7 @@ async function updateSolution (ctx: Context) {
     const result = SolutionUpdateQueryResultSchema.encode({
       ...solution.toObject(),
       course: solution.course ? solution.course.toString() : null,
+      contest,
       status: solution.status as 0 | 2,
       testcases: solution.testcases,
     })
@@ -210,6 +220,7 @@ async function updateSolution (ctx: Context) {
   const result = SolutionUpdateQueryResultSchema.encode({
     ...solution.toObject(),
     course: solution.course ? solution.course.toString() : null,
+    contest,
     status: solution.status as 0 | 2,
     testcases: solution.testcases,
   })

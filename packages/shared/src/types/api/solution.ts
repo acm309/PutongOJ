@@ -31,7 +31,9 @@ const SolutionFieldsSchema = z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
   uid: SolutionModelSchema.shape.uid,
-  mid: SolutionModelSchema.shape.mid,
+  contest: z.object({
+    contestId: ContestModelSchema.shape.contestId,
+  }).nullable(),
   course: z.string().nullable().optional(),
   code: SolutionModelSchema.shape.code,
   length: SolutionModelSchema.shape.length,

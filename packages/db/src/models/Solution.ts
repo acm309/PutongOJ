@@ -54,11 +54,17 @@ const solutionSchema = new mongoose.Schema({
     index: true,
     required: true,
   },
-  mid: { // mid 指代 contest id (历史遗留问题)
-    type: Number,
-    default: -1,
+  contest: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Contest',
+    default: null,
     immutable: true,
-    index: true,
+    validate: {
+      validator (v: any) {
+        return v === null || mongoose.Types.ObjectId.isValid(v)
+      },
+      message: 'Invalid contest ID',
+    },
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
@@ -159,7 +165,7 @@ solutionSchema.index({ createdAt: -1 })
 solutionSchema.index({ judge: 1, createdAt: -1 })
 solutionSchema.index({ uid: 1, createdAt: -1 })
 solutionSchema.index({ pid: 1, createdAt: -1 })
-solutionSchema.index({ mid: 1, createdAt: -1 })
+solutionSchema.index({ contest: 1, createdAt: -1 })
 solutionSchema.index({ language: 1, createdAt: -1 })
 
 solutionSchema.pre('save', async function () {

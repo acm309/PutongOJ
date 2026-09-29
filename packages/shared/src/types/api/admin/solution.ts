@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { JudgeStatus, Language } from '@/consts/index.js'
 import { stringToInt } from '../../codec.js'
+import { ContestModelSchema } from '../../model/contest.js'
 import { SolutionModelSchema } from '../../model/index.js'
 import {
   PaginatedSchema,
@@ -26,7 +27,9 @@ export const AdminSolutionListQueryResultSchema = PaginatedSchema(z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
   uid: SolutionModelSchema.shape.uid,
-  mid: SolutionModelSchema.shape.mid,
+  contest: z.object({
+    contestId: ContestModelSchema.shape.contestId,
+  }).nullable(),
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,
@@ -53,7 +56,7 @@ export const AdminSolutionListExportQueryResultSchema = z.array(z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
   uid: SolutionModelSchema.shape.uid,
-  mid: SolutionModelSchema.shape.mid,
+  contestId: ContestModelSchema.shape.contestId.nullable(),
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,

@@ -93,15 +93,17 @@ function handleSort (event: any) {
       </template>
     </Column>
 
-    <Column v-if="!props.hideContest" field="mid" class="text-center">
+    <Column v-if="!props.hideContest" field="contest" class="text-center">
       <template #header>
         <span class="font-semibold text-center w-full">
           {{ t('ptoj.contest') }}
         </span>
       </template>
       <template #body="{ data }">
-        <RouterLink v-if="data.mid && data.mid > 0" :to="{ name: 'ContestOverview', params: { contestId: data.mid } }">
-          <Button class="-my-px p-0" link fluid :label="String(data.mid)" />
+        <RouterLink
+          v-if="data.contest" :to="{ name: 'ContestOverview', params: { contestId: data.contest.contestId } }"
+        >
+          <Button class="-my-px p-0" link fluid :label="String(data.contest.contestId)" />
         </RouterLink>
         <span v-else>
           -

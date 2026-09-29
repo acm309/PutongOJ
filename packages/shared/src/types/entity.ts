@@ -117,7 +117,7 @@ export type SolutionEntity = {
   sid: number
   pid: number
   uid: string
-  mid: number
+  contest: Types.ObjectId | null
   course: Types.ObjectId | WithId<CourseEntity> | null
   code: string
   length: number

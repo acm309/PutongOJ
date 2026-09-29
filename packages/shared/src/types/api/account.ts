@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { JudgeStatus, Language } from '@/consts/index.js'
 import { stringToInt } from '../codec.js'
+import { ContestModelSchema } from '../model/contest.js'
 import { SolutionModelSchema } from '../model/solution.js'
 import { UserModelSchema } from '../model/user.js'
 import { PaginatedSchema, PaginationSchema, SortOptionSchema } from './utils.js'
@@ -65,7 +66,9 @@ export type AccountSubmissionListQuery = z.infer<typeof AccountSubmissionListQue
 export const AccountSubmissionListQueryResultSchema = PaginatedSchema(z.object({
   sid: SolutionModelSchema.shape.sid,
   pid: SolutionModelSchema.shape.pid,
-  mid: SolutionModelSchema.shape.mid,
+  contest: z.object({
+    contestId: ContestModelSchema.shape.contestId,
+  }).nullable(),
   language: SolutionModelSchema.shape.language,
   judge: SolutionModelSchema.shape.judge,
   time: SolutionModelSchema.shape.time,

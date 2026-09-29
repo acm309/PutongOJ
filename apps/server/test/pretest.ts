@@ -17,6 +17,7 @@ async function main () {
     Course.syncIndexes(),
     Discussion.syncIndexes(),
     Group.syncIndexes(),
+    Solution.syncIndexes(),
     User.syncIndexes(),
   ])
   await Promise.all([

@@ -146,10 +146,10 @@ onRouteQueryUpdate(fetch)
                 {{ solution.uid }}
               </RouterLink>
             </span>
-            <span v-if="solution.mid > 0">
+            <span v-if="solution.contest">
               {{ t('oj.contest_label') }}
-              <RouterLink :to="{ name: 'ContestOverview', params: { contestId: solution.mid } }">
-                {{ solution.mid }}
+              <RouterLink :to="{ name: 'ContestOverview', params: { contestId: solution.contest.contestId } }">
+                {{ solution.contest.contestId }}
               </RouterLink>
             </span>
           </div>

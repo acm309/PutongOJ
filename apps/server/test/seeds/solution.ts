@@ -9,7 +9,7 @@ const solutionSeeds = [
     language: 2, // C++
     length: 135,
     memory: 1720,
-    mid: -1,
+    contest: null,
     pid: 1001,
     similarity: 0,
     status: status.Available,
@@ -39,7 +39,7 @@ const solutionSeeds = [
     language: 2, // C++
     length: 138,
     memory: 1720,
-    mid: -1,
+    contest: null,
     pid: 1001,
     similarity: 0,
     status: status.Available,
@@ -69,7 +69,7 @@ const solutionSeeds = [
     language: 3, // Java
     length: 273,
     memory: 24836,
-    mid: -1,
+    contest: null,
     pid: 1001,
     similarity: 0,
     status: status.Available,
@@ -99,7 +99,7 @@ const solutionSeeds = [
     language: 2, // C++
     length: 138,
     memory: 1720,
-    mid: -1,
+    contest: null,
     pid: 1001,
     similarity: 100,
     status: status.Available,

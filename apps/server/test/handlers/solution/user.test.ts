@@ -1,3 +1,4 @@
+import { Contest, Solution } from '@putong-oj/db'
 import { Language } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
@@ -268,6 +269,11 @@ test.serial('Contest submission accepts allowed language', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
+
+  const solution = await Solution.findOne({ sid: res.body.data.sid }).lean()
+  const contest = await Contest.findOne({ contestId }).select('_id').lean()
+  t.true(solution?.contest?.equals(contest?._id))
+  t.false(Object.hasOwn(solution, 'mid'))
 })
 
 test.serial('Contest submission is rejected before the contest starts', async (t) => {

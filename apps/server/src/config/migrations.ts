@@ -333,6 +333,78 @@ async function migrateSolutionSimilarSolutionRef () {
   )
 }
 
+async function migrateSolutionContestRef () {
+  interface LegacySolution {
+    _id: mongoose.Types.ObjectId
+    mid?: unknown
+  }
+
+  interface LegacyContest {
+    _id: mongoose.Types.ObjectId
+    contestId?: unknown
+  }
+
+  const solutionCollection = mongoose.connection.collection('Solution')
+  const solutions = await solutionCollection
+    .find({ mid: { $exists: true } })
+    .toArray() as unknown as LegacySolution[]
+  const contests = await Contest
+    .find({}, { _id: 1, contestId: 1 })
+    .lean() as unknown as LegacyContest[]
+  const contestIdMap = new Map<number, mongoose.Types.ObjectId>()
+
+  for (const contest of contests) {
+    if (typeof contest.contestId === 'number' && contest._id instanceof mongoose.Types.ObjectId) {
+      contestIdMap.set(contest.contestId, contest._id)
+    }
+  }
+
+  let missingCount = 0
+  let unassignedCount = 0
+  if (solutions.length > 0) {
+    const operations = solutions.map((solution) => {
+      const mid = typeof solution.mid === 'number' ? solution.mid : -1
+      let contest: mongoose.Types.ObjectId | null = null
+
+      if (mid > 0) {
+        contest = contestIdMap.get(mid) ?? null
+        if (!contest) {
+          missingCount += 1
+        }
+      } else {
+        unassignedCount += 1
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: solution._id },
+          update: {
+            $set: { contest },
+            $unset: { mid: '' },
+          },
+        },
+      }
+    })
+
+    const result = await solutionCollection.bulkWrite(operations, { ordered: false })
+    logger.info(
+      'Migration Solution.mid -> contest completed, '
+      + `modified=${result.modifiedCount}, missing=${missingCount}, unassigned=${unassignedCount}`,
+    )
+  } else {
+    logger.info('Migration Solution.mid -> contest skipped, no solutions to migrate')
+  }
+
+  const indexNames = new Set((await solutionCollection.indexes()).map(index => index.name))
+  for (const indexName of [ 'mid_1', 'mid_1_createdAt_-1' ]) {
+    if (indexNames.has(indexName)) {
+      await solutionCollection.dropIndex(indexName)
+    }
+  }
+  await solutionCollection.createIndex({ contest: 1 }, { name: 'contest_1' })
+  await solutionCollection.createIndex({ contest: 1, createdAt: -1 }, { name: 'contest_1_createdAt_-1' })
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -427,6 +499,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-solution-similar-solution-ref',
     description: 'Replace Solution.sim_s_id with ObjectId similarSolution reference and rename Solution.sim to similarity',
     run: migrateSolutionSimilarSolutionRef,
+  },
+  {
+    key: '20260929-solution-contest-ref',
+    description: 'Replace Solution.mid with ObjectId contest reference',
+    run: migrateSolutionContestRef,
   },
 ]
 

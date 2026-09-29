@@ -200,13 +200,13 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
     async () => {
       const contestDoc = await Contest
         .findById(contest)
-        .select({ _id: 0, contestId: 1, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
+        .select({ _id: 1, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
         .lean()
       if (!contestDoc || contestDoc.problems.length === 0) {
         return []
       }
 
-      const { contestId, endsAt, scoreboardFrozenAt } = contestDoc
+      const { _id, endsAt, scoreboardFrozenAt } = contestDoc
       const problems = await Problem
         .find({ _id: { $in: contestDoc.problems } })
         .select({ _id: 1, pid: 1, title: 1 })
@@ -218,13 +218,13 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
       return await Promise.all(problems.map(async ({ _id, pid, title }) => {
         const [ { length: submit }, { length: solve } ] = await Promise.all([
           Solution.distinct('uid', {
-            mid: contestId,
+            contest: _id,
             pid,
             judge: { $nin: ignoredJudges },
             createdAt: { $lt: before },
           }).lean(),
           Solution.distinct('uid', {
-            mid: contestId,
+            contest: _id,
             pid,
             judge: JudgeStatus.Accepted,
             createdAt: { $lt: before },
@@ -250,17 +250,17 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
     async () => {
       const contestDoc = await Contest
         .findById(contest)
-        .select({ _id: 0, contestId: 1, endsAt: 1, scoreboardFrozenAt: 1, scoreboardUnfrozenAt: 1 })
+        .select({ _id: 1, endsAt: 1, scoreboardFrozenAt: 1, scoreboardUnfrozenAt: 1 })
         .lean()
       if (!contestDoc) {
         return []
       }
 
-      const { contestId, endsAt, scoreboardFrozenAt, scoreboardUnfrozenAt } = contestDoc
+      const { _id, endsAt, scoreboardFrozenAt, scoreboardUnfrozenAt } = contestDoc
       const ranklistRecord: Record<string, Record<number, ContestRanklistProblem>> = {}
       const solutions = await Solution
         .find({
-          mid: contestId,
+          contest: _id,
           judge: { $nin: ignoredJudges },
           createdAt: { $lt: endsAt },
         })

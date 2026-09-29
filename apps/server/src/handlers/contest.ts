@@ -212,10 +212,10 @@ async function getContest (ctx: Context) {
   const [ problemsBasic, attempted, solved ] = await Promise.all([
     contestService.getProblemsWithStats(contest._id, isJury),
     Solution.distinct('pid', {
-      mid: contest.contestId, uid: profile.uid,
+      contest: contest._id, uid: profile.uid,
     }).lean(),
     Solution.distinct('pid', {
-      mid: contest.contestId, uid: profile.uid, judge: JudgeStatus.Accepted,
+      contest: contest._id, uid: profile.uid, judge: JudgeStatus.Accepted,
     }).lean(),
   ])
 
@@ -394,7 +394,7 @@ export async function findSolutions (ctx: Context) {
   const { contest } = state
   const solutions = await solutionService.findSolutions({
     ...query.data,
-    contest: contest.contestId,
+    contest: contest._id,
   })
   const result = ContestSolutionListQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
@@ -412,7 +412,7 @@ export async function exportSolutions (ctx: Context) {
   const { contest } = state
   const solutions = await solutionService.exportSolutions({
     ...query.data,
-    contest: contest.contestId,
+    contest: contest._id,
   })
   const result = ContestSolutionListExportQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)
