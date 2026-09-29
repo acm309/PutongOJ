@@ -119,7 +119,7 @@ function handleViewProblem (data: any) {
     name: 'contestProblem',
     params: {
       contestId: contestId.value,
-      problemId: data.pid,
+      problemId: data.problem.pid,
     },
   })
 }
@@ -185,7 +185,10 @@ onRouteQueryUpdate(fetch)
       :sort-order="query.sort" hide-user hide-contest @sort="onSort"
     >
       <template #problem="{ data }">
-        <Button class="-my-px p-0" :label="problemLabels.get(data.pid) " link fluid @click="handleViewProblem(data)" />
+        <Button
+          class="-my-px p-0" :label="problemLabels.get(data.problem.pid) " link fluid
+          @click="handleViewProblem(data)"
+        />
       </template>
     </SolutionDataTable>
 

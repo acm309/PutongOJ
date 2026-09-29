@@ -3,6 +3,7 @@ import { JudgeStatus, Language } from '@/consts/index.js'
 import { stringToInt } from '../../codec.js'
 import { ContestModelSchema } from '../../model/contest.js'
 import { SolutionModelSchema } from '../../model/index.js'
+import { ProblemModelSchema } from '../../model/problem.js'
 import { UserModelSchema } from '../../model/user.js'
 import {
   PaginatedSchema,
@@ -26,7 +27,9 @@ export type AdminSolutionListQuery = z.infer<typeof AdminSolutionListQuerySchema
 
 export const AdminSolutionListQueryResultSchema = PaginatedSchema(z.object({
   sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
+  problem: z.object({
+    pid: ProblemModelSchema.shape.pid,
+  }),
   user: z.object({
     uid: UserModelSchema.shape.uid,
   }),
@@ -57,7 +60,7 @@ export type AdminSolutionListExportQuery = z.infer<typeof AdminSolutionListExpor
 
 export const AdminSolutionListExportQueryResultSchema = z.array(z.object({
   sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
+  pid: ProblemModelSchema.shape.pid,
   uid: UserModelSchema.shape.uid,
   contestId: ContestModelSchema.shape.contestId.nullable(),
   language: SolutionModelSchema.shape.language,

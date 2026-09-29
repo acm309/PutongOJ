@@ -64,12 +64,18 @@ async function main () {
     const users = await User.find({})
     const userByUid = new Map(users.map(user => [ user.uid, user ]))
     const ghost = userByUid.get('ghost')!
+    const problems = await Problem.find({})
+    const problemByPid = new Map(problems.map(problem => [ problem.pid, problem ]))
     const solutions = []
 
     for (const solutionSeed of solutionSeeds) {
-      const { uid, ...solution } = solutionSeed
+      const { uid, pid, ...solution } = solutionSeed
       const user = userByUid.get(uid) ?? ghost
-      solutions.push(await new Solution({ ...solution, user: user._id }).save())
+      const problem = problemByPid.get(pid)
+      if (!problem) {
+        throw new Error(`Problem ${pid} not found while seeding solutions`)
+      }
+      solutions.push(await new Solution({ ...solution, problem: problem._id, user: user._id }).save())
     }
 
     const similarSolution = solutions.find(solution => solution.similarity > 0)

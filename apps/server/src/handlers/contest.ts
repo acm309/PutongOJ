@@ -209,15 +209,24 @@ async function getContest (ctx: Context) {
   const profile = await loadProfile(ctx)
   const { contest, isJury } = state
 
-  const [ problemsBasic, attempted, solved ] = await Promise.all([
+  const [ problemsBasic, attemptedProblemIds, solvedProblemIds ] = await Promise.all([
     contestService.getProblemsWithStats(contest._id, isJury),
-    Solution.distinct('pid', {
+    Solution.distinct('problem', {
       contest: contest._id, user: profile._id,
     }).lean(),
-    Solution.distinct('pid', {
+    Solution.distinct('problem', {
       contest: contest._id, user: profile._id, judge: JudgeStatus.Accepted,
     }).lean(),
   ])
+  const solvedProblems = await Problem
+    .find({ _id: { $in: [ ...attemptedProblemIds, ...solvedProblemIds ] }, deletedAt: null })
+    .select({ _id: 1, pid: 1 })
+    .lean()
+  const pidByProblemId = new Map(solvedProblems.map(problem => [ problem._id.toString(), problem.pid ]))
+  const attempted = attemptedProblemIds
+    .map(problem => pidByProblemId.get(problem.toString())!)
+  const solved = solvedProblemIds
+    .map(problem => pidByProblemId.get(problem.toString())!)
 
   const problems = problemsBasic.map(problem => ({
     ...problem,
@@ -263,7 +272,7 @@ async function getConfig (ctx: Context) {
     })(),
     (async () => {
       const problems = await Problem
-        .find({ _id: { $in: contest.problems } })
+        .find({ _id: { $in: contest.problems }, deletedAt: null })
         .select({ _id: 1, pid: 1, title: 1 })
         .lean()
       return problems
@@ -334,7 +343,10 @@ async function updateConfig (ctx: Context) {
   let problems: Types.ObjectId[] | undefined
   if (payload.data.problems !== undefined) {
     const problemsOrder = payload.data.problems
-    const problemsDocs = await Problem.find({ pid: { $in: payload.data.problems } }).select([ '_id', 'pid' ]).lean()
+    const problemsDocs = await Problem
+      .find({ pid: { $in: payload.data.problems }, deletedAt: null })
+      .select([ '_id', 'pid' ])
+      .lean()
     problems = problemsDocs.sort((a, b) => {
       return problemsOrder.indexOf(a.pid) - problemsOrder.indexOf(b.pid)
     }).map(p => p._id)

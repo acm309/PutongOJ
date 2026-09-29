@@ -28,7 +28,7 @@ async function checkSimilarity (item: string) {
   const start_time = Date.now()
 
   const solutions = await Solution.find({
-    pid: solution.pid,
+    problem: solution.problem,
     user: { $ne: solution.user },
     create: { $lt: solution.create },
     judge: JudgeStatus.Accepted,

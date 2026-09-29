@@ -1,3 +1,4 @@
+import { Problem } from '@putong-oj/db'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -63,8 +64,15 @@ test.serial('Delete a Problem', async (t) => {
     .get(`/api/problem/${createPid}`)
 
   t.is(find.status, 200)
-  t.is(find.body.success, false)
+  t.false(find.body.success)
   t.is(find.body.code, 404)
+
+  const deletedProblem = await Problem.findOne({ pid: createPid }).select('deletedAt').lean()
+  t.truthy(deletedProblem?.deletedAt)
+
+  const list = await request.get('/api/problem?page=-1')
+  t.is(list.status, 200)
+  t.false(list.body.data.list.docs.some((problem: { pid: number }) => problem.pid === createPid))
 })
 
 test.after.always('close server', () => {

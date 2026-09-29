@@ -11,14 +11,11 @@ import { JudgerTaskSchema, ProblemTestcaseListQueryResultSchema } from '@putong-
 import fse from 'fs-extra'
 import { createLogger } from '../logger.ts'
 
-type SolutionRecord = Pick<SolutionEntity, 'sid' | 'pid' | 'language' | 'code'>
-type ProblemRecord = Pick<ProblemEntity, 'pid' | 'time' | 'memory' | 'type' | 'code'>
-
 const logger = createLogger('judger.submission')
 
 export function buildJudgerTask (
-  solution: SolutionRecord,
-  problem: ProblemRecord,
+  solution: Pick<SolutionEntity, 'sid' | 'language' | 'code'>,
+  problem: Pick<ProblemEntity, 'pid' | 'time' | 'memory' | 'type' | 'code'>,
   testcases: Array<{ uuid: string }>,
   sandboxDataDir: string,
 ): JudgerTask {
@@ -59,21 +56,20 @@ export async function loadJudgerTask (
 ): Promise<JudgerTask | undefined> {
   const solution = await Solution
     .findOne({ _id: id })
-    .select('sid pid language code')
-    .lean()
-    .exec() as unknown as SolutionRecord | null
+    .select('sid problem language code')
+    .exec()
   if (!solution) {
     logger.warn({ solutionId: id }, 'Solution not found')
     return undefined
   }
 
   const problem = await Problem
-    .findOne({ pid: solution.pid })
-    .select('pid time memory type code')
-    .lean()
-    .exec() as unknown as ProblemRecord | null
-  if (!problem) {
-    throw new Error(`Problem <${solution.pid}> for solution <${id}> not found`)
+    .findById(solution.problem)
+    .select('pid deletedAt time memory type code')
+    .orFail()
+    .exec()
+  if (problem.deletedAt) {
+    throw new Error(`Problem <${solution.problem}> for solution <${id}> is deleted`)
   }
 
   const testcases = await loadTestcases(problem.pid, config.dataDir)

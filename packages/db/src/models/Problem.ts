@@ -106,6 +106,10 @@ const problemSchema = new mongoose.Schema({
       message: 'Invalid owner ID',
     },
   },
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
   submit: {
     type: Number,
     default: 0,

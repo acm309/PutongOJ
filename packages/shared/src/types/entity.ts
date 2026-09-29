@@ -91,6 +91,7 @@ export type ProblemEntity = {
   code: string
   tags: Types.ObjectId[]
   owner: Types.ObjectId | null
+  deletedAt: Date | null
   submit: number
   solve: number
 } & Entity
@@ -115,7 +116,7 @@ export type ProblemEntityView = Pick<ProblemEntity, 'pid' | 'title' | 'time' | '
 
 export type SolutionEntity = {
   sid: number
-  pid: number
+  problem: Types.ObjectId
   user: Types.ObjectId
   contest: Types.ObjectId | null
   course: Types.ObjectId | WithId<CourseEntity> | null

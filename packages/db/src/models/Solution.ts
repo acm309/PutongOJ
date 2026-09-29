@@ -42,11 +42,18 @@ const solutionSchema = new mongoose.Schema({
       unique: true,
     },
   },
-  pid: {
-    type: Number,
+  problem: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Problem',
     immutable: true,
     index: true,
     required: true,
+    validate: {
+      validator (v: any) {
+        return mongoose.Types.ObjectId.isValid(v)
+      },
+      message: 'Invalid problem ID',
+    },
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -171,7 +178,7 @@ solutionSchema.virtual('isPending').get(function () {
 solutionSchema.index({ createdAt: -1 })
 solutionSchema.index({ judge: 1, createdAt: -1 })
 solutionSchema.index({ user: 1, createdAt: -1 })
-solutionSchema.index({ pid: 1, createdAt: -1 })
+solutionSchema.index({ problem: 1, createdAt: -1 })
 solutionSchema.index({ contest: 1, createdAt: -1 })
 solutionSchema.index({ language: 1, createdAt: -1 })
 

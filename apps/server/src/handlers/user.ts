@@ -1,7 +1,7 @@
 import type { UserDocument } from '@putong-oj/db'
 import type { Context } from 'koa'
 import Router from '@koa/router'
-import { Group, Solution } from '@putong-oj/db'
+import { Group, Problem, Solution } from '@putong-oj/db'
 import {
   JudgeStatus,
   UserItemListQueryResultSchema,
@@ -54,14 +54,14 @@ export async function findRanklist (ctx: Context) {
 
 export async function getUser (ctx: Context) {
   const user = await loadUser(ctx)
-  const [ solved, failed, groups, submissionHeatmap ] = await Promise.all([
+  const [ solvedProblemIds, failedProblemIds, groups, submissionHeatmap ] = await Promise.all([
     Solution
       .find({ user: user._id, judge: JudgeStatus.Accepted })
-      .distinct('pid')
+      .distinct('problem')
       .lean(),
     Solution
       .find({ user: user._id, judge: { $nin: [ JudgeStatus.Accepted, JudgeStatus.Skipped ] } })
-      .distinct('pid')
+      .distinct('problem')
       .lean(),
     Group
       .find({ _id: { $in: user.groups } })
@@ -69,6 +69,16 @@ export async function getUser (ctx: Context) {
       .lean(),
     userService.getSubmissionHeatmap(user._id),
   ])
+
+  const problems = await Problem
+    .find({ _id: { $in: [ ...solvedProblemIds, ...failedProblemIds ] } })
+    .select({ _id: 1, pid: 1 })
+    .lean()
+  const pidByProblemId = new Map(problems.map(problem => [ problem._id.toString(), problem.pid ]))
+  const solved = solvedProblemIds
+    .map(problem => pidByProblemId.get(problem.toString())!)
+  const failed = failedProblemIds
+    .map(problem => pidByProblemId.get(problem.toString())!)
 
   const codeforces = await userService.getCodeforcesProfile(user._id)
   const attempted = difference(failed, solved)

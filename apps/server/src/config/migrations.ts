@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer'
 import { randomUUID } from 'node:crypto'
 import { md5 } from '@noble/hashes/legacy.js'
-import { Contest, ID, mongoose, OAuth, Post, User } from '@putong-oj/db'
-import { OAuthProvider } from '@putong-oj/shared'
+import { Contest, ID, mongoose, OAuth, Post, Problem, User } from '@putong-oj/db'
+import { OAuthProvider, status as problemStatus } from '@putong-oj/shared'
 import { isVerifiableOAuthConnection } from '../services/oauth.ts'
 import { settingsService } from '../services/settings.ts'
 import { passwordHash } from '../utils/index.ts'
@@ -501,6 +501,120 @@ async function migrateSolutionUserRef () {
   await solutionCollection.createIndex({ user: 1, createdAt: -1 }, { name: 'user_1_createdAt_-1' })
 }
 
+async function migrateSolutionProblemRef () {
+  interface LegacySolution {
+    _id: mongoose.Types.ObjectId
+    pid?: unknown
+  }
+
+  interface LegacyProblem {
+    _id: mongoose.Types.ObjectId
+    pid?: unknown
+  }
+
+  const solutionCollection = mongoose.connection.collection('Solution')
+  const solutions = await solutionCollection
+    .find({ pid: { $exists: true } })
+    .toArray() as unknown as LegacySolution[]
+  await Problem.updateMany(
+    { deletedAt: { $exists: false } },
+    { $set: { deletedAt: null } },
+  )
+
+  if (solutions.length > 0) {
+    const pidBySolution = new Map<mongoose.Types.ObjectId, number>()
+    const solutionPids = new Set<number>()
+    let fallbackPidCount = 0
+
+    for (const solution of solutions) {
+      const pid = typeof solution.pid === 'number'
+        ? solution.pid
+        : Number(solution.pid)
+      if (!Number.isInteger(pid)) {
+        fallbackPidCount += 1
+        pidBySolution.set(solution._id, -1)
+        solutionPids.add(-1)
+      } else {
+        pidBySolution.set(solution._id, pid)
+        solutionPids.add(pid)
+      }
+    }
+
+    const problems = await Problem
+      .find({ pid: { $in: [ ...solutionPids ] } }, { _id: 1, pid: 1 })
+      .lean() as unknown as LegacyProblem[]
+    const problemIdByPid = new Map<number, mongoose.Types.ObjectId>()
+
+    for (const problem of problems) {
+      if (typeof problem.pid === 'number' && problem._id instanceof mongoose.Types.ObjectId) {
+        problemIdByPid.set(problem.pid, problem._id)
+      }
+    }
+
+    const missingPids = [ ...solutionPids ].filter(pid => !problemIdByPid.has(pid))
+    if (missingPids.length > 0) {
+      const deletedAt = new Date()
+      const createdProblems = await Problem.insertMany(
+        missingPids.map(pid => ({
+          pid,
+          title: `Deleted problem ${pid}`,
+          status: problemStatus.Reserve,
+          owner: null,
+          tags: [],
+          deletedAt,
+        })),
+      )
+      for (const problem of createdProblems) {
+        problemIdByPid.set(problem.pid, problem._id)
+      }
+    }
+
+    const maxPid = Math.max(...solutionPids)
+    if (maxPid > 0) {
+      await ID.updateOne(
+        { name: 'Problem' },
+        { $max: { id: maxPid } },
+        { upsert: true },
+      )
+    }
+
+    const operations = solutions.map((solution) => {
+      const pid = pidBySolution.get(solution._id)!
+      const problem = problemIdByPid.get(pid)
+      if (!problem) {
+        throw new Error(`Migration Solution.pid -> problem blocked, Problem<${pid}> was not resolved`)
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: solution._id },
+          update: {
+            $set: { problem },
+            $unset: { pid: '' },
+          },
+        },
+      }
+    })
+
+    const result = await solutionCollection.bulkWrite(operations, { ordered: false })
+    logger.info(
+      'Migration Solution.pid -> problem completed, '
+      + `modified=${result.modifiedCount}, tombstones=${missingPids.length}, fallback=${fallbackPidCount}`,
+    )
+  } else {
+    logger.info('Migration Solution.pid -> problem skipped, no solutions to migrate')
+  }
+
+  const indexNames = new Set((await solutionCollection.indexes()).map(index => index.name))
+  for (const indexName of [ 'pid_1', 'pid_1_createdAt_-1' ]) {
+    if (indexNames.has(indexName)) {
+      await solutionCollection.dropIndex(indexName)
+    }
+  }
+  await solutionCollection.createIndex({ problem: 1 }, { name: 'problem_1' })
+  await solutionCollection.createIndex({ problem: 1, createdAt: -1 }, { name: 'problem_1_createdAt_-1' })
+}
+
 async function migrateUserVerifiedBackfill () {
   const users = await User.find({ verified: { $exists: false } })
     .select({ _id: 1, uid: 1 })
@@ -605,6 +719,11 @@ const migrationTasks: MigrationTask[] = [
     key: '20260929-solution-user-ref',
     description: 'Replace Solution.uid with ObjectId user reference',
     run: migrateSolutionUserRef,
+  },
+  {
+    key: '20260929-solution-problem-ref',
+    description: 'Replace Solution.pid with ObjectId problem reference and tombstone missing problems',
+    run: migrateSolutionProblemRef,
   },
 ]
 

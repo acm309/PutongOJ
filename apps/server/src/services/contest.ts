@@ -208,7 +208,7 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
 
       const { _id, endsAt, scoreboardFrozenAt } = contestDoc
       const problems = await Problem
-        .find({ _id: { $in: contestDoc.problems } })
+        .find({ _id: { $in: contestDoc.problems }, deletedAt: null })
         .select({ _id: 1, pid: 1, title: 1 })
         .lean()
       const before = (scoreboardFrozenAt && !isJury)
@@ -219,13 +219,13 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
         const [ { length: submit }, { length: solve } ] = await Promise.all([
           Solution.distinct('user', {
             contest: _id,
-            pid,
+            problem: _id,
             judge: { $nin: ignoredJudges },
             createdAt: { $lt: before },
           }).lean(),
           Solution.distinct('user', {
             contest: _id,
-            pid,
+            problem: _id,
             judge: JudgeStatus.Accepted,
             createdAt: { $lt: before },
           }).lean(),
@@ -250,7 +250,7 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
     async () => {
       const contestDoc = await Contest
         .findById(contest)
-        .select({ _id: 1, endsAt: 1, scoreboardFrozenAt: 1, scoreboardUnfrozenAt: 1 })
+        .select({ _id: 1, endsAt: 1, scoreboardFrozenAt: 1, scoreboardUnfrozenAt: 1, problems: 1 })
         .lean()
       if (!contestDoc) {
         return []
@@ -258,13 +258,19 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
 
       const { _id, endsAt, scoreboardFrozenAt, scoreboardUnfrozenAt } = contestDoc
       const ranklistRecord: Record<string, Record<number, ContestRanklistProblem>> = {}
+      const problems = await Problem
+        .find({ _id: { $in: contestDoc.problems }, deletedAt: null })
+        .select({ _id: 1, pid: 1 })
+        .lean()
+      const problemIdByProblem = new Map(problems.map(problem => [ problem._id.toString(), problem.pid ]))
       const solutions = await Solution
         .find({
           contest: _id,
+          problem: { $in: problems.map(problem => problem._id) },
           judge: { $nin: ignoredJudges },
           createdAt: { $lt: endsAt },
         })
-        .select({ _id: 0, pid: 1, user: 1, judge: 1, createdAt: 1 })
+        .select({ _id: 0, problem: 1, user: 1, judge: 1, createdAt: 1 })
         .sort({ createdAt: 1 })
         .lean()
 
@@ -272,7 +278,8 @@ async function getRanklist (contest: Types.ObjectId, isJury: boolean) {
         && (!scoreboardUnfrozenAt || scoreboardUnfrozenAt > new Date())
 
       solutions.forEach((solution) => {
-        const { pid: problemId, judge: judgement, createdAt } = solution
+        const { problem, judge: judgement, createdAt } = solution
+        const problemId = problemIdByProblem.get(problem.toString())!
         const userId = solution.user.toString()
 
         if (!ranklistRecord[userId]) {

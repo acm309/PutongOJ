@@ -30,7 +30,9 @@ const SolutionTestcaseResultSchema = z.object({
 
 const SolutionFieldsSchema = z.object({
   sid: SolutionModelSchema.shape.sid,
-  pid: SolutionModelSchema.shape.pid,
+  problem: z.object({
+    pid: ProblemModelSchema.shape.pid,
+  }),
   user: z.object({
     uid: UserModelSchema.shape.uid,
   }),

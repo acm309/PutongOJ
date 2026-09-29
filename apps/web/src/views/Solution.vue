@@ -59,7 +59,7 @@ async function fetch () {
   if (!loaded) {
     return
   }
-  root.changeDomTitle({ title: `Solution ${solution.value.pid}` })
+  root.changeDomTitle({ title: `Solution ${solution.value.problem.pid}` })
 }
 
 const showRefresh = ref(false)
@@ -126,7 +126,7 @@ onRouteQueryUpdate(fetch)
 </script>
 
 <template>
-  <div class="solution-wrap">
+  <div v-if="solution.sid" class="solution-wrap">
     <div class="flex justify-end solution-header">
       <div class="flex-1 solution-header-col">
         <h1 class="font-verdana solution-result">
@@ -136,8 +136,10 @@ onRouteQueryUpdate(fetch)
           <div class="flex flex-wrap gap-4 solution-info">
             <span>
               {{ t('oj.problem_label') }}
-              <RouterLink v-if="solution.pid" :to="{ name: 'problemInfo', params: { pid: solution.pid } }">
-                {{ solution.pid }}
+              <RouterLink
+                :to="{ name: 'problemInfo', params: { pid: solution.problem.pid } }"
+              >
+                {{ solution.problem.pid }}
               </RouterLink>
             </span>
             <span>
@@ -200,8 +202,8 @@ onRouteQueryUpdate(fetch)
       <Column v-if="isAdmin" field="files" :header="t('oj.files')">
         <template #body="{ data }">
           <div class="flex gap-4 items-center">
-            <a :href="testcaseUrl(solution.pid, data.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
-            <a :href="testcaseUrl(solution.pid, data.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
+            <a :href="testcaseUrl(solution.problem.pid, data.uuid, 'in')" target="_blank">{{ t('oj.input') }}</a>
+            <a :href="testcaseUrl(solution.problem.pid, data.uuid, 'out')" target="_blank">{{ t('oj.output') }}</a>
           </div>
         </template>
       </Column>

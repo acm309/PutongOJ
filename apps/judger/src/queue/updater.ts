@@ -72,7 +72,7 @@ export class Updater {
     }
 
     const tasks: Promise<unknown>[] = [
-      this.distributeWork('updateStatistic', `problem:${solution.pid}`),
+      this.distributeWork('updateStatistic', `problem:${solution.problem}`),
       this.distributeWork('updateStatistic', `user:${solution.user._id}`),
       this.redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch)),
     ]

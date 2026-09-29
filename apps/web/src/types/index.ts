@@ -1,4 +1,4 @@
-import type { SolutionModel } from '@putong-oj/shared'
+import type { ProblemModel, SolutionModel } from '@putong-oj/shared'
 
 export interface Solution {
   language: number | null
@@ -8,7 +8,7 @@ export interface Solution {
 export interface SolutionModelDataTable {
   sid: SolutionModel['sid']
   user?: { uid: string }
-  pid?: SolutionModel['pid']
+  problem?: { pid: ProblemModel['pid'] }
   contest?: { contestId: number } | null
   judge: SolutionModel['judge']
   similarity: SolutionModel['similarity']

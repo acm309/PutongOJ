@@ -28,7 +28,7 @@ export async function findProblems (
   },
 ): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
   const { page, pageSize, content, type, showReserved, includeOwner } = opt
-  const filters: Record<string, any>[] = []
+  const filters: Record<string, any>[] = [ { deletedAt: null } ]
 
   if (!(showReserved === true)) {
     const statusFilters: Record<string, any>[]
@@ -98,6 +98,7 @@ export async function findProblemItems (
   if (Number.isInteger(Number(keyword))) {
     result.push(...await Problem.find(
       {
+        deletedAt: null,
         $expr: {
           $regexMatch: {
             input: { $toString: '$pid' },
@@ -113,6 +114,7 @@ export async function findProblemItems (
   if (result.length < limit) {
     result.push(...await Problem.find(
       {
+        deletedAt: null,
         pid: { $nin: result.map(p => p.pid) },
         title: { $regex: new RegExp(escapeRegExp(keyword), 'i') },
       },
@@ -126,7 +128,7 @@ export async function findProblemItems (
 
 export async function getProblemItems (): Promise<ProblemEntityItem[]> {
   const result = await Problem
-    .find({}, { _id: 0, title: 1, pid: 1 })
+    .find({ deletedAt: null }, { _id: 0, title: 1, pid: 1 })
     .lean()
   return result
 }
@@ -135,7 +137,7 @@ export async function getProblem (
   pid: number,
 ): Promise<ProblemDocumentPopulated | undefined> {
   const problem = await Problem
-    .findOne({ pid })
+    .findOne({ pid, deletedAt: null })
     .populate('tags')
   return (problem ?? undefined) as ProblemDocumentPopulated | undefined
 }
@@ -166,7 +168,16 @@ export async function updateProblem (
 }
 
 export async function removeProblem (pid: number): Promise<boolean> {
-  const problem = await Problem.deleteOne({ pid })
+  const problem = await Problem.findOneAndUpdate(
+    { pid },
+    {
+      $set: {
+        status: status.Reserve,
+        deletedAt: new Date(),
+      },
+    },
+    { returnDocument: 'after' },
+  )
   return !!problem
 }
 
@@ -204,30 +215,21 @@ export async function getStatistics (problem: Types.ObjectId): Promise<ProblemSt
     CacheKey.problemStatistics(problem),
 
     async () => {
-      const problemDoc = await Problem
-        .findById(problem)
-        .select({ _id: 0, pid: 1 })
-        .lean()
-      if (!problemDoc) {
-        return { judgeCounts: [], timeDistribution: [], memoryDistribution: [] }
-      }
-
-      const { pid } = problemDoc
       const [ judgeCountsRaw, acceptedTimeRaw, acceptedMemoryRaw ] = await Promise.all([
         Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: { $in: JUDGE_STATUS_TERMINAL } } },
+          { $match: { problem, judge: { $in: JUDGE_STATUS_TERMINAL } } },
           { $group: { _id: '$judge', count: { $sum: 1 } } },
           { $sort: { _id: 1 } },
         ]),
 
         Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: JudgeStatus.Accepted } },
+          { $match: { problem, judge: JudgeStatus.Accepted } },
           { $group: { _id: '$time', count: { $sum: 1 } } },
           { $sort: { _id: 1 } },
         ]),
 
         Solution.aggregate<{ _id: number, count: number }>([
-          { $match: { pid, judge: JudgeStatus.Accepted } },
+          { $match: { problem, judge: JudgeStatus.Accepted } },
           { $group: { _id: '$memory', count: { $sum: 1 } } },
           { $sort: { _id: 1 } },
         ]),
@@ -252,7 +254,7 @@ export async function findCourseProblems (
   },
 ): Promise<Paginated<ProblemEntityPreview & { owner: Types.ObjectId | null }>> {
   const { page, pageSize, type, content } = opt
-  const filters: Record<string, any>[] = []
+  const filters: Record<string, any>[] = [ { 'problem.deletedAt': null } ]
 
   if (content && type) {
     switch (type) {
@@ -411,7 +413,10 @@ export async function findCourseProblemItems (
       $unwind: '$problem',
     },
     {
-      $match: { $or: filters },
+      $match: {
+        'problem.deletedAt': null,
+        '$or': filters,
+      },
     },
     {
       $sort: { sort: 1, updatedAt: -1 },

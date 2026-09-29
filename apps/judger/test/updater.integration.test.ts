@@ -1,4 +1,4 @@
-import { connectMongoose, disconnectMongoose, Solution, User } from '@putong-oj/db'
+import { connectMongoose, disconnectMongoose, mongoose, Solution, User } from '@putong-oj/db'
 import { JudgeStatus, Language, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { loadJudgerConfig } from '../src/config.ts'
@@ -38,9 +38,10 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
       uid,
       pwd: '0'.repeat(72),
     })
+    const problemId = new mongoose.Types.ObjectId()
     const solution = await Solution.create({
       sid,
-      pid: 999_999,
+      problem: problemId,
       user: user._id,
       code: 'print("hello")\n',
       length: 15,
@@ -78,7 +79,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
         },
       },
     })
-    t.true([ problemTask, userTask ].some(task => task?.[1] === 'problem:999999'))
+    t.true([ problemTask, userTask ].some(task => task?.[1] === `problem:${problemId}`))
     t.true([ problemTask, userTask ].some(task => task?.[1] === `user:${user._id}`))
     t.deepEqual(similarityTask, [ similarityQueue, String(sid) ])
   } finally {

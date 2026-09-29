@@ -1,4 +1,4 @@
-import { Contest, Solution, User } from '@putong-oj/db'
+import { Contest, Problem, Solution, User } from '@putong-oj/db'
 import { Language } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
@@ -137,8 +137,11 @@ test.serial('Submit a solution', async (t) => {
   t.is(res.body.data.code, code)
 
   const solution = await Solution.findOne({ sid }).lean()
+  const problem = await Problem.findOne({ pid: 1000 }).select('_id').lean()
   const user = await User.findOne({ uid: userSeeds.primaryuser.uid }).select('_id').lean()
+  t.true(solution?.problem.equals(problem?._id))
   t.true(solution?.user.equals(user?._id))
+  t.false(Object.hasOwn(solution ?? {}, 'pid'))
   t.false(Object.hasOwn(solution ?? {}, 'uid'))
 })
 

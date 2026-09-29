@@ -9,18 +9,12 @@ const logger = createLogger('worker.update-statistic')
  * @param userId 用户 ObjectId
  */
 async function updateUserStatistic (userId: string) {
-  const user = await User.findById(userId.trim()).select('uid').exec()
-  if (!user) {
-    logger.warn({ userId }, 'User not found while updating statistic')
-    return
-  }
-
   const [ submitProblems, solveProblems ] = await Promise.all([
-    Solution.distinct('pid', { user: user._id, judge: { $ne: JudgeStatus.Skipped } }),
-    Solution.distinct('pid', { user: user._id, judge: JudgeStatus.Accepted }),
+    Solution.distinct('problem', { user: userId, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('problem', { user: userId, judge: JudgeStatus.Accepted }),
   ])
   await User.updateOne(
-    { _id: user._id },
+    { _id: userId },
     {
       $set: {
         submit: submitProblems.length,
@@ -29,24 +23,20 @@ async function updateUserStatistic (userId: string) {
     },
   ).exec()
 
-  logger.info({ uid: user.uid, userId: user._id.toString() }, 'User statistic updated')
+  logger.info({ userId }, 'User statistic updated')
 }
 
 /**
  * 更新题目的统计信息
- * @param pid 题目 ID
+ * @param problemId 题目 ObjectId
  */
-async function updateProblemStatistic (pid: number | string) {
-  if (typeof pid === 'string') {
-    pid = Number.parseInt(pid, 10)
-  }
-
+async function updateProblemStatistic (problemId: string) {
   const [ submitUsers, acceptedUsers ] = await Promise.all([
-    Solution.distinct('user', { pid, judge: { $ne: JudgeStatus.Skipped } }),
-    Solution.distinct('user', { pid, judge: JudgeStatus.Accepted }),
+    Solution.distinct('user', { problem: problemId, judge: { $ne: JudgeStatus.Skipped } }),
+    Solution.distinct('user', { problem: problemId, judge: JudgeStatus.Accepted }),
   ])
   await Problem.findOneAndUpdate(
-    { pid },
+    { _id: problemId },
     {
       $set: {
         submit: submitUsers.length,
@@ -55,7 +45,7 @@ async function updateProblemStatistic (pid: number | string) {
     },
   ).exec()
 
-  logger.info({ pid }, 'Problem statistic updated')
+  logger.info({ problemId }, 'Problem statistic updated')
 }
 
 async function updateDiscussionStatistic (discussion: string) {

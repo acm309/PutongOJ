@@ -1,5 +1,5 @@
 import type { CourseDocument, Types } from '@putong-oj/db'
-import type { ContestModel, SolutionEntity, UserModel, WithId } from '@putong-oj/shared'
+import type { ContestModel, ProblemModel, SolutionEntity, UserModel, WithId } from '@putong-oj/shared'
 import type { Context } from 'koa'
 import type { ProblemState } from '../policies/problem.ts'
 import { Buffer } from 'node:buffer'
@@ -32,6 +32,7 @@ export async function findOne (ctx: Context) {
     .findOne({ sid: opt })
     .populate<{
     contest: WithId<Pick<ContestModel, 'contestId'>> | null
+    problem: WithId<Pick<ProblemModel, 'pid'>>
     user: WithId<Pick<UserModel, 'uid'>>
     similarSolution: (
         WithId<Pick<SolutionEntity, 'sid' | 'code' | 'create'>>
@@ -39,6 +40,7 @@ export async function findOne (ctx: Context) {
       ) | null
   }>([
       { path: 'contest', select: 'contestId' },
+      { path: 'problem', select: 'pid' },
       { path: 'user', select: 'uid' },
       {
         path: 'similarSolution',
@@ -78,6 +80,7 @@ export async function findOne (ctx: Context) {
 
   const result = SolutionDetailQueryResultSchema.encode({
     ...solution,
+    problem: solution.problem,
     status: solution.status as 0 | 2,
     course: solution.course ? solution.course.toString() : null,
     contest: solution.contest,
@@ -146,10 +149,12 @@ async function create (ctx: Context) {
       ctx.throw(404, 'Problem not found or access denied')
     }
   }
-
+  if (problemState.problem.deletedAt) {
+    ctx.throw(404, 'Problem not found or access denied')
+  }
   try {
     const solution = new Solution({
-      pid, contest, user: profile._id, code, language,
+      problem: problemState.problem._id, contest, user: profile._id, code, language,
       length: Buffer.from(code).length, // 这个属性是不是没啥用？
     })
 
@@ -183,9 +188,13 @@ async function updateSolution (ctx: Context) {
   if (!solution) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
   }
-  const pid = solution.pid
-  if (!await Problem.exists({ pid })) {
-    return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution not found')
+  const problem = await Problem
+    .findById(solution.problem)
+    .select('pid deletedAt')
+    .orFail()
+    .exec()
+  if (problem.deletedAt) {
+    return createErrorResponse(ctx, ErrorCode.NotFound, 'Problem of the solution is deleted')
   }
 
   let contest: Pick<ContestModel, 'contestId'> | null = null
@@ -213,6 +222,7 @@ async function updateSolution (ctx: Context) {
   if (updatedJudge !== JudgeStatus.RejudgePending) {
     const result = SolutionUpdateQueryResultSchema.encode({
       ...solution.toObject(),
+      problem: { pid: problem.pid },
       user: solutionUser,
       course: solution.course ? solution.course.toString() : null,
       contest,
@@ -232,6 +242,7 @@ async function updateSolution (ctx: Context) {
 
   const result = SolutionUpdateQueryResultSchema.encode({
     ...solution.toObject(),
+    problem: { pid: problem.pid },
     user: solutionUser,
     course: solution.course ? solution.course.toString() : null,
     contest,

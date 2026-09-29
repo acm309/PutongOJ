@@ -78,7 +78,7 @@ function handleSort (event: any) {
       </template>
     </Column>
 
-    <Column v-if="!props.hideProblem" field="pid" class="text-center">
+    <Column v-if="!props.hideProblem" field="problem.pid" class="text-center">
       <template #header>
         <span class="font-semibold text-center w-full">
           {{ t('ptoj.problem') }}
@@ -86,8 +86,8 @@ function handleSort (event: any) {
       </template>
       <template #body="{ data }">
         <slot name="problem" :data="data">
-          <RouterLink :to="{ name: 'problemInfo', params: { pid: data.pid } }">
-            <Button class="-my-px p-0" link fluid :label="String(data.pid ?? '')" />
+          <RouterLink :to="{ name: 'problemInfo', params: { pid: data.problem?.pid } }">
+            <Button class="-my-px p-0" link fluid :label="String(data.problem?.pid ?? '')" />
           </RouterLink>
         </slot>
       </template>

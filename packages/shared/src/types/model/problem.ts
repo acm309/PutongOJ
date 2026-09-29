@@ -19,6 +19,7 @@ export const ProblemModelSchema = z.object({
   code: z.string(),
   tags: z.array(ObjectIdSchema),
   owner: ObjectIdSchema.nullable(),
+  deletedAt: isoDatetimeToDate.nullable(),
   submit: z.number(),
   solve: z.number(),
   createdAt: isoDatetimeToDate,

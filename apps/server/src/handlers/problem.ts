@@ -61,7 +61,7 @@ async function findProblems (ctx: Context) {
   const { page, pageSize, course: courseId, type, content } = query.data
 
   if (page === -1 && profile?.isAdmin) {
-    const total = await Problem.countDocuments()
+    const total = await Problem.countDocuments({ deletedAt: null })
     const result = total === 0
       ? { docs: [], limit: 0, page: 1, pages: 0, total: 0 }
       : await problemService.findProblems({
@@ -97,14 +97,21 @@ async function findProblems (ctx: Context) {
 
   let solved: number[] = []
   if (profile && result.total > 0) {
-    solved = await Solution
+    const problems = await Problem
+      .find({ pid: { $in: result.docs.map(problem => problem.pid) }, deletedAt: null })
+      .select({ _id: 1, pid: 1 })
+      .lean()
+    const pidByProblemId = new Map(problems.map(problem => [ problem._id.toString(), problem.pid ]))
+    const solvedProblemIds = await Solution
       .find({
         user: profile._id,
-        pid: { $in: result.docs.map(problem => problem.pid) },
+        problem: { $in: problems.map(problem => problem._id) },
         judge: JudgeStatus.Accepted,
       })
-      .distinct('pid')
+      .distinct('problem')
       .lean()
+    solved = solvedProblemIds
+      .map(problem => pidByProblemId.get(problem.toString())!)
   }
 
   return createEnvelopedResponse(ctx, ProblemListQueryResultSchema.encode({
@@ -287,7 +294,7 @@ export async function findSolutions (ctx: Context) {
   const problem = await loadProblemOrThrow(ctx)
   const solutions = await solutionService.findSolutions({
     ...query.data,
-    problem: problem.pid,
+    problem: problem._id,
   })
   const result = ProblemSolutionListQueryResultSchema.encode(solutions)
   return createEnvelopedResponse(ctx, result)

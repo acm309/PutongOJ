@@ -47,7 +47,7 @@ integrationTest('processes a queued submission in order', async (t) => {
         testcases: [ { uuid: testcaseUUID } ],
       }),
     ])
-    await Problem.create({
+    const problem = await Problem.create({
       pid,
       title: 'Tasks queue integration',
       time: 1000,
@@ -59,7 +59,7 @@ integrationTest('processes a queued submission in order', async (t) => {
     })
     const queuedSolution = await Solution.create({
       sid,
-      pid,
+      problem: problem._id,
       user: user._id,
       code: 'a, b = map(int, input().split())\nprint(a + b)\n',
       length: 47,
