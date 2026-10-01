@@ -18,7 +18,6 @@ mongoosePaginate.paginate.options = {
 
 export type ConnectMongooseOptions = {
   uri: string
-  authSource?: string
   debug?: boolean
   onConnected?: () => void
   onDisconnected?: () => void
@@ -43,9 +42,7 @@ export async function connectMongoose (options: ConnectMongooseOptions) {
   }
 
   try {
-    await mongoose.connect(options.uri, {
-      authSource: options.authSource ?? 'admin',
-    })
+    await mongoose.connect(options.uri)
   } catch (error) {
     options.onError?.(error as Error)
     throw error
