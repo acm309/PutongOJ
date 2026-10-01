@@ -79,6 +79,9 @@ async function main (): Promise<void> {
               await fetchCodeforces(redis, item)
               break
             case 'scanUploadsFolder':
+              if (config.uploadStorage !== 'local') {
+                throw new Error('Local uploads-folder scanning is disabled for S3 storage')
+              }
               await scanUploadsFolder(config.uploadDir)
               break
             default:

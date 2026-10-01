@@ -154,6 +154,10 @@ pnpm dev:db
 pnpm dev:db:down
 ```
 
+Optional S3 storage for editor uploads has a separate local development stack.
+See [S3 uploads development](docs/s3-uploads.md) for configuration, tests and
+migration requirements.
+
 ## License 📜
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.

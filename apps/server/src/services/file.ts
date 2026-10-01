@@ -2,13 +2,14 @@ import type { Types, UserDocument } from '@putong-oj/db'
 import type { AdminFileListQuery, FileListQuery, FileModel } from '@putong-oj/shared'
 import type { QueryFilter } from '../types/mongo.ts'
 import path from 'node:path'
-import { Files } from '@putong-oj/db'
+import { Files, mongoose } from '@putong-oj/db'
 import fse from 'fs-extra'
+import { detectContentType } from '../storage/contentType.ts'
+import { uploadStorage } from '../storage/index.ts'
 import { createLogger } from '../utils/logger.ts'
 import userService from './user.ts'
 
 const logger = createLogger('server.file')
-const uploadDir = path.join(import.meta.dirname, '../../public/uploads')
 
 async function queryFiles (
   filter: QueryFilter<FileModel>,
@@ -52,23 +53,47 @@ export async function uploadFile (
     size?: number
   },
 ) {
-  const sizeBytes = Number(file.size || 0)
-  const quota = await checkQuota(profile, sizeBytes)
-  if (!quota.allowed) {
-    return { success: false as const, quota, sizeBytes }
-  }
-
   const filename = path.basename(file.filepath)
   const originalName = String(file.originalFilename || filename)
-  const destination = path.join(uploadDir, filename)
-
   try {
-    await fse.move(file.filepath, destination)
-    const record = await createFileRecord(profile._id, {
-      storageKey: filename,
-      originalName,
-      sizeBytes,
-    })
+    const sizeBytes = (await fse.stat(file.filepath)).size
+    const quota = await checkQuota(profile, sizeBytes)
+    if (!quota.allowed) {
+      return { success: false as const, quota, sizeBytes }
+    }
+    const contentType = await detectContentType(file.filepath)
+    try {
+      await uploadStorage.putFile(filename, file.filepath, contentType)
+    } catch (err) {
+      // A lost PUT response can leave bytes behind without a database row.
+      // Preserve them until reconciliation; never delete a possibly existing key.
+      logger.warn({ storageKey: filename }, 'Storage upload did not return success; check object during reconciliation')
+      throw err
+    }
+    let record
+    try {
+      record = await createFileRecord(profile._id, {
+        storageKey: filename,
+        originalName,
+        sizeBytes,
+      })
+    } catch (err: any) {
+      // A network timeout may occur after MongoDB committed. Preserve the object
+      // unless registration was definitely rejected and no row references this key.
+      const rejected = err instanceof mongoose.Error.ValidationError || [ 11000, 121 ].includes(err.code)
+      if (rejected) {
+        try {
+          if (!await Files.exists({ storageKey: filename })) {
+            await uploadStorage.remove(filename)
+          }
+        } catch (cleanupError) {
+          logger.warn({ err: cleanupError, storageKey: filename }, 'Upload requires storage reconciliation')
+        }
+      } else {
+        logger.warn({ storageKey: filename }, 'Upload registration outcome unknown; object retained for reconciliation')
+      }
+      throw err
+    }
 
     return {
       success: true as const,
@@ -76,9 +101,10 @@ export async function uploadFile (
       sizeBytes,
       url: `/uploads/${filename}`,
     }
-  } catch (err) {
-    await fse.remove(destination).catch(() => {})
-    throw err
+  } finally {
+    await fse.remove(file.filepath).catch((err) => {
+      logger.warn({ err }, 'Failed to clean up temporary upload')
+    })
   }
 }
 
@@ -192,18 +218,12 @@ export async function removeFile (profile: UserDocument, storageKey: string) {
     return false
   }
 
+  // If physical deletion fails, keep the row active so the caller can retry.
+  // Removal is idempotent if saving the tombstone fails after deleting the object.
+  await uploadStorage.remove(file.storageKey)
   file.deletedAt = new Date()
   file.deletedBy = profile._id
-  const saved = await file.save()
-
-  const absolutePath = path.join(uploadDir, saved.storageKey)
-  try {
-    await fse.remove(absolutePath)
-  } catch (err: any) {
-    logger.warn({ err, storageKey: saved.storageKey }, 'Failed to remove file on disk')
-  }
-
-  return saved
+  return await file.save()
 }
 
 const fileService = {

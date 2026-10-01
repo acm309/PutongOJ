@@ -12,9 +12,14 @@ export interface WorkerConfig {
   redisOptions: RedisOptions
   redisURL: string
   uploadDir: string
+  uploadStorage: 'local' | 's3'
 }
 
 export function loadWorkerConfig (env: NodeJS.ProcessEnv = process.env): WorkerConfig {
+  const uploadStorage = env.PTOJ_UPLOAD_STORAGE?.trim() || 'local'
+  if (uploadStorage !== 'local' && uploadStorage !== 's3') {
+    throw new Error('PTOJ_UPLOAD_STORAGE must be local or s3')
+  }
   const mongodbURL = env.PTOJ_MONGODB_URL?.trim() || 'mongodb://localhost:27017/oj'
   const redisURL = env.PTOJ_REDIS_URL?.trim() || 'redis://localhost:6379'
   const redisOptions = parseRedisUrl(redisURL)
@@ -31,5 +36,6 @@ export function loadWorkerConfig (env: NodeJS.ProcessEnv = process.env): WorkerC
     },
     redisURL,
     uploadDir,
+    uploadStorage,
   }
 }

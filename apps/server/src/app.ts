@@ -15,6 +15,7 @@ import {
   setupRequestContext,
   spaFallback,
 } from './middlewares/index.ts'
+import { serveUploads } from './middlewares/uploads.ts'
 import router from './routes.ts'
 import { createLogger } from './utils/logger.ts'
 import './config/db.ts'
@@ -40,23 +41,24 @@ app.use(session({
   renew: true,
 }, app))
 
+app.use(errorHandler)
 app.use(koaBody({
   jsonLimit: '8mb', // Limit JSON body to 8MB
   formLimit: '8mb', // Limit form body to 8MB
   textLimit: '8mb', // Limit text body to 8MB
   multipart: true, // Enable multipart for file uploads
   formidable: {
-    maxFileSize: 4 * 1024 * 1024, // Limit file size to 4MB
+    maxFileSize: 5 * 1024 * 1024, // Match the editor's 5 MiB upload limit
   },
 }))
 
+app.use(serveUploads)
 app.use(staticServe(path.join(import.meta.dirname, '..', 'public'), {
   gzip: true,
   maxage: 7 * 24 * 60 * 60, // 1 week
 }))
 
 app.use(setupRequestContext)
-app.use(errorHandler)
 app.use(spaFallback)
 
 app.use(router.routes()).use(router.allowedMethods())

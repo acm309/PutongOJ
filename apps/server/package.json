@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.test.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
     "@koa/router": "catalog:",
     "@noble/ciphers": "catalog:",
     "@noble/curves": "catalog:",
@@ -24,6 +25,7 @@
     "@zip.js/zip.js": "catalog:",
     "cross-env": "catalog:",
     "dotenv-flow": "catalog:",
+    "file-type": "catalog:",
     "fs-extra": "catalog:",
     "ioredis": "catalog:",
     "koa": "catalog:",

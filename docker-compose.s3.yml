@@ -1,0 +1,46 @@
+# Optional, isolated dependencies for S3 upload development. No production credentials.
+name: putong-oj-s3-dev
+
+services:
+  mongo:
+    image: mongo:8.2
+    restart: unless-stopped
+    ports: ["127.0.0.1:27028:27017"]
+    volumes: ["mongo-data:/data/db"]
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports: ["127.0.0.1:6388:6379"]
+    volumes: ["redis-data:/data"]
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  silo:
+    image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    ports: ["127.0.0.1:19000:9000", "127.0.0.1:19001:9001"]
+    environment:
+      MINIO_ROOT_USER: ${PTOJ_DEV_S3_ROOT_USER:?Set a local Silo administrator username}
+      MINIO_ROOT_PASSWORD: ${PTOJ_DEV_S3_ROOT_PASSWORD:?Set a local Silo administrator password}
+    volumes: ["silo-data:/data"]
+    healthcheck:
+      test: ["CMD", "silo", "healthcheck", "ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mongo-data:
+  redis-data:
+  silo-data:
