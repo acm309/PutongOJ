@@ -1,6 +1,7 @@
-import { Contest, User } from '@putong-oj/db'
-import { ParticipationStatus } from '@putong-oj/shared'
+import { Contest, Problem, Solution, User } from '@putong-oj/db'
+import { JudgeStatus, ParticipationStatus } from '@putong-oj/shared'
 import test from 'ava'
+import { CacheKey, cacheService } from '../../src/services/cache.ts'
 import { contestService } from '../../src/services/contest.ts'
 import { userSeeds } from '../seeds/user.ts'
 import '../../src/config/db.ts'
@@ -124,6 +125,52 @@ test.serial('findContests: applies the explicit hidden-contest filter', async (t
 
   // Clean up
   await Contest.deleteOne({ contestId: hidden.contestId })
+})
+
+// ─── getProblemsWithStats ────────────────────────────────────────────────────
+
+test.serial('getProblemsWithStats: counts distinct submitters and solvers', async (t) => {
+  const problem = await Problem.findOne({ pid: 1000 }).lean()
+  if (!problem) { return t.fail('Problem 1000 not in DB') }
+
+  const contest = await contestService.createContest({
+    ...testContest,
+    title: 'Stats Test Contest',
+  })
+  await contestService.updateContest(contest.contestId, { problems: [ problem._id ] })
+
+  const primary = await User.findOne({ uid: userSeeds.primaryuser.uid }).lean()
+  const accepter = await User.findOne({ uid: userSeeds.ugordon.uid }).lean()
+  const failer = await User.findOne({ uid: userSeeds.kevin63.uid }).lean()
+  if (!primary || !accepter || !failer) { return t.fail('Seed users missing') }
+
+  const makeSolution = (user: { _id: any }, judge: JudgeStatus) => ({
+    contest: contest._id,
+    problem: problem._id,
+    user: user._id,
+    judge,
+    language: 2,
+    length: 12,
+    code: 'int main(){}',
+  })
+
+  await Solution.create([
+    makeSolution(primary, JudgeStatus.Accepted),
+    makeSolution(accepter, JudgeStatus.Accepted),
+    makeSolution(failer, JudgeStatus.WrongAnswer),
+  ])
+
+  const stats = await contestService.getProblemsWithStats(contest._id, false)
+  t.is(stats.length, 1)
+  t.is(stats[0].problemId, 1000)
+  t.is(stats[0].index, 1)
+  // submit counts distinct submitters, solve counts distinct users with an Accepted solution
+  t.is(stats[0].submit, 3)
+  t.is(stats[0].solve, 2)
+
+  await Solution.deleteMany({ contest: contest._id })
+  await cacheService.remove(CacheKey.contestProblems(contest._id, false))
+  await Contest.deleteOne({ contestId: contest.contestId })
 })
 
 // ─── updateContest ───────────────────────────────────────────────────────────

@@ -200,38 +200,36 @@ async function getProblemsWithStats (contest: Types.ObjectId, isJury: boolean) {
     async () => {
       const contestDoc = await Contest
         .findById(contest)
-        .select({ _id: 1, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
+        .select({ _id: 0, endsAt: 1, scoreboardFrozenAt: 1, problems: 1 })
         .lean()
       if (!contestDoc || contestDoc.problems.length === 0) {
         return []
       }
 
-      const { _id, endsAt, scoreboardFrozenAt } = contestDoc
       const problems = await Problem
         .find({ _id: { $in: contestDoc.problems }, deletedAt: null })
         .select({ _id: 1, pid: 1, title: 1 })
         .lean()
-      const before = (scoreboardFrozenAt && !isJury)
-        ? scoreboardFrozenAt
-        : endsAt
+      const submissionCutoff = (contestDoc.scoreboardFrozenAt && !isJury)
+        ? contestDoc.scoreboardFrozenAt
+        : contestDoc.endsAt
 
-      return await Promise.all(problems.map(async ({ _id, pid, title }) => {
+      return await Promise.all(problems.map(async ({ _id: problem, pid: problemId, title }) => {
         const [ { length: submit }, { length: solve } ] = await Promise.all([
           Solution.distinct('user', {
-            contest: _id,
-            problem: _id,
+            contest,
+            problem,
             judge: { $nin: ignoredJudges },
-            createdAt: { $lt: before },
+            createdAt: { $lt: submissionCutoff },
           }).lean(),
           Solution.distinct('user', {
-            contest: _id,
-            problem: _id,
+            contest,
+            problem,
             judge: JudgeStatus.Accepted,
-            createdAt: { $lt: before },
+            createdAt: { $lt: submissionCutoff },
           }).lean(),
         ])
-        const problemId = pid
-        const index = contestDoc.problems.findIndex(p => p.equals(_id)) + 1
+        const index = contestDoc.problems.findIndex(problemRef => problemRef.equals(problem)) + 1
 
         return { index, problemId, title, submit, solve }
       }))
