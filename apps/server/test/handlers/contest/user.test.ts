@@ -21,6 +21,9 @@ const state = {
   endedContestId: undefined as number | undefined,
   earlyExitContestId: undefined as number | undefined,
   endedContestWithEarlyExitId: undefined as number | undefined,
+  allowedUserContestId: undefined as number | undefined,
+  allowedGroupContestId: undefined as number | undefined,
+  disallowedGroupContestId: undefined as number | undefined,
 }
 
 const now = Date.now()
@@ -120,6 +123,51 @@ test.before('Setup: admin creates test contests and user logs in', async (t) => 
   await adminAgent
     .put(`/api/contests/${state.endedContestWithEarlyExitId}/configs`)
     .send({ allowEarlyExit: true, problems: [ 1000 ] })
+
+  // Create a private contest that allow-lists primaryuser (no password)
+  const allowedUserContestRes = await adminAgent
+    .post('/api/contests')
+    .send(makeContest({ title: 'User Allow-listed Contest', isPublic: false }))
+  t.true(allowedUserContestRes.body.success)
+  state.allowedUserContestId = allowedUserContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.allowedUserContestId}/configs`)
+    .send({ allowedUsers: [ user.uid ], problems: [ 1000 ] })
+
+  // Create a private contest restricted to a group primaryuser belongs to
+  const allowGroupRes = await adminAgent
+    .post('/api/admin/groups')
+    .send({ name: 'User Allow Group' })
+  t.true(allowGroupRes.body.success)
+  const allowGroupId: string = allowGroupRes.body.data.id
+  await adminAgent
+    .put(`/api/admin/groups/${allowGroupId}/members`)
+    .send({ members: [ user.uid ] })
+
+  const allowedGroupContestRes = await adminAgent
+    .post('/api/contests')
+    .send(makeContest({ title: 'User Allowed Group Contest', isPublic: false }))
+  t.true(allowedGroupContestRes.body.success)
+  state.allowedGroupContestId = allowedGroupContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.allowedGroupContestId}/configs`)
+    .send({ allowedGroups: [ allowGroupId ], problems: [ 1000 ] })
+
+  // Create a private contest restricted to a group primaryuser does NOT belong to
+  const denyGroupRes = await adminAgent
+    .post('/api/admin/groups')
+    .send({ name: 'User Deny Group' })
+  t.true(denyGroupRes.body.success)
+  const denyGroupId: string = denyGroupRes.body.data.id
+
+  const disallowedGroupContestRes = await adminAgent
+    .post('/api/contests')
+    .send(makeContest({ title: 'User Disallowed Group Contest', isPublic: false }))
+  t.true(disallowedGroupContestRes.body.success)
+  state.disallowedGroupContestId = disallowedGroupContestRes.body.data.contestId
+  await adminAgent
+    .put(`/api/contests/${state.disallowedGroupContestId}/configs`)
+    .send({ allowedGroups: [ denyGroupId ], problems: [ 1000 ] })
 
   // Login as primaryuser
   const userLogin = await userAgent
@@ -327,6 +375,80 @@ test.serial('Participate with correct password: succeeds', async (t) => {
 
   t.is(res.status, 200)
   t.true(res.body.success)
+})
+
+// ─── Allow-listed private contest (no password) ──────────────────────────────
+
+test.serial('Participation status: allow-listed user can participate without password', async (t) => {
+  if (!state.allowedUserContestId) { return t.fail('No allowedUserContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.allowedUserContestId}/participation`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.true(res.body.data.canParticipate)
+  t.false(res.body.data.canParticipateByPassword)
+})
+
+test.serial('Participate in allow-listed private contest without password: succeeds', async (t) => {
+  if (!state.allowedUserContestId) { return t.fail('No allowedUserContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.allowedUserContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+// ─── Group-restricted private contests (no password) ─────────────────────────
+
+test.serial('Participation status: group member can participate without password', async (t) => {
+  if (!state.allowedGroupContestId) { return t.fail('No allowedGroupContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.allowedGroupContestId}/participation`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.true(res.body.data.canParticipate)
+  t.false(res.body.data.canParticipateByPassword)
+})
+
+test.serial('Participate in group-restricted contest as a member without password: succeeds', async (t) => {
+  if (!state.allowedGroupContestId) { return t.fail('No allowedGroupContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.allowedGroupContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Participation status: non-member cannot participate in group-restricted contest', async (t) => {
+  if (!state.disallowedGroupContestId) { return t.fail('No disallowedGroupContestId') }
+
+  const res = await userAgent.get(`/api/contests/${state.disallowedGroupContestId}/participation`)
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+  t.is(res.body.data.participation, ParticipationStatus.NotApplied)
+  t.false(res.body.data.canParticipate)
+  t.false(res.body.data.canParticipateByPassword)
+})
+
+test.serial('Participate in group-restricted contest without membership: forbidden', async (t) => {
+  if (!state.disallowedGroupContestId) { return t.fail('No disallowedGroupContestId') }
+
+  const res = await userAgent
+    .post(`/api/contests/${state.disallowedGroupContestId}/participation`)
+    .send({})
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+  t.is(res.body.code, 403)
 })
 
 // ─── IP whitelist blocking ────────────────────────────────────────────────────

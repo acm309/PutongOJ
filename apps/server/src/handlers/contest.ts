@@ -84,12 +84,9 @@ async function getParticipation (ctx: Context) {
       if (contest.password && contest.password.length > 0) {
         canParticipateByPassword = true
       }
-      if (contest.allowedUsers.includes(profile._id)) {
+      if (contestService.isAllowedParticipant(contest, profile)) {
         canParticipate = true
       }
-      /**
-       * @TODO allowed groups
-       */
     }
   }
 
@@ -172,6 +169,9 @@ async function participateContest (ctx: Context) {
   } else {
     const pwd = payload.data.password ?? ''
     if (contest.password && contest.password.length > 0 && contest.password === pwd) {
+      canParticipate = true
+    }
+    if (contestService.isAllowedParticipant(contest, profile)) {
       canParticipate = true
     }
   }

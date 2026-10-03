@@ -183,6 +183,18 @@ async function updateParticipantStatus (
   return res.matchedCount > 0
 }
 
+export function isAllowedParticipant (
+  contest: ContestModel,
+  profile: { _id: Types.ObjectId, groups: Types.ObjectId[] },
+): boolean {
+  if (contest.allowedUsers.some(userId => userId.equals(profile._id))) {
+    return true
+  }
+  return profile.groups.some(userGroup =>
+    contest.allowedGroups.some(allowedGroup => allowedGroup.equals(userGroup)),
+  )
+}
+
 export type ContestProblemsWithStats = {
   index: number
   problemId: number
@@ -347,6 +359,7 @@ export const contestService = {
   updateParticipation,
   findParticipants,
   updateParticipantStatus,
+  isAllowedParticipant,
   getProblemsWithStats,
   getRanklist,
 } as const
