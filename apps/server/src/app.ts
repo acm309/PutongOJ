@@ -1,3 +1,4 @@
+import type { Context } from 'koa'
 import path from 'node:path'
 import process, { env } from 'node:process'
 import Koa from 'koa'
@@ -21,6 +22,31 @@ import './config/db.ts'
 
 const logger = createLogger('server')
 const app = new Koa()
+
+// Errors the client causes by going away before the response is finished.
+// Koa's default error handler prints these as raw stacks through console.error,
+// which is noisy and bypasses pino, so handle the event ourselves.
+const CLIENT_ABORT_ERROR_CODES = new Set([
+  'ECONNRESET',
+  'EPIPE',
+  'ERR_STREAM_PREMATURE_CLOSE',
+])
+
+app.on('error', (err: NodeJS.ErrnoException, ctx?: Context) => {
+  const trace = {
+    err,
+    requestId: ctx?.state?.requestId,
+    method: ctx?.method,
+    path: ctx?.path,
+  }
+
+  if (err.code && CLIENT_ABORT_ERROR_CODES.has(err.code)) {
+    logger.debug(trace, 'Client aborted the response')
+    return
+  }
+
+  logger.error(trace, 'Unhandled server error')
+})
 
 // Logger for development, will show the method and route in the console
 // Not used in production for better performance
