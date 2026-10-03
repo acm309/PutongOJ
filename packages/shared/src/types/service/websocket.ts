@@ -1,4 +1,5 @@
 import type { JudgeStatus } from '@/consts/index.js'
+import type { NotificationSeverity } from '@/types/api/admin/notification.js'
 
 export enum WebSocketMessageType {
   Connect = 'connect',
@@ -19,6 +20,8 @@ type WebSocketMessageNotification = {
   data: {
     title: string
     content: string
+    severity: NotificationSeverity
+    life: number | null
   }
 }
 

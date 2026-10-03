@@ -213,6 +213,60 @@ test.serial('Send broadcast notification', async (t) => {
   t.true(res.body.success)
 })
 
+test.serial('Send broadcast notification - rejects a zero duration', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Zero', content: 'Should be rejected', duration: 0 })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+})
+
+test.serial('Send broadcast notification - rejects a negative duration', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Negative', content: 'Should be rejected', duration: -5 })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+})
+
+test.serial('Send broadcast notification - rejects an unknown severity', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Bad severity', content: 'Should be rejected', severity: 'fatal' })
+
+  t.is(res.status, 200)
+  t.false(res.body.success)
+})
+
+test.serial('Send broadcast notification - accepts a custom severity and duration', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Maintenance', content: 'Maintenance at midnight', severity: 'warn', duration: 30 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Send broadcast notification - accepts an arbitrary positive duration', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Seven', content: 'An unusual but valid duration', duration: 7 })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
+test.serial('Send broadcast notification - accepts a persistent notification', async (t) => {
+  const res = await requestAdmin
+    .post('/api/admin/notifications/broadcast')
+    .send({ title: 'Pinned notice', content: 'Please read carefully', severity: 'error', duration: null })
+
+  t.is(res.status, 200)
+  t.true(res.body.success)
+})
+
 // ─── sendNotificationUser ──────────────────────────────────────────────────
 
 test.serial('Send user notification - fails for non-existent user', async (t) => {

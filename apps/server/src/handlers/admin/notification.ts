@@ -20,8 +20,7 @@ export async function sendNotificationBroadcast (ctx: Context) {
   }
 
   try {
-    const { title, content } = payload.data
-    await websocketService.sendBroadcastNotification(title, content)
+    await websocketService.sendBroadcastNotification(payload.data)
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
@@ -42,8 +41,7 @@ export async function sendNotificationUser (ctx: Context) {
   }
 
   try {
-    const { title, content } = payload.data
-    await websocketService.sendUserNotification(username, title, content)
+    await websocketService.sendUserNotification(username, payload.data)
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)

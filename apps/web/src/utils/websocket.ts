@@ -80,8 +80,8 @@ class WebSocketService {
       )
       emitter.emit('submission-updated', solutionId)
     } else if (message.type === WebSocketMessageType.Notification) {
-      const { title, content } = message.data
-      this.messageService.info(title, content)
+      const { title, content, severity, life } = message.data
+      this.messageService.notify(severity, title, content, life)
     }
   }
 

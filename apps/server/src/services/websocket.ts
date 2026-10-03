@@ -1,28 +1,33 @@
-import type { WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
+import type { AdminNotificationCreatePayload, WebSocketDispatch, WebSocketMessage } from '@putong-oj/shared'
 import { WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
 import redis from '../config/redis.ts'
 
-export async function sendBroadcastNotification (title: string, content: string) {
-  const message: WebSocketMessage = {
+function createNotificationMessage (payload: AdminNotificationCreatePayload): WebSocketMessage {
+  const { title, content, severity, duration } = payload
+  return {
     type: WebSocketMessageType.Notification,
-    data: { title, content },
+    data: {
+      title,
+      content,
+      severity,
+      life: duration === null ? null : duration * 1000,
+    },
   }
+}
+
+export async function sendBroadcastNotification (payload: AdminNotificationCreatePayload) {
   const dispatch: WebSocketDispatch = {
     type: WebSocketDispatchType.Broadcast,
-    message,
+    message: createNotificationMessage(payload),
   }
   await redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch))
 }
 
-export async function sendUserNotification (username: string, title: string, content: string) {
-  const message: WebSocketMessage = {
-    type: WebSocketMessageType.Notification,
-    data: { title, content },
-  }
+export async function sendUserNotification (username: string, payload: AdminNotificationCreatePayload) {
   const dispatch: WebSocketDispatch = {
     type: WebSocketDispatchType.User,
     username,
-    message,
+    message: createNotificationMessage(payload),
   }
   await redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch))
 }
