@@ -20,7 +20,6 @@ COPY turbo.json ./
 COPY apps/server/package.json apps/server/
 COPY apps/docs/package.json apps/docs/
 COPY apps/web/package.json apps/web/
-COPY apps/ws-server/package.json apps/ws-server/
 COPY apps/worker/package.json apps/worker/
 COPY apps/judger/package.json apps/judger/
 COPY packages/db/package.json packages/db/
@@ -51,7 +50,6 @@ WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY apps/server/package.json apps/server/
-COPY apps/ws-server/package.json apps/ws-server/
 COPY apps/worker/package.json apps/worker/
 COPY apps/judger/package.json apps/judger/
 COPY packages/db/package.json packages/db/
@@ -59,7 +57,6 @@ COPY packages/shared/package.json packages/shared/
 RUN npm i -g pnpm@11.17.0 && pnpm install --prod --frozen-lockfile
 
 COPY --from=app_builder /app/apps/server/dist ./apps/server/dist
-COPY --from=app_builder /app/apps/ws-server/dist ./apps/ws-server/dist
 COPY --from=app_builder /app/apps/worker/dist ./apps/worker/dist
 COPY --from=app_builder /app/apps/judger/dist ./apps/judger/dist
 COPY --from=app_builder /app/apps/web/dist ./apps/server/public
@@ -75,7 +72,7 @@ COPY apps/server/entrypoint.sh .
 RUN chmod +x entrypoint.sh
 RUN mkdir -p /app/apps/server/data /app/logs /app/apps/server/public/uploads
 
-EXPOSE 3000/tcp 3001/tcp
+EXPOSE 3000/tcp
 VOLUME [ "/app/apps/server/data", "/app/logs", "/app/apps/server/public/uploads" ]
 
 ENTRYPOINT [ "/app/entrypoint.sh" ]

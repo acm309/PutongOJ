@@ -96,6 +96,19 @@ local function revoke_others(user_id, keep_session_id)
   return removed
 end
 
+-- Check whether a session still exists, without sliding its TTL
+local function validate(user_id, session_id)
+  local lk = list_key(user_id)
+  local ik = info_key(user_id, session_id)
+
+  if not redis.call('GET', ik) then
+    redis.call('ZREM', lk, session_id)
+    return 0
+  end
+
+  return 1
+end
+
 -- List all active sessions with their timestamps and info
 local function list(user_id)
   local lk = list_key(user_id)
@@ -129,6 +142,8 @@ elseif method == 'revoke' then
   return revoke(ARGV[2], ARGV[3])
 elseif method == 'revoke_others' then
   return revoke_others(ARGV[2], ARGV[3])
+elseif method == 'validate' then
+  return validate(ARGV[2], ARGV[3])
 elseif method == 'list' then
   return list(ARGV[2])
 else

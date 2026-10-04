@@ -5,8 +5,8 @@ import {
   ErrorCode,
 } from '@putong-oj/shared'
 import { loadProfile } from '../../middlewares/authn.ts'
+import notificationService from '../../services/notification.ts'
 import userService from '../../services/user.ts'
-import websocketService from '../../services/websocket.ts'
 import {
   createEnvelopedResponse,
   createErrorResponse,
@@ -20,7 +20,7 @@ export async function sendNotificationBroadcast (ctx: Context) {
   }
 
   try {
-    await websocketService.sendBroadcastNotification(payload.data)
+    await notificationService.sendBroadcastNotification(payload.data)
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification broadcast was sent by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)
@@ -36,12 +36,13 @@ export async function sendNotificationUser (ctx: Context) {
     return createZodErrorResponse(ctx, payload.error)
   }
   const username = String(ctx.params.username)
-  if (!username || !(await userService.getUser(username))) {
+  const user = await userService.getUser(username)
+  if (!username || !user) {
     return createErrorResponse(ctx, ErrorCode.NotFound)
   }
 
   try {
-    await websocketService.sendUserNotification(username, payload.data)
+    await notificationService.sendUserNotification(user.id, payload.data)
     const profile = await loadProfile(ctx)
     ctx.auditLog.info(`A notification was sent to <User:${username}> by <User:${profile.uid}>`)
     return createEnvelopedResponse(ctx, null)

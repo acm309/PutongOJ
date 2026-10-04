@@ -1,5 +1,5 @@
 import { connectMongoose, disconnectMongoose, mongoose, Solution, User } from '@putong-oj/db'
-import { JudgeStatus, Language, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
+import { JudgeStatus, Language, NOTIFICATION_CHANNEL, NotificationDispatchType, NotificationMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { loadJudgerConfig } from '../src/config.ts'
 import { RESULT_QUEUE_NAME } from '../src/constants.ts'
@@ -51,7 +51,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
     })
     const solutionId = solution._id.toString()
 
-    await subscriber.subscribe(WEBSOCKET_CHANNEL)
+    await subscriber.subscribe(NOTIFICATION_CHANNEL)
     const messagePromise = new Promise<unknown>((resolve) => {
       subscriber.once('message', (_channel, message) => {
         resolve(JSON.parse(message))
@@ -69,10 +69,10 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
     ])
 
     t.deepEqual(dispatch, {
-      type: WebSocketDispatchType.User,
-      username: uid,
+      type: NotificationDispatchType.User,
+      userId: user.id,
       message: {
-        type: WebSocketMessageType.SubmissionResult,
+        type: NotificationMessageType.SubmissionResult,
         data: {
           solutionId: sid,
           judgeStatus: JudgeStatus.Accepted,
@@ -94,7 +94,7 @@ integrationTest('publishes result notifications and queues follow-up jobs', asyn
           similarityQueue,
           `${similarityQueue}:set`,
         ),
-        subscriber.unsubscribe(WEBSOCKET_CHANNEL),
+        subscriber.unsubscribe(NOTIFICATION_CHANNEL),
         Solution.deleteMany({ sid }),
         User.deleteMany({ uid }),
       ])

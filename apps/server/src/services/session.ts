@@ -62,6 +62,15 @@ export async function revokeSession (userId: string, sessionId: string) {
   )
 }
 
+/** Checks whether a session is still active without refreshing its TTL. */
+export async function validateSession (userId: string, sessionId: string) {
+  const result = await redis.eval(
+    luaScript, 0,
+    'validate', userId, sessionId,
+  )
+  return result === 1
+}
+
 export async function revokeOtherSessions (userId: string, keepSessionId: string) {
   return await redis.eval(
     luaScript, 0,
@@ -94,6 +103,7 @@ const sessionService = {
   createSession,
   accessSession,
   revokeSession,
+  validateSession,
   revokeOtherSessions,
   listSessions,
 } as const

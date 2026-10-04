@@ -1,12 +1,5 @@
 import { z } from 'zod'
-
-export const NotificationSeveritySchema = z.enum([
-  'info',
-  'success',
-  'warn',
-  'error',
-])
-export type NotificationSeverity = z.infer<typeof NotificationSeveritySchema>
+import { NotificationSeveritySchema } from '../../service/notification.js'
 
 export const AdminNotificationCreatePayloadSchema = z.object({
   title: z.string().min(1).max(30),

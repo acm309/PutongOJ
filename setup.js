@@ -6,7 +6,6 @@ import fse from 'fs-extra'
 dotenvFlow.config({ silent: true })
 
 const serverDistDir = resolve(import.meta.dirname, 'apps/server/dist')
-const wsServerDistDir = resolve(import.meta.dirname, 'apps/ws-server/dist')
 const workerDistDir = resolve(import.meta.dirname, 'apps/worker/dist')
 const judgerDistDir = resolve(import.meta.dirname, 'apps/judger/dist')
 const logsDir = resolve(import.meta.dirname, 'logs')
@@ -29,13 +28,6 @@ async function main () {
     script: resolve(serverDistDir, 'app.js'),
     out_file: resolve(logsDir, 'app.out.log'),
     error_file: resolve(logsDir, 'app.err.log'),
-    ...commons,
-  })
-  apps.push({
-    name: 'ws',
-    script: resolve(wsServerDistDir, 'index.js'),
-    out_file: resolve(logsDir, 'ws.out.log'),
-    error_file: resolve(logsDir, 'ws.err.log'),
     ...commons,
   })
   apps.push({

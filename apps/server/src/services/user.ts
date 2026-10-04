@@ -94,7 +94,7 @@ export async function findRanklist (
   return await User.paginate(filter, query) as any
 }
 
-export async function getUser (uid: string): Promise<UserDocument | null> {
+export async function getUser (uid: string) {
   return await User.findOne({
     uid: { $regex: new RegExp(`^${escapeRegExp(uid)}$`, 'i') },
   })

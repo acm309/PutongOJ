@@ -60,11 +60,11 @@ export const ServerTimeQueryResultSchema = z.object({
 
 export type ServerTimeQueryResult = z.input<typeof ServerTimeQueryResultSchema>
 
-export const WebSocketTokenQueryResultSchema = z.object({
+export const NotificationTokenQueryResultSchema = z.object({
   token: z.string(),
 })
 
-export type WebSocketTokenQueryResult = z.input<typeof WebSocketTokenQueryResultSchema>
+export type NotificationTokenQueryResult = z.input<typeof NotificationTokenQueryResultSchema>
 
 export const PublicConfigQueryResultSchema = z.object({
   name: z.string(),

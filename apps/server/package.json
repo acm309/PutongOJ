@@ -37,6 +37,7 @@
     "luxon": "catalog:",
     "pino": "catalog:",
     "superagent": "catalog:",
+    "ws": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -51,6 +52,7 @@
     "@types/node": "catalog:",
     "@types/superagent": "catalog:",
     "@types/supertest": "catalog:",
+    "@types/ws": "catalog:",
     "ava": "catalog:",
     "c8": "catalog:",
     "supertest": "catalog:",

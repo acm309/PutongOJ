@@ -1,4 +1,5 @@
 import type { Context } from 'koa'
+import type { Server } from 'node:http'
 import path from 'node:path'
 import process, { env } from 'node:process'
 import Koa from 'koa'
@@ -17,6 +18,7 @@ import {
   spaFallback,
 } from './middlewares/index.ts'
 import router from './routes.ts'
+import notificationService from './services/notification.ts'
 import { createLogger } from './utils/logger.ts'
 import './config/db.ts'
 
@@ -90,12 +92,15 @@ app.use(router.routes()).use(router.allowedMethods())
 // If not in test environment, start the server and listen on the specified port
 // In test environment, we will export the app without starting the server,
 // and let the test framework handle it
+let httpServer: Server | null = null
+
 if (env.NODE_ENV !== 'test') {
   databaseSetup()
     .then(() => {
-      app.listen(config.port, () => {
+      httpServer = app.listen(config.port, () => {
         logger.info(`The server is running at http://localhost:${config.port}`)
       })
+      notificationService.startNotificationGateway(httpServer)
     })
     .catch((err) => {
       logger.error({ err }, 'Database setup failed')
@@ -104,6 +109,8 @@ if (env.NODE_ENV !== 'test') {
 
   async function shutdown (signal: string) {
     logger.info(`Received ${signal}, shutting down...`)
+    await notificationService.stopNotificationGateway()
+    httpServer?.close()
     await redis.quit()
     logger.info('Redis connection closed')
     process.exit(0)

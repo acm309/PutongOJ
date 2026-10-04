@@ -1,17 +1,16 @@
 import type { Context } from 'koa'
-import { randomUUID } from 'node:crypto'
 import { env } from 'node:process'
 import Router from '@koa/router'
 import {
   AvatarPresetsQueryResultSchema,
+  NotificationTokenQueryResultSchema,
   PublicConfigQueryResultSchema,
   ServerTimeQueryResultSchema,
-  WebSocketTokenQueryResultSchema,
 } from '@putong-oj/shared'
 import { globalConfig } from '../config/index.ts'
-import redis from '../config/redis.ts'
 import { loadProfile, loginRequire } from '../middlewares/authn.ts'
 import cryptoService from '../services/crypto.ts'
+import notificationService from '../services/notification.ts'
 import { settingsService } from '../services/settings.ts'
 import { createEnvelopedResponse } from '../utils/index.ts'
 
@@ -59,11 +58,10 @@ export async function getPublicConfig (ctx: Context) {
   return createEnvelopedResponse(ctx, result)
 }
 
-export async function getWebSocketToken (ctx: Context) {
+export async function getNotificationToken (ctx: Context) {
   const profile = await loadProfile(ctx)
-  const token = randomUUID()
-  await redis.setex(`websocket:token:${token}`, 10, profile.uid)
-  const result = WebSocketTokenQueryResultSchema.encode({ token })
+  const token = await notificationService.createNotificationToken(profile._id.toString(), ctx.state.sessionId!)
+  const result = NotificationTokenQueryResultSchema.encode({ token })
   return createEnvelopedResponse(ctx, result)
 }
 
@@ -78,7 +76,7 @@ function registerUtilsHandlers (router: Router) {
 
   utilsRouter.get('/servertime', serverTime)
   utilsRouter.get('/config', getPublicConfig)
-  utilsRouter.get('/websocket/token', loginRequire, getWebSocketToken)
+  utilsRouter.get('/notifications/token', loginRequire, getNotificationToken)
   utilsRouter.get('/utils/avatar-presets', loginRequire, getAvatarPresets)
 
   router.use(utilsRouter.routes(), utilsRouter.allowedMethods())

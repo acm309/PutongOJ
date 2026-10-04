@@ -1,8 +1,8 @@
 import type {
   AvatarPresetsQueryResult,
+  NotificationTokenQueryResult,
   PublicConfigQueryResult,
   ServerTimeQueryResult,
-  WebSocketTokenQueryResult,
 } from '@putong-oj/shared'
 import { apiClient } from './instance'
 
@@ -14,8 +14,8 @@ export async function getPublicConfig () {
   return apiClient.get<PublicConfigQueryResult>('/config')
 }
 
-export async function getWebSocketToken () {
-  return apiClient.get<WebSocketTokenQueryResult>('/websocket/token')
+export async function getNotificationToken () {
+  return apiClient.get<NotificationTokenQueryResult>('/notifications/token')
 }
 
 export async function getAvatarPresets () {

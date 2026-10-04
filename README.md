@@ -93,7 +93,6 @@ services:
       - PTOJ_SANDBOX_ENDPOINT=http://sandbox:5050
     ports:
       - 3000:3000
-      - 3001:3001
     volumes:
       - putong-oj-data:/app/apps/server/data
       - putong-oj-uploads:/app/apps/server/public/uploads
@@ -141,12 +140,11 @@ To retain data across container restarts, mount the following volumes:
 
 The backend is split into independently built applications:
 
-- [`apps/server`](apps/server) provides the Koa HTTP API.
-- [`apps/ws-server`](apps/ws-server/README.md) serves WebSocket connections and Redis dispatches.
+- [`apps/server`](apps/server) provides the Koa HTTP API and the notification WebSocket stream.
 - [`apps/worker`](apps/worker/README.md) runs asynchronous maintenance jobs.
 - [`apps/judger`](apps/judger/README.md) judges submissions with the go-judge sandbox.
 
-The root image launches all four processes with PM2. The root
+The root image launches all three processes with PM2. The root
 `docker-compose.yml` starts MongoDB, Redis, and sandbox for local development:
 
 ```bash

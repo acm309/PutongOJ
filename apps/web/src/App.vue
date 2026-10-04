@@ -11,7 +11,7 @@ import { useRootStore } from '@/store'
 import { setApiErrorHandler } from './api/instance'
 import { useSessionStore } from './store/modules/session'
 import { useMessage } from './utils/message'
-import { useWebSocket } from './utils/websocket'
+import { useNotification } from './utils/notification'
 
 // https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md#declaring-additional-options
 export default {
@@ -55,18 +55,18 @@ watch(() => route.meta, () => changeDomTitle(route.meta))
 
 const sessionStore = useSessionStore()
 const { isLogined, profile } = storeToRefs(sessionStore)
-const websocket = useWebSocket()
+const notification = useNotification()
 
-async function initWebSocket () {
+async function initNotification () {
   if (isLogined.value) {
-    await websocket.connect()
+    await notification.connect()
   } else {
-    websocket.disconnect()
+    notification.disconnect()
   }
 }
 
-watch(profile, () => nextTick(initWebSocket))
-setTimeout(initWebSocket, 1000)
+watch(profile, () => nextTick(initNotification))
+setTimeout(initNotification, 1000)
 </script>
 
 <template>

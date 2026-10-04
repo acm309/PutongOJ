@@ -1,7 +1,7 @@
-import type { UserModel, WebSocketDispatch, WebSocketMessage, WithId } from '@putong-oj/shared'
+import type { NotificationDispatch, NotificationMessage, UserModel, WithId } from '@putong-oj/shared'
 import type { JudgerConfig } from '../config.ts'
 import { Solution } from '@putong-oj/db'
-import { JudgeStatus, WEBSOCKET_CHANNEL, WebSocketDispatchType, WebSocketMessageType } from '@putong-oj/shared'
+import { JudgeStatus, NOTIFICATION_CHANNEL, NotificationDispatchType, NotificationMessageType } from '@putong-oj/shared'
 import { Redis } from 'ioredis'
 import { RESULT_QUEUE_NAME } from '../constants.ts'
 import { createLogger } from '../logger.ts'
@@ -58,23 +58,23 @@ export class Updater {
       return
     }
 
-    const message: WebSocketMessage = {
-      type: WebSocketMessageType.SubmissionResult,
+    const message: NotificationMessage = {
+      type: NotificationMessageType.SubmissionResult,
       data: {
         solutionId: solution.sid,
         judgeStatus: solution.judge as JudgeStatus,
       },
     }
-    const dispatch: WebSocketDispatch = {
-      type: WebSocketDispatchType.User,
-      username: solution.user.uid,
+    const dispatch: NotificationDispatch = {
+      type: NotificationDispatchType.User,
+      userId: solution.user._id.toString(),
       message,
     }
 
     const tasks: Promise<unknown>[] = [
       this.distributeWork('updateStatistic', `problem:${solution.problem}`),
       this.distributeWork('updateStatistic', `user:${solution.user._id}`),
-      this.redis.publish(WEBSOCKET_CHANNEL, JSON.stringify(dispatch)),
+      this.redis.publish(NOTIFICATION_CHANNEL, JSON.stringify(dispatch)),
     ]
     if (solution.judge === JudgeStatus.Accepted) {
       tasks.push(this.distributeWork('checkSimilarity', solution.sid))
