@@ -91,12 +91,6 @@ services:
       - PTOJ_MONGODB_URL=mongodb://db:27017/oj
       - PTOJ_REDIS_URL=redis://redis:6379
       - PTOJ_SANDBOX_ENDPOINT=http://sandbox:5050
-      # Optional S3 uploads; see docs/s3-uploads.md.
-      - PTOJ_UPLOAD_STORAGE=${PTOJ_UPLOAD_STORAGE:-local}
-      - PTOJ_S3_ENDPOINT=${PTOJ_S3_ENDPOINT:-}
-      - PTOJ_S3_BUCKET=${PTOJ_S3_BUCKET:-}
-      - PTOJ_S3_ACCESS_KEY_ID=${PTOJ_S3_ACCESS_KEY_ID:-}
-      - PTOJ_S3_SECRET_ACCESS_KEY=${PTOJ_S3_SECRET_ACCESS_KEY:-}
     ports:
       - 3000:3000
       - 3001:3001
@@ -133,10 +127,6 @@ volumes:
   putong-oj-uploads:
 ```
 
-S3 uploads are optional; the default is `local`. Before enabling S3, migrate
-existing uploads and provide the endpoint, bucket, and application credentials.
-See [S3 uploads development](docs/s3-uploads.md) for details.
-
 ### Persistent Data Storage
 
 To retain data across container restarts, mount the following volumes:
@@ -163,10 +153,6 @@ The root image launches all four processes with PM2. The root
 pnpm dev:db
 pnpm dev:db:down
 ```
-
-Optional S3 storage for editor uploads has a separate local development stack.
-See [S3 uploads development](docs/s3-uploads.md) for configuration, tests and
-migration requirements.
 
 ## License 📜
 
