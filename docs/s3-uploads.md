@@ -44,6 +44,25 @@ plus HeadBucket access (S3 `ListBucket` permission) to distinguish a missing obj
 from a missing/misconfigured bucket on HEAD requests. It does not need public
 bucket access or bucket creation privileges. Use an application account in production.
 
+### Docker Compose deployment
+
+The README Compose example passes the required S3 settings to all processes in
+`putong-oj`. Region, upload prefix, and path style use the defaults above; add
+those variables to the container environment if you need different values.
+Supply deployment values through an ignored `.env.production.local` and pass
+`--env-file .env.production.local` to Compose. Its `environment` entries pass
+the values to the container; the environment file does not need to be mounted.
+
+The example connects to an existing S3-compatible service. The API endpoint
+must be reachable from the application container. `http://silo:9000` only works
+if a service named `silo` shares the Docker network; `127.0.0.1` refers to the
+application container itself. The uploads volume is used in local mode;
+testcases still need the data volume in both modes.
+
+Create the private bucket and application credentials, then migrate and verify
+existing uploads before enabling S3. Bucket creation and old-file migration
+are not performed automatically.
+
 ## Isolated local services
 
 Run commands in Linux / WSL2 with Node >= 24, pnpm >= 11 and Docker Compose.

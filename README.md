@@ -91,15 +91,12 @@ services:
       - PTOJ_MONGODB_URL=mongodb://db:27017/oj
       - PTOJ_REDIS_URL=redis://redis:6379
       - PTOJ_SANDBOX_ENDPOINT=http://sandbox:5050
-      # Optional S3 uploads; keep local until existing uploads have been migrated.
+      # Optional S3 uploads; see docs/s3-uploads.md.
       - PTOJ_UPLOAD_STORAGE=${PTOJ_UPLOAD_STORAGE:-local}
       - PTOJ_S3_ENDPOINT=${PTOJ_S3_ENDPOINT:-}
-      - PTOJ_S3_REGION=${PTOJ_S3_REGION:-us-east-1}
       - PTOJ_S3_BUCKET=${PTOJ_S3_BUCKET:-}
-      - PTOJ_S3_UPLOAD_PREFIX=${PTOJ_S3_UPLOAD_PREFIX:-uploads}
       - PTOJ_S3_ACCESS_KEY_ID=${PTOJ_S3_ACCESS_KEY_ID:-}
       - PTOJ_S3_SECRET_ACCESS_KEY=${PTOJ_S3_SECRET_ACCESS_KEY:-}
-      - PTOJ_S3_FORCE_PATH_STYLE=${PTOJ_S3_FORCE_PATH_STYLE:-true}
     ports:
       - 3000:3000
       - 3001:3001
@@ -136,24 +133,9 @@ volumes:
   putong-oj-uploads:
 ```
 
-The upload storage variables are passed to all application processes in the
-`putong-oj` container. The default is `local`, which uses the uploads volume.
-To enable S3, supply deployment values in an ignored `.env.production.local`
-file and pass `--env-file .env.production.local` when running the saved Compose
-configuration. Compose substitutes those values into the `environment` entries
-above; the application does not need the environment file mounted inside it.
-
-This example connects to an existing S3-compatible service. Set
-`PTOJ_S3_ENDPOINT` to its API address reachable from the application container,
-not its web console. An address such as `http://silo:9000` only works if a service
-named `silo` shares the Docker network; `127.0.0.1` inside the application
-container refers to that container itself.
-
-Create a private bucket and application credentials, and migrate and verify
-existing uploads before setting `PTOJ_UPLOAD_STORAGE=s3`. The application does
-not create the bucket or copy old files automatically. Testcases still require
-the data volume. See [S3 uploads development](docs/s3-uploads.md) for permissions,
-configuration, tests, and migration requirements.
+S3 uploads are optional; the default is `local`. Before enabling S3, migrate
+existing uploads and provide the endpoint, bucket, and application credentials.
+See [S3 uploads development](docs/s3-uploads.md) for details.
 
 ### Persistent Data Storage
 
