@@ -40,8 +40,7 @@ bower_components
 build/Release
 
 # Dependency directories
-# Also ignore a symlink to dependencies stored on the Linux filesystem in WSL2.
-node_modules
+node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
