@@ -19,6 +19,7 @@ export interface UploadStorage {
 }
 
 export function assertUploadKey (key: string): void {
+  // 拒绝编码小于 32 的控制字符（如制表符、换行、回车）及编码为 127 的删除字符。
   const hasControlCharacter = Array.from(key).some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)
   if (!key || key === '.' || key === '..' || /[/\\]/.test(key) || hasControlCharacter) {
     throw new Error('Invalid upload storage key')
