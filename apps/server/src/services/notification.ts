@@ -20,6 +20,8 @@ const STREAM_PATH = '/ws'
 /** One-time tokens are written by the token endpoint and consumed on connection. */
 const TOKEN_PREFIX = 'notification:token:'
 const TOKEN_TTL_SECONDS = 10
+/** Clients only listen on this stream, so even small client frames are rejected. */
+const MAX_PAYLOAD_BYTES = 1024
 const HEARTBEAT_INTERVAL = 30_000
 const CONNECTION_STATS_INTERVAL = 300_000
 
@@ -288,7 +290,7 @@ export function startNotificationGateway (server: Server): void {
     return
   }
 
-  const wss = new WebSocketServer({ noServer: true })
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_PAYLOAD_BYTES })
   webSocketServer = wss
 
   const listener = (request: IncomingMessage, socket: Duplex, head: Buffer): void => {
