@@ -46,7 +46,7 @@ jobs:
   server-tests:
     name: Server Tests
     needs: checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       mongodb:
@@ -110,7 +110,7 @@ jobs:
   judger-tests:
     name: Judger Tests
     needs: checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     env:
       PTOJ_DATA_DIR: /tmp/putong-oj-judger-data
