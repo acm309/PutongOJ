@@ -1,4 +1,5 @@
 import type { Context, Next } from 'koa'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { ErrorCode, ErrorCodeValues } from '@putong-oj/shared'
 import send from 'koa-send'
@@ -27,6 +28,8 @@ export async function parseClientIp (ctx: Context, next: () => Promise<any>) {
 }
 
 export async function setupAuditLog (ctx: Context, next: Next) {
+  ctx.state.requestId = ctx.get('X-Request-ID') || randomUUID()
+  ctx.set('X-Request-ID', ctx.state.requestId)
   const getTraceInfo = () => {
     const { requestId, clientIp, sessionId } = ctx.state
     return { requestId, clientIp, sessionId }
@@ -52,7 +55,6 @@ export async function setupAuditLog (ctx: Context, next: Next) {
 }
 
 export async function setupRequestContext (ctx: Context, next: Next) {
-  ctx.state.requestId = ctx.get('X-Request-ID') || 'unknown'
   await authnMiddleware.checkSession(ctx)
   await next()
 }

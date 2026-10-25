@@ -1,5 +1,13 @@
 import type { Readable } from 'node:stream'
 
+export class UploadTimeoutError extends Error {
+  override name = 'UploadTimeoutError'
+
+  constructor () {
+    super('Image upload timed out. Please try uploading again.')
+  }
+}
+
 export interface StoredFileInfo {
   sizeBytes: number
   contentType: string

@@ -11,6 +11,7 @@ import supertest from 'supertest'
 import app from '../../../src/app.ts'
 import { encryptData } from '../../../src/services/crypto.ts'
 import { uploadStorage } from '../../../src/storage/index.ts'
+import { UploadTimeoutError } from '../../../src/storage/types.ts'
 import { deploy } from '../../../src/utils/constants.ts'
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jFioAAAAASUVORK5CYII=', 'base64')
@@ -54,11 +55,79 @@ test.serial('An upload is public at its original URL, supports HEAD and conditio
   const head = await supertest(server).head(url)
   t.is(head.status, 200)
   t.is(Number(head.headers['content-length']), png.length)
+  const read = mock.method(uploadStorage, 'get', async () => { throw new Error('304 must not read the object body') })
+  t.teardown(() => read.mock.restore())
   const cached = await supertest(server).get(url).set('If-None-Match', get.headers.etag)
   t.is(cached.status, 304)
+  t.is((await supertest(server).get(url).set('If-Modified-Since', head.headers['last-modified'])).status, 304)
+  t.is(read.mock.callCount(), 0)
+  read.mock.restore()
+  t.is((await supertest(server).get(url).set('If-None-Match', '"stale"')).status, 200)
   const removed = await request.delete(`/api/files/${storageKey}`)
   t.true(removed.body.success)
   t.is((await supertest(server).get(url)).status, 404)
+})
+
+test.serial('Storage failures return an uncacheable HTTP 503 and a request ID', async (t) => {
+  const uploaded = await upload()
+  const { url } = uploaded.body.data
+  for (const method of [ 'get', 'head' ] as const) {
+    const stub = mock.method(uploadStorage, method, async () => { throw new Error('Storage denied') })
+    try {
+      const res = await supertest(server)[method](url)
+      t.is(res.status, 503)
+      t.is(res.headers['cache-control'], 'no-store')
+      t.truthy(res.headers['x-request-id'])
+      t.falsy(res.headers.etag)
+    } finally {
+      stub.mock.restore()
+    }
+  }
+  const head = await supertest(server).head(url)
+  const get = mock.method(uploadStorage, 'get', async () => { throw new Error('GET failed after HEAD') })
+  t.teardown(() => get.mock.restore())
+  const res = await supertest(server).get(url).set('If-None-Match', '"stale"').set('X-Request-ID', 'storage-failure-test')
+  t.is(res.status, 503)
+  t.is(res.headers['x-request-id'], 'storage-failure-test')
+  t.is(res.headers['cache-control'], 'no-store')
+  t.not(res.headers['content-length'], head.headers['content-length'])
+  t.falsy(res.headers.etag)
+  t.falsy(res.headers['last-modified'])
+})
+
+test.serial('Concurrent conditional writes preserve exactly one complete object', async (t) => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'ptoj-conflict-test-'))
+  t.teardown(() => rm(directory, { recursive: true, force: true }))
+  const first = path.join(directory, 'first')
+  const second = path.join(directory, 'second')
+  await writeFile(first, 'first complete object')
+  await writeFile(second, 'second complete object')
+  const key = `concurrent-${randomUUID()}`
+  keys.add(key)
+  const results = await Promise.allSettled([
+    uploadStorage.putFile(key, first, 'application/octet-stream'),
+    uploadStorage.putFile(key, second, 'application/octet-stream'),
+  ])
+  t.is(results.filter(result => result.status === 'fulfilled').length, 1)
+  async function readBytes () {
+    const file = (await uploadStorage.get(key))!
+    const chunks: Buffer[] = []
+    for await (const chunk of file.body) chunks.push(Buffer.from(chunk))
+    return Buffer.concat(chunks).toString()
+  }
+  const expected = results[0].status === 'fulfilled' ? 'first complete object' : 'second complete object'
+  t.is(await readBytes(), expected)
+  await t.throwsAsync(uploadStorage.putFile(key, results[0].status === 'fulfilled' ? second : first, 'application/octet-stream'))
+  t.is(await readBytes(), expected)
+})
+
+test.serial('A timeout gives the editor a retry message without registering a file', async (t) => {
+  const put = mock.method(uploadStorage, 'putFile', async () => { throw new UploadTimeoutError() })
+  t.teardown(() => put.mock.restore())
+  const res = await upload()
+  t.false(res.body.success)
+  t.regex(res.body.message, /timed out.*uploading again/)
+  t.truthy(res.headers['x-request-id'])
 })
 
 test.serial('Missing and malformed uploads never fall through to SPA or static files', async (t) => {
@@ -164,6 +233,28 @@ test.serial('A failed deletion marker can be retried after the object was remove
   t.true((await request.delete(`/api/files/${storageKey}`)).body.success)
   t.truthy((await Files.findOne({ storageKey }).lean())!.deletedAt)
 })
+
+for (const committed of [ false, true ]) {
+  test.serial(`Deletion recovers from a lost Mongo acknowledgement (committed=${committed})`, async (t) => {
+    const uploaded = await upload()
+    const { storageKey } = uploaded.body.data
+    const originalSave = Files.prototype.save
+    let calls = 0
+    const save = mock.method(Files.prototype, 'save', async function (this: any) {
+      calls++
+      if (calls === 1) {
+        if (committed) await originalSave.call(this)
+        throw new Error('Mongo acknowledgement lost')
+      }
+      return await originalSave.call(this)
+    })
+    t.teardown(() => save.mock.restore())
+    t.true((await request.delete(`/api/files/${storageKey}`)).body.success)
+    t.is(calls, committed ? 1 : 2)
+    t.truthy((await Files.findOne({ storageKey }).lean())!.deletedAt)
+    t.is(await uploadStorage.head(storageKey), null)
+  })
+}
 
 test.serial('The server accepts editor uploads above 4 MiB and rejects files above 5 MiB', async (t) => {
   const accepted = Buffer.alloc(4 * 1024 * 1024 + 1)

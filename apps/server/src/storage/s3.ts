@@ -4,7 +4,7 @@ import type { StoredFile, StoredFileInfo, UploadStorage } from './types.ts'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { assertUploadKey } from './types.ts'
+import { assertUploadKey, UploadTimeoutError } from './types.ts'
 
 export class S3UploadStorage implements UploadStorage {
   readonly client: S3Client
@@ -17,8 +17,12 @@ export class S3UploadStorage implements UploadStorage {
       region: config.region,
       forcePathStyle: config.forcePathStyle,
       credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
-      maxAttempts: 3,
-      requestHandler: { connectionTimeout: 3000, requestTimeout: 10000 },
+      maxAttempts: 3, // 流式 PUT 不会自动重试；其他可重试请求最多尝试三次。
+      requestHandler: {
+        connectionTimeout: config.connectionTimeoutMs,
+        requestTimeout: 10000,
+        throwOnRequestTimeout: true,
+      },
     })
   }
 
@@ -34,6 +38,10 @@ export class S3UploadStorage implements UploadStorage {
   async putFile (key: string, filepath: string, contentType: string): Promise<void> {
     const info = await stat(filepath)
     const body = createReadStream(filepath)
+    const controller = new AbortController()
+    // 覆盖整个 S3 上传等待过程，超时后真正取消请求。
+    const timer = setTimeout(() => controller.abort(), this.config.uploadTimeoutMs)
+    timer.unref()
     try {
       await this.client.send(new PutObjectCommand({
         ...this.object(key),
@@ -41,8 +49,14 @@ export class S3UploadStorage implements UploadStorage {
         ContentLength: info.size,
         ContentType: contentType,
         IfNoneMatch: '*',
-      }))
+      }), { abortSignal: controller.signal, requestTimeout: this.config.uploadTimeoutMs })
+    } catch (err) {
+      if (controller.signal.aborted || (err instanceof Error && err.name === 'TimeoutError')) {
+        throw new UploadTimeoutError()
+      }
+      throw err
     } finally {
+      clearTimeout(timer)
       body.destroy()
     }
   }

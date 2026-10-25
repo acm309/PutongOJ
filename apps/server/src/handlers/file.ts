@@ -3,6 +3,7 @@ import Router from '@koa/router'
 import { ErrorCode, FileListQueryResultSchema, FileListQuerySchema, FileUploadResultSchema } from '@putong-oj/shared'
 import { loadProfile, loginRequire } from '../middlewares/authn.ts'
 import fileService from '../services/file.ts'
+import { UploadTimeoutError } from '../storage/types.ts'
 import { createEnvelopedResponse, createErrorResponse, createZodErrorResponse } from '../utils/index.ts'
 
 export async function upload (ctx: Context) {
@@ -18,7 +19,15 @@ export async function upload (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'No file uploaded')
   }
 
-  const uploaded = await fileService.uploadFile(profile, file)
+  let uploaded
+  try {
+    uploaded = await fileService.uploadFile(profile, file, ctx.state.requestId)
+  } catch (err) {
+    if (err instanceof UploadTimeoutError) {
+      return createErrorResponse(ctx, ErrorCode.InternalServerError, err.message)
+    }
+    throw err
+  }
   if (!uploaded.success) {
     return createErrorResponse(
       ctx,
@@ -55,7 +64,7 @@ export async function removeFile (ctx: Context) {
     return createErrorResponse(ctx, ErrorCode.BadRequest, 'Invalid storage key')
   }
 
-  const file = await fileService.removeFile(profile, storageKey)
+  const file = await fileService.removeFile(profile, storageKey, ctx.state.requestId)
   if (file === false) {
     return createErrorResponse(ctx, ErrorCode.Forbidden, 'Insufficient privilege to delete this file')
   }

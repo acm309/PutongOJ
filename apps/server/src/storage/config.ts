@@ -15,6 +15,8 @@ export type UploadStorageConfig = {
   accessKeyId: string
   secretAccessKey: string
   forcePathStyle: boolean
+  connectionTimeoutMs: number
+  uploadTimeoutMs: number
 }
 
 export function loadUploadStorageConfig (env: NodeJS.ProcessEnv = process.env): UploadStorageConfig {
@@ -43,6 +45,17 @@ export function loadUploadStorageConfig (env: NodeJS.ProcessEnv = process.env): 
   if (pathStyle !== 'true' && pathStyle !== 'false') {
     throw new Error('PTOJ_S3_FORCE_PATH_STYLE must be true or false')
   }
+  const timeout = (name: string, fallback: number): number => {
+    const value = env[name]?.trim()
+    if (!value) {
+      return fallback
+    }
+    const parsed = Number(value)
+    if (!/^\d+$/.test(value) || !Number.isSafeInteger(parsed) || parsed < 1 || parsed > 2_147_483_647) {
+      throw new Error(`${name} must be a positive integer up to 2147483647 milliseconds`)
+    }
+    return parsed
+  }
   return {
     driver,
     endpoint,
@@ -52,5 +65,7 @@ export function loadUploadStorageConfig (env: NodeJS.ProcessEnv = process.env): 
     accessKeyId: required('PTOJ_S3_ACCESS_KEY_ID'),
     secretAccessKey: required('PTOJ_S3_SECRET_ACCESS_KEY'),
     forcePathStyle: pathStyle === 'true',
+    connectionTimeoutMs: timeout('PTOJ_S3_CONNECTION_TIMEOUT_MS', 3000),
+    uploadTimeoutMs: timeout('PTOJ_S3_UPLOAD_TIMEOUT_MS', 10000),
   }
 }

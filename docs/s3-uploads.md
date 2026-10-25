@@ -38,6 +38,17 @@ them through the deployment environment. The server and worker must use the same
 | `PTOJ_S3_ACCESS_KEY_ID` | Required application access key |
 | `PTOJ_S3_SECRET_ACCESS_KEY` | Required application secret key |
 | `PTOJ_S3_FORCE_PATH_STYLE` | `true` by default; only `true` / `false` accepted |
+| `PTOJ_S3_CONNECTION_TIMEOUT_MS` | Connection timeout, default `3000` ms |
+| `PTOJ_S3_UPLOAD_TIMEOUT_MS` | Deadline for one S3 upload, default `10000` ms |
+
+Timeout values must be positive integer milliseconds (maximum `2147483647`).
+The upload deadline starts when the server begins the S3 PUT, after receiving
+the browser's multipart file and checking quota. It includes waiting for S3's
+response and aborts the request when reached. Other S3 operations use a hard
+10-second request timeout per attempt, with up to three SDK attempts; this does
+not impose a deadline on streaming a downloaded body to the browser. The current
+SDK does not retry streaming PUTs. Increase the upload deadline only if real
+successful uploads regularly approach it; a timeout cannot undo a committed write.
 
 The application needs GetObject, PutObject and DeleteObject for its upload prefix,
 plus HeadBucket access (S3 `ListBucket` permission) to distinguish a missing object
@@ -122,6 +133,15 @@ pnpm lint
 The tests cover byte preservation, old URLs, HEAD/304, deleted/missing objects,
 legacy files without database records, overwrite refusal and partial failures.
 
+### Known editor save timing issue
+
+Browser testing reproduced an uploaded image being omitted when saving the
+problem immediately after the image appeared. Vditor delays its input callback
+by 800 ms, so the form can still contain the previous Markdown. The successful
+save/reload test waits one second for this callback; it does not verify immediate
+saving. This frontend issue remains open. A follow-up should synchronize the
+latest editor content before submission and test saving without a fixed wait.
+
 ## Failure behavior and compatibility
 
 - PUT refuses an existing key instead of overwriting bytes.
@@ -135,7 +155,9 @@ legacy files without database records, overwrite refusal and partial failures.
   for reconciliation. This stage has no automated reconciliation job.
 - A physical deletion failure returns an error and keeps the record active so
   the caller can retry. If saving the deletion marker fails after physical
-  deletion, the next delete can repeat the storage operation safely.
+  deletion, the server reads back the record and retries saving once if needed.
+  If recovery also fails, retry deletion after MongoDB recovers. A process crash
+  between the two writes still needs this recovery; the operation is not atomic.
 - Deleted records return 404 even if bytes remain. Legacy keys without a Files
   row remain readable. Missing uploads never fall through to static files or SPA.
 - Content-Type is detected from uploaded bytes. Recognized raster images are
@@ -146,9 +168,54 @@ legacy files without database records, overwrite refusal and partial failures.
 - Upload cache lifetime preserves the current effective static setting:
   `max-age=604` seconds. The old `koa-static` option is in milliseconds despite
   its "1 week" comment; this change does not silently extend caching to a week.
+- Conditional GET first reads object metadata. A matching validator returns 304
+  without opening the body; a stale validator costs HEAD plus GET. Ordinary GET
+  uses one GET. Permission, connectivity or database failures before streaming
+  return HTTP 503 with `Cache-Control: no-store`, instead of a successful HTTP
+  response carrying an API error. A failure after response bytes have started
+  can only interrupt that response; it cannot replace its HTTP status.
+- Responses include `X-Request-ID`, also available for upload failure logs.
+  Upload timeouts return a retry message in the existing API error envelope.
+  The editor displays it and lets the user choose to upload again, generating a
+  new key. It does not insert a failed upload's URL or retry automatically.
 - S3 configuration or service failures propagate as errors; there is no silent
   fallback to local files. Local folder scan jobs are rejected in S3 mode to
   avoid treating an old local directory as the current storage source.
+
+## Manual recovery of an uncertain upload
+
+1. Find `storageKey`, `requestId`, `userId` and `stage` in the server failure log.
+   Use the environment for the affected OJ instance, with its normal application
+   credentials. Do not paste credentials into shell arguments or tickets.
+2. Run the read-only inspection command after the request has settled:
+
+   ```bash
+   pnpm --filter @putong-oj/server storage:inspect <storageKey>
+   ```
+
+   It checks the exact object and MongoDB record; it does not list buckets,
+   change records or delete objects. `unknown` (exit code 1), including a timeout
+   or permission error, means the check failed and must be repeated after repair.
+3. Follow the result:
+
+   | State | Action |
+   | --- | --- |
+   | `registered` | Check owner, size and downloaded bytes against the intended upload; the existing file can be found in My Files. |
+   | `absent` | No object or record was observed. After checking that the original request has finished, let the user upload again. |
+   | `unregistered-needs-review` | Could be a historical image or an unacknowledged new upload. Match the failure log and original bytes; absence of a row alone never permits deletion. |
+   | `registered-object-missing` | If this was an interrupted deletion, retry the same delete; otherwise investigate the missing object and restore from backup. |
+   | `deleted-record-object-remains` | Check that deletion was intended, then back up and remove only that exact object using the administrator's storage tools. |
+   | `deleted` | Both deletion steps are complete. |
+
+4. For a confirmed failed new upload with no record, the simplest recovery is a
+   user-initiated reupload. Verify that the new file works, then retain a backup
+   and remove the old exact object after confirming no content references it.
+   Compare downloaded bytes (for example SHA-256); object size and ETag alone do
+   not prove identical contents. Do not bulk-delete objects without Files rows.
+
+The inspection is a snapshot of two systems, not a transaction. An in-flight
+request can finish after a timeout or a check, so recheck before destructive
+action. Automatic orphan cleanup and reference tracking remain deferred.
 
 ## Before enabling in production
 

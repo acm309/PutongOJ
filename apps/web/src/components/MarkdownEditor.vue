@@ -5,6 +5,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRootStore } from '@/store'
 import { useThemeStore } from '@/store/theme'
+import { useMessage } from '@/utils/message'
 import 'vditor/dist/index.css'
 import '@/styles/vditor.styl'
 
@@ -19,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
+const message = useMessage()
 const rootStore = useRootStore()
 const themeStore = useThemeStore()
 const { effectiveTheme } = storeToRefs(themeStore)
@@ -120,6 +122,9 @@ function init () {
         const filename = files[0]?.name || 'file'
         const response = JSON.parse(responseText)
         if (!response.success) {
+          if (response.message) {
+            message.error(response.message)
+          }
           return JSON.stringify({ data: { succMap: {}, errFiles: [ filename ] } })
         }
         const url = response.data.url

@@ -52,6 +52,7 @@ export async function uploadFile (
     originalFilename?: string | null
     size?: number
   },
+  requestId?: string,
 ) {
   const filename = path.basename(file.filepath)
   const originalName = String(file.originalFilename || filename)
@@ -67,7 +68,7 @@ export async function uploadFile (
     } catch (err) {
       // A lost PUT response can leave bytes behind without a database row.
       // Preserve them until reconciliation; never delete a possibly existing key.
-      logger.warn({ storageKey: filename }, 'Storage upload did not return success; check object during reconciliation')
+      logger.warn({ err, storageKey: filename, userId: profile.uid, sizeBytes, requestId, stage: 'put' }, 'Storage upload did not return success; check object during reconciliation')
       throw err
     }
     let record
@@ -87,10 +88,10 @@ export async function uploadFile (
             await uploadStorage.remove(filename)
           }
         } catch (cleanupError) {
-          logger.warn({ err: cleanupError, storageKey: filename }, 'Upload requires storage reconciliation')
+          logger.warn({ err: cleanupError, storageKey: filename, userId: profile.uid, requestId, stage: 'registration-cleanup' }, 'Upload requires storage reconciliation')
         }
       } else {
-        logger.warn({ storageKey: filename }, 'Upload registration outcome unknown; object retained for reconciliation')
+        logger.warn({ err, storageKey: filename, userId: profile.uid, requestId, stage: 'registration' }, 'Upload registration outcome unknown; object retained for reconciliation')
       }
       throw err
     }
@@ -209,7 +210,7 @@ export async function findAdminFiles (query: AdminFileListQuery) {
   }
 }
 
-export async function removeFile (profile: UserDocument, storageKey: string) {
+export async function removeFile (profile: UserDocument, storageKey: string, requestId?: string) {
   const file = await Files.findOne({ storageKey })
   if (!file || file.deletedAt) {
     return null
@@ -220,10 +221,30 @@ export async function removeFile (profile: UserDocument, storageKey: string) {
 
   // If physical deletion fails, keep the row active so the caller can retry.
   // Removal is idempotent if saving the tombstone fails after deleting the object.
-  await uploadStorage.remove(file.storageKey)
+  const trace = { storageKey, userId: profile.uid, requestId }
+  try {
+    await uploadStorage.remove(file.storageKey)
+  } catch (err) {
+    logger.warn({ ...trace, err, stage: 'delete-object' }, 'File deletion not confirmed; retry the delete after storage recovers')
+    throw err
+  }
   file.deletedAt = new Date()
   file.deletedBy = profile._id
-  return await file.save()
+  try {
+    return await file.save()
+  } catch (err) {
+    logger.warn({ ...trace, err, stage: 'delete-record' }, 'Deletion marker not confirmed; checking the record and retrying once')
+    try {
+      const saved = await Files.findById(file._id)
+      if (saved?.deletedAt) {
+        return saved
+      }
+      return await file.save()
+    } catch (recoveryError) {
+      logger.error({ ...trace, err: recoveryError, stage: 'delete-record' }, 'Object removed but deletion marker is unconfirmed; retry the delete after database recovery')
+      throw recoveryError
+    }
+  }
 }
 
 const fileService = {

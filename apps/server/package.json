@@ -11,6 +11,7 @@
     "pretest": "cross-env NODE_ENV=test node test/pretest.ts",
     "report": "c8 report --reporter=html",
     "start": "cross-env NODE_ENV=production node dist/app.js",
+    "storage:inspect": "node src/tools/inspect-upload.ts",
     "test": "cross-env NODE_ENV=test c8 ava",
     "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.test.json"
   },
