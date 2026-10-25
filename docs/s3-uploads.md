@@ -40,15 +40,22 @@ them through the deployment environment. The server and worker must use the same
 | `PTOJ_S3_FORCE_PATH_STYLE` | `true` by default; only `true` / `false` accepted |
 | `PTOJ_S3_CONNECTION_TIMEOUT_MS` | Connection timeout, default `3000` ms |
 | `PTOJ_S3_UPLOAD_TIMEOUT_MS` | Deadline for one S3 upload, default `10000` ms |
+| `PTOJ_S3_READ_TIMEOUT_MS` | Total wait for GET/HEAD, including retries, default `5000` ms |
 
 Timeout values must be positive integer milliseconds (maximum `2147483647`).
 The upload deadline starts when the server begins the S3 PUT, after receiving
 the browser's multipart file and checking quota. It includes waiting for S3's
-response and aborts the request when reached. Other S3 operations use a hard
-10-second request timeout per attempt, with up to three SDK attempts; this does
-not impose a deadline on streaming a downloaded body to the browser. The current
+response and aborts the request when reached. GET/HEAD have a separate total
+deadline across SDK attempts and retry backoff. It ends after metadata succeeds
+or a GET returns its successful response headers; it does not limit streaming
+the downloaded body to the browser. A conditional request with a stale validator
+can perform HEAD followed by GET, each with its own deadline. MongoDB operations
+are outside this S3 deadline.
+DELETE uses a 10-second request timeout per attempt, with up to three attempts. The current
 SDK does not retry streaming PUTs. Increase the upload deadline only if real
 successful uploads regularly approach it; a timeout cannot undo a committed write.
+Uploads disable `Expect: 100-continue`, so large images do not depend on a proxy
+sending an interim response before their bytes can be sent. SDK checksums remain enabled.
 
 The application needs GetObject, PutObject and DeleteObject for its upload prefix,
 plus HeadBucket access (S3 `ListBucket` permission) to distinguish a missing object
@@ -133,14 +140,14 @@ pnpm lint
 The tests cover byte preservation, old URLs, HEAD/304, deleted/missing objects,
 legacy files without database records, overwrite refusal and partial failures.
 
-### Known editor save timing issue
+### Immediate editor saves
 
-Browser testing reproduced an uploaded image being omitted when saving the
-problem immediately after the image appeared. Vditor delays its input callback
-by 800 ms, so the form can still contain the previous Markdown. The successful
-save/reload test waits one second for this callback; it does not verify immediate
-saving. This frontend issue remains open. A follow-up should synchronize the
-latest editor content before submission and test saving without a fixed wait.
+Vditor delays its input callback by 800 ms. The editor now synchronizes on blur,
+and problem creation, problem editing and post editing explicitly read the
+current Markdown before submission. Browser regression tests must upload an
+image or type text and immediately save, without waiting for that callback.
+Check the actual submitted Markdown and reload the saved page. Include a
+4–5 MiB image and a submission that does not blur the editor.
 
 ## Failure behavior and compatibility
 
@@ -175,8 +182,11 @@ latest editor content before submission and test saving without a fixed wait.
   response carrying an API error. A failure after response bytes have started
   can only interrupt that response; it cannot replace its HTTP status.
 - Responses include `X-Request-ID`, also available for upload failure logs.
-  Upload timeouts return a retry message in the existing API error envelope.
-  The editor displays it and lets the user choose to upload again, generating a
+  Client IDs must match `^[\w-]{1,128}$`; other values are replaced with a UUID.
+  The existing API error envelope uses code `504` for upload timeout and `507`
+  for exhausted storage quota. These are API codes, not changes to HTTP status.
+  The editor maps codes to localized messages rather than displaying server
+  error details. After a timeout the user can choose to upload again, generating a
   new key. It does not insert a failed upload's URL or retry automatically.
 - S3 configuration or service failures propagate as errors; there is no silent
   fallback to local files. Local folder scan jobs are rejected in S3 mode to
@@ -187,13 +197,27 @@ latest editor content before submission and test saving without a fixed wait.
 1. Find `storageKey`, `requestId`, `userId` and `stage` in the server failure log.
    Use the environment for the affected OJ instance, with its normal application
    credentials. Do not paste credentials into shell arguments or tickets.
-2. Run the read-only inspection command after the request has settled:
+2. Run the read-only inspection command after the request has settled. With the
+   README's Compose service name, run this on the Docker host, from the directory
+   containing the deployed Compose file:
 
    ```bash
+   docker compose exec putong-oj node apps/server/dist/tools/inspect-upload.js <storageKey>
+   ```
+
+   It runs inside the **OJ application container**, using its deployed environment,
+   not inside the Silo container. Replace `putong-oj` if your service has another
+   name. The production image contains `dist`, not `src`.
+
+   For a source checkout, build first and then run:
+
+   ```bash
+   pnpm --filter @putong-oj/server... build
    pnpm --filter @putong-oj/server storage:inspect <storageKey>
    ```
 
-   It checks the exact object and MongoDB record; it does not list buckets,
+   Local developers may instead use `storage:inspect:dev` with Node >= 24.
+   The tool checks the exact object and MongoDB record; it does not list buckets,
    change records or delete objects. `unknown` (exit code 1), including a timeout
    or permission error, means the check failed and must be repeated after repair.
 3. Follow the result:

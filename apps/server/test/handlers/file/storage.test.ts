@@ -6,6 +6,7 @@ import path from 'node:path'
 // eslint-disable-next-line test/no-import-node-test -- AVA uses Node's built-in method mocks.
 import { mock } from 'node:test'
 import { Files, mongoose } from '@putong-oj/db'
+import { ErrorCode } from '@putong-oj/shared'
 import test from 'ava'
 import supertest from 'supertest'
 import app from '../../../src/app.ts'
@@ -126,8 +127,21 @@ test.serial('A timeout gives the editor a retry message without registering a fi
   t.teardown(() => put.mock.restore())
   const res = await upload()
   t.false(res.body.success)
+  t.is(res.body.code, ErrorCode.UploadTimeout)
   t.regex(res.body.message, /timed out.*uploading again/)
   t.truthy(res.headers['x-request-id'])
+})
+
+test.serial('Request IDs accept bounded tokens and replace arbitrary client strings', async (t) => {
+  const url = `/uploads/${randomUUID()}`
+  for (const value of [ 'a'.repeat(129), 'spaces and punctuation!', 'audit=value' ]) {
+    const res = await supertest(server).get(url).set('X-Request-ID', value)
+    t.not(res.headers['x-request-id'], value)
+    t.regex(res.headers['x-request-id'], /^[0-9a-f-]{36}$/)
+  }
+  const accepted = `${'a'.repeat(126)}_-`
+  const res = await supertest(server).get(url).set('X-Request-ID', accepted)
+  t.is(res.headers['x-request-id'], accepted)
 })
 
 test.serial('Missing and malformed uploads never fall through to SPA or static files', async (t) => {

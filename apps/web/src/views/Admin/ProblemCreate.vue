@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { createTestcase } from '@/api/problem'
@@ -15,6 +15,7 @@ const confirm = useConfirm()
 const route = useRoute()
 const router = useRouter()
 const problemStore = useProblemStore()
+const problemEditor = ref<InstanceType<typeof OJProblemEdit>>()
 const problem = reactive({
   title: '',
   memory: 32768,
@@ -32,6 +33,7 @@ const problem = reactive({
 })
 
 async function submit () {
+  problemEditor.value?.syncEditors()
   const pid = await problemStore.create({
     ...problem,
     course: problem.course ?? undefined,
@@ -51,6 +53,7 @@ async function submit () {
 }
 
 async function submitCheck () {
+  problemEditor.value?.syncEditors()
   if (!problem.title.trim()) {
     message.error(t('oj.title_is_required'))
   } else if (!problem.description.trim()) {
@@ -115,7 +118,7 @@ onMounted(() => {
       </li>
     </ol>
     <br>
-    <OJProblemEdit :problem="problem" />
+    <OJProblemEdit ref="problemEditor" :problem="problem" />
     <Button label="Submit" @click="submitCheck" />
   </div>
 </template>

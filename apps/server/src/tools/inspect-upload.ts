@@ -8,7 +8,7 @@ import { assertUploadKey } from '../storage/types.ts'
 async function main () {
   const key = process.argv[2]
   if (!key || process.argv.length !== 3) {
-    console.error('Usage: pnpm --filter @putong-oj/server storage:inspect <storageKey>')
+    console.error('Usage: pnpm --filter @putong-oj/server storage:inspect <storageKey> (build first; use storage:inspect:dev with sources)')
     process.exitCode = 1
     return
   }

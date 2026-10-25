@@ -17,6 +17,7 @@ export type UploadStorageConfig = {
   forcePathStyle: boolean
   connectionTimeoutMs: number
   uploadTimeoutMs: number
+  readTimeoutMs: number
 }
 
 export function loadUploadStorageConfig (env: NodeJS.ProcessEnv = process.env): UploadStorageConfig {
@@ -67,5 +68,6 @@ export function loadUploadStorageConfig (env: NodeJS.ProcessEnv = process.env): 
     forcePathStyle: pathStyle === 'true',
     connectionTimeoutMs: timeout('PTOJ_S3_CONNECTION_TIMEOUT_MS', 3000),
     uploadTimeoutMs: timeout('PTOJ_S3_UPLOAD_TIMEOUT_MS', 10000),
+    readTimeoutMs: timeout('PTOJ_S3_READ_TIMEOUT_MS', 5000),
   }
 }

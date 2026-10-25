@@ -34,6 +34,7 @@ const editingPost = ref<Required<Omit<AdminPostUpdatePayload, 'publishesAt'>> & 
 const { isRoot } = storeToRefs(useSessionStore())
 const loading = ref(false)
 const saving = ref(false)
+const contentEditor = ref<InstanceType<typeof MarkdownEditor>>()
 const deleting = ref(false)
 
 const hasChanges = computed(() => {
@@ -81,6 +82,7 @@ onMounted(fetchPost)
 watch(() => route.params.slug, fetchPost)
 
 async function submit () {
+  contentEditor.value?.syncValue()
   if (!post.value || editingPost.value.title?.trim().length === 0) {
     message.error(t('ptoj.title_required'))
     return
@@ -216,7 +218,7 @@ function del (event: Event) {
       </div>
 
       <div class="border-surface border-y">
-        <MarkdownEditor v-model="editingPost.content" :height="768" />
+        <MarkdownEditor ref="contentEditor" v-model="editingPost.content" :height="768" />
       </div>
 
       <div class="flex justify-between p-6">

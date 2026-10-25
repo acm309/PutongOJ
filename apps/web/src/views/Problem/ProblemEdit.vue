@@ -21,6 +21,7 @@ const paramPid = computed(() => Number.parseInt(route.params.pid as string))
 
 const loadingProblem = ref(false)
 const problemForm = ref({} as ProblemUpdatePayload)
+const problemEditor = ref<InstanceType<typeof OjProblemEdit>>()
 
 async function loadProblem () {
   loadingProblem.value = true
@@ -29,6 +30,7 @@ async function loadProblem () {
 }
 
 async function submitForm () {
+  problemEditor.value?.syncEditors()
   const data = await updateProblem({
     pid: paramPid.value,
     ...problemForm.value,
@@ -54,7 +56,7 @@ onMounted(async () => {
 
 <template>
   <div>
-    <OjProblemEdit :problem="problemForm" />
+    <OjProblemEdit ref="problemEditor" :problem="problemForm" />
     <Button label="Submit" @click="submitForm" />
   </div>
 </template>

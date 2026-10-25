@@ -68,7 +68,7 @@ test.serial('Upload fails when storage quota is 0', async (t) => {
 
   t.is(res.status, 200)
   t.is(res.body.success, false)
-  t.is(res.body.code, 403)
+  t.is(res.body.code, 507)
 
   // Restore quota
   user!.storageQuota = 2 * 1024 * 1024

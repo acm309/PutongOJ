@@ -17,6 +17,7 @@ export class S3UploadStorage implements UploadStorage {
       region: config.region,
       forcePathStyle: config.forcePathStyle,
       credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
+      expectContinueHeader: false,
       maxAttempts: 3, // 流式 PUT 不会自动重试；其他可重试请求最多尝试三次。
       requestHandler: {
         connectionTimeout: config.connectionTimeoutMs,
@@ -33,6 +34,25 @@ export class S3UploadStorage implements UploadStorage {
 
   private missing (err: any): boolean {
     return err.name === 'NoSuchKey' || (err.name === 'NotFound' && err.$metadata?.httpStatusCode === 404)
+  }
+
+  private async read<T> (operation: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    const controller = new AbortController()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const deadline = new Promise<never>((resolve, reject) => {
+      timer = setTimeout(() => {
+        controller.abort()
+        reject(controller.signal.reason)
+      }, this.config.readTimeoutMs)
+      timer.unref()
+    })
+    try {
+      // SDK 的重试退避等待不能被 abort 中断，因此也要限制外层等待。
+      return await Promise.race([ operation(controller.signal), deadline ])
+    } finally {
+      // 仅限制取得响应及重试的等待，不截断交给浏览器的下载流。
+      clearTimeout(timer)
+    }
   }
 
   async putFile (key: string, filepath: string, contentType: string): Promise<void> {
@@ -62,43 +82,47 @@ export class S3UploadStorage implements UploadStorage {
   }
 
   async get (key: string): Promise<StoredFile | null> {
-    try {
-      const result = await this.client.send(new GetObjectCommand(this.object(key)))
-      if (!result.Body) {
-        throw new Error('S3 returned an object without a body')
+    return this.read(async (abortSignal) => {
+      try {
+        const result = await this.client.send(new GetObjectCommand(this.object(key)), { abortSignal })
+        if (!result.Body) {
+          throw new Error('S3 returned an object without a body')
+        }
+        return {
+          body: result.Body as Readable,
+          sizeBytes: result.ContentLength ?? 0,
+          contentType: result.ContentType || 'application/octet-stream',
+          etag: result.ETag,
+          lastModified: result.LastModified,
+        }
+      } catch (err) {
+        if (this.missing(err)) {
+          return null
+        }
+        throw err
       }
-      return {
-        body: result.Body as Readable,
-        sizeBytes: result.ContentLength ?? 0,
-        contentType: result.ContentType || 'application/octet-stream',
-        etag: result.ETag,
-        lastModified: result.LastModified,
-      }
-    } catch (err) {
-      if (this.missing(err)) {
-        return null
-      }
-      throw err
-    }
+    })
   }
 
   async head (key: string): Promise<StoredFileInfo | null> {
-    try {
-      const result = await this.client.send(new HeadObjectCommand(this.object(key)))
-      return {
-        sizeBytes: result.ContentLength ?? 0,
-        contentType: result.ContentType || 'application/octet-stream',
-        etag: result.ETag,
-        lastModified: result.LastModified,
+    return this.read(async (abortSignal) => {
+      try {
+        const result = await this.client.send(new HeadObjectCommand(this.object(key)), { abortSignal })
+        return {
+          sizeBytes: result.ContentLength ?? 0,
+          contentType: result.ContentType || 'application/octet-stream',
+          etag: result.ETag,
+          lastModified: result.LastModified,
+        }
+      } catch (err) {
+        if (this.missing(err)) {
+          // HEAD has no error body: a missing bucket can also return NotFound.
+          await this.client.send(new HeadBucketCommand({ Bucket: this.config.bucket }), { abortSignal })
+          return null
+        }
+        throw err
       }
-    } catch (err) {
-      if (this.missing(err)) {
-        // HEAD has no error body: a missing bucket can also return NotFound.
-        await this.client.send(new HeadBucketCommand({ Bucket: this.config.bucket }))
-        return null
-      }
-      throw err
-    }
+    })
   }
 
   async remove (key: string): Promise<void> {

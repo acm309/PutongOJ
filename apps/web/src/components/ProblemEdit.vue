@@ -5,6 +5,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import RadioButton from 'primevue/radiobutton'
 import Textarea from 'primevue/textarea'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MarkdownEditor from '@/components/MarkdownEditor.vue'
 import ProblemTagSelect from '@/components/ProblemTagSelect.vue'
@@ -19,6 +20,19 @@ const problemTypeOptions = Object.entries(problemType)
   }))
 
 const { t } = useI18n()
+const descriptionEditor = ref<InstanceType<typeof MarkdownEditor>>()
+const inputEditor = ref<InstanceType<typeof MarkdownEditor>>()
+const outputEditor = ref<InstanceType<typeof MarkdownEditor>>()
+const hintEditor = ref<InstanceType<typeof MarkdownEditor>>()
+
+function syncEditors () {
+  // 提交前主动读取，避免依赖编辑器延迟的 input 回调或失焦事件。
+  for (const editor of [ descriptionEditor, inputEditor, outputEditor, hintEditor ]) {
+    editor.value?.syncValue()
+  }
+}
+
+defineExpose({ syncEditors })
 </script>
 
 <template>
@@ -48,15 +62,15 @@ const { t } = useI18n()
     </div>
     <div>
       <span class="form-label">{{ t('oj.description') }}</span>
-      <MarkdownEditor v-model="problem.description" />
+      <MarkdownEditor ref="descriptionEditor" v-model="problem.description" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.input') }}</span>
-      <MarkdownEditor v-model="problem.input" />
+      <MarkdownEditor ref="inputEditor" v-model="problem.input" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.output') }}</span>
-      <MarkdownEditor v-model="problem.output" />
+      <MarkdownEditor ref="outputEditor" v-model="problem.output" />
     </div>
     <div>
       <span class="form-label">{{ t('oj.sample_input') }}</span>
@@ -68,7 +82,7 @@ const { t } = useI18n()
     </div>
     <div>
       <span class="form-label">{{ t('oj.hint') }}</span>
-      <MarkdownEditor v-model="problem.hint" />
+      <MarkdownEditor ref="hintEditor" v-model="problem.hint" />
     </div>
     <div>
       <span class="form-label">Tags</span>

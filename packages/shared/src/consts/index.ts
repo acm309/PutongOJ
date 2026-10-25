@@ -12,6 +12,8 @@ export enum ErrorCode {
   Teapot = 418,
   InternalServerError = 500,
   NotImplemented = 501,
+  UploadTimeout = 504,
+  StorageQuotaExceeded = 507,
 }
 
 export const ErrorCodeValues = Object.values(ErrorCode)

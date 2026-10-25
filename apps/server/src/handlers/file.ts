@@ -24,14 +24,14 @@ export async function upload (ctx: Context) {
     uploaded = await fileService.uploadFile(profile, file, ctx.state.requestId)
   } catch (err) {
     if (err instanceof UploadTimeoutError) {
-      return createErrorResponse(ctx, ErrorCode.InternalServerError, err.message)
+      return createErrorResponse(ctx, ErrorCode.UploadTimeout, err.message)
     }
     throw err
   }
   if (!uploaded.success) {
     return createErrorResponse(
       ctx,
-      ErrorCode.Forbidden,
+      ErrorCode.StorageQuotaExceeded,
       `Storage quota exceeded. used=${uploaded.quota.usedBytes}, quota=${uploaded.quota.storageQuota}, incoming=${uploaded.sizeBytes}`,
     )
   }

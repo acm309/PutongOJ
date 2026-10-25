@@ -28,7 +28,8 @@ export async function parseClientIp (ctx: Context, next: () => Promise<any>) {
 }
 
 export async function setupAuditLog (ctx: Context, next: Next) {
-  ctx.state.requestId = ctx.get('X-Request-ID') || randomUUID()
+  const requestId = ctx.get('X-Request-ID')
+  ctx.state.requestId = /^[\w-]{1,128}$/.test(requestId) ? requestId : randomUUID()
   ctx.set('X-Request-ID', ctx.state.requestId)
   const getTraceInfo = () => {
     const { requestId, clientIp, sessionId } = ctx.state

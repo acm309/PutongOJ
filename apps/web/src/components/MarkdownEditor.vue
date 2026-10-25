@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ErrorCode } from '@putong-oj/shared'
 import { storeToRefs } from 'pinia'
 import Vditor from 'vditor'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -33,6 +34,14 @@ const i18nLang = computed(() => {
   return locale.value === 'zh-CN' ? 'zh_CN' : 'en_US'
 })
 
+function syncValue () {
+  if (editor.value) {
+    emit('update:modelValue', editor.value.getValue())
+  }
+}
+
+defineExpose({ syncValue })
+
 function init () {
   if (!vditor.value) {
     return
@@ -50,6 +59,9 @@ function init () {
     },
     height: props.height,
     input: (value: string) => {
+      emit('update:modelValue', value)
+    },
+    blur: (value: string) => {
       emit('update:modelValue', value)
     },
     lang: i18nLang.value,
@@ -122,9 +134,13 @@ function init () {
         const filename = files[0]?.name || 'file'
         const response = JSON.parse(responseText)
         if (!response.success) {
-          if (response.message) {
-            message.error(response.message)
+          const messages: Partial<Record<ErrorCode, string>> = {
+            [ErrorCode.UploadTimeout]: 'ptoj.upload_timeout',
+            [ErrorCode.StorageQuotaExceeded]: 'ptoj.upload_quota_exceeded',
+            [ErrorCode.Unauthorized]: 'ptoj.upload_login_required',
+            [ErrorCode.Forbidden]: 'ptoj.upload_forbidden',
           }
+          message.error(t(messages[response.code as ErrorCode] || 'ptoj.upload_failed'))
           return JSON.stringify({ data: { succMap: {}, errFiles: [ filename ] } })
         }
         const url = response.data.url
